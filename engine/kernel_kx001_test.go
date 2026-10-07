@@ -41,6 +41,22 @@ func TestConfirmedProductionKX001(t *testing.T) {
 			queue:         []QueueItem{aa, q(ItemFactory, 5, 0), q(ItemMine, 2, 0)},
 			wantFactories: 2, wantDefenses: 10, wantMinerals: Minerals{111, 111, 3},
 			wantQueue: []QueueItem{q(ItemMineralAlchemy, 1, 15), aa, q(ItemFactory, 3, 24), q(ItemMine, 2, 0)}},
+		// stars-elegy #18: the prefix stays with an auto item (A5); any short
+		// mineral blocks an auto item even when resources are lower (A6 with
+		// a prefix, A7 without).
+		{name: "A5", pop: 9000, defenses: 10, minerals: Minerals{100, 100, 0},
+			queue:         []QueueItem{aa, q(ItemAutoFactories, 2, 0), q(ItemMine, 2, 0)},
+			wantFactories: 2, wantMines: 2, wantDefenses: 10, wantMinerals: Minerals{108, 108, 0},
+			wantQueue: []QueueItem{aa, q(ItemAutoFactories, 2, 0)}, wantResearch: 70, wantCompleted: true,
+			wantEvents: []EventKind{EventAlchemy, EventBuilt, EventBuilt}},
+		{name: "A6", pop: 10, defenses: 10, minerals: Minerals{100, 100, 0},
+			queue:        []QueueItem{aa, q(ItemAutoFactories, 2, 0)},
+			wantDefenses: 10, wantMinerals: Minerals{100, 100, 0},
+			wantQueue: []QueueItem{q(ItemMineralAlchemy, 1, 1), aa, q(ItemAutoFactories, 2, 0)}},
+		{name: "A7", pop: 10, defenses: 10, minerals: Minerals{100, 100, 0},
+			queue:        []QueueItem{q(ItemAutoFactories, 2, 0), q(ItemMine, 1, 0)},
+			wantDefenses: 10, wantMinerals: Minerals{100, 100, 0},
+			wantQueue: []QueueItem{q(ItemAutoFactories, 2, 0), q(ItemMine, 1, 39)}},
 		// M3's race was over its advantage-point budget and the game raised
 		// colonists per resource to 2,400 before production (not modelled);
 		// the case starts from the degraded race.

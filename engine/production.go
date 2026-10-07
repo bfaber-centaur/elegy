@@ -215,16 +215,6 @@ func (pr *production) affordable(c Cost, pct int) bool {
 	return true
 }
 
-func (pr *production) mineralShort(c Cost, pct int) bool {
-	s := spent(c, pct)
-	for m := range NumMinerals {
-		if c.Minerals[m]-s.Minerals[m] > pr.planet.Surface[m] {
-			return true
-		}
-	}
-	return false
-}
-
 // pay moves a unit from from% to to% (100 completes it).
 func (pr *production) pay(c Cost, from, to int) {
 	a, b := spent(c, from), spent(c, to)
@@ -309,8 +299,8 @@ func (pr *production) walk() {
 // finished (count reached 0). Installation orders are first cut to
 // max(maximum, operable) − installed (KERNEL.md "Caps", CONFIRMED PQ C10).
 // A unit that cannot be finished becomes partial and stops the queue;
-// behind an Auto Alchemy prefix (alch), a mineral-short unit first takes
-// its partial and then buys its shortfall.
+// behind an Auto Alchemy prefix (alch), a unit not limited strictly by
+// resources first takes its partial and then buys its shortfall.
 func (pr *production) plain(i int, alch bool) bool {
 	it := &pr.planet.Queue[i]
 	if inst := pr.installed(it.Kind); inst != nil {
@@ -324,12 +314,12 @@ func (pr *production) plain(i int, alch bool) bool {
 	built := 0
 	for it.Count > 0 {
 		if !pr.affordable(c, it.Percent) {
-			short, mineral := pr.shortfall(c, it.Percent)
+			l := pr.limiting(c, it.Percent)
 			it.Percent = pr.partial(c, it.Percent)
-			if alch && mineral && pr.buy(short) {
+			if alch && !l.resources && pr.buy(l.short) {
 				continue // retry the unit; it now completes
 			}
-			if alch && mineral {
+			if alch && !l.resources {
 				pr.alchemyRemainder()
 			}
 			pr.stopped = true
@@ -347,7 +337,8 @@ func (pr *production) plain(i int, alch bool) bool {
 // autoInstall processes Auto Mines/Factories/Defenses at index i and returns
 // the next index. They build at most operable − installed (KERNEL.md
 // "Caps", CONFIRMED PQ C04, C09, C13, C14). Behind an Auto Alchemy prefix
-// (alch), a mineral-short unit buys its shortfall without a partial.
+// (alch), a mineral-short unit buys the lowest component's shortfall
+// without a partial.
 func (pr *production) autoInstall(i int, alch bool) int {
 	it := pr.planet.Queue[i]
 	c := pr.cost(it.Kind)
@@ -359,20 +350,20 @@ func (pr *production) autoInstall(i int, alch bool) int {
 			built++
 			continue
 		}
-		if alch {
-			if short, mineral := pr.shortfall(c, 0); mineral {
-				if pr.buy(short) {
-					continue
-				}
-				pr.complete(it.Kind, built)
-				pr.alchemyRemainder()
-				pr.stopped = true
-				return i + 1
+		// Any short mineral blocks an auto item, even when resources give
+		// the lower percentage (CONFIRMED, KX-001 A6, A7).
+		if l := pr.limiting(c, 0); l.mineral {
+			if !alch {
+				pr.blocked = true // skipped; the walk continues
+				break
 			}
-		}
-		if pr.mineralShort(c, 0) {
-			pr.blocked = true // skipped; the walk continues
-			break
+			if pr.buy(l.short) {
+				continue
+			}
+			pr.complete(it.Kind, built)
+			pr.alchemyRemainder()
+			pr.stopped = true
+			return i + 1
 		}
 		pct := pr.partial(c, 0)
 		pr.complete(it.Kind, built)
@@ -384,27 +375,41 @@ func (pr *production) autoInstall(i int, alch bool) int {
 	return i + 1
 }
 
-// shortfall reports whether the component limiting a unit at pct (the one
-// with the smallest whole percentage it can pay for) is a mineral, and that
-// mineral's shortfall: cost − available − already spent. Ties go to the
-// mineral, first in mineral order (KERNEL.md does not say).
-func (pr *production) shortfall(c Cost, pct int) (short int, mineral bool) {
+// limit describes what stops a unit at pct from completing (KERNEL.md
+// "Production", stars-elegy #18): components are compared Fe, Bo, Ge, then
+// resources, and one replaces the current lowest percentage only if
+// strictly lower.
+type limit struct {
+	short     int  // the lowest component's shortfall: cost − available − spent
+	resources bool // resources were strictly the lowest
+	mineral   bool // some mineral is short
+}
+
+func (pr *production) limiting(c Cost, pct int) limit {
 	s := spent(c, pct)
-	best := 100
-	if c.Resources > 0 {
-		best = min(best, largestPercent(c.Resources, pr.r+s.Resources))
-	}
+	var l limit
+	best := -1
 	for m := range NumMinerals {
 		if c.Minerals[m] == 0 {
 			continue
 		}
-		if p := largestPercent(c.Minerals[m], pr.planet.Surface[m]+s.Minerals[m]); p < 100 && p <= best {
+		avail := pr.planet.Surface[m] + s.Minerals[m]
+		if avail < c.Minerals[m] {
+			l.mineral = true
+		}
+		if p := min(100, largestPercent(c.Minerals[m], avail)); best < 0 || p < best {
 			best = p
-			short = c.Minerals[m] - pr.planet.Surface[m] - s.Minerals[m]
-			mineral = true
+			l.short = c.Minerals[m] - avail
 		}
 	}
-	return short, mineral
+	if c.Resources > 0 {
+		avail := pr.r + s.Resources
+		if p := min(100, largestPercent(c.Resources, avail)); best < 0 || p < best {
+			l.short = c.Resources - avail
+			l.resources = true
+		}
+	}
+	return l
 }
 
 // buy is an Auto Alchemy prefix buying up to short units with the
