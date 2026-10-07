@@ -301,7 +301,7 @@ func GenerateTurn(
 		grown[i] = growth{gp, gc}
 
 		res := col.Resources(p.Population, p.Factories)
-		r, ev := RunProduction(p, ProductionInput{
+		r, ev := g.PlanetProduction(i, ProductionInput{
 			Colony:         col,
 			Resources:      res,
 			GrownPop:       gp,
