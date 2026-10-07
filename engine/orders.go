@@ -466,11 +466,12 @@ const (
 // QueueOrder replaces a planet's whole production queue (LIMITS.md
 // "Production-queue replace", stars-elegy #65, CONFIRMED LQ-1..LQ-6): the
 // planet must be the sender's; an empty list removes the queue; otherwise
-// the new list replaces the old in the order given, counts as sent. Each
-// new item sent with progress keeps progress only if the old queue has an
-// unmatched item of the same kind with progress, the first in queue order;
-// otherwise it starts at 0. Elegy's chosen rule keeps the old item's
-// percentage, not the one sent, so an order cannot add progress.
+// the new list replaces the old in the order given, counts as sent. Elegy's
+// chosen rule (#65 f0c3651): taking items in queue order, a new item sent
+// with a nonzero percentage keeps it only if the old queue has an item not
+// yet matched of the same kind with exactly that percentage, which is then
+// used up; otherwise it starts at 0. It gives the original's result for
+// every queue a legal client sends and never creates progress.
 //
 // Ship items, and the dock check they will need (DockAllows), wait on ship
 // items in the queue.
@@ -503,8 +504,8 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 		pct := 0
 		if it.Percent > 0 {
 			for j, old := range p.Queue {
-				if !used[j] && old.Percent > 0 && old.Kind == it.Kind {
-					used[j], pct = true, old.Percent
+				if !used[j] && old.Percent == it.Percent && old.Kind == it.Kind {
+					used[j], pct = true, it.Percent
 					break
 				}
 			}

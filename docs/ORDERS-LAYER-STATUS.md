@@ -44,7 +44,7 @@ lane.
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
 | `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
-| `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, progress kept by the matching rule with the old percentage (chosen rule) | LIMITS.md "Production-queue replace" (#65) | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueKeepsOldPercent` |
+| `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, a sent percentage kept only against an unused old item of the same kind with exactly that percentage (chosen rule) | LIMITS.md "Production-queue replace" (#65 `f0c3651`) | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueNoNewProgress` |
 | `PlanetSettingsOrder` | own planet; leftover-only and route destination | LIMITS.md "Setting orders" (#65) | BINARY-ONLY | `TestPredictionSettingOrders` |
 | `RelationsOrder` | only the sender's row | LIMITS.md "Setting orders" (#65) | BINARY-ONLY | `TestPredictionSettingOrders` |
 

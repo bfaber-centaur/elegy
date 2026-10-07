@@ -217,17 +217,11 @@ func TestDetonateNotModelled(t *testing.T) {
 }
 
 func TestConfirmedQueueReplace(t *testing.T) {
-	// LIMITS.md "Production-queue replace" (stars-elegy #65, CONFIRMED
-	// LQ-1..LQ-4) with its chosen rule (the old percentage is kept). The
-	// base queue is Factory ×5 at 49%, Mine ×5 at 30%, Defenses ×5,
-	// Factory ×5 at 20%.
-	//
-	// Where two items of one kind have progress, the chosen rule and the
-	// original differ even for a legal client: the original keeps the sent
-	// percentage, the chosen rule the first matching old item's. LQ-2 sent
-	// the second Factory at 20 and the original kept 20; the chosen rule
-	// gives it 49. Question Q21 to stars-elegy; the rule is followed as
-	// written meanwhile.
+	// LIMITS.md "Production-queue replace" (stars-elegy #65 f0c3651,
+	// CONFIRMED LQ-1..LQ-4) with its chosen rule: a sent percentage is kept
+	// only against an unused old item of the same kind with exactly that
+	// percentage. The base queue is Factory ×5 at 49%, Mine ×5 at 30%,
+	// Defenses ×5, Factory ×5 at 20%.
 	base := []QueueItem{{ItemFactory, 5, 49}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}
 	for _, tt := range []struct {
 		name      string
@@ -236,12 +230,12 @@ func TestConfirmedQueueReplace(t *testing.T) {
 		wantQueue bool
 	}{
 		// Moved and recounted items keep progress (LQ-1: Mine ×5 → ×3).
-		{"moved", []QueueItem{{ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}, {ItemFactory, 5, 20}},
-			[]QueueItem{{ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}, {ItemFactory, 5, 20}}, true},
+		{"moved", []QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}},
+			[]QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}}, true},
 		// LQ-2: the 49% Factory removed, a new Factory at the top sent at
-		// 0; the other Factory, sent at 20, matches the old 49% item.
+		// 0; the other Factory keeps its 20.
 		{"LQ-2", []QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}},
-			[]QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}}, true},
+			[]QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}, true},
 		// LQ-4: an empty list removes the queue.
 		{"LQ-4", nil, nil, false},
 	} {
@@ -257,10 +251,11 @@ func TestConfirmedQueueReplace(t *testing.T) {
 	}
 }
 
-func TestPredictionQueueKeepsOldPercent(t *testing.T) {
-	// LIMITS.md chosen rule: a matched item keeps the old percentage, not
-	// the one sent (LQ-3 setup: old Factory 0, Mine 0, Factory 20; the
-	// client sends 49, 30, 20). Bad items are refused (L14).
+func TestPredictionQueueNoNewProgress(t *testing.T) {
+	// The chosen rule never creates progress: on the LQ-3 host-edited
+	// queue (Factory 0, Mine 0, Factory 20) a client sending 49, 30, 20
+	// gets 0, 0, 20 (the original gave the first Factory 49). Bad items
+	// are refused (L14).
 	g := ordersGame()
 	p := &g.Planets[0]
 	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}
@@ -272,7 +267,7 @@ func TestPredictionQueueKeepsOldPercent(t *testing.T) {
 	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrOutOfRange) {
 		t.Fatal(errs)
 	}
-	if want := []QueueItem{{ItemFactory, 9, 20}, {ItemMine, 5, 0}, {ItemFactory, 9, 0}}; !reflect.DeepEqual(p.Queue, want) {
+	if want := []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}; !reflect.DeepEqual(p.Queue, want) {
 		t.Errorf("queue %+v, want %+v", p.Queue, want)
 	}
 }
