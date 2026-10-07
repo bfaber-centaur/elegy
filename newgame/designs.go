@@ -194,7 +194,7 @@ type shipEntry struct {
 	atSecond bool
 }
 
-func startingShips(ps PlayerSetup, levels [engine.NumFields]int, secondPlanet bool) ([]shipEntry, error) {
+func startingShips(ps player, levels [engine.NumFields]int, secondPlanet bool) ([]shipEntry, error) {
 	one := func(s *shipSpec) shipEntry { return shipEntry{spec: s} }
 	var list []shipEntry
 	second := func() {
@@ -258,7 +258,7 @@ func startingShips(ps PlayerSetup, levels [engine.NumFields]int, secondPlanet bo
 // addDesignsAndFleets gives player i its starbase designs, homeworld
 // starbase, second planet (PP and IT on a map larger than tiny), ship
 // designs and fleets.
-func (g *generator) addDesignsAndFleets(i int, ps PlayerSetup, start *PlayerStart) error {
+func (g *generator) addDesignsAndFleets(i int, ps player, start *PlayerStart) error {
 	game := &g.res.Game
 	pl := &game.Players[i]
 	levels := pl.Research.Levels

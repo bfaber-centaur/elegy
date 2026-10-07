@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/races"
 )
 
 // legacySharedHomeworldMinerals reproduces the original's LEGACY BUG that
@@ -61,13 +62,42 @@ func StartingTech(race engine.Race, expensiveAt3 bool) [engine.NumFields]int {
 	return t
 }
 
-// leftover is L = min(50, leftover points); 50 for computer players
-// (UNIVERSE.md "Leftover advantage points", CONFIRMED).
-func leftover(p PlayerSetup) int {
-	if p.Computer {
-		return 50
+// resolvePlayers applies RACES.md "At game creation" to every player
+// (CONFIRMED RD-4..RD-6): Random races are generated; human races are
+// repaired, and an illegal one becomes the default race with a computer
+// name; computer races are not checked. L = min(50, points), 50 for
+// computer players (UNIVERSE.md "Leftover advantage points"); spends 5
+// and 6 act as 0.
+func (g *generator) resolvePlayers() {
+	g.players = make([]player, len(g.s.Players))
+	for i, ps := range g.s.Players {
+		d := ps.Race
+		if d.Random {
+			d = races.Generate(d.Name, g.rng)
+			if d.Name == "Random" {
+				d.Name = ""
+			}
+		}
+		cr := races.AtCreation(d, ps.Computer)
+		if cr.Replaced {
+			cr.Race.Name = ""
+		}
+		p := player{
+			Race: cr.Race.Race, Design: cr.Race, Points: cr.Points, Name: cr.Race.Name,
+			Computer: ps.Computer, Level: ps.Level,
+			Leftover: races.Leftover(cr.Points), Spend: Spend(races.EffectiveSpend(cr.Race.Spend)),
+			ExpensiveAt3: cr.Race.ExpensiveAt3,
+		}
+		if ps.Computer {
+			p.Leftover = 50
+		}
+		if p.Name == "" {
+			// PLACEHOLDER: the original picks one of its 24 built-in
+			// computer-player names, game data not in the spec.
+			p.Name = fmt.Sprintf("Computer %d", i+1)
+		}
+		g.players[i] = p
 	}
-	return max(0, min(50, p.LeftoverPoints))
 }
 
 // homeworldPopulation is the starting homeworld population in units of
@@ -76,7 +106,7 @@ func leftover(p PlayerSetup) int {
 //
 // ELEGY CHOICE: the order of BBS and the expert bonus is not specified;
 // BBS applies first, then the expert +10%, each truncating.
-func homeworldPopulation(p PlayerSetup, bbs bool) int {
+func homeworldPopulation(p player, bbs bool) int {
 	pop := 250
 	if p.Race.LRT.LowStartingPopulation {
 		pop = 175
@@ -202,17 +232,14 @@ func (g *generator) setUpPlayers(hws []int) error {
 	sharedConc := floorConcentrations(ref)
 
 	humans := 0
-	for _, ps := range g.s.Players {
+	for _, ps := range g.players {
 		if !ps.Computer {
 			humans++
 		}
 	}
 
-	for i, ps := range g.s.Players {
-		start := PlayerStart{Name: ps.Name, Homeworld: hws[i], SecondPlanet: -1}
-		if ps.Computer && start.Name == "" {
-			start.Name = fmt.Sprintf("Computer %d", i+1) // PLACEHOLDER
-		}
+	for i, ps := range g.players {
+		start := PlayerStart{Name: ps.Name, Race: ps.Design, Points: ps.Points, Homeworld: hws[i], SecondPlanet: -1}
 		levels := StartingTech(ps.Race, ps.ExpensiveAt3)
 		pl := engine.Player{
 			Race: ps.Race,
@@ -228,7 +255,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 		// a game with no human player was not run; Elegy leaves it
 		// neutral.
 		if humans == 1 {
-			pl.Relations = make([]engine.Relation, len(g.s.Players))
+			pl.Relations = make([]engine.Relation, len(g.players))
 			for j := range pl.Relations {
 				if j != i {
 					pl.Relations[j] = engine.RelationEnemy
@@ -243,7 +270,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 	// Designs, second planets and fleets, in player order, after every
 	// homeworld is owned. ELEGY CHOICE: the order players pick their
 	// second planets is not specified.
-	for i, ps := range g.s.Players {
+	for i, ps := range g.players {
 		if err := g.addDesignsAndFleets(i, ps, &g.res.Players[i]); err != nil {
 			return err
 		}
@@ -253,7 +280,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 
 // setUpHomeworld gives player i's homeworld its starting state
 // (UNIVERSE.md "Homeworld", CONFIRMED).
-func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps PlayerSetup, shared engine.Minerals, sharedConc [engine.NumMinerals]int) {
+func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps player, shared engine.Minerals, sharedConc [engine.NumMinerals]int) {
 	ar := ps.Race.PRT == engine.PRTAlternateReality
 	hw.Owner = i
 	hw.Homeworld = true
@@ -272,7 +299,7 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps PlayerSetup, sha
 		conc, surface = floorConcentrations(own), g.surfaceDraw(own)
 	}
 
-	l := leftover(ps)
+	l := ps.Leftover
 	switch ps.Spend {
 	case SpendSurfaceMinerals:
 		surface = SurfaceSpend(surface, l)

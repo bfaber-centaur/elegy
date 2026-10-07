@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/races"
 )
 
 // Test names follow the engine's convention: TestConfirmed* tests rules
@@ -38,15 +39,36 @@ var allPRTs = []engine.PRT{
 }
 
 func human(prt engine.PRT) PlayerSetup {
-	return PlayerSetup{Race: testRace(prt), LeftoverPoints: 0, Spend: SpendSurfaceMinerals}
+	return PlayerSetup{Race: races.Design{Race: testRace(prt), Spend: int(SpendSurfaceMinerals)}}
 }
 
 func computer(prt engine.PRT, l Level) PlayerSetup {
-	return PlayerSetup{Race: testRace(prt), Computer: true, Level: l, Spend: SpendMines}
+	return PlayerSetup{Race: races.Design{Race: testRace(prt), Spend: int(SpendMines)}, Computer: true, Level: l}
+}
+
+// withPoints makes a human race worth at least min points by raising its
+// colonists per resource, then lowering its growth (each step adds
+// points), so that game creation keeps it (RACES.md "At game creation").
+func withPoints(ps PlayerSetup, min int) PlayerSetup {
+	d := &ps.Race
+	for races.Points(*d) < min && d.Race.ColonistsPerResource < races.MaxColonists {
+		d.Race.ColonistsPerResource += 100
+	}
+	for races.Points(*d) < min && d.Race.GrowthRate > 1 {
+		d.Race.GrowthRate--
+	}
+	return ps
 }
 
 func generate(t *testing.T, s Settings, seed uint64) Result {
 	t.Helper()
+	players := append([]PlayerSetup(nil), s.Players...)
+	for i, p := range players {
+		if !p.Computer && !p.Race.Random {
+			players[i] = withPoints(p, 0)
+		}
+	}
+	s.Players = players
 	res, err := Generate(s, NewRand(seed))
 	if err != nil {
 		t.Fatalf("seed %d: %v", seed, err)
@@ -504,7 +526,7 @@ func TestConfirmedHomeworld(t *testing.T) {
 // design 0 an empty Orbital Fort.
 func TestConfirmedAlternateReality(t *testing.T) {
 	ar := human(engine.PRTAlternateReality)
-	ar.Spend = SpendMines
+	ar.Race.Spend = int(SpendMines)
 	res := playerGame(t, Small, 2, ar, computer(engine.PRTInnerStrength, Standard))
 	st := res.Players[0]
 	hw := res.Game.Planets[st.Homeworld]
@@ -544,7 +566,7 @@ func TestConfirmedBBSPopulation(t *testing.T) {
 	if sp := res.Game.Planets[res.Players[1].SecondPlanet].Population; sp != 300 {
 		t.Errorf("IT second planet %d, want 300", sp)
 	}
-	if got := homeworldPopulation(computer(engine.PRTInnerStrength, Expert), false); got != 275 {
+	if got := homeworldPopulation(player{Race: testRace(engine.PRTInnerStrength), Computer: true, Level: Expert}, false); got != 275 {
 		t.Errorf("expert computer population %d, want 275", got)
 	}
 }
@@ -560,7 +582,7 @@ func TestConfirmedSharedHomeworldMinerals(t *testing.T) {
 	var players []PlayerSetup
 	for _, prt := range allPRTs {
 		players = append(players, human(prt))
-		players[len(players)-1].Spend = SpendMines
+		players[len(players)-1].Race.Spend = int(SpendMines)
 	}
 	for seed := range uint64(5) {
 		res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, seed)
@@ -619,14 +641,15 @@ func TestConfirmedLeftoverSpends(t *testing.T) {
 		t.Errorf("concentration spend tie, L 2: %v", got)
 	}
 
-	wm := human(engine.PRTWarMonger)
-	wm.LeftoverPoints, wm.Spend = 80, SpendMines
-	sd := human(engine.PRTSpaceDemolition)
-	sd.LeftoverPoints, sd.Spend = 50, SpendFactories
-	it := human(engine.PRTInterstellarTraveler)
-	it.LeftoverPoints, it.Spend = 50, SpendDefenses
-	joat := human(engine.PRTJackOfAllTrades)
-	joat.LeftoverPoints, joat.Spend = 50, SpendSurfaceMinerals
+	// Races worth at least 50 points have L = 50.
+	wm := withPoints(human(engine.PRTWarMonger), 80)
+	wm.Race.Spend = int(SpendMines)
+	sd := withPoints(human(engine.PRTSpaceDemolition), 50)
+	sd.Race.Spend = int(SpendFactories)
+	it := withPoints(human(engine.PRTInterstellarTraveler), 50)
+	it.Race.Spend = int(SpendDefenses)
+	joat := withPoints(human(engine.PRTJackOfAllTrades), 50)
+	joat.Race.Spend = int(SpendSurfaceMinerals)
 	res := playerGame(t, Medium, 9, wm, sd, it, joat)
 	hw := func(i int) engine.Planet { return res.Game.Planets[res.Players[i].Homeworld] }
 	if m := hw(0).Mines; m != 35 {
@@ -647,9 +670,9 @@ func TestConfirmedLeftoverSpends(t *testing.T) {
 // concentration boost (UNIVERSE.md "Computer players", CONFIRMED).
 func TestConfirmedComputerConcentrationBoost(t *testing.T) {
 	std := computer(engine.PRTInnerStrength, Standard)
-	std.Spend = SpendSurfaceMinerals
+	std.Race.Spend = int(SpendSurfaceMinerals)
 	exp := computer(engine.PRTInnerStrength, Expert)
-	exp.Spend = SpendSurfaceMinerals
+	exp.Race.Spend = int(SpendSurfaceMinerals)
 	res := playerGame(t, Small, 11, human(engine.PRTInnerStrength), std, exp)
 	c := func(i int) [3]int {
 		p := res.Game.Planets[res.Players[i].Homeworld]
@@ -781,13 +804,13 @@ func TestConfirmedStartingShips(t *testing.T) {
 func TestConfirmedConditionalShips(t *testing.T) {
 	wm := human(engine.PRTWarMonger)
 	wm.Race.ResearchCosts[engine.Construction] = engine.ResearchExpensive
-	wm.ExpensiveAt3 = true
+	wm.Race.ExpensiveAt3 = true
 	ss := human(engine.PRTSuperStealth)
 	ss.Race.ResearchCosts[engine.Energy] = engine.ResearchExpensive
-	ss.ExpensiveAt3 = true
+	ss.Race.ExpensiveAt3 = true
 	joat := human(engine.PRTJackOfAllTrades)
 	joat.Race.ResearchCosts[engine.Construction] = engine.ResearchExpensive
-	joat.ExpensiveAt3 = true
+	joat.Race.ExpensiveAt3 = true
 	arm := human(engine.PRTInnerStrength)
 	arm.Race.LRT.AdvancedRemoteMining = true
 	res := playerGame(t, Small, 2, wm, ss, joat, arm)
@@ -936,7 +959,7 @@ func TestPredictionSecondPlanetRedraw(t *testing.T) {
 		r.Env[i] = engine.EnvRange{Center: 50, Low: 49, High: 51}
 	}
 	ps := human(engine.PRTPacketPhysics)
-	ps.Race = r
+	ps.Race.Race = r
 	res := generate(t, Settings{Size: Medium, Density: Normal, Players: []PlayerSetup{ps}}, 3)
 	st := res.Players[0]
 	sp, hw := res.Game.Planets[st.SecondPlanet], res.Game.Planets[st.Homeworld]
@@ -1048,7 +1071,7 @@ func TestElegyDecisionDeterministic(t *testing.T) {
 		{Size: 5, Players: twoPlayers()},
 		{Density: -1, Players: twoPlayers()},
 		{},
-		{Players: []PlayerSetup{{Race: testRace(engine.PRTOther)}}},
+		{Players: []PlayerSetup{{Race: races.Design{Race: testRace(engine.PRTOther)}, Computer: true}}},
 	} {
 		if _, err := Generate(bad, NewRand(1)); !errors.Is(err, ErrSettings) {
 			t.Errorf("settings %+v: %v", bad, err)
@@ -1079,7 +1102,7 @@ func TestElegyDecisionSharedMineralsSwitch(t *testing.T) {
 	var players []PlayerSetup
 	for range 8 {
 		p := human(engine.PRTInnerStrength)
-		p.Spend = SpendMines
+		p.Race.Spend = int(SpendMines)
 		players = append(players, p)
 	}
 	res := generate(t, Settings{Size: Large, Density: Normal, Players: players}, 2)
@@ -1212,5 +1235,48 @@ func TestConfirmedWormholeBadness(t *testing.T) {
 		if got := g.wormholeBadness(c.p, c.partner); got != c.want {
 			t.Errorf("%v partner %v: %d, want %d", c.p, c.partner, got, c.want)
 		}
+	}
+}
+
+// Races at creation (RACES.md "At game creation", CONFIRMED RD-4): an
+// illegal human race becomes the default race with a computer name and
+// L 25; a Random race is generated with 0..50 points and keeps a name
+// other than "Random"; computer races are not checked.
+func TestConfirmedRacesAtCreation(t *testing.T) {
+	illegal := human(engine.PRTInterstellarTraveler) // −82 points as built
+	illegal.Race.Name = "Cheaters"
+	illegal.Race.Spend = int(SpendMines)
+	if p := races.Points(illegal.Race); p >= 0 {
+		t.Fatalf("test race is legal (%d points)", p)
+	}
+	random := PlayerSetup{Race: races.RandomTemplate("Random")}
+	zorgon := PlayerSetup{Race: races.RandomTemplate("Zorgon")}
+	cpu := computer(engine.PRTInterstellarTraveler, Easy)
+	s := Settings{Size: Small, Density: Normal, Players: []PlayerSetup{illegal, random, zorgon, cpu}}
+	res, err := Generate(s, NewRand(5))
+	if err != nil {
+		t.Fatal(err)
+	}
+	st := res.Players[0]
+	def := races.Default()
+	def.Tampered = true
+	if st.Race != def || st.Name != "Computer 1" || st.Points != 25 {
+		t.Errorf("illegal race: %+v name %q points %d", st.Race, st.Name, st.Points)
+	}
+	if p := res.Game.Players[0].Race.PRT; p != engine.PRTJackOfAllTrades {
+		t.Errorf("illegal race plays as PRT %d", p)
+	}
+	// L 25 with the default race's spend (surface minerals): no mines spend.
+	if hw := res.Game.Planets[st.Homeworld]; hw.Mines != 10 {
+		t.Errorf("illegal race homeworld mines %d", hw.Mines)
+	}
+	for i, name := range []string{"Computer 2", "Zorgon"} {
+		st := res.Players[i+1]
+		if st.Name != name || st.Race.Random || st.Points < 0 || st.Points > 50 {
+			t.Errorf("random race %d: name %q points %d", i, st.Name, st.Points)
+		}
+	}
+	if st := res.Players[3]; st.Race.Race.PRT != engine.PRTInterstellarTraveler || st.Race.Tampered {
+		t.Errorf("computer race changed: %+v", st.Race)
 	}
 }

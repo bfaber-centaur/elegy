@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/races"
 )
 
 // Size is the universe size, tiny (0) to huge (4).
@@ -76,26 +77,29 @@ const (
 
 // PlayerSetup is one player of a new game.
 type PlayerSetup struct {
-	// Race is the player's race. For a computer player it is that
-	// computer type's built-in race, which the caller supplies: the
-	// original's computer races are game data UNIVERSE.md does not
-	// specify ("Computer players").
-	Race engine.Race
-	// Name is the player's name. A computer player without a name gets
-	// a PLACEHOLDER name ("Computer N"): the original's 24 built-in
-	// names are game data not in the spec.
-	Name string
+	// Race is the player's race design, with its name, leftover spend
+	// and options. For a computer player it is that computer type's
+	// built-in race, which the caller supplies: the original's computer
+	// races are game data UNIVERSE.md does not specify ("Computer
+	// players"). A race marked Random is generated at creation
+	// (races.Generate).
+	Race races.Design
 
 	Computer bool
 	Level    Level // computer players only
+}
 
-	// LeftoverPoints are the race-design points left unspent. How they
-	// are computed is the race-design point system, not specified in
-	// UNIVERSE.md; the caller supplies them. Computer players always use
-	// 50.
-	LeftoverPoints int
-	Spend          Spend
-	// ExpensiveAt3 is the race option "expensive fields start at tech 3".
+// player is a PlayerSetup after the RACES.md creation rules: the race
+// actually played, its name, leftover L and effective spend.
+type player struct {
+	Race         engine.Race
+	Design       races.Design
+	Points       int
+	Name         string
+	Computer     bool
+	Level        Level
+	Leftover     int
+	Spend        Spend
 	ExpensiveAt3 bool
 }
 
@@ -141,6 +145,12 @@ type WormholeEnd struct {
 // PlayerStart is where a player's starting objects are in the Game.
 type PlayerStart struct {
 	Name string
+	// Race is the race the player starts with, after repairs, the
+	// illegal-race replacement or Random generation (RACES.md "At game
+	// creation"); Race.Tampered is the race's tampered flag. Points are
+	// its advantage points.
+	Race   races.Design
+	Points int
 	// Homeworld and SecondPlanet are planet indexes; SecondPlanet is −1
 	// without one.
 	Homeworld    int
@@ -195,11 +205,11 @@ func (s Settings) validate() error {
 		if p.Computer && (p.Level < Easy || p.Level > Expert) {
 			return fmt.Errorf("%w: player %d level %d", ErrSettings, i, p.Level)
 		}
-		if p.Race.PRT < engine.PRTHyperExpansion || p.Race.PRT > engine.PRTSpaceDemolition {
-			return fmt.Errorf("%w: player %d primary racial trait %d is not one of the ten", ErrSettings, i, p.Race.PRT)
-		}
-		if p.Spend < SpendSurfaceMinerals || p.Spend > SpendDefenses {
-			return fmt.Errorf("%w: player %d spend %d", ErrSettings, i, p.Spend)
+		// Human races are repaired at creation (an out-of-range PRT
+		// becomes JOAT); computer races are taken as given, so they
+		// must be well formed.
+		if p.Computer && (p.Race.Race.PRT < engine.PRTHyperExpansion || p.Race.Race.PRT > engine.PRTSpaceDemolition) {
+			return fmt.Errorf("%w: player %d primary racial trait %d is not one of the ten", ErrSettings, i, p.Race.Race.PRT)
 		}
 	}
 	return nil
@@ -225,6 +235,8 @@ type generator struct {
 	rng engine.Rand
 	cat *engine.Catalog
 
+	players []player
+
 	res Result
 }
 
@@ -248,6 +260,9 @@ func (g *generator) run() (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
+	// Races are settled when the players get their homeworlds, after
+	// placement (RACES.md "At game creation" step 6).
+	g.resolvePlayers()
 	if err := g.setUpPlayers(hws); err != nil {
 		return Result{}, err
 	}

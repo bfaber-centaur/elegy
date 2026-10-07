@@ -1,0 +1,63 @@
+file	case	predicted points	predicted outcome	race
+rw01a	growth 3	25	L 25	HE IFE,TT,ARM,ISB,UR,MA,BET,RS g3 hab[imm imm imm] col700 fac15/5/25 mine25/2/7 res+-++++ f-germ tech3
+rw01b	growth 5	7	L 7	IT IFE,UR,MA g5 hab[imm imm 16-100] col2400 fac15/14/15 mine20/8/7 res+++n++ f-germ tech3
+rw01c	growth 6	24	L 24	SS ARM,ISB,NAS g6 hab[4-96 imm 0-100] col2200 fac11/14/15 mine19/2/24 res++nn++ f-germ tech3
+rw01d	growth 7	27	L 27	SD IFE,UR g7 hab[3-96 6-74 14-100] col700 fac15/18/11 mine10/8/25 res-nnn-n f-germ
+rw01e	growth 8	23	L 23	IT ISB,GR,OBRM,RS g8 hab[imm 12-93 19-85] col1200 fac9/21/12 mine17/14/21 res+n-+n+ tech3
+rw01f	growth 9	33	L 33	SD GR,CE,NAS,LSP g9 hab[55-95 9-90 31-92] col700 fac8/16/25 mine16/13/7 res----nn
+rw01g	growth 13	38	L 38	AR TT,UR,NRSE g13 hab[27-61 17-81 imm] col1900 fac5/18/13 mine11/12/19 resnn+n+n f-germ tech3
+rw01h	growth 14	36	L 36	IT TT,ISB,GR g14 hab[imm 28-79 11-46] col1600 fac9/13/6 mine12/7/22 res-n+nnn
+rw01i	growth 19	21	L 21	HE MA g19 hab[34-68 42-66 6-100] col1400 fac11/22/21 mine13/12/17 res+n-n+n f-germ tech3
+rw01j	growth 20	50	L 50	SD TT,ARM,BET g20 hab[33-100 16-42 0-98] col2100 fac14/12/13 mine10/11/16 resnnn-+n tech3
+rw01k	three immunities	12	L 12	WM NRSE,CE,OBRM,NAS g9 hab[imm imm imm] col1500 fac10/19/6 mine5/15/12 res------
+rw01l	two immunities, factory output 13	40	L 40	JOAT IFE,GR g5 hab[imm 30-70 imm] col900 fac13/11/21 mine19/11/21 res+nnn++ f-germ tech3
+rw01m	one immunity, TT	22	L 22	JOAT TT g14 hab[10-50 imm 35-95] col1700 fac11/24/16 mine16/10/17 resnnnnnn
+rw01n	narrow 0-20 habitat	8	L 8	WM ARM,UR,LSP g20 hab[0-20 40-60 80-100] col2000 fac14/6/14 mine7/12/15 resnn+++n f-germ tech3
+rw01o	HE, factory output 13	26	L 26	HE GR g9 hab[16-85 41-77 4-100] col900 fac13/15/14 mine13/5/11 resn--nnn tech3
+rw01p	factory cost 5	47	L 47	SD TT g5 hab[4-90 18-100 4-82] col800 fac11/5/22 mine23/10/19 resnn+--- tech3
+rw02a	factory cost 25	31	L 31	PP - g7 hab[0-100 imm 5-96] col1000 fac14/25/21 mine17/12/13 res+nnnn+ f-germ tech3
+rw02b	factories operated 17	39	L 39	IT TT g5 hab[imm 9-90 imm] col1000 fac15/5/17 mine18/10/17 res--nnnn f-germ tech3
+rw02c	factories operated 22	10	L 10	AR MA g8 hab[1-86 11-90 10-100] col1100 fac5/16/22 mine8/12/23 res+++nnn f-germ
+rw02d	factories operated 25	9	L 9	SD IFE,GR,NRSE,LSP g10 hab[19-93 imm 0-56] col1400 fac12/18/25 mine7/4/17 res--n+n+ tech3
+rw02e	factory output 15	29	L 29	IS OBRM g10 hab[48-82 7-82 25-98] col1800 fac15/22/7 mine21/3/19 res--++nn f-germ
+rw02f	factories cost 1 less germanium	45	L 45	HE ARM g14 hab[17-99 13-82 3-92] col1400 fac8/19/18 mine12/13/19 resnnn-nn f-germ tech3
+rw02g	mine cost 2	6	L 6	PP IFE,ARM,GR g13 hab[53-82 16-39 36-100] col1300 fac9/10/9 mine11/2/22 res+nnnnn f-germ tech3
+rw02h	mine output 25, mines operated 25	13	L 13	WM IFE,TT,ARM,BET g5 hab[13-65 3-75 imm] col800 fac9/9/25 mine25/14/25 resnn+n+- f-germ tech3
+rw02i	colonists 700	37	L 37	IS UR,CE,OBRM,LSP,BET,RS g10 hab[3-89 11-76 0-58] col700 fac12/10/5 mine12/12/5 res-n---n
+rw02j	colonists 800	3	L 3	IT IFE,TT,ISB,UR,MA g4 hab[imm 19-47 0-100] col800 fac15/9/25 mine25/2/13 res+nn+++ f-germ tech3
+rw02k	colonists 900	32	L 32	IS TT,MA,BET g14 hab[47-94 38-90 12-78] col900 fac10/14/23 mine8/15/16 res-+++-n
+rw02l	colonists 2500	42	L 42	IT IFE,MA,CE g16 hab[6-39 21-70 20-76] col2500 fac7/20/25 mine19/4/17 resnnnnn+ f-germ tech3
+rw02m	AR	34	L 34	AR IFE,TT,ARM,UR,MA,RS g8 hab[45-67 imm imm] col1800 fac12/5/14 mine23/6/12 resn+-n++ f-germ
+rw02n	AR, cheap energy	17	L 17	AR IFE,UR g7 hab[imm imm imm] col2300 fac5/18/10 mine18/14/13 res+nnnnn tech3
+rw02o	PP + NAS	2	L 2	PP NAS g18 hab[4-95 1-81 32-62] col2200 fac11/8/14 mine14/11/21 resnnn+-+
+rw02p	SS + NAS	46	L 46	SS NAS g7 hab[2-81 imm imm] col1800 fac15/5/11 mine7/14/25 resnn-++n f-germ
+rw03a	JOAT + NAS	5	L 5	JOAT NAS g17 hab[21-85 5-40 48-92] col1100 fac7/16/11 mine19/2/24 res-n--nn
+rw03b	six LRTs	14	L 14	IS IFE,TT,MA,NRSE,BET,RS g12 hab[imm 14-92 27-69] col2400 fac6/18/20 mine11/2/11 resn-+++n f-germ
+rw03c	five good LRTs	35	L 35	CA IFE,ARM,ISB,UR,MA g7 hab[8-50 50-100 13-100] col1000 fac14/16/11 mine25/9/9 res--+n++
+rw03d	five bad LRTs	1	L 1	SS NRSE,NAS,LSP,BET,RS g8 hab[12-64 imm 0-100] col900 fac13/22/22 mine10/10/6 resnnn++n tech3
+rw03e	all research +75%, colonists 900	18	L 18	IT TT,UR,MA g6 hab[20-80 imm 42-83] col900 fac15/7/25 mine22/10/20 res------ f-germ tech3
+rw03f	five fields -50%	4	L 4	SD CE,BET,RS g16 hab[54-98 26-90 24-94] col2500 fac5/19/8 mine15/4/13 res+++++n
+rw03g	six fields -50%	49	L 49	SD ISB,GR,BET,RS g7 hab[72-97 39-95 6-66] col1700 fac11/22/19 mine23/14/9 res++++++ tech3
+rw03h	expensive tech starts at 3	19	L 19	IS GR g18 hab[0-84 22-73 13-95] col1200 fac13/24/10 mine11/6/19 res--nn-n tech3
+rw03i	IS	41	L 41	IS - g7 hab[11-49 33-90 64-94] col700 fac5/7/10 mine20/6/10 res-+n-nn f-germ
+rw03j	SD	11	L 11	SD IFE,MA,NAS g8 hab[18-56 21-99 60-95] col1400 fac11/21/18 mine24/10/22 resnnnn+n f-germ tech3
+rw03k	CA	16	L 16	CA CE g7 hab[3-50 6-67 6-95] col1800 fac13/6/11 mine23/2/25 res++nn-- tech3
+rw03l	WM	15	L 15	WM MA,NAS g8 hab[imm imm 16-49] col2100 fac14/9/14 mine14/7/16 resnn+nnn tech3
+rw03m	IT	43	L 43	IT IFE,TT,MA,LSP,BET g8 hab[71-93 imm 39-96] col1100 fac15/15/11 mine8/12/18 res++nnn+ f-germ
+rw03n	StarsAPI disagrees (factory term)	20	L 20	WM TT g13 hab[18-52 0-56 imm] col2300 fac10/9/15 mine9/2/18 res+n++n- tech3
+rw03o	StarsAPI disagrees (factory term)	30	L 30	IT - g8 hab[26-94 16-68 32-100] col1100 fac10/16/19 mine16/4/10 resnnn+n+ f-germ
+rw03p	StarsAPI disagrees (factory term)	28	L 28	SD GR g20 hab[14-73 65-86 23-47] col1800 fac5/18/24 mine20/5/12 res++-n+n
+rw04a	exactly 0 points	0	legal, L 0	JOAT ARM,ISB g5 hab[4-86 imm 34-82] col700 fac15/12/19 mine18/10/24 res-n+-+n tech3
+rw04b	-1 points: illegal	-1	illegal: replaced by the default race (JOAT g15 15-85, Humanoid economy), computer name, L 25	HE TT,ISB,GR,NRSE,NAS g10 hab[16-71 20-80 30-90] col2300 fac15/15/7 mine15/7/19 res+++n-+ f-germ
+rw04c	far over budget: illegal	-1433	illegal: replaced by the default race, computer name, L 25	HE IFE,ISB,UR g20 hab[44-88 imm 7-73] col2400 fac12/18/25 mine18/6/19 res++-n-n f-germ tech3
+rw04d	habitat centre off by one: repaired	34	repaired: centre 50, flag 0x10, kept	IS UR g20 hab[15-85 20-70 30-90] col2100 fac12/20/9 mine18/5/7 res--+--n f-germ tech3
+rw04e	race stat 15 = 1: repaired	32	repaired: stat 15 = 0, flag 0x10, kept	SD IFE,GR g14 hab[23-85 52-95 24-85] col2200 fac6/21/20 mine23/4/20 resnn-n++
+rw04f	growth 0: reset to 1	5851	repaired: growth 1 (5851 points), flag 0x10, L 50	SS ARM,CE g0 hab[imm 43-77 imm] col1400 fac15/21/10 mine25/2/9 resn+++n+ f-germ
+rw04g	leftover spend 5	13	spend 5 acts as the minerals spend	CA IFE,TT g12 hab[5-86 6-100 34-88] col1100 fac6/8/20 mine11/15/15 res+-+-nn
+rw04h	leftover spend 6	22	spend 6 acts as the minerals spend	SS IFE,ARM,NAS g14 hab[3-64 imm 44-82] col2300 fac7/14/11 mine7/5/22 resn+nn++ f-germ tech3
+rw04i	51 points: capped at 50	51	L 50 (capped)	AR TT,ISB,GR,UR,NAS,BET,RS g6 hab[2-79 3-100 imm] col700 fac13/24/17 mine13/8/8 res+n+nn+ f-germ
+rw04j	exactly 50 points	50	L 50	SS ISB,GR,MA,LSP,BET g11 hab[0-100 29-94 imm] col2400 fac9/21/5 mine5/2/8 resn+-+++ f-germ
+rw04k	random race (wizard Random)		random race: generated race named by the computer, 0..50 points	HE - g15 hab[17-83 17-83 17-83] col1000 fac10/10/10 mine10/3/10 resnnnnnn
+rw04l	random race (wizard Random)		random race: generated race named by the computer, 0..50 points	HE - g15 hab[17-83 17-83 17-83] col1000 fac10/10/10 mine10/3/10 resnnnnnn
+rw04m	random race (wizard Random)		random race: generated race named by the computer, 0..50 points	HE - g15 hab[17-83 17-83 17-83] col1000 fac10/10/10 mine10/3/10 resnnnnnn
+rw04n	random race (wizard Random)		random race named Zorgon: generated race, keeps its name, 0..50 points	HE - g15 hab[17-83 17-83 17-83] col1000 fac10/10/10 mine10/3/10 resnnnnnn
