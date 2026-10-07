@@ -58,7 +58,8 @@ func (s ResearchState) levelSum() int {
 // given the sum of the player's six current levels.
 //
 // KERNEL.md "Level cost": CONFIRMED for the normal setting (levels 3–9 of
-// one field, PG); other settings and slower tech are BINARY-ONLY.
+// one field, PG) and the other two settings (KX-002 R1, R2); slower tech is
+// BINARY-ONLY.
 func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech bool) int {
 	c := researchBase[level] + 10*levelSum
 	switch setting {
@@ -78,7 +79,9 @@ func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech boo
 //
 // KERNEL.md "Allocation": accumulation and single level-ups with "same
 // field" are CONFIRMED (PG); several levels per year, field switching,
-// Generalized Research and the level cap are BINARY-ONLY. With Generalized
+// Generalized Research's split and research lost at level 26 are CONFIRMED
+// (KX-002 G1, R2–R6); only the current field switching under Generalized
+// Research, and the level-10 cap, are BINARY-ONLY. With Generalized
 // Research every field is checked before any switch (the order is the
 // code's choice; KERNEL.md does not give it).
 func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) ResearchState {

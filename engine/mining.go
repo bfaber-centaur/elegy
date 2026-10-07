@@ -24,8 +24,8 @@ type Deposit struct {
 // concentration-30 output floor.
 //
 // KERNEL.md "Mining": output and depletion CONFIRMED (48 PG years,
-// homeworld, 10 mines, eff 10); the random +1 mechanism and the homeworld
-// floor are BINARY-ONLY.
+// homeworld, 10 mines, eff 10; KX-002 N2, 1000 mines), and the homeworld
+// floor (KX-002 N2); the random +1 mechanism is BINARY-ONLY.
 func MineYear(d Deposit, mines, eff int, homeworld bool, rng Rand) (gain int, out Deposit) {
 	used := d.Concentration
 	if homeworld && used < 30 {
@@ -42,7 +42,8 @@ func MineYear(d Deposit, mines, eff int, homeworld bool, rng Rand) (gain int, ou
 
 // depletionConcentration is the stored concentration clamped for the
 // depletion computation. It is re-evaluated on every repetition, as the
-// concentration drops inside one year (KERNEL.md "Mining", BINARY-ONLY).
+// concentration drops inside one year (KERNEL.md "Mining", CONFIRMED by
+// KX-002 N2; the clamp to 10 below 5 is BINARY-ONLY).
 func depletionConcentration(conc int) int {
 	switch {
 	case conc > 100:
