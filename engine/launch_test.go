@@ -296,7 +296,7 @@ func TestMeasuredStarbaseReplacementCost(t *testing.T) {
 		t.Errorf("replacement %+v, want 35/29/61 and 136", got)
 	}
 	// The fresh resources are 146 (the spec's 149 was a typo, corrected on
-	// stars-elegy #57 2496594).
+	// PRODUCTION-LAUNCH.md).
 	if fresh := starbaseCharge(c, isb); fresh != (Cost{Resources: 146, Minerals: Minerals{37, 29, 63}}) {
 		t.Errorf("fresh %+v", fresh)
 	}
@@ -320,7 +320,7 @@ func TestConfirmedStarbaseKeepsDamage(t *testing.T) {
 }
 
 func TestPredictionJoinTakesSlotPlace(t *testing.T) {
-	// stars-elegy #57 2496594 (BINARY-ONLY): at the fleet limit, ships of
+	// PRODUCTION-LAUNCH.md (BINARY-ONLY): at the fleet limit, ships of
 	// a design the fleet lacks take their design slot's place.
 	g := launchGame(t)
 	g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: 0}, {Owner: 0, Slot: 1, Design: 1}, {Owner: 0, Slot: 2, Design: 2}}

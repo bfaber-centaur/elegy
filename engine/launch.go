@@ -1,7 +1,7 @@
 package engine
 
 // Ships and starbases leaving production: stars-elegy
-// docs/PRODUCTION-LAUNCH.md (PR #57 head 2496594). Rules are tagged as
+// docs/PRODUCTION-LAUNCH.md (main b654cb3). Rules are tagged as
 // there; Elegy's own choices are ASSUMPTION Ln (docs/ORDERS-LAYER-STATUS.md).
 //
 // Elegy's production queue has no ship or starbase items yet, so nothing
@@ -120,7 +120,7 @@ func (g *Game) routeWarp(f *Fleet, src, dst int) int {
 // lowestFreeFleetNumber is the number of a player's next new fleet
 // (PRODUCTION-LAUNCH.md "The new fleet", CONFIRMED SL-02: the owner's
 // lowest unused fleet number, counting from 1). It sorts among the
-// owner's fleets by that number (stars-elegy #57 2496594, BINARY-ONLY;
+// owner's fleets by that number (BINARY-ONLY;
 // Game.fleetOrder).
 func (g *Game) lowestFreeFleetNumber(owner int) int {
 	used := map[int]bool{}
@@ -272,8 +272,8 @@ func (g *Game) DockAllows(pi, design int) bool {
 // (PRODUCTION-LAUNCH.md "Starbases"): without the tech nothing is built
 // and there is no message (BINARY-ONLY); otherwise the new starbase
 // replaces the old one, keeps its damage units (CONFIRMED SL-12), and the
-// owner is told what it can build, by its dock (stars-elegy #57 2496594,
-// BINARY-ONLY): no ships (Orbital Fort, Count 0), ships up to N kT (Space
+// owner is told what it can build, by its dock
+// (BINARY-ONLY): no ships (Orbital Fort, Count 0), ships up to N kT (Space
 // Dock, Count N), or any size (Count DockUnlimited).
 //
 // Not modelled: removing queued ship items and resetting starbase items

@@ -17,7 +17,7 @@ type DesignSlot struct {
 }
 
 // Design slots per player (LIMITS.md "Designs and battle plans",
-// stars-elegy #65, BINARY-ONLY; the ship-slot count MEASURED by OB-026): a
+// BINARY-ONLY; the ship-slot count MEASURED by OB-026): a
 // design order naming a slot past the last is refused.
 const (
 	maxShipDesigns     = 16
@@ -70,12 +70,12 @@ func (g *Game) designInUse(d int) bool {
 // A slot number outside the player's slots (LIMITS.md) and a name longer
 // than maxNameLength are rejected. A new design for a slot whose design
 // has ships or a starbase in play is refused (ORDERS.md "Design change
-// into an occupied slot", stars-elegy #51, chosen rule; the original is
+// into an occupied slot", chosen rule; the original is
 // BINARY-ONLY). Production has no ship items yet, so a queued design does
 // not count.
 //
 // Malformed fills are dropped or cut, never rejecting the design
-// (ORDERS.md "Design read, four malformed cases", #51): a part the slot
+// (ORDERS.md "Design read, four malformed cases"): a part the slot
 // does not take is dropped, a count over the slot's capacity is cut to
 // it, then ReadDesign strips parts above tech and back-fills an empty
 // engine slot.
@@ -163,7 +163,7 @@ func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
 }
 
 // DeleteDesignOrder empties one of the player's design slots (ORDERS.md
-// "Design delete effect", stars-elegy #51, chosen rule): ships of the
+// "Design delete effect", chosen rule): ships of the
 // design are removed, a fleet left without ships is removed, and a
 // starbase of the design is removed from its planet, which keeps its
 // population (KERNEL.md "Maximum population", BINARY-ONLY). The player's

@@ -34,22 +34,22 @@ const (
 // planet or fleet acts on a foreign object and is rejected (ORDERS.md
 // "Ownership", chosen rule). What is given is taken from the fleet as the
 // order applies; relations do not matter (TAKEOVER.md "Manual cargo
-// transfers to other players", stars-elegy #69, CONFIRMED TK-501, TK-502):
+// transfers to other players", CONFIRMED TK-501, TK-502):
 //   - colonists onto another player's planet without a starbase are a
 //     drop, resolved with the before-movement unloads;
 //   - colonists onto an unowned planet, or a planet with a starbase, are
 //     lost and the giver is told;
 //   - minerals (and fuel, to a fleet) are credited once every player's
 //     orders have applied (creditGifts; MEASURED for planets, TK-405,
-//     TK-412, and for fleets, TK-406, TK-407, TK-409, stars-elegy #76,
+//     TK-412, and for fleets, TK-406, TK-407, TK-409,
 //     with no message).
 //
 // Colonists given to another player's fleet are rejected: a legal client
-// never writes such an order (TAKEOVER.md, stars-elegy #76, TK-408,
+// never writes such an order (TAKEOVER.md, TK-408,
 // TK-414), so Elegy treats it as acting on a foreign object (ORDERS.md
 // "Ownership", chosen rule).
 //
-// Preconditions (ORDERS.md "Elegy implementation Q4", stars-elegy #51,
+// Preconditions (ORDERS.md "Elegy implementation Q4",
 // chosen rules): the fleet must be at the target's position, or the
 // order is refused; there is no deep-space jettison (a target is a planet
 // or a fleet); fuel to or from a planet is dropped from the order, and
@@ -227,17 +227,17 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 }
 
 // creditGifts is the second pass of the replay (TAKEOVER.md "Manual cargo
-// transfers to other players", stars-elegy #69): each gift, in the order
+// transfers to other players"): each gift, in the order
 // given, is credited in place. A planet takes all its minerals with no
 // message (MEASURED, TK-405, TK-412). A fleet takes what fits its free
-// hold and tank (MEASURED, TK-406, TK-407, TK-409, stars-elegy #76); the
+// hold and tank (MEASURED, TK-406, TK-407, TK-409); the
 // giver has already lost the whole amount, the rest is lost and the giver
-// is told (CONFIRMED, #76).
+// is told (CONFIRMED).
 //
 // ASSUMPTION L9: a receiving fleet that a later order in the replay
 // removed (a merge, or deleting its design) gets nothing, and the whole
 // gift is lost. The original skips a record whose receiver is missing at
-// replay (stars-elegy #69); a receiver removed between the passes is not
+// replay (TAKEOVER.md); a receiver removed between the passes is not
 // covered.
 func (g *Game) creditGifts(gifts []CargoGift) []Event {
 	var events []Event

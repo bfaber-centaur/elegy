@@ -7,8 +7,8 @@ import (
 
 // The orders layer: what a player may order for a year and the checks
 // Elegy applies when it accepts them. The specification is stars-elegy
-// docs/ORDERS.md (PR #51 head 14e3c10), with battle plans from COMBAT.md
-// (PR #59) and research from KERNEL.md "Research". Rules are tagged as
+// docs/ORDERS.md (main b654cb3), with battle plans from COMBAT.md
+// and research from KERNEL.md "Research". Rules are tagged as
 // there; Elegy's own choices where the specs are silent are marked
 // ASSUMPTION Ln and listed in docs/ORDERS-LAYER-STATUS.md.
 //
@@ -71,8 +71,8 @@ type Applied struct {
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
-// accepts (LIMITS.md "Names", stars-elegy #65, chosen rule; COMBAT.md
-// "Order validation", #72): at most 31 characters of any text. An empty
+// accepts (LIMITS.md "Names", chosen rule; COMBAT.md
+// "Order validation"): at most 31 characters of any text. An empty
 // fleet name restores the default name.
 const maxNameLength = 31
 
@@ -98,7 +98,7 @@ func (g *Game) acceptFile(o PlayerOrders) error {
 // one player at a time, in the replay order given (player indices). Cargo
 // given to another owner is taken from the giver as each order applies,
 // and credited only after every file has been replayed (TAKEOVER.md
-// "Manual cargo transfers to other players", stars-elegy #69: replay is
+// "Manual cargo transfers to other players": replay is
 // two passes, debits then credits; creditGifts). Each
 // order is validated on its own; a rejected order is dropped and the rest
 // of the file still applies (ORDERS.md "Per-order validation"). When two
@@ -143,7 +143,7 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 }
 
 // ShufflePlayers is the year's player replay order (KERNEL.md "Turn
-// order", 1. Orders, step 2, stars-elegy #53): a forward shuffle of the n
+// order", 1. Orders, step 2): a forward shuffle of the n
 // players, where position i swaps with position i + Random(n − i). One
 // draw per player, the last always 0; they are the first draws of the
 // year (CONFIRMED as a draw count, KX-004; the permutation BINARY-ONLY).
@@ -225,12 +225,12 @@ func (o ResearchOrder) apply(g *Game, player int, _ *Applied) error {
 }
 
 // maxBattlePlans is the battle-plan limit (COMBAT.md "Order validation",
-// stars-elegy #72, BINARY-ONLY): Elegy enforces the host's 16; the
+// BINARY-ONLY): Elegy enforces the host's 16; the
 // client's 15 is a client limit (MEASURED, BP-L).
 const maxBattlePlans = 16
 
 // validPlan checks a battle plan's fields (ORDERS.md "Battle-plan
-// fields" and COMBAT.md "Order validation", stars-elegy #72, Elegy's
+// fields" and COMBAT.md "Order validation", Elegy's
 // rules; the original lets a tactic of 6, a target of 8 and any
 // attack-who through, BINARY-ONLY): tactic and targets in their legal
 // sets, and a plan that attacks a player must name another player in the
@@ -252,7 +252,7 @@ func (g *Game) validPlan(player int, p BattlePlan) error {
 }
 
 // BattlePlanOrder defines battle plan Index (COMBAT.md "Adding, replacing
-// and deleting" and "Order validation", stars-elegy #72, BINARY-ONLY):
+// and deleting" and "Order validation", BINARY-ONLY):
 // Index below the count replaces, Index equal to the count adds, anything
 // else, and a 17th plan, is refused.
 type BattlePlanOrder struct {
@@ -366,7 +366,7 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 //
 // A warp outside 0..11, a target planet or fleet that does not exist,
 // and a negative transport amount reject the order (ORDERS.md "Waypoint
-// warp, target and transport", stars-elegy #51, chosen rule). Warp 11 is
+// warp, target and transport", chosen rule). Warp 11 is
 // the stargate hop, which Elegy does not model yet, so it is rejected as
 // not modelled.
 //
@@ -461,7 +461,7 @@ func (o DetonateOrder) apply(*Game, int, *Applied) error {
 // Production-queue limits Elegy checks on a queue order.
 //
 // ASSUMPTION L14: the host checks neither item kinds nor counts nor the
-// length (LIMITS.md "Production queue", stars-elegy #65). Elegy refuses an
+// length (LIMITS.md "Production queue"). Elegy refuses an
 // unknown item, a count outside 1..1023 (the host's stored field) and
 // more than 255 items (the host's order-record limit).
 const (
@@ -470,10 +470,10 @@ const (
 )
 
 // QueueOrder replaces a planet's whole production queue (LIMITS.md
-// "Production-queue replace", stars-elegy #65, CONFIRMED LQ-1..LQ-6): the
+// "Production-queue replace", CONFIRMED LQ-1..LQ-6): the
 // planet must be the sender's; an empty list removes the queue; otherwise
 // the new list replaces the old in the order given, counts as sent. Elegy's
-// chosen rule (#65 f0c3651): taking items in queue order, a new item sent
+// chosen rule: taking items in queue order, a new item sent
 // with a nonzero percentage keeps it only if the old queue has an item not
 // yet matched of the same kind with exactly that percentage, which is then
 // used up; otherwise it starts at 0. It gives the original's result for
@@ -524,7 +524,7 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 }
 
 // PlanetSettingsOrder sets a planet's settings (LIMITS.md "Setting
-// orders", stars-elegy #65, BINARY-ONLY): "contribute only leftover
+// orders", BINARY-ONLY): "contribute only leftover
 // resources to research" and the route destination for new ships. The
 // planet must be the sender's. Mass drivers are not modelled.
 //
@@ -554,7 +554,7 @@ func (o PlanetSettingsOrder) apply(g *Game, player int, _ *Applied) error {
 }
 
 // RelationsOrder sets the sender's own relations row (LIMITS.md "Setting
-// orders", stars-elegy #65, BINARY-ONLY): only the sender's view of the
+// orders", BINARY-ONLY): only the sender's view of the
 // other players changes.
 //
 // ASSUMPTION L16: the row must have one entry per player, each friend,

@@ -217,8 +217,8 @@ func TestDetonateNotModelled(t *testing.T) {
 }
 
 func TestConfirmedQueueReplace(t *testing.T) {
-	// LIMITS.md "Production-queue replace" (stars-elegy #65 f0c3651,
-	// CONFIRMED LQ-1..LQ-4) with its chosen rule: a sent percentage is kept
+	// LIMITS.md "Production-queue replace"
+	// (CONFIRMED LQ-1..LQ-4) with its chosen rule: a sent percentage is kept
 	// only against an unused old item of the same kind with exactly that
 	// percentage. The base queue is Factory ×5 at 49%, Mine ×5 at 30%,
 	// Defenses ×5, Factory ×5 at 20%.
@@ -376,7 +376,7 @@ func TestConfirmedCargoOwnPlanet(t *testing.T) {
 
 func TestConfirmedManualTransfersToOthers(t *testing.T) {
 	// TAKEOVER.md "Manual cargo transfers to other players" (stars-elegy
-	// #69, CONFIRMED TK-501, TK-502; minerals MEASURED TK-405, TK-412):
+	// CONFIRMED TK-501, TK-502; minerals MEASURED TK-405, TK-412):
 	// colonists onto another player's planet are a drop, whatever the
 	// relations; onto an unowned planet they are lost and the giver is
 	// told; minerals join the surface once every file has applied, with no
@@ -407,7 +407,7 @@ func TestConfirmedManualTransfersToOthers(t *testing.T) {
 }
 
 func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
-	// stars-elegy #69: replay is two passes, debits then credits. Player 1
+	// TAKEOVER.md: replay is two passes, debits then credits. Player 1
 	// replays first and cannot use what player 0 gives it this year.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
@@ -422,7 +422,7 @@ func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
 }
 
 func TestPredictionCargoToForeignFleet(t *testing.T) {
-	// stars-elegy #76 (MEASURED TK-406/407/409, over-full CONFIRMED): no
+	// TAKEOVER.md (MEASURED TK-406/407/409, over-full CONFIRMED): no
 	// relation check; the receiver takes what fits and the rest is lost,
 	// the giver told. Colonists to another player's fleet are rejected
 	// (chosen rule; no legal client writes them, TK-408, TK-414).
@@ -446,7 +446,7 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 }
 
 func TestCargoChecks(t *testing.T) {
-	// ORDERS.md Q4 (#51, chosen rules): the fleet must be at the target;
+	// ORDERS.md Q4 (chosen rules): the fleet must be at the target;
 	// fuel to a planet is dropped from the order and its minerals still
 	// move.
 	g := ordersGame()
@@ -507,7 +507,7 @@ func TestPredictionDesignOrders(t *testing.T) {
 }
 
 func TestDesignMalformedFills(t *testing.T) {
-	// ORDERS.md "Design read, four malformed cases" (#51): a part the slot
+	// ORDERS.md "Design read, four malformed cases": a part the slot
 	// does not take is dropped, a count over capacity is cut, and an
 	// emptied engine slot is back-filled; the design is kept.
 	g := ordersGame()
@@ -527,7 +527,7 @@ func TestDesignMalformedFills(t *testing.T) {
 }
 
 func TestDesignDeleteRenumbers(t *testing.T) {
-	// ORDERS.md "Design delete effect" (#51): later slots move down one,
+	// ORDERS.md "Design delete effect": later slots move down one,
 	// as battle plans do; the other kind's slots stay.
 	g := ordersGame()
 	fill := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
@@ -553,7 +553,7 @@ func TestDesignDeleteRenumbers(t *testing.T) {
 }
 
 func TestPredictionPlayerShuffle(t *testing.T) {
-	// KERNEL.md "Turn order", 1. Orders, step 2 (stars-elegy #53): for
+	// KERNEL.md "Turn order", 1. Orders, step 2: for
 	// i = 0..n−1 swap position i with i + Random(n − i); one draw per
 	// player, the last always 0. Draws 2, 0, 1, 0 on four players:
 	// [0 1 2 3] → [2 1 0 3] → [2 1 0 3] → [2 1 3 0] → [2 1 3 0].

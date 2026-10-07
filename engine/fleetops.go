@@ -103,7 +103,7 @@ func (g *Game) absorb(dst, src *Fleet, overflow, dilute bool) {
 // insertStack adds a stack of a design the fleet lacks in its owner's
 // design-slot order and returns its index: a fleet keeps one count per
 // design slot, so the new stack takes its slot's place
-// (PRODUCTION-LAUNCH.md, stars-elegy #57, BINARY-ONLY). Merges and the
+// (PRODUCTION-LAUNCH.md, BINARY-ONLY). Merges and the
 // orders layer's launch share it.
 func (g *Game) insertStack(f *Fleet, s Stack) int {
 	slot := g.shipSlot(f.Owner, s.Design)
