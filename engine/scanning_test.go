@@ -635,3 +635,134 @@ func TestPredictionDefenseEstimate(t *testing.T) {
 		t.Errorf("no type: %d, want 1", got)
 	}
 }
+
+func TestConfirmedBombingCheck(t *testing.T) {
+	// SC-024, SC-031, SC-032: a blind freighter whose plan attacks the
+	// owner gets a normal report of an enemy colony without a starbase
+	// (estimates, no surface minerals), but position only at a colony with
+	// a starbase and at an unowned planet. A plan attacking nobody gives
+	// only the orbit report (BINARY-ONLY).
+	for _, c := range []struct {
+		name     string
+		owner    int
+		starbase bool
+		attack   AttackWho
+		want     ReportLevel
+	}{
+		{"enemy colony", 1, false, AttackNeutralsAndEnemies, ReportNormal},
+		{"enemy starbase", 1, true, AttackNeutralsAndEnemies, ReportPosition},
+		{"unowned", NoOwner, false, AttackNeutralsAndEnemies, ReportPosition},
+		{"plan nobody", 1, false, AttackNobody, ReportPosition},
+		{"enemies only, neutral owner", 1, false, AttackEnemies, ReportPosition},
+	} {
+		l := newScanLab()
+		l.g.Players[0].Plans = []BattlePlan{{Attack: c.attack}}
+		blind := l.design(hFreight, 25)
+		sb := l.design(Hull{Name: "Space Station", Starbase: true}, 0)
+		l.fleet(0, Point{40, 40}, Stack{Design: blind, Count: 1})
+		p := l.planet(c.owner, Point{40, 40})
+		pl := &l.g.Planets[0]
+		pl.Surface, pl.Population = Minerals{1, 2, 3}, 100
+		pl.HasStarbase, pl.StarbaseDesign = c.starbase, sb
+		r := l.report(0, p)
+		if r.Level != c.want || r.Surface != (Minerals{}) {
+			t.Errorf("%s: level %d surface %v, want level %d", c.name, r.Level, r.Surface, c.want)
+		}
+	}
+}
+
+func TestConfirmedBattleDisclosure(t *testing.T) {
+	// SC-031: a design that fought the viewer is disclosed in full even
+	// when every ship of it was destroyed. SC-032: the battle planet gets
+	// at least a position-only report (BINARY-ONLY for a viewer with no
+	// fleet left there).
+	l := newScanLab()
+	mine := l.design(hFreight, 25)
+	theirs := l.design(hFreight, 30)
+	far := l.design(hFreight, 35)
+	l.fleet(0, Point{500, 500}, Stack{Design: mine, Count: 1})
+	l.fleet(1, Point{900, 900}, Stack{Design: far, Count: 1})
+	p := l.planet(NoOwner, Point{40, 40})
+	b := []battleSeen{{planet: 0, players: []int{0, 1}, designs: map[int][]int{0: {mine}, 1: {theirs}}}}
+	v := views(l.g, nil, b)[0]
+	if len(v.Designs) != 1 || v.Designs[0].Design != theirs || !v.Designs[0].Full {
+		t.Errorf("designs %+v, want %d in full", v.Designs, theirs)
+	}
+	if len(v.Players) != 1 || v.Players[0].Player != 1 {
+		t.Errorf("players %+v", v.Players)
+	}
+	found := false
+	for _, r := range v.Planets {
+		if r.Planet == p {
+			found = r.Level == ReportPosition
+		}
+	}
+	if !found {
+		t.Errorf("battle planet: planets %+v", v.Planets)
+	}
+	// A player not in the battle learns nothing from it.
+	if v := views(l.g, nil, []battleSeen{{planet: 0, players: []int{1}, designs: map[int][]int{1: {theirs}}}})[0]; len(v.Designs) != 0 || len(v.Planets) != 0 {
+		t.Errorf("outsider %+v", v)
+	}
+}
+
+func TestPredictionLeftOutOfBattle(t *testing.T) {
+	// A fleet in orbit left out of a battle by the size limit gives a
+	// normal report of the planet it orbits.
+	l := newScanLab()
+	blind := l.design(hFreight, 25)
+	l.fleet(0, Point{40, 40}, Stack{Design: blind, Count: 1})
+	p := l.planet(1, Point{40, 40})
+	b := []battleSeen{{planet: 0, players: []int{0, 1}, designs: map[int][]int{}, leftOut: []int{0}}}
+	level := ReportNone
+	for _, r := range views(l.g, nil, b)[0].Planets {
+		if r.Planet == p {
+			level = r.Level
+		}
+	}
+	if level != ReportNormal {
+		t.Errorf("level %d, want normal", level)
+	}
+}
+
+func TestPredictionBattleRecords(t *testing.T) {
+	// battles records each battle's planet, players and the designs on the
+	// board, destroyed ones included, for the views.
+	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
+	g := combatLabGame(prey, 6, 3)
+	res := battles(&g, rand.New(rand.NewSource(3)), map[int]bool{})
+	if len(res.seen) != 1 {
+		t.Fatalf("seen %+v", res.seen)
+	}
+	s := res.seen[0]
+	if len(s.players) != 2 || len(s.designs[0]) == 0 || len(s.designs[1]) == 0 {
+		t.Errorf("seen %+v", s)
+	}
+}
+
+func TestConfirmedDefenseEstimateVectors(t *testing.T) {
+	// SCANNING.md: Neutron Shields (v 38): 1, 3, 5, 10 defenses → 1, 2, 3,
+	// 6; 40 defenses with 10 operable → 6; 100 defenses with population
+	// 104,400 (42 operable) → 14.
+	g := Game{Players: []Player{{Race: pgRace()}}, Defenses: []DefenseType{{Name: "Neutron Shield", Coverage: 38}}}
+	for _, c := range []struct{ defenses, pop, want int }{
+		{1, 10000, 1}, {3, 10000, 2}, {5, 10000, 3}, {10, 10000, 6}, {40, 250, 6}, {100, 1044, 14},
+	} {
+		p := Planet{Owner: 0, Population: c.pop, Defenses: c.defenses, Env: [3]int{50, 50, 50}}
+		if got := g.defenseEstimate(&p); got != c.want {
+			t.Errorf("%d defenses, pop %d: %d, want %d", c.defenses, c.pop, got, c.want)
+		}
+	}
+}
+
+func TestConfirmedHeadingVectors(t *testing.T) {
+	// SC-027: halved toward zero while a component is 128 or more.
+	for _, c := range []struct{ in, want Point }{
+		{Point{300, 100}, Point{75, 25}}, {Point{50, -120}, Point{50, -120}}, {Point{-128, 3}, Point{-64, 1}},
+		{Point{300, -7}, Point{75, -1}}, {Point{-1, -395}, Point{0, -98}},
+	} {
+		if got := scanHeading(c.in.X, c.in.Y); got != c.want {
+			t.Errorf("scanHeading(%v) = %v, want %v", c.in, got, c.want)
+		}
+	}
+}

@@ -300,7 +300,7 @@ func GenerateTurn(
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
-	views := Views(g, PopulationEstimates(g, rng))
+	views := views(g, PopulationEstimates(g, rng), fights.seen)
 
 	return TurnResult{
 		Game:   g,
