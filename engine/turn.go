@@ -2,11 +2,46 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 )
 
 // ErrNilRand is returned by GenerateTurn when no random source is given.
 var ErrNilRand = errors.New("engine: GenerateTurn needs a non-nil Rand")
+
+// ZeroMaxPopulationError is returned by GenerateTurn for an Alternate
+// Reality planet with population, habitability ≥ 0 and no starbase, whose
+// maximum population is 0.
+//
+// ELEGY DECISION, not original behavior: the original stops with an
+// integer divide by zero and generates no year (KERNEL.md "Maximum
+// population", CONFIRMED KX-001 Z1, LEGACY BUG). Elegy refuses the year
+// with this error before changing anything. To choose another rule,
+// change checkGenerable (and the population rule) only.
+type ZeroMaxPopulationError struct {
+	Planet int // planet id
+}
+
+func (e *ZeroMaxPopulationError) Error() string {
+	return fmt.Sprintf("engine: planet %d has population and a maximum population of 0 (Alternate Reality without a starbase)", e.Planet)
+}
+
+// checkGenerable reports a state the year cannot be generated from. Nothing
+// in movement or production changes a planet's maximum population, so the
+// check runs once, before the year starts.
+func checkGenerable(g *Game) error {
+	for i := range g.Planets {
+		p := &g.Planets[i]
+		if p.Owner == NoOwner || p.Population <= 0 {
+			continue
+		}
+		col := NewColony(p, &g.Players[p.Owner])
+		if col.MaxPop == 0 && col.Hab >= 0 {
+			return &ZeroMaxPopulationError{Planet: p.ID}
+		}
+	}
+	return nil
+}
 
 // NoOwner marks an unowned planet.
 const NoOwner = -1
@@ -81,7 +116,8 @@ type TurnResult struct {
 //
 // rng must not be nil: the turn's random draws (mining's +1) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
-// returns ErrNilRand.
+// returns ErrNilRand. A state the original cannot generate from returns
+// a *ZeroMaxPopulationError (see checkGenerable).
 //
 // game is not modified; the returned Game is independent of it.
 func GenerateTurn(
@@ -92,6 +128,9 @@ func GenerateTurn(
 ) (TurnResult, error) {
 	if rng == nil {
 		return TurnResult{}, ErrNilRand
+	}
+	if err := checkGenerable(&game); err != nil {
+		return TurnResult{}, err
 	}
 	g := game.clone()
 	var events []Event

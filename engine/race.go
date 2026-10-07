@@ -23,12 +23,14 @@ const (
 	PRTHyperExpansion
 	PRTJackOfAllTrades
 	PRTAlternateReality
+	PRTInnerStrength
 )
 
 // LRTs is the set of lesser racial traits the kernel rules mention.
 type LRTs struct {
 	OnlyBasicRemoteMining bool
 	GeneralizedResearch   bool
+	MineralAlchemy        bool
 }
 
 // ResearchCost is a race's research-cost setting for one field.
@@ -54,8 +56,10 @@ type Race struct {
 	MinesOperated        int // per 10,000 colonists
 	MineOutput           int // the wizard's mine output setting (eff)
 
-	FactoryCost Cost // per factory
-	MineCost    Cost // per mine
+	FactoryCost int // resources per factory
+	MineCost    int // resources per mine
+	// FactoryLessGermanium is "factories cost 1 kT less germanium".
+	FactoryLessGermanium bool
 
 	ResearchCosts [NumFields]ResearchCost
 }

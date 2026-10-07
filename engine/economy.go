@@ -81,7 +81,7 @@ func (c Colony) OperableDefenses(pop int) int {
 }
 
 // WorkingMines is the number of mines that mine this year.
-// CONFIRMED for non-AR (PG mining); the AR rule is BINARY-ONLY.
+// CONFIRMED for non-AR (PG mining) and AR (KX-001 Z2, Z3).
 func (c Colony) WorkingMines(pop, installed int) int {
 	if c.alternateReality() {
 		return int(math.Sqrt(float64(pop)))
@@ -102,8 +102,8 @@ func (c Colony) effectivePop(pop int) int {
 // (units) and installed factories.
 //
 // KERNEL.md "Resources per planet": CONFIRMED for R0 10, F 10, 10 factories
-// (PG) and for no factories (PQ-001); the over-max and AR rules are
-// BINARY-ONLY.
+// (PG) and for no factories (PQ-001); AR CONFIRMED at one point (KX-001 Z2,
+// Z3); the over-max rule is BINARY-ONLY.
 func (c Colony) Resources(pop, factories int) int {
 	if pop <= 0 {
 		return 0
@@ -111,8 +111,9 @@ func (c Colony) Resources(pop, factories int) int {
 	e := c.effectivePop(pop)
 	var r int
 	if c.alternateReality() {
-		r = int(math.Sqrt(float64(e/c.Race.colonistsPerResourceUnits()*max(1, c.EnergyTech)))*
-			float64(max(25, c.Hab))*0.1 + 0.999)
+		// E/R0 is a floating-point division (CONFIRMED, KX-001 Z2).
+		ep := float64(e) / float64(c.Race.colonistsPerResourceUnits())
+		r = int(math.Sqrt(ep*float64(max(1, c.EnergyTech)))*float64(max(25, c.Hab))*0.1 + 0.999)
 	} else {
 		n := min(factories, c.OperableFactories(pop))
 		r = e/c.Race.colonistsPerResourceUnits() + (c.Race.FactoryOutput*n+9)/10

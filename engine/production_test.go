@@ -23,6 +23,8 @@ type pqCase struct {
 	wantResearch                           int
 	wantCompleted                          bool
 	wantEvents                             []EventKind // must appear (in order)
+
+	race func(*Race) // race changes from the PG race, if any
 }
 
 func q(kind ItemKind, count, pct int) QueueItem {
@@ -32,6 +34,9 @@ func q(kind ItemKind, count, pct int) QueueItem {
 func runPQ(t *testing.T, tc pqCase) {
 	t.Helper()
 	c := pgColony()
+	if tc.race != nil {
+		tc.race(&c.Race)
+	}
 	p := &Planet{
 		Owner:        0,
 		Population:   tc.pop,

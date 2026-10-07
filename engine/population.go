@@ -95,8 +95,9 @@ func GrowPopulation(pop, carry, maxPop, growthRate, hab int) (newPop, newCarry i
 }
 
 // crowdingPermille is trunc(1000·P/max). A zero maximum (Alternate Reality
-// without a starbase) is not covered by KERNEL.md; it is treated as
-// maximally overcrowded.
+// without a starbase) stops the original with a divide by zero (KERNEL.md,
+// LEGACY BUG); GenerateTurn rejects that state (ErrZeroMaxPopulation), and
+// a direct call here treats it as maximally overcrowded.
 func crowdingPermille(pop, maxPop int) int {
 	if maxPop <= 0 {
 		return 1 << 30

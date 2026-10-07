@@ -67,7 +67,7 @@ func TestPredictionCapsAndResources(t *testing.T) {
 	if got := c.Resources(0, 10); got != 0 {
 		t.Errorf("Resources(0) = %d, want 0", got)
 	}
-	// Alternate Reality: trunc(sqrt(trunc(E/R0)·max(1, energy))·max(25, hab)·0.1 + 0.999).
+	// Alternate Reality: trunc(sqrt((E/R0)·max(1, energy))·max(25, hab)·0.1 + 0.999).
 	ar := pgRace()
 	ar.PRT = PRTAlternateReality
 	arc := Colony{Race: ar, Hab: 40, MaxPop: 10000, EnergyTech: 4}
