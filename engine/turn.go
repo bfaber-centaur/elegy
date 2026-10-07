@@ -57,6 +57,13 @@ type Game struct {
 	Designs []Design
 	Fleets  []Fleet
 	Salvage []Salvage
+
+	// PlanetScanners is the catalogue of planetary scanners; a planet
+	// with a scanner uses the best one its owner's tech allows.
+	PlanetScanners []PlanetScanner
+	// Defenses is the catalogue of planetary defense types, for the
+	// defense coverage estimate.
+	Defenses []DefenseType
 }
 
 type Player struct {
@@ -89,6 +96,9 @@ type Planet struct {
 	HasStarbase    bool
 	StarbaseDesign int
 	StarbaseDamage int
+	// HasScanner marks a planetary scanner (its range comes from the
+	// owner's tech, see Game.PlanetScanners).
+	HasScanner bool
 
 	Population  int // units of 100 colonists
 	GrowthCarry int // hundredths of a unit, 0..99 (StarsAPI excessPop)
@@ -116,6 +126,9 @@ func Jrc3() Ruleset {
 type TurnResult struct {
 	Game   Game
 	Events []Event
+	// Views is each player's knowledge at the end of the year
+	// (SCANNING.md), by player index.
+	Views []PlayerView
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
@@ -123,7 +136,7 @@ type TurnResult struct {
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
 // level-ups, then battles (COMBAT.md), a second research level-up check
-// and repair.
+// and repair. Each player's view of the result (SCANNING.md) comes last.
 //
 // Not yet modelled: order application, waypoint tasks, space objects
 // other than battle salvage, random events, fuel generators, mine
@@ -247,9 +260,14 @@ func GenerateTurn(
 
 	g.Year++
 
+	// Knowledge is computed last, from the final state (SCANNING.md "When
+	// knowledge is computed").
+	views := Views(g, PopulationEstimates(g, rng))
+
 	return TurnResult{
 		Game:   g,
 		Events: events,
+		Views:  views,
 	}, nil
 }
 

@@ -53,6 +53,20 @@ type Part struct {
 	Thrust     int
 	HalfThrust bool
 
+	// Scanning (SCANNING.md). Scanner marks a part that scans (a scanner
+	// part, or a part with a built-in scanner), with its normal and
+	// penetrating ranges in ly. CargoScan parts (Pick Pocket, Robber
+	// Baron) see the cargo of an enemy fleet at their exact position;
+	// DetailedPlanetScan (Robber Baron) gives a detailed report of an
+	// orbited planet.
+	Scanner            bool
+	ScanRange          int
+	PenRange           int
+	CargoScan          bool
+	DetailedPlanetScan bool
+	CloakPoints        int
+	Tachyon            bool // Tachyon Detector
+
 	Cost    Cost
 	TechReq [NumFields]int
 }
@@ -72,6 +86,9 @@ type Hull struct {
 	// RepairBonus is f in the repair rule: 25 for a Fuel Transport, 50
 	// for a Super-Fuel Xport.
 	RepairBonus int
+	// JOATScanner marks the Scout, Frigate and Destroyer hulls, which
+	// have a built-in scanner for a Jack of All Trades owner.
+	JOATScanner bool
 	Cost        Cost
 	TechReq     [NumFields]int
 }

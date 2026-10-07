@@ -26,6 +26,10 @@ const (
 	PRTInnerStrength
 	PRTWarMonger
 	PRTInterstellarTraveler
+	PRTClaimAdjuster
+	PRTSuperStealth
+	PRTPacketPhysics
+	PRTSpaceDemolition
 )
 
 // LRTs is the set of lesser racial traits the kernel rules mention.
@@ -36,6 +40,8 @@ type LRTs struct {
 	RegeneratingShields   bool
 	CheapEngines          bool
 	BleedingEdgeTech      bool
+	NoAdvancedScanners    bool
+	ImprovedStarbases     bool
 }
 
 // ResearchCost is a race's research-cost setting for one field.

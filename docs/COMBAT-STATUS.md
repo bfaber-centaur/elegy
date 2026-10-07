@@ -1,12 +1,11 @@
 # Combat status
 
 The battle phase in `engine/` follows the public combat specification,
-stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `a6ac76e` (PR #19
-plus the implementer answers merged in PR #24, `113a4d2`) with the
-follow-up answers in open PR #31 (branch at `a0512f1`), the owner cost
-rule of `docs/COMPONENTS.md` in open PR #30 (branch at `f851a4b`), the
-turn order in `docs/KERNEL.md`, and the measured data in `docs/PARITY.md`
-"Combat" (CB-000..CB-022). Nothing else was used.
+stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `df57443` (PR #19
+with the implementer answers merged in #24 and #31), the owner cost rule
+of `docs/COMPONENTS.md` (merged in #30), the turn order in
+`docs/KERNEL.md`, and the measured data in `docs/PARITY.md` "Combat"
+(CB-000..CB-022). Nothing else was used.
 
 `go test -run Confirmed ./...` runs the CB vectors; `TestPrediction*`
 tests pin BINARY-ONLY rules.
