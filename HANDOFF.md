@@ -7,11 +7,12 @@ the component table.
 
 ## State
 
-- Kernel, movement, battles and scanning are merged (elegy #1–#6). The
-  component table is elegy #7.
-- This branch adds `engine/takeover.go`, stacked on #7, following
-  stars-elegy TAKEOVER.md with the answers in stars-elegy #34 (order inside
-  a phase, unload amounts, capture tech, colonize retries).
+- Kernel, movement, battles, scanning and the component table are merged
+  (elegy #1–#7).
+- This branch (elegy #8) adds `engine/takeover.go`, following stars-elegy
+  TAKEOVER.md with the answers in stars-elegy #34 (order inside a phase,
+  unload amounts, capture tech) and the corrections in #37 (deep-space
+  unloads; colonize is tried once).
   `docs/TAKEOVER-STATUS.md` maps rules, tests and assumptions.
 - Fleets now carry a waypoint-0 task (`Fleet.Task`, `Waypoint.Task`):
   transport unload actions and colonize.

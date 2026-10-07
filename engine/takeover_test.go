@@ -326,7 +326,7 @@ func TestConfirmedColonyMinerals(t *testing.T) {
 		fi := l.fleet(0, pi, 0, Stack{Design: l.colonyShip(), Count: 1})
 		l.g.Fleets[fi].Cargo.Colonists = 25
 		l.g.Fleets[fi].Task = Task{Kind: TaskColonize}
-		queue, _, _ := l.g.unloadPhase(l.g.phaseStart())
+		queue, _ := l.g.unloadPhase(l.g.phaseStart())
 		l.g.resolveQueue(queue, panicRand{}, map[int]bool{})
 		p := l.g.Planets[pi]
 		if p.Surface != tt.want || p.Owner != 0 || p.Population != 25 || len(l.g.Fleets) != 0 {
@@ -345,7 +345,7 @@ func TestConfirmedColonyMinerals(t *testing.T) {
 		l.g.Fleets[fi].Cargo.Colonists = 25
 		l.g.Fleets[fi].Task = Task{Kind: TaskColonize}
 	}
-	queue, _, _ := l.g.unloadPhase(l.g.phaseStart())
+	queue, _ := l.g.unloadPhase(l.g.phaseStart())
 	l.g.resolveQueue(queue, panicRand{}, map[int]bool{})
 	if p := l.g.Planets[pi]; p.Surface != (Minerals{22, 7, 22}) || p.Owner != NoOwner || len(l.g.Fleets) != 0 {
 		t.Errorf("25 vs 25: surface %v owner %d fleets %d, want 22/7/22, unowned, both consumed", p.Surface, p.Owner, len(l.g.Fleets))
@@ -475,7 +475,7 @@ func TestConfirmedFriendInvaded(t *testing.T) {
 	fi := l.fleet(0, pi, 0, Stack{Design: freighter, Count: 1})
 	l.g.Fleets[fi].Cargo.Colonists = 100
 	l.g.Fleets[fi].Task = unloadColonists
-	queue, _, _ := l.g.unloadPhase(l.g.phaseStart())
+	queue, _ := l.g.unloadPhase(l.g.phaseStart())
 	l.g.resolveQueue(queue, &seqRand{}, map[int]bool{})
 	if p := l.g.Planets[pi]; p.Owner != 0 || p.Population != 9 {
 		t.Errorf("owner %d pop %d, want 0 and 9", p.Owner, p.Population)
@@ -612,7 +612,7 @@ func TestPredictionGroundStrengthTraits(t *testing.T) {
 	fi := l.fleet(0, pi, 0, Stack{Design: freighter, Count: 1})
 	l.g.Fleets[fi].Cargo.Colonists = 100
 	l.g.Fleets[fi].Task = unloadColonists
-	queue, _, ev := l.g.unloadPhase(l.g.phaseStart())
+	queue, ev := l.g.unloadPhase(l.g.phaseStart())
 	if len(queue) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused || l.g.Fleets[fi].Cargo.Colonists != 100 {
 		t.Errorf("Alternate Reality drop should be refused: queue %v events %v", queue, ev)
 	}
@@ -649,28 +649,21 @@ func TestPredictionCaptureTech(t *testing.T) {
 	}
 }
 
-func TestPredictionColonizeRetries(t *testing.T) {
-	// #34 "Colonize retries": a colonize that failed on an owned planet
-	// is retried in the load pass, which succeeds only when a tie emptied
-	// the planet. Before movement its drop is resolved after movement;
-	// after movement the colonists are lost (LEGACY BUG).
-	setup := func(arrive bool) (*tkLab, int, int) {
+func TestConfirmedColonizeTriedOnce(t *testing.T) {
+	// TK-113 (stars-elegy #37): players 0 and 2 drop 150 each on a planet
+	// of 100. That is a tie, so the planet is emptied and nobody lands.
+	// Player 0's colony ship there has already failed ("planet owned"):
+	// it keeps its 25 colonists and its task is cleared, whether it was
+	// in orbit or arrived. The planet stays unowned with no minerals.
+	for _, arrive := range []bool{false, true} {
 		l := newTKLab(t, 3)
 		l.g.Players = append(l.g.Players, l.g.Players[0])
-		pi := l.planet(2, 0, 10)
+		for p := range l.g.Players {
+			l.g.Players[p].Relations = []Relation{RelationEnemy, RelationEnemy, RelationEnemy}
+		}
+		pi := l.planet(1, 0, 100)
 		freighter := l.design("Small Freighter", SlotFill{0, "Quick Jump 5", 1})
 		colony := l.colonyShip()
-		// Players 0 and 1 drop 10 each: strength 11 each, Σ 22 ≥ 10, so
-		// the planet is emptied, and the tie lands nobody.
-		for p := range 2 {
-			if arrive {
-				l.arriving(p, pi, freighter, 10, unloadColonists)
-			} else {
-				fi := l.fleet(p, pi, 0, Stack{Design: freighter, Count: 1})
-				l.g.Fleets[fi].Cargo.Colonists = 10
-				l.g.Fleets[fi].Task = unloadColonists
-			}
-		}
 		var ci int
 		if arrive {
 			ci = l.arriving(0, pi, colony, 25, colonizeTask)
@@ -680,27 +673,31 @@ func TestPredictionColonizeRetries(t *testing.T) {
 			l.g.Fleets[fi].Task = colonizeTask
 			ci = l.g.Fleets[fi].ID
 		}
-		return l, pi, ci
-	}
-
-	l, pi, ci := setup(false)
-	g := l.turn(&seqRand{}).Game
-	if p := g.Planets[pi]; p.Owner != 0 || p.Population != 25 || fleetByID(&g, ci) != nil {
-		t.Errorf("before movement: owner %d pop %d, want 0 and 25 with the ship consumed", p.Owner, p.Population)
-	}
-
-	l, pi, ci = setup(true)
-	g = l.turn(&seqRand{}).Game
-	if p := g.Planets[pi]; p.Owner != NoOwner || p.Population != 0 || fleetByID(&g, ci) != nil || p.Surface == (Minerals{}) {
-		t.Errorf("after movement: owner %d pop %d surface %v, want unowned, empty, ship consumed and minerals delivered",
-			p.Owner, p.Population, p.Surface)
+		for _, p := range []int{0, 2} {
+			if arrive {
+				l.arriving(p, pi, freighter, 150, unloadColonists)
+			} else {
+				fi := l.fleet(p, pi, 0, Stack{Design: freighter, Count: 1})
+				l.g.Fleets[fi].Cargo.Colonists = 150
+				l.g.Fleets[fi].Task = unloadColonists
+			}
+		}
+		g := l.turn(&seqRand{}).Game
+		p := g.Planets[pi]
+		f := fleetByID(&g, ci)
+		if p.Owner != NoOwner || p.Population != 0 || p.Surface != (Minerals{}) {
+			t.Errorf("arrive=%v: owner %d pop %d surface %v, want unowned, empty, no minerals", arrive, p.Owner, p.Population, p.Surface)
+		}
+		if f == nil || f.Cargo.Colonists != 25 || f.Task != (Task{}) {
+			t.Errorf("arrive=%v: colony ship %+v, want kept with 25 colonists and no task", arrive, f)
+		}
 	}
 }
 
 func TestPredictionEmptiedPlanet(t *testing.T) {
 	// TAKEOVER.md "Capture": starvation empties a planet; a Claim
 	// Adjuster's lost planet returns to its original environment
-	// (BINARY-ONLY); a new colony gets the default queue less AR's first
+	// (CONFIRMED, TK-116); a new colony gets the default queue less AR's first
 	// three or CA's fifth and sixth items, and the default leftover
 	// setting.
 	l := newTKLab(t, 3)
@@ -795,7 +792,7 @@ func TestPredictionDeepSpaceUnload(t *testing.T) {
 	l.g.Fleets = append(l.g.Fleets, Fleet{ID: 1, Owner: 0, Pos: Point{50, 50}, Stacks: []Stack{{Design: freighter, Count: 1}},
 		Cargo: Cargo{Minerals: Minerals{7, 3, 0}, Colonists: 20},
 		Task:  Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}, CargoColonists: {Action: UnloadAll}}}})
-	_, _, ev := l.g.unloadPhase(l.g.phaseStart())
+	_, ev := l.g.unloadPhase(l.g.phaseStart())
 	f := l.g.Fleets[0]
 	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused {
 		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal", f.Cargo, l.g.Salvage, ev)

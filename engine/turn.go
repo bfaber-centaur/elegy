@@ -177,15 +177,13 @@ func GenerateTurn(
 	var events []Event
 
 	// Waypoint tasks before movement (TAKEOVER.md "Where each task
-	// happens", step 2): unloads and colonize, the drops, then colonize
-	// retries, whose drops wait for the after-movement resolution.
+	// happens", step 2): unloads and colonize, then the drops.
 	// gained marks the players that gained tech this turn, from a capture
 	// or a battle.
 	gained := map[int]bool{}
-	queue, retry, ev := g.unloadPhase(g.phaseStart())
+	queue, ev := g.unloadPhase(g.phaseStart())
 	events = append(events, ev...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
-	carried := g.loadPass(retry)
 
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
@@ -281,15 +279,12 @@ func GenerateTurn(
 	fights := battles(&g, rng, gained)
 	events = append(events, fights.events...)
 	events = append(events, bombing(&g, rng)...)
-	queue, retry, ev = g.unloadPhase(owned)
+	queue, ev = g.unloadPhase(owned)
 	events = append(events, ev...)
-	events = append(events, g.resolveQueue(append(carried, queue...), rng, gained)...)
+	events = append(events, g.resolveQueue(queue, rng, gained)...)
 	for i := range g.Players {
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
-	}
-	if lost := g.loadPass(retry); !legacyRetryLost {
-		events = append(events, g.resolveQueue(lost, rng, gained)...)
 	}
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {

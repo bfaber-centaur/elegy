@@ -4,8 +4,9 @@ Bombing, transport unloads, colonist drops, ground combat, colonization
 and capture in `engine/takeover.go` follow the public specification
 stars-elegy `docs/TAKEOVER.md` on `main` at `bd8f063`, which includes the
 implementer answers merged in PR #34 (order inside a phase, unload
-amounts and foreign minerals, capture tech, colonize retries, the mines'
-loss clamp), and the deep-space unload rule of PR #37, and the TK-001..TK-007 cases in
+amounts and foreign minerals, capture tech, the mines' loss clamp), and
+the corrections of PR #37 (deep-space unloads; colonize is tried once,
+TK-113; the Claim Adjuster revert, TK-116), and the TK cases in
 `experiments/tk/README.md`. Bomb, colonizer and defense values come from
 the component table (`docs/COMPONENTS-STATUS.md`). Nothing else was used.
 
@@ -14,15 +15,12 @@ the component table (`docs/COMPONENTS-STATUS.md`). Nothing else was used.
 `GenerateTurn` follows TAKEOVER.md "Where each task happens":
 
 1. Before movement: each fleet's waypoint-0 task in fleet order (unloads,
-   colonize), then the queued drops, then colonize retries, whose drops
-   wait for the after-movement resolution.
+   colonize), then the queued drops.
 2. Movement, production and growth. A planet whose population dies out is
    emptied.
 3. The after-movement phase records ownership, then battles, then bombing
    in fleet order, then the waypoint-0 tasks of the fleets' new locations,
-   then the drops (the before-movement retries first), then the second
-   research level-up check, then colonize retries (LEGACY BUG: their
-   colonists are lost).
+   then the drops, then the second research level-up check.
 
 A fleet's current task is `Fleet.Task`. A fleet that moves leaves it and
 takes up `Waypoint.Task` of the waypoint it arrives at.
@@ -47,8 +45,8 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Several players dropping | `dropWinner` (switch `legacyDropScan`) | LEGACY BUG, CONFIRMED (T-32) | `TestConfirmedSeveralPlayersDrop` |
 | Colonization (requirements, whole fleet, ⌊3C/4⌋ minerals) | `colonize` | CONFIRMED (T-1, T-30, T-31); requirements BINARY-ONLY | `TestConfirmedColonyMinerals`, `TestConfirmedTakeoverTiming` |
 | Timing (in orbit before growth, arriving after; bombing before arrivals) | `GenerateTurn` | CONFIRMED (TK-001..003) | `TestConfirmedTakeoverTiming` |
-| Colonize retries | `loadPass` (switch `legacyRetryLost`) | BINARY-ONLY; after movement LEGACY BUG | `TestPredictionColonizeRetries` |
-| Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27); CA environment BINARY-ONLY | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
+| Colonize is tried once: any failure clears the task and keeps the cargo | `colonize` | CONFIRMED (TK-113, #37) | `TestConfirmedColonizeTriedOnce` |
+| Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
 | Starvation and AR starbase loss empty the planet | `GenerateTurn`, combat `finish` | as Capture | `TestPredictionEmptiedPlanet` |

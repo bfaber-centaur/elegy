@@ -2,7 +2,6 @@ package engine
 
 import (
 	"math"
-	"slices"
 	"sort"
 )
 
@@ -294,7 +293,7 @@ func (g *Game) bombPlanet(pi, bomber int, pass bombPass, rng Rand) []Event {
 // factories, minerals, concentrations, environment and the growth carry
 // stay; owner, population, defenses, scanner, queue, starbase and the
 // leftover setting go. A Claim Adjuster owner's planet returns to its
-// original environment (BINARY-ONLY).
+// original environment (CONFIRMED, TK-116).
 //
 // Not modelled: ancient artifacts (Elegy has no random events).
 func (g *Game) emptyPlanet(pi int) Event {
@@ -352,13 +351,13 @@ func (g *Game) phaseStart() []bool {
 
 // unloadPhase is a waypoint phase's unload pass (TAKEOVER.md "Where each
 // task happens", steps 2 and 5): each fleet in fleet order carries out its
-// whole task. It returns the drops queued, in the order they were made,
-// and the fleets whose colonize failed because the planet was owned, for
-// the load pass to retry.
+// whole task. It returns the drops queued, in the order they were made.
 //
-// Not modelled: scrap, remote mining, mine laying, and colonists given by
-// manual cargo transfers (which would start the queue before movement).
-func (g *Game) unloadPhase(owned []bool) (queue []drop, retry []int, events []Event) {
+// Not modelled: scrap, remote mining, mine laying, colonists given by
+// manual cargo transfers (which would start the queue before movement),
+// and the load pass (loads, merges, fleet transfers, cargo given to
+// other players' fleets).
+func (g *Game) unloadPhase(owned []bool) (queue []drop, events []Event) {
 	consumed := map[int]bool{}
 	for _, i := range g.fleetOrder() {
 		f := &g.Fleets[i]
@@ -366,51 +365,16 @@ func (g *Game) unloadPhase(owned []bool) (queue []drop, retry []int, events []Ev
 		case TaskTransport:
 			events = append(events, g.unload(f, owned, &queue)...)
 		case TaskColonize:
-			ev, ok, owned := g.colonize(f, &queue)
-			switch {
-			case ok:
+			if ev, ok := g.colonize(f, &queue); ok {
 				consumed[f.ID] = true
-			case owned:
-				retry = append(retry, f.ID)
-				events = append(events, ev)
-			default:
+			} else {
 				events = append(events, ev)
 			}
 		}
 	}
 	g.removeFleets(consumed)
-	return queue, retry, events
+	return queue, events
 }
-
-// loadPass is the colonize retries of a waypoint phase's load pass
-// (TAKEOVER.md "Colonize retries", BINARY-ONLY): a fleet whose colonize
-// failed in the unload pass because the planet was owned succeeds if the
-// planet is unowned now. The retries' drops are returned unresolved.
-//
-// Not modelled: loads, merges, fleet transfers and cargo given to other
-// players' fleets.
-func (g *Game) loadPass(retry []int) []drop {
-	var queue []drop
-	consumed := map[int]bool{}
-	for _, i := range g.fleetOrder() {
-		f := &g.Fleets[i]
-		if !slices.Contains(retry, f.ID) || f.Task.Kind != TaskColonize {
-			continue
-		}
-		if _, ok, _ := g.colonize(f, &queue); ok {
-			consumed[f.ID] = true
-		}
-	}
-	g.removeFleets(consumed)
-	return queue
-}
-
-// legacyRetryLost reproduces the original's LEGACY BUG for a colonize
-// retry after movement (TAKEOVER.md "Colonize retries", BINARY-ONLY):
-// the fleet is consumed and its minerals delivered, but nothing resolves
-// its drop, so the colonists are lost and the planet stays unowned. Set
-// it to false to resolve that drop at once.
-const legacyRetryLost = true
 
 func (g *Game) removeFleets(ids map[int]bool) {
 	if len(ids) == 0 {
@@ -528,21 +492,22 @@ func (g *Game) dropColonists(f *Fleet, pi, amount int, owned []bool, queue *[]dr
 // fleet is consumed, the planet gains ⌊3C/4⌋ of each mineral of the
 // fleet's cost for its owner this year plus its mineral cargo, and the
 // colonists are queued as a drop; the colony's event comes when the drop
-// is resolved. owned reports a failure because the planet is owned.
-func (g *Game) colonize(f *Fleet, queue *[]drop) (ev Event, ok, owned bool) {
+// is resolved.
+//
+// The order is tried once (TAKEOVER.md "Colonize is tried once",
+// CONFIRMED TK-113): on any failure the task is cleared and the fleet
+// keeps its cargo; there is no retry.
+func (g *Game) colonize(f *Fleet, queue *[]drop) (ev Event, ok bool) {
 	pi := g.planetAt(f.Pos)
 	fail := Event{Kind: EventColonizeFailed, Player: f.Owner, Planet: -1, Fleet: f.ID}
-	if pi < 0 {
-		return fail, false, false
+	if pi >= 0 {
+		fail.Planet = g.Planets[pi].ID
+	}
+	if pi < 0 || g.Planets[pi].Owner != NoOwner || f.Cargo.Colonists <= 0 || !g.canColonize(f) {
+		f.Task = Task{}
+		return fail, false
 	}
 	p := &g.Planets[pi]
-	fail.Planet = p.ID
-	if p.Owner != NoOwner {
-		return fail, false, true
-	}
-	if f.Cargo.Colonists <= 0 || !g.canColonize(f) {
-		return fail, false, false
-	}
 	pl := &g.Players[f.Owner]
 	var C Minerals
 	for _, st := range f.Stacks {
@@ -555,7 +520,7 @@ func (g *Game) colonize(f *Fleet, queue *[]drop) (ev Event, ok, owned bool) {
 		p.Surface[m] += 3*C[m]/4 + f.Cargo.Minerals[m]
 	}
 	*queue = append(*queue, drop{pi, f.Owner, f.Cargo.Colonists})
-	return Event{}, true, false
+	return Event{}, true
 }
 
 func (g *Game) canColonize(f *Fleet) bool {
