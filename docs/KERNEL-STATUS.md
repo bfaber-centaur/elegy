@@ -3,8 +3,9 @@
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
-movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `9569af3` (PR #44: scores, random events, AR colonists in flight, FM round 2; earlier PR #35:
-KX-002 and the overcrowding correction).
+movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
+OT runs and the turn order and random draw order), and the parity vectors
+copied from that commit.
 Nothing here comes from the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
@@ -25,7 +26,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Population growth and carry | `population.go` | PG-001..003, 36 years of P and carry; KX-002 H3, H4, P1–P3, G1–G3 (overcrowding factor 4), hostile deaths, HE ×2 | 3 KERNEL vectors (uncrowded, quantization, g < 1000), empty planets |
 | Resources, caps | `economy.go` | PG resources, PQ operable caps, AR resources (floating E/R0) and mines (KX-001 Z2, Z3); KX-002 C1–C3 maximums, E above max (G1) | floor of 10, other defense branches, the 2·max limit of E |
 | Mining | `mining.go` | PG002 concentration and fraction 2407–2411; KX-002 N2 (1000 mines, homeworld floor, clamp re-evaluated) | random +1 draw, draw order |
-| Research | `research.go` | PG003 energy 2408–2436, level cost; KX-002 R1, R2 (cost settings), R5 (GR split), R6 (maxed field) | slower tech, several levels, next field, same-year switch, explicit/lowest persistence |
+| Research | `research.go` | PG003 energy 2408–2436, level cost; KX-002 R1, R2 (cost settings), R5 (GR split), R6 (maxed field); slower tech's half-scale storage (KX-003 S2 vectors, parity KX-003-r2) | several levels, next field, same-year switch, explicit/lowest persistence |
 | Production queue | `production.go` | PQ-001 C01–C14 (15 cases); KX-001 A1–A4 (Auto Alchemy before a ×n item), M1–M4 (item costs) | empty queue (no tax), zero resources |
 | Movement and fuel | `movement.go` | all 224 fleets of FM-001..004 (position, fuel, waypoints, warp, orbit, events), KERNEL fuel/range/chase vectors | no free warp, more than one engine per ship, cargo ties, chaser fuel per round (R, running dry, top-up, ram scoop) |
 | Starbase refuelling | `movement.go` | FM-004 DK | |
@@ -34,22 +35,28 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
-| Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in stars-elegy #53 "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
-| Claim Adjuster year-end step: original-value drift, then every axis to its limit with the reach just researched; terraform reach per axis | `terraform.go` `claimAdjusterYearEnd`, `terraformReach` | KX-003 S3/S3L; capture examples for TK-108, TK-118..121 (stars-elegy #53 24d4c09); parity vectors TK-108-A, TK-118-A, TK-119-A now match | the drift's draw sequence, CONFIRMED by KX-005 replays but tested here only with scripted draws |
+| Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in KERNEL.md "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
+| Claim Adjuster year-end step: original-value drift, then every axis to its limit with the reach just researched; terraform reach per axis | `terraform.go` `claimAdjusterYearEnd`, `terraformReach` | KX-003 S3/S3L; capture examples for TK-108, TK-118..121 (KERNEL.md "Terraforming"); parity vectors TK-108-A, TK-118-A, TK-119-A now match | the drift's draw sequence, CONFIRMED by KX-005 replays but tested here only with scripted draws |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
 
 ## Turn order implemented
 
-`GenerateTurn` runs: fleet movement (ordinary fleets in id order, then
-fleet chasers in rounds, then waypoint settlement); mining for every planet
-in id order (population before growth); per planet in id order: resources,
-research tax, production queue (caps use the grown population); population growth for every planet; starbase refuelling;
-research level-ups; random events (when `Game.RandomEvents` is on); battles, bombing and the after-movement takeover tasks
-(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1; scores, victory flags and deciding the game
-(`TurnResult.Scores`, each view's visible records). The
-before-movement takeover tasks (unloads, colonize, drops) come first.
+`GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
+models: the before-movement takeover tasks (unloads, colonize, drops, the
+research level-up check, loads and merges); fleet movement (ordinary fleets in fleet order, owner
+then fleet number, then fleet chasers in rounds, then waypoint
+settlement), Radiating Hydro-Ram Scoop losses and fuel generation;
+mining for every planet in id order (population before growth); per
+planet in id order: resources, research tax, production queue (caps use
+the grown population); population growth for every planet; research
+level-ups; random events (when `Game.RandomEvents` is on); starbase
+refuelling; battles, bombing and the after-movement takeover tasks
+(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; the Claim Adjuster
+year-end step; year + 1; scores, victory flags and deciding the game
+(`TurnResult.Scores`, each view's visible records). Its random draws
+follow KERNEL.md "Random draws" for the same steps.
 
 Not modelled yet: order application, waypoint tasks other than unloads and
 colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
@@ -162,7 +169,7 @@ Places where the original has no behavior to copy, and Elegy chose one.
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
 
-- **K1, K3–K6** were answered by stars-elegy #53 (OT-6, KX-003): the AR
+- **K1, K3–K6** are answered by KERNEL.md (OT-6, KX-003): the AR
   loss applies whenever the next waypoint's warp is above 0; ship power
   uses the design's own speed code without the War Monger bonus; Orbital
   Forts are left out of the starbase count; a tie for the top score flags

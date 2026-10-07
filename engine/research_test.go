@@ -69,3 +69,36 @@ func TestPredictionResearchNextLowestField(t *testing.T) {
 		t.Errorf("state %+v", s)
 	}
 }
+
+// TestConfirmedSlowerTech: under slower tech the stored accumulation is
+// kept at half scale (KERNEL.md "Slower tech", KX-003 S2 vectors; KX-005
+// R2 for a Generalized Research share).
+func TestConfirmedSlowerTech(t *testing.T) {
+	start := ResearchState{Levels: [NumFields]int{3, 3, 3, 3, 3, 3}, Current: Energy, Next: NextSameField}
+	for _, c := range []struct {
+		research   [2]int
+		levels     [2]int
+		accumulate [2]int
+	}{
+		{[2]int{435, 485}, [2]int{3, 4}, [2]int{218, 71}},
+		{[2]int{937, 954}, [2]int{4, 5}, [2]int{79, 26}},
+	} {
+		s := start
+		for y := range 2 {
+			s = AddResearch(s, Race{}, c.research[y], true)
+			if s.Levels[Energy] != c.levels[y] || s.Accumulated[Energy] != c.accumulate[y] {
+				t.Errorf("research %v year %d: level %d stored %d, want %d and %d",
+					c.research, y+1, s.Levels[Energy], s.Accumulated[Energy], c.levels[y], c.accumulate[y])
+			}
+		}
+	}
+
+	// A Generalized Research share o = 300 for another field stores 150.
+	gr := Race{}
+	gr.LRT.GeneralizedResearch = true
+	s := ResearchState{Levels: [NumFields]int{20, 20, 20, 20, 20, 20}, Current: Energy, Next: NextSameField}
+	s = AddResearch(s, gr, 1995, true)
+	if s.Accumulated[Energy] != 499 || s.Accumulated[Weapons] != 150 {
+		t.Errorf("stored energy %d, weapons %d; want 499 and 150", s.Accumulated[Energy], s.Accumulated[Weapons])
+	}
+}

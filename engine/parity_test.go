@@ -55,6 +55,7 @@ type pvState struct {
 type pvGame struct {
 	Size         string `json:"size"`
 	RandomEvents bool   `json:"random_events"`
+	SlowerTech   bool   `json:"slower_tech"`
 }
 
 type pvPlayer struct {
@@ -66,7 +67,7 @@ type pvPlayer struct {
 	Relations           map[string]string `json:"relations"`
 	MysteryTraderItems  []string          `json:"mystery_trader_items"`
 	Race                struct {
-		PRT           string `json:"prt"`
+		PRT           json.RawMessage `json:"prt"`
 		LRT           []string
 		GrowthPercent int `json:"growth_percent"`
 		Habitability  struct {
@@ -186,6 +187,8 @@ type pvExpect struct {
 	X      *int            `json:"x"`
 	Y      *int            `json:"y"`
 	Equals json.RawMessage `json:"equals"`
+	// Tolerance is, as an object, the difference allowed per field.
+	Tolerance json.RawMessage `json:"tolerance"`
 }
 
 func (p *pvBattlePlan) UnmarshalJSON(b []byte) error {
@@ -240,6 +243,9 @@ type pvLoaded struct {
 	start       map[[2]int]Point // each fleet's starting position
 	// global is a reason every case of the vector is skipped, if any.
 	global string
+	// queued marks the players with a production queue the harness does
+	// not load.
+	queued map[int]bool
 }
 
 func pvFleetKey(owner, id int) [2]int { return [2]int{owner, id} }
@@ -250,10 +256,11 @@ func pvElegyFleetID(owner, id int) int { return owner*100000 + id + 1 }
 func loadVector(v *pvVector) (*pvLoaded, error) {
 	s := v.InitialState
 	cat := Components()
-	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]Point{}}
+	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]Point{}, queued: map[int]bool{}}
 	g := &l.g
 	g.Year = s.Year
 	g.RandomEvents = s.Game.RandomEvents
+	g.SlowerTech = s.Game.SlowerTech
 	g.Size = map[string]int{"tiny": 0, "small": 1, "medium": 2, "large": 3, "huge": 4}[s.Game.Size]
 	g.PlanetScanners = cat.PlanetScanners()
 	g.Defenses = cat.Defenses()
@@ -262,9 +269,15 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
 		r := &pl.Race
-		prt, ok := pvPRTs[p.Race.PRT]
+		// An out-of-range PRT is given as its stored number (FORMAT.md).
+		var name string
+		if json.Unmarshal(p.Race.PRT, &name) != nil {
+			l.global = "out-of-range PRT " + string(p.Race.PRT)
+			continue
+		}
+		prt, ok := pvPRTs[name]
 		if !ok {
-			return nil, fmt.Errorf("PRT %q", p.Race.PRT)
+			return nil, fmt.Errorf("PRT %q", name)
 		}
 		r.PRT = prt
 		for _, t := range p.Race.LRT {
@@ -441,7 +454,11 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 			pl.LeftoverOnly = *p.LeftoverToResearch
 		}
 		if pl.Owner != NoOwner {
-			pl.HasQueue = true
+			// A planet the state lists no queue for has none: its
+			// resources all go to research (KERNEL.md "Production").
+			for _, q := range s.ProductionQueues {
+				pl.HasQueue = pl.HasQueue || q.Planet == p.ID
+			}
 			pl.Homeworld = false
 		}
 		if sb := p.Starbase; sb != nil && sb.Design != nil && pl.Owner != NoOwner {
@@ -458,6 +475,23 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	}
 	if len(s.Objects) > 0 {
 		l.global = "space objects (" + s.Objects[0].Kind + ")"
+	}
+	// A production queue is not loaded: FORMAT.md does not give the
+	// planetary item ids. Checks its planet, its owner or ships it may
+	// build could see are skipped.
+	for _, q := range s.ProductionQueues {
+		if len(q.Items) == 0 {
+			continue
+		}
+		for _, p := range s.Planets {
+			if p.ID != q.Planet || p.Owner < 0 {
+				continue
+			}
+			key := [2]int{p.Owner, -1 - p.ID}
+			l.unsupported[key] = "production queue"
+			l.start[key] = Point{p.X, p.Y}
+			l.queued[p.Owner] = true
+		}
 	}
 
 	for _, f := range s.Fleets {
@@ -605,6 +639,12 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		return nil
 	}
 	switch e.Kind {
+	case "fleet", "fleet_gone":
+		if _, ok := l.fleetID[pvFleetKey(*e.Owner, *e.ID)]; !ok && l.queued[*e.Owner] {
+			return "skip: fleet built from a production queue"
+		}
+	}
+	switch e.Kind {
 	case "fleet":
 		if why := l.unsupportedNear(pvFleetKey(*e.Owner, *e.ID)); why != "" {
 			return "skip: " + why
@@ -658,11 +698,21 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		}
 		for i := range g.Planets {
 			if g.Planets[i].ID == l.planet[id] {
-				return l.planetEquals(g, &g.Planets[i], eq)
+				var tol map[string]int
+				json.Unmarshal(e.Tolerance, &tol)
+				return l.planetEquals(g, &g.Planets[i], eq, tol)
 			}
 		}
 		return "no planet"
 	case "player":
+		if l.queued[*e.ID] {
+			return "skip: production queue"
+		}
+		if g.Players[*e.ID].Race.PRT == PRTSuperStealth && len(g.Players) > 1 {
+			if _, ok := eq["research_accumulated"]; ok {
+				return "skip: Super Stealth research stealing"
+			}
+		}
 		return l.playerEquals(g, *e.ID, eq)
 	case "design":
 		return l.designEquals(g, *e.Owner, *e.Slot, eq)
@@ -799,7 +849,7 @@ func (l *pvLoaded) fleetEquals(f *Fleet, eq map[string]json.RawMessage) string {
 	return strings.Join(errs, "; ")
 }
 
-func (l *pvLoaded) planetEquals(g *Game, p *Planet, eq map[string]json.RawMessage) string {
+func (l *pvLoaded) planetEquals(g *Game, p *Planet, eq map[string]json.RawMessage, tol map[string]int) string {
 	var errs []string
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
@@ -824,8 +874,11 @@ func (l *pvLoaded) planetEquals(g *Game, p *Planet, eq map[string]json.RawMessag
 		case "surface_minerals":
 			var want [3]int
 			json.Unmarshal(raw, &want)
-			if [3]int(p.Surface) != want {
-				errs = append(errs, pvMismatch(k, p.Surface, want))
+			for m, w := range want {
+				if d := p.Surface[m] - w; d > tol[k] || -d > tol[k] {
+					errs = append(errs, pvMismatch(k, p.Surface, want))
+					break
+				}
 			}
 		case "environment", "original_environment":
 			var want *[3]int
@@ -909,6 +962,12 @@ func runVector(v *pvVector) []pvResult {
 		}
 		return out
 	}
+	if l.global != "" {
+		for _, c := range v.Cases {
+			res(c, "skip", l.global)
+		}
+		return out
+	}
 	// Generate year by year, keeping each year's game.
 	games := []Game{l.g}
 	g := l.g
@@ -925,6 +984,10 @@ func runVector(v *pvVector) []pvResult {
 	for _, c := range v.Cases {
 		if l.global != "" {
 			res(c, "skip", l.global)
+			continue
+		}
+		if why := pvNotModelled[c.ID]; why != "" {
+			res(c, "skip", why)
 			continue
 		}
 		if c.VariesByStream {
@@ -974,6 +1037,15 @@ const pvBaseline = "testdata/vectors/baseline.txt"
 var pvLegacyOff = map[string]string{
 	"FO-03-E": "legacyMergeOverflow off",
 	"FO-06-G": "legacyMergeOverflow off",
+}
+
+// pvNotModelled skips cases that need state the vector does not carry or
+// a rule Elegy does not model yet.
+var pvNotModelled = map[string]string{
+	"KX-002-R3": "the next research field choice is not in the vector",
+	"KX-002-R4": "the next research field choice is not in the vector",
+	"RD-P11":    "the turn-time race check (RACES.md \"In a running game\")",
+	"RD-P12":    "the turn-time race check (RACES.md \"In a running game\")",
 }
 
 func pvUnique(xs []string) []string {

@@ -165,7 +165,7 @@ type TurnResult struct {
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
 // level-ups and random events, then battles (COMBAT.md), bombing and the takeover tasks
-// after movement (TAKEOVER.md), a second research level-up check and
+// after movement (TAKEOVER.md), the after-movement research level-up check and
 // repair. Each player's view of the result (SCANNING.md) comes last.
 //
 // Not yet modelled: order application, waypoint tasks other than
@@ -204,6 +204,11 @@ func GenerateTurn(
 	queue, ev := g.unloadPhase(g.phaseStart())
 	events = append(events, ev...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
+	// The first research level-up check (KERNEL.md "Turn order" step 2.4).
+	for i := range g.Players {
+		pl := &g.Players[i]
+		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+	}
 	events = append(events, g.loadPass()...)
 
 	start := map[int]Point{}
@@ -290,15 +295,14 @@ func GenerateTurn(
 		}
 	}
 
-	refuelFleets(&g)
-
 	for i := range g.Players {
 		pl := &g.Players[i]
 		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 	}
-	// Random events end production (KERNEL.md "Turn order" step 4);
-	// starbase refuelling (step 5) above does not depend on them.
+	// Research level-ups, then random events (KERNEL.md "Turn order"
+	// steps 4b and 4c), then starbase refuelling (step 5.2).
 	events = append(events, g.randomEvents(rng)...)
+	refuelFleets(&g)
 
 	// Battles, bombing, the waypoint tasks after movement, then the
 	// post-movement research check, then repair (KERNEL.md "Turn order"

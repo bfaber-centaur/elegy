@@ -768,7 +768,7 @@ func TestConfirmedHeadingVectors(t *testing.T) {
 }
 
 func TestPredictionBombingCheckAtBombingStep(t *testing.T) {
-	// SC-035 (stars-elegy #57): the check is taken at the bombing step and
+	// SCANNING.md, CONFIRMED SC-035: the check is taken at the bombing step and
 	// the report written from the end-of-year state, so a planet bombing
 	// empties is still reported at the normal level, now unowned.
 	l := newScanLab()

@@ -23,8 +23,49 @@
     1400
    ],
    "density": "sparse",
+   "players": 2,
+   "slower_tech": false,
    "random_events": false,
-   "players": 2
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 30
+    }
+   }
   },
   "players": [
    {
@@ -92,6 +133,8 @@
       "electronics": "normal",
       "biotechnology": "normal"
      },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
      "techs_start_high": false,
      "factories_cost_less": false
     },
@@ -165,6 +208,8 @@
       "electronics": "normal",
       "biotechnology": "normal"
      },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
      "techs_start_high": false,
      "factories_cost_less": false
     },
@@ -1068,6 +1113,23 @@
      "year": 1
     },
     {
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "mystery_trader_items": [
+       "Anti Matter Torpedo"
+      ]
+     },
+     "year": 1
+    },
+    {
+     "kind": "message",
+     "player": 1,
+     "message_id": 265,
+     "present": true,
+     "year": 1
+    },
+    {
      "kind": "sample",
      "check": "tech_gain",
      "target": [
@@ -1108,23 +1170,6 @@
      },
      "year": 1,
      "stream": "cycles 26000"
-    },
-    {
-     "kind": "player",
-     "id": 1,
-     "equals": {
-      "mystery_trader_items": [
-       "Anti Matter Torpedo"
-      ]
-     },
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 265,
-     "present": true,
-     "year": 1
     }
    ],
    "prediction": "research: exactly 8 levels in total (sum 30 -> 38); mt still 0x0040; message 0x109"
