@@ -135,7 +135,8 @@ checks every case's expectations:
 - Each vector runs with 8 seed variants. The harness's random stream is
   not the original's, so a case whose result changes with the seed only
   matches by chance. It is reported as "random", with how many seeds it
-  passes with and the reference seed's comparison.
+  passes with and the reference seed's comparison. The tally counts the
+  random cases whose reference seed fails in their own column.
 
 `go test -run TestParityVectors -v ./engine` prints the per-corpus tally
 and every case that does not pass. `baseline.txt` lists the passing

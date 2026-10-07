@@ -722,7 +722,8 @@ type pvResult struct {
 	id, corpus, tag string
 	status          string // pass, fail, skip, differs, random
 	why             string
-	passes          int // seed variants the case passes with
+	passes          int    // seed variants the case passes with
+	refStatus       string // for a random case, the reference seed's status
 }
 
 // pvCheck compares one expectation with a generated game; "" passes, a
@@ -1186,7 +1187,9 @@ func pvUnique(xs []string) []string {
 // vectors), so a case whose outcome depends on the draws matches only by
 // chance. Such a case passes with some seeds and fails with others; it is
 // reported as "random" with its pass count and the reference seed's
-// comparison kept, and it cannot sit in the baseline.
+// comparison kept. The tally counts random cases whose reference seed
+// fails apart, and the baseline lists each random case with its pass
+// count.
 const pvSeeds = 8
 
 // pvStreamCheck folds one vector's seed variants into one result per case.
@@ -1210,6 +1213,7 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 			}
 			out[i].status = "random"
 			out[i].passes = passes
+			out[i].refStatus = r.status
 			out[i].why = fmt.Sprintf("passes with %d of %d seeds; reference seed %s: %s", passes, len(runs), r.status, why)
 		}
 	}
@@ -1225,7 +1229,7 @@ func TestParityVectors(t *testing.T) {
 		}
 		all = append(all, pvStreamCheck(runs)...)
 	}
-	type tally struct{ pass, fail, skip, measured, differs, random int }
+	type tally struct{ pass, fail, skip, measured, differs, random, randomFail int }
 	per := map[string]*tally{}
 	var corpora []string
 	for _, r := range all {
@@ -1240,6 +1244,8 @@ func TestParityVectors(t *testing.T) {
 			tl.skip++
 		case r.status == "differs":
 			tl.differs++
+		case r.status == "random" && r.refStatus == "fail":
+			tl.randomFail++
 		case r.status == "random":
 			tl.random++
 		case r.tag == "MEASURED":
@@ -1252,7 +1258,7 @@ func TestParityVectors(t *testing.T) {
 	}
 	for _, c := range corpora {
 		tl := per[c]
-		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.measured)
+		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail, tl.measured)
 	}
 	for _, r := range all {
 		if r.status != "pass" {
