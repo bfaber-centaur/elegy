@@ -49,7 +49,8 @@ func MaxPopulation(race Race, hab int, starbaseHull int) int {
 // within-10-of-max freeze, overcrowding and hostile deaths are BINARY-ONLY.
 func GrowPopulation(pop, carry, maxPop, growthRate, hab int) (newPop, newCarry int) {
 	if pop <= 0 {
-		// Not specified by KERNEL.md; an empty planet has nothing to grow.
+		// Growth and deaths act only on a non-zero population (KERNEL.md
+		// "Population", BINARY-ONLY).
 		return pop, carry
 	}
 	if hab < 0 {

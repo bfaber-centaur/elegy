@@ -9,7 +9,9 @@ subsystem the specification covers.
 
 ## State
 
-- Merged to `main` (elegy PR #1).
+- Merged to `main` (elegy PR #1). The sync to stars-elegy PR #14
+  (BINARY-ONLY answers: chaser fuel per round, research switching, mining
+  pass) is on branch `claude/project-thread-8c4kqn`, in review.
 - `engine/` holds habitability, population, economy, mining, research,
   production, movement and `GenerateTurn`. `docs/KERNEL-STATUS.md` is the
   map: rules, tests, statuses, gaps.
@@ -24,21 +26,25 @@ subsystem the specification covers.
   FM-001..004 (copied into `engine/testdata/fm`).
 - Three KERNEL.md/corpus disagreements found here (auto-item caps, running
   dry with exact fuel, mutual chases) are corrected upstream in stars-elegy
-  PR #13 (merged); the code follows that text. Remaining open questions and the
-  code's interim choices are in KERNEL-STATUS.md.
+  PR #13 (merged); the code follows that text. PR #14 answered most open
+  questions; the remaining three are KERNEL.md "Open experiments" (Auto
+  Alchemy before a ×n item, zero max population, cost modifiers), with the
+  code's interim choices in KERNEL-STATUS.md.
 - `PlayerOrders` and `Ruleset` are still stubs; RNG is injected as
   `engine.Rand`.
 
 ## What still matters
 
-- Send the remaining KERNEL-STATUS.md open questions back to stars-elegy.
+- When an Open experiment is run, flip the matching interim choice.
+- Combat is the likely next subsystem here, once stars-elegy has a public
+  combat spec; build it only from that public text, like the kernel.
 - Not modelled: orders, waypoint tasks, colonization, ships and starbases
   in production, terraforming, remote mining, random events, combat, and
   the BINARY-ONLY LRT/engine movement rules.
 
 ## Best next move
 
-When KERNEL.md answers a gap, flip the matching test or code. Otherwise add
-the next specified subsystem (waypoint tasks and colonization are the
-natural step toward an expansion slice) with the same Confirmed/Prediction
-test split.
+When KERNEL.md answers a gap, flip the matching test or code. When the
+public combat spec lands, implement it with the same Confirmed/Prediction
+test split; otherwise waypoint tasks and colonization are the natural step
+toward an expansion slice.

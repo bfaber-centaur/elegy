@@ -82,8 +82,8 @@ type fleetDesign struct {
 
 // groups returns the fleet's ships grouped by design, ordered by increasing
 // f(w), with the fleet's cargo assigned to them in that order up to each
-// group's capacity. KERNEL.md does not say how ties in f(w) are ordered;
-// here they keep design order.
+// group's capacity. Ties in f(w) keep the fleet's own design order
+// (KERNEL.md "Fuel cost", BINARY-ONLY).
 func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 	var out []fleetDesign
 	index := map[int]int{}
@@ -385,14 +385,18 @@ func (g *Game) moveOrdinary(f *Fleet) []Event {
 }
 
 // moveChasers moves fleets whose destination is another fleet, in rounds.
-// KERNEL.md "Chasing another fleet", CONFIRMED (FM-001..003). KERNEL.md does
-// not yet give fuel-limit, running-dry, top-up or ram-scoop rules for
-// chasers (docs/KERNEL-STATUS.md); here fuel is only charged on the year's
-// total distance, never below 0.
+// KERNEL.md "Chasing another fleet": rounds, steps and charging on the
+// year's total are CONFIRMED (FM-001..003); the per-round fuel rules (rule
+// 6: R reduced by the distance already moved, running dry, top-up and ram
+// scoop per round) are BINARY-ONLY.
 func (g *Game) moveChasers(chasers []int) []Event {
 	type chase struct {
-		rem, moved, fuel0 int
-		active            bool
+		rem, moved int
+		// fuel0 is the start-of-year fuel plus any top-up and ram-scoop
+		// fuel gained in earlier rounds; each round charges the year's
+		// total distance against it.
+		fuel0  int
+		active bool
 	}
 	state := map[int]*chase{} // by fleet index
 	for _, i := range chasers {
@@ -400,6 +404,7 @@ func (g *Game) moveChasers(chasers []int) []Event {
 		state[i] = &chase{rem: w * w, fuel0: g.Fleets[i].Fuel, active: true}
 	}
 
+	var events []Event
 	for round := 0; round < 10; round++ {
 		for _, i := range chasers {
 			c := state[i]
@@ -407,7 +412,7 @@ func (g *Game) moveChasers(chasers []int) []Event {
 				continue
 			}
 			f := &g.Fleets[i]
-			wp := f.Waypoints[0]
+			wp := &f.Waypoints[0]
 			ti := g.fleetIndex(wp.ID)
 			tc, targetChasing := state[ti]
 			targetChasing = targetChasing && tc.active
@@ -416,28 +421,45 @@ func (g *Game) moveChasers(chasers []int) []Event {
 			if targetChasing {
 				step = min(c.rem, (c.rem+c.moved+4)/5)
 			}
-			dest := g.Fleets[ti].Pos
-			d := distance(f.Pos, dest)
-			a := min(int(d+0.9999), step)
+			m := g.newLegMove(f, wp.Warp, g.Fleets[ti].Pos)
+			start := *f
+			start.Fuel = c.fuel0
+			r, unl := g.fuelRange(&start, m.warp)
+			a, rLimited := m.limit(min(m.leg, step), max(0, r-c.moved), unl)
 
+			arrived := m.place(a, rLimited)
 			total := c.moved + step
-			if arrives(d, a) {
-				f.Pos = dest
+			if arrived || rLimited {
 				total = c.moved + a
+			}
+			before := f.Fuel
+			f.Fuel = max(0, c.fuel0-g.FuelCost(f, m.warp, total))
+			if rLimited {
+				f.Fuel = 0
+			}
+			cost := before - f.Fuel
+
+			if arrived {
 				c.active = false
 				if targetChasing {
 					tc.active = false // the target stops for the year
 				}
 			} else {
-				f.Pos = along(f.Pos, dest, a, d)
 				c.moved += step
 				c.rem -= step
 				c.active = c.rem > 0
 			}
-			f.Fuel = max(0, c.fuel0-g.FuelCost(f, wp.Warp, total))
+			if m.ranDry(rLimited, cost, arrived, a) {
+				events = append(events, g.dryOut(wp, f, m.leg))
+				c.active = false
+				continue
+			}
+			gain, ev := g.afterMove(m, a, arrived)
+			c.fuel0 += gain
+			events = append(events, ev...)
 		}
 	}
-	return nil
+	return events
 }
 
 // settleWaypoints runs after all movement (KERNEL.md "Chasing another
