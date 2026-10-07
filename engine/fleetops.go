@@ -175,7 +175,8 @@ func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 // drops every part the owner is not entitled to.
 const legacyKeepUnentitledParts = false
 
-// basicEngine back-fills an emptied engine slot (ASSUMPTION O5).
+// basicEngine back-fills an emptied engine slot (ORDERS.md: engine item
+// 1, skipping the Hyper-Expansion-only item 0, BINARY-ONLY).
 const basicEngine = "Quick Jump 5"
 
 // ReadDesign builds an owner's design from the table (ORDERS.md "Design
@@ -191,10 +192,7 @@ const basicEngine = "Quick Jump 5"
 // chosen rule rejects a design on a hull the owner may not build (not
 // under legacyKeepUnentitledParts, which reproduces the original). A ship
 // hull whose engine slot is left empty is back-filled with the basic
-// engine at the slot's capacity, as in the original.
-//
-// ASSUMPTION O5: the basic engine is the Quick Jump 5 (basicEngine).
-// ORDERS.md does not name it.
+// engine, the Quick Jump 5, at the slot's capacity, as in the original.
 func (c *Catalog) ReadDesign(name, hull string, fills []SlotFill, race Race, levels [NumFields]int, traderItems map[string]bool) (Design, error) {
 	return c.readDesign(name, hull, fills, race, levels, traderItems, legacyKeepUnentitledParts)
 }

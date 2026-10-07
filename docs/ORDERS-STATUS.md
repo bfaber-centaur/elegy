@@ -26,7 +26,7 @@ and the design read are engine functions an order layer will call:
 | Ownership checked on every order (chosen rule) | `MergeFleets` | chosen rule (ORDERS.md "Ownership") | `TestPredictionMergeOrder` |
 | Design read: parts above research tech dropped; mass and capacities from the parts kept | `ReadDesign` | BINARY-ONLY | `TestPredictionDesignTechStrip` |
 | Hull not entitled: the original keeps it; Elegy's chosen rule rejects the design | `readDesign` | BINARY-ONLY, chosen rule (#51) | `TestPredictionDesignHullAndEngine` |
-| An emptied engine slot is back-filled with the basic engine at the slot's capacity | `readDesign` | BINARY-ONLY (#51) | `TestPredictionDesignHullAndEngine` |
+| An emptied engine slot is back-filled with the basic engine (Quick Jump 5) at the slot's capacity | `readDesign` | BINARY-ONLY (#51) | `TestPredictionDesignHullAndEngine` |
 | Design read keeps parts the owner is not entitled to (Mystery Trader, race) | `readDesign` (switch `legacyKeepUnentitledParts`, off) | LEGACY BUG, CONFIRMED | `TestConfirmedDesignLegality` (both settings) |
 | Elegy's chosen rule: drop every part the owner is not entitled to (tech, race, Mystery Trader items) | `ReadDesign` | chosen rule (ORDERS.md "Design legality") | `TestConfirmedDesignLegality` |
 
@@ -46,11 +46,8 @@ and the design read are engine functions an order layer will call:
 Elegy's own choices where ORDERS.md is silent. They are **not**
 established Stars! behavior; each is marked `ASSUMPTION On` in the code.
 
-| Id | What Elegy does | Why |
-|---|---|---|
-| O5 | The basic engine that back-fills an emptied engine slot is the Quick Jump 5. | ORDERS.md says "the basic engine" without naming it. |
-
-O1 to O4 were answered by stars-elegy #51 and are cited rules above.
+None open. O1 to O5 were answered by stars-elegy #51 and are cited rules
+above.
 
 ## Not modelled
 

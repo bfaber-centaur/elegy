@@ -212,8 +212,8 @@ func TestPredictionDesignHullAndEngine(t *testing.T) {
 	// ORDERS.md "Design legality (hull not entitled, or every part
 	// stripped)" (BINARY-ONLY): the original keeps a hull above the owner's
 	// tech; Elegy's chosen rule rejects it. An emptied engine slot is
-	// back-filled with the basic engine at the slot's capacity
-	// (ASSUMPTION O5: Quick Jump 5).
+	// back-filled with the basic engine, the Quick Jump 5, at the slot's
+	// capacity.
 	c := Components()
 	fills := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
 	if _, err := c.readDesign("D", "Destroyer", fills, Race{}, [NumFields]int{}, nil, false); err == nil {
