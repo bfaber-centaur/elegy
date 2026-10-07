@@ -5,18 +5,21 @@ The orders layer (`engine/orders.go`, `orders_cargo.go`,
 Elegy applies when it accepts the orders. It follows the public
 specification stars-elegy `docs/ORDERS.md` at PR #51 head `14e3c10`, with
 battle plans from `docs/COMBAT.md` at PR #59 head `1026471`, research
-from `docs/KERNEL.md` "Research" and the planet side of cargo from
+from `docs/KERNEL.md` "Research", battle-plan order validation from
+`docs/COMBAT.md` "Order validation" (PR #71), the replay shuffle from
+`docs/KERNEL.md` "Turn order" (PR #53), and the planet side of cargo from
 `docs/TAKEOVER.md` on main `09e94c4`. Nothing else was used.
 
 The merge order and the design read are the kernel lane's
 `Game.MergeFleets` and `Catalog.ReadDesign` (`engine/fleetops.go`,
 [ORDERS-STATUS.md](ORDERS-STATUS.md)); the orders layer calls them.
 
-`ApplyOrders` is not called from `GenerateTurn` yet. The replay order is
-a random draw whose place in the year's random sequence belongs to the
-turn (KERNEL.md "Turn order" step 1), and the drops and gifts the orders
-make have to be handed to the waypoint phases. That wiring is a turn
-change for the kernel lane.
+`YearOrders` draws the replay order with `ShufflePlayers` (KERNEL.md
+"Turn order", 1. Orders, step 2, on stars-elegy #53: a forward shuffle,
+one draw per player, the first draws of the year) and applies the files.
+It is not called from `GenerateTurn` yet: that, and handing the orders'
+drops and gifts to the waypoint phases, is a turn change for the kernel
+lane.
 
 ## Orders and checks
 
@@ -24,6 +27,7 @@ change for the kernel lane.
 |---|---|---|---|---|
 | (file) | another game, an earlier year or a later year: the whole file is refused | ORDERS.md "Wrong game or wrong year" | BINARY-ONLY | `TestPredictionFileAcceptance` |
 | (file) | players replayed in a given order, later wins; no file keeps standing orders | ORDERS.md "Conflicts between players", "A player who submits nothing" | BINARY-ONLY | `TestPredictionReplayOrder` |
+| (year) | replay order: forward shuffle, one draw per player, first draws of the year | KERNEL.md step 1 (#53) | draw count CONFIRMED (KX-004), permutation BINARY-ONLY | `TestPredictionPlayerShuffle` |
 | (every order) | an order naming another player's fleet or planet is rejected | ORDERS.md "Ownership" | chosen rule | `TestPredictionOwnershipEveryOrder` |
 | `ResearchOrder` | budget 0..100, a field, a next-field choice; anything else rejects the order | ORDERS.md "Research allocation" | BINARY-ONLY | `TestPredictionResearchOrder` |
 | `BattlePlanOrder` | replaces a plan or adds the next one, at most 16; tactic and targets in range | COMBAT.md "Adding, replacing and deleting"; ORDERS.md "Battle-plan fields" | BINARY-ONLY; chosen rule | `TestPredictionBattlePlanOrders` |
@@ -49,11 +53,11 @@ and has been sent to stars-elegy as a question.
 
 | Id | What Elegy does | Why |
 |---|---|---|
-| L1 | Fleet, design and battle-plan names are at most 31 characters, any text. | No spec gives a name limit; PRODUCTION-LAUNCH.md only says the client shows 28 characters of a design name. |
+| L1 | Fleet and design names follow COMBAT.md's battle-plan name rule (#71): at most 31 characters, any text. | No spec gives their limit. |
 | L2 | A player's second file in a year is refused; the first applies. | ORDERS.md has one file per player. |
-| L3 | At most 16 battle plans (the host's limit, not the client's 15). | COMBAT.md gives both and does not say which to enforce. |
-| L4 | An attack-who value outside its five values, or "attack a player" naming no other existing player, rejects the plan. | ORDERS.md names only the tactic and target ranges. |
-| L5 | A battle-plan number beyond the next one is rejected. | COMBAT.md: a new plan "takes the next number". |
+| L3 | (settled: COMBAT.md #71 sets Elegy's limit at 16) | |
+| L4 | An attack-who value outside Elegy's five rejects the plan. ("Attack a player" naming itself or no player in the game is now COMBAT.md #71's Elegy rule.) | COMBAT.md describes the host's stored values; Elegy's type has no others. |
+| L5 | (settled: COMBAT.md #71, a definition is accepted only for k ≤ count) | |
 | L6 | A warp outside 0..10, a negative transport amount, an unmodelled task, or a target planet or fleet that does not exist rejects a waypoint order. | ORDERS.md gives no other waypoint checks. |
 | L7 | A cargo order needs the fleet at its target; fuel to or from a planet rejects it; any failed check rejects the whole order; any fleet with a hold may carry colonists. | ORDERS.md and KERNEL.md cover the waypoint unload of fuel, not a direct transfer, and leave the colonist condition unpinned. |
 | L8 | The enemy check on cargo for another player's fleet is made when the order applies. | TAKEOVER.md says nothing moves, not when it is checked. |
@@ -90,7 +94,7 @@ record slot positions), mass drivers, and the route task on arrival.
 
 ## Not modelled
 
-- the replay-order draw and calling `ApplyOrders` from `GenerateTurn`;
+- calling `YearOrders` from `GenerateTurn`;
   `DeliverGifts` is not called either (ORDERS.md puts the credit after
   movement, TAKEOVER.md step 2 before it);
 - splits, the transfer-balance between the player's own fleets, and

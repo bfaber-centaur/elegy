@@ -155,10 +155,10 @@ func TestPredictionBattlePlanOrders(t *testing.T) {
 	errs, _ := apply(g, 0,
 		BattlePlanOrder{Index: 5, Plan: p},                                // adds plan 5
 		BattlePlanOrder{Index: 2, Plan: p},                                // replaces plan 2
-		BattlePlanOrder{Index: 7, Plan: p},                                // beyond the next number (L5)
+		BattlePlanOrder{Index: 7, Plan: p},                                // beyond the next number
 		BattlePlanOrder{Index: 6, Plan: BattlePlan{Tactic: 6}},            // tactic 6
 		BattlePlanOrder{Index: 6, Plan: BattlePlan{Primary: 8}},           // target 8
-		BattlePlanOrder{Index: 6, Plan: BattlePlan{Attack: AttackPlayer}}, // attacks itself (L4)
+		BattlePlanOrder{Index: 6, Plan: BattlePlan{Attack: AttackPlayer}}, // attacks itself
 		DeletePlanOrder{Index: 0},                                         // plan 0
 		FleetPlanOrder{Fleet: 1, Plan: 5},                                 // ok
 		FleetPlanOrder{Fleet: 2, Plan: 6},                                 // no plan 6
@@ -412,5 +412,16 @@ func TestPredictionDesignOrders(t *testing.T) {
 	}
 	if g.fleetIndex(2) >= 0 || len(g.Fleets[0].Stacks) != 1 {
 		t.Errorf("fleets after delete %+v", g.Fleets)
+	}
+}
+
+func TestPredictionPlayerShuffle(t *testing.T) {
+	// KERNEL.md "Turn order", 1. Orders, step 2 (stars-elegy #53): for
+	// i = 0..n−1 swap position i with i + Random(n − i); one draw per
+	// player, the last always 0. Draws 2, 0, 1, 0 on four players:
+	// [0 1 2 3] → [2 1 0 3] → [2 1 0 3] → [2 1 3 0] → [2 1 3 0].
+	r := &seqRand{draws: []int{2, 0, 1, 0}}
+	if got := ShufflePlayers(4, r); !reflect.DeepEqual(got, []int{2, 1, 3, 0}) || len(r.draws) != 0 {
+		t.Errorf("order %v, %d draws left", got, len(r.draws))
 	}
 }

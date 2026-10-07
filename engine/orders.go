@@ -72,11 +72,12 @@ type Applied struct {
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
-// accepts.
+// accepts. For battle plans it is COMBAT.md "Order validation" (stars-elegy
+// #71), Elegy's rule: a name over 31 characters is refused, any text and
+// the empty name are accepted.
 //
-// ASSUMPTION L1: no public spec gives a name limit or name validation;
-// PRODUCTION-LAUNCH.md only says the client cuts a design name to 28
-// characters for display. Elegy takes 31 characters, any text.
+// ASSUMPTION L1: fleet and design names follow the same rule; no public
+// spec gives their limit.
 const maxNameLength = 31
 
 // acceptFile is ORDERS.md "File acceptance" (BINARY-ONLY): a file for
@@ -106,9 +107,8 @@ func (g *Game) acceptFile(o PlayerOrders) error {
 // no accepted file keeps their standing orders (ORDERS.md "A player who
 // submits nothing", BINARY-ONLY): nothing is applied for them.
 //
-// The replay order is the caller's: KERNEL.md draws it from the game's
-// generator, and the draw's place in the year's random sequence belongs
-// with GenerateTurn.
+// The replay order is the caller's; YearOrders draws it as the original
+// does.
 //
 // ASSUMPTION L2: a player's second file in the same year is rejected
 // whole; the first is used. ORDERS.md has one file per player.
@@ -139,6 +139,32 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 		}
 	}
 	return a
+}
+
+// ShufflePlayers is the year's player replay order (KERNEL.md "Turn
+// order", 1. Orders, step 2, stars-elegy #53): a forward shuffle of the n
+// players, where position i swaps with position i + Random(n − i). One
+// draw per player, the last always 0; they are the first draws of the
+// year (CONFIRMED as a draw count, KX-004; the permutation BINARY-ONLY).
+// With orders that pass Elegy's ownership rule the permutation has no
+// observable effect, but the draws are made.
+func ShufflePlayers(n int, rng Rand) []int {
+	perm := make([]int, n)
+	for i := range perm {
+		perm[i] = i
+	}
+	for i := range n {
+		j := i + rng.Intn(n-i)
+		perm[i], perm[j] = perm[j], perm[i]
+	}
+	return perm
+}
+
+// YearOrders applies a year's order files in the replay order drawn by
+// ShufflePlayers, KERNEL.md step 1. It is the call GenerateTurn makes
+// first.
+func YearOrders(g *Game, files []PlayerOrders, rng Rand) *Applied {
+	return ApplyOrders(g, files, ShufflePlayers(len(g.Players), rng))
 }
 
 // ownFleet returns the index of fleet id when player owns it. ORDERS.md
@@ -197,21 +223,20 @@ func (o ResearchOrder) apply(g *Game, player int, _ *Applied) error {
 	return nil
 }
 
-// maxBattlePlans is the host's battle-plan limit (COMBAT.md, PR #59:
-// between 1 and 16 plans; the 17th is refused, BINARY-ONLY). The original
-// client stops at 15 (MEASURED, BP-L).
-//
-// ASSUMPTION L3: Elegy accepts the host's 16. COMBAT.md gives both
-// limits and does not say which an implementation should enforce.
+// maxBattlePlans is the battle-plan limit (COMBAT.md "Order validation",
+// stars-elegy #71, BINARY-ONLY): Elegy enforces the host's 16; the
+// client's 15 is a client limit (MEASURED, BP-L).
 const maxBattlePlans = 16
 
 // validPlan checks a battle plan's fields (ORDERS.md "Battle-plan
-// fields", Elegy's chosen rule: an out-of-range tactic or target is
-// rejected; the original stores it, BINARY-ONLY).
+// fields" and COMBAT.md "Order validation", stars-elegy #71, Elegy's
+// rules; the original lets a tactic of 6, a target of 8 and any
+// attack-who through, BINARY-ONLY): tactic and targets in their legal
+// sets, and a plan that attacks a player must name another player in the
+// game.
 //
-// ASSUMPTION L4: attack-who outside its five values is rejected the same
-// way, and "attack a player" must name another existing player. ORDERS.md
-// names only the tactic and target ranges.
+// ASSUMPTION L4: an attack-who value outside Elegy's five is rejected;
+// COMBAT.md describes the stored values, Elegy's AttackWho has no others.
 func (g *Game) validPlan(player int, p BattlePlan) error {
 	switch {
 	case p.Tactic < TacticDisengage || p.Tactic > TacticMaximizeDamage,
@@ -226,11 +251,9 @@ func (g *Game) validPlan(player int, p BattlePlan) error {
 }
 
 // BattlePlanOrder defines battle plan Index (COMBAT.md "Adding, replacing
-// and deleting", BINARY-ONLY): an existing number is replaced, the next
-// number (the current count) adds a plan, and a 17th plan is refused.
-//
-// ASSUMPTION L5: a number beyond the next one is rejected. COMBAT.md's
-// new plan "takes the next number"; Elegy's order names the number.
+// and deleting" and "Order validation", stars-elegy #71, BINARY-ONLY):
+// Index below the count replaces, Index equal to the count adds, anything
+// else, and a 17th plan, is refused.
 type BattlePlanOrder struct {
 	Index int
 	Plan  BattlePlan
