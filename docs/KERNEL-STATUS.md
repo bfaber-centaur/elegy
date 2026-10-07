@@ -3,7 +3,9 @@
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001) and the public FM-001..004 movement
-corpus (`experiments/fm00N`), as of stars-elegy `main` at `46db4d9` (after PR #16).
+corpus (`experiments/fm00N`), as of stars-elegy `main` at `46db4d9` (after PR #16) plus open
+stars-elegy PR #18 (partial percentage, limiting component, prefix after an
+auto item; branch `claude/project-thread-57v9tt` at `984ad8b`).
 Nothing here comes from the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
@@ -104,7 +106,20 @@ KX-001 M4 also showed that the partial percentage is PARITY.md's formula
 `max(trunc((a+1)·100/c) − 1, trunc(a·100/c))`, which is one less than "the
 largest p with trunc(c·p/100) ≤ a" whenever `c` does not divide
 `(a+1)·100` (9 resources: 54%, not 55%). The code now uses the formula;
-PQ-001's costs (4, 5, 10, 100) never separated the two.
+PQ-001's costs (4, 5, 10, 100) never separated the two. stars-elegy #18
+states the formula as the rule.
+
+stars-elegy #18 also settled the limiting component (code follows it;
+`limiting` in `production.go`):
+
+- Components are compared Fe, Bo, Ge, then resources; one replaces the
+  lowest only if strictly lower, so the first of tied minerals wins and a
+  mineral wins a tie with resources (BINARY-ONLY).
+- An auto item with any mineral short is mineral-blocked even when
+  resources give the lower percentage: skipped without a prefix (KX-001
+  A7), straight to alchemy for the lowest component's shortfall with one
+  (A6). Changed; A6 failed before.
+- A prefix stays in front of an auto item after it builds (A5). Already so.
 
 ## Elegy decisions
 
@@ -125,13 +140,6 @@ Places where the original has no behavior to copy, and Elegy chose one.
 None from KERNEL.md's current text. Choices the code makes where KERNEL.md
 is silent:
 
-- **Auto Alchemy limiting component.** Alchemy buys only when "the limiting
-  component is a mineral". When resources and a mineral pay for the same
-  percentage, or two minerals tie, the code treats the first mineral in
-  mineral order as limiting.
-- **Auto Alchemy prefix before an auto item.** An auto item keeps its
-  prefix after building (auto items stay in the queue); KX-001 A3 only
-  covers the case where alchemy runs short.
 - **Generalized Research order.** Every field is checked for level-ups
   before any switch.
 - **PG race settings.** KERNEL.md does not give the PG race's factories and
