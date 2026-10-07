@@ -129,25 +129,35 @@ func (g *generator) newDesign(s shipSpec, upgrade bool, race engine.Race, levels
 	return len(g.res.Game.Designs) - 1, nil
 }
 
-// Starbase designs (UNIVERSE.md "Starbases"). Starting starbase designs
-// are not upgraded.
+// Starbase designs (UNIVERSE.md "Starbases", CONFIRMED in every UG
+// game). Starting starbase designs are not upgraded.
 //
-// PLACEHOLDER: the spec says design 0 is "a Space Station armed with
-// lasers and Mole-skin shields" without counts or slots. Elegy fills both
-// Space Station beam slots 1 and 3 with 16 Lasers and shield slot 2 with
-// 16 Mole-skin Shields until the spec gives the loadout.
+// The Space Station's 12 slots in hull order: empty, 8 Laser, 8 Mole-skin,
+// 8 Laser, 8 Mole-skin, 8 Mole-skin, empty, 8 Laser, empty, 8 Laser,
+// empty, 8 Mole-skin (32 Lasers, 32 Mole-skin Shields). PP and IT add their
+// Mass Driver 5 or Stargate 100/250 in the first slot.
 func spaceStation(name, orbital string) shipSpec {
-	fills := []engine.SlotFill{fill(1, "Laser", 16), fill(2, "Mole-skin Shield", 16), fill(3, "Laser", 16)}
-	if orbital != "" {
-		fills = append([]engine.SlotFill{fill(0, orbital, 1)}, fills...)
-	}
-	return shipSpec{name, "Space Station", fills}
-}
-
-func orbitalFort(name, orbital string) shipSpec {
+	const l, m = "Laser", "Mole-skin Shield"
 	var fills []engine.SlotFill
 	if orbital != "" {
 		fills = append(fills, fill(0, orbital, 1))
+	}
+	fills = append(fills, fill(1, l, 8), fill(2, m, 8), fill(3, l, 8), fill(4, m, 8),
+		fill(5, m, 8), fill(7, l, 8), fill(9, l, 8), fill(11, m, 8))
+	return shipSpec{name, "Space Station", fills}
+}
+
+// orbitalFort is an Orbital Fort with orbital in its first slot and, when
+// shield is set, 6 Lasers, 6 shields, 6 Lasers, 6 shields after it (the
+// PP fort with Cow-hide, the IT fort with Mole-skin). Without an orbital
+// part it is AR's empty design 0.
+func orbitalFort(name, orbital, shield string) shipSpec {
+	var fills []engine.SlotFill
+	if orbital != "" {
+		fills = append(fills, fill(0, orbital, 1))
+	}
+	if shield != "" {
+		fills = append(fills, fill(1, "Laser", 6), fill(2, shield, 6), fill(3, "Laser", 6), fill(4, shield, 6))
 	}
 	return shipSpec{name, "Orbital Fort", fills}
 }
@@ -157,19 +167,18 @@ func orbitalFort(name, orbital string) shipSpec {
 func starbaseSpecs(prt engine.PRT, tiny bool) (specs []shipSpec, homeworld int) {
 	switch prt {
 	case engine.PRTAlternateReality:
-		// Design 0 an empty Orbital Fort; design 1 a Space Station at
-		// the homeworld. ELEGY CHOICE: design 1 has design 0's usual
-		// loadout.
-		return []shipSpec{orbitalFort("Orbital Fort", ""), spaceStation("Starbase", "")}, 1
+		// Design 0 an empty Orbital Fort; design 1 the plain Space
+		// Station, at the homeworld.
+		return []shipSpec{orbitalFort("Orbital Fort", "", ""), spaceStation("Starbase", "")}, 1
 	case engine.PRTPacketPhysics:
 		specs = []shipSpec{spaceStation("Starbase", "Mass Driver 5")}
 		if !tiny {
-			specs = append(specs, orbitalFort("Accelerator Platform", "Mass Driver 5"))
+			specs = append(specs, orbitalFort("Accelerator Platform", "Mass Driver 5", "Cow-hide Shield"))
 		}
 	case engine.PRTInterstellarTraveler:
 		specs = []shipSpec{spaceStation("Starbase", "Stargate 100/250")}
 		if !tiny {
-			specs = append(specs, orbitalFort("Gate Platform", "Stargate 100/250"))
+			specs = append(specs, orbitalFort("Gate Platform", "Stargate 100/250", "Mole-skin Shield"))
 		}
 	default:
 		specs = []shipSpec{spaceStation("Starbase", "")}

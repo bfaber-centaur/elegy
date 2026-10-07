@@ -1,6 +1,10 @@
 package newgame
 
-import "github.com/bfaber-centaur/elegy/engine"
+import (
+	"sort"
+
+	"github.com/bfaber-centaur/elegy/engine"
+)
 
 // MaxPlanets is the most planets a galaxy holds (UNIVERSE.md "Count").
 const MaxPlanets = 999
@@ -35,9 +39,14 @@ func (g *generator) placePlanets() []engine.Point {
 		cand[i] = engine.Point{X: Origin + 10 + g.rand(span), Y: Origin + 10 + g.rand(span)}
 	}
 
-	// Minimum spacing. ELEGY CHOICE: the spec says which pairs may not
-	// survive but not which member goes; Elegy keeps candidates in
-	// order and drops any within d² ≤ 144 of one already kept.
+	// Minimum spacing (CONFIRMED): the candidates are sorted by x;
+	// taking each survivor in that order, every later candidate within
+	// d² ≤ 144 goes. A removed candidate removes nothing, so this is
+	// "keep a candidate unless it is within 12 ly of one already kept".
+	// The planet list stays in this x order.
+	// ELEGY CHOICE: the original's sort is not stable for equal x;
+	// Elegy's is.
+	sort.SliceStable(cand, func(i, j int) bool { return cand[i].X < cand[j].X })
 	kept := make([]engine.Point, 0, m)
 	for _, c := range cand {
 		ok := true
@@ -53,7 +62,8 @@ func (g *generator) placePlanets() []engine.Point {
 	}
 
 	// Remove random candidates until N remain; fewer remain when the
-	// spacing pass already removed more than M − N.
+	// spacing pass already removed more than M − N, and none is added
+	// back (tiny and small packed games can end below N, BINARY-ONLY).
 	for len(kept) > n {
 		i := g.rand(len(kept))
 		kept = append(kept[:i], kept[i+1:]...)

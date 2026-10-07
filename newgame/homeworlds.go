@@ -117,8 +117,8 @@ func (g *generator) tryHomeworlds(players int, central, wide box, sp spacing) ([
 	n := len(planets)
 
 	// The first homeworld: a random planet in the central box; after
-	// 50 picks outside it, the pick nearest to the box.
-	// ELEGY CHOICE: ties for nearest go to the earliest pick.
+	// 50 picks outside it, the pick nearest to the box by dx² + dy²
+	// outside it; the first of equally near picks wins.
 	first, best := -1, 0
 	for range hwPicks {
 		i := g.rand(n)
@@ -162,10 +162,10 @@ func (g *generator) tryHomeworlds(players int, central, wide box, sp spacing) ([
 			}
 		}
 		if pick < 0 {
-			// After 50 failed picks, the next qualifying planet in
-			// list order. ELEGY CHOICE: the scan starts after the
-			// last pick and wraps.
-			for k := 1; k <= n; k++ {
+			// After 50 failed picks, the list is scanned from the
+			// planet after the 50th pick, wrapping, and stops on
+			// returning to that pick, which is not tested again.
+			for k := 1; k < n; k++ {
 				if i := (last + k) % n; qualifies(i) {
 					pick = i
 					break

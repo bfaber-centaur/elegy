@@ -1120,3 +1120,97 @@ func TestElegyDecisionGameRuns(t *testing.T) {
 		t.Fatalf("year %d", g.Year)
 	}
 }
+
+func loadout(d engine.Design) map[string]int {
+	out := map[string]int{}
+	for _, s := range d.Slots {
+		out[s.Part.Name] += s.Count
+	}
+	return out
+}
+
+// Starbase loadouts (UNIVERSE.md "Starbases", CONFIRMED in every UG game):
+// the Space Station has 32 Lasers and 32 Mole-skin Shields in eight slots;
+// the PP fort uses Cow-hide, the IT fort Mole-skin; AR's design 1 is the
+// plain station and design 0 an empty fort.
+func TestConfirmedStarbaseLoadouts(t *testing.T) {
+	res := playerGame(t, Small, 1, human(engine.PRTInnerStrength), human(engine.PRTPacketPhysics),
+		human(engine.PRTInterstellarTraveler), human(engine.PRTAlternateReality))
+	sb := func(i, k int) engine.Design { return designAt(res, res.Players[i].StarbaseDesigns[k]) }
+	station := map[string]int{"Laser": 32, "Mole-skin Shield": 32}
+	if got := loadout(sb(0, 0)); !reflect.DeepEqual(got, station) || len(sb(0, 0).Slots) != 8 {
+		t.Errorf("Space Station: %v in %d slots", got, len(sb(0, 0).Slots))
+	}
+	if got := loadout(sb(1, 0)); got["Mass Driver 5"] != 1 || got["Laser"] != 32 {
+		t.Errorf("PP design 0: %v", got)
+	}
+	if got := loadout(sb(1, 1)); !reflect.DeepEqual(got, map[string]int{"Mass Driver 5": 1, "Laser": 12, "Cow-hide Shield": 12}) {
+		t.Errorf("PP fort: %v", got)
+	}
+	if got := loadout(sb(2, 1)); !reflect.DeepEqual(got, map[string]int{"Stargate 100/250": 1, "Laser": 12, "Mole-skin Shield": 12}) {
+		t.Errorf("IT fort: %v", got)
+	}
+	if got := loadout(sb(3, 1)); !reflect.DeepEqual(got, station) {
+		t.Errorf("AR design 1: %v", got)
+	}
+}
+
+// Research, relations and production at the start (UNIVERSE.md
+// "Relations, research and production", MEASURED): 15% research on
+// energy with next field "same" for every player, and no production
+// queue anywhere.
+func TestConfirmedResearchAndQueues(t *testing.T) {
+	res := playerGame(t, Small, 1, human(engine.PRTPacketPhysics), computer(engine.PRTClaimAdjuster, Expert))
+	for i, p := range res.Game.Players {
+		if p.ResearchBudget != 15 || p.Research.Current != engine.Energy || p.Research.Next != engine.NextSameField {
+			t.Errorf("player %d research %d%% %+v", i, p.ResearchBudget, p.Research)
+		}
+	}
+	for _, p := range res.Game.Planets {
+		if p.HasQueue {
+			t.Errorf("planet %d has a production queue", p.ID)
+		}
+	}
+}
+
+// The second-planet band truncates each bound before squaring and
+// includes both ends (UNIVERSE.md "Second planet").
+func TestConfirmedSecondPlanetBand(t *testing.T) {
+	// W 1210: 15W/100 = 181 (181.5), 23W/100 = 278 (278.3).
+	cases := []struct {
+		d2   int
+		want bool
+	}{{181*181 - 1, false}, {181 * 181, true}, {278 * 278, true}, {278*278 + 1, false}}
+	for _, c := range cases {
+		if got := secondBand(c.d2, 1210); got != c.want {
+			t.Errorf("d² %d: %v", c.d2, got)
+		}
+	}
+}
+
+// Wormhole badness flags (OBJECTS.md "Placement badness", CONFIRMED at
+// creation): bands set 8, 4, 2, 1; the edge sets 4; flags are OR-ed.
+func TestConfirmedWormholeBadness(t *testing.T) {
+	g := &generator{w: 400}
+	g.res.Game.Planets = []engine.Planet{{Pos: engine.Point{X: 1200, Y: 1200}}, {Pos: engine.Point{X: 1210, Y: 1200}}}
+	cases := []struct {
+		p       engine.Point
+		partner *engine.Point
+		want    int
+	}{
+		{engine.Point{X: 1300, Y: 1300}, nil, 0},
+		{engine.Point{X: 1200, Y: 1200}, nil, 15},                                // on a planet
+		{engine.Point{X: 1204, Y: 1200}, nil, 8 | 4},                             // d² 16 (closest band) and 36
+		{engine.Point{X: 1200, Y: 1215}, nil, 2},                                 // d² 225, 325
+		{engine.Point{X: 1005, Y: 1300}, nil, 4},                                 // edge
+		{engine.Point{X: 1300, Y: 1300}, &engine.Point{X: 1330, Y: 1300}, 1},     // partner d² 900: the 4900 band
+		{engine.Point{X: 1300, Y: 1300}, &engine.Point{X: 1329, Y: 1300}, 2},     // partner d² 841
+		{engine.Point{X: 1300, Y: 1300}, &engine.Point{X: 1300, Y: 1309}, 4},     // partner d² 81
+		{engine.Point{X: 1395, Y: 1300}, &engine.Point{X: 1395, Y: 1302}, 4 | 8}, // edge and partner d² 4
+	}
+	for _, c := range cases {
+		if got := g.wormholeBadness(c.p, c.partner); got != c.want {
+			t.Errorf("%v partner %v: %d, want %d", c.p, c.partner, got, c.want)
+		}
+	}
+}

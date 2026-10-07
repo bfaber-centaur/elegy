@@ -114,8 +114,8 @@ func (g *generator) homeworldEnv(r engine.Race) [3]int {
 // per mineral 10 + rand(10·c), plus 155 + rand(150) when that is below
 // 200; BBS adds a quarter.
 //
-// ELEGY CHOICE: c is read as the reference planet's concentration before
-// the floor of 30 (the spec names "the concentration of planet 0").
+// c is the reference planet's concentration as generated, not raised to
+// 30; the floor applies only to the homeworlds' concentrations.
 func (g *generator) surfaceDraw(c [engine.NumMinerals]int) engine.Minerals {
 	var s engine.Minerals
 	for m := range s {
@@ -216,17 +216,17 @@ func (g *generator) setUpPlayers(hws []int) error {
 		levels := StartingTech(ps.Race, ps.ExpensiveAt3)
 		pl := engine.Player{
 			Race: ps.Race,
-			// Research starts at 15% of resources (MEASURED for human
-			// players). PLACEHOLDER: computer players use 15% too.
+			// Every player starts at 15% research, current field
+			// energy, next field "same field" (UNIVERSE.md "Relations,
+			// research and production", MEASURED).
 			ResearchBudget: 15,
-			// PLACEHOLDER: the first research field and next-field
-			// choice are not specified.
-			Research: engine.ResearchState{Levels: levels, Current: engine.Energy, Next: engine.NextSameField},
+			Research:       engine.ResearchState{Levels: levels, Current: engine.Energy, Next: engine.NextSameField},
 		}
 		// Relations (MEASURED): with exactly one human player every
-		// player starts as an enemy of every other. Otherwise the
-		// default starting value is BINARY-ONLY and unstated;
-		// PLACEHOLDER: the engine's neutral default.
+		// player starts as an enemy of every other; with two or more,
+		// every player is neutral (the engine's default). PLACEHOLDER:
+		// a game with no human player was not run; Elegy leaves it
+		// neutral.
 		if humans == 1 {
 			pl.Relations = make([]engine.Relation, len(g.s.Players))
 			for j := range pl.Relations {
@@ -260,9 +260,7 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps PlayerSetup, sha
 	hw.Env = g.homeworldEnv(ps.Race)
 	g.res.Artifact[hw.ID] = false
 	hw.Population = homeworldPopulation(ps, g.s.BBS)
-	// PLACEHOLDER: the starting production queue is not specified;
-	// the homeworld has an empty queue.
-	hw.HasQueue = true
+	// No planet has a production queue at the start (MEASURED).
 	if !ar {
 		hw.Mines, hw.Factories, hw.Defenses = 10, 10, 10
 		hw.HasScanner = true
@@ -283,8 +281,8 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps PlayerSetup, sha
 		}
 	case SpendConcentrations:
 		conc = ConcentrationSpend(conc, l)
-	// PLACEHOLDER: an AR homeworld has no installations; the spec does
-	// not say what an installation spend does for AR, so it adds none.
+	// AR's mines, factories or defenses spend adds nothing
+	// (BINARY-ONLY).
 	case SpendMines:
 		if !ar {
 			hw.Mines += l / 2
@@ -304,9 +302,12 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps PlayerSetup, sha
 	hw.Surface = surface
 }
 
-// secondBand reports whether d² lies in 0.15W ≤ d ≤ 0.23W.
+// secondBand reports whether d² lies in the second-planet band:
+// (15W/100)² ≤ d² ≤ (23W/100)², each bound truncated before squaring
+// (UNIVERSE.md "Second planet", BINARY-ONLY detail).
 func secondBand(dd, w int) bool {
-	return 10000*dd >= 225*w*w && 10000*dd <= 529*w*w
+	lo, hi := 15*w/100, 23*w/100
+	return dd >= lo*lo && dd <= hi*hi
 }
 
 // setUpSecondPlanet gives a PP or IT player its second planet
@@ -329,7 +330,7 @@ func (g *generator) setUpSecondPlanet(i int) error {
 		if secondBand(dd, g.w) {
 			band = append(band, j)
 		} else if nearest < 0 || dd < best {
-			// ELEGY CHOICE: ties for nearest go to the earliest planet.
+			// Ties for nearest go to the first in list order.
 			nearest, best = j, dd
 		}
 	}
@@ -359,7 +360,6 @@ func (g *generator) setUpSecondPlanet(i int) error {
 	g.res.Artifact[pick] = false // ELEGY CHOICE: as on a homeworld.
 	sp.Mines, sp.Factories = 10, 4
 	sp.HasScanner = true
-	sp.HasQueue = true // PLACEHOLDER, as on the homeworld.
 	for m := range sp.Surface {
 		sp.Surface[m] = 100 + g.rand(200)
 	}
