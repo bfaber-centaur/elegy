@@ -34,6 +34,8 @@ type LRTs struct {
 	GeneralizedResearch   bool
 	MineralAlchemy        bool
 	RegeneratingShields   bool
+	CheapEngines          bool
+	BleedingEdgeTech      bool
 }
 
 // ResearchCost is a race's research-cost setting for one field.

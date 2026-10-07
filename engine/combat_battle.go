@@ -46,7 +46,8 @@ type battle struct {
 	rng      Rand
 	loc      location
 	sets     attackSets
-	players  []int // involved players, in player order
+	players  []int // the battle's player list P, in player order
+	involved int   // n, the number of involved players (size of Q)
 	tokens   []*token
 	round    int
 	in       map[int]bool // players still in the battle
@@ -61,7 +62,21 @@ func dist(ax, ay, bx, by int) int {
 	return max(abs(ax-bx), abs(ay-by))
 }
 
-func (b *battle) attacks(p, q int) bool { return b.sets[p][q] }
+// attacks reports whether player p may target player q's tokens. A
+// player's own tokens are never targets, even when the plan-0 LEGACY BUG
+// names the player in its own set.
+func (b *battle) attacks(p, q int) bool { return p != q && b.sets[p][q] }
+
+// startSquare is the start square for rank r in the battle's player list
+// with n involved players: entry n(n−1)/2 + r of the start-square table
+// read as one flat list (COMBAT.md "Start squares").
+func startSquare(n, r int) [2]int {
+	var flat [][2]int
+	for _, row := range startSquares[1:] {
+		flat = append(flat, row...)
+	}
+	return flat[min(n*(n-1)/2+r, len(flat)-1)]
+}
 
 // setup creates the tokens (COMBAT.md "Setup steps", "Token values").
 // fought receives the fleets that take part.
@@ -109,7 +124,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 				continue
 			}
 			d := g.Designs[s.Design]
-			t := tokenValues(d, race, false)
+			t := tokenValues(d, race, false, designCost(d, race, g.Players[f.Owner].Research.Levels))
 			t.player, t.fleet, t.stack, t.planet, t.design = f.Owner, i, si, -1, s.Design
 			t.ships, t.dmg = s.Count, s.Damage
 			t.mass = d.Mass
@@ -128,7 +143,8 @@ func (b *battle) setup(fought map[int]bool) []Event {
 	}
 	if owner, ok := g.battleStarbase(b.loc.planet); ok && isInvolved[owner] {
 		pl := &g.Planets[b.loc.planet]
-		t := tokenValues(g.Designs[pl.StarbaseDesign], g.Players[owner].Race, true)
+		sd, race := g.Designs[pl.StarbaseDesign], g.Players[owner].Race
+		t := tokenValues(sd, race, true, designCost(sd, race, g.Players[owner].Research.Levels))
 		t.player, t.fleet, t.stack, t.planet, t.design = owner, -1, -1, b.loc.planet, pl.StarbaseDesign
 		t.ships, t.dmg = 1, Damage{Pct: 100, Units: pl.StarbaseDamage}
 		t.tactic, t.primary, t.secondary = TacticMaximizeDamage, TargetAny, TargetAny
@@ -157,7 +173,6 @@ func (b *battle) setup(fought map[int]bool) []Event {
 	for r, p := range b.players {
 		rank[p] = r
 	}
-	squares := startSquares[min(len(b.players), 16)]
 	for _, t := range b.tokens {
 		if damp && !t.starbase {
 			t.speed = max(0, t.speed-4)
@@ -165,7 +180,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		if t.tactic == TacticDisengage {
 			t.counter = 7
 		}
-		sq := squares[rank[t.player]%len(squares)]
+		sq := startSquare(min(b.involved, 16), rank[t.player])
 		t.x, t.y = sq[0], sq[1]
 	}
 	return events
@@ -262,28 +277,38 @@ func (b *battle) fight() {
 				t.jitter = b.rng.Intn(jitterSpan)
 			}
 		}
-		b.in = map[int]bool{}
-		for _, t := range b.tokens {
-			if t.live() && b.hasPrey(t.player) {
-				b.in[t.player] = true
-			}
-		}
-		if len(b.in) <= 1 {
+		if b.checkIn(); len(b.in) <= 1 {
 			return
 		}
 		b.fire()
 	}
 }
 
-// hasPrey reports whether player p has a live token of a player it
-// attacks.
-func (b *battle) hasPrey(p int) bool {
+// checkIn is round step 5: players with live tokens are checked in player
+// order, and a player whose attack set names no player still in is out.
+// A player removed earlier in the check no longer counts for later ones.
+func (b *battle) checkIn() {
+	b.in = map[int]bool{}
 	for _, t := range b.tokens {
-		if t.live() && b.attacks(p, t.player) {
-			return true
+		if t.live() {
+			b.in[t.player] = true
 		}
 	}
-	return false
+	for _, p := range b.players {
+		if !b.in[p] {
+			continue
+		}
+		named := false
+		for q := range b.sets[p] {
+			if b.in[q] {
+				named = true
+				break
+			}
+		}
+		if !named {
+			delete(b.in, p)
+		}
+	}
 }
 
 // regenerate is Regenerating Shields at the start of a round after the

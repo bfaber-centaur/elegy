@@ -15,6 +15,8 @@ const (
 	PartShield
 	PartElectrical
 	PartMechanical
+	PartEngine
+	PartStargate
 )
 
 // Part is one ship part. Fields that do not apply are zero.
@@ -72,6 +74,73 @@ type Hull struct {
 	RepairBonus int
 	Cost        Cost
 	TechReq     [NumFields]int
+}
+
+// designCost is a design's per-ship cost for an owner with race and
+// tech levels (COMBAT.md "Design cost", BINARY-ONLY): the hull plus each
+// slot's count × part cost, each adjusted for miniaturization, race and
+// Bleeding Edge Technology.
+func designCost(d Design, race Race, levels [NumFields]int) Cost {
+	c := itemCost(d.Hull.Cost, d.Hull.TechReq, PartOther, race, levels)
+	for _, s := range d.Slots {
+		pc := itemCost(s.Part.Cost, s.Part.TechReq, s.Part.Kind, race, levels)
+		c.Resources += s.Count * pc.Resources
+		for m := range NumMinerals {
+			c.Minerals[m] += s.Count * pc.Minerals[m]
+		}
+	}
+	return c
+}
+
+// itemCost is one hull's or part's adjusted cost.
+func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [NumFields]int) Cost {
+	m, hasReq := 0, false
+	for f := range NumFields {
+		if req[f] > 0 {
+			if v := levels[f] - req[f]; !hasReq || v < m {
+				m = v
+			}
+			hasReq = true
+		}
+	}
+	if !hasReq {
+		m = levels[0]
+		for _, l := range levels {
+			m = min(m, l)
+		}
+	}
+	bet := race.LRT.BleedingEdgeTech
+	comps := []*int{&base.Resources, &base.Minerals[Ironium], &base.Minerals[Boranium], &base.Minerals[Germanium]}
+	adjust := func(fn func(int) int) {
+		for _, c := range comps {
+			if *c != 0 {
+				*c = fn(*c)
+			}
+		}
+	}
+	if m > 0 {
+		d := min(75, 4*min(m, 19))
+		if bet {
+			d = min(80, 5*min(m, 19))
+		}
+		adjust(func(c int) int { return max(1, c-(c*d+50)/100) })
+	}
+	weapon := kind == PartBeam || kind == PartTorpedo || kind == PartBomb
+	switch {
+	case race.PRT == PRTInterstellarTraveler && kind == PartStargate,
+		race.PRT == PRTWarMonger && weapon:
+		adjust(func(c int) int { return c - c/4 })
+	case race.PRT == PRTInnerStrength && weapon:
+		adjust(func(c int) int { return c + c/4 })
+	case race.LRT.CheapEngines && kind == PartEngine:
+		adjust(func(c int) int { return c - c/2 })
+	}
+	// The game-wide flag that suppresses the doubling is not identified;
+	// Elegy always doubles.
+	if bet && m <= 0 && hasReq {
+		adjust(func(c int) int { return 2 * c })
+	}
+	return base
 }
 
 // Slot is a number of one part in one hull slot.

@@ -3,7 +3,7 @@
 ## Current question
 
 Implement the public combat specification (stars-elegy `docs/COMBAT.md`,
-PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
+merged in PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
 
 ## State
 
@@ -11,7 +11,8 @@ PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
   through #18).
 - This branch adds the battle phase: `engine/ships.go` (parts, hulls),
   `battleplan.go`, `combat_*.go`, and `docs/COMBAT-STATUS.md` (rules,
-  statuses, tests, choices). It merges after stars-elegy #19.
+  statuses, tests, choices). It follows #19 as merged (`3968ec2`), with
+  round 3 (CB-020..022) and the KERNEL.md second research check.
 - `go test ./...` is green; `go test -run Confirmed ./...` runs the
   CB-000..CB-019 vectors.
 
@@ -32,7 +33,8 @@ PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
   "Choices"); the capacitor 132% vs per-item compounding is the one that
   contradicts a CONFIRMED number.
 - Round 3 (R-8..R-10) may change BINARY-ONLY statuses.
-- No part catalogue: CB battles cannot be replayed end to end publicly.
+- No part catalogue yet: a public component table (COMPONENTS.md) is
+  planned; plug it into `Design` when it lands.
 
 ## Best next move
 

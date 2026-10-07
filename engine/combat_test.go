@@ -28,7 +28,8 @@ var (
 
 // testDesign is a design on a hull with the given slots.
 func testDesign(h Hull, cost int, slots ...Slot) Design {
-	return Design{Name: h.Name, Mass: h.Mass, Hull: h, Slots: slots, Cost: Cost{Resources: cost}}
+	h.Cost.Resources = cost
+	return Design{Name: h.Name, Mass: h.Mass, Hull: h, Slots: slots}
 }
 
 // testBattle is a two-player battle in which each player attacks the
@@ -40,14 +41,14 @@ type testBattle struct {
 func newTestBattle(rng Rand, designs []Design, toks ...*token) testBattle {
 	g := &Game{Players: make([]Player, 2), Designs: designs}
 	sets := attackSets{{1: true}, {0: true}}
-	b := &battle{g: g, rng: rng, loc: location{planet: -1}, sets: sets, players: []int{0, 1},
+	b := &battle{g: g, rng: rng, loc: location{planet: -1}, sets: sets, players: []int{0, 1}, involved: 2,
 		tokens: toks, killed: map[int]bool{}, in: map[int]bool{0: true, 1: true}}
 	return testBattle{b}
 }
 
 // tok makes a ship token of design i of designs for player p.
 func tok(designs []Design, i, p, ships int) *token {
-	t := tokenValues(designs[i], Race{}, false)
+	t := tokenValues(designs[i], Race{}, false, designCost(designs[i], Race{}, [NumFields]int{}))
 	t.player, t.fleet, t.stack, t.planet, t.design, t.ships = p, -1, 0, -1, i, ships
 	t.tactic, t.primary, t.secondary = TacticMaximizeDamage, TargetAny, TargetAny
 	return &t
@@ -68,8 +69,8 @@ func TestConfirmedStartSquares(t *testing.T) {
 		},
 	}
 	loc := g.locations()[0]
-	sets, inv := g.whoFights(loc, locationHistory{})
-	b := &battle{g: g, rng: &seqRand{}, loc: loc, sets: sets, players: inv, killed: map[int]bool{}}
+	sets, inv, n := g.whoFights(loc, locationHistory{})
+	b := &battle{g: g, rng: &seqRand{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
 	b.setup(map[int]bool{})
 	for _, tk := range b.tokens {
 		want := [2]int{1, 4}
@@ -84,29 +85,29 @@ func TestConfirmedStartSquares(t *testing.T) {
 
 func TestConfirmedTokenValues(t *testing.T) {
 	// Laser Frigate: initiative 4 + Laser 9 = weapon initiative 13, armor 45.
-	lf := tokenValues(testDesign(tFrigate, 0, Slot{tLaser, 1}), Race{}, false)
+	lf := tokenValues(testDesign(tFrigate, 0, Slot{tLaser, 1}), Race{}, false, Cost{})
 	if lf.initiative != 4 || lf.weapons[0].init != 13 || lf.armor != 45 {
 		t.Errorf("Laser Frigate: init %d weapon init %d armor %d, want 4 13 45", lf.initiative, lf.weapons[0].init, lf.armor)
 	}
 	// Battle Super Computer: computer 30%, initiative +2.
-	bc := tokenValues(testDesign(tFrigate, 0, Slot{tBeta, 1}, Slot{tBSC, 1}), Race{}, false)
+	bc := tokenValues(testDesign(tFrigate, 0, Slot{tBeta, 1}, Slot{tBSC, 1}), Race{}, false, Cost{})
 	if bc.computer != 30 || bc.initiative != 6 {
 		t.Errorf("BSC: computer %d initiative %d, want 30 6", bc.computer, bc.initiative)
 	}
 	// Jammer 20 and Jammer 50 (factors 80, 50).
 	for _, c := range []struct{ f, want int }{{80, 20}, {50, 50}} {
-		j := tokenValues(testDesign(tFrigate, 0, Slot{tJammer(c.f), 1}), Race{}, false)
+		j := tokenValues(testDesign(tFrigate, 0, Slot{tJammer(c.f), 1}), Race{}, false, Cost{})
 		if j.jammer != c.want {
 			t.Errorf("jammer factor %d: %d%%, want %d%%", c.f, j.jammer, c.want)
 		}
 	}
 	// Capacitors compound: an Energy (10) and a Flux (20) Capacitor → 132%.
-	cp := tokenValues(testDesign(tFrigate, 0, Slot{Part{Capacitor: 10}, 1}, Slot{Part{Capacitor: 20}, 1}), Race{}, false)
+	cp := tokenValues(testDesign(tFrigate, 0, Slot{Part{Capacitor: 10}, 1}, Slot{Part{Capacitor: 20}, 1}), Race{}, false, Cost{})
 	if cp.capacitor != 132 {
 		t.Errorf("capacitor %d%%, want 132%%", cp.capacitor)
 	}
 	// Beam Deflector 90%.
-	df := tokenValues(testDesign(tFrigate, 0, Slot{Part{Deflector: true}, 1}), Race{}, false)
+	df := tokenValues(testDesign(tFrigate, 0, Slot{Part{Deflector: true}, 1}), Race{}, false, Cost{})
 	if df.deflector != 90 {
 		t.Errorf("deflector %d%%, want 90%%", df.deflector)
 	}
@@ -120,7 +121,7 @@ func TestConfirmedRegeneratingShields(t *testing.T) {
 	mole := Part{Name: "Mole-skin Shield", Kind: PartShield, Shield: 25}
 	trit := Part{Name: "Tritanium", Kind: PartArmor, Armor: 50}
 	destroyer := Hull{Name: "Destroyer", Mass: 30, Armor: 200, Initiative: 3}
-	tk := tokenValues(testDesign(destroyer, 0, Slot{mole, 2}, Slot{trit, 2}), rs, false)
+	tk := tokenValues(testDesign(destroyer, 0, Slot{mole, 2}, Slot{trit, 2}), rs, false, Cost{})
 	if tk.shield != 70 || tk.armor != 250 {
 		t.Errorf("RS: shield %d armor %d, want 70 250", tk.shield, tk.armor)
 	}
@@ -159,8 +160,8 @@ func TestConfirmedEnergyDampener(t *testing.T) {
 		},
 	}
 	loc := g.locations()[0]
-	sets, inv := g.whoFights(loc, locationHistory{})
-	b := &battle{g: g, rng: &seqRand{}, loc: loc, sets: sets, players: inv, killed: map[int]bool{}}
+	sets, inv, n := g.whoFights(loc, locationHistory{})
+	b := &battle{g: g, rng: &seqRand{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
 	b.setup(map[int]bool{})
 	for _, tk := range b.tokens {
 		if tk.speed != 0 {
@@ -298,7 +299,7 @@ func TestConfirmedBeamDropoff(t *testing.T) {
 	station := testDesign(Hull{Name: "Space Station", Armor: 500, Initiative: 14, Starbase: true}, 100, Slot{tLaser, 8})
 	target := testDesign(Hull{Armor: 10000}, 10)
 	d := []Design{station, target, testDesign(tFrigate, 10, Slot{tLaser, 1})}
-	sb := tokenValues(station, Race{}, true)
+	sb := tokenValues(station, Race{}, true, Cost{})
 	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 0, 0, 1, -1, 0
 	sb.primary, sb.secondary = TargetAny, TargetAny
 	e := tok(d, 1, 1, 1)
@@ -394,7 +395,7 @@ func TestConfirmedStarbaseDamageSteps(t *testing.T) {
 	// (The first armor hit was 90 after the shields took the rest.)
 	station := testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), station}
-	sb := tokenValues(station, Race{}, true)
+	sb := tokenValues(station, Race{}, true, Cost{})
 	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 1, 1, 1, -1, -1
 	sb.dmg = Damage{Pct: 100}
 	tb := newTestBattle(panicRand{}, d, tok(d, 0, 0, 1), &sb)
@@ -418,7 +419,7 @@ func TestConfirmedSalvage(t *testing.T) {
 	// CB-001 B1: kill events of 3, 4 and 3 Small Freighters (4 Fe, 5 Ge
 	// each) in deep space leave 10 Fe, 13 Ge.
 	sf := testDesign(Hull{Name: "Small Freighter", Armor: 25}, 10)
-	sf.Cost.Minerals = Minerals{4, 0, 5}
+	sf.Hull.Cost.Minerals = Minerals{4, 0, 5}
 	d := []Design{sf}
 	e := tok(d, 0, 1, 10)
 	tb := newTestBattle(panicRand{}, d, e)
@@ -550,16 +551,17 @@ func TestConfirmedOnlyFleetsStartBattles(t *testing.T) {
 		Planets: []Planet{{Pos: Point{5, 5}, Owner: 0, HasStarbase: true, StarbaseDesign: 0}},
 		Fleets:  []Fleet{{ID: 1, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}}},
 	}
-	if _, inv := g.whoFights(g.locations()[0], locationHistory{}); inv != nil {
+	if _, inv, _ := g.whoFights(g.locations()[0], locationHistory{}); inv != nil {
 		t.Errorf("lone starbase started a battle: %v", inv)
 	}
 }
 
 func TestConfirmedStarbaseJoinsWithPlan0(t *testing.T) {
 	// CB-011 (Q-1): player 1 sees player 0 as neutral; its armed fleet
-	// attacks enemies. Player 0's armed station with plan 0 "enemies",
-	// "everyone" or "player 1" fights; with plan 0 "nobody", or an unarmed
-	// station, there is no battle.
+	// attacks enemies. Player 0's armed station with plan 0 "enemies"
+	// fights, and so do "everyone" and "player 1" when the previous
+	// location had a battle (CB-012, CB-013: X = player 0). With plan 0
+	// "nobody", or an unarmed station, there is no battle.
 	laserStation := testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100, Slot{tLaser, 8})
 	bare := testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)
 	frig := testDesign(tFrigate, 10, Slot{tLaser, 1})
@@ -583,7 +585,7 @@ func TestConfirmedStarbaseJoinsWithPlan0(t *testing.T) {
 			Planets: []Planet{{Pos: Point{5, 5}, Owner: 0, HasStarbase: true, StarbaseDesign: 0}},
 			Fleets:  []Fleet{{ID: 1, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}}},
 		}
-		_, inv := g.whoFights(g.locations()[0], locationHistory{})
+		_, inv, _ := g.whoFights(g.locations()[0], locationHistory{any: true, battle: true})
 		if (inv != nil) != c.battle {
 			t.Errorf("station armed %v, plan 0 attack %d: involved %v, want battle %v", c.station.armed(), c.attack, inv, c.battle)
 		}
@@ -593,7 +595,7 @@ func TestConfirmedStarbaseJoinsWithPlan0(t *testing.T) {
 func TestConfirmedStarbaseIsArmedTarget(t *testing.T) {
 	// CB-011..013 S4/S5 (Q-4), LEGACY BUG: an unarmed station matches
 	// "armed" and "any", not "unarmed".
-	sb := tokenValues(testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100), Race{}, true)
+	sb := tokenValues(testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100), Race{}, true, Cost{})
 	if sb.matches(TargetUnarmed) || !sb.matches(TargetArmed) || !sb.matches(TargetAny) {
 		t.Errorf("unarmed station class %d", sb.class)
 	}
@@ -604,7 +606,7 @@ func TestPredictionBattleTurn(t *testing.T) {
 	// stream, the stronger side wins, deep-space salvage is left, and the
 	// fleets that fought get no repair.
 	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
-	prey.Cost.Minerals = Minerals{30, 0, 9}
+	prey.Hull.Cost.Minerals = Minerals{30, 0, 9}
 	run := func() TurnResult {
 		res, err := GenerateTurn(combatLabGame(prey, 6, 3), nil, Jrc3(), rand.New(rand.NewSource(7)))
 		if err != nil {
@@ -657,20 +659,207 @@ func TestPredictionTokenCap(t *testing.T) {
 }
 
 func TestPredictionLegacyPlan0Recipient(t *testing.T) {
-	// LEGACY BUG: plan 0 "everyone" or a named player gives the attack
-	// set to player 0 after a battle, else to the owner of the previous
-	// location's last fleet.
-	everyone := BattlePlan{Attack: AttackEveryone}
-	if x := legacyPlan0Recipient(1, everyone, locationHistory{any: true, battle: true, lastOwner: 1}); x != 0 {
-		t.Errorf("after a battle: %d, want 0", x)
+	// X is player 0 after a battle, else the owner of the previous
+	// location's last fleet; at the first location it has no effect.
+	if x, ok := legacyPlan0Recipient(1, locationHistory{any: true, battle: true, lastOwner: 1}); !ok || x != 0 {
+		t.Errorf("after a battle: %d %v, want 0", x, ok)
 	}
-	if x := legacyPlan0Recipient(0, everyone, locationHistory{any: true, lastOwner: 1}); x != 1 {
-		t.Errorf("after no battle: %d, want 1", x)
+	if x, ok := legacyPlan0Recipient(0, locationHistory{any: true, lastOwner: 1}); !ok || x != 1 {
+		t.Errorf("after no battle: %d %v, want 1", x, ok)
 	}
-	if x := legacyPlan0Recipient(1, BattlePlan{Attack: AttackEnemies}, locationHistory{any: true, battle: true}); x != 1 {
-		t.Errorf("plan 0 enemies: %d, want the owner", x)
+	if _, ok := legacyPlan0Recipient(0, locationHistory{}); ok {
+		t.Error("first location: want no recipient")
 	}
 }
+
+// plan0Game is the CB-022 setup: player 0's Laser Station planet; player
+// 1, who sees player 0 as neutral, has an armed fleet attacking "enemies"
+// there and, when hauler is set, a lone hauler with a lower fleet number
+// elsewhere.
+func plan0Game(attack AttackWho, hauler bool) *Game {
+	station := testDesign(Hull{Name: "Space Station", Armor: 500, Initiative: 14, Starbase: true}, 100, Slot{tLaser, 8})
+	frig := testDesign(tFrigate, 10, Slot{tLaser, 1})
+	g := &Game{
+		Players: []Player{
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: attack, Player: 1}}, Relations: []Relation{RelationFriend, RelationEnemy}},
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Secondary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationNeutral, RelationFriend}},
+		},
+		Designs: []Design{station, frig, testDesign(Hull{Name: "Hauler", Armor: 20}, 5)},
+		Planets: []Planet{{ID: 1, Pos: Point{5, 5}, Owner: 0, HasStarbase: true, StarbaseDesign: 0}},
+		Fleets:  []Fleet{{ID: 2, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 5}}}},
+	}
+	if hauler {
+		g.Fleets = append(g.Fleets, Fleet{ID: 1, Owner: 1, Pos: Point{50, 50}, Stacks: []Stack{{Design: 2, Count: 1}}})
+	}
+	return g
+}
+
+func TestConfirmedPlan0OnePlayerBattle(t *testing.T) {
+	// CB-022 (R-10): after the lone hauler's location (no battle), plan 0
+	// "player 1" and "everyone" give a one-player battle: two tokens, the
+	// station on (4,4), the visitor on (1,4), no actions. Plan 0
+	// "enemies" is an ordinary battle; without the hauler, "player 1"
+	// gives no battle.
+	for _, c := range []struct {
+		attack   AttackWho
+		hauler   bool
+		battle   bool
+		involved int
+	}{
+		{AttackPlayer, true, true, 1},
+		{AttackEveryone, true, true, 1},
+		{AttackEnemies, true, true, 2},
+		{AttackPlayer, false, false, 0},
+	} {
+		g := plan0Game(c.attack, c.hauler)
+		var prev locationHistory
+		var b *battle
+		for _, loc := range g.locations() {
+			sets, inv, n := g.whoFights(loc, prev)
+			prev = locationHistory{any: true, battle: inv != nil, lastOwner: g.Fleets[loc.fleets[len(loc.fleets)-1]].Owner}
+			if inv != nil {
+				b = &battle{g: g, rng: rand.New(rand.NewSource(1)), loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+			}
+		}
+		if (b != nil) != c.battle {
+			t.Errorf("attack %d hauler %v: battle %v, want %v", c.attack, c.hauler, b != nil, c.battle)
+			continue
+		}
+		if b == nil {
+			continue
+		}
+		if b.involved != c.involved || len(b.players) != 2 {
+			t.Errorf("attack %d: n %d, players %v; want n %d, players [0 1]", c.attack, b.involved, b.players, c.involved)
+		}
+		b.setup(map[int]bool{})
+		if c.involved == 1 {
+			for _, tk := range b.tokens {
+				want := [2]int{1, 4}
+				if tk.starbase {
+					want = [2]int{4, 4}
+				}
+				if got := [2]int{tk.x, tk.y}; got != want {
+					t.Errorf("attack %d: token of player %d on %v, want %v", c.attack, tk.player, got, want)
+				}
+			}
+		}
+		b.fight()
+		if c.involved == 1 {
+			if len(b.hits) != 0 {
+				t.Errorf("attack %d: %d hits, want none", c.attack, len(b.hits))
+			}
+			for _, tk := range b.tokens {
+				if !tk.starbase && (tk.x != 1 || tk.y != 4) {
+					t.Errorf("attack %d: visitor moved to (%d,%d)", c.attack, tk.x, tk.y)
+				}
+			}
+		} else if len(b.hits) == 0 {
+			t.Errorf("attack %d: ordinary battle has no hits", c.attack)
+		}
+	}
+}
+
+func TestConfirmedTechAttemptLocation(t *testing.T) {
+	// CB-021, CB-012: in a two-token, two-player battle at player 0's
+	// planet, player 0 attempts (even having lost nothing) and the
+	// attacker at another player's planet does not.
+	d := []Design{testDesign(tFrigate, 10)}
+	tb := newTestBattle(&seqRand{draws: []int{50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Weapons, 50}}, d, tok(d, 0, 0, 1), tok(d, 0, 1, 1))
+	tb.g.Planets = []Planet{{Owner: 0}}
+	tb.loc.planet = 0
+	tb.seen[Weapons] = 5
+	ev := tb.techAttempts(map[int]bool{})
+	if len(ev) != 1 || ev[0].Player != 0 || tb.g.Players[1].Research.Accumulated[Weapons] != 0 {
+		t.Errorf("events %+v", ev)
+	}
+	if got := tb.g.Players[0].Research.Accumulated[Weapons]; got != ResearchLevelCost(1, 0, ResearchNormal, false) {
+		t.Errorf("gain %d, want the next level's cost", got)
+	}
+}
+
+func TestPredictionStartSquareFlatTable(t *testing.T) {
+	// Entry n(n−1)/2 + rank of the flattened table: n = 1 gives (4,4) then
+	// (1,4); a third player in P with n = 2 runs into row 3.
+	for _, c := range []struct{ n, r, x, y int }{{1, 0, 4, 4}, {1, 1, 1, 4}, {2, 1, 8, 5}, {2, 2, 4, 1}} {
+		if got := startSquare(c.n, c.r); got != [2]int{c.x, c.y} {
+			t.Errorf("startSquare(%d, %d) = %v, want (%d,%d)", c.n, c.r, got, c.x, c.y)
+		}
+	}
+}
+
+func TestPredictionDesignCost(t *testing.T) {
+	laser := Part{Kind: PartBeam, Cost: Cost{Resources: 5, Minerals: Minerals{0, 6, 0}}}
+	laser.TechReq[Weapons] = 1
+	hull := Hull{Cost: Cost{Resources: 10, Minerals: Minerals{3, 0, 1}}}
+	d := Design{Hull: hull, Slots: []Slot{{laser, 2}}}
+	var lv [NumFields]int
+	lv[Weapons] = 3
+	// Hull: no requirement, m = lowest level 0: unchanged. Laser: m = 2,
+	// d = 8%: 5 → 5 − round(0.4) = 5, 6 → 6 − round(0.48) = 6.
+	if got := designCost(d, Race{}, lv); got != (Cost{Resources: 20, Minerals: Minerals{3, 12, 1}}) {
+		t.Errorf("cost %+v", got)
+	}
+	// m = 19 levels: d = 75%: 5 → 5 − round(3.75) = 1; 6 → 6 − round(4.5) = 1.
+	lv[Weapons] = 20
+	if got := designCost(d, Race{}, lv); got != (Cost{Resources: 12, Minerals: Minerals{3, 2, 1}}) {
+		t.Errorf("miniaturized cost %+v", got)
+	}
+	// War Monger weapons −¼ after miniaturization; IS +¼.
+	lv[Weapons] = 1
+	wm := Race{PRT: PRTWarMonger}
+	if got := designCost(Design{Slots: []Slot{{Part{Kind: PartBeam, Cost: Cost{Resources: 40}, TechReq: laser.TechReq}, 1}}}, wm, lv); got.Resources != 30 {
+		t.Errorf("WM cost %+v", got)
+	}
+	is := Race{PRT: PRTInnerStrength}
+	if got := designCost(Design{Slots: []Slot{{Part{Kind: PartBeam, Cost: Cost{Resources: 40}, TechReq: laser.TechReq}, 1}}}, is, lv); got.Resources != 50 {
+		t.Errorf("IS cost %+v", got)
+	}
+	// Bleeding Edge doubles a part at exactly its requirement.
+	bet := Race{}
+	bet.LRT.BleedingEdgeTech = true
+	if got := designCost(Design{Slots: []Slot{{Part{Kind: PartBeam, Cost: Cost{Resources: 40}, TechReq: laser.TechReq}, 1}}}, bet, lv); got.Resources != 80 {
+		t.Errorf("BET cost %+v", got)
+	}
+}
+
+func TestPredictionCargoShare(t *testing.T) {
+	// Losing 1 of 4 freighters (capacity 10 each) with cargo 7 Fe, 3 Bo,
+	// 0 Ge, 2 colonists: moved = 12·10/40 = 3; shares 1, 0, 0, 0 by
+	// truncation, then the remainder 2 goes 1 kT to Fe and 1 to Bo.
+	fr := testDesign(Hull{Name: "Freighter", Armor: 25}, 10)
+	fr.CargoCapacity = 10
+	d := []Design{fr}
+	e := tok(d, 0, 1, 3)
+	e.fleet = 0
+	tb := newTestBattle(panicRand{}, d, e)
+	tb.g.Fleets = []Fleet{{Owner: 1, Cargo: Cargo{Minerals: Minerals{7, 3, 0}, Colonists: 2}, Stacks: []Stack{{Design: 0, Count: 4}}}}
+	got := tb.cargoShare(e, 1)
+	if got != (Minerals{2, 1, 0}) || tb.g.Fleets[0].Cargo != (Cargo{Minerals: Minerals{5, 2, 0}, Colonists: 2}) {
+		t.Errorf("share %v, cargo left %+v", got, tb.g.Fleets[0].Cargo)
+	}
+}
+
+func TestPredictionEstimateDrawsAt200(t *testing.T) {
+	// One ship with one torpedo simulates exactly 200 torpedoes: 200 draws.
+	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 1}), testDesign(Hull{Armor: 10000}, 10)}
+	f, e := tok(d, 0, 0, 1), tok(d, 1, 1, 1)
+	n := &countRand{}
+	tb := newTestBattle(n, d, f, e)
+	tb.estimate(f, e, 0, false)
+	if n.n != 200 {
+		t.Errorf("%d draws, want 200", n.n)
+	}
+	f2 := tok(d, 0, 0, 2)
+	n.n = 0
+	tb.estimate(f2, e, 0, false)
+	if n.n != 0 {
+		t.Errorf("400 torpedoes: %d draws, want 0", n.n)
+	}
+}
+
+type countRand struct{ n int }
+
+func (c *countRand) Intn(int) int { c.n++; return 0 }
 
 func TestPredictionRepairOthers(t *testing.T) {
 	// "Moved" rate 5, Interstellar Traveler doubling, starbase repair 50
@@ -716,7 +905,7 @@ func TestPredictionAlternateRealityStarbaseLoss(t *testing.T) {
 	// uninhabited; any destroyed starbase leaves the planet without one.
 	station := testDesign(Hull{Name: "Orbital Fort", Armor: 100, Starbase: true}, 10)
 	d := []Design{station}
-	sb := tokenValues(station, Race{}, true)
+	sb := tokenValues(station, Race{}, true, Cost{})
 	sb.player, sb.planet, sb.fleet, sb.dead = 0, 0, -1, true
 	tb := newTestBattle(panicRand{}, d, &sb)
 	tb.g.Players[0].Race.PRT = PRTAlternateReality
@@ -730,7 +919,7 @@ func TestPredictionAlternateRealityStarbaseLoss(t *testing.T) {
 
 func TestPredictionStarbaseJammer(t *testing.T) {
 	// A starbase's jammer is reduced by a quarter: Jammer 20 → 15.
-	sb := tokenValues(testDesign(Hull{Starbase: true, Armor: 500}, 10, Slot{tJammer(80), 1}), Race{}, true)
+	sb := tokenValues(testDesign(Hull{Starbase: true, Armor: 500}, 10, Slot{tJammer(80), 1}), Race{}, true, Cost{})
 	if sb.jammer != 15 {
 		t.Errorf("starbase jammer %d, want 15", sb.jammer)
 	}

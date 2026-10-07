@@ -243,10 +243,10 @@ func (b *battle) score(t *token, qx, qy int) int {
 		}
 		bestS, bestGive, bestTake := 0, 0, 0
 		for x := lo; x <= hi; x++ {
-			tk := estimate(e, t, x, t.tactic == TacticDisengage)
+			tk := b.estimate(e, t, x, t.tactic == TacticDisengage)
 			gv := 0
 			if e.matches(tt) {
-				gv = estimate(t, e, x, false)
+				gv = b.estimate(t, e, x, false)
 			}
 			if s := tacticScore(e.tactic, tk, gv); x == lo || s <= bestS {
 				bestS, bestGive, bestTake = s, gv, tk
@@ -269,11 +269,11 @@ func (b *battle) score(t *token, qx, qy int) int {
 	return s
 }
 
-// estimate is a's estimated damage to b at distance x (COMBAT.md "Damage
-// estimate"). Torpedo hits use the expected count, with no random draws
-// (the original draws for exactly 200 simulated torpedoes; COMBAT.md
-// allows the expected value).
-func estimate(a, b *token, x int, ignoreRange bool) int {
+// estimate is a's estimated damage to e at distance x (COMBAT.md "Damage
+// estimate"). It simulates ships × count × 200 torpedoes per slot; like a
+// salvo, exactly 200 of them draw one rand(100) each (BINARY-ONLY quirk,
+// kept for the random stream).
+func (bt *battle) estimate(a, b *token, x int, ignoreRange bool) int {
 	if !ignoreRange && x > a.longestReach() {
 		return 0
 	}
@@ -306,8 +306,17 @@ func estimate(a, b *token, x int, ignoreRange bool) int {
 		n := a.ships * w.count * 200
 		pct := hitChance(p.Accuracy, a.computer, b.jammer)
 		h := n
-		if pct < 100 {
+		switch {
+		case pct >= 100:
+		case n > 200:
 			h = n * pct / 100
+		default:
+			h = 0
+			for range n {
+				if bt.rng.Intn(100) < pct {
+					h++
+				}
+			}
 		}
 		v := p.Damage * h / 200
 		if b.shield > 0 {

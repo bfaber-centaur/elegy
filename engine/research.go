@@ -147,3 +147,21 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	}
 	return s
 }
+
+// LevelUpCheck is the second research level-up check of the turn, after
+// battles (KERNEL.md "Turn order" step 6): every field whose accumulated
+// research covers its next level rises, in field order. It does not
+// switch the current field.
+func LevelUpCheck(s ResearchState, race Race, slowerTech bool) ResearchState {
+	for f := range NumFields {
+		for s.Levels[f] < s.maxLevel() {
+			cost := ResearchLevelCost(s.Levels[f]+1, s.levelSum(), race.ResearchCosts[f], slowerTech)
+			if s.Accumulated[f] < cost {
+				break
+			}
+			s.Accumulated[f] -= cost
+			s.Levels[f]++
+		}
+	}
+	return s
+}

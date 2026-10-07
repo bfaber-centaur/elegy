@@ -36,12 +36,11 @@ type Design struct {
 	CargoCapacity int // kT per ship
 	FuelCapacity  int // mg per ship
 
+	// Hull and Slots carry the hull's and parts' values and base costs.
+	// Engines count in Slots as PartEngine parts for cost; Engine and
+	// Engines give their fuel table and number for movement.
 	Hull  Hull
 	Slots []Slot
-	// Cost is the current cost of one ship to its owner, with the
-	// owner's discounts and miniaturization already applied (KERNEL.md
-	// and COMBAT.md give no formula for those).
-	Cost Cost
 }
 
 // Stack is a number of ships of one design (an index into Game.Designs).

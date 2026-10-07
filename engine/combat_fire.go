@@ -27,7 +27,7 @@ func (b *battle) fire() {
 		for i := len(b.tokens) - 1; i >= 0; i-- {
 			t := b.tokens[i]
 			for _, w := range t.weapons {
-				if w.init != level || !t.live() {
+				if w.init != level || !t.live() || !b.in[t.player] {
 					continue
 				}
 				if b.playersIn() < 2 {
@@ -46,22 +46,18 @@ func (b *battle) fire() {
 	}
 }
 
-// playersIn counts the players still in the battle: those that were in
-// at the start of firing and still have a live token and a live token to
-// attack. (Recomputing it during firing is Elegy's reading of "while at
-// least two players are still in the battle".)
+// playersIn counts the players still in the battle while firing: those
+// in after round step 5 that still have a live token. (COMBAT.md checks
+// only at step 5; recounting the live tokens during firing is Elegy's
+// reading of "while at least two players are still in the battle".)
 func (b *battle) playersIn() int {
 	n := 0
 	for p := range b.in {
-		alive := false
 		for _, t := range b.tokens {
 			if t.live() && t.player == p {
-				alive = true
+				n++
 				break
 			}
-		}
-		if alive && b.hasPrey(p) {
-			n++
 		}
 	}
 	return n
@@ -320,11 +316,11 @@ func (b *battle) damage(e *token, dp, extra int, shieldOnly bool, limit int) (h 
 		return h, true
 	}
 	armor := e.armor
-	damaged := 0
-	if e.dmg.Units > 0 && e.dmg.Pct > 0 {
+	damaged, per := 0, 0 // no damage: no damaged ships (CONFIRMED, CB-001 B3)
+	if e.dmg.Units > 0 {
 		damaged = max(1, e.ships*e.dmg.Pct/100)
+		per = max(1, e.dmg.Units*armor/500)
 	}
-	per := max(1, e.dmg.Units*armor/500)
 	fresh := e.ships - damaged
 	kills := 0
 	can := func() bool { return limit < 0 || kills < limit }
@@ -397,33 +393,12 @@ func (b *battle) killEvent(e *token, kills int) {
 	}
 	var s Minerals
 	for m := range NumMinerals {
-		s[m] = d.Cost.Minerals[m] * kills / 3
+		s[m] = e.minerals[m] * kills / 3
 	}
 	if e.fleet >= 0 {
-		f := &g.Fleets[e.fleet]
-		capacity := kills * d.CargoCapacity
-		fleetDead := true
-		for _, o := range b.tokens {
-			if o.fleet == e.fleet && o.ships > 0 {
-				fleetDead = false
-				capacity += o.ships * g.Designs[o.design].CargoCapacity
-			}
-		}
+		share := b.cargoShare(e, kills)
 		for m := range NumMinerals {
-			share := f.Cargo.Minerals[m]
-			if !fleetDead {
-				share = 0
-				if capacity > 0 {
-					share = f.Cargo.Minerals[m] * kills * d.CargoCapacity / capacity
-				}
-			}
-			s[m] += share
-			f.Cargo.Minerals[m] -= share
-		}
-		if fleetDead {
-			f.Cargo.Colonists = 0
-		} else if capacity > 0 {
-			f.Cargo.Colonists -= f.Cargo.Colonists * kills * d.CargoCapacity / capacity
+			s[m] += share[m]
 		}
 	}
 	if b.loc.planet >= 0 {
@@ -441,4 +416,43 @@ func (b *battle) killEvent(e *token, kills int) {
 		b.salvage[m] += s[m] - s[m]/4
 	}
 	b.salvaged = true
+}
+
+// cargoShare removes the destroyed ships' share of their fleet's cargo
+// and returns its minerals (COMBAT.md "Salvage", BINARY-ONLY). The share
+// of colonists is destroyed. e.ships already excludes the kills.
+func (b *battle) cargoShare(e *token, kills int) Minerals {
+	g := b.g
+	f := &g.Fleets[e.fleet]
+	lost := kills * g.Designs[e.design].CargoCapacity
+	before, fleetDead := lost, true
+	for _, o := range b.tokens {
+		if o.fleet == e.fleet && !o.starbase && o.ships > 0 {
+			fleetDead = false
+			before += o.ships * g.Designs[o.design].CargoCapacity
+		}
+	}
+	cargo := [NumMinerals + 1]int{f.Cargo.Minerals[Ironium], f.Cargo.Minerals[Boranium], f.Cargo.Minerals[Germanium], f.Cargo.Colonists}
+	var share [NumMinerals + 1]int
+	if fleetDead {
+		share = cargo
+	} else if C := f.Cargo.mass(); C > 0 && before > 0 && lost > 0 {
+		moved := C * lost / before
+		left := moved
+		for i := range cargo {
+			share[i] = cargo[i] * moved / C
+			left -= share[i]
+		}
+		for i := range cargo {
+			if left > 0 && cargo[i]-share[i] > 0 {
+				share[i]++
+				left--
+			}
+		}
+	}
+	for m := range NumMinerals {
+		f.Cargo.Minerals[m] -= share[m]
+	}
+	f.Cargo.Colonists -= share[NumMinerals]
+	return Minerals{share[Ironium], share[Boranium], share[Germanium]}
 }

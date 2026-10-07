@@ -24,12 +24,12 @@ func battles(g *Game, rng Rand) battleResult {
 	gained := map[int]bool{} // players that gained tech from a battle this turn
 	var prev locationHistory
 	for _, loc := range g.locations() {
-		sets, inv := g.whoFights(loc, prev)
+		sets, inv, n := g.whoFights(loc, prev)
 		prev = locationHistory{any: true, battle: inv != nil, lastOwner: g.Fleets[loc.fleets[len(loc.fleets)-1]].Owner}
 		if inv == nil {
 			continue
 		}
-		b := &battle{g: g, rng: rng, loc: loc, sets: sets, players: inv, killed: map[int]bool{}}
+		b := &battle{g: g, rng: rng, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
 		fought := map[int]bool{}
 		res.events = append(res.events, b.setup(fought)...)
 		for i := range fought {

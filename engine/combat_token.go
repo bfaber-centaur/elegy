@@ -43,7 +43,8 @@ type token struct {
 	capacitor  int
 	deflector  int
 	class      int
-	cost       int // per ship: resources + boranium
+	cost       int      // per ship: resources + boranium
+	minerals   Minerals // per-ship mineral cost, for salvage
 
 	tactic             Tactic
 	primary, secondary TargetType
@@ -95,8 +96,9 @@ func (t *token) toughArmor() int {
 }
 
 // tokenValues computes a design's per-ship battle values (COMBAT.md
-// "Token values"; CONFIRMED CB-000..CB-008 and the round-2 replays).
-func tokenValues(d Design, race Race, starbase bool) token {
+// "Token values"; CONFIRMED CB-000..CB-008 and the round-2 replays). cost
+// is the design's cost to its owner (designCost).
+func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 	t := token{starbase: starbase, initiative: d.Hull.Initiative}
 	rs := race.LRT.RegeneratingShields
 	c := 0
@@ -163,7 +165,8 @@ func tokenValues(d Design, race Race, starbase bool) token {
 		shield = shield * 7 / 5
 	}
 	t.shield, t.maxShield, t.armor, t.regen = shield, shield, armor, rs
-	t.cost = d.Cost.Resources + d.Cost.Minerals[Boranium]
+	t.cost = cost.Resources + cost.Minerals[Boranium]
+	t.minerals = cost.Minerals
 
 	switch {
 	case starbase:

@@ -121,8 +121,9 @@ type TurnResult struct {
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
 // (KERNEL.md "Turn order"): fleet movement, then mining for every planet,
 // then per planet resources, research tax and production queue, then population
-// growth for every planet, then starbase refuelling, then battles
-// (COMBAT.md) and repair, then research level-ups.
+// growth for every planet, then starbase refuelling, then research
+// level-ups, then battles (COMBAT.md), a second research level-up check
+// and repair.
 //
 // Not yet modelled: order application, waypoint tasks, space objects
 // other than battle salvage, random events, fuel generators, mine
@@ -222,11 +223,20 @@ func GenerateTurn(
 
 	refuelFleets(&g)
 
-	// Battles, then repair, before research level-ups (COMBAT.md "Where
-	// battles happen in the turn"; research gained in a battle levels up
-	// the same turn, CB-018).
+	for i := range g.Players {
+		pl := &g.Players[i]
+		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
+	}
+
+	// Battles, then the post-movement research check, then repair
+	// (KERNEL.md "Turn order" steps 6–7; research gained in a battle
+	// levels up the same turn, CB-018, CB-021).
 	fights := battles(&g, rng)
 	events = append(events, fights.events...)
+	for i := range g.Players {
+		pl := &g.Players[i]
+		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+	}
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
 		if p, ok := start[f.ID]; ok && p != f.Pos {
@@ -234,11 +244,6 @@ func GenerateTurn(
 		}
 	}
 	repair(&g, moved, fights)
-
-	for i := range g.Players {
-		pl := &g.Players[i]
-		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
-	}
 
 	g.Year++
 

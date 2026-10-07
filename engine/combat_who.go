@@ -93,43 +93,48 @@ func (a attackSets) add(attacker, target int) bool {
 	return true
 }
 
-// selected is the set of present players other than owner that plan's
-// attack-who selects for owner.
-func (g *Game) selected(owner int, plan BattlePlan, present []int) []int {
-	var out []int
-	for _, q := range present {
-		if q == owner {
-			continue
+// selects reports whether attack-who "enemies" or "neutrals and enemies"
+// of owner selects player q.
+func (g *Game) selects(owner int, a AttackWho, q int) bool {
+	if q == owner {
+		return false
+	}
+	rel := g.relation(owner, q)
+	return rel == RelationEnemy || (a == AttackNeutralsAndEnemies && rel == RelationNeutral)
+}
+
+// write applies one plan's attack-who to the set of player x on behalf of
+// owner (COMBAT.md "Who fights" steps 3 and 4): "enemies" and "neutrals
+// and enemies" add every such player of the game, a named player is
+// added, and "everyone" replaces the set with every player but owner.
+func (g *Game) write(sets attackSets, x, owner int, plan BattlePlan) {
+	switch plan.Attack {
+	case AttackEnemies, AttackNeutralsAndEnemies:
+		for q := range g.Players {
+			if g.selects(owner, plan.Attack, q) {
+				sets.add(x, q)
+			}
 		}
-		rel := g.relation(owner, q)
-		switch plan.Attack {
-		case AttackEnemies:
-			if rel == RelationEnemy {
-				out = append(out, q)
-			}
-		case AttackNeutralsAndEnemies:
-			if rel != RelationFriend {
-				out = append(out, q)
-			}
-		case AttackEveryone:
-			out = append(out, q)
-		case AttackPlayer:
-			if q == plan.Player {
-				out = append(out, q)
+	case AttackPlayer:
+		sets.add(x, plan.Player)
+	case AttackEveryone:
+		sets[x] = map[int]bool{}
+		for q := range g.Players {
+			if q != owner {
+				sets[x][q] = true
 			}
 		}
 	}
-	return out
 }
 
 // legacyPlan0Recipient reproduces the original's LEGACY BUG for a
-// starbase whose owner's plan 0 attacks "everyone" or a named player:
-// the attack set goes to another player X (COMBAT.md "LEGACY BUG: plan 0
-// ...", BINARY-ONLY, consistent with CB-011..013). X is player 0 when
-// the previously examined location had a battle, else the owner of that
-// location's last fleet. For the first location the original's value is
-// undetermined; Elegy uses the starbase's owner. Set legacyPlan0 to false
-// to always give the set to the owner.
+// starbase whose owner's plan 0 attacks "everyone" or a named player: the
+// set is written to another player X (COMBAT.md "LEGACY BUG: plan 0 ...",
+// CONFIRMED CB-011..013, CB-022). X is player 0 when the previously
+// examined location had a battle, else the owner of that location's last
+// fleet. For the first location of a turn the original's X is left over
+// from earlier processing; CB-022 measured no effect, so Elegy gives none
+// (ok is false). Set legacyPlan0 to false to write to the owner instead.
 const legacyPlan0 = true
 
 type locationHistory struct {
@@ -138,40 +143,49 @@ type locationHistory struct {
 	lastOwner int  // owner of its last fleet
 }
 
-func legacyPlan0Recipient(owner int, plan BattlePlan, prev locationHistory) int {
-	if !legacyPlan0 || !prev.any || (plan.Attack != AttackEveryone && plan.Attack != AttackPlayer) {
-		return owner
+func legacyPlan0Recipient(owner int, prev locationHistory) (x int, ok bool) {
+	switch {
+	case !legacyPlan0:
+		return owner, true
+	case !prev.any:
+		return 0, false
+	case prev.battle:
+		return 0, true
 	}
-	if prev.battle {
-		return 0
-	}
-	return prev.lastOwner
+	return prev.lastOwner, true
 }
 
-// whoFights decides a location's battle: the attack sets and the involved
-// players (in player order), or no involved players when there is no
-// battle.
-func (g *Game) whoFights(loc location, prev locationHistory) (attackSets, []int) {
-	sets := make(attackSets, len(g.Players))
-	var present []int
-	isPresent := map[int]bool{}
-	addPresent := func(p int) {
-		if !isPresent[p] {
-			isPresent[p] = true
-			present = append(present, p)
-		}
-	}
+// whoFights decides a location's battle (COMBAT.md "Who fights", the
+// procedure; BINARY-ONLY in its details). It returns the attack sets, the
+// battle's player list P in player order and n, the number of involved
+// players; P is nil when there is no battle.
+func (g *Game) whoFights(loc location, prev locationHistory) (attackSets, []int, int) {
+	np := len(g.Players)
+	sets := make(attackSets, np)
+	inP := map[int]bool{}
 	for _, i := range loc.fleets {
-		addPresent(g.Fleets[i].Owner)
+		inP[g.Fleets[i].Owner] = true
 	}
 	sbOwner, hasSB := g.battleStarbase(loc.planet)
 	if hasSB {
-		addPresent(sbOwner)
+		inP[sbOwner] = true
 	}
-	sort.Ints(present)
 
-	// 1–3. Aggressor fleets, and their owners' attack sets. Only fleets
-	// start battles (CONFIRMED, CB-002, CB-003, CB-004, CB-006, Q-1).
+	// 3. Starbase plan 0 (CONFIRMED, CB-011, Q-1; LEGACY BUG CB-022).
+	if hasSB && g.Designs[g.Planets[loc.planet].StarbaseDesign].armed() {
+		plan := g.plan(sbOwner, 0)
+		switch plan.Attack {
+		case AttackEnemies, AttackNeutralsAndEnemies:
+			g.write(sets, sbOwner, sbOwner, plan)
+		case AttackEveryone, AttackPlayer:
+			if x, ok := legacyPlan0Recipient(sbOwner, prev); ok && x >= 0 && x < np {
+				g.write(sets, x, sbOwner, plan)
+			}
+		}
+	}
+
+	// 4–5. Aggressor fleets, in location order. Only fleets start battles
+	// (CONFIRMED, CB-002, CB-003, CB-004, CB-006, Q-1).
 	aggressor := false
 	for _, i := range loc.fleets {
 		f := &g.Fleets[i]
@@ -180,72 +194,79 @@ func (g *Game) whoFights(loc location, prev locationHistory) (attackSets, []int)
 			continue
 		}
 		aggressor = true
-		for _, q := range g.selected(f.Owner, plan, present) {
-			sets.add(f.Owner, q)
-		}
+		g.write(sets, f.Owner, f.Owner, plan)
 	}
 	if !aggressor {
-		return nil, nil
+		return nil, nil, 0
 	}
 
-	// 4. An armed starbase joins with its owner's plan 0 (CONFIRMED,
-	// CB-011, Q-1).
-	if hasSB {
-		p := &g.Planets[loc.planet]
-		plan := g.plan(sbOwner, 0)
-		if g.Designs[p.StarbaseDesign].armed() && plan.Attack != AttackNobody {
-			x := legacyPlan0Recipient(sbOwner, plan, prev)
-			for _, q := range g.selected(sbOwner, plan, present) {
-				sets.add(x, q)
+	// 6. The attacked set Q.
+	Q := map[int]bool{}
+	for _, s := range sets {
+		for q := range s {
+			if inP[q] {
+				Q[q] = true
+			}
+		}
+	}
+	if len(Q) == 0 {
+		return nil, nil, 0
+	}
+
+	// 7. Retaliation: one pass in player order (firing back CONFIRMED,
+	// CB-002, CB-009).
+	for i := range np {
+		for q := range sets[i] {
+			if Q[q] {
+				Q[i] = true
+				break
+			}
+		}
+		if Q[i] {
+			for j := range np {
+				if sets[j][i] {
+					sets.add(i, j)
+				}
 			}
 		}
 	}
 
-	// 5. Retaliation and friends, until nothing changes (BINARY-ONLY;
-	// firing back is CONFIRMED, CB-002, CB-009).
-	involved := func(p int) bool {
-		if len(sets[p]) > 0 {
-			return true
-		}
-		for _, s := range sets {
-			if s[p] {
-				return true
-			}
-		}
-		return false
-	}
+	// 8. Friends: passes over the fleets until nothing changes.
 	for changed := true; changed; {
 		changed = false
-		for a := range sets {
-			for b := range sets[a] {
-				if sets.add(b, a) {
-					changed = true
-				}
+		for _, i := range loc.fleets {
+			p := g.Fleets[i].Owner
+			if !inP[p] || Q[p] {
+				continue
 			}
-		}
-		for _, f := range present {
-			for _, p := range present {
-				if f == p || g.relation(f, p) != RelationFriend || !involved(p) {
+			built := map[int]bool{}
+			for f := range np {
+				if f == p || g.relation(p, f) != RelationFriend || !Q[f] {
 					continue
 				}
-				for q := range sets[p] {
-					if q != f && sets.add(f, q) {
-						changed = true
-					}
+				if built[f] {
+					built = map[int]bool{} // two friends fight each other
+					break
+				}
+				for q := range sets[f] {
+					built[q] = true
 				}
 			}
+			sets[p] = built
+			if len(built) == 0 {
+				delete(inP, p)
+			} else {
+				Q[p] = true
+			}
+			changed = true
 		}
 	}
 
-	// 6. Involvement: a battle needs two or more involved players.
-	var inv []int
-	for _, p := range present {
-		if involved(p) {
-			inv = append(inv, p)
+	var players []int
+	for p := range np {
+		if inP[p] {
+			players = append(players, p)
 		}
 	}
-	if len(inv) < 2 {
-		return nil, nil
-	}
-	return sets, inv
+	return sets, players, len(Q)
 }
