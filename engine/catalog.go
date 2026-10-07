@@ -627,6 +627,7 @@ func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error)
 		d.FuelCapacity += f.Count * p.FuelCapacity
 		d.CargoCapacity += f.Count * p.CargoCapacity
 		d.Slots = append(d.Slots, Slot{Part: p, Count: f.Count})
+		d.SlotPos = append(d.SlotPos, f.Slot)
 	}
 	if !h.Starbase && len(h.Slots) > 0 && d.Engines != h.Slots[0].Max {
 		return Design{}, fmt.Errorf("design %q: %s needs %d engines", name, hull, h.Slots[0].Max)

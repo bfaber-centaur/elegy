@@ -276,9 +276,9 @@ func (g *Game) DockAllows(pi, design int) bool {
 // (BINARY-ONLY): no ships (Orbital Fort, Count 0), ships up to N kT (Space
 // Dock, Count N), or any size (Count DockUnlimited).
 //
-// Not modelled: removing queued ship items and resetting starbase items
-// when the new hull is earlier in the hull list (CONFIRMED SL-12; the
-// queue has no such items yet), and the mass driver (no packets).
+// Production's queue change when the new hull is earlier in the hull list
+// is in production.go (afterEarlierHull). Not modelled: the mass driver
+// (no packets).
 func (g *Game) BuildStarbase(pi, design int) []Event {
 	p := &g.Planets[pi]
 	d := g.Designs[design]
@@ -295,19 +295,67 @@ func (g *Game) BuildStarbase(pi, design int) []Event {
 }
 
 // StarbaseReplacementCost is what a starbase design costs to build where a
-// starbase of another hull stands (PRODUCTION-LAUNCH.md "Cost of a
-// replacement", MEASURED SL-12): per component, with c the new design's
-// owner cost and o the old one's, max(⌊c/2⌋, c − ⌊o/2⌋); then the
-// Improved Starbases or Alternate Reality reduction and the halving, as
-// for any starbase (StarbaseBuildCost).
+// starbase stands (PRODUCTION-LAUNCH.md "Cost of a replacement"), per
+// component, with c the new design's owner cost and o the old one's:
+//   - a different hull: max(⌊c/2⌋, c − ⌊o/2⌋) (MEASURED SL-12);
+//   - the same hull (BINARY-ONLY): c less the hull's cost, then for each
+//     slot position filled in both designs, with N the new slot's cost
+//     (count × part cost) and O the old slot's, the slot is charged
+//     max(0, N − O) for the same part, max(N − ⌊8·O/10⌋, ⌊2·N/10⌋) for a
+//     different part of the same kind, and max(N − ⌊7·O/10⌋, ⌊3·N/10⌋)
+//     otherwise; the cost falls by N less the charge, not below 0.
 //
-// The same-hull rule (BINARY-ONLY) compares slot positions, which Elegy's
-// designs do not record; ok is false for a same-hull replacement.
+// Then the Improved Starbases or Alternate Reality reduction and the
+// halving, as for any starbase (StarbaseBuildCost). ok is false for a
+// same-hull replacement whose designs do not record slot positions
+// (Design.SlotPos; designs from NewDesign do).
 func StarbaseReplacementCost(newD, oldD Design, race Race, levels [NumFields]int) (c Cost, ok bool) {
-	if newD.Hull.Name == oldD.Hull.Name {
+	if newD.Hull.Name != oldD.Hull.Name {
+		return starbaseCharge(replacementBase(designCost(newD, race, levels), designCost(oldD, race, levels)), race), true
+	}
+	if len(newD.SlotPos) != len(newD.Slots) || len(oldD.SlotPos) != len(oldD.Slots) {
 		return Cost{}, false
 	}
-	return starbaseCharge(replacementBase(designCost(newD, race, levels), designCost(oldD, race, levels)), race), true
+	c = designCost(newD, race, levels)
+	hull := itemCost(newD.Hull.Cost, newD.Hull.TechReq, PartOther, race, levels)
+	fall := func(by Cost) {
+		c.Resources = max(0, c.Resources-by.Resources)
+		for m := range NumMinerals {
+			c.Minerals[m] = max(0, c.Minerals[m]-by.Minerals[m])
+		}
+	}
+	fall(hull)
+	slotCost := func(s Slot) Cost {
+		pc := itemCost(s.Part.Cost, s.Part.TechReq, s.Part.Kind, race, levels)
+		pc.Resources *= s.Count
+		for m := range NumMinerals {
+			pc.Minerals[m] *= s.Count
+		}
+		return pc
+	}
+	for i, ns := range newD.Slots {
+		for j, os := range oldD.Slots {
+			if oldD.SlotPos[j] != newD.SlotPos[i] {
+				continue
+			}
+			charge := func(n, o int) int {
+				switch {
+				case ns.Part.Name == os.Part.Name:
+					return max(0, n-o)
+				case ns.Part.Kind == os.Part.Kind:
+					return max(n-8*o/10, 2*n/10)
+				}
+				return max(n-7*o/10, 3*n/10)
+			}
+			n, o := slotCost(ns), slotCost(os)
+			by := Cost{Resources: n.Resources - charge(n.Resources, o.Resources)}
+			for m := range NumMinerals {
+				by.Minerals[m] = n.Minerals[m] - charge(n.Minerals[m], o.Minerals[m])
+			}
+			fall(by)
+		}
+	}
+	return starbaseCharge(c, race), true
 }
 
 func replacementBase(c, o Cost) Cost {

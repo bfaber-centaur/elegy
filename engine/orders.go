@@ -479,8 +479,15 @@ const (
 // used up; otherwise it starts at 0. It gives the original's result for
 // every queue a legal client sends and never creates progress.
 //
-// Ship items, and the dock check they will need (DockAllows), wait on ship
-// items in the queue.
+// A ship or starbase item names one of the sender's design slots, matched
+// like any item by its id (the slot) and kind (LIMITS.md "Production-queue
+// replace"). A ship item the client could not queue, at a planet whose
+// starbase has no dock or a dock too small for the hull, is refused
+// (PRODUCTION-LAUNCH.md "Can the planet build it", Elegy's chosen rule;
+// DockAllows).
+//
+// ASSUMPTION P3: a design item naming an empty slot, or a slot outside
+// the player's slots, refuses the queue order.
 type QueueOrder struct {
 	Planet int
 	Queue  []QueueItem
@@ -495,8 +502,18 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 		return fmt.Errorf("production queue: %d items: %w", len(o.Queue), ErrOutOfRange)
 	}
 	for _, it := range o.Queue {
-		if it.Kind < ItemMine || it.Kind > ItemAutoAlchemy || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+		if it.Kind < ItemMine || it.Kind > ItemStarbase || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
 			return fmt.Errorf("production queue item %+v: %w", it, ErrOutOfRange)
+		}
+		if !it.Kind.design() {
+			continue
+		}
+		d, ok := g.PlayerDesign(player, it.Kind == ItemStarbase, it.Slot)
+		if !ok {
+			return fmt.Errorf("production queue item %+v: no design in the slot: %w", it, ErrOutOfRange)
+		}
+		if it.Kind == ItemShip && !g.DockAllows(pi, d) {
+			return fmt.Errorf("production queue item %+v: the starbase cannot build it: %w", it, ErrOutOfRange)
 		}
 	}
 	p := &g.Planets[pi]
@@ -510,7 +527,7 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 		pct := 0
 		if it.Percent > 0 {
 			for j, old := range p.Queue {
-				if !used[j] && old.Percent == it.Percent && old.Kind == it.Kind {
+				if !used[j] && old.Percent == it.Percent && old.Kind == it.Kind && (!it.Kind.design() || old.Slot == it.Slot) {
 					used[j], pct = true, it.Percent
 					break
 				}
