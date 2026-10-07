@@ -94,6 +94,12 @@ type Fleet struct {
 	Cargo     Cargo
 	Waypoints []Waypoint
 	Plan      int // battle plan index in the owner's Plans
+	// Heading and HeadingWarp are the direction of this year's last
+	// movement step (halved until each component fits in ±127) and its
+	// warp, as other players see them (SCANNING.md "Heading"). Both are
+	// zero when the fleet did not move this year.
+	Heading     Point
+	HeadingWarp int
 }
 
 // fleetDesign is one design group inside a fleet, with its share of cargo.
@@ -290,6 +296,9 @@ func moveFleets(g *Game) []Event {
 	}
 	sort.SliceStable(order, func(a, b int) bool { return g.Fleets[order[a]].ID < g.Fleets[order[b]].ID })
 
+	for i := range g.Fleets {
+		g.Fleets[i].Heading, g.Fleets[i].HeadingWarp = Point{}, 0
+	}
 	var events []Event
 	var chasers []int
 	for _, i := range order {
@@ -338,6 +347,9 @@ func (m legMove) place(a int, rLimited bool) bool {
 	switch {
 	case rLimited && a == 0:
 		return false // R = 0: the fleet does not move
+	}
+	m.f.Heading, m.f.HeadingWarp = scanHeading(m.dest.X-m.f.Pos.X, m.dest.Y-m.f.Pos.Y), m.warp
+	switch {
 	case arrives(m.d, a):
 		m.f.Pos = m.dest
 		return true
