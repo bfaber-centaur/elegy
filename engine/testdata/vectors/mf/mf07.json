@@ -1617,7 +1617,7 @@
    "id": "MF-07",
    "rule": "OBJECTS MF-12, MF-7, MF-8",
    "setup": "MF 07",
-   "tag": "MEASURED",
+   "tag": "CONFIRMED",
    "prediction_held": true,
    "varies_by_stream": false,
    "expect": [
@@ -1861,41 +1861,6 @@
     {
      "kind": "message",
      "player": 0,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 169,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
      "message_id": 355,
      "present": true,
      "year": 1
@@ -1953,41 +1918,6 @@
     {
      "kind": "message",
      "player": 1,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 169,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
      "message_id": 352,
      "present": true,
      "year": 1
@@ -2029,7 +1959,7 @@
      "year": 1
     }
    ],
-   "verdict": "MF-07-A OBSERVED (MF-7): both Tanks dmg 312/100% (2000), layer undamaged, nobody moves; field 730 | MF-07-B OBSERVED (MF-7): no damage; field 730 (27%, no minimum 10) | MF-07-C OBSERVED (MF-8): Laser DD destroyed (100 + 500 > 200 armor); 5 Tanks dmg 265/100% (1600 + 100 each); single Tank dmg 78/100% (500); field 730 | MF-07-D HELD (MF-12): one field 710 at (1301,1252) | MF-07-E HELD (MF-12): one field 710 at (1382,1051)"
+   "verdict": "MF-07-A HELD (MF-7): both Tanks dmg 312/100% (2000), layer undamaged, nobody moves; field 730 | MF-07-B HELD (MF-7): no damage; field 730 (27%, no minimum 10) | MF-07-C HELD (MF-8): Laser DD destroyed (100 + 500 > 200 armor); 5 Tanks dmg 265/100% (1600 + 100 each); single Tank dmg 78/100% (500); field 730 | MF-07-D HELD (MF-12): one field 710 at (1301,1252) | MF-07-E HELD (MF-12): one field 710 at (1382,1051) | held: every value compared by hand with the predictions committed before the run (stars-oracle-apparatus evidence/mf/README.md verdict note)"
   }
  ],
  "source": {
