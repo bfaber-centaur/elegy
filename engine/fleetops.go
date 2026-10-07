@@ -25,8 +25,8 @@ const legacyMergeDilution = true
 // with Fleet task (ORDERS.md "Merge", CONFIRMED FO): the task applies no
 // ship-count cap, a stack of 32767 is kept, and a stack pushed to 32768 or
 // beyond leaves the merged fleet with no ships, its cargo and fuel staying
-// behind. Off by default: Elegy's chosen rule holds both merge paths to
-// maxStackShips per design.
+// behind. Off by default: Elegy's chosen rule holds the task to the merge
+// order's cap (absorb).
 const legacyMergeOverflow = false
 
 // mergeDamage combines two stacks of one design (ORDERS.md "Merge",
@@ -54,13 +54,12 @@ func mergeDamage(a, b Stack, dilute bool) Damage {
 }
 
 // absorb adds src's ships, cargo and fuel to dst: ships add per design
-// (ORDERS.md "Merge"). Each per-design stack is held to maxStackShips
-// unless overflow is set; then a stack above 32767 empties dst of ships
-// (the Merge with Fleet task's LEGACY BUG).
-//
-// ASSUMPTION O4: ships above maxStackShips are lost. ORDERS.md says the
-// merge order holds a stack to 32766, not where the rest go.
-func absorb(dst, src *Fleet, overflow bool) {
+// (ORDERS.md "Merge"), damage combined by mergeDamage with dilute. Unless
+// overflow is set, a stack that would pass 32767 is held to maxStackShips
+// and the ships above it are lost; a total of exactly 32767 is kept
+// (ORDERS.md "Merge order", BINARY-ONLY). With overflow, a stack above
+// 32767 empties dst of ships (the Merge with Fleet task's LEGACY BUG).
+func absorb(dst, src *Fleet, overflow, dilute bool) {
 	for _, s := range src.Stacks {
 		if s.Count <= 0 {
 			continue
@@ -77,11 +76,11 @@ func absorb(dst, src *Fleet, overflow bool) {
 			j = len(dst.Stacks) - 1
 		} else {
 			d := &dst.Stacks[j]
-			d.Damage = mergeDamage(*d, s, legacyMergeDilution)
+			d.Damage = mergeDamage(*d, s, dilute)
 			d.Count += s.Count
 		}
-		if !overflow {
-			dst.Stacks[j].Count = min(dst.Stacks[j].Count, maxStackShips)
+		if !overflow && dst.Stacks[j].Count > 32767 {
+			dst.Stacks[j].Count = maxStackShips
 		}
 	}
 	for m := range NumMinerals {
@@ -99,14 +98,12 @@ func absorb(dst, src *Fleet, overflow bool) {
 	}
 }
 
-// MergeFleets is the merge order (ORDERS.md "Merge"): the fleets with ids
-// from join the fleet with id into, all at one location and all the
-// owner's, and are removed. into keeps its id. Elegy validates ownership
-// on every order (ORDERS.md "Ownership", chosen rule).
-//
-// The order's 32766 cap is BINARY-ONLY. ASSUMPTION O1: the merge order
-// combines damage as the Merge with Fleet task does (ORDERS.md gives the
-// damage rule for the task only).
+// MergeFleets is the merge order (ORDERS.md "Merge order", BINARY-ONLY):
+// the fleets with ids from join the fleet with id into, all at one
+// location and all the owner's, and are removed; into keeps its id. The
+// order combines damage by its own rule, the units averaged over the
+// damaged ships only (no dilution), and holds each design to 32766. Elegy
+// validates ownership on every order (ORDERS.md "Ownership", chosen rule).
 func (g *Game) MergeFleets(owner, into int, from []int) error {
 	t := g.fleetIndex(into)
 	if t < 0 || g.Fleets[t].Owner != owner {
@@ -126,7 +123,7 @@ func (g *Game) MergeFleets(owner, into int, from []int) error {
 		ids[id] = true
 	}
 	for _, id := range from {
-		absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false)
+		absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, false)
 	}
 	g.removeFleets(ids)
 	return nil
@@ -155,21 +152,18 @@ func (g *Game) loadPass() []Event {
 }
 
 // mergeTask runs a Merge with Fleet task (ORDERS.md "Merge", CONFIRMED
-// FO-01..07): f joins the target, the owner's own fleet (TAKEOVER.md
-// "Other waypoint tasks", BINARY-ONLY), which keeps its id, if the target
-// is at f's position; otherwise the task is refused and cleared, both
-// fleets unchanged. It reports whether f merged.
-//
-// ASSUMPTION O2: a target that is another player's fleet, or that has
-// already merged away this pass, is refused the same way as a target
-// elsewhere. ORDERS.md and TAKEOVER.md do not say what such a task does.
+// FO-01..07): f joins the target, which keeps its id, if the target is at
+// f's position; otherwise the task is refused and cleared, both fleets
+// unchanged. A target that is gone, has already merged away, or is another
+// player's fleet is refused the same way (BINARY-ONLY). It reports whether
+// f merged.
 func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 	t := g.fleetIndex(f.Task.Fleet)
 	if t < 0 || gone[f.Task.Fleet] || f.Task.Fleet == f.ID || g.Fleets[t].Owner != f.Owner || g.Fleets[t].Pos != f.Pos {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}
-	absorb(&g.Fleets[t], f, legacyMergeOverflow)
+	absorb(&g.Fleets[t], f, legacyMergeOverflow, legacyMergeDilution)
 	return Event{}, true
 }
 
@@ -181,6 +175,9 @@ func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 // drops every part the owner is not entitled to.
 const legacyKeepUnentitledParts = false
 
+// basicEngine back-fills an emptied engine slot (ASSUMPTION O5).
+const basicEngine = "Quick Jump 5"
+
 // ReadDesign builds an owner's design from the table (ORDERS.md "Design
 // legality"): a filled slot whose part the owner may not build is dropped,
 // and the design's mass and capacities are those of the parts that remain
@@ -189,9 +186,15 @@ const legacyKeepUnentitledParts = false
 // (traderItems, by part name); with legacyKeepUnentitledParts only the
 // tech levels are checked.
 //
-// ASSUMPTION O3: the design is rejected (an error) when its hull fails the
-// same check, or when its engines are dropped. ORDERS.md drops components
-// and does not say what happens to a design without its hull or engines.
+// The hull (ORDERS.md "Design legality (hull not entitled, or every part
+// stripped)", BINARY-ONLY): the original does not check it; Elegy's
+// chosen rule rejects a design on a hull the owner may not build (not
+// under legacyKeepUnentitledParts, which reproduces the original). A ship
+// hull whose engine slot is left empty is back-filled with the basic
+// engine at the slot's capacity, as in the original.
+//
+// ASSUMPTION O5: the basic engine is the Quick Jump 5 (basicEngine).
+// ORDERS.md does not name it.
 func (c *Catalog) ReadDesign(name, hull string, fills []SlotFill, race Race, levels [NumFields]int, traderItems map[string]bool) (Design, error) {
 	return c.readDesign(name, hull, fills, race, levels, traderItems, legacyKeepUnentitledParts)
 }
@@ -212,14 +215,25 @@ func (c *Catalog) readDesign(name, hull string, fills []SlotFill, race Race, lev
 		}
 		return pc.Buildable(race, levels, traderItems[part])
 	}
-	ok, err := keep(hull)
-	if err != nil {
-		return Design{}, err
-	}
+	hc, ok := c.Lookup(hull)
 	if !ok {
-		return Design{}, fmt.Errorf("design %q: hull %q is not available to this owner", name, hull)
+		return Design{}, fmt.Errorf("design %q: no hull %q", name, hull)
+	}
+	h, err := hc.Hull()
+	if err != nil {
+		return Design{}, fmt.Errorf("design %q: %w", name, err)
+	}
+	if !techOnly {
+		ok, err := hc.Buildable(race, levels, traderItems[hull])
+		if err != nil {
+			return Design{}, err
+		}
+		if !ok {
+			return Design{}, fmt.Errorf("design %q: hull %q is not available to this owner", name, hull)
+		}
 	}
 	var kept []SlotFill
+	engine := false
 	for _, f := range fills {
 		ok, err := keep(f.Part)
 		if err != nil {
@@ -227,7 +241,11 @@ func (c *Catalog) readDesign(name, hull string, fills []SlotFill, race Race, lev
 		}
 		if ok {
 			kept = append(kept, f)
+			engine = engine || f.Slot == 0
 		}
+	}
+	if !h.Starbase && len(h.Slots) > 0 && !engine {
+		kept = append([]SlotFill{{Slot: 0, Part: basicEngine, Count: h.Slots[0].Max}}, kept...)
 	}
 	return c.NewDesign(name, hull, kept)
 }

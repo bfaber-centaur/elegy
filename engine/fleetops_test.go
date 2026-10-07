@@ -35,15 +35,16 @@ func TestConfirmedMergeDamageDilution(t *testing.T) {
 func TestConfirmedMergeTaskOverflow(t *testing.T) {
 	// ORDERS.md "Merge" (FO), the LEGACY BUG: 32000+767 → 32767 kept;
 	// 32000+768 and 32000+1000 → no ships, cargo and fuel stay. Elegy's
-	// chosen rule (switch off) holds the stack to 32766.
+	// chosen rule (switch off) is the merge order's cap: 32767 is kept,
+	// anything above becomes 32766 (ORDERS.md "Merge order", BINARY-ONLY).
 	for _, tt := range []struct {
 		add            int
 		legacy, chosen int // ships after the merge; 0 = no ships at all
-	}{{767, 32767, 32766}, {768, 0, 32766}, {1000, 0, 32766}} {
+	}{{767, 32767, 32767}, {768, 0, 32766}, {1000, 0, 32766}} {
 		for _, overflow := range []bool{true, false} {
 			dst := Fleet{Stacks: []Stack{{Design: 0, Count: 32000}}, Fuel: 10, Cargo: Cargo{Minerals: Minerals{5, 0, 0}}}
 			src := Fleet{Stacks: []Stack{{Design: 0, Count: tt.add}}, Fuel: 20, Cargo: Cargo{Colonists: 7}}
-			absorb(&dst, &src, overflow)
+			absorb(&dst, &src, overflow, true)
 			want := tt.chosen
 			if overflow {
 				want = tt.legacy
@@ -102,9 +103,9 @@ func TestPredictionMergeTaskForeignTarget(t *testing.T) {
 }
 
 func TestPredictionMergeOrder(t *testing.T) {
-	// ORDERS.md "Merge": the merge order joins co-located fleets of the
-	// owner, holding each design to 32766 (BINARY-ONLY); ownership is
-	// checked on every order (chosen rule).
+	// ORDERS.md "Merge order" (BINARY-ONLY): the merge order joins
+	// co-located fleets of the owner, holding each design to 32766 with
+	// the rest lost; ownership is checked on every order (chosen rule).
 	g := opsGame()
 	g.Fleets = []Fleet{
 		{ID: 1, Owner: 0, Stacks: []Stack{{Design: 0, Count: 32000}}},
@@ -123,6 +124,23 @@ func TestPredictionMergeOrder(t *testing.T) {
 	}
 	if len(g.Fleets) != 3 || !reflect.DeepEqual(g.Fleets[0].Stacks, []Stack{{Design: 0, Count: 32766}, {Design: 1, Count: 2}}) || g.Fleets[0].Fuel != 9 {
 		t.Errorf("fleets %+v", g.Fleets)
+	}
+}
+
+func TestPredictionMergeOrderDamage(t *testing.T) {
+	// ORDERS.md "Merge order": the percentage spreads over all ships as on
+	// the task path, but the units are averaged over the damaged ships: the
+	// task's example gives 35% and ceil(900/7) = 129 units, not 45.
+	g := opsGame()
+	g.Fleets = []Fleet{
+		{ID: 1, Owner: 0, Stacks: []Stack{{Design: 0, Count: 10, Damage: Damage{Pct: 50, Units: 100}}}},
+		{ID: 2, Owner: 0, Stacks: []Stack{{Design: 0, Count: 10, Damage: Damage{Pct: 20, Units: 200}}}},
+	}
+	if err := g.MergeFleets(0, 1, []int{2}); err != nil {
+		t.Fatal(err)
+	}
+	if got := g.Fleets[0].Stacks[0].Damage; got != (Damage{Pct: 35, Units: 129}) {
+		t.Errorf("damage %+v, want 35%% 129 units", got)
 	}
 }
 
@@ -173,8 +191,7 @@ func TestConfirmedDesignLegality(t *testing.T) {
 func TestPredictionDesignTechStrip(t *testing.T) {
 	// ORDERS.md "Design legality (tech strip)" (BINARY-ONLY): a part above
 	// the owner's tech is dropped under both settings, and the stored mass
-	// is that of the parts that remain. ASSUMPTION O3: a design whose hull
-	// is not available is rejected.
+	// is that of the parts that remain.
 	c := Components()
 	var lv [NumFields]int
 	lv[Construction] = 3
@@ -189,7 +206,28 @@ func TestPredictionDesignTechStrip(t *testing.T) {
 			t.Errorf("techOnly=%v: %+v, %v; want only the engine, mass %d", techOnly, d.Slots, err, want.Mass)
 		}
 	}
-	if _, err := c.ReadDesign("D", "Destroyer", fills, Race{}, [NumFields]int{}, nil); err == nil {
-		t.Error("hull above tech: want an error")
+}
+
+func TestPredictionDesignHullAndEngine(t *testing.T) {
+	// ORDERS.md "Design legality (hull not entitled, or every part
+	// stripped)" (BINARY-ONLY): the original keeps a hull above the owner's
+	// tech; Elegy's chosen rule rejects it. An emptied engine slot is
+	// back-filled with the basic engine at the slot's capacity
+	// (ASSUMPTION O5: Quick Jump 5).
+	c := Components()
+	fills := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
+	if _, err := c.readDesign("D", "Destroyer", fills, Race{}, [NumFields]int{}, nil, false); err == nil {
+		t.Error("chosen rule, hull above tech: want an error")
+	}
+	if _, err := c.readDesign("D", "Destroyer", fills, Race{}, [NumFields]int{}, nil, true); err != nil {
+		t.Errorf("original, hull above tech: %v, want the design kept", err)
+	}
+	var lv [NumFields]int
+	lv[Construction] = 3
+	for _, techOnly := range []bool{true, false} {
+		d, err := c.readDesign("D", "Destroyer", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}, Race{}, lv, nil, techOnly)
+		if err != nil || d.Engine.Name != "Quick Jump 5" || d.Engines != 1 {
+			t.Errorf("techOnly=%v: engine %q ×%d, %v; want the Quick Jump 5 back-filled", techOnly, d.Engine.Name, d.Engines, err)
+		}
 	}
 }
