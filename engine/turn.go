@@ -168,10 +168,14 @@ type TurnResult struct {
 	// Scores is every player's score record for the year, by player.
 	// Views[v].Scores holds the ones player v may see.
 	Scores []ScoreRecord
+	// Orders is the outcome of every order file and order applied at
+	// the start of the year (YearOrders); a rejected order has an Err.
+	Orders []OrderResult
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
-// (KERNEL.md "Turn order"): the takeover tasks before movement
+// (KERNEL.md "Turn order"): the players' orders (YearOrders), the
+// takeover tasks before movement
 // (TAKEOVER.md), fleet movement, then mining for every planet,
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
@@ -179,8 +183,9 @@ type TurnResult struct {
 // after movement (TAKEOVER.md), the after-movement research level-up check and
 // repair. Each player's view of the result (SCANNING.md) comes last.
 //
-// Not yet modelled: order application, waypoint tasks other than
-// unloads and colonize, space objects
+// Not yet modelled: following fleets and the waypoint check after the
+// orders (step 1a.3), waypoint tasks other than unloads, colonize, load
+// and merge, space objects
 // other than battle salvage, the Mystery Trader, fuel generators, mine
 // sweeping, terraforming other than the Claim Adjuster's year-end step,
 // and remote mining. Scores and victory come after
@@ -207,13 +212,26 @@ func GenerateTurn(
 	g := game.clone()
 	var events []Event
 
+	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
+	// whose draws are the first of the year, then each player's file in
+	// that order; gifts to other players are credited at the end of the
+	// replay, before any waypoint task (TAKEOVER.md "Manual cargo
+	// transfers to other players"). Step 1a's registration check has no
+	// Elegy equivalent.
+	applied := YearOrders(&g, orders, rng)
+	events = append(events, applied.Events...)
+
 	// Waypoint tasks before movement (TAKEOVER.md "Where each task
-	// happens", step 2): unloads and colonize, then the drops.
+	// happens", step 2): unloads and colonize, then the drops. Colonists
+	// put onto other players' planets by the orders come first in the
+	// drop queue, in the order given (TAKEOVER.md "Order inside a phase",
+	// MEASURED TK-501).
 	// gained marks the players that gained tech this turn, from a capture
 	// or a battle.
 	gained := map[int]bool{}
 	queue, ev := g.unloadPhase(g.phaseStart())
 	events = append(events, ev...)
+	queue = append(append([]drop(nil), applied.drops...), queue...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
 	// The first research level-up check (KERNEL.md "Turn order" step 2.4).
 	for i := range g.Players {
@@ -362,6 +380,7 @@ func GenerateTurn(
 		Events: events,
 		Views:  views,
 		Scores: scores,
+		Orders: applied.Results,
 	}, nil
 }
 

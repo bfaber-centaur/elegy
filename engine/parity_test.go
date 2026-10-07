@@ -31,8 +31,8 @@ type pvVector struct {
 	InitialState pvState  `json:"initial_state"`
 	Cases        []pvCase `json:"cases"`
 	// Orders are the orders players submitted (FORMAT.md "orders").
-	Orders []json.RawMessage `json:"orders"`
-	path   string            // corpus/run
+	Orders []pvOrderBlock `json:"orders"`
+	path   string         // corpus/run
 	corpus string
 }
 
@@ -558,25 +558,11 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 				ef.Task = task
 				continue
 			}
-			wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp, Task: task}
-			if w.Warp > 10 {
-				// Warp 11 is a stargate jump; the fleet is held here.
-				l.unsupported[key] = "stargate"
-				wp.Warp = 0
+			wp, why := l.waypoint(f.Owner, w)
+			if why != "" {
+				l.unsupported[key] = why
 			}
-			switch w.Target.Kind {
-			case "space":
-			case "planet":
-				wp.Target, wp.ID = TargetPlanet, l.planet[*w.Target.ID]
-			case "fleet":
-				owner := f.Owner
-				if w.Target.Owner != nil {
-					owner = *w.Target.Owner
-				}
-				wp.Target, wp.ID = TargetFleet, l.fleetID[pvFleetKey(owner, *w.Target.ID)]
-			default:
-				l.unsupported[key] = "target " + w.Target.Kind
-			}
+			wp.Task = task
 			ef.Waypoints = append(ef.Waypoints, wp)
 		}
 		g.Fleets = append(g.Fleets, ef)
@@ -639,6 +625,30 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 		items = append(items, QueueItem{Kind: k, Count: it.Count, Percent: it.Percent})
 	}
 	return items, ""
+}
+
+// waypoint converts a waypoint's position, warp and target for a fleet of
+// owner, or names what Elegy cannot model. A stargate jump (warp 11)
+// holds the fleet.
+func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
+	wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp}
+	why := ""
+	if w.Warp > 10 {
+		why, wp.Warp = "stargate", 0
+	}
+	switch w.Target.Kind {
+	case "space":
+	case "planet":
+		wp.Target, wp.ID = TargetPlanet, l.planet[*w.Target.ID]
+	case "fleet":
+		if w.Target.Owner != nil {
+			owner = *w.Target.Owner
+		}
+		wp.Target, wp.ID = TargetFleet, l.fleetID[pvFleetKey(owner, *w.Target.ID)]
+	default:
+		why = "target " + w.Target.Kind
+	}
+	return wp, why
 }
 
 // task converts a waypoint task, or names what Elegy cannot model.
@@ -1062,9 +1072,6 @@ func runVector(v *pvVector) []pvResult {
 		// Every rp case tests the race penalty.
 		l.global = "the turn-time race check (RACES.md \"In a running game\")"
 	}
-	if len(v.Orders) > 0 {
-		l.global = "submitted orders (the order layer)"
-	}
 	if l.global != "" {
 		for _, c := range v.Cases {
 			res(c, "skip", l.global)
@@ -1076,7 +1083,14 @@ func runVector(v *pvVector) []pvResult {
 	g := l.g
 	var genErr error
 	for y := 1; y <= v.Years; y++ {
-		r, err := GenerateTurn(g, nil, Jrc3(), rand.New(rand.NewSource(int64(y))))
+		files, why := l.orders(v.Orders, y, &g)
+		if why != "" {
+			for _, c := range v.Cases {
+				res(c, "skip", why)
+			}
+			return out
+		}
+		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y))))
 		if err != nil {
 			genErr = err
 			break

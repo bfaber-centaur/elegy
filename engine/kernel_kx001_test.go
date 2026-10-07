@@ -141,7 +141,8 @@ func TestConfirmedAlternateRealityKX001(t *testing.T) {
 		if h := Habitability(g.Players[0].Race, g.Planets[0].Env); h != -15 {
 			t.Fatalf("hab %d, want -15", h)
 		}
-		r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 99}})
+		// The player shuffle's draw, then mining.
+		r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 0, 99}})
 		if err != nil {
 			t.Fatal(err)
 		}
