@@ -2,54 +2,39 @@
 
 ## Current question
 
-Grow the engine from the public stars-elegy specification. The peaceful
-kernel and ordinary fleet movement from stars-elegy `docs/KERNEL.md` (on `main`)
-are implemented; the next work is either closing the spec gaps or the next
-subsystem the specification covers.
+Implement the public combat specification (stars-elegy `docs/COMBAT.md`,
+PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
 
 ## State
 
-- Merged to `main`: elegy PR #1 (kernel), PR #2 (stars-elegy PR #14
-  rules) and PR #3 (KX-001: Auto Alchemy before a ×n item, item costs, AR
-  resources, the AR zero-maximum decision). This branch follows merged
-  stars-elegy PR #18 (limiting component; KX-001 A5–A7).
-- `engine/` holds habitability, population, economy, mining, research,
-  production, movement and `GenerateTurn`. `docs/KERNEL-STATUS.md` is the
-  map: rules, tests, statuses, gaps.
-- `go test ./...` is green. `go test -run Confirmed ./...` runs only ground
-  truth; `TestPrediction*` tests pin BINARY-ONLY rules.
+- Kernel and movement are merged (elegy #1–#4, following stars-elegy
+  through #18).
+- This branch adds the battle phase: `engine/ships.go` (parts, hulls),
+  `battleplan.go`, `combat_*.go`, and `docs/COMBAT-STATUS.md` (rules,
+  statuses, tests, choices). It merges after stars-elegy #19.
+- `go test ./...` is green; `go test -run Confirmed ./...` runs the
+  CB-000..CB-019 vectors.
 
 ## What we know
 
-- Every CONFIRMED vector in KERNEL.md passes, plus the full public oracle
-  data behind them: PG-001..003 population/carry 2400–2436, PG research
-  and mining, all 15 PQ-001 production cases, KX-001 (Auto Alchemy, item
-  costs, AR), and all 224 fleets of
-  FM-001..004 (copied into `engine/testdata/fm`).
-- Three KERNEL.md/corpus disagreements found here (auto-item caps, running
-  dry with exact fuel, mutual chases) are corrected upstream in stars-elegy
-  PR #13 (merged); the code follows that text. PR #14 and PR #16 (KX-001)
-  settled every open question. The one Elegy decision (an AR planet with
-  maximum population 0 makes `GenerateTurn` return
-  `*ZeroMaxPopulationError`) and the code's remaining small choices are in
-  KERNEL-STATUS.md.
-- `PlayerOrders` and `Ruleset` are still stubs; RNG is injected as
-  `engine.Rand`.
+- Every CB vector stated in COMBAT.md/PARITY.md that needs no part
+  catalogue passes: token values, hit chances and 202-torpedo hit counts,
+  missile damage and one kill per missile, misses on shields, beam
+  dropoff (starbase uses the part range), carry R', gatling, sappers,
+  target choice, starbase damage steps, salvage, repair rates, plan-0
+  joining, and the same-turn tech gain of CB-018.
+- Choices where COMBAT.md is silent are listed in COMBAT-STATUS.md and
+  were raised with the spec author.
 
 ## What still matters
 
-- Bobby has not yet picked the rule for the AR zero-maximum state; the
-  typed error is the recommended default. If he picks another, change
-  `checkGenerable`.
-- Combat is the likely next subsystem here, once stars-elegy has a public
-  combat spec; build it only from that public text, like the kernel.
-- Not modelled: orders, waypoint tasks, colonization, ships and starbases
-  in production, terraforming, remote mining, random events, combat, and
-  the BINARY-ONLY LRT/engine movement rules.
+- Answers from the spec author may flip a default (COMBAT-STATUS.md
+  "Choices"); the capacitor 132% vs per-item compounding is the one that
+  contradicts a CONFIRMED number.
+- Round 3 (R-8..R-10) may change BINARY-ONLY statuses.
+- No part catalogue: CB battles cannot be replayed end to end publicly.
 
 ## Best next move
 
-When KERNEL.md answers a gap, flip the matching test or code. When the
-public combat spec lands, implement it with the same Confirmed/Prediction
-test split; otherwise waypoint tasks and colonization are the natural step
-toward an expansion slice.
+Fold in COMBAT.md corrections as they land. After that, waypoint tasks,
+colonization and ships in production move toward a playable slice.

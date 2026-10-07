@@ -12,14 +12,22 @@ func distance(a, b Point) float64 {
 	return math.Hypot(float64(b.X-a.X), float64(b.Y-a.Y))
 }
 
-// Engine is an engine part as far as movement needs it.
+// Engine is an engine part as far as movement and battle speed need it.
 type Engine struct {
 	Name string
 	// Fuel is the fuel factor f(w) for warp 0..10 (index 0 unused).
 	Fuel [11]int
+	// BattleWarp10 marks the engines whose battle speed uses warp 10
+	// (Interspace-10, Enigma Pulsar, Trans-Star 10, Trans-Galactic Mizer
+	// Scoop, Galaxy Scoop; COMBAT.md "Token values").
+	BattleWarp10 bool
+	// EnigmaPulsar counts toward the half-step speed bonus.
+	EnigmaPulsar bool
 }
 
-// Design is a ship design as far as movement needs it.
+// Design is a ship or starbase design. Movement reads Mass, Engine,
+// Engines, CargoCapacity and FuelCapacity; battles also read Hull, Slots
+// and Cost.
 type Design struct {
 	Name          string
 	Mass          int // kT per ship
@@ -27,12 +35,27 @@ type Design struct {
 	Engines       int // engines per ship
 	CargoCapacity int // kT per ship
 	FuelCapacity  int // mg per ship
+
+	Hull  Hull
+	Slots []Slot
+	// Cost is the current cost of one ship to its owner, with the
+	// owner's discounts and miniaturization already applied (KERNEL.md
+	// and COMBAT.md give no formula for those).
+	Cost Cost
 }
 
 // Stack is a number of ships of one design (an index into Game.Designs).
+// Damage is the stack's battle damage.
 type Stack struct {
 	Design int
 	Count  int
+	Damage Damage
+}
+
+// Damage on a stack (COMBAT.md "Conventions"): Pct of its ships are damaged,
+// each by Units/500 of the design's armor.
+type Damage struct {
+	Pct, Units int
 }
 
 // Cargo is carried minerals and colonists, in kT.
@@ -71,6 +94,7 @@ type Fleet struct {
 	Fuel      int // mg
 	Cargo     Cargo
 	Waypoints []Waypoint
+	Plan      int // battle plan index in the owner's Plans
 }
 
 // fleetDesign is one design group inside a fleet, with its share of cargo.
