@@ -786,3 +786,18 @@ func TestPredictionForeignMinerals(t *testing.T) {
 		}
 	}
 }
+
+func TestPredictionDeepSpaceUnload(t *testing.T) {
+	// #37: in deep space minerals are destroyed with no salvage, and
+	// colonists are refused and stay aboard.
+	l := newTKLab(t, 3)
+	freighter := l.design("Small Freighter", SlotFill{0, "Quick Jump 5", 1})
+	l.g.Fleets = append(l.g.Fleets, Fleet{ID: 1, Owner: 0, Pos: Point{50, 50}, Stacks: []Stack{{Design: freighter, Count: 1}},
+		Cargo: Cargo{Minerals: Minerals{7, 3, 0}, Colonists: 20},
+		Task:  Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}, CargoColonists: {Action: UnloadAll}}}})
+	_, _, ev := l.g.unloadPhase(l.g.phaseStart())
+	f := l.g.Fleets[0]
+	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused {
+		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal", f.Cargo, l.g.Salvage, ev)
+	}
+}

@@ -7,8 +7,9 @@ import (
 )
 
 // Planet takeover (stars-elegy TAKEOVER.md, with the order and amount
-// rules of stars-elegy #34): orbital bombing, transport unloads, colonist
-// drops and ground combat, colonization, and what an emptied planet keeps.
+// rules of stars-elegy #34 and #37): orbital bombing, transport unloads,
+// colonist drops and ground combat, colonization, and what an emptied
+// planet keeps.
 
 // Takeover events.
 const (
@@ -432,8 +433,14 @@ func (g *Game) removeFleets(ids map[int]bool) {
 // population at once, with no cap; colonists for any other planet follow
 // "Unloading colonists on another player's planet".
 //
-// ASSUMPTION T1: anything unloaded in deep space stays aboard;
-// TAKEOVER.md covers only unloads at a planet.
+// In deep space minerals are destroyed, with no salvage, and colonists
+// are refused (BINARY-ONLY).
+//
+// ASSUMPTION T1: Elegy's task does not record what a waypoint pointed
+// at, so a fleet away from any planet but sharing its position with
+// another fleet or a salvage object keeps its cargo: unloads to fleets
+// and salvage are not modelled. Anywhere else away from a planet is deep
+// space.
 func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 	var events []Event
 	pi := g.planetAt(f.Pos)
@@ -453,7 +460,17 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 			continue
 		}
 		t.Action, t.Amount = TransportNone, 0
-		if pi < 0 || amount <= 0 {
+		if amount <= 0 {
+			continue
+		}
+		if pi < 0 {
+			switch {
+			case !g.deepSpace(f):
+			case c < NumMinerals:
+				f.Cargo.Minerals[c] -= amount
+			default:
+				events = append(events, Event{Kind: EventDropRefused, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: amount})
+			}
 			continue
 		}
 		p := &g.Planets[pi]
@@ -469,6 +486,22 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		}
 	}
 	return events
+}
+
+// deepSpace reports a fleet away from any planet with no other fleet or
+// salvage object at its position (ASSUMPTION T1).
+func (g *Game) deepSpace(f *Fleet) bool {
+	for _, o := range g.Fleets {
+		if o.ID != f.ID && o.Pos == f.Pos {
+			return false
+		}
+	}
+	for _, s := range g.Salvage {
+		if s.Pos == f.Pos {
+			return false
+		}
+	}
+	return true
 }
 
 // dropColonists is an unload of colonists on a planet the fleet's owner

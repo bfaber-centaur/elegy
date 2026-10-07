@@ -20,8 +20,9 @@ the component table.
 
 ## What we know
 
-- One Elegy assumption remains (TAKEOVER-STATUS.md T1): anything
-  unloaded in deep space stays aboard.
+- One Elegy assumption remains (TAKEOVER-STATUS.md T1): away from a
+  planet, cargo stays aboard where another fleet or salvage shares the
+  position, since Elegy's task does not record the waypoint's target.
 - Combat keeps one placeholder: A6, the plan-0 X on a turn's first
   location (COMBAT-STATUS.md).
 

@@ -5,7 +5,7 @@ and capture in `engine/takeover.go` follow the public specification
 stars-elegy `docs/TAKEOVER.md` on `main` at `bd8f063`, which includes the
 implementer answers merged in PR #34 (order inside a phase, unload
 amounts and foreign minerals, capture tech, colonize retries, the mines'
-loss clamp), and the TK-001..TK-007 cases in
+loss clamp), and the deep-space unload rule of PR #37, and the TK-001..TK-007 cases in
 `experiments/tk/README.md`. Bomb, colonizer and defense values come from
 the component table (`docs/COMPONENTS-STATUS.md`). Nothing else was used.
 
@@ -40,7 +40,8 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Retro bombs | `bombPlanet` | CONFIRMED (T-16) | `TestConfirmedRetroBombs` |
 | Unloading colonists on another player's planet (refusals, relation unchecked) | `dropColonists` | CONFIRMED (T-4, T-28, T-29); AR BINARY-ONLY | `TestConfirmedTakeoverTiming`, `TestConfirmedFriendInvaded`, `TestPredictionGroundStrengthTraits` |
 | "At the start of this phase" ownership | `phaseStart` | BINARY-ONLY (#34) | `TestPredictionPhaseStartOwnership` |
-| Unload amounts; own-planet unloads before or after growth; minerals on any planet | `unload` | BINARY-ONLY (#34) | `TestPredictionUnloadAmounts` |
+| Unload amounts; own-planet unloads before or after growth; minerals on any planet | `unload` | BINARY-ONLY (#34) | `TestPredictionUnloadAmounts`, `TestPredictionForeignMinerals` |
+| Deep space: minerals destroyed (no salvage), colonists refused | `unload`, `deepSpace` | BINARY-ONLY (#37) | `TestPredictionDeepSpaceUnload` |
 | Ground combat | `resolveDrops` | CONFIRMED (T-21..T-25); WM, IS, AR BINARY-ONLY | `TestConfirmedGroundCombat`, `TestPredictionGroundStrengthTraits` |
 | Drop resolution order | `resolveQueue` | BINARY-ONLY (#34) | none yet beyond one planet at a time |
 | Several players dropping | `dropWinner` (switch `legacyDropScan`) | LEGACY BUG, CONFIRMED (T-32) | `TestConfirmedSeveralPlayersDrop` |
@@ -59,7 +60,7 @@ established Stars! behavior; each is marked `ASSUMPTION Tn` in the code.
 
 | Id | What Elegy does | Why |
 |---|---|---|
-| T1 | Anything unloaded in deep space stays aboard (the action still clears). | TAKEOVER.md covers only unloads at a planet. |
+| T1 | Away from a planet, a fleet that shares its position with another fleet or a salvage object keeps the cargo it would unload (the action still clears). Anywhere else is deep space. | TAKEOVER.md defines deep space by the waypoint's target, which Elegy's task does not record, and unloads to fleets and salvage are not modelled. |
 
 The scan for several drops starts at the first dropping player, so a lone
 attacker of strength 0 (Alternate Reality colonists, `k = 0`) lands; the
