@@ -24,6 +24,8 @@ const (
 	PRTJackOfAllTrades
 	PRTAlternateReality
 	PRTInnerStrength
+	PRTWarMonger
+	PRTInterstellarTraveler
 )
 
 // LRTs is the set of lesser racial traits the kernel rules mention.
@@ -31,6 +33,9 @@ type LRTs struct {
 	OnlyBasicRemoteMining bool
 	GeneralizedResearch   bool
 	MineralAlchemy        bool
+	RegeneratingShields   bool
+	CheapEngines          bool
+	BleedingEdgeTech      bool
 }
 
 // ResearchCost is a race's research-cost setting for one field.

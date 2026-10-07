@@ -56,12 +56,20 @@ type Game struct {
 	Planets []Planet
 	Designs []Design
 	Fleets  []Fleet
+	Salvage []Salvage
 }
 
 type Player struct {
 	Race           Race
 	Research       ResearchState
 	ResearchBudget int // percent of resources taxed for research
+
+	// Plans are the player's battle plans; plan 0 is the default plan,
+	// also used by the player's starbases.
+	Plans []BattlePlan
+	// Relations is this player's view of each player, by player index.
+	// Missing entries are neutral; a player is its own friend.
+	Relations []Relation
 }
 
 type Planet struct {
@@ -75,6 +83,12 @@ type Planet struct {
 	StarbaseHull int
 	// StarbaseDock is set when the owner's starbase here can refuel fleets.
 	StarbaseDock bool
+	// HasStarbase marks a starbase that takes part in battles, of design
+	// StarbaseDesign (an index into Game.Designs) with StarbaseDamage
+	// units (1/500 of its armor) of damage.
+	HasStarbase    bool
+	StarbaseDesign int
+	StarbaseDamage int
 
 	Population  int // units of 100 colonists
 	GrowthCarry int // hundredths of a unit, 0..99 (StarsAPI excessPop)
@@ -108,13 +122,14 @@ type TurnResult struct {
 // (KERNEL.md "Turn order"): fleet movement, then mining for every planet,
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
-// level-ups.
+// level-ups, then battles (COMBAT.md), a second research level-up check
+// and repair.
 //
-// Not yet modelled: order application, waypoint tasks, space objects,
-// random events, fuel generators, battles, mine sweeping, repair, terraforming,
-// remote mining and scores.
+// Not yet modelled: order application, waypoint tasks, space objects
+// other than battle salvage, random events, fuel generators, mine
+// sweeping, terraforming, remote mining and scores.
 //
-// rng must not be nil: the turn's random draws (mining's +1) come only from
+// rng must not be nil: the turn's random draws (mining's +1, battles) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
 // returns ErrNilRand. A state the original cannot generate from returns
 // a *ZeroMaxPopulationError (see checkGenerable).
@@ -135,6 +150,10 @@ func GenerateTurn(
 	g := game.clone()
 	var events []Event
 
+	start := map[int]Point{}
+	for _, f := range g.Fleets {
+		start[f.ID] = f.Pos
+	}
 	events = append(events, moveFleets(&g)...)
 
 	type growth struct{ pop, carry int }
@@ -209,6 +228,23 @@ func GenerateTurn(
 		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 	}
 
+	// Battles, then the post-movement research check, then repair
+	// (KERNEL.md "Turn order" steps 6–7; research gained in a battle
+	// levels up the same turn, CB-018, CB-021).
+	fights := battles(&g, rng)
+	events = append(events, fights.events...)
+	for i := range g.Players {
+		pl := &g.Players[i]
+		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+	}
+	moved := map[int]bool{}
+	for _, f := range g.Fleets {
+		if p, ok := start[f.ID]; ok && p != f.Pos {
+			moved[f.ID] = true
+		}
+	}
+	repair(&g, moved, fights)
+
 	g.Year++
 
 	return TurnResult{
@@ -224,6 +260,7 @@ func (g Game) clone() Game {
 	for i := range c.Planets {
 		c.Planets[i].Queue = append([]QueueItem(nil), g.Planets[i].Queue...)
 	}
+	c.Salvage = append([]Salvage(nil), g.Salvage...)
 	c.Designs = append([]Design(nil), g.Designs...)
 	c.Fleets = append([]Fleet(nil), g.Fleets...)
 	for i := range c.Fleets {

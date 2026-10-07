@@ -12,9 +12,9 @@ func TestPredictionChaserRangeReducedByMoved(t *testing.T) {
 	// = 10, so A moves 10 (18 in all), ends with 0 and runs dry.
 	qj5 := fmEngines[1]
 	g := scoutGame(qj5, 1,
-		Fleet{ID: 1, Stacks: []Stack{{0, 1}}, Pos: Point{0, 0}, Fuel: 3, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 6}}},
-		Fleet{ID: 2, Stacks: []Stack{{0, 1}}, Pos: Point{100, 0}, Fuel: 300, Waypoints: []Waypoint{{Target: TargetFleet, ID: 3, Warp: 6}}},
-		Fleet{ID: 3, Stacks: []Stack{{0, 1}}, Pos: Point{110, 0}},
+		Fleet{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{0, 0}, Fuel: 3, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 6}}},
+		Fleet{ID: 2, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{100, 0}, Fuel: 300, Waypoints: []Waypoint{{Target: TargetFleet, ID: 3, Warp: 6}}},
+		Fleet{ID: 3, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{110, 0}},
 	)
 	ev := moveFleets(&g)
 	a := g.Fleets[0]
@@ -32,8 +32,8 @@ func TestPredictionChaserRamScoopPerRound(t *testing.T) {
 	// then stops. Over the whole year A would have gained 12.
 	fm := fmEngines[2]
 	g := scoutGame(fm, 1,
-		Fleet{ID: 1, Stacks: []Stack{{0, 1}}, Pos: Point{1200, 1000}, Fuel: 100, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 4}}},
-		Fleet{ID: 2, Stacks: []Stack{{0, 1}}, Pos: Point{1220, 1000}, Fuel: 100, Waypoints: []Waypoint{{Target: TargetFleet, ID: 1, Warp: 4}}},
+		Fleet{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{1200, 1000}, Fuel: 100, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 4}}},
+		Fleet{ID: 2, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{1220, 1000}, Fuel: 100, Waypoints: []Waypoint{{Target: TargetFleet, ID: 1, Warp: 4}}},
 	)
 	moveFleets(&g)
 	if a, b := g.Fleets[0].Fuel, g.Fleets[1].Fuel; a != 111 || b != 108 {
@@ -46,8 +46,8 @@ func TestPredictionChaserTopUp(t *testing.T) {
 	// scout, warp 9, fuel 102 moves 81, has 36 and is topped up to 37.
 	qj5 := fmEngines[1]
 	g := scoutGame(qj5, 1,
-		Fleet{ID: 1, Stacks: []Stack{{0, 1}}, Pos: Point{0, 0}, Fuel: 102, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 9}}},
-		Fleet{ID: 2, Stacks: []Stack{{0, 1}}, Pos: Point{126, 0}},
+		Fleet{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{0, 0}, Fuel: 102, Waypoints: []Waypoint{{Target: TargetFleet, ID: 2, Warp: 9}}},
+		Fleet{ID: 2, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{126, 0}},
 	)
 	moveFleets(&g)
 	if f := g.Fleets[0]; f.Pos != (Point{81, 0}) || f.Fuel != 37 {
@@ -142,8 +142,8 @@ func TestPredictionCargoTiesKeepDesignOrder(t *testing.T) {
 		{Name: "light", Mass: 1, Engine: e, Engines: 1, CargoCapacity: 10},
 		{Name: "heavy", Mass: 20, Engine: e, Engines: 1, CargoCapacity: 10},
 	}}
-	light := Fleet{Stacks: []Stack{{0, 1}, {1, 1}}, Cargo: Cargo{Minerals: Minerals{1, 0, 0}}}
-	heavy := Fleet{Stacks: []Stack{{1, 1}, {0, 1}}, Cargo: Cargo{Minerals: Minerals{1, 0, 0}}}
+	light := Fleet{Stacks: []Stack{{Design: 0, Count: 1}, {Design: 1, Count: 1}}, Cargo: Cargo{Minerals: Minerals{1, 0, 0}}}
+	heavy := Fleet{Stacks: []Stack{{Design: 1, Count: 1}, {Design: 0, Count: 1}}, Cargo: Cargo{Minerals: Minerals{1, 0, 0}}}
 	if a, b := g.FuelCost(&light, 6, 10), g.FuelCost(&heavy, 6, 10); a != 2 || b != 1 {
 		t.Errorf("light first %d mg, heavy first %d mg, want 2 and 1", a, b)
 	}
