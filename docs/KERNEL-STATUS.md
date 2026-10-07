@@ -2,8 +2,8 @@
 
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
-`docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 and KX-002) and the public FM-001..004
-movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `004b4dc` (after PR #35:
+`docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
+movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `9569af3` (PR #44: scores, random events, AR colonists in flight, FM round 2; earlier PR #35:
 KX-002 and the overcrowding correction).
 Nothing here comes from the private archaeology repositories.
 
@@ -32,6 +32,8 @@ KERNEL.md gives every rule a status. Test names follow it:
 | AR colonists in flight | `movement.go` `arColonistLoss` | TK-117, TK-107 (stars-elegy #44) | |
 | Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, switch `legacyFuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
 | Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
+| Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
+| Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
@@ -43,13 +45,14 @@ fleet chasers in rounds, then waypoint settlement); mining for every planet
 in id order (population before growth); per planet in id order: resources,
 research tax, production queue (caps use the grown population); population growth for every planet; starbase refuelling;
 research level-ups; random events (when `Game.RandomEvents` is on); battles, bombing and the after-movement takeover tasks
-(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1. The
+(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1; scores, victory flags and deciding the game
+(`TurnResult.Scores`, each view's visible records). The
 before-movement takeover tasks (unloads, colonize, drops) come first.
 
 Not modelled yet: order application, waypoint tasks other than unloads and
 colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
 sweeping,
-terraforming, remote mining, scores, Super Stealth research stealing, the
+terraforming, remote mining, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
 friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
 Engines, warp-10 losses, Radiating Hydro-Ram colonist
@@ -160,6 +163,17 @@ Places where the original has no behavior to copy, and Elegy chose one.
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
+
+- **K3 (ASSUMPTION), ship power.** Each slot's beam and torpedo terms
+  are truncated before summing; the speed code is the design's own (empty
+  mass, owner's race, no cargo dumped).
+- **K4 (ASSUMPTION), record starbase count.** Every owned starbase,
+  Orbital Forts included; only the score term needs a dock.
+- **K5 (ASSUMPTION), victory tests.** "round" in the planets test rounds
+  halves up; the lead test flags every player with the top score.
+- **K6 (ASSUMPTION), deciding.** A decided game is not decided again, a
+  dead player also gets the loss message, `Needed` below 1 counts as 1,
+  and the victory settings use the dialog encoding `v` in `Victory`.
 
 Choices the code makes where KERNEL.md is silent:
 

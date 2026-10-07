@@ -56,6 +56,12 @@ type Game struct {
 	RandomEvents bool
 	// Size is the universe size, 0 tiny .. 4 huge (new-minerals chance).
 	Size int
+	// PublicScores is the game's public player scores option.
+	PublicScores bool
+	// Victory is the game's victory settings; Decided is set once a
+	// player has won.
+	Victory Victory
+	Decided bool
 
 	Players []Player
 	Planets []Planet
@@ -87,6 +93,10 @@ type Player struct {
 	// player starts with (TAKEOVER.md "Colonization").
 	DefaultQueue        []QueueItem
 	DefaultLeftoverOnly bool
+
+	// Dead is set when the player has no planets and no ships (KERNEL.md
+	// "Victory conditions").
+	Dead bool
 }
 
 type Planet struct {
@@ -144,6 +154,9 @@ type TurnResult struct {
 	// Views is each player's knowledge at the end of the year
 	// (SCANNING.md), by player index.
 	Views []PlayerView
+	// Scores is every player's score record for the year, by player.
+	// Views[v].Scores holds the ones player v may see.
+	Scores []ScoreRecord
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
@@ -158,7 +171,8 @@ type TurnResult struct {
 // Not yet modelled: order application, waypoint tasks other than
 // unloads and colonize, space objects
 // other than battle salvage, the Mystery Trader, fuel generators, mine
-// sweeping, terraforming, remote mining and scores.
+// sweeping, terraforming and remote mining. Scores and victory come after
+// the year advances.
 //
 // rng must not be nil: the turn's random draws (mining's +1, random events, battles) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
@@ -305,15 +319,21 @@ func GenerateTurn(
 	repair(&g, moved, fights)
 
 	g.Year++
+	scores := g.scores()
+	events = append(events, g.decide(scores)...)
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
 	views := views(g, PopulationEstimates(g, rng), fights.seen)
+	for v := range views {
+		views[v].Scores = g.visibleScores(v, scores)
+	}
 
 	return TurnResult{
 		Game:   g,
 		Events: events,
 		Views:  views,
+		Scores: scores,
 	}, nil
 }
 

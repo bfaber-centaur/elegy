@@ -45,6 +45,7 @@ type PlayerView struct {
 	Planets []PlanetReport   // every planet with a report, by planet index
 	Designs []DesignSighting // other players' designs seen, by design index
 	Players []PlayerSighting // other known players, in player order
+	Scores  []ScoreRecord    // score records this player may see (scores.go)
 }
 
 // FleetSighting is another player's fleet as a player sees it.
