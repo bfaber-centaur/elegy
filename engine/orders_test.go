@@ -445,10 +445,28 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 	}
 }
 
+func TestGiftReceiverRemovedEarlier(t *testing.T) {
+	// ORDERS.md "Cross-owner cargo", "Missing endpoint" (stars-elegy #87,
+	// BINARY-ONLY for the same-turn removal): player 1's replay runs first
+	// and merges the receiver away, so player 0's gift is skipped whole and
+	// the giver keeps the cargo.
+	g := ordersGame()
+	g.Fleets[0].Pos = g.Fleets[2].Pos
+	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
+	files := []PlayerOrders{
+		{Player: 0, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}}},
+		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
+	}
+	a := ApplyOrders(g, files, []int{1, 0})
+	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Gifts) != 0 || len(a.Events) != 0 {
+		t.Errorf("giver Fe %d, gifts %+v, events %+v; want 30, none, none", g.Fleets[0].Cargo.Minerals[Ironium], a.Gifts, a.Events)
+	}
+}
+
 func TestGiftToFleetMergedAway(t *testing.T) {
-	// ASSUMPTION L9 (an Elegy choice, giftReturnsToGiver): the receiver
-	// merged away after the debit is treated as a missing endpoint, and the
-	// cargo goes back to the giver's fleet.
+	// ASSUMPTION L9: the receiver merged away after the debit is treated
+	// like a missing endpoint (ORDERS.md "Missing endpoint"), and the cargo
+	// goes back to the giver's fleet.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
@@ -457,9 +475,6 @@ func TestGiftToFleetMergedAway(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
 	}
 	a := ApplyOrders(g, files, []int{0, 1})
-	if !giftReturnsToGiver {
-		t.Skip("giftReturnsToGiver is off")
-	}
 	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Events) != 0 {
 		t.Errorf("giver Fe %d, events %+v; want 30 and none", g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
 	}

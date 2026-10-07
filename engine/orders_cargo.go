@@ -240,21 +240,23 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 // TK-409); the remainder is lost, not returned, and the giver is told
 // (ORDERS.md "Receiver short of room", CONFIRMED).
 //
-// A gift naming a receiver that is missing when its order applies is
-// rejected there, so neither side changes (ORDERS.md "Missing endpoint").
+// A gift naming a receiver that is missing when its order is replayed,
+// including one removed by an earlier order the same turn (merged,
+// scrapped, or removed in a player's replay that ran first), is rejected
+// there: the record is skipped whole and the giver keeps the cargo, as
+// nothing is debited (ORDERS.md "Cross-owner cargo", "Missing endpoint",
+// stars-elegy #87; BINARY-ONLY for the same-turn removal).
 //
-// ASSUMPTION L9, an Elegy choice and not observed Stars! behaviour: a
-// receiving fleet that a later order in the same replay removed (a merge,
-// or deleting its design) is treated as a missing endpoint, and what was
-// taken goes back to the giver's fleet, as much as fits it now; anything
-// that cannot go back (the giver's fleet is gone, or has filled up since)
-// is lost and the giver told. No measurement covers a receiver removed
-// between the debit and the credit; the public reading of this case is
-// being reconciled on stars-elegy, and BINARY-ONLY analysis there says the
-// cargo is lost. giftReturnsToGiver isolates the choice: false loses the
-// whole gift with the message instead.
-const giftReturnsToGiver = true
-
+// ASSUMPTION L9: a receiving fleet removed by a later order, after the
+// debit and before the credit pass, is treated the same way: the record
+// is skipped and what was taken goes back to the giver's fleet, as much
+// as fits it now; anything that cannot go back (the giver's fleet is gone
+// too, or has filled up since) is lost and the giver told. ORDERS.md does
+// not cover a removal between the passes.
+//
+// Not modelled: the binary's separate queued cross-player credit routine,
+// which no legal order is known to reach (ORDERS.md "A separate queued
+// credit routine exists in the binary", UNRESOLVED).
 func (g *Game) creditGifts(gifts []CargoGift) []Event {
 	var events []Event
 	for _, gift := range gifts {
@@ -267,7 +269,7 @@ func (g *Game) creditGifts(gifts []CargoGift) []Event {
 		}
 		lost := 0
 		ti := g.fleetIndex(gift.ID)
-		if ti < 0 && giftReturnsToGiver {
+		if ti < 0 {
 			ti = g.fleetIndex(gift.FromFleet)
 		}
 		if ti < 0 {
