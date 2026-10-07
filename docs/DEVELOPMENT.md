@@ -67,11 +67,18 @@ queues, fleet movement, fuel, fleet chases and starbase refuelling.
 per-player views (`SCANNING.md`). Parts, hulls and
 planetary items come from the measured component table (`COMPONENTS.md`).
 
+`newgame/` builds a new game (galaxy, homeworlds, starting players,
+designs, fleets and wormholes) from the stars-elegy `UNIVERSE.md` spec; it
+reads the engine's state types and leaves the engine unchanged. `races/`
+scores, repairs and generates race designs (`RACES.md`).
+
 See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
 [SCANNING-STATUS.md](SCANNING-STATUS.md),
 [COMPONENTS-STATUS.md](COMPONENTS-STATUS.md),
-[TAKEOVER-STATUS.md](TAKEOVER-STATUS.md) and
-[ORDERS-STATUS.md](ORDERS-STATUS.md) for what is implemented, which
+[TAKEOVER-STATUS.md](TAKEOVER-STATUS.md),
+[ORDERS-STATUS.md](ORDERS-STATUS.md),
+[UNIVERSE-STATUS.md](UNIVERSE-STATUS.md) and
+[RACES-STATUS.md](RACES-STATUS.md) for what is implemented, which
 tests are ground truth and which are predictions, and the open spec gaps.
 
 ## Near-term milestones
