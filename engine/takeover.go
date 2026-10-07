@@ -87,6 +87,9 @@ func (g *Game) fleetOrder() []int {
 		if fa.Owner != fb.Owner {
 			return fa.Owner < fb.Owner
 		}
+		if fa.Number != fb.Number {
+			return fa.Number < fb.Number
+		}
 		return fa.ID < fb.ID
 	})
 	return order

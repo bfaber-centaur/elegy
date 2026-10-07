@@ -34,6 +34,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
+| Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in stars-elegy #53 "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |

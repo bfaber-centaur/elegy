@@ -87,7 +87,12 @@ type Waypoint struct {
 }
 
 type Fleet struct {
+	// ID is Elegy's internal key, unique across players. Number is the
+	// owner's fleet number as the specs count it (PRODUCTION-LAUNCH.md
+	// "the owner's lowest unused fleet number"); fleet order is by owner,
+	// then Number, then ID.
 	ID        int
+	Number    int
 	Owner     int
 	Pos       Point
 	Stacks    []Stack
@@ -130,7 +135,7 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 		out = append(out, fleetDesign{d: g.Designs[s.Design], n: s.Count})
 	}
 	sort.SliceStable(out, func(a, b int) bool {
-		return engineFactor(out[a].d, warp) < engineFactor(out[b].d, warp)
+		return g.fleetFactor(f, out[a].d, warp) < g.fleetFactor(f, out[b].d, warp)
 	})
 	left := f.Cargo.mass()
 	for i := range out {
@@ -146,7 +151,7 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
 	tenths := 0
 	for _, gr := range g.groups(f, warp) {
-		tenths += fuelTerm(engineFactor(gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
+		tenths += fuelTerm(g.fleetFactor(f, gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
 	}
 	return (tenths + 9) / 10
 }
@@ -163,6 +168,18 @@ func engineFactor(d Design, warp int) int {
 		return underEngined
 	}
 	return d.Engine.Fuel[warp]
+}
+
+// fleetFactor is f for a design in fleet f: the engine factor, less
+// trunc(15f/100) for an Improved Fuel Efficiency owner (KERNEL.md "Other
+// movement rules", CONFIRMED KB-4A E, FM-101). The under-engined factor
+// is not reduced (FM-105 with an IFE owner).
+func (g *Game) fleetFactor(f *Fleet, d Design, warp int) int {
+	e := engineFactor(d, warp)
+	if e != underEngined && f.Owner >= 0 && f.Owner < len(g.Players) && g.Players[f.Owner].Race.LRT.ImprovedFuelEfficiency {
+		e -= 15 * e / 100
+	}
+	return e
 }
 
 // legacyFuelWrap reproduces the original's LEGACY BUG in the fuel term
@@ -192,7 +209,7 @@ func fuelTermWrap(f, l, m int, wrap bool) int {
 func (g *Game) fuelRange(f *Fleet, warp int) (r int, unlimited bool) {
 	sum := 0
 	for _, gr := range g.groups(f, warp) {
-		sum += fuelTerm(engineFactor(gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
+		sum += fuelTerm(g.fleetFactor(f, gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
 	}
 	c1000 := sum / 10
 	switch {
@@ -345,6 +362,62 @@ func (g *Game) arColonistLoss(f *Fleet) []Event {
 	}
 	f.Cargo.Colonists -= lost
 	return []Event{g.fleetEvent(f, EventColonistsLostInFlight, lost)}
+}
+
+// generateFuel adds each year's fuel from generators after movement: 50
+// mg per fuel-generating part and 200 mg per fuel-transport ship, capped
+// at the tank (KERNEL.md "Other movement rules", CONFIRMED CS-003-W,
+// KB-4A G, X, FM-102 G–K).
+func (g *Game) generateFuel() {
+	for i := range g.Fleets {
+		f := &g.Fleets[i]
+		add := 0
+		for _, s := range f.Stacks {
+			d := g.Designs[s.Design]
+			if d.Hull.FuelTransport {
+				add += 200 * s.Count
+			}
+			for _, sl := range d.Slots {
+				add += sl.Part.FuelPerYear * sl.Count * s.Count
+			}
+		}
+		if add > 0 {
+			f.Fuel = max(f.Fuel, min(f.Fuel+add, g.tankCapacity(f)))
+		}
+	}
+}
+
+// EventColonistsKilledByEngine: Count = kT of colonists a Radiating
+// Hydro-Ram Scoop fleet lost.
+const EventColonistsKilledByEngine EventKind = EventGameLost + 1
+
+// radiatingColonists is KERNEL.md's Radiating Hydro-Ram Scoop rule
+// (CONFIRMED for mid 50, KB-4A H, FM-102 Z1, Z2; the exemptions
+// BINARY-ONLY): a fleet with the engine that moved this year loses
+// max(1, trunc(C·trunc((86 − mid)/2)/100)) kT of its C kT of colonists,
+// at most all, with mid the owner's radiation midpoint.
+func (g *Game) radiatingColonists(f *Fleet) []Event {
+	c := f.Cargo.Colonists
+	if c <= 0 || f.Owner < 0 || f.Owner >= len(g.Players) {
+		return nil
+	}
+	rad := g.Players[f.Owner].Race.Env[Radiation]
+	if rad.Immune || rad.Low+rad.High >= 170 {
+		return nil
+	}
+	has := false
+	for _, s := range f.Stacks {
+		if g.Designs[s.Design].Engine.Name == "Radiating Hydro-Ram Scoop" {
+			has = true
+		}
+	}
+	if !has {
+		return nil
+	}
+	mid := (rad.Low + rad.High) / 2
+	lost := min(c, max(1, c*((86-mid)/2)/100))
+	f.Cargo.Colonists -= lost
+	return []Event{g.fleetEvent(f, EventColonistsKilledByEngine, lost)}
 }
 
 func moving(f *Fleet) bool {
@@ -596,7 +669,10 @@ func refuelFleets(g *Game) {
 	for i := range g.Fleets {
 		f := &g.Fleets[i]
 		for _, p := range g.Planets {
-			if p.Pos == f.Pos && p.Owner == f.Owner && p.StarbaseDock {
+			// The owner's starbase, or one whose owner treats the fleet's
+			// owner as a friend; not an Orbital Fort (KERNEL.md "Other
+			// movement rules", CONFIRMED KB-4A F1–F5, FM-103).
+			if p.Pos == f.Pos && p.Owner != NoOwner && p.StarbaseDock && (p.Owner == f.Owner || g.relation(p.Owner, f.Owner) == RelationFriend) {
 				f.Fuel = g.tankCapacity(f)
 				break
 			}

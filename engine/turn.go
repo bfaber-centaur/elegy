@@ -210,6 +210,12 @@ func GenerateTurn(
 		start[f.ID] = f.Pos
 	}
 	events = append(events, moveFleets(&g)...)
+	for i := range g.Fleets {
+		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
+			events = append(events, g.radiatingColonists(f)...)
+		}
+	}
+	g.generateFuel()
 
 	type growth struct{ pop, carry int }
 	grown := make([]growth, len(g.Planets))
@@ -313,7 +319,9 @@ func GenerateTurn(
 	events = append(events, g.loadPass()...)
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
-		if p, ok := start[f.ID]; ok && p != f.Pos {
+		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
+		// SL-03).
+		if p, ok := start[f.ID]; !ok || p != f.Pos {
 			moved[f.ID] = true
 		}
 	}
