@@ -258,7 +258,8 @@ func moving(f *Fleet) bool {
 }
 
 // moveFleets runs the movement phase: ordinary fleets in id order, then
-// fleets chasing other fleets in rounds. KERNEL.md "Fleet movement".
+// fleets chasing other fleets in rounds, then waypoint settlement.
+// KERNEL.md "Fleet movement".
 func moveFleets(g *Game) []Event {
 	order := make([]int, len(g.Fleets))
 	for i := range order {
@@ -279,78 +280,115 @@ func moveFleets(g *Game) []Event {
 		}
 		events = append(events, g.moveOrdinary(f)...)
 	}
-	return append(events, g.moveChasers(chasers)...)
+	events = append(events, g.moveChasers(chasers)...)
+	return append(events, g.settleWaypoints(order)...)
+}
+
+// legMove is one fuel-checked move toward dest: the fuel rules shared by
+// ordinary fleets and by each chase round.
+type legMove struct {
+	f      *Fleet
+	warp   int
+	dest   Point
+	d      float64 // distance to dest
+	leg    int     // trunc(d + 0.9999), the whole leg
+	enough bool    // could pay for the whole leg
+}
+
+func (g *Game) newLegMove(f *Fleet, warp int, dest Point) legMove {
+	d := distance(f.Pos, dest)
+	leg := int(d + 0.9999)
+	return legMove{f: f, warp: warp, dest: dest, d: d, leg: leg, enough: f.Fuel >= g.FuelCost(f, warp, leg)}
+}
+
+// limit applies the fuel range r (unlimited when unl) to a move of a
+// light-years and reports whether R limited it.
+func (m legMove) limit(a, r int, unl bool) (int, bool) {
+	if !m.enough && !unl && a > r {
+		return r, true
+	}
+	return a, false
+}
+
+// place moves the fleet a light-years and reports whether it reached dest.
+func (m legMove) place(a int, rLimited bool) bool {
+	switch {
+	case rLimited && a == 0:
+		return false // R = 0: the fleet does not move
+	case arrives(m.d, a):
+		m.f.Pos = m.dest
+		return true
+	}
+	m.f.Pos = along(m.f.Pos, m.dest, a, m.d)
+	return false
+}
+
+// ranDry is KERNEL.md "Running dry" (CONFIRMED, FM-002 24 and 29), after
+// paying: fuel 0, limited by R or
+// paid a non-zero cost, could not afford the whole leg, and short of the
+// destination (or R = 0).
+func (m legMove) ranDry(rLimited bool, cost int, arrived bool, a int) bool {
+	return m.f.Fuel == 0 && (rLimited || cost > 0) && !m.enough && (!arrived || rLimited && a == 0)
+}
+
+// dryOut lowers the leg's warp to the fastest free warp for the whole leg
+// from the fleet's start-of-year position (or leaves it when none is free).
+func (g *Game) dryOut(wp *Waypoint, f *Fleet, leg int) Event {
+	if fw := g.freeWarp(f, leg); fw > 0 {
+		wp.Warp = fw
+	}
+	return g.fleetEvent(f, EventOutOfFuel, 0)
+}
+
+// afterMove applies the top-up and free-warp fuel gain to a fleet that did
+// not run dry, returning the fuel added.
+func (g *Game) afterMove(m legMove, a int, arrived bool) (int, []Event) {
+	f := m.f
+	before := f.Fuel
+	if m.enough && !arrived {
+		// Top-up (CONFIRMED, FM-004 TU; the tank cap is not exercised):
+		// per-year rounding never strands a fleet that could pay for the
+		// whole leg.
+		rest := g.FuelCost(f, m.warp, int(distance(f.Pos, m.dest)+0.9999))
+		f.Fuel = max(f.Fuel, min(rest, g.tankCapacity(f)))
+	}
+	var events []Event
+	if gain := g.ramScoopGain(f, m.warp, max(0, min(int(m.d-0.99999), a))); gain > 0 {
+		gain = min(gain, g.tankCapacity(f)-f.Fuel)
+		if gain > 0 {
+			f.Fuel += gain
+			events = append(events, g.fleetEvent(f, EventRamScoopFuel, gain))
+		}
+	}
+	return f.Fuel - before, events
 }
 
 // moveOrdinary moves a fleet toward a fixed destination for one year.
 func (g *Game) moveOrdinary(f *Fleet) []Event {
 	wp := &f.Waypoints[0]
-	w := wp.Warp
-	dest := g.destination(*wp)
-	d := distance(f.Pos, dest)
-	leg := int(d + 0.9999)
-	a := min(leg, w*w)
+	m := g.newLegMove(f, wp.Warp, g.destination(*wp))
+	r, unl := g.fuelRange(f, m.warp)
+	a, rLimited := m.limit(min(m.leg, m.warp*m.warp), r, unl)
 
-	enough := f.Fuel >= g.FuelCost(f, w, leg)
-	move, dry := a, false
-	if !enough {
-		if r, unlimited := g.fuelRange(f, w); !unlimited && a > r {
-			move, dry = r, true
-		}
-	}
-
-	var events []Event
-	arrived := false
-	switch {
-	case dry && move == 0:
-		// R = 0: the fleet does not move.
-	case arrives(d, move):
-		f.Pos = dest
-		arrived = true
-	default:
-		f.Pos = along(f.Pos, dest, move, d)
-	}
-
-	f.Fuel -= g.FuelCost(f, w, move)
-	if dry || f.Fuel <= 0 && !enough && !arrived {
-		dry = true
+	arrived := m.place(a, rLimited)
+	cost := g.FuelCost(f, m.warp, a)
+	f.Fuel = max(0, f.Fuel-cost)
+	if rLimited {
 		f.Fuel = 0
 	}
-	f.Fuel = max(0, f.Fuel)
 
-	switch {
-	case dry:
-		if fw := g.freeWarp(f, leg); fw > 0 {
-			wp.Warp = fw
-		}
-		events = append(events, g.fleetEvent(f, EventOutOfFuel, 0))
-	default:
-		if enough && !arrived {
-			// Top-up (CONFIRMED, FM-004 TU; the tank cap is not exercised):
-			// per-year rounding never strands a fleet that could pay for
-			// the whole leg.
-			rest := g.FuelCost(f, w, int(distance(f.Pos, dest)+0.9999))
-			f.Fuel = max(f.Fuel, min(rest, g.tankCapacity(f)))
-		}
-		if gain := g.ramScoopGain(f, w, max(0, min(int(d-0.99999), move))); gain > 0 {
-			gain = min(gain, g.tankCapacity(f)-f.Fuel)
-			if gain > 0 {
-				f.Fuel += gain
-				events = append(events, g.fleetEvent(f, EventRamScoopFuel, gain))
-			}
-		}
+	if m.ranDry(rLimited, cost, arrived, a) {
+		return []Event{g.dryOut(wp, f, m.leg)}
 	}
-
-	if arrived {
-		events = append(events, g.arrive(f)...)
-	}
+	_, events := g.afterMove(m, a, arrived)
 	return events
 }
 
 // moveChasers moves fleets whose destination is another fleet, in rounds.
 // KERNEL.md "Chasing another fleet", CONFIRMED (FM-001..003). KERNEL.md does
-// not give fuel-limit, out-of-fuel or ram-scoop rules for chasers; none are
-// applied here beyond charging fuel.
+// not yet give fuel-limit, running-dry, top-up or ram-scoop rules for
+// chasers (docs/KERNEL-STATUS.md); here fuel is only charged on the year's
+// total distance, never below 0.
 func (g *Game) moveChasers(chasers []int) []Event {
 	type chase struct {
 		rem, moved, fuel0 int
@@ -362,7 +400,6 @@ func (g *Game) moveChasers(chasers []int) []Event {
 		state[i] = &chase{rem: w * w, fuel0: g.Fleets[i].Fuel, active: true}
 	}
 
-	var events []Event
 	for round := 0; round < 10; round++ {
 		for _, i := range chasers {
 			c := state[i]
@@ -388,17 +425,8 @@ func (g *Game) moveChasers(chasers []int) []Event {
 				f.Pos = dest
 				total = c.moved + a
 				c.active = false
-				events = append(events, g.arrive(f)...)
 				if targetChasing {
 					tc.active = false // the target stops for the year
-				}
-				// KERNEL.md does not say so, but in FM-001..003 a target that
-				// is itself chasing the arriving fleet (mutual chase) has
-				// also arrived, whether or not it had finished moving.
-				t := &g.Fleets[ti]
-				if _, chasing := state[ti]; chasing && len(t.Waypoints) > 0 &&
-					t.Waypoints[0].Target == TargetFleet && g.destination(t.Waypoints[0]) == t.Pos {
-					events = append(events, g.arrive(t)...)
 				}
 			} else {
 				f.Pos = along(f.Pos, dest, a, d)
@@ -407,6 +435,31 @@ func (g *Game) moveChasers(chasers []int) []Event {
 				c.active = c.rem > 0
 			}
 			f.Fuel = max(0, c.fuel0-g.FuelCost(f, wp.Warp, total))
+		}
+	}
+	return nil
+}
+
+// settleWaypoints runs after all movement (KERNEL.md "Chasing another
+// fleet" rules 6 and 7, CONFIRMED FM-001..003): every waypoint aimed at a
+// fleet takes that fleet's end position, then every fleet sitting exactly
+// on its next waypoint completes it.
+func (g *Game) settleWaypoints(order []int) []Event {
+	for _, i := range order {
+		for j := range g.Fleets[i].Waypoints {
+			wp := &g.Fleets[i].Waypoints[j]
+			if wp.Target == TargetFleet {
+				if t := g.fleetIndex(wp.ID); t >= 0 {
+					wp.Pos = g.Fleets[t].Pos
+				}
+			}
+		}
+	}
+	var events []Event
+	for _, i := range order {
+		f := &g.Fleets[i]
+		if len(f.Waypoints) > 0 && g.destination(f.Waypoints[0]) == f.Pos {
+			events = append(events, g.arrive(f)...)
 		}
 	}
 	return events

@@ -286,8 +286,9 @@ func (pr *production) walk() {
 }
 
 // plain processes a non-auto item at index i and reports whether it
-// finished (count reached 0). A unit that cannot be finished becomes
-// partial and stops the queue.
+// finished (count reached 0). Installation orders are first cut to
+// max(maximum, operable) − installed (KERNEL.md "Caps", CONFIRMED PQ C10).
+// A unit that cannot be finished becomes partial and stops the queue.
 func (pr *production) plain(i int) bool {
 	it := &pr.planet.Queue[i]
 	if inst := pr.installed(it.Kind); inst != nil {
@@ -315,7 +316,8 @@ func (pr *production) plain(i int) bool {
 }
 
 // autoInstall processes Auto Mines/Factories/Defenses at index i and returns
-// the next index.
+// the next index. They build at most operable − installed (KERNEL.md
+// "Caps", CONFIRMED PQ C04, C09, C13, C14).
 func (pr *production) autoInstall(i int) int {
 	it := pr.planet.Queue[i]
 	c := pr.cost(it.Kind)

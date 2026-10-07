@@ -2,8 +2,9 @@
 
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
-`docs/KERNEL.md`, `docs/PARITY.md`, and the public FM-001..004 movement
-corpus (`experiments/fm00N`), all as of stars-elegy `main` at `b927632`. Nothing here comes from
+`docs/KERNEL.md` (synced to stars-elegy PR #13 head `bda2c3b`, which
+corrects the three findings below), `docs/PARITY.md`, and the public
+FM-001..004 movement corpus (`experiments/fm00N`, `main` at `b927632`). Nothing here comes from
 the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
@@ -46,59 +47,56 @@ friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
 Engines, warp-10 losses, AR colonist losses, Radiating Hydro-Ram colonist
 deaths and transport/lay-mines tasks.
 
-## Spec gaps and choices
+## Corrected upstream
 
-Questions for stars-elegy, with what the code does meanwhile. Items marked
-*corpus* are where the public corpus decides something KERNEL.md does not
-state.
+This implementation surfaced three places where KERNEL.md disagreed with
+the public corpus. stars-elegy PR #13 corrects them, and the code and
+`TestConfirmed*` tests follow the corrected text:
 
-1. **Auto item caps.** KERNEL.md "Caps" says production caps are
-   `max(maximum, operable) − installed` for both auto items and plain
-   installation orders. PQ-001 C04, C09, C13 and C14 only fit `operable −
-   installed` for auto items (C09: 55 mines, not all the resources' worth).
-   Code: auto items use `operable − installed`, plain orders are clipped to
-   `max(maximum, operable) − installed` (C10). *corpus*
-2. **Running dry with exactly enough fuel.** KERNEL.md lowers the warp only
-   when the allowed distance exceeds `R`. FM-002 fleet 24 (fuel 6, cost of
-   36 ly = 6, R 37) moved the full 36 ly and still got the out-of-fuel event
-   and warp 1. Code: a fleet that could not pay for the whole leg and ends
-   the year with 0 mg short of its destination has run dry. Unknown: a
-   fleet that cannot pay for the leg, is not range-limited, and keeps
-   some fuel (no corpus case). *corpus*
-3. **Mutual chases.** When a chaser lands on a target that is chasing it,
-   the target's waypoint is also completed (event "completed orders"), even
-   if the target had already used its movement (FM-001 72, 73; FM-002 40;
-   FM-003 28, 30, 32, 33). KERNEL.md says only that the target stops.
-   *corpus*
-4. **Chasers and fuel.** KERNEL.md gives no fuel limit, running-dry,
+- **Caps by order kind.** Auto Mines/Factories/Defenses build at most
+  `operable − installed`; plain orders are cut to `max(maximum, operable)
+  − installed` (PQ C04, C09, C10, C13, C14).
+- **Running dry.** Fuel 0, limited by `R` or paid a non-zero cost, could
+  not afford the whole leg, and short of the destination (or `R = 0`),
+  even when this year's move was paid in full (FM-002 24, 29).
+- **Waypoint settlement.** After all movement, waypoints aimed at a fleet
+  take its end position and every fleet sitting exactly on its next
+  waypoint completes it, so both sides of a mutual chase complete
+  (FM-001 71/72, FM-002 39/40, FM-003 21/22, 29/30, ...).
+
+## Open spec questions
+
+Not yet answered by KERNEL.md; the code's current choice is given.
+
+1. **Chasers and fuel.** KERNEL.md gives no fuel limit, running-dry,
    top-up or ram-scoop rule for fleets chasing fleets. Code charges fuel on
    the year's total distance only, never below 0.
-5. **Auto Alchemy before an item.** The PQ text covers a ×1 item. Code:
+2. **Auto Alchemy before an item.** The PQ text covers a ×1 item. Code:
    the shortfall is for the item's whole remaining count; when resources
    cover the shortfall, alchemy buys it and the item is processed normally;
    when they do not, the item first takes its partial on current stock and
    alchemy then converts what is left (the order C07's 49% and 46% require).
-6. **Research field switching.** After a level-up moves the leftover to the
+3. **Research field switching.** After a level-up moves the leftover to the
    next field, are further level-ups in the new field checked the same year?
    (Code: no.) Does the choice persist? What does "cheapest field" do (not
    implemented)? With Generalized Research, code checks level-ups in every
    field, and only the current field triggers a switch.
-7. **Depletion clamp.** Is the clamped concentration (`cc`) re-evaluated as
+4. **Depletion clamp.** Is the clamped concentration (`cc`) re-evaluated as
    the concentration drops within one year? It only matters crossing 5
    (25 → 10). Code: re-evaluated.
-8. **Empty queue.** "Contributes nothing to research": does that include the
+5. **Empty queue.** "Contributes nothing to research": does that include the
    research tax? Code: nothing at all.
-9. **Zero maximum population** (Alternate Reality without a starbase):
+6. **Zero maximum population** (Alternate Reality without a starbase):
    the crowding permille divides by zero. Code: treated as fully
    overcrowded.
-10. **Empty planets.** Hostile deaths of `max(1, …)` would act on a planet
-    with no population. Code: a planet with 0 population does not change.
-11. **Cargo ties.** Order of designs with equal `f(w)` when assigning cargo.
-    Code: fleet stack order.
-12. **Mining draws.** Order of the `rand(100)` draws across minerals and
-    planets. Code: planets in id order, ironium, boranium, germanium.
-13. **PG race settings.** KERNEL.md does not state the PG race's factories
+7. **Empty planets.** Hostile deaths of `max(1, …)` would act on a planet
+   with no population. Code: a planet with 0 population does not change.
+8. **Cargo ties.** Order of designs with equal `f(w)` when assigning cargo.
+   Code: fleet stack order.
+9. **Mining draws.** Order of the `rand(100)` draws across minerals and
+   planets. Code: planets in id order, ironium, boranium, germanium.
+10. **PG race settings.** KERNEL.md does not state the PG race's factories
     and mines operated; 10 per 10,000 colonists fits every PQ-001 cap.
-14. **Fixed costs.** Defense (15 + 5/5/5) and alchemy (100) costs are
+11. **Fixed costs.** Defense (15 + 5/5/5) and alchemy (100) costs are
     constants; the Mineral Alchemy LRT and other cost modifiers are not
     modelled.
