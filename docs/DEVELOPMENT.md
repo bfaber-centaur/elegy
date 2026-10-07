@@ -69,8 +69,9 @@ planetary items come from the measured component table (`COMPONENTS.md`).
 
 See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
 [SCANNING-STATUS.md](SCANNING-STATUS.md),
-[COMPONENTS-STATUS.md](COMPONENTS-STATUS.md) and
-[TAKEOVER-STATUS.md](TAKEOVER-STATUS.md) for what is implemented, which
+[COMPONENTS-STATUS.md](COMPONENTS-STATUS.md),
+[TAKEOVER-STATUS.md](TAKEOVER-STATUS.md) and
+[ORDERS-STATUS.md](ORDERS-STATUS.md) for what is implemented, which
 tests are ground truth and which are predictions, and the open spec gaps.
 
 ## Near-term milestones

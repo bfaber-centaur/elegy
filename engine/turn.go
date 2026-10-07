@@ -184,6 +184,7 @@ func GenerateTurn(
 	queue, ev := g.unloadPhase(g.phaseStart())
 	events = append(events, ev...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
+	events = append(events, g.loadPass()...)
 
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
@@ -286,6 +287,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
+	events = append(events, g.loadPass()...)
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
 		if p, ok := start[f.ID]; ok && p != f.Pos {

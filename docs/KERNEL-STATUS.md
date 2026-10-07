@@ -43,7 +43,7 @@ research level-ups; battles, bombing and the after-movement takeover tasks
 before-movement takeover tasks (unloads, colonize, drops) come first.
 
 Not modelled yet: order application, waypoint tasks other than unloads and
-colonize (load, scrap, merge, transfer), space objects, random events, mine
+colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects, random events, mine
 sweeping,
 terraforming, remote mining, scores, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
