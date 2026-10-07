@@ -780,6 +780,48 @@ func TestConfirmedTechAttemptLocation(t *testing.T) {
 	}
 }
 
+func TestPredictionTechAttemptRules(t *testing.T) {
+	// COMBAT.md "Tech from battle" (stars-elegy #31). countRand returns 0,
+	// so each attempt stops after its first draw: draws = attempts.
+	d := []Design{testDesign(tFrigate, 10)}
+	setup := func() (testBattle, *countRand) {
+		n := &countRand{}
+		tb := newTestBattle(n, d, tok(d, 0, 2, 1), tok(d, 0, 3, 1))
+		tb.g.Players = make([]Player, 4)
+		tb.players, tb.involved = []int{2, 3}, 2
+		// Players 0 and 1 have fleets at the location but are not in the
+		// battle: observers = 0b11.
+		tb.g.Fleets = []Fleet{{Owner: 0}, {Owner: 1}, {Owner: 2}, {Owner: 3}}
+		tb.loc.fleets = []int{0, 1, 2, 3}
+		return tb, n
+	}
+
+	// Deep space, n = 2: both participants attempt. LEGACY BUG: player 1
+	// qualifies (1 AND 0b11 ≠ 0), player 0 never does.
+	tb, n := setup()
+	tb.techAttempts(map[int]bool{})
+	if n.n != 3 {
+		t.Errorf("%d attempts, want 3 (players 1, 2, 3)", n.n)
+	}
+
+	// n = 2: a wiped-out participant makes no attempt.
+	tb, n = setup()
+	tb.tokens[1].ships, tb.tokens[1].dead = 0, true
+	tb.techAttempts(map[int]bool{})
+	if n.n != 2 {
+		t.Errorf("%d attempts, want 2 (players 1, 2)", n.n)
+	}
+
+	// n ≠ 2: every participant attempts, whatever it lost.
+	tb, n = setup()
+	tb.involved = 3
+	tb.tokens[1].ships, tb.tokens[1].dead = 0, true
+	tb.techAttempts(map[int]bool{})
+	if n.n != 3 {
+		t.Errorf("%d attempts, want 3", n.n)
+	}
+}
+
 func TestPredictionStartSquareFlatTable(t *testing.T) {
 	// Entry n(n−1)/2 + rank of the flattened table: n = 1 gives (4,4) then
 	// (1,4); a third player in P with n = 2 runs into row 3.

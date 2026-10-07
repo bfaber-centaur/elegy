@@ -163,7 +163,8 @@ func (b *battle) beam(fi int, w weaponSlot) {
 		}
 		e := b.tokens[ti]
 		dp := R * t.capacitor / 100 * e.deflector / 100
-		// Dropoff uses the part's own range, without the starbase +1.
+		// Dropoff uses the part's own range, without the starbase +1; a
+		// range-0 beam has none (BINARY-ONLY).
 		if x := dist(t.x, t.y, e.x, e.y); x > 0 && p.Range > 0 {
 			dp = (100 - x*10/p.Range) * dp / 100
 		}

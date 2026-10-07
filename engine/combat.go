@@ -93,43 +93,73 @@ func (b *battle) finish() {
 	}
 }
 
+// legacyObserverTechMask reproduces the original's LEGACY BUG in the
+// tech attempt of players outside the battle (COMBAT.md "Tech from
+// battle", BINARY-ONLY): it tests the player's number against the
+// observer bitmask instead of the player's bit. Set it to false to test
+// the bit, as the game means to.
+const legacyObserverTechMask = true
+
 // techAttempts makes the battle's tech-from-battle attempts (COMBAT.md
-// "Tech from battle"; who attempts is BINARY-ONLY in detail).
+// "Tech from battle", BINARY-ONLY in detail): every player of the game is
+// considered once, in player-number order.
 func (b *battle) techAttempts(gained map[int]bool) []Event {
 	g := b.g
-	owner := NoOwner
+	owner, sbOwnerless := NoOwner, false
 	if b.loc.planet >= 0 {
-		owner = g.Planets[b.loc.planet].Owner
+		pl := g.Planets[b.loc.planet]
+		owner, sbOwnerless = pl.Owner, !pl.HasStarbase
 	}
-	locationOK := func(p int) bool { return owner == NoOwner || owner == p }
-	simple := len(b.players) == 2 && len(b.tokens) == 2
-	var events []Event
-	involved := false
+	inBattle := map[int]bool{}
 	for _, p := range b.players {
-		if p == owner {
-			involved = true
-		}
-		if !locationOK(p) {
-			continue
-		}
-		if !simple {
-			// ASSUMPTION A9 (docs/COMBAT-STATUS.md): in larger battles,
-			// only when another player's ships were destroyed. COMBAT.md
-			// gives this as "probably" and "not fully settled".
-			other := false
-			for q := range b.killed {
-				if q != p {
-					other = true
-				}
-			}
-			if !other {
-				continue
-			}
-		}
-		events = append(events, b.techAttempt(p, gained)...)
+		inBattle[p] = true
 	}
-	if owner != NoOwner && !involved {
-		events = append(events, b.techAttempt(owner, gained)...)
+	// What each participant still has, and whether an Alternate Reality
+	// starbase was destroyed.
+	has := map[int]bool{}
+	arStarbaseLost := false
+	for _, t := range b.tokens {
+		switch {
+		case t.starbase && t.dead:
+			if g.Players[t.player].Race.PRT == PRTAlternateReality {
+				arStarbaseLost = true
+			}
+		case t.starbase || t.ships > 0:
+			has[t.player] = true
+		}
+	}
+	// Observers: players present but not in the battle, and the owner of
+	// a planet there without a starbase.
+	observers := 0
+	present := map[int]bool{}
+	for _, i := range b.loc.fleets {
+		o := g.Fleets[i].Owner
+		present[o] = true
+		if !inBattle[o] {
+			observers |= 1 << o
+		}
+	}
+	if owner != NoOwner && sbOwnerless {
+		observers |= 1 << owner
+	}
+	var events []Event
+	for p := range g.Players {
+		attempt := false
+		switch {
+		case inBattle[p]:
+			attempt = (owner == NoOwner || owner == p) && !arStarbaseLost && (b.involved != 2 || has[p])
+		case owner == p:
+			attempt = true
+		default:
+			mask := 1 << p
+			if legacyObserverTechMask {
+				mask = p
+			}
+			attempt = mask&observers != 0 && present[p]
+		}
+		if attempt {
+			events = append(events, b.techAttempt(p, gained)...)
+		}
 	}
 	return events
 }

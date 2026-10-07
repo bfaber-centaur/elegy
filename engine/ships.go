@@ -82,10 +82,9 @@ type Hull struct {
 // slot's count × part cost, each adjusted for miniaturization, race and
 // Bleeding Edge Technology. The terraform and planetary cases of that
 // rule do not arise: ship and starbase designs have no such parts.
-//
-// ASSUMPTION A10 (docs/COMBAT-STATUS.md): a starbase token's cost for
-// target choice is this owner cost, without the starbase reduction
-// (ISB/AR, then halved) that COMPONENTS.md gives for starbase designs.
+// A starbase token's cost for target choice is this plain owner cost; the
+// starbase build-cost reduction applies only to production (COMBAT.md
+// "Target choice", BINARY-ONLY).
 func designCost(d Design, race Race, levels [NumFields]int) Cost {
 	c := itemCost(d.Hull.Cost, d.Hull.TechReq, PartOther, race, levels)
 	for _, s := range d.Slots {

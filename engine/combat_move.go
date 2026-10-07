@@ -296,9 +296,10 @@ func (bt *battle) estimate(a, b *token, x int, ignoreRange bool) int {
 		if p.Kind == PartBeam {
 			v := p.Damage * w.count
 			v = v * a.capacitor / 100
-			// COMBAT.md: "If x > 0". The r > 0 test only guards the
-			// division for a range-0 beam, which COMBAT.md does not cover
-			// (ASSUMPTION A7, docs/COMBAT-STATUS.md).
+			// COMBAT.md: "If x > 0", with r including the starbase +1.
+			// ASSUMPTION A7 (docs/COMBAT-STATUS.md): r is 0 only for a
+			// ship's range-0 beam when range is ignored; the estimate then
+			// skips the dropoff, as real fire does for range 0.
 			if x > 0 && r > 0 {
 				v = v + (x*v)/(-10)/r
 			}

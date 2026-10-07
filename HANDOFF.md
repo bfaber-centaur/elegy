@@ -12,7 +12,7 @@ commit and implements `docs/SCANNING.md`.
 - This branch adds the battle phase: `engine/ships.go` (parts, hulls,
   design cost), `battleplan.go`, `combat_*.go`, and
   `docs/COMBAT-STATUS.md`. It follows COMBAT.md on stars-elegy `main` at
-  `a6ac76e` plus open #31 (answers to A1–A4, A8) and the owner-cost rule
+  `a6ac76e` plus open #31 (answers to the A-list) and the owner-cost rule
   of COMPONENTS.md in open #30. Merge order: stars-elegy #30, #31, then
   elegy #5.
 - `go vet ./...` and `go test ./...` are green. `go test -run Confirmed
@@ -23,15 +23,17 @@ commit and implements `docs/SCANNING.md`.
 - Every CB vector in COMBAT.md/PARITY.md that needs no part catalogue
   passes, including the 132% capacitor of CB-002 C4. Capacitors compound
   per item, as current COMBAT.md says.
-- Where COMBAT.md is silent or unsettled, four explicit assumptions or
-  placeholders remain (A6, A7, A9, A10). They are marked in the code and
-  listed in COMBAT-STATUS.md. None is claimed as Stars! behavior. The
-  others (A1–A5, A8) are now cited rules.
+- Where COMBAT.md is silent or unsettled, two explicit assumptions
+  remain: A6 (plan-0 X on a turn's first location, an open experiment)
+  and A7 (a range-0 beam in the estimate when range is ignored). They are
+  marked in the code and listed in COMBAT-STATUS.md. The others are now
+  cited rules, including the observer tech-attempt LEGACY BUG (switch
+  `legacyObserverTechMask`).
 
 ## What still matters
 
-- A10 (starbase cost in target choice) is with the spec author. A6 and
-  A9 only matter with three or more players or larger battles.
+- A6 only matters with three or more players, and A7 only for a ship
+  with a range-0 beam.
 - No part catalogue yet. Plug the public component table into `Design`
   when stars-elegy `docs/COMPONENTS.md` lands.
 
