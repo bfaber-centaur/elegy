@@ -2,7 +2,7 @@
 
 Copied unchanged from the public `bfaber-centaur/stars-elegy` repository,
 `experiments/fm00N/fm00N.spec` and `experiments/fm00N/results.tsv`
-(PR #11 head `4766d27`). Each `.spec` line is one fleet's starting state and
+(`main` at `b927632`). Each `.spec` line is one fleet's starting state and
 orders; each `results.tsv` row is the original game's observed state of that
 fleet one year later. FM-004's results use a different column layout (read
 by `TestConfirmedFleetMovementCorpusFM004`). See `docs/PARITY.md`, "Fleet

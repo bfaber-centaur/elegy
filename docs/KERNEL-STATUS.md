@@ -2,8 +2,8 @@
 
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
-`docs/KERNEL.md` (PR #12 head `44ae1bd`), `docs/PARITY.md`, and the public
-FM-001..004 movement corpus (PR #11 head `4766d27`). Nothing here comes from
+`docs/KERNEL.md`, `docs/PARITY.md`, and the public FM-001..004 movement
+corpus (`experiments/fm00N`), all as of stars-elegy `main` at `b927632`. Nothing here comes from
 the private archaeology repositories.
 
 ## Tests: ground truth versus predictions

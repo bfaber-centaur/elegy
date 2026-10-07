@@ -3,7 +3,7 @@
 ## Current question
 
 Grow the engine from the public stars-elegy specification. The peaceful
-kernel and ordinary fleet movement from `docs/KERNEL.md` (stars-elegy PR #12)
+kernel and ordinary fleet movement from stars-elegy `docs/KERNEL.md` (on `main`)
 are implemented; the next work is either closing the spec gaps or the next
 subsystem the specification covers.
 
