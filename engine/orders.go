@@ -364,10 +364,13 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 // 1000 .. 1000 + W). A planet or fleet target takes that object's
 // position.
 //
-// ASSUMPTION L6: a warp outside 0..10, a negative transport amount, a
-// task Elegy does not model, or a target planet or fleet that does not
-// exist rejects the order. Stargate jumps are not modelled. ORDERS.md
-// gives no other waypoint checks.
+// A warp outside 0..11, a target planet or fleet that does not exist,
+// and a negative transport amount reject the order (ORDERS.md "Waypoint
+// warp, target and transport", stars-elegy #51, chosen rule). Warp 11 is
+// the stargate hop, which Elegy does not model yet, so it is rejected as
+// not modelled.
+//
+// ASSUMPTION L6: a task Elegy does not model rejects the order.
 type WaypointOrder struct {
 	Fleet     int
 	Task      Task
@@ -384,8 +387,11 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	wps := make([]Waypoint, len(o.Waypoints))
 	for k, wp := range o.Waypoints {
-		if wp.Warp < 0 || wp.Warp > 10 {
+		if wp.Warp < 0 || wp.Warp > 11 {
 			return fmt.Errorf("waypoint %d warp %d: %w", k, wp.Warp, ErrOutOfRange)
+		}
+		if wp.Warp == 11 {
+			return fmt.Errorf("waypoint %d stargate hop: %w", k, ErrNotModelled)
 		}
 		if err := validTask(wp.Task); err != nil {
 			return err

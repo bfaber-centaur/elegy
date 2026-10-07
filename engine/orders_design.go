@@ -67,11 +67,24 @@ func (g *Game) designInUse(d int) bool {
 // player is not entitled to are dropped and an un-entitled hull is
 // rejected (ORDERS.md "Design legality", Elegy's chosen rule).
 //
-// ASSUMPTION L11: a slot number outside the player's slots, a hull that
-// is a starbase hull for a ship slot or a ship hull for a starbase slot,
-// a name longer than maxNameLength, and a new design for a slot whose
-// design has ships or a starbase in play are rejected. ORDERS.md does
-// not say what replacing a design in use does.
+// A slot number outside the player's slots (LIMITS.md) and a name longer
+// than maxNameLength are rejected. A new design for a slot whose design
+// has ships or a starbase in play is refused (ORDERS.md "Design change
+// into an occupied slot", stars-elegy #51, chosen rule; the original is
+// BINARY-ONLY). Production has no ship items yet, so a queued design does
+// not count.
+//
+// Malformed fills are dropped or cut, never rejecting the design
+// (ORDERS.md "Design read, four malformed cases", #51): a part the slot
+// does not take is dropped, a count over the slot's capacity is cut to
+// it, then ReadDesign strips parts above tech and back-fills an empty
+// engine slot.
+//
+// ASSUMPTION L11: a hull of the wrong kind for the slot (a starbase hull
+// for a ship slot, or the reverse) rejects the design. A fill naming a
+// slot the hull lacks, or a count below 1, is dropped like a part the
+// slot does not take; two fills for one slot, or an engine slot holding
+// fewer than its capacity, still reject the design (NewDesign).
 //
 // Mystery Trader items are not modelled: the player owns none.
 type DesignOrder struct {
@@ -97,7 +110,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		}
 	}
 	pl := &g.Players[player]
-	d, err := cat.ReadDesign(o.Name, o.Hull, o.Fills, pl.Race, pl.Research.Levels, nil)
+	d, err := cat.ReadDesign(o.Name, o.Hull, fitFills(cat, o.Hull, o.Fills), pl.Race, pl.Research.Levels, nil)
 	if err != nil {
 		return err
 	}
@@ -115,13 +128,48 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 	return nil
 }
 
-// DeleteDesignOrder empties one of the player's design slots. A starbase
-// of the design is removed from its planet, which keeps its population
-// (KERNEL.md "Maximum population", BINARY-ONLY).
-//
-// ASSUMPTION L12: ships of a deleted design are removed, and a fleet left
-// without ships is removed. No public spec says what happens to them.
-// The entry in Game.Designs stays, so other indices do not move.
+// fitFills drops each fill whose part the hull's slot does not take and
+// cuts a count over the slot's capacity to it (ORDERS.md "Design read,
+// four malformed cases", cases 2 and 3). An unknown hull or part is left
+// for ReadDesign to reject.
+func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
+	hc, ok := cat.Lookup(hull)
+	if !ok {
+		return fills
+	}
+	h, err := hc.Hull()
+	if err != nil {
+		return fills
+	}
+	var out []SlotFill
+	for _, f := range fills {
+		pc, ok := cat.Lookup(f.Part)
+		if !ok {
+			out = append(out, f)
+			continue
+		}
+		p, err := pc.Part()
+		if err != nil {
+			out = append(out, f)
+			continue
+		}
+		if f.Slot < 0 || f.Slot >= len(h.Slots) || f.Count < 1 || !kindIn(p.Kind, h.Slots[f.Slot].Kinds) {
+			continue
+		}
+		f.Count = min(f.Count, h.Slots[f.Slot].Max)
+		out = append(out, f)
+	}
+	return out
+}
+
+// DeleteDesignOrder empties one of the player's design slots (ORDERS.md
+// "Design delete effect", stars-elegy #51, chosen rule): ships of the
+// design are removed, a fleet left without ships is removed, and a
+// starbase of the design is removed from its planet, which keeps its
+// population (KERNEL.md "Maximum population", BINARY-ONLY). The player's
+// later slots of the same kind move down one, as later battle plans do.
+// Production has no ship items yet, so no queue entry is dropped. The
+// entry in Game.Designs stays, so other indices do not move.
 type DeleteDesignOrder struct {
 	Starbase bool
 	Slot     int
@@ -134,6 +182,11 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	d := g.DesignSlots[i].Design
 	g.DesignSlots = append(g.DesignSlots[:i:i], g.DesignSlots[i+1:]...)
+	for k := range g.DesignSlots {
+		if s := &g.DesignSlots[k]; s.Owner == player && s.Starbase == o.Starbase && s.Slot > o.Slot {
+			s.Slot--
+		}
+	}
 	for k := range g.Planets {
 		p := &g.Planets[k]
 		if p.Owner == player && p.HasStarbase && p.StarbaseDesign == d {

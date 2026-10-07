@@ -302,10 +302,13 @@ func TestPredictionWaypointClamp(t *testing.T) {
 	g := ordersGame()
 	errs, _ := apply(g, 0,
 		WaypointOrder{Fleet: 1, Waypoints: []Waypoint{{Pos: Point{2000, 900}, Warp: 6}, {Target: TargetPlanet, ID: 2, Warp: 5}}},
-		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Pos: Point{1200, 1200}, Warp: 11}}},
+		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Pos: Point{1200, 1200}, Warp: 12}}},
 		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Target: TargetPlanet, ID: 9}}},
+		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Pos: Point{1200, 1200}, Warp: 11}}},
 	)
-	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrNoSuchObject) {
+	// ORDERS.md Q13 (chosen rule): warp outside 0..11 and a missing
+	// target are rejected; warp 11, the stargate hop, is not modelled.
+	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrNoSuchObject) || !errors.Is(errs[3], ErrNotModelled) {
 		t.Fatalf("errors %v", errs)
 	}
 	want := []Waypoint{{Pos: Point{1400, 1000}, Warp: 6}, {Pos: Point{1200, 1200}, Warp: 5, Target: TargetPlanet, ID: 2}}
@@ -443,18 +446,22 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 }
 
 func TestCargoChecks(t *testing.T) {
-	// ASSUMPTION L7: the fleet must be at the target; fuel and planets do
-	// not mix.
+	// ORDERS.md Q4 (#51, chosen rules): the fleet must be at the target;
+	// fuel to a planet is dropped from the order and its minerals still
+	// move.
 	g := ordersGame()
 	errs, _ := apply(g, 0,
 		CargoOrder{Fleet: 1, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-1}},
-		CargoOrder{Fleet: 1, Target: TargetPlanet, ID: 1, Amounts: [NumCargo + 1]int{0, 0, 0, 0, -1}},
+		CargoOrder{Fleet: 1, Target: TargetPlanet, ID: 1, Amounts: [NumCargo + 1]int{-5, 0, 0, 0, -1}},
 		CargoOrder{Fleet: 1, Target: TargetFleet, ID: 1},
 	)
-	for i, want := range []error{ErrNotTogether, ErrOutOfRange, ErrNoSuchObject} {
+	for i, want := range []error{ErrNotTogether, nil, ErrNoSuchObject} {
 		if !errors.Is(errs[i], want) {
 			t.Errorf("order %d: %v, want %v", i, errs[i], want)
 		}
+	}
+	if f := g.Fleets[0]; f.Fuel != 150 || f.Cargo.Minerals[Ironium] != 25 || g.Planets[0].Surface[Ironium] != 45 {
+		t.Errorf("fuel %d, fleet Fe %d, planet Fe %d; want 150, 25, 45", f.Fuel, f.Cargo.Minerals[Ironium], g.Planets[0].Surface[Ironium])
 	}
 }
 
@@ -496,6 +503,52 @@ func TestPredictionDesignOrders(t *testing.T) {
 	}
 	if g.fleetIndex(2) >= 0 || len(g.Fleets[0].Stacks) != 1 {
 		t.Errorf("fleets after delete %+v", g.Fleets)
+	}
+}
+
+func TestDesignMalformedFills(t *testing.T) {
+	// ORDERS.md "Design read, four malformed cases" (#51): a part the slot
+	// does not take is dropped, a count over capacity is cut, and an
+	// emptied engine slot is back-filled; the design is kept.
+	g := ordersGame()
+	errs, _ := apply(g, 0, DesignOrder{Slot: 0, Name: "S", Hull: "Scout", Fills: []SlotFill{
+		{Slot: 0, Part: "Beta Torpedo", Count: 1},
+		{Slot: 2, Part: "Fuel Tank", Count: 9},
+		{Slot: 7, Part: "Fuel Tank", Count: 1},
+	}})
+	if errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	di, _ := g.PlayerDesign(0, false, 0)
+	d := g.Designs[di]
+	if d.Engine.Name != basicEngine || len(d.Slots) != 2 || d.Slots[1].Count != 1 {
+		t.Errorf("design %+v", d)
+	}
+}
+
+func TestDesignDeleteRenumbers(t *testing.T) {
+	// ORDERS.md "Design delete effect" (#51): later slots move down one,
+	// as battle plans do; the other kind's slots stay.
+	g := ordersGame()
+	fill := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
+	apply(g, 0,
+		DesignOrder{Slot: 0, Name: "A", Hull: "Scout", Fills: fill},
+		DesignOrder{Slot: 1, Name: "B", Hull: "Scout", Fills: fill},
+		DesignOrder{Slot: 2, Name: "C", Hull: "Scout", Fills: fill},
+		DesignOrder{Starbase: true, Slot: 1, Name: "Fort", Hull: "Orbital Fort"},
+	)
+	c, _ := g.PlayerDesign(0, false, 2)
+	if errs, _ := apply(g, 0, DeleteDesignOrder{Slot: 1}); errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	if got, ok := g.PlayerDesign(0, false, 1); !ok || got != c {
+		t.Errorf("slot 1 holds %d (%v), want %d", got, ok, c)
+	}
+	if _, ok := g.PlayerDesign(0, false, 2); ok {
+		t.Error("slot 2 still filled")
+	}
+	if _, ok := g.PlayerDesign(0, true, 1); !ok {
+		t.Error("starbase slot 1 moved")
 	}
 }
 

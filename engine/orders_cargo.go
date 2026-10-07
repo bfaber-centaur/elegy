@@ -49,12 +49,19 @@ const (
 // TK-414), so Elegy treats it as acting on a foreign object (ORDERS.md
 // "Ownership", chosen rule).
 //
-// ASSUMPTION L7: the fleet must be at the target's position (in orbit
-// of the planet); fuel to or from a planet rejects the order (KERNEL.md
-// "Fuel cannot be unloaded onto a planet" covers the waypoint unload, not
-// a direct transfer); any failed check rejects the whole order; and any
-// fleet with cargo space may carry colonists (ORDERS.md says the
-// condition exists but is not pinned).
+// Preconditions (ORDERS.md "Elegy implementation Q4", stars-elegy #51,
+// chosen rules): the fleet must be at the target's position, or the
+// order is refused; there is no deep-space jettison (a target is a planet
+// or a fleet); fuel to or from a planet is dropped from the order, and
+// its minerals and colonists still move (planets hold no fuel, FO-01 E).
+// Any fleet with free cargo space may carry colonists (ORDERS.md "Elegy
+// implementation Q3", chosen rule).
+//
+// ASSUMPTION L7: a transfer between the player's own fleets moves the
+// amounts given, clamped to source and free space. ORDERS.md "Transfer
+// between the player's own fleets" reads the original's order as a
+// capacity rebalance (BINARY-ONLY); the contradiction is open until
+// oracle case CO-04. Any other failed check rejects the whole order.
 type CargoOrder struct {
 	Fleet   int
 	Target  TargetKind // TargetPlanet or TargetFleet
@@ -106,6 +113,9 @@ func (o CargoOrder) apply(g *Game, player int, a *Applied) error {
 		return err
 	}
 	f := &g.Fleets[fi]
+	if o.Target == TargetPlanet {
+		o.Amounts[CargoFuel] = 0
+	}
 	taking := false
 	for _, v := range o.Amounts {
 		taking = taking || v > 0
@@ -119,9 +129,6 @@ func (o CargoOrder) apply(g *Game, player int, a *Applied) error {
 		p := &g.Planets[pi]
 		if p.Pos != f.Pos {
 			return fmt.Errorf("cargo: fleet %d and planet %d: %w", f.ID, p.ID, ErrNotTogether)
-		}
-		if o.Amounts[CargoFuel] != 0 {
-			return fmt.Errorf("cargo: fuel and planet %d: %w", p.ID, ErrOutOfRange)
 		}
 		if p.Owner != player {
 			if taking {
