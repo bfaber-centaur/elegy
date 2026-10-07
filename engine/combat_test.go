@@ -957,3 +957,52 @@ func TestPredictionStarbaseJammer(t *testing.T) {
 		t.Errorf("starbase jammer %d, want 15", sb.jammer)
 	}
 }
+
+func TestPredictionPlan0AbsentPlayer(t *testing.T) {
+	// Plan-0 X is a player of the game not at the location (C = player 0,
+	// whose lone hauler was examined first): C's set names B, so Q = {B,
+	// C} and n = 2. A (player 1, the station) starts on (1,4), B (player
+	// 2) on (8,5), and the battle ends after round 0's movement with no
+	// shots.
+	station := testDesign(Hull{Name: "Space Station", Armor: 500, Initiative: 14, Starbase: true}, 100, Slot{tLaser, 8})
+	frig := testDesign(tFrigate, 10, Slot{tLaser, 1})
+	g := &Game{
+		Players: []Player{
+			{},
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 2}}},
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Secondary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationNeutral, RelationNeutral, RelationFriend}},
+		},
+		Designs: []Design{station, frig, testDesign(Hull{Name: "Hauler", Armor: 20}, 5)},
+		Planets: []Planet{{ID: 1, Pos: Point{5, 5}, Owner: 1, HasStarbase: true, StarbaseDesign: 0}},
+		Fleets: []Fleet{
+			{ID: 1, Owner: 0, Pos: Point{50, 50}, Stacks: []Stack{{Design: 2, Count: 1}}},
+			{ID: 2, Owner: 2, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 5}}},
+		},
+	}
+	var prev locationHistory
+	var b *battle
+	for _, loc := range g.locations() {
+		sets, inv, n := g.whoFights(loc, prev)
+		prev = locationHistory{any: true, battle: inv != nil, lastOwner: g.Fleets[loc.fleets[len(loc.fleets)-1]].Owner}
+		if inv != nil {
+			b = &battle{g: g, rng: rand.New(rand.NewSource(1)), loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+		}
+	}
+	if b == nil || b.involved != 2 || !reflect.DeepEqual(b.players, []int{1, 2}) {
+		t.Fatalf("battle %+v", b)
+	}
+	b.setup(map[int]bool{})
+	for _, tk := range b.tokens {
+		want := [2]int{8, 5}
+		if tk.starbase {
+			want = [2]int{1, 4}
+		}
+		if got := [2]int{tk.x, tk.y}; got != want {
+			t.Errorf("token of player %d on %v, want %v", tk.player, got, want)
+		}
+	}
+	b.fight()
+	if len(b.hits) != 0 || b.round != 0 {
+		t.Errorf("%d hits, ended in round %d; want none in round 0", len(b.hits), b.round)
+	}
+}

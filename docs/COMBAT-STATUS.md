@@ -2,8 +2,9 @@
 
 The battle phase in `engine/` follows the public combat specification,
 stars-elegy `docs/COMBAT.md` as merged in PR #19 (`main` at `3968ec2`)
-plus the implementer answers on the PR #19 branch at `33a5603` (per-target
-torpedo hits, the salvage limit, no leftover past a starbase, capacitors),
+plus the implementer answers in stars-elegy PR #24 (branch at `c5dda13`:
+per-target torpedo hits, the salvage limit, no leftover past a starbase,
+capacitors, self-entries in attack sets, absent players in retaliation),
 the turn order in `docs/KERNEL.md`, and the measured data in
 `docs/PARITY.md` "Combat" (CB-000..CB-022). Nothing else was used.
 
@@ -27,7 +28,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Aggressors; only fleets start battles | `whoFights` | CONFIRMED | `TestConfirmedOnlyFleetsStartBattles` |
 | Starbase joins with plan 0 | `whoFights` | CONFIRMED | `TestConfirmedStarbaseJoinsWithPlan0` |
 | Procedure: P, Q, retaliation, friends | `whoFights` | BINARY-ONLY (firing back CONFIRMED) | `TestPredictionBattleTurn` |
-| LEGACY BUG plan 0 "everyone"/named player, one-player battle | `legacyPlan0Recipient`, `write` (switch `legacyPlan0`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022) | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient` |
+| LEGACY BUG plan 0 "everyone"/named player, one-player battle | `legacyPlan0Recipient`, `write` (switch `legacyPlan0`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022) | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient`, `TestPredictionPlan0AbsentPlayer` |
 | Token cap | `capTokens` | BINARY-ONLY | `TestPredictionTokenCap` |
 | Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 2 and n = 1 | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionStartSquareFlatTable` |
 | Setup: dump cargo, jitter, shuffle | `setup` | BINARY-ONLY | `TestPredictionBattleTurn` |
@@ -77,11 +78,6 @@ the spec says otherwise.
 - **Part and hull values.** Elegy has no part catalogue yet; designs carry
   their hull's and parts' values and base costs. A public component table
   (stars-elegy `docs/COMPONENTS.md`) is planned and can fill `Design`.
-- **Own tokens are never targets**, even when the plan-0 LEGACY BUG names
-  a player in its own set (that set still keeps the player in at round
-  step 5, as CB-022 needs).
-- **Retaliation** runs over every player of the game, as written, so an X
-  that is not present can count in `n`.
 - **Players still in the battle** while firing are those in after step 5
   that still have a live token; a player out at step 5 does not fire.
 - **Beam estimate** at distance 0 or range 0 skips the dropoff term; the
