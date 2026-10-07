@@ -130,15 +130,14 @@ func (g *Game) write(sets attackSets, x, owner int, plan BattlePlan) {
 // legacyPlan0Recipient reproduces the original's LEGACY BUG for a
 // starbase whose owner's plan 0 attacks "everyone" or a named player: the
 // set is written to another player X (COMBAT.md "LEGACY BUG: plan 0 ...",
-// CONFIRMED CB-011..013, CB-022). X is player 0 when the previously
+// CONFIRMED CB-011..013, CB-022, CB-035). X is player 0 when the previously
 // examined location had a battle, else the owner of that location's last
 // fleet. Set legacyPlan0 to false to write to the owner instead.
 //
-// PLACEHOLDER A6 (docs/COMBAT-STATUS.md): for the first location of a
-// turn COMBAT.md says X is not determined (left over from earlier
-// processing; neither player in the two-player CB-022). Elegy treats it
-// as a value that is not a player, so plan 0 contributes nothing (ok is
-// false). With three or more players the original may differ.
+// For the first location of a turn X is not determined (COMBAT.md,
+// BINARY-ONLY; never a player of the game in CB-022 and in 36 runs of
+// CB-035). COMBAT.md's chosen rule for Elegy: there plan 0 contributes
+// nothing (ok is false).
 const legacyPlan0 = true
 
 type locationHistory struct {

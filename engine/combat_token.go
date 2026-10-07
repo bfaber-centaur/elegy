@@ -212,9 +212,9 @@ func battleWarp(e Engine) int {
 }
 
 // speedCode is a ship design's battle speed code for a ship of mass
-// (design mass plus its cargo share), before the dampener (COMBAT.md
-// "Token values"; CONFIRMED by the designer, CB-000, without the
-// battle-only terms).
+// (battleMass), before the dampener (COMBAT.md "Token values"; CONFIRMED
+// by the designer, CB-000; War Monger and cargo in battle, CB-038; dump,
+// CB-025).
 func speedCode(d Design, race Race, mass int, dumped bool) int {
 	if d.Engines <= 0 {
 		return 0

@@ -2,9 +2,9 @@
 
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
-`docs/KERNEL.md`, `docs/PARITY.md` (including KX-001) and the public FM-001..004 movement
-corpus (`experiments/fm00N`), as of stars-elegy `main` at `6d86846` (after PR #18: partial
-percentage, limiting component, and prefix-after-auto-item rules).
+`docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 and KX-002) and the public FM-001..004
+movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `004b4dc` (after PR #35:
+KX-002 and the overcrowding correction).
 Nothing here comes from the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
@@ -20,12 +20,12 @@ KERNEL.md gives every rule a status. Test names follow it:
 
 | Area | Code | Ground truth | Predictions |
 |---|---|---|---|
-| Habitability | `habitability.go` | center → 100 | 7 KERNEL vectors |
-| Maximum population | `population.go` | hab 100 → 10,000 | HE, JOAT, OBRM, hab < 5, AR |
-| Population growth and carry | `population.go` | PG-001..003, 36 years of P and carry | 6 KERNEL vectors (g < 1000, frozen, overcrowded, zero growth, ...), hostile deaths, empty planets, HE ×2 |
-| Resources, caps | `economy.go` | PG resources, PQ operable caps, AR resources (floating E/R0) and mines (KX-001 Z2, Z3) | maximums, over-max E |
-| Mining | `mining.go` | PG002 concentration and fraction 2407–2411 | random +1 draw, homeworld floor, clamp re-evaluated, draw order |
-| Research | `research.go` | PG003 energy 2408–2436, level cost | other cost settings, slower tech, several levels, next field, same-year switch, explicit/lowest persistence, GR, maxed field |
+| Habitability | `habitability.go` | center → 100; KX-002 H1–H6 | 70, 50, 50 → 79 |
+| Maximum population | `population.go` | hab 100 → 10,000; KX-002 hab 92, 58, 41, 3, hostile; HE, JOAT, OBRM (P1–P3) | JOAT+OBRM, AR |
+| Population growth and carry | `population.go` | PG-001..003, 36 years of P and carry; KX-002 H3, H4, P1–P3, G1–G3 (overcrowding factor 4), hostile deaths, HE ×2 | 3 KERNEL vectors (uncrowded, quantization, g < 1000), empty planets |
+| Resources, caps | `economy.go` | PG resources, PQ operable caps, AR resources (floating E/R0) and mines (KX-001 Z2, Z3); KX-002 C1–C3 maximums, E above max (G1) | floor of 10, other defense branches, the 2·max limit of E |
+| Mining | `mining.go` | PG002 concentration and fraction 2407–2411; KX-002 N2 (1000 mines, homeworld floor, clamp re-evaluated) | random +1 draw, draw order |
+| Research | `research.go` | PG003 energy 2408–2436, level cost; KX-002 R1, R2 (cost settings), R5 (GR split), R6 (maxed field) | slower tech, several levels, next field, same-year switch, explicit/lowest persistence |
 | Production queue | `production.go` | PQ-001 C01–C14 (15 cases); KX-001 A1–A4 (Auto Alchemy before a ×n item), M1–M4 (item costs) | empty queue (no tax), zero resources |
 | Movement and fuel | `movement.go` | all 224 fleets of FM-001..004 (position, fuel, waypoints, warp, orbit, events), KERNEL fuel/range/chase vectors | no free warp, more than one engine per ship, cargo ties, chaser fuel per round (R, running dry, top-up, ram scoop) |
 | Starbase refuelling | `movement.go` | FM-004 DK | |
@@ -38,10 +38,13 @@ KERNEL.md gives every rule a status. Test names follow it:
 fleet chasers in rounds, then waypoint settlement); mining for every planet
 in id order (population before growth); per planet in id order: resources,
 research tax, production queue (caps use the grown population); population growth for every planet; starbase refuelling;
-research level-ups; year + 1.
+research level-ups; battles, bombing and the after-movement takeover tasks
+(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1. The
+before-movement takeover tasks (unloads, colonize, drops) come first.
 
-Not modelled yet: order application, waypoint tasks (load, unload, colonize,
-scrap), space objects, random events, battles, mine sweeping, repair,
+Not modelled yet: order application, waypoint tasks other than unloads and
+colonize (load, scrap, merge, transfer), space objects, random events, mine
+sweeping,
 terraforming, remote mining, scores, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
 friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
@@ -119,6 +122,15 @@ stars-elegy #18 also settled the limiting component (code follows it;
   A7), straight to alchemy for the lowest component's shortfall with one
   (A6). Changed; A6 failed before.
 - A prefix stays in front of an auto item after it builds (A5). Already so.
+
+KX-002 (stars-elegy PR #35) confirmed many of the BINARY-ONLY rules above;
+their vectors are now `TestConfirmed*` tests in `kernel_kx002_test.go`. It
+also corrected one: overcrowding deaths are `g = 4·max(−300, trunc(c/−10)
++ 99)`, not `2·…` (G1: 12,000 → 11,899 carry 20). Changed. KX-002's
+research switching cases (R3, R4) and several levels a year (R2, G1) agree
+with the rules already pinned by `TestPrediction*` tests; KERNEL.md does
+not give their full starting state, so they stay predictions here.
+Terraforming (KX-002 T1–T3) is not modelled.
 
 ## Elegy decisions
 

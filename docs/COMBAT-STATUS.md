@@ -1,11 +1,12 @@
 # Combat status
 
 The battle phase in `engine/` follows the public combat specification,
-stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `df57443` (PR #19
-with the implementer answers merged in #24 and #31), the owner cost rule
+stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `5a6621a` (PR #19
+with the implementer answers merged in #24 and #31, and rounds 4 and 5
+reconciled in #38: CB-023..CB-041 and CS-003), the owner cost rule
 of `docs/COMPONENTS.md` (merged in #30), the turn order in
 `docs/KERNEL.md`, and the measured data in `docs/PARITY.md` "Combat"
-(CB-000..CB-022). Nothing else was used.
+(CB-000..CB-041). Nothing else was used.
 
 `go test -run Confirmed ./...` runs the CB vectors; `TestPrediction*`
 tests pin BINARY-ONLY rules.
@@ -27,50 +28,49 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Aggressors; only fleets start battles | `whoFights` | CONFIRMED | `TestConfirmedOnlyFleetsStartBattles` |
 | Starbase joins with plan 0 | `whoFights` | CONFIRMED | `TestConfirmedStarbaseJoinsWithPlan0` |
 | Procedure: P, Q, retaliation, friends | `whoFights` | BINARY-ONLY (firing back CONFIRMED) | `TestPredictionBattleTurn` |
-| LEGACY BUG plan 0 "everyone"/named player, one-player battle | `legacyPlan0Recipient`, `write` (switch `legacyPlan0`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022) | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient`, `TestPredictionPlan0AbsentPlayer` |
-| Token cap | `capTokens` | BINARY-ONLY | `TestPredictionTokenCap` |
-| Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 2 and n = 1 | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionStartSquareFlatTable` |
+| LEGACY BUG plan 0 "everyone"/named player, one-player battle; X at the first location (Elegy's chosen rule: contributes nothing) | `legacyPlan0Recipient`, `write` (switch `legacyPlan0`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022, CB-035); the first-location rule BINARY-ONLY | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient`, `TestPredictionPlan0AbsentPlayer` |
+| Token cap: 255, quota 255/n, first pass from the location's first fleet then highest to lowest, re-add pass | `capTokens` | CONFIRMED (CB-039); a starbase and a skipped re-add BINARY-ONLY | `TestConfirmedTokenCap`, `TestPredictionTokenCapStarbase` |
+| Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 1 to 6 and a rank past row n (CB-022, CB-031..CB-036) | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestConfirmedStartSquareFlatTable` |
 | Setup: dump cargo, jitter, shuffle | `setup` | BINARY-ONLY | `TestPredictionBattleTurn` |
 | Energy Dampener | `setup` | CONFIRMED | `TestConfirmedEnergyDampener` |
 | Token values | `combat_token.go` `tokenValues` | CONFIRMED (starbase jammer BINARY-ONLY) | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestPredictionStarbaseJammer` |
 | LEGACY BUG starbase is always "armed" | `starbaseClass` (switch `legacyStarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
-| Speed code | `speedCode` | CONFIRMED by the designer; cargo, WM, dump BINARY-ONLY | `TestConfirmedEnergyDampener` |
+| Speed code; cargo mass per ship `C·c/F` | `speedCode`, `battleMass` | CONFIRMED (designer CB-000; cargo and WM CB-038; dump CB-025) | `TestConfirmedEnergyDampener`, `TestConfirmedCargoMassPerShip` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
-| Rounds, out-of-battle check in player order (ends the battle only) | `combat_battle.go` `fight`, `checkIn` | BINARY-ONLY ordering | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionOutPlayerStillFires` |
-| Movement order, square choice, square score, damage estimate (no dropoff at r = 0) | `combat_move.go` | BINARY-ONLY (one mover vs a station CONFIRMED, CB-012, CB-019..021) | `TestPredictionBattleTurn`, `TestPredictionEstimateDrawsAt200` |
-| Disengaging | `step` | CONFIRMED; a move that stays put counts, BINARY-ONLY | `TestConfirmedDisengageLeavesOnEighthMove` |
+| Rounds, out-of-battle check in player order (ends the battle only) | `combat_battle.go` `fight`, `checkIn` | CONFIRMED (CB-033) | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionOutPlayerStillFires` |
+| Movement order, square choice, square score, damage estimate (no dropoff at r = 0) | `combat_move.go` | movement order CONFIRMED (CB-030), r = 0 CONFIRMED (CB-026); the rest BINARY-ONLY (one mover vs a station CONFIRMED, CB-012, CB-019..021) | `TestPredictionBattleTurn`, `TestPredictionEstimateDrawsAt200` |
+| Disengaging | `step` | CONFIRMED; a move that stays put counts (CB-034) | `TestConfirmedDisengageLeavesOnEighthMove` |
 | Regenerating Shields | `regenerate` | CONFIRMED | `TestConfirmedRegeneratingShields` |
 | Firing order, target choice; live-player check before each token | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED; the check BINARY-ONLY | `TestConfirmedTargetChoice`, `TestPredictionOutPlayerStillFires` |
 | Design cost (COMPONENTS.md owner cost: miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | CONFIRMED (CS-001) | `TestPredictionDesignCost` |
-| Beams, dropoff (none at range 0, BINARY-ONLY), carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
+| Beams, dropoff (none at range 0, CB-026), carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
 | Gatling, sappers | `gatling`, `damage` | CONFIRMED | `TestConfirmedGatlingHitsEveryTarget`, `TestConfirmedSapperShieldsOnly` |
-| Torpedoes and missiles | `hitChance`, `torpedoes` | CONFIRMED | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestPredictionTorpedoHitsPerTarget` |
+| Torpedoes and missiles; `h = hits·d/2` once; a hit record for every reached target, even 0 hits | `hitChance`, `torpedoes` | CONFIRMED (CS-003-C2 for the rounding); the 0-hit record BINARY-ONLY | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestConfirmedTorpedoHitRounding`, `TestPredictionTorpedoHitsPerTarget`, `TestPredictionTorpedoZeroHitRecord` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
 | Starbase damage | `starbaseDamage` | CONFIRMED in part | `TestConfirmedStarbaseDamageSteps` |
-| Starbase loss, AR planet uninhabited | `combat.go` `finish` | BINARY-ONLY | `TestPredictionAlternateRealityStarbaseLoss` |
-| Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each); cargo and fuel share, empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
-| Dump cargo (full amount; first salvage addition in deep space) | `setup` | BINARY-ONLY | `TestPredictionDumpCargo` |
-| Repair | `repair` | CONFIRMED; moved, Inner Strength, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
-| Tech from battle, same-turn level | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
-| Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | BINARY-ONLY (CB-021, CB-012 cases CONFIRMED) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
-| LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, BINARY-ONLY | `TestPredictionTechAttemptRules` |
+| Starbase loss, AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `emptyPlanet` | CONFIRMED (CB-041) | `TestPredictionAlternateRealityStarbaseLoss` |
+| Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each; overflow CB-040; fuel share CB-023); cargo share, empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestConfirmedSalvageOverflow`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
+| Dump cargo (full amount; first salvage addition in deep space) | `setup` | CONFIRMED (CB-025) | `TestPredictionDumpCargo` |
+| Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024) | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
+| Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
+| Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | CONFIRMED (CB-012, CB-021, CB-029, CB-031-n3, CB-041) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
+| LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, CONFIRMED (CB-031-obs, CB-037) | `TestPredictionTechAttemptRules` |
 
 ## Not tested against the oracle
 
-Implemented as written, with no oracle data yet:
+Implemented as written, with no oracle data yet (COMBAT.md "Open
+experiments"):
 
-- battles with several moving tokens on both sides (movement order by
-  jittered weight, square ties among many movers);
-- three or more players, start squares for other counts, friends joining,
-  a starbase owner in P but not in Q;
-- the token cap, War Monger and cargo in the speed code;
-- dump cargo, the fuel share, an out player still firing, and a
-  disengaging token that stays on its square;
-- the tech-attempt rules beyond the two-player cases (a wiped-out
-  participant, three or more players, the AR starbase case, outside
-  players and the observer LEGACY BUG);
-- a starbase token's cost in target choice, and range-0 beams;
-- starbase loss side effects, the "moved", Inner Strength and starbase repair rates.
+- the token cap with more than two involved players, with a starbase,
+  and with multi-design fleets;
+- the exact plan-0 value X at the first location of a turn (Elegy
+  follows COMBAT.md's chosen rule: plan 0 contributes nothing);
+- the 0-hit torpedo record and the cargo share lost with destroyed
+  ships;
+- salvage at more than one point.
+
+The battle record goes to every player in P and no one else (CONFIRMED,
+CB-031): Elegy emits `EventBattle` for each player in P.
 
 The exact CB-019/CB-020 squares and the CB-021 per-stream gains depend on
 the original's random stream and part table, so they are not replayed
@@ -84,9 +84,9 @@ in the code with `ASSUMPTION An` or `PLACEHOLDER An`. An ASSUMPTION is a
 reading of unclear text. A PLACEHOLDER stands in for a value or rule the
 spec says is unknown.
 
-| Id | What Elegy does | What COMBAT.md says | When it matters | Code |
-|---|---|---|---|---|
-| A6 | **Placeholder.** On the first location of a turn, plan-0 LEGACY BUG X is treated as a non-player, so plan 0 adds nothing. | X is "not determined" there: a leftover value that "needs a debugger run or more oracle cases" (open experiment). An X that is not a player has no effect. | Three or more players, where the leftover X might be a real player. | `legacyPlan0Recipient` |
+None open. A6 (plan-0 X at the first location of a turn) is now
+COMBAT.md's chosen rule for Elegy (#38), so it is cited above rather than
+listed here.
 
 Resolved by stars-elegy #31 and now cited rules: A1 (step 5 only ends
 the battle; the live-player check before each token), A2 (every move

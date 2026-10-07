@@ -77,6 +77,11 @@ type Player struct {
 	// Relations is this player's view of each player, by player index.
 	// Missing entries are neutral; a player is its own friend.
 	Relations []Relation
+
+	// DefaultQueue and DefaultLeftoverOnly are what a new colony of the
+	// player starts with (TAKEOVER.md "Colonization").
+	DefaultQueue        []QueueItem
+	DefaultLeftoverOnly bool
 }
 
 type Planet struct {
@@ -99,6 +104,11 @@ type Planet struct {
 	// HasScanner marks a planetary scanner (its range comes from the
 	// owner's tech, see Game.PlanetScanners).
 	HasScanner bool
+
+	// OrigEnv is the planet's original environment, which retro bombs
+	// and a Claim Adjuster's lost planet return to (TAKEOVER.md). Game
+	// states must set it; the zero value is 0/0/0.
+	OrigEnv [3]int
 
 	Population  int // units of 100 colonists
 	GrowthCarry int // hundredths of a unit, 0..99 (StarsAPI excessPop)
@@ -132,13 +142,16 @@ type TurnResult struct {
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
-// (KERNEL.md "Turn order"): fleet movement, then mining for every planet,
+// (KERNEL.md "Turn order"): the takeover tasks before movement
+// (TAKEOVER.md), fleet movement, then mining for every planet,
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
-// level-ups, then battles (COMBAT.md), a second research level-up check
-// and repair. Each player's view of the result (SCANNING.md) comes last.
+// level-ups, then battles (COMBAT.md), bombing and the takeover tasks
+// after movement (TAKEOVER.md), a second research level-up check and
+// repair. Each player's view of the result (SCANNING.md) comes last.
 //
-// Not yet modelled: order application, waypoint tasks, space objects
+// Not yet modelled: order application, waypoint tasks other than
+// unloads and colonize, space objects
 // other than battle salvage, random events, fuel generators, mine
 // sweeping, terraforming, remote mining and scores.
 //
@@ -162,6 +175,15 @@ func GenerateTurn(
 	}
 	g := game.clone()
 	var events []Event
+
+	// Waypoint tasks before movement (TAKEOVER.md "Where each task
+	// happens", step 2): unloads and colonize, then the drops.
+	// gained marks the players that gained tech this turn, from a capture
+	// or a battle.
+	gained := map[int]bool{}
+	queue, ev := g.unloadPhase(g.phaseStart())
+	events = append(events, ev...)
+	events = append(events, g.resolveQueue(queue, rng, gained)...)
 
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
@@ -230,8 +252,15 @@ func GenerateTurn(
 	}
 
 	for i := range g.Planets {
-		g.Planets[i].Population = grown[i].pop
-		g.Planets[i].GrowthCarry = grown[i].carry
+		p := &g.Planets[i]
+		starved := p.Owner != NoOwner && p.Population > 0 && grown[i].pop <= 0
+		p.Population = grown[i].pop
+		p.GrowthCarry = grown[i].carry
+		if starved {
+			// A planet whose population dies out is emptied
+			// (TAKEOVER.md "Capture").
+			events = append(events, g.emptyPlanet(i))
+		}
 	}
 
 	refuelFleets(&g)
@@ -241,11 +270,18 @@ func GenerateTurn(
 		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 	}
 
-	// Battles, then the post-movement research check, then repair
-	// (KERNEL.md "Turn order" steps 6–7; research gained in a battle
-	// levels up the same turn, CB-018, CB-021).
-	fights := battles(&g, rng)
+	// Battles, bombing, the waypoint tasks after movement, then the
+	// post-movement research check, then repair (KERNEL.md "Turn order"
+	// steps 6–7, TAKEOVER.md "Where each task happens" steps 4–5;
+	// research gained in a battle levels up the same turn, CB-018,
+	// CB-021).
+	owned := g.phaseStart()
+	fights := battles(&g, rng, gained)
 	events = append(events, fights.events...)
+	events = append(events, bombing(&g, rng)...)
+	queue, ev = g.unloadPhase(owned)
+	events = append(events, ev...)
+	events = append(events, g.resolveQueue(queue, rng, gained)...)
 	for i := range g.Players {
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)

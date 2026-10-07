@@ -81,9 +81,31 @@ type Part struct {
 	FuelCapacity  int
 	CargoCapacity int
 
+	// Bombing (TAKEOVER.md "Bomb totals"). KillRate is in tenths of a
+	// percent; InstallKill is installations destroyed; MinKill is the
+	// minimum kill in colonists (COMPONENTS.md "min_kill"; TAKEOVER.md
+	// counts it in units of 100).
+	Bomb        BombKind
+	KillRate    int
+	InstallKill int
+	MinKill     int
+	// Colonizer marks a Colonization Module or Orbital Construction
+	// Module (TAKEOVER.md "Colonization").
+	Colonizer bool
+
 	Cost    Cost
 	TechReq [NumFields]int
 }
+
+// BombKind is how a part bombs (TAKEOVER.md "Bomb totals").
+type BombKind int
+
+const (
+	BombNone   BombKind = iota
+	BombNormal          // kill rates add; installations; minimum kill
+	BombSmart           // kill rates multiply; no installations
+	BombRetro           // moves the environment back to its original values
+)
 
 func (p Part) weapon() bool { return p.Kind == PartBeam || p.Kind == PartTorpedo }
 

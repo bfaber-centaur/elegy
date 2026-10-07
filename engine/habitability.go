@@ -7,8 +7,9 @@ import "math"
 // (−1..−45) for hostile ones. env is the planet's current environment on
 // the 0–100 internal scale.
 //
-// KERNEL.md "Habitability"; BINARY-ONLY except a planet at the race's
-// center on every axis (100, CONFIRMED).
+// KERNEL.md "Habitability": CONFIRMED at the race's center (100, PG) and
+// at the six KX-002 points (H1–H6, hostile planets included); other points
+// and the cap of 15 per hostile axis are BINARY-ONLY.
 func Habitability(race Race, env [3]int) int {
 	hostile := 0
 	for axis, r := range race.Env {
