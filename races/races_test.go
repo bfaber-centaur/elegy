@@ -214,6 +214,20 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 		{"P8", func(d *Design) { d.Race.Env[engine.Gravity].Low, d.Race.Env[engine.Gravity].Center = -5, 40 }, want{212, true, 1800, 10, 532}},
 		{"P9", func(d *Design) { d.Race.ColonistsPerResource, d.Race.FactoryOutput, d.Race.MineOutput = 900, 8, 12 }, want{0, false, 900, 10, 0}},
 		{"P10", func(d *Design) { d.Race.ColonistsPerResource, d.Race.FactoryOutput, d.Race.MineOutput = 1400, 7, 19 }, want{-1, true, 2500, 9, 559}},
+		// Round 3 (RACES.md "In a running game", CONFIRMED RD-P13..RD-P18).
+		// Points after the edit are scored after the silent clamps.
+		{"P13", func(d *Design) { d.Race.GrowthRate, d.Race.ColonistsPerResource = 25, 2500 }, want{159, false, 2500, 20, 159}},
+		{"P14", func(d *Design) { d.Race.GrowthRate = 25 }, want{-440, true, 2500, 16, 502}},
+		{"P16", func(d *Design) {
+			d.Race.Env[engine.Gravity] = engine.EnvRange{Low: 15, Center: 67, High: 120}
+		}, want{218, true, 1800, 10, 538}},
+		{"P17", func(d *Design) {
+			d.Race.Env[engine.Gravity] = engine.EnvRange{Low: ImmuneMarker, Center: 50, High: 85}
+		}, want{-72, true, 2500, 10, 527}},
+		{"P18", func(d *Design) { d.Race.GrowthRate = -3 }, want{7565, false, 1000, 1, 7565}},
+		// RD-P11's rule (growth 0 is repaired to 1 and punished) on the
+		// PG001 race; RD-P11 itself used the RD-7 AR race.
+		{"growth 0", func(d *Design) { d.Race.GrowthRate = 0 }, want{7565, true, 1000, 1, 7565}},
 	}
 	for _, c := range cases {
 		d := pg001()
@@ -232,7 +246,7 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 		if got := Points(d); got != c.want.after {
 			t.Errorf("%s: %d points after the check, want %d", c.id, got, c.want.after)
 		}
-		// A second year changes nothing (BINARY-ONLY).
+		// A second year changes nothing (CONFIRMED RD-P19, RD-P21).
 		before := d
 		if res := YearlyCheck(&d, &budget, false); res.Punished || d != before {
 			t.Errorf("%s: second year changed the race", c.id)
@@ -245,7 +259,7 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 	if e := d.Race.Env[engine.Gravity]; e.Low != 0 || e.High != 85 || e.Center != 42 {
 		t.Errorf("P8 gravity %+v", e)
 	}
-	// Silent research-share clamp (BINARY-ONLY) and computer races.
+	// Silent research-share clamp (CONFIRMED RD-P15) and computer races.
 	d = pg001()
 	d.Race.FactoryCost, d.Race.MineCost = 5, 2
 	budget := 140
@@ -253,7 +267,8 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 		t.Errorf("computer: %+v budget %d tampered %v", res, budget, d.Tampered)
 	}
 	// A computer race gets the scoring repair and the tampered flag, but
-	// no penalty (RACES.md "In a running game" step 5, BINARY-ONLY).
+	// no penalty (RACES.md "In a running game" step 5, CONFIRMED RD-P20;
+	// on the PG001 race as a stand-in).
 	d = pg001()
 	d.Race.Env[engine.Gravity].Low, d.Race.Env[engine.Gravity].Center = -5, 40
 	before := d
@@ -266,16 +281,44 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 	}
 }
 
-// Repairs (RACES.md "Repairs", BINARY-ONLY): the immune marker in the low
-// makes an axis immune; research costs outside the settings go to the
-// nearest end.
+// Repairs at creation (RACES.md "Repairs", CONFIRMED RW08), on the PG001
+// race as a stand-in for RW08's races: a gravity low equal to the immune
+// marker makes the axis immune; a high of 120 becomes 100 with the centre
+// forced; growth 25 becomes 20. Each race is kept, marked tampered.
+func TestConfirmedCreationRepairs(t *testing.T) {
+	cases := []struct {
+		id   string
+		edit func(*Design)
+		ok   func(Design) bool
+	}{
+		{"immune marker", func(d *Design) {
+			// Colonists 2500 keep the stand-in legal (RD-P17: 527).
+			d.Race.ColonistsPerResource = 2500
+			d.Race.Env[engine.Gravity] = engine.EnvRange{Low: ImmuneMarker, Center: 50, High: 85}
+		}, func(d Design) bool { return d.Race.Env[engine.Gravity] == engine.EnvRange{Immune: true} }},
+		{"high 120", func(d *Design) {
+			d.Race.Env[engine.Gravity] = engine.EnvRange{Low: 15, Center: 67, High: 120}
+		}, func(d Design) bool {
+			return d.Race.Env[engine.Gravity] == engine.EnvRange{Low: 15, Center: 57, High: 100}
+		}},
+		{"growth 25", func(d *Design) { d.Race.GrowthRate, d.Race.ColonistsPerResource = 25, 2500 },
+			func(d Design) bool { return d.Race.GrowthRate == 20 }},
+	}
+	for _, c := range cases {
+		d := pg001()
+		c.edit(&d)
+		r := AtCreation(d, false)
+		if r.Replaced || !r.Race.Tampered || !c.ok(r.Race) {
+			t.Errorf("%s: %+v", c.id, r)
+		}
+	}
+}
+
+// Research costs outside the settings go to the nearest end (RACES.md
+// "Repairs", BINARY-ONLY), and an immune axis carrying other values is
+// normalised (Elegy's representation).
 func TestPredictionRepairs(t *testing.T) {
 	d := Default()
-	d.Race.Env[engine.Radiation] = engine.EnvRange{Low: ImmuneMarker, Center: 50, High: 80}
-	if !scoringRepair(&d) || d.Race.Env[engine.Radiation] != (engine.EnvRange{Immune: true}) {
-		t.Errorf("immune marker: %+v", d.Race.Env[engine.Radiation])
-	}
-	d = Default()
 	d.Race.Env[engine.Radiation] = engine.EnvRange{Immune: true, Center: 3}
 	if !scoringRepair(&d) || d.Race.Env[engine.Radiation] != (engine.EnvRange{Immune: true}) {
 		t.Errorf("immune centre: %+v", d.Race.Env[engine.Radiation])

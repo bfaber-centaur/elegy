@@ -951,8 +951,8 @@ func TestConfirmedSecondPlanet(t *testing.T) {
 }
 
 // The redraw rule and its LEGACY BUG fallback (UNIVERSE.md "Second
-// planet", BINARY-ONLY).
-func TestPredictionSecondPlanetRedraw(t *testing.T) {
+// planet", CONFIRMED UG29, UG30).
+func TestConfirmedSecondPlanetRedraw(t *testing.T) {
 	r := testRace(engine.PRTPacketPhysics)
 	// A narrow race: 50 ± 1 on every axis makes most redraws fail.
 	for i := range r.Env {
@@ -1278,5 +1278,28 @@ func TestConfirmedRacesAtCreation(t *testing.T) {
 	}
 	if st := res.Players[3]; st.Race.Race.PRT != engine.PRTInterstellarTraveler || st.Race.Tampered {
 		t.Errorf("computer race changed: %+v", st.Race)
+	}
+}
+
+// A game with one computer player of each built-in type (AI.md "Built-in
+// races") is created, and each keeps its built-in race unchecked
+// (RACES.md "At game creation": computer races are not checked).
+func TestConfirmedBuiltInComputerPlayers(t *testing.T) {
+	ps := []PlayerSetup{withPoints(human(engine.PRTJackOfAllTrades), 0)}
+	for typ := 1; typ <= 6; typ++ {
+		c, err := ComputerPlayer(typ, Level(typ%4))
+		if err != nil {
+			t.Fatal(err)
+		}
+		ps = append(ps, c)
+	}
+	res := generate(t, Settings{Size: Medium, Density: Normal, Players: ps}, 11)
+	for i := 1; i < len(ps); i++ {
+		if got := res.Players[i].Race; got.Race != ps[i].Race.Race || got.Tampered {
+			t.Errorf("computer %d: race %+v, want %+v", i, got.Race, ps[i].Race.Race)
+		}
+	}
+	if _, err := ComputerPlayer(7, Easy); err == nil {
+		t.Error("type 7 accepted")
 	}
 }

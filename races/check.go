@@ -56,7 +56,8 @@ type YearResult struct {
 	Clamped bool
 	// Punished is set when the race was penalised: the player gets the
 	// "Your race definition has been tampered with" message and every
-	// other player "Hacked race discovered" (BINARY-ONLY for the latter).
+	// other human player "Hacked race discovered" (CONFIRMED RD-P12;
+	// whether a computer player is told is not observable).
 	Punished bool
 }
 
@@ -65,21 +66,24 @@ type YearResult struct {
 const penaltyTarget = 500
 
 // YearlyCheck is the check every player's race gets each year before
-// fleets move (RACES.md "In a running game", CONFIRMED RD-P1..RD-P10).
+// fleets move (RACES.md "In a running game", CONFIRMED RD-P1..RD-P21).
 // researchBudget is the player's research share in percent.
 //
 //  1. Silent clamps: every setting to its range, no message or flag
-//     (RD-P5, P6, P7); a research share outside 0–100 becomes 15
-//     (BINARY-ONLY).
+//     (RD-P5, P6, P7, P13, P18); a research share outside 0–100 becomes
+//     15 (RD-P15).
 //  2. A human race is punished when its points are negative or the
 //     scoring repair (habitat, growth 0) changes something (RD-P1..P4,
-//     P8, P10); exactly 0 is left alone (RD-P9). A computer race gets
-//     the scoring repair, which sets the tampered flag, but no penalty
-//     and no message (BINARY-ONLY).
+//     P8, P10, P11, P14, P16, P17); exactly 0 is left alone (RD-P9), and
+//     so is a tampered race with nothing new to repair and points not
+//     negative (RD-P19, P21). A computer race gets the scoring repair,
+//     which sets the tampered flag, but no penalty and no message
+//     (RD-P20).
 //  3. Penalty: tampered; colonists per resource +100 until 500 points or
 //     2500; then growth −1 until 500 points or growth 1; then research
 //     fields one at a time to "costs 75% extra" in field order until more
-//     than 499 points (BINARY-ONLY).
+//     than 499 points (CONFIRMED for colonists and growth; the research
+//     step BINARY-ONLY).
 func YearlyCheck(d *Design, researchBudget *int, computer bool) YearResult {
 	var res YearResult
 	res.Clamped = clampSettings(d)

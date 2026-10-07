@@ -6,8 +6,9 @@ import "github.com/bfaber-centaur/elegy/engine"
 // (RACES.md "Repairs": "every other setting is clamped"; "In a running
 // game" step 1, the silent clamps). An out-of-range PRT becomes JOAT
 // (CONFIRMED RD-P7), stat 15 becomes 0 (RD-P5), colonists per resource
-// are clamped to 700–2500 (RD-P6), growth below 0 becomes 1 and above 20
-// becomes 20 (BINARY-ONLY). Growth 0 is left for the scoring repair.
+// are clamped to 700–2500 (RD-P6), growth below 0 becomes 1 (RD-P18) and
+// above 20 becomes 20 (RW08 at creation, RD-P13, RD-P14 in a running
+// game). Growth 0 is left for the scoring repair (RD-P11).
 //
 // Colonists per resource are stored in hundreds (7–25), so a value that
 // is not a multiple of 100 cannot occur in the original; Elegy truncates
@@ -57,12 +58,13 @@ const ImmuneMarker = -1
 // growth 0"):
 //   - a low equal to the immune marker makes the axis immune, and a
 //     centre or high that is not also the marker is set to it
-//     (BINARY-ONLY). Elegy's immune axis is EnvRange.Immune with every
+//     (CONFIRMED RW08, RD-P17). Elegy's immune axis is EnvRange.Immune with every
 //     value 0, so an immune axis with any other value is repaired to that;
 //   - otherwise `lo` is clamped to 0..100, `hi` to lo..100 and the centre
 //     forced to lo + (hi − lo)/2 (CONFIRMED RD-4, RD-P4; a low of −5
-//     became 0, RD-P8); a value outside 0..100 never becomes immunity;
-//   - growth below 1 becomes 1 (CONFIRMED RD-4).
+//     became 0, RD-P8; a high of 120 became 100, RW08, RD-P16); a value
+//     outside 0..100 never becomes immunity;
+//   - growth below 1 becomes 1 (CONFIRMED RD-4, RD-P11).
 func scoringRepair(d *Design) bool {
 	before := *d
 	for a := range d.Race.Env {

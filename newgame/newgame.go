@@ -79,14 +79,24 @@ const (
 type PlayerSetup struct {
 	// Race is the player's race design, with its name, leftover spend
 	// and options. For a computer player it is that computer type's
-	// built-in race, which the caller supplies: the original's computer
-	// races are game data UNIVERSE.md does not specify ("Computer
-	// players"). A race marked Random is generated at creation
-	// (races.Generate).
+	// built-in race (ComputerPlayer). A race marked Random is generated
+	// at creation (races.Generate).
 	Race races.Design
 
 	Computer bool
 	Level    Level // computer players only
+}
+
+// ComputerPlayer is a computer player of definition-file type 1–6 (HE,
+// SS, IS, CA, PP, AR) at a level, with its built-in race (stars-elegy
+// AI.md "Built-in races"). The race's leftover spend is the caller's
+// (races.BuiltIn, ASSUMPTION B1).
+func ComputerPlayer(typ int, level Level) (PlayerSetup, error) {
+	d, err := races.BuiltIn(typ, int(level))
+	if err != nil {
+		return PlayerSetup{}, err
+	}
+	return PlayerSetup{Race: d, Computer: true, Level: level}, nil
 }
 
 // player is a PlayerSetup after the RACES.md creation rules: the race
@@ -115,8 +125,9 @@ type Settings struct {
 	SlowerTech     bool
 	BBS            bool // accelerated BBS play
 	NoRandomEvents bool
-	// ComputerAlliances and PublicScores change nothing at creation
-	// (BINARY-ONLY); they are carried for later systems.
+	// SlowerTech, ComputerAlliances and PublicScores change nothing at
+	// creation but the option word (CONFIRMED UG26–UG28); they are
+	// carried for later systems.
 	ComputerAlliances bool
 	PublicScores      bool
 	Clumping          bool

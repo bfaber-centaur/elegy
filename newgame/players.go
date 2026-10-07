@@ -18,7 +18,8 @@ var legacySharedHomeworldMinerals = true
 // legacySecondPlanetFallback reproduces the original's LEGACY BUG that a
 // second planet whose 100 environment redraws were all used takes the
 // homeworld's environment, even when the last redraw reached 10%
-// (UNIVERSE.md "Second planet", BINARY-ONLY). Set it to false to keep the
+// (UNIVERSE.md "Second planet", LEGACY BUG CONFIRMED UG29, UG30; a success
+// on exactly the 100th redraw is BINARY-ONLY). Set it to false to keep the
 // last redraw.
 var legacySecondPlanetFallback = true
 
@@ -309,7 +310,7 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps player, shared e
 	case SpendConcentrations:
 		conc = ConcentrationSpend(conc, l)
 	// AR's mines, factories or defenses spend adds nothing
-	// (BINARY-ONLY).
+	// (CONFIRMED RD-7).
 	case SpendMines:
 		if !ar {
 			hw.Mines += l / 2

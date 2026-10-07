@@ -63,7 +63,8 @@ func (g *generator) placePlanets() []engine.Point {
 
 	// Remove random candidates until N remain; fewer remain when the
 	// spacing pass already removed more than M − N, and none is added
-	// back (tiny and small packed games can end below N, BINARY-ONLY).
+	// back (tiny and small packed games can end below N, CONFIRMED UG22,
+	// UG23, UG24).
 	for len(kept) > n {
 		i := g.rand(len(kept))
 		kept = append(kept[:i], kept[i+1:]...)
