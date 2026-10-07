@@ -129,7 +129,9 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 		}
 	}
 	// Observers: players present but not in the battle, and the owner of
-	// a planet there without a starbase.
+	// a planet there without a starbase, even when that owner is a
+	// participant (BINARY-ONLY): its bit counts for other players, though
+	// a participant never gets the observer attempt itself.
 	observers := 0
 	present := map[int]bool{}
 	for _, i := range b.loc.fleets {

@@ -23,17 +23,15 @@ commit and implements `docs/SCANNING.md`.
 - Every CB vector in COMBAT.md/PARITY.md that needs no part catalogue
   passes, including the 132% capacitor of CB-002 C4. Capacitors compound
   per item, as current COMBAT.md says.
-- Where COMBAT.md is silent or unsettled, two explicit assumptions
-  remain: A6 (plan-0 X on a turn's first location, an open experiment)
-  and A7 (a range-0 beam in the estimate when range is ignored). They are
+- Where COMBAT.md is unsettled, one explicit placeholder remains: A6
+  (plan-0 X on a turn's first location, an open experiment). It is
   marked in the code and listed in COMBAT-STATUS.md. The others are now
   cited rules, including the observer tech-attempt LEGACY BUG (switch
   `legacyObserverTechMask`).
 
 ## What still matters
 
-- A6 only matters with three or more players, and A7 only for a ship
-  with a range-0 beam.
+- A6 only matters with three or more players.
 - No part catalogue yet. Plug the public component table into `Design`
   when stars-elegy `docs/COMPONENTS.md` lands.
 

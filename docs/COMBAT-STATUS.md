@@ -3,7 +3,7 @@
 The battle phase in `engine/` follows the public combat specification,
 stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `a6ac76e` (PR #19
 plus the implementer answers merged in PR #24, `113a4d2`) with the
-follow-up answers in open PR #31 (branch at `38a0239`), the owner cost
+follow-up answers in open PR #31 (branch at `a0512f1`), the owner cost
 rule of `docs/COMPONENTS.md` in open PR #30 (branch at `f851a4b`), the
 turn order in `docs/KERNEL.md`, and the measured data in `docs/PARITY.md`
 "Combat" (CB-000..CB-022). Nothing else was used.
@@ -38,7 +38,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Speed code | `speedCode` | CONFIRMED by the designer; cargo, WM, dump BINARY-ONLY | `TestConfirmedEnergyDampener` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
 | Rounds, out-of-battle check in player order (ends the battle only) | `combat_battle.go` `fight`, `checkIn` | BINARY-ONLY ordering | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionOutPlayerStillFires` |
-| Movement order, square choice, square score, damage estimate | `combat_move.go` | BINARY-ONLY (one mover vs a station CONFIRMED, CB-012, CB-019..021) | `TestPredictionBattleTurn`, `TestPredictionEstimateDrawsAt200` |
+| Movement order, square choice, square score, damage estimate (no dropoff at r = 0) | `combat_move.go` | BINARY-ONLY (one mover vs a station CONFIRMED, CB-012, CB-019..021) | `TestPredictionBattleTurn`, `TestPredictionEstimateDrawsAt200` |
 | Disengaging | `step` | CONFIRMED; a move that stays put counts, BINARY-ONLY | `TestConfirmedDisengageLeavesOnEighthMove` |
 | Regenerating Shields | `regenerate` | CONFIRMED | `TestConfirmedRegeneratingShields` |
 | Firing order, target choice; live-player check before each token | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED; the check BINARY-ONLY | `TestConfirmedTargetChoice`, `TestPredictionOutPlayerStillFires` |
@@ -54,7 +54,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Repair | `repair` | CONFIRMED; moved, Inner Strength, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
 | Tech from battle, same-turn level | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | BINARY-ONLY (CB-021, CB-012 cases CONFIRMED) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
-| LEGACY BUG observer tech attempt (player number AND observer mask) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, BINARY-ONLY | `TestPredictionTechAttemptRules` |
+| LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, BINARY-ONLY | `TestPredictionTechAttemptRules` |
 
 ## Not tested against the oracle
 
@@ -88,14 +88,14 @@ spec says is unknown.
 | Id | What Elegy does | What COMBAT.md says | When it matters | Code |
 |---|---|---|---|---|
 | A6 | **Placeholder.** On the first location of a turn, plan-0 LEGACY BUG X is treated as a non-player, so plan 0 adds nothing. | X is "not determined" there: a leftover value that "needs a debugger run or more oracle cases" (open experiment). An X that is not a player has no effect. | Three or more players, where the leftover X might be a real player. | `legacyPlan0Recipient` |
-| A7 | In the damage estimate, a ship's range-0 beam skips the dropoff term when range is ignored. | The estimate divides by `r` (part range + 1 on a starbase), which is 0 only in this case. Real fire has no dropoff for range 0 (#31). | A tactic-0 token scoring squares against an enemy with a range-0 beam. | `estimate` |
 
 Resolved by stars-elegy #31 and now cited rules: A1 (step 5 only ends
 the battle; the live-player check before each token), A2 (every move
 counts), A3 (dump cargo), A4 (fuel share by fuel capacity), A8 (Inner
 Strength for both repair lines), A9 (who attempts tech, with the
 observer LEGACY BUG), A10 (a starbase's plain owner cost in target
-choice), and real fire with a range-0 beam (the rest of A7). A5 (the Bleeding Edge suppression flag)
+choice), and A7 (no dropoff for a range-0 beam, in real fire and in
+the estimate). A5 (the Bleeding Edge suppression flag)
 is gone: COMPONENTS.md's CONFIRMED rule has no such flag.
 
 ### Settled by current COMBAT.md
