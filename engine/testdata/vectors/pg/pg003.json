@@ -1,0 +1,1224 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "PG-003",
+ "title": "PG001 2407 advanced 29 years with empty orders; crowded years 2426-2436 (repeats PG-002); unpinned clock-seeded turns, so random outcomes (mining) are not exact",
+ "source": {
+  "experiment": "PG-003 (no generator; procedure in PARITY.md)",
+  "spec_rules": "docs/KERNEL.md \"Population growth\"",
+  "parity": "docs/PARITY.md \"Measured behavior \u2014 PG-003, crowded turns 2427\u20132436\"",
+  "raw_evidence": "stars-oracle-apparatus evidence/pg003/raw (private)"
+ },
+ "years": 29,
+ "random": "single_stream",
+ "streams": 1,
+ "initial_state": {
+  "year": 2407,
+  "game": {
+   "name": "A Barefoot JayWalk",
+   "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "normal",
+   "players": 1,
+   "slower_tech": false,
+   "random_events": false,
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 100
+    }
+   }
+  },
+  "players": [
+   {
+    "id": 0,
+    "tech": {
+     "energy": 2,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 5,
+     "biotechnology": 0
+    },
+    "research_accumulated": {
+     "energy": 65,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 15,
+    "research_field": "energy",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "SS",
+     "lrt": [],
+     "growth_percent": 10,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 3,
+     "starbase_designs": 1
+    }
+   }
+  ],
+  "planets": [
+   {
+    "id": 0,
+    "x": 1019,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     18,
+     113,
+     84
+    ],
+    "environment": [
+     94,
+     33,
+     99
+    ]
+   },
+   {
+    "id": 1,
+    "x": 1031,
+    "y": 1365,
+    "owner": -1,
+    "concentrations": [
+     97,
+     5,
+     85
+    ],
+    "environment": [
+     46,
+     17,
+     82
+    ]
+   },
+   {
+    "id": 2,
+    "x": 1045,
+    "y": 1108,
+    "owner": -1,
+    "concentrations": [
+     83,
+     67,
+     75
+    ],
+    "environment": [
+     73,
+     50,
+     88
+    ]
+   },
+   {
+    "id": 3,
+    "x": 1047,
+    "y": 1038,
+    "owner": -1,
+    "concentrations": [
+     88,
+     104,
+     108
+    ],
+    "environment": [
+     33,
+     78,
+     25
+    ]
+   },
+   {
+    "id": 4,
+    "x": 1057,
+    "y": 1168,
+    "owner": -1,
+    "concentrations": [
+     5,
+     70,
+     73
+    ],
+    "environment": [
+     90,
+     67,
+     58
+    ]
+   },
+   {
+    "id": 5,
+    "x": 1085,
+    "y": 1086,
+    "owner": -1,
+    "concentrations": [
+     86,
+     8,
+     107
+    ],
+    "environment": [
+     70,
+     93,
+     20
+    ]
+   },
+   {
+    "id": 6,
+    "x": 1101,
+    "y": 1283,
+    "owner": -1,
+    "concentrations": [
+     56,
+     97,
+     30
+    ],
+    "environment": [
+     62,
+     47,
+     57
+    ]
+   },
+   {
+    "id": 7,
+    "x": 1113,
+    "y": 1298,
+    "owner": 0,
+    "concentrations": [
+     30,
+     113,
+     84
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     550,
+     713,
+     545
+    ],
+    "population": 486,
+    "excess": 80,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 8,
+    "x": 1130,
+    "y": 1383,
+    "owner": -1,
+    "concentrations": [
+     96,
+     8,
+     89
+    ],
+    "environment": [
+     73,
+     60,
+     57
+    ]
+   },
+   {
+    "id": 9,
+    "x": 1133,
+    "y": 1346,
+    "owner": -1,
+    "concentrations": [
+     90,
+     94,
+     1
+    ],
+    "environment": [
+     20,
+     22,
+     95
+    ]
+   },
+   {
+    "id": 10,
+    "x": 1133,
+    "y": 1116,
+    "owner": -1,
+    "concentrations": [
+     30,
+     83,
+     98
+    ],
+    "environment": [
+     58,
+     42,
+     73
+    ]
+   },
+   {
+    "id": 11,
+    "x": 1146,
+    "y": 1073,
+    "owner": -1,
+    "concentrations": [
+     63,
+     75,
+     77
+    ],
+    "environment": [
+     83,
+     60,
+     88
+    ]
+   },
+   {
+    "id": 12,
+    "x": 1153,
+    "y": 1335,
+    "owner": -1,
+    "concentrations": [
+     109,
+     71,
+     29
+    ],
+    "environment": [
+     90,
+     21,
+     90
+    ]
+   },
+   {
+    "id": 13,
+    "x": 1156,
+    "y": 1114,
+    "owner": -1,
+    "concentrations": [
+     37,
+     59,
+     88
+    ],
+    "environment": [
+     4,
+     68,
+     8
+    ]
+   },
+   {
+    "id": 14,
+    "x": 1159,
+    "y": 1365,
+    "owner": -1,
+    "concentrations": [
+     94,
+     79,
+     75
+    ],
+    "environment": [
+     73,
+     68,
+     13
+    ]
+   },
+   {
+    "id": 15,
+    "x": 1159,
+    "y": 1062,
+    "owner": -1,
+    "concentrations": [
+     56,
+     45,
+     83
+    ],
+    "environment": [
+     83,
+     37,
+     36
+    ]
+   },
+   {
+    "id": 16,
+    "x": 1164,
+    "y": 1024,
+    "owner": -1,
+    "concentrations": [
+     79,
+     49,
+     98
+    ],
+    "environment": [
+     86,
+     37,
+     66
+    ]
+   },
+   {
+    "id": 17,
+    "x": 1221,
+    "y": 1348,
+    "owner": -1,
+    "concentrations": [
+     83,
+     83,
+     68
+    ],
+    "environment": [
+     5,
+     5,
+     82
+    ]
+   },
+   {
+    "id": 18,
+    "x": 1237,
+    "y": 1248,
+    "owner": -1,
+    "concentrations": [
+     77,
+     66,
+     19
+    ],
+    "environment": [
+     48,
+     73,
+     66
+    ]
+   },
+   {
+    "id": 19,
+    "x": 1244,
+    "y": 1140,
+    "owner": -1,
+    "concentrations": [
+     21,
+     66,
+     93
+    ],
+    "environment": [
+     51,
+     67,
+     81
+    ]
+   },
+   {
+    "id": 20,
+    "x": 1246,
+    "y": 1343,
+    "owner": -1,
+    "concentrations": [
+     3,
+     88,
+     75
+    ],
+    "environment": [
+     12,
+     66,
+     65
+    ]
+   },
+   {
+    "id": 21,
+    "x": 1269,
+    "y": 1133,
+    "owner": -1,
+    "concentrations": [
+     42,
+     83,
+     59
+    ],
+    "environment": [
+     86,
+     14,
+     23
+    ]
+   },
+   {
+    "id": 22,
+    "x": 1270,
+    "y": 1250,
+    "owner": -1,
+    "concentrations": [
+     97,
+     70,
+     88
+    ],
+    "environment": [
+     14,
+     90,
+     95
+    ]
+   },
+   {
+    "id": 23,
+    "x": 1301,
+    "y": 1084,
+    "owner": -1,
+    "concentrations": [
+     91,
+     98,
+     93
+    ],
+    "environment": [
+     88,
+     95,
+     95
+    ]
+   },
+   {
+    "id": 24,
+    "x": 1305,
+    "y": 1140,
+    "owner": -1,
+    "concentrations": [
+     16,
+     61,
+     9
+    ],
+    "environment": [
+     11,
+     64,
+     26
+    ]
+   },
+   {
+    "id": 25,
+    "x": 1320,
+    "y": 1057,
+    "owner": -1,
+    "concentrations": [
+     60,
+     65,
+     14
+    ],
+    "environment": [
+     90,
+     53,
+     2
+    ]
+   },
+   {
+    "id": 26,
+    "x": 1322,
+    "y": 1175,
+    "owner": -1,
+    "concentrations": [
+     50,
+     80,
+     100
+    ],
+    "environment": [
+     11,
+     12,
+     7
+    ]
+   },
+   {
+    "id": 27,
+    "x": 1328,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     102,
+     38,
+     69
+    ],
+    "environment": [
+     39,
+     39,
+     5
+    ]
+   },
+   {
+    "id": 28,
+    "x": 1337,
+    "y": 1268,
+    "owner": -1,
+    "concentrations": [
+     74,
+     27,
+     94
+    ],
+    "environment": [
+     82,
+     32,
+     90
+    ]
+   },
+   {
+    "id": 29,
+    "x": 1339,
+    "y": 1113,
+    "owner": -1,
+    "concentrations": [
+     72,
+     75,
+     76
+    ],
+    "environment": [
+     28,
+     15,
+     18
+    ]
+   },
+   {
+    "id": 30,
+    "x": 1378,
+    "y": 1287,
+    "owner": -1,
+    "concentrations": [
+     109,
+     10,
+     76
+    ],
+    "environment": [
+     64,
+     29,
+     51
+    ]
+   },
+   {
+    "id": 31,
+    "x": 1386,
+    "y": 1022,
+    "owner": -1,
+    "concentrations": [
+     87,
+     18,
+     12
+    ],
+    "environment": [
+     91,
+     31,
+     9
+    ]
+   }
+  ],
+  "designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Possum Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     }
+    ],
+    "mass": 18
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Transport Cloaking"
+     },
+     {
+      "count": 1,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 31
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Colony Ship",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Colonization Module"
+     }
+    ],
+    "mass": 56
+   }
+  ],
+  "starbase_designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   }
+  ],
+  "battle_plans": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   }
+  ],
+  "fleets": [
+   {
+    "owner": 0,
+    "id": 0,
+    "x": 1113,
+    "y": 1298,
+    "orbiting": 7,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 300,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1113,
+      "y": 1298,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 7
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 1,
+    "x": 1113,
+    "y": 1298,
+    "orbiting": 7,
+    "ships": [
+     {
+      "design": 1,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 130,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1113,
+      "y": 1298,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 7
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 2,
+    "x": 1113,
+    "y": 1298,
+    "orbiting": 7,
+    "ships": [
+     {
+      "design": 2,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1113,
+      "y": 1298,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 7
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   }
+  ],
+  "objects": [],
+  "production_queues": []
+ },
+ "cases": [
+  {
+   "id": "PG-003-A",
+   "rule": "KERNEL Population growth: uncrowded growth and carry (PG-001 model)",
+   "setup": "years 2408-2425, population below 25% of capacity at the start of each year",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 535,
+      "excess": 40
+     }
+    },
+    {
+     "year": 2,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 588,
+      "excess": 90
+     }
+    },
+    {
+     "year": 3,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 647,
+      "excess": 70
+     }
+    },
+    {
+     "year": 4,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 712,
+      "excess": 40
+     }
+    },
+    {
+     "year": 5,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 783,
+      "excess": 60
+     }
+    },
+    {
+     "year": 6,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 861,
+      "excess": 90
+     }
+    },
+    {
+     "year": 7,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 948,
+      "excess": 0
+     }
+    },
+    {
+     "year": 8,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1042,
+      "excess": 80
+     }
+    },
+    {
+     "year": 9,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1147,
+      "excess": 0
+     }
+    },
+    {
+     "year": 10,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1261,
+      "excess": 70
+     }
+    },
+    {
+     "year": 11,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1387,
+      "excess": 80
+     }
+    },
+    {
+     "year": 12,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1526,
+      "excess": 50
+     }
+    },
+    {
+     "year": 13,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1679,
+      "excess": 10
+     }
+    },
+    {
+     "year": 14,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 1847,
+      "excess": 0
+     }
+    },
+    {
+     "year": 15,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 2031,
+      "excess": 70
+     }
+    },
+    {
+     "year": 16,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 2234,
+      "excess": 80
+     }
+    },
+    {
+     "year": 17,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 2458,
+      "excess": 20
+     }
+    },
+    {
+     "year": 18,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 2704,
+      "excess": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "PG-003-B",
+   "rule": "KERNEL Population growth: crowding factor above 25% of capacity",
+   "setup": "years 2426-2436; the run's predictions (H0-H2) were all rejected",
+   "tag": "MEASURED",
+   "prediction_held": false,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 19,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 2958,
+      "excess": 17
+     }
+    },
+    {
+     "year": 20,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 3218,
+      "excess": 47
+     }
+    },
+    {
+     "year": 21,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 3479,
+      "excess": 12
+     }
+    },
+    {
+     "year": 22,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 3740,
+      "excess": 4
+     }
+    },
+    {
+     "year": 23,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 3998,
+      "excess": 10
+     }
+    },
+    {
+     "year": 24,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 4253,
+      "excess": 97
+     }
+    },
+    {
+     "year": 25,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 4500,
+      "excess": 64
+     }
+    },
+    {
+     "year": 26,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 4739,
+      "excess": 14
+     }
+    },
+    {
+     "year": 27,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 4971,
+      "excess": 35
+     }
+    },
+    {
+     "year": 28,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 5190,
+      "excess": 7
+     }
+    },
+    {
+     "year": 29,
+     "kind": "planet",
+     "id": 7,
+     "equals": {
+      "population": 5402,
+      "excess": 86
+     }
+    }
+   ]
+  }
+ ]
+}

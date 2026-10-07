@@ -30,8 +30,10 @@ type pvVector struct {
 	Random       string   `json:"random"`
 	InitialState pvState  `json:"initial_state"`
 	Cases        []pvCase `json:"cases"`
-	path         string   // corpus/run
-	corpus       string
+	// Orders are the orders players submitted (FORMAT.md "orders").
+	Orders []json.RawMessage `json:"orders"`
+	path   string            // corpus/run
+	corpus string
 }
 
 type pvState struct {
@@ -64,6 +66,7 @@ type pvPlayer struct {
 	ResearchAccumulated map[string]int    `json:"research_accumulated"`
 	ResearchPercent     int               `json:"research_percent"`
 	ResearchField       string            `json:"research_field"`
+	ResearchNextField   json.RawMessage   `json:"research_next_field"`
 	Relations           map[string]string `json:"relations"`
 	MysteryTraderItems  []string          `json:"mystery_trader_items"`
 	Race                struct {
@@ -333,6 +336,23 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		}
 		pl.Research.Current = pvFields[p.ResearchField]
 		pl.Research.Next = NextSameField
+		if len(p.ResearchNextField) > 0 {
+			var next string
+			if json.Unmarshal(p.ResearchNextField, &next) != nil {
+				return nil, fmt.Errorf("research_next_field %s", p.ResearchNextField)
+			}
+			switch next {
+			case "same":
+			case "lowest":
+				pl.Research.Next = NextLowestField
+			default:
+				f, ok := pvFields[next]
+				if !ok {
+					return nil, fmt.Errorf("research_next_field %q", next)
+				}
+				pl.Research.Next = f
+			}
+		}
 		pl.ResearchBudget = p.ResearchPercent
 		pl.Relations = make([]Relation, len(s.Players))
 		for i := range pl.Relations {
@@ -476,24 +496,31 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	if len(s.Objects) > 0 {
 		l.global = "space objects (" + s.Objects[0].Kind + ")"
 	}
-	// A production queue is not loaded: FORMAT.md does not give the
-	// planetary item ids. Checks its planet, its owner or ships it may
-	// build could see are skipped.
+	// Production queues (FORMAT.md "Queue items"). A queue holding an
+	// item Elegy does not build (designs, terraforming, packets, scanners,
+	// the Genesis Device) is not loaded: checks its planet, its owner or
+	// ships it may build could see are skipped.
 	for _, q := range s.ProductionQueues {
-		if len(q.Items) == 0 {
+		pi := -1
+		for i := range g.Planets {
+			if g.Planets[i].ID == l.planet[q.Planet] {
+				pi = i
+			}
+		}
+		if pi < 0 || g.Planets[pi].Owner == NoOwner {
 			continue
 		}
-		for _, p := range s.Planets {
-			if p.ID != q.Planet || p.Owner < 0 {
-				continue
-			}
-			key := [2]int{p.Owner, -1 - p.ID}
-			l.unsupported[key] = "production queue"
-			l.start[key] = Point{p.X, p.Y}
-			l.queued[p.Owner] = true
+		p := &g.Planets[pi]
+		items, why := pvQueue(q.Items)
+		if why == "" {
+			p.HasQueue, p.Queue = true, items
+			continue
 		}
+		key := [2]int{p.Owner, -1 - q.Planet}
+		l.unsupported[key] = why
+		l.start[key] = p.Pos
+		l.queued[p.Owner] = true
 	}
-
 	for _, f := range s.Fleets {
 		l.fleetID[pvFleetKey(f.Owner, f.ID)] = pvElegyFleetID(f.Owner, f.ID)
 		l.start[pvFleetKey(f.Owner, f.ID)] = Point{f.X, f.Y}
@@ -532,6 +559,11 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 				continue
 			}
 			wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp, Task: task}
+			if w.Warp > 10 {
+				// Warp 11 is a stargate jump; the fleet is held here.
+				l.unsupported[key] = "stargate"
+				wp.Warp = 0
+			}
 			switch w.Target.Kind {
 			case "space":
 			case "planet":
@@ -550,6 +582,63 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		g.Fleets = append(g.Fleets, ef)
 	}
 	return l, nil
+}
+
+// pvItemKinds maps the planetary queue item ids Elegy builds to its
+// items (FORMAT.md "Queue items").
+var pvItemKinds = map[int]ItemKind{
+	0: ItemAutoMines, 1: ItemAutoFactories, 2: ItemAutoDefenses, 3: ItemAutoAlchemy,
+	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy,
+}
+
+// queueEquals checks a planet's production queue (FORMAT.md
+// "production_queue").
+func (l *pvLoaded) queueEquals(g *Game, e pvExpect) string {
+	if e.Planet == nil {
+		return "skip: production_queue without a planet"
+	}
+	if why := l.unsupportedAt(-1); why != "" {
+		return "skip: " + why
+	}
+	var raw []json.RawMessage
+	if err := json.Unmarshal(e.Equals, &raw); err != nil {
+		return "skip: production_queue " + err.Error()
+	}
+	want, why := pvQueue(raw)
+	if why != "" {
+		return "skip: " + why
+	}
+	for i := range g.Planets {
+		if g.Planets[i].ID == l.planet[*e.Planet] {
+			got := g.Planets[i].Queue
+			if len(got) == 0 && len(want) == 0 || reflect.DeepEqual(got, want) {
+				return ""
+			}
+			return pvMismatch("queue", got, want)
+		}
+	}
+	return "no planet"
+}
+
+// pvQueue converts a production queue, or names an item Elegy does not
+// build.
+func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
+	var items []QueueItem
+	for _, r := range raw {
+		var it struct{ ID, Count, Percent, Kind int }
+		if err := json.Unmarshal(r, &it); err != nil {
+			return nil, "production queue item " + string(r)
+		}
+		if it.Kind != 1 {
+			return nil, "production queue: a design"
+		}
+		k, ok := pvItemKinds[it.ID]
+		if !ok {
+			return nil, fmt.Sprintf("production queue: planetary item %d", it.ID)
+		}
+		items = append(items, QueueItem{Kind: k, Count: it.Count, Percent: it.Percent})
+	}
+	return items, ""
 }
 
 // task converts a waypoint task, or names what Elegy cannot model.
@@ -625,6 +714,9 @@ type pvResult struct {
 // pvCheck compares one expectation with a generated game; "" passes, a
 // leading "skip: " skips.
 func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
+	if e.Kind == "production_queue" {
+		return l.queueEquals(g, e)
+	}
 	var eq map[string]json.RawMessage
 	if len(e.Equals) > 0 && json.Unmarshal(e.Equals, &eq) != nil {
 		return "skip: " + e.Kind + " list"
@@ -705,6 +797,9 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		}
 		return "no planet"
 	case "player":
+		if *e.ID >= len(g.Players) {
+			return "skip: player not in the state"
+		}
 		if l.queued[*e.ID] {
 			return "skip: production queue"
 		}
@@ -864,10 +959,11 @@ func (l *pvLoaded) planetEquals(g *Game, p *Planet, eq map[string]json.RawMessag
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
-		case "population", "defenses":
+		case "population", "defenses", "mines", "factories", "excess":
 			var want int
 			json.Unmarshal(raw, &want)
-			got := map[string]int{"population": p.Population, "defenses": p.Defenses}[k]
+			got := map[string]int{"population": p.Population, "defenses": p.Defenses,
+				"mines": p.Mines, "factories": p.Factories, "excess": p.GrowthCarry}[k]
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
@@ -962,6 +1058,13 @@ func runVector(v *pvVector) []pvResult {
 		}
 		return out
 	}
+	if v.corpus == "rp" {
+		// Every rp case tests the race penalty.
+		l.global = "the turn-time race check (RACES.md \"In a running game\")"
+	}
+	if len(v.Orders) > 0 {
+		l.global = "submitted orders (the order layer)"
+	}
 	if l.global != "" {
 		for _, c := range v.Cases {
 			res(c, "skip", l.global)
@@ -1044,8 +1147,6 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
-	"RD-P11":    "the turn-time race check (RACES.md \"In a running game\")",
-	"RD-P12":    "the turn-time race check (RACES.md \"In a running game\")",
 }
 
 func pvUnique(xs []string) []string {

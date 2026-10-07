@@ -1,0 +1,8569 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "CS-003-C",
+ "title": "torpedo and missile damage per hit; minimum beam damage against an Orbital Fort",
+ "source": {
+  "experiment": "experiments/cs003",
+  "spec_rules": "docs/COMPONENTS.md",
+  "parity": "docs/PARITY.md \"The remaining BINARY-ONLY columns (CS-003, CONFIRMED 2026-10-07)\"",
+  "raw_evidence": "stars-oracle-apparatus evidence/cs/cs-003/run-c (private)"
+ },
+ "years": 1,
+ "random": "single_stream",
+ "streams": 1,
+ "initial_state": {
+  "year": 2400,
+  "game": {
+   "name": "Combat Lab",
+   "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "sparse",
+   "players": 2,
+   "slower_tech": false,
+   "random_events": false,
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 30
+    }
+   }
+  },
+  "players": [
+   {
+    "id": 0,
+    "tech": {
+     "energy": 26,
+     "weapons": 26,
+     "propulsion": 26,
+     "construction": 26,
+     "electronics": 26,
+     "biotechnology": 26
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 0,
+    "research_field": "energy",
+    "relations": {
+     "1": "enemy"
+    },
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 15,
+     "starbase_designs": 1
+    }
+   },
+   {
+    "id": 1,
+    "tech": {
+     "energy": 26,
+     "weapons": 26,
+     "propulsion": 26,
+     "construction": 26,
+     "electronics": 26,
+     "biotechnology": 26
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 0,
+    "research_field": "energy",
+    "relations": {
+     "0": "enemy"
+    },
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 1,
+     "starbase_designs": 1
+    }
+   }
+  ],
+  "planets": [
+   {
+    "id": 0,
+    "x": 1045,
+    "y": 1291,
+    "owner": -1,
+    "concentrations": [
+     20,
+     17,
+     89
+    ],
+    "environment": [
+     88,
+     79,
+     69
+    ]
+   },
+   {
+    "id": 1,
+    "x": 1071,
+    "y": 1087,
+    "owner": -1,
+    "concentrations": [
+     73,
+     9,
+     47
+    ],
+    "environment": [
+     19,
+     23,
+     64
+    ]
+   },
+   {
+    "id": 2,
+    "x": 1090,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     112,
+     84,
+     56
+    ],
+    "environment": [
+     40,
+     7,
+     9
+    ]
+   },
+   {
+    "id": 3,
+    "x": 1129,
+    "y": 1265,
+    "owner": -1,
+    "concentrations": [
+     88,
+     14,
+     7
+    ],
+    "environment": [
+     41,
+     11,
+     62
+    ]
+   },
+   {
+    "id": 4,
+    "x": 1143,
+    "y": 1103,
+    "owner": 1,
+    "concentrations": [
+     62,
+     10,
+     87
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     0,
+     0,
+     0
+    ],
+    "population": 100,
+    "excess": 0,
+    "mines": 0,
+    "factories": 0,
+    "defenses": 0,
+    "planetary_scanner": null,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 5,
+    "x": 1146,
+    "y": 1180,
+    "owner": 1,
+    "concentrations": [
+     13,
+     89,
+     87
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     0,
+     0,
+     0
+    ],
+    "population": 100,
+    "excess": 0,
+    "mines": 0,
+    "factories": 0,
+    "defenses": 0,
+    "planetary_scanner": null,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 6,
+    "x": 1166,
+    "y": 1017,
+    "owner": -1,
+    "concentrations": [
+     4,
+     50,
+     71
+    ],
+    "environment": [
+     58,
+     4,
+     63
+    ]
+   },
+   {
+    "id": 7,
+    "x": 1166,
+    "y": 1382,
+    "owner": -1,
+    "concentrations": [
+     81,
+     25,
+     78
+    ],
+    "environment": [
+     8,
+     23,
+     93
+    ]
+   },
+   {
+    "id": 8,
+    "x": 1169,
+    "y": 1145,
+    "owner": 1,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 9,
+    "x": 1208,
+    "y": 1297,
+    "owner": -1,
+    "concentrations": [
+     100,
+     86,
+     95
+    ],
+    "environment": [
+     20,
+     39,
+     47
+    ]
+   },
+   {
+    "id": 10,
+    "x": 1224,
+    "y": 1359,
+    "owner": -1,
+    "concentrations": [
+     94,
+     104,
+     24
+    ],
+    "environment": [
+     84,
+     13,
+     35
+    ]
+   },
+   {
+    "id": 11,
+    "x": 1243,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     79,
+     49,
+     13
+    ],
+    "environment": [
+     85,
+     20,
+     63
+    ]
+   },
+   {
+    "id": 12,
+    "x": 1245,
+    "y": 1158,
+    "owner": 1,
+    "concentrations": [
+     15,
+     82,
+     45
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     0,
+     0,
+     0
+    ],
+    "population": 100,
+    "excess": 0,
+    "mines": 0,
+    "factories": 0,
+    "defenses": 0,
+    "planetary_scanner": null,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 13,
+    "x": 1249,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     114,
+     97,
+     14
+    ],
+    "environment": [
+     54,
+     61,
+     50
+    ]
+   },
+   {
+    "id": 14,
+    "x": 1268,
+    "y": 1317,
+    "owner": -1,
+    "concentrations": [
+     68,
+     78,
+     76
+    ],
+    "environment": [
+     70,
+     71,
+     98
+    ]
+   },
+   {
+    "id": 15,
+    "x": 1281,
+    "y": 1064,
+    "owner": -1,
+    "concentrations": [
+     89,
+     53,
+     71
+    ],
+    "environment": [
+     88,
+     82,
+     1
+    ]
+   },
+   {
+    "id": 16,
+    "x": 1284,
+    "y": 1383,
+    "owner": -1,
+    "concentrations": [
+     27,
+     49,
+     53
+    ],
+    "environment": [
+     75,
+     47,
+     62
+    ]
+   },
+   {
+    "id": 17,
+    "x": 1306,
+    "y": 1060,
+    "owner": 0,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 18,
+    "x": 1324,
+    "y": 1192,
+    "owner": -1,
+    "concentrations": [
+     57,
+     27,
+     81
+    ],
+    "environment": [
+     25,
+     31,
+     17
+    ]
+   },
+   {
+    "id": 19,
+    "x": 1342,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     23,
+     38,
+     74
+    ],
+    "environment": [
+     52,
+     78,
+     29
+    ]
+   },
+   {
+    "id": 20,
+    "x": 1348,
+    "y": 1290,
+    "owner": -1,
+    "concentrations": [
+     1,
+     57,
+     30
+    ],
+    "environment": [
+     72,
+     44,
+     10
+    ]
+   },
+   {
+    "id": 21,
+    "x": 1359,
+    "y": 1121,
+    "owner": -1,
+    "concentrations": [
+     10,
+     7,
+     62
+    ],
+    "environment": [
+     41,
+     43,
+     64
+    ]
+   },
+   {
+    "id": 22,
+    "x": 1368,
+    "y": 1292,
+    "owner": -1,
+    "concentrations": [
+     70,
+     52,
+     88
+    ],
+    "environment": [
+     22,
+     10,
+     84
+    ]
+   },
+   {
+    "id": 23,
+    "x": 1380,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     91,
+     70,
+     3
+    ],
+    "environment": [
+     75,
+     59,
+     96
+    ]
+   }
+  ],
+  "designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Alpha Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Alpha Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Alpha Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Beta Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Beta Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Beta Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Delta Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Delta Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Delta Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Epsilon Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Epsilon Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Epsilon Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Rho Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Rho Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Rho Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 5,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Upsilon Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Upsilon Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Upsilon Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 6,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Omega Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Omega Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Omega Torpedo"
+     },
+     null
+    ],
+    "mass": 250
+   },
+   {
+    "owner": 0,
+    "slot": 7,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Anti Matter Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Anti Matter Torpedo"
+     },
+     {
+      "count": 2,
+      "part": "Anti Matter Torpedo"
+     },
+     null
+    ],
+    "mass": 148
+   },
+   {
+    "owner": 0,
+    "slot": 8,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Jihad Missile"
+     },
+     {
+      "count": 2,
+      "part": "Jihad Missile"
+     },
+     {
+      "count": 2,
+      "part": "Jihad Missile"
+     },
+     null
+    ],
+    "mass": 310
+   },
+   {
+    "owner": 0,
+    "slot": 9,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Juggernaut Missile"
+     },
+     {
+      "count": 2,
+      "part": "Juggernaut Missile"
+     },
+     {
+      "count": 2,
+      "part": "Juggernaut Missile"
+     },
+     null
+    ],
+    "mass": 310
+   },
+   {
+    "owner": 0,
+    "slot": 10,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Doomsday Missile"
+     },
+     {
+      "count": 2,
+      "part": "Doomsday Missile"
+     },
+     {
+      "count": 2,
+      "part": "Doomsday Missile"
+     },
+     null
+    ],
+    "mass": 310
+   },
+   {
+    "owner": 0,
+    "slot": 11,
+    "hull": "Cruiser",
+    "slots": [
+     {
+      "count": 2,
+      "part": "Trans-Star 10"
+     },
+     null,
+     null,
+     {
+      "count": 2,
+      "part": "Armageddon Missile"
+     },
+     {
+      "count": 2,
+      "part": "Armageddon Missile"
+     },
+     {
+      "count": 2,
+      "part": "Armageddon Missile"
+     },
+     null
+    ],
+    "mass": 310
+   },
+   {
+    "owner": 0,
+    "slot": 12,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Blackjack"
+     },
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 49
+   },
+   {
+    "owner": 0,
+    "slot": 13,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Bludgeon"
+     },
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 49
+   },
+   {
+    "owner": 0,
+    "slot": 14,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Blunderbuss"
+     },
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 49
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Battleship",
+    "slots": [
+     {
+      "count": 4,
+      "part": "Long Hump 6"
+     },
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     {
+      "count": 6,
+      "part": "Neutronium"
+     },
+     null,
+     null
+    ],
+    "mass": 528
+   }
+  ],
+  "starbase_designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Orbital Fort",
+    "slots": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 0
+   }
+  ],
+  "battle_plans": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "tactic": 5,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 1,
+    "dump_cargo": false,
+    "name": "Enemies"
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   }
+  ],
+  "fleets": [
+   {
+    "owner": 0,
+    "id": 0,
+    "x": 1020,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 1,
+    "x": 1060,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 1,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 2,
+    "x": 1100,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 2,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 3,
+    "x": 1140,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 3,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1140,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 4,
+    "x": 1180,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 4,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1180,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 5,
+    "x": 1220,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 5,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1220,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 6,
+    "x": 1260,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 6,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1260,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 7,
+    "x": 1300,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 7,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1300,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 8,
+    "x": 1020,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 8,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 9,
+    "x": 1060,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 9,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 10,
+    "x": 1100,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 10,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 11,
+    "x": 1140,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 11,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1140,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 12,
+    "x": 1146,
+    "y": 1180,
+    "orbiting": 5,
+    "ships": [
+     {
+      "design": 12,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1146,
+      "y": 1180,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 5
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 13,
+    "x": 1143,
+    "y": 1103,
+    "orbiting": 4,
+    "ships": [
+     {
+      "design": 13,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1143,
+      "y": 1103,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 4
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 14,
+    "x": 1245,
+    "y": 1158,
+    "orbiting": 12,
+    "ships": [
+     {
+      "design": 14,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1245,
+      "y": 1158,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 12
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 0,
+    "x": 1020,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 1,
+    "x": 1060,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 2,
+    "x": 1100,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 3,
+    "x": 1140,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1140,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 4,
+    "x": 1180,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1180,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 5,
+    "x": 1220,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1220,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 6,
+    "x": 1260,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1260,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 7,
+    "x": 1300,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1300,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 8,
+    "x": 1020,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 9,
+    "x": 1060,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 10,
+    "x": 1100,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 11,
+    "x": 1140,
+    "y": 1030,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 3
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 200,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1140,
+      "y": 1030,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   }
+  ],
+  "objects": [],
+  "production_queues": []
+ },
+ "cases": [
+  {
+   "id": "CS-003-C-T00",
+   "rule": "COMPONENTS Alpha Torpedo: kind",
+   "setup": "Cruiser with 6 Alpha Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1020,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 0
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 0
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1020,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        3,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 1,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 2,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 3,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 5,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 6,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 7,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 9,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 10,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 11,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        7,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 13,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 13,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 14,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 15,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 17,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 17,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 17,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        7,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        4,
+        6
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 18,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 19,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 20,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 0,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 5 to armor (torpedo)",
+   "verdict": "prediction not discriminated: 20 hit records: predicted fits, alternative fits; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T01",
+   "rule": "COMPONENTS Beta Torpedo: kind",
+   "setup": "Cruiser with 6 Beta Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1060,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 1,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 1
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 1
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1060,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 1,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 1,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 3,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 4,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 5,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 6,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 7,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 7,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 9,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 9,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 10,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 11,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 14,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        5,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 17,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 19,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 20,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 12 to armor (torpedo)",
+   "verdict": "16 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T02",
+   "rule": "COMPONENTS Delta Torpedo: kind",
+   "setup": "Cruiser with 6 Delta Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1100,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 2,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 2
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 2
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1100,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 2,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 5,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 7,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 10,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 15,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        7,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 18,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 21,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 23,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        6,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 25,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 27,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 27,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        7,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 29,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 29,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 31,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 33,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 33,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 33,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        7,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 36,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 38,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 38,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        6,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 40,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 43,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 46,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 26 to armor (torpedo)",
+   "verdict": "19 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T03",
+   "rule": "COMPONENTS Epsilon Torpedo: kind",
+   "setup": "Cruiser with 6 Epsilon Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1140,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 3,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 3
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 3
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1140,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 3,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 11,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 19,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 22,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        7,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 25,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 31,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        8,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 36,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 41,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 46,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        9,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 46,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 49,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 54,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 57,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 60,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 65,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        9,
+        2
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 70,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 73,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 78,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        8,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        4,
+        2
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 81,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 86,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 91,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 48 to armor (torpedo)",
+   "verdict": "23 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T04",
+   "rule": "COMPONENTS Rho Torpedo: kind",
+   "setup": "Cruiser with 6 Rho Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1180,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 4
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 4,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 4
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1180,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        9,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        3,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 5,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 10,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 19,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 33,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 37,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 47,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 47,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        8,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 61,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 66,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        7,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 70,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 75,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 89,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 94,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 103,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 112,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 117,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 122,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 131,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 140,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 145,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 0,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 90 to armor (torpedo)",
+   "verdict": "23 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T05",
+   "rule": "COMPONENTS Upsilon Torpedo: kind",
+   "setup": "Cruiser with 6 Upsilon Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1220,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 5
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 5,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 5
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1220,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        9,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        3,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 40,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 72,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 88,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 96,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 96,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 112,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        8,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 128,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 136,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 144,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        8,
+        8
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 152,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 168,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 176,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 184,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 192,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 208,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        9,
+        9
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 224,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 240,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 256,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        8,
+        9
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 272,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 280,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 296,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 0,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 169 to armor (torpedo)",
+   "verdict": "23 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T06",
+   "rule": "COMPONENTS Omega Torpedo: kind",
+   "setup": "Cruiser with 6 Omega Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1260,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 6,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 250,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 6
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 6
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1260,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        9,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 29,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 58,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 73,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 88,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 117,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 146,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        8,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 175,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 204,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 233,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        8,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 248,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 263,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 278,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        8,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 307,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 336,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 351,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 380,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 409,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 424,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 430,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 447,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 491,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 491,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 316 to armor (torpedo)",
+   "verdict": "22 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T07",
+   "rule": "COMPONENTS Anti Matter Torpedo: kind",
+   "setup": "Cruiser with 6 Anti Matter Torpedo vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1300,
+     "y": 1230,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 7,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 148,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 7
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 7
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1300,
+     "y": 1230,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 6,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 12,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 18,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        8,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 30,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 36,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 48,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 54,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 60,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 66,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 72,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        7,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 72,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 78,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 81,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 87,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 93,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 96,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 102,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 108,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 114,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 196,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 114,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 120,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 126,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 132,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 138,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 4,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 144,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 60 to armor (torpedo)",
+   "verdict": "25 hit records: predicted fits, alternative fails; record flags 04"
+  },
+  {
+   "id": "CS-003-C-T08",
+   "rule": "COMPONENTS Jihad Missile: kind",
+   "setup": "Cruiser with 6 Jihad Missile vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1020,
+     "y": 1030,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 8,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 310,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 8
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 8
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1020,
+     "y": 1030,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        9,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 8,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 16,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 24,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 32,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 48,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 64,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 72,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        4,
+        4
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 80,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 170 to armor (missile: doubled)",
+   "verdict": "9 hit records: predicted fits, alternative fails; record flags 0c"
+  },
+  {
+   "id": "CS-003-C-T09",
+   "rule": "COMPONENTS Juggernaut Missile: kind",
+   "setup": "Cruiser with 6 Juggernaut Missile vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1060,
+     "y": 1030,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 9
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 9,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 310,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 9
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1060,
+     "y": 1030,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        9,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 14,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 14,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        9,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 14,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        8,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 28,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 42,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        4,
+        3
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 56,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 0,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 300 to armor (missile: doubled)",
+   "verdict": "prediction not discriminated: 4 hit records: predicted fits, alternative fits; record flags 0c"
+  },
+  {
+   "id": "CS-003-C-T10",
+   "rule": "COMPONENTS Doomsday Missile: kind",
+   "setup": "Cruiser with 6 Doomsday Missile vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1100,
+     "y": 1030,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 10,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 310,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 10
+      },
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 10
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1100,
+     "y": 1030,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        9,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 26,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 26,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        8,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 52,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 78,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        7,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 78,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        8,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        8,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 104,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 130,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 130,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 156,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 182,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        9,
+        3
+       ],
+       "hits": []
+      },
+      {
+       "round": 7,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 182,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 182,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 208,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 8,
+       "token": 1,
+       "to": [
+        9,
+        2
+       ],
+       "hits": []
+      },
+      {
+       "round": 8,
+       "token": 0,
+       "to": [
+        3,
+        3
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 208,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 208,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 1,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 208,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 9,
+       "token": 1,
+       "to": null,
+       "hits": []
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 560 to armor (missile: doubled)",
+   "verdict": "prediction not discriminated: 8 hit records: predicted fits, alternative fits; record flags 0c"
+  },
+  {
+   "id": "CS-003-C-T11",
+   "rule": "COMPONENTS Armageddon Missile: kind",
+   "setup": "Cruiser with 6 Armageddon Missile vs 3 unarmed, unshielded Battleships",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1140,
+     "y": 1030,
+     "planet": null,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "ships",
+       "design": 0,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 528,
+       "shield": 0,
+       "ships": 3,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 11
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 11,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 5,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 310,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 11
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1140,
+     "y": 1030,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 0,
+          "percent_of_ships": 0
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 48,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        9,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 96,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 96,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 144,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 192,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 240,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 240,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        8,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 288,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 288,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 336,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        7,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 336,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 2,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        6,
+        7
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 204,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        },
+        {
+         "token": 0,
+         "flags": 12,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 384,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "every hit does 1050 to armor (missile: doubled)",
+   "verdict": "10 hit records: predicted fits, alternative fails; record flags 0c"
+  },
+  {
+   "id": "CS-003-C-Z-Blackjack",
+   "rule": "COMPONENTS Blackjack: kind",
+   "setup": "Destroyer with 1 Blackjack at a planet with an unarmed, unshielded Orbital Fort",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1146,
+     "y": 1180,
+     "planet": 5,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "starbase",
+       "design": 16,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 65535,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "planet": 5
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 12,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 3,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 49,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 12
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1146,
+     "y": 1180,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        3,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        5,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        6,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 1,
+         "kills": 0,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 450,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      },
+      {
+       "round": 7,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 1,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 500,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "armor damage 90 per hit on the fort (beam)",
+   "verdict": "first hit on the fort: kills=0 units=450"
+  },
+  {
+   "id": "CS-003-C-Z-Bludgeon",
+   "rule": "COMPONENTS Bludgeon: kind",
+   "setup": "Destroyer with 1 Bludgeon at a planet with an unarmed, unshielded Orbital Fort",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1143,
+     "y": 1103,
+     "planet": 4,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 1,
+       "kind": "starbase",
+       "design": 16,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 65535,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "planet": 4
+      },
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 13,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 3,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 49,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 13
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1143,
+     "y": 1103,
+     "actions": [
+      {
+       "round": 0,
+       "token": 1,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 1,
+       "to": [
+        3,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 2,
+       "token": 1,
+       "to": [
+        4,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 1,
+       "to": [
+        5,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 1,
+       "to": [
+        6,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 1,
+       "to": [
+        7,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 1,
+       "to": [
+        8,
+        5
+       ],
+       "hits": [
+        {
+         "token": 0,
+         "flags": 2,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 500,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "armor damage 231 per hit on the fort (beam)",
+   "verdict": "first hit on the fort: kills=1 units=500"
+  },
+  {
+   "id": "CS-003-C-Z-Blunderbuss",
+   "rule": "COMPONENTS Blunderbuss: kind",
+   "setup": "Destroyer with 1 Blunderbuss at a planet with an unarmed, unshielded Orbital Fort",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "battle",
+     "x": 1245,
+     "y": 1158,
+     "planet": 12,
+     "players": [
+      0,
+      1
+     ],
+     "tokens": [
+      {
+       "owner": 0,
+       "kind": "ships",
+       "design": 14,
+       "start_square": [
+        1,
+        4
+       ],
+       "initiative": 3,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 49,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "fleet": 14
+      },
+      {
+       "owner": 1,
+       "kind": "starbase",
+       "design": 16,
+       "start_square": [
+        8,
+        5
+       ],
+       "initiative": 10,
+       "jammer": 0,
+       "computer": 0,
+       "capacitor": 0,
+       "deflector": 100,
+       "mass": 65535,
+       "shield": 0,
+       "ships": 1,
+       "damage": {
+        "units": 0,
+        "percent_of_ships": 0
+       },
+       "planet": 12
+      }
+     ],
+     "year": 1
+    },
+    {
+     "kind": "battle_actions",
+     "x": 1245,
+     "y": 1158,
+     "actions": [
+      {
+       "round": 0,
+       "token": 0,
+       "to": [
+        2,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 1,
+       "token": 0,
+       "to": [
+        3,
+        6
+       ],
+       "hits": []
+      },
+      {
+       "round": 2,
+       "token": 0,
+       "to": [
+        4,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 3,
+       "token": 0,
+       "to": [
+        5,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 4,
+       "token": 0,
+       "to": [
+        6,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 5,
+       "token": 0,
+       "to": [
+        7,
+        4
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        8,
+        5
+       ],
+       "hits": []
+      },
+      {
+       "round": 6,
+       "token": 0,
+       "to": [
+        8,
+        5
+       ],
+       "hits": [
+        {
+         "token": 1,
+         "flags": 2,
+         "kills": 1,
+         "shield_damage": 0,
+         "armor_damage": {
+          "units": 500,
+          "percent_of_ships": 100
+         }
+        }
+       ]
+      }
+     ],
+     "year": 1
+    }
+   ],
+   "prediction": "armor damage 592 per hit on the fort (beam)",
+   "verdict": "first hit on the fort: kills=1 units=500"
+  }
+ ]
+}

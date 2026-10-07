@@ -1,0 +1,3598 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "ES-002",
+ "title": "client estimates follow-up: stargate legs, Skipped, report ETA, Generalized Research, a maxed field",
+ "source": {
+  "experiment": "experiments/es002",
+  "spec_rules": "docs/ESTIMATES.md",
+  "parity": "docs/PARITY.md \"Client estimates follow-up (ES-002)\"",
+  "raw_evidence": "stars-oracle-apparatus evidence/es/es-002 (private)"
+ },
+ "years": 1,
+ "random": "single_stream",
+ "streams": 1,
+ "initial_state": {
+  "year": 2400,
+  "game": {
+   "name": "Combat Lab",
+   "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "sparse",
+   "players": 2,
+   "slower_tech": false,
+   "random_events": false,
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 30
+    }
+   }
+  },
+  "players": [
+   {
+    "id": 0,
+    "tech": {
+     "energy": 7,
+     "weapons": 4,
+     "propulsion": 26,
+     "construction": 7,
+     "electronics": 9,
+     "biotechnology": 4
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 10,
+    "research_field": "weapons",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [
+      "GR",
+      "NRSE",
+      "CE",
+      "OBRM",
+      "LSP",
+      "BET"
+     ],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 3,
+     "starbase_designs": 3
+    }
+   },
+   {
+    "id": 1,
+    "tech": {
+     "energy": 25,
+     "weapons": 3,
+     "propulsion": 3,
+     "construction": 3,
+     "electronics": 3,
+     "biotechnology": 3
+    },
+    "research_accumulated": {
+     "energy": 85090,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 15,
+    "research_field": "energy",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 6,
+     "starbase_designs": 1
+    }
+   }
+  ],
+  "planets": [
+   {
+    "id": 0,
+    "x": 1045,
+    "y": 1291,
+    "owner": -1,
+    "concentrations": [
+     20,
+     17,
+     89
+    ],
+    "environment": [
+     88,
+     79,
+     69
+    ]
+   },
+   {
+    "id": 1,
+    "x": 1071,
+    "y": 1087,
+    "owner": -1,
+    "concentrations": [
+     73,
+     9,
+     47
+    ],
+    "environment": [
+     19,
+     23,
+     64
+    ]
+   },
+   {
+    "id": 2,
+    "x": 1090,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     112,
+     84,
+     56
+    ],
+    "environment": [
+     40,
+     7,
+     9
+    ]
+   },
+   {
+    "id": 3,
+    "x": 1129,
+    "y": 1265,
+    "owner": -1,
+    "concentrations": [
+     88,
+     14,
+     7
+    ],
+    "environment": [
+     41,
+     11,
+     62
+    ]
+   },
+   {
+    "id": 4,
+    "x": 1143,
+    "y": 1103,
+    "owner": 0,
+    "concentrations": [
+     50,
+     50,
+     50
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     100,
+     100,
+     100
+    ],
+    "population": 150,
+    "excess": 0,
+    "mines": 15,
+    "factories": 15,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 2,
+     "damage": 0
+    }
+   },
+   {
+    "id": 5,
+    "x": 1146,
+    "y": 1180,
+    "owner": -1,
+    "concentrations": [
+     13,
+     89,
+     87
+    ],
+    "environment": [
+     63,
+     78,
+     91
+    ]
+   },
+   {
+    "id": 6,
+    "x": 1166,
+    "y": 1017,
+    "owner": -1,
+    "concentrations": [
+     4,
+     50,
+     71
+    ],
+    "environment": [
+     58,
+     4,
+     63
+    ]
+   },
+   {
+    "id": 7,
+    "x": 1166,
+    "y": 1382,
+    "owner": -1,
+    "concentrations": [
+     81,
+     25,
+     78
+    ],
+    "environment": [
+     8,
+     23,
+     93
+    ]
+   },
+   {
+    "id": 8,
+    "x": 1169,
+    "y": 1145,
+    "owner": 1,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 9,
+    "x": 1208,
+    "y": 1297,
+    "owner": -1,
+    "concentrations": [
+     100,
+     86,
+     95
+    ],
+    "environment": [
+     20,
+     39,
+     47
+    ]
+   },
+   {
+    "id": 10,
+    "x": 1224,
+    "y": 1359,
+    "owner": -1,
+    "concentrations": [
+     94,
+     104,
+     24
+    ],
+    "environment": [
+     84,
+     13,
+     35
+    ]
+   },
+   {
+    "id": 11,
+    "x": 1243,
+    "y": 1123,
+    "owner": 0,
+    "concentrations": [
+     30,
+     30,
+     30
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     3000,
+     3000,
+     3000
+    ],
+    "population": 700,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 100,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": null,
+     "damage": -1
+    }
+   },
+   {
+    "id": 12,
+    "x": 1245,
+    "y": 1158,
+    "owner": -1,
+    "concentrations": [
+     15,
+     82,
+     45
+    ],
+    "environment": [
+     95,
+     10,
+     52
+    ]
+   },
+   {
+    "id": 13,
+    "x": 1249,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     114,
+     97,
+     14
+    ],
+    "environment": [
+     54,
+     61,
+     50
+    ]
+   },
+   {
+    "id": 14,
+    "x": 1268,
+    "y": 1317,
+    "owner": -1,
+    "concentrations": [
+     68,
+     78,
+     76
+    ],
+    "environment": [
+     70,
+     71,
+     98
+    ]
+   },
+   {
+    "id": 15,
+    "x": 1281,
+    "y": 1064,
+    "owner": 0,
+    "concentrations": [
+     50,
+     50,
+     50
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     300,
+     300,
+     300
+    ],
+    "population": 200,
+    "excess": 0,
+    "mines": 20,
+    "factories": 20,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 1,
+     "damage": 0
+    }
+   },
+   {
+    "id": 16,
+    "x": 1284,
+    "y": 1383,
+    "owner": 0,
+    "concentrations": [
+     50,
+     50,
+     50
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     100,
+     100,
+     100
+    ],
+    "population": 100,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 1,
+     "damage": 0
+    }
+   },
+   {
+    "id": 17,
+    "x": 1306,
+    "y": 1060,
+    "owner": 0,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 18,
+    "x": 1324,
+    "y": 1192,
+    "owner": 0,
+    "concentrations": [
+     40,
+     40,
+     40
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     50,
+     50,
+     50
+    ],
+    "population": 300,
+    "excess": 0,
+    "mines": 500,
+    "factories": 20,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": null,
+     "damage": -1
+    }
+   },
+   {
+    "id": 19,
+    "x": 1342,
+    "y": 1123,
+    "owner": 0,
+    "concentrations": [
+     50,
+     50,
+     50
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     300,
+     300,
+     300
+    ],
+    "population": 200,
+    "excess": 0,
+    "mines": 20,
+    "factories": 20,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 1,
+     "damage": 0
+    }
+   },
+   {
+    "id": 20,
+    "x": 1348,
+    "y": 1290,
+    "owner": -1,
+    "concentrations": [
+     1,
+     57,
+     30
+    ],
+    "environment": [
+     72,
+     44,
+     10
+    ]
+   },
+   {
+    "id": 21,
+    "x": 1359,
+    "y": 1121,
+    "owner": 0,
+    "concentrations": [
+     40,
+     40,
+     40
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     100,
+     100,
+     100
+    ],
+    "population": 100,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 0,
+    "planetary_scanner": 16,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": null,
+     "damage": -1
+    }
+   },
+   {
+    "id": 22,
+    "x": 1368,
+    "y": 1292,
+    "owner": -1,
+    "concentrations": [
+     70,
+     52,
+     88
+    ],
+    "environment": [
+     22,
+     10,
+     84
+    ]
+   },
+   {
+    "id": 23,
+    "x": 1380,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     91,
+     70,
+     3
+    ],
+    "environment": [
+     75,
+     59,
+     96
+    ]
+   }
+  ],
+  "designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     null,
+     null
+    ],
+    "mass": 17
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Medium Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     null,
+     null
+    ],
+    "mass": 64
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Medium Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     null,
+     {
+      "count": 1,
+      "part": "Crobmnium"
+     }
+    ],
+    "mass": 120
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     }
+    ],
+    "mass": 23
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     }
+    ],
+    "mass": 25
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "hull": "Colony Ship",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Colonization Module"
+     }
+    ],
+    "mass": 61
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "hull": "Medium Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Crobmnium"
+     }
+    ],
+    "mass": 130
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     },
+     {
+      "count": 1,
+      "part": "Alpha Torpedo"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 2,
+      "part": "Crobmnium"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     },
+     {
+      "count": 1,
+      "part": "Battle Computer"
+     }
+    ],
+    "mass": 186
+   },
+   {
+    "owner": 1,
+    "slot": 5,
+    "hull": "Mini-Miner",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     }
+    ],
+    "mass": 574
+   }
+  ],
+  "starbase_designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Stargate 100/250"
+     },
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 0
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Orbital Fort",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Stargate 100/250"
+     },
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 0
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Orbital Fort",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Stargate 150/600"
+     },
+     null,
+     null,
+     null,
+     null
+    ],
+    "mass": 0
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   }
+  ],
+  "battle_plans": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   }
+  ],
+  "fleets": [
+   {
+    "owner": 0,
+    "id": 0,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1123,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 19
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1150,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 1,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 1,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 50,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 100,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1123,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 19
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 2,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1284,
+      "y": 1383,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 16
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 3,
+    "x": 1143,
+    "y": 1103,
+    "orbiting": 4,
+    "ships": [
+     {
+      "design": 2,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 100,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1143,
+      "y": 1103,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 4
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1143,
+      "y": 1103,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1123,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 19
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 4,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1359,
+      "y": 1121,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 21
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 5,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1169,
+      "y": 1145,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 8
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 6,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1300,
+      "y": 1100,
+      "warp": 11,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 7,
+    "x": 1281,
+    "y": 1064,
+    "orbiting": 15,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1245,
+      "y": 1158,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 12
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 8,
+    "x": 1359,
+    "y": 1121,
+    "orbiting": 21,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1359,
+      "y": 1121,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 21
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1359,
+      "y": 1121,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1123,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 19
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 9,
+    "x": 1306,
+    "y": 1060,
+    "orbiting": 17,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1306,
+      "y": 1060,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 17
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1306,
+      "y": 1060,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1281,
+      "y": 1064,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 15
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1342,
+      "y": 1123,
+      "warp": 11,
+      "target": {
+       "kind": "planet",
+       "id": 19
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 10,
+    "x": 1020,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1020,
+      "y": 1230,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1040,
+      "y": 1231,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1050,
+      "y": 1232,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1053,
+      "y": 1233,
+      "warp": 2,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1058,
+      "y": 1234,
+      "warp": 3,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 11,
+    "x": 1020,
+    "y": 1260,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1020,
+      "y": 1260,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1020,
+      "y": 1260,
+      "warp": 5,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1020,
+      "y": 1263,
+      "warp": 2,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1027,
+      "y": 1264,
+      "warp": 3,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   }
+  ],
+  "objects": [],
+  "production_queues": [
+   {
+    "planet": 11,
+    "items": [
+     {
+      "id": 2,
+      "count": 50,
+      "kind": 1
+     },
+     {
+      "id": 1,
+      "count": 20,
+      "kind": 1
+     },
+     {
+      "id": 7,
+      "count": 5,
+      "kind": 1
+     }
+    ]
+   },
+   {
+    "planet": 18,
+    "items": [
+     {
+      "id": 0,
+      "count": 50,
+      "kind": 1
+     },
+     {
+      "id": 8,
+      "count": 5,
+      "kind": 1
+     }
+    ]
+   }
+  ]
+ },
+ "cases": [
+  {
+   "id": "ES-002-F00-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 0 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 84.86
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F00-w2",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 0 wp 2",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 2
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 27.0
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 2
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 3
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0,
+      "waypoint": 2
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 4
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T00",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 0 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0
+     },
+     "field": "eta",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F01-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 1 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 1,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 84.86
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 1,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "unload"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 1,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T01",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 1 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 1
+     },
+     "field": "eta",
+     "equals": {
+      "state": "unload"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F02-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 2 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 2,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 319.1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 2,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "danger"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 2,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T02",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 2 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 2
+     },
+     "field": "eta",
+     "equals": {
+      "state": "danger"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F03-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 3 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 3,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 200.0
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 3,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "danger"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 3,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T03",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 3 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 3
+     },
+     "field": "eta",
+     "equals": {
+      "state": "danger"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F04-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 4 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 4,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 96.61
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 4,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 4,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T04",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 4 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 4
+     },
+     "field": "eta",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F05-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 5 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 5,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 138.22
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 5,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "uncertain"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 5,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T05",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 5 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 5
+     },
+     "field": "eta",
+     "equals": {
+      "state": "uncertain"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F06-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 6 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 6,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 40.71
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 6,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 6,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T06",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 6 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 6
+     },
+     "field": "eta",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F07-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 7 wp 1",
+   "tag": "MEASURED",
+   "prediction_held": false,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 7,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 100.66
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 7,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "uncertain"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 7,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T07",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 7 report ETA",
+   "tag": "MEASURED",
+   "prediction_held": false,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 7
+     },
+     "field": "eta",
+     "equals": {
+      "state": "uncertain"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F08-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 8 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 8,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 17.12
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 8,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 8,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T08",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 8 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 8
+     },
+     "field": "eta",
+     "equals": {
+      "state": "never"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F09-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 9 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 25.32
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F09-w2",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 9 wp 2",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 2
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 84.86
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 2
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 2
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9,
+      "waypoint": 2
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T09",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 9 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 9
+     },
+     "field": "eta",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F10-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 10 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 20.2
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 2
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F10-w2",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 10 wp 2",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 2
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 10.5
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 2
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 2
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 2
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 3
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F10-w3",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 10 wp 3",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 3
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 3.16
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 3
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 3
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 3
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 3
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F10-w4",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 10 wp 4",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 4
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 5.1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 4
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 4
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10,
+      "waypoint": 4
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 4
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T10",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 10 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 10
+     },
+     "field": "eta",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F11-w1",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 11 wp 1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 1
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 3.0
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 1
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 1
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 0
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-F11-w2",
+   "rule": "ESTIMATES Leg distance",
+   "setup": "fleet 11 wp 2",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 2
+     },
+     "field": "distance",
+     "equals": {
+      "light_years": 7.7
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 2
+     },
+     "field": "travel_time",
+     "equals": {
+      "years": 2
+     },
+     "year": 1
+    },
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_waypoints",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11,
+      "waypoint": 2
+     },
+     "field": "fuel_usage",
+     "equals": {
+      "mg": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-T11",
+   "rule": "ESTIMATES Travel time",
+   "setup": "fleet 11 report ETA",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "fleet_summary_report",
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 11
+     },
+     "field": "eta",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-P11-0",
+   "rule": "ESTIMATES Production completion",
+   "setup": "planet 11 item 0 (id 7 x1, 29%)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "production_dialog",
+     "subject": {
+      "kind": "planet",
+      "id": 11,
+      "queue_item": 0
+     },
+     "field": "completion",
+     "equals": {
+      "years": 1
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-P11-1",
+   "rule": "ESTIMATES Production completion",
+   "setup": "planet 11 item 1 (id 2 x50, 0%)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "production_dialog",
+     "subject": {
+      "kind": "planet",
+      "id": 11,
+      "queue_item": 1
+     },
+     "field": "completion",
+     "equals": {
+      "state": "skipped"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-P11-2",
+   "rule": "ESTIMATES Production completion",
+   "setup": "planet 11 item 2 (id 1 x20, 0%)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "production_dialog",
+     "subject": {
+      "kind": "planet",
+      "id": 11,
+      "queue_item": 2
+     },
+     "field": "completion",
+     "equals": {
+      "years_min": 1,
+      "years_max": 6
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-P11-3",
+   "rule": "ESTIMATES Production completion",
+   "setup": "planet 11 item 3 (id 7 x5, 0%)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "production_dialog",
+     "subject": {
+      "kind": "planet",
+      "id": 11,
+      "queue_item": 3
+     },
+     "field": "completion",
+     "equals": {
+      "years_min": 6,
+      "years_max": 7
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-P18-0",
+   "rule": "ESTIMATES Production completion",
+   "setup": "planet 18 item 0 (id 0 x50, 0%)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "production_dialog",
+     "subject": {
+      "kind": "planet",
+      "id": 18,
+      "queue_item": 0
+     },
+     "field": "completion",
+     "equals": {
+      "state": "skipped"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-R1",
+   "rule": "ESTIMATES Research",
+   "setup": "player 0 field weapons level 4 -> resources needed",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 0,
+      "research_field": "weapons",
+      "level": 4
+     },
+     "field": "resources_needed",
+     "equals": {
+      "resources": 801
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-R2",
+   "rule": "ESTIMATES Research",
+   "setup": "player 0 next year's projected research budget",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 0
+     },
+     "field": "next_year_projected_research_budget",
+     "equals": {
+      "resources": 261
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-R3",
+   "rule": "ESTIMATES Research",
+   "setup": "player 0 estimated time to completion (GR)",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 0
+     },
+     "field": "estimated_time_to_completion",
+     "equals": {
+      "years": 7
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-R4",
+   "rule": "ESTIMATES Research",
+   "setup": "player 0 annual resources from all planets",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 0
+     },
+     "field": "annual_resources_from_all_planets",
+     "equals": {
+      "resources": 349
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-S1",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 field weapons level 3 -> resources needed",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1,
+      "research_field": "weapons",
+      "level": 3
+     },
+     "field": "resources_needed",
+     "equals": {
+      "resources": 595
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-S2",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 next year's projected research budget",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1
+     },
+     "field": "next_year_projected_research_budget",
+     "equals": {
+      "resources": 38
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-S3",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 estimated time to completion",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1
+     },
+     "field": "estimated_time_to_completion",
+     "equals": {
+      "years": 16
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-S4",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 annual resources from all planets",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1
+     },
+     "field": "annual_resources_from_all_planets",
+     "equals": {
+      "resources": 38
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-S5",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 energy (level 26) selected: resources needed",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1,
+      "research_field": "energy",
+      "level": 26
+     },
+     "field": "resources_needed",
+     "equals": {
+      "state": "maxed_out"
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-K1",
+   "rule": "KERNEL Research",
+   "setup": "player 1 energy level after the year",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "tech": {
+       "energy": 26
+      }
+     },
+     "year": 1
+    }
+   ]
+  },
+  {
+   "id": "ES-002-K3",
+   "rule": "ESTIMATES Research",
+   "setup": "player 1 next-field choice after the year",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "client_estimate",
+     "screen": "research_dialog",
+     "subject": {
+      "kind": "player",
+      "id": 1
+     },
+     "field": "next_field_choice_after_the_year",
+     "equals": {
+      "state": "same_field"
+     },
+     "year": 1
+    }
+   ]
+  }
+ ]
+}
