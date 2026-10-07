@@ -426,8 +426,11 @@ func TestConfirmedSalvage(t *testing.T) {
 	for _, k := range []int{3, 4, 3} {
 		tb.killEvent(e, k)
 	}
-	if tb.salvage != (Minerals{10, 0, 13}) {
-		t.Errorf("deep space salvage %v, want [10 0 13]", tb.salvage)
+	for _, add := range tb.pending {
+		tb.addSalvage(add)
+	}
+	if !reflect.DeepEqual(tb.salvage, []Minerals{{10, 0, 13}}) {
+		t.Errorf("deep space salvage %v, want one object [10 0 13]", tb.salvage)
 	}
 	// CB-011..013 S6/S7 (Q-13): six in one kill event at a planet give
 	// 6 Fe / 8 Ge with a starbase, 4 / 5 without, and no salvage object.
@@ -439,8 +442,8 @@ func TestConfirmedSalvage(t *testing.T) {
 		tb.g.Planets = []Planet{{HasStarbase: c.starbase}}
 		tb.loc.planet = 0
 		tb.killEvent(e, 6)
-		if got := tb.g.Planets[0].Surface; got != c.want || tb.salvaged {
-			t.Errorf("starbase %v: surface %v salvaged %v, want %v", c.starbase, got, tb.salvaged, c.want)
+		if got := tb.g.Planets[0].Surface; got != c.want || len(tb.pending) != 0 {
+			t.Errorf("starbase %v: surface %v pending %v, want %v", c.starbase, got, tb.pending, c.want)
 		}
 	}
 }
@@ -889,14 +892,44 @@ func TestPredictionRepairOthers(t *testing.T) {
 }
 
 func TestPredictionEmptySalvageGetsTokenAmount(t *testing.T) {
-	// A deep-space salvage object whose minerals would all be 0 gets
-	// rand(10) of each.
+	// An all-zero deep-space addition becomes rand(10) of each, redrawn
+	// until the total is above 0.
 	d := []Design{testDesign(tFrigate, 10)}
-	tb := newTestBattle(&seqRand{draws: []int{3, 4, 5}}, d)
-	tb.salvaged = true
+	tb := newTestBattle(&seqRand{draws: []int{0, 0, 0, 3, 4, 5}}, d)
+	tb.pending = []Minerals{{}}
 	tb.finish()
 	if len(tb.g.Salvage) != 1 || tb.g.Salvage[0].Minerals != (Minerals{3, 4, 5}) {
 		t.Errorf("salvage %+v", tb.g.Salvage)
+	}
+}
+
+func TestPredictionSalvageLimit(t *testing.T) {
+	// 3000 steps of 10 kT per object; a mineral that does not fit fills
+	// the object and the rest goes into a new object.
+	tb := newTestBattle(panicRand{}, nil)
+	tb.addSalvage(Minerals{29995, 20, 0})
+	if want := []Minerals{{29995, 0, 0}, {0, 20, 0}}; !reflect.DeepEqual(tb.salvage, want) {
+		t.Errorf("salvage %v, want %v", tb.salvage, want)
+	}
+	tb = newTestBattle(panicRand{}, nil)
+	tb.addSalvage(Minerals{0, 0, 100})
+	tb.addSalvage(Minerals{29950, 0, 0})
+	if want := []Minerals{{29950, 0, 50}, {0, 0, 50}}; !reflect.DeepEqual(tb.salvage, want) {
+		t.Errorf("salvage %v, want %v", tb.salvage, want)
+	}
+}
+
+func TestPredictionTorpedoHitsPerTarget(t *testing.T) {
+	// Hits are drawn afresh for each target from the unfired torpedoes:
+	// 10 Betas kill a 5-armor ship with 1 torpedo, then draw 9 more for
+	// the next target.
+	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 1}), testDesign(Hull{Armor: 5}, 1000), testDesign(Hull{Armor: 10000}, 10)}
+	f := tok(d, 0, 0, 10)
+	n := &countRand{}
+	tb := newTestBattle(n, d, f, tok(d, 1, 1, 1), tok(d, 2, 1, 1))
+	tb.torpedoes(0, f.weapons[0])
+	if n.n != 19 || len(tb.hits) != 2 || tb.hits[0].Hits != 1 || tb.hits[1].Hits != 9 {
+		t.Errorf("%d draws, hits %+v; want 19 draws, 1 then 9 hits", n.n, tb.hits)
 	}
 }
 

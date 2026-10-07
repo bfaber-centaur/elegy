@@ -1,7 +1,9 @@
 # Combat status
 
 The battle phase in `engine/` follows the public combat specification,
-stars-elegy `docs/COMBAT.md` as merged in PR #19 (`main` at `3968ec2`),
+stars-elegy `docs/COMBAT.md` as merged in PR #19 (`main` at `3968ec2`)
+plus the implementer answers on the PR #19 branch at `33a5603` (per-target
+torpedo hits, the salvage limit, no leftover past a starbase, capacitors),
 the turn order in `docs/KERNEL.md`, and the measured data in
 `docs/PARITY.md` "Combat" (CB-000..CB-022). Nothing else was used.
 
@@ -42,11 +44,11 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Design cost (miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | BINARY-ONLY | `TestPredictionDesignCost` |
 | Beams, dropoff, carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
 | Gatling, sappers | `gatling`, `damage` | CONFIRMED | `TestConfirmedGatlingHitsEveryTarget`, `TestConfirmedSapperShieldsOnly` |
-| Torpedoes and missiles | `hitChance`, `torpedoes` | CONFIRMED | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields` |
+| Torpedoes and missiles | `hitChance`, `torpedoes` | CONFIRMED | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestPredictionTorpedoHitsPerTarget` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
 | Starbase damage | `starbaseDamage` | CONFIRMED in part | `TestConfirmedStarbaseDamageSteps` |
 | Starbase loss, AR planet uninhabited | `combat.go` `finish` | BINARY-ONLY | `TestPredictionAlternateRealityStarbaseLoss` |
-| Salvage | `killEvent`, `cargoShare`, `finish` | CONFIRMED (one case each); cargo share and empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionEmptySalvageGetsTokenAmount` |
+| Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each); cargo share and empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
 | Repair | `repair` | CONFIRMED; moved, IS, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
 | Tech from battle, same-turn level | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation` |
 
@@ -86,21 +88,14 @@ the spec says otherwise.
   range-3 exception uses non-sapper beams.
 - **Off-board steps** are scored, and choosing one leaves the token in
   place. The disengage counter counts each move action.
-- **Torpedo hit chance** depends on the target's jammer but the hits are
-  drawn once per salvo; Elegy uses the first target chosen.
-- **Starbase leftover** for beam carry is the damage past its remaining
-  armor.
-- **Deep-space salvage** over 30000 kT is scaled down in proportion per
-  mineral. Dumped cargo goes into it without the quarter loss.
+- **Dumped cargo** in deep space is one salvage addition, without the
+  quarter loss. Salvage additions are made after the battle's tech
+  attempts, in kill-event order (the draw order COMBAT.md lists).
 - **Fuel** of destroyed ships is not removed from the fleet (COMBAT.md
   says it is destroyed but not how the share is computed).
 - **Mystery Trader items** are not modelled; the 13 `rand(13)` item tries
   are still drawn.
 - **Bleeding Edge suppression flag** is not identified; Elegy always
   doubles.
-- **Capacitors.** COMBAT.md compounds per item, which gives 158% for two
-  Flux Capacitors and an Energy Capacitor, not the 132% quoted for that
-  design; the code follows the per-item rule, and the test uses one of
-  each (132%).
 - **Queued ships and packets** lost with a starbase are not modelled
   (Elegy's queue has no ship items yet).

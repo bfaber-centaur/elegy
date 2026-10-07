@@ -84,24 +84,13 @@ func (b *battle) finish() {
 			pl.Owner, pl.Population, pl.GrowthCarry = NoOwner, 0, 0
 		}
 	}
-	if b.loc.planet >= 0 || !b.salvaged {
-		return
+	// Deep-space salvage, after the tech attempts in the draw order.
+	for _, add := range b.pending {
+		b.addSalvage(add)
 	}
-	s := b.salvage
-	total := s[Ironium] + s[Boranium] + s[Germanium]
-	if total > 30000 {
-		// Capped at 30000 kT. COMBAT.md does not say how the cap is
-		// shared; Elegy scales each mineral down in proportion.
-		for m := range NumMinerals {
-			s[m] = s[m] * 30000 / total
-		}
+	for _, m := range b.salvage {
+		g.Salvage = append(g.Salvage, Salvage{Pos: b.loc.pos, Minerals: m})
 	}
-	if s == (Minerals{}) {
-		for m := range NumMinerals {
-			s[m] = b.rng.Intn(10)
-		}
-	}
-	g.Salvage = append(g.Salvage, Salvage{Pos: b.loc.pos, Minerals: s})
 }
 
 // techAttempts makes the battle's tech-from-battle attempts (COMBAT.md

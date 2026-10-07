@@ -52,8 +52,8 @@ type battle struct {
 	round    int
 	in       map[int]bool // players still in the battle
 	hits     []BattleHit
-	salvage  Minerals // deep-space salvage gathered so far
-	salvaged bool     // a deep-space kill event happened
+	salvage  []Minerals // this battle's deep-space salvage objects
+	pending  []Minerals // deep-space salvage additions, added after the battle
 	seen     [NumFields]int
 	killed   map[int]bool // players that lost ships or a starbase
 }
@@ -111,10 +111,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 					g.Planets[b.loc.planet].Surface[m] += f.Cargo.Minerals[m]
 				}
 			} else {
-				for m := range NumMinerals {
-					b.salvage[m] += f.Cargo.Minerals[m]
-				}
-				b.salvaged = true
+				b.pending = append(b.pending, f.Cargo.Minerals)
 			}
 			f.Cargo.Minerals = Minerals{}
 		}

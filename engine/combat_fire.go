@@ -211,31 +211,25 @@ func (b *battle) torpedoes(fi int, w weaponSlot) {
 	t := b.tokens[fi]
 	p := w.part
 	N := t.ships * w.count
-	ti := b.choose(t, w)
-	if ti < 0 {
-		return
-	}
-	// The hit count uses the jammer of the first target. (COMBAT.md
-	// computes p per target; the hits are drawn once per salvo. Elegy
-	// draws against the first target chosen.)
-	pct := hitChance(p.Accuracy, t.computer, b.tokens[ti].jammer)
-	H := 0
-	switch {
-	case pct >= 100:
-		H = N
-	case N > 200:
-		H = N * pct / 100
-	default:
-		for range N {
-			if b.rng.Intn(100) < pct {
-				H++
-			}
-		}
-	}
 	for N > 0 {
+		ti := b.choose(t, w)
 		if ti < 0 {
-			if ti = b.choose(t, w); ti < 0 {
-				return
+			return
+		}
+		// Hits are computed afresh for each target, from the torpedoes
+		// still unfired and that target's jammer.
+		pct := hitChance(p.Accuracy, t.computer, b.tokens[ti].jammer)
+		H := 0
+		switch {
+		case pct >= 100:
+			H = N
+		case N > 200:
+			H = N * pct / 100
+		default:
+			for range N {
+				if b.rng.Intn(100) < pct {
+					H++
+				}
 			}
 		}
 		e := b.tokens[ti]
@@ -282,8 +276,6 @@ func (b *battle) torpedoes(fi int, w weaponSlot) {
 			b.record(fi, ti, h)
 		}
 		N -= n
-		H -= hits
-		ti = -1
 	}
 }
 
@@ -372,10 +364,7 @@ func (b *battle) starbaseDamage(e *token, dp, extra int, h *BattleHit) {
 			return
 		}
 	}
-	// Destroyed. The leftover for a beam carry is what remains past the
-	// starbase's remaining armor (Elegy's reading; COMBAT.md states the
-	// leftover for ship stacks).
-	h.Leftover = max(0, total-e.armor-extra)
+	// Destroyed. No damage is left over after a hit on a starbase.
 	h.Kills = 1
 	e.dead, e.ships = true, 0
 	b.killEvent(e, 1)
@@ -413,9 +402,60 @@ func (b *battle) killEvent(e *token, kills int) {
 		return
 	}
 	for m := range NumMinerals {
-		b.salvage[m] += s[m] - s[m]/4
+		s[m] -= s[m] / 4
 	}
-	b.salvaged = true
+	b.pending = append(b.pending, s)
+}
+
+// salvageSteps is a salvage object's limit: 30000 kT in 10 kT steps.
+const salvageSteps = 3000
+
+// addSalvage adds minerals to this battle's deep-space salvage (COMBAT.md
+// "Salvage", BINARY-ONLY in detail). An all-zero addition becomes rand(10)
+// of each, redrawn until above 0. The open object's minerals are taken
+// out and re-added with the new ones, ironium, boranium, germanium; a
+// mineral that does not fit fills the object to exactly 3000 steps, and
+// the rest goes into a new object at the same position in a new pass.
+func (b *battle) addSalvage(add Minerals) {
+	for add == (Minerals{}) {
+		for m := range NumMinerals {
+			add[m] = b.rng.Intn(10)
+		}
+	}
+	if len(b.salvage) == 0 {
+		b.salvage = append(b.salvage, Minerals{})
+	}
+	last := len(b.salvage) - 1
+	for m := range NumMinerals {
+		add[m] += b.salvage[last][m]
+	}
+	b.salvage[last] = Minerals{}
+	for {
+		obj := &b.salvage[len(b.salvage)-1]
+		used := 0
+		full := false
+		for m := range NumMinerals {
+			a := add[m]
+			if a == 0 {
+				continue
+			}
+			if steps := (a + 9) / 10; used+steps <= salvageSteps {
+				obj[m] += a
+				used += steps
+				add[m] = 0
+				continue
+			}
+			fit := 10 * (salvageSteps - used)
+			obj[m] += fit
+			add[m] -= fit
+			full = true
+			break
+		}
+		if !full {
+			return
+		}
+		b.salvage = append(b.salvage, Minerals{})
+	}
 }
 
 // cargoShare removes the destroyed ships' share of their fleet's cargo
