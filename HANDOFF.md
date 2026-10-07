@@ -11,9 +11,8 @@ subsystem the specification covers.
 
 - Merged to `main`: elegy PR #1 (kernel), PR #2 (stars-elegy PR #14
   rules) and PR #3 (KX-001: Auto Alchemy before a ×n item, item costs, AR
-  resources, the AR zero-maximum decision). The follow-up for stars-elegy
-  PR #18 (limiting component; KX-001 A5–A7) is on branch
-  `claude/project-thread-8c4kqn`, in review; it should merge after #18.
+  resources, the AR zero-maximum decision). This branch follows merged
+  stars-elegy PR #18 (limiting component; KX-001 A5–A7).
 - `engine/` holds habitability, population, economy, mining, research,
   production, movement and `GenerateTurn`. `docs/KERNEL-STATUS.md` is the
   map: rules, tests, statuses, gaps.
