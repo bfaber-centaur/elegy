@@ -43,7 +43,6 @@ var (
 	ErrNoSuchObject   = errors.New("orders: no such object")
 	ErrOutOfRange     = errors.New("orders: a value is out of range")
 	ErrNotModelled    = errors.New("orders: Elegy does not model this yet")
-	ErrAwaitingSpec   = errors.New("orders: placeholder until the stars-elegy spec lands")
 	ErrNotTogether    = errors.New("orders: the objects are not at the same place")
 	ErrRefusedByOwner = errors.New("orders: the receiver will not accept it")
 )
@@ -72,12 +71,9 @@ type Applied struct {
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
-// accepts. For battle plans it is COMBAT.md "Order validation" (stars-elegy
-// #72), Elegy's rule: a name over 31 characters is refused, any text and
-// the empty name are accepted.
-//
-// ASSUMPTION L1: fleet and design names follow the same rule; no public
-// spec gives their limit.
+// accepts (LIMITS.md "Names", stars-elegy #65, chosen rule; COMBAT.md
+// "Order validation", #72): at most 31 characters of any text. An empty
+// fleet name restores the default name.
 const maxNameLength = 31
 
 // acceptFile is ORDERS.md "File acceptance" (BINARY-ONLY): a file for
@@ -456,47 +452,121 @@ func (o DetonateOrder) apply(*Game, int, *Applied) error {
 	return fmt.Errorf("minefield %d: %w", o.Minefield, ErrNotModelled)
 }
 
-// QueueOrder replaces a planet's production queue. PLACEHOLDER: the
-// production-queue spec is being written in stars-elegy (ORDERS.md text
-// for queue replace). Elegy checks ownership, which ORDERS.md "Ownership"
-// says the original re-checks too, and then rejects the order with
-// ErrAwaitingSpec. The starbase-dock check that will apply to ship items
-// is DockAllows.
+// Production-queue limits Elegy checks on a queue order.
+//
+// ASSUMPTION L14: the host checks neither item kinds nor counts nor the
+// length (LIMITS.md "Production queue", stars-elegy #65). Elegy refuses an
+// unknown item, a count outside 1..1023 (the host's stored field) and
+// more than 255 items (the host's order-record limit).
+const (
+	maxQueueItems = 255
+	maxItemCount  = 1023
+)
+
+// QueueOrder replaces a planet's whole production queue (LIMITS.md
+// "Production-queue replace", stars-elegy #65, CONFIRMED LQ-1..LQ-6): the
+// planet must be the sender's; an empty list removes the queue; otherwise
+// the new list replaces the old in the order given, counts as sent. Each
+// new item sent with progress keeps progress only if the old queue has an
+// unmatched item of the same kind with progress, the first in queue order;
+// otherwise it starts at 0. Elegy's chosen rule keeps the old item's
+// percentage, not the one sent, so an order cannot add progress.
+//
+// Ship items, and the dock check they will need (DockAllows), wait on ship
+// items in the queue.
 type QueueOrder struct {
 	Planet int
 	Queue  []QueueItem
 }
 
 func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
-	if _, err := g.ownPlanet(player, o.Planet); err != nil {
+	pi, err := g.ownPlanet(player, o.Planet)
+	if err != nil {
 		return err
 	}
-	return fmt.Errorf("production queue: %w", ErrAwaitingSpec)
+	if len(o.Queue) > maxQueueItems {
+		return fmt.Errorf("production queue: %d items: %w", len(o.Queue), ErrOutOfRange)
+	}
+	for _, it := range o.Queue {
+		if it.Kind < ItemMine || it.Kind > ItemAutoAlchemy || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+			return fmt.Errorf("production queue item %+v: %w", it, ErrOutOfRange)
+		}
+	}
+	p := &g.Planets[pi]
+	if len(o.Queue) == 0 {
+		p.HasQueue, p.Queue = false, nil
+		return nil
+	}
+	used := make([]bool, len(p.Queue))
+	queue := make([]QueueItem, len(o.Queue))
+	for k, it := range o.Queue {
+		pct := 0
+		if it.Percent > 0 {
+			for j, old := range p.Queue {
+				if !used[j] && old.Percent > 0 && old.Kind == it.Kind {
+					used[j], pct = true, old.Percent
+					break
+				}
+			}
+		}
+		it.Percent = pct
+		queue[k] = it
+	}
+	p.HasQueue, p.Queue = true, queue
+	return nil
 }
 
-// PlanetFlagsOrder sets a planet's production flags (ORDERS.md
-// "planet-production flags"). PLACEHOLDER with QueueOrder: ownership is
-// checked (re-checked by the original too), then ErrAwaitingSpec.
-type PlanetFlagsOrder struct {
+// PlanetSettingsOrder sets a planet's settings (LIMITS.md "Setting
+// orders", stars-elegy #65, BINARY-ONLY): "contribute only leftover
+// resources to research" and the route destination for new ships. The
+// planet must be the sender's. Mass drivers are not modelled.
+//
+// ASSUMPTION L15: a route destination that is not a planet is refused.
+// The host does not check that it exists.
+type PlanetSettingsOrder struct {
 	Planet       int
 	LeftoverOnly bool
+	HasRoute     bool
+	RouteTo      int
 }
 
-func (o PlanetFlagsOrder) apply(g *Game, player int, _ *Applied) error {
-	if _, err := g.ownPlanet(player, o.Planet); err != nil {
+func (o PlanetSettingsOrder) apply(g *Game, player int, _ *Applied) error {
+	pi, err := g.ownPlanet(player, o.Planet)
+	if err != nil {
 		return err
 	}
-	return fmt.Errorf("planet flags: %w", ErrAwaitingSpec)
+	if o.HasRoute && g.planetIndex(o.RouteTo) < 0 {
+		return fmt.Errorf("route to planet %d: %w", o.RouteTo, ErrNoSuchObject)
+	}
+	p := &g.Planets[pi]
+	p.LeftoverOnly, p.HasRoute, p.RouteTo = o.LeftoverOnly, o.HasRoute, o.RouteTo
+	if !o.HasRoute {
+		p.RouteTo = 0
+	}
+	return nil
 }
 
-// SettingsOrder is a player-settings or relations order (ORDERS.md
-// "housekeeping orders"). PLACEHOLDER: the settings-orders spec is being
-// written in stars-elegy; every such order is rejected with
-// ErrAwaitingSpec.
-type SettingsOrder struct {
+// RelationsOrder sets the sender's own relations row (LIMITS.md "Setting
+// orders", stars-elegy #65, BINARY-ONLY): only the sender's view of the
+// other players changes.
+//
+// ASSUMPTION L16: the row must have one entry per player, each friend,
+// neutral or enemy, and the sender's own entry is kept as friend.
+type RelationsOrder struct {
 	Relations []Relation
 }
 
-func (o SettingsOrder) apply(*Game, int, *Applied) error {
-	return fmt.Errorf("settings: %w", ErrAwaitingSpec)
+func (o RelationsOrder) apply(g *Game, player int, _ *Applied) error {
+	if len(o.Relations) != len(g.Players) {
+		return fmt.Errorf("relations: %w", ErrOutOfRange)
+	}
+	row := append([]Relation(nil), o.Relations...)
+	for _, r := range row {
+		if r < RelationFriend || r > RelationEnemy {
+			return fmt.Errorf("relations: %w", ErrOutOfRange)
+		}
+	}
+	row[player] = RelationFriend
+	g.Players[player].Relations = row
+	return nil
 }

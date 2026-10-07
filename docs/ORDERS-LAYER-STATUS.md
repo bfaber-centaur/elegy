@@ -8,7 +8,8 @@ battle plans from `docs/COMBAT.md` at PR #59 head `1026471`, research
 from `docs/KERNEL.md` "Research", battle-plan order validation from
 `docs/COMBAT.md` "Order validation" (PR #72), the replay shuffle from
 `docs/KERNEL.md` "Turn order" (PR #53), manual transfers to other
-players from `docs/TAKEOVER.md` (PR #69, `9cef650`), and the planet side of cargo from
+players from `docs/TAKEOVER.md` (PR #69, `9cef650`), queue replace, setting
+orders, names and design slots from `docs/LIMITS.md` (PR #65, `74e4e94`), and the planet side of cargo from
 `docs/TAKEOVER.md` on main `09e94c4`. Nothing else was used.
 
 The merge order and the design read are the kernel lane's
@@ -42,9 +43,10 @@ lane.
 | `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position | ORDERS.md "Waypoint coordinates"; UNIVERSE.md | BINARY-ONLY | `TestPredictionWaypointClamp` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
-| `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestPlaceholderOrders` |
-| `QueueOrder`, `PlanetFlagsOrder` | ownership checked, then rejected | ORDERS.md "Ownership"; queue replace spec pending | PLACEHOLDER | `TestPlaceholderOrders` |
-| `SettingsOrder` | rejected | settings-orders spec pending | PLACEHOLDER | `TestPlaceholderOrders` |
+| `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
+| `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, progress kept by the matching rule with the old percentage (chosen rule) | LIMITS.md "Production-queue replace" (#65) | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueKeepsOldPercent` |
+| `PlanetSettingsOrder` | own planet; leftover-only and route destination | LIMITS.md "Setting orders" (#65) | BINARY-ONLY | `TestPredictionSettingOrders` |
+| `RelationsOrder` | only the sender's row | LIMITS.md "Setting orders" (#65) | BINARY-ONLY | `TestPredictionSettingOrders` |
 
 ## Implementation assumptions
 
@@ -54,7 +56,7 @@ and has been sent to stars-elegy as a question.
 
 | Id | What Elegy does | Why |
 |---|---|---|
-| L1 | Fleet and design names follow COMBAT.md's battle-plan name rule (#72): at most 31 characters, any text. | No spec gives their limit. |
+| L1 | (settled: LIMITS.md "Names", #65, at most 31 characters of any text) | |
 | L2 | A player's second file in a year is refused; the first applies. | ORDERS.md has one file per player. |
 | L3 | (settled: COMBAT.md #72 sets Elegy's limit at 16) | |
 | L4 | An attack-who value outside Elegy's five rejects the plan. ("Attack a player" naming itself or no player in the game is now COMBAT.md #72's Elegy rule.) | COMBAT.md describes the host's stored values; Elegy's type has no others. |
@@ -63,9 +65,12 @@ and has been sent to stars-elegy as a question.
 | L7 | A cargo order needs the fleet at its target; fuel to or from a planet rejects it; any failed check rejects the whole order; any fleet with a hold may carry colonists. | ORDERS.md and KERNEL.md cover the waypoint unload of fuel, not a direct transfer, and leave the colonist condition unpinned. |
 | L8 | Colonists are not given to another player's fleet by a manual transfer. | TAKEOVER.md says so for the waypoint task; #69 does not cover the manual transfer. |
 | L9 | Cargo given to a fleet that a later order in the same replay removed (merge, design delete) is lost. | #69 covers a receiver missing at replay, not one removed between the passes. |
-| L10 | 16 ship and 10 starbase design slots per player. | No spec gives the number yet (COVERAGE.md lists it among the limits). |
+| L10 | (settled: LIMITS.md, #65, 16 ship and 10 starbase slots) | |
 | L11 | A design slot out of range, a hull of the wrong kind for the slot, and a new design for a slot whose design is in play are rejected. | ORDERS.md does not say what replacing a design in use does. |
 | L12 | Deleting a design removes its ships, and fleets left empty. | No spec says what happens to them. |
+| L14 | A queue item of unknown kind, a count outside 1..1023, or more than 255 items refuses the queue order. | The host checks none of them (LIMITS.md "Production queue"). |
+| L15 | A route destination that is not a planet refuses the planet-settings order. | The host does not check it exists. |
+| L16 | A relations row needs one entry per player in range; the sender's own entry stays friend. | LIMITS.md says only the sender's row changes. |
 
 ## Ships leaving production
 
@@ -100,5 +105,5 @@ record slot positions), mass drivers, and the route task on arrival.
 - splits, the transfer-balance between the player's own fleets, and
   cargo to deep space;
 - Mystery Trader items (the player owns none), minefields, stargates;
-- production queue replace, planet flags and settings orders, until their
-  spec lands.
+- mass drivers and packets in planet settings, and ship and starbase
+  items in the queue.

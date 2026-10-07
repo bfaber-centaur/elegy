@@ -16,11 +16,9 @@ type DesignSlot struct {
 	Design   int
 }
 
-// Design slots per player.
-//
-// ASSUMPTION L10: 16 ship and 10 starbase designs. No public spec gives
-// the number yet (COVERAGE.md lists design slots under the limits still
-// to collect).
+// Design slots per player (LIMITS.md "Designs and battle plans",
+// stars-elegy #65, BINARY-ONLY; the ship-slot count MEASURED by OB-026): a
+// design order naming a slot past the last is refused.
 const (
 	maxShipDesigns     = 16
 	maxStarbaseDesigns = 10

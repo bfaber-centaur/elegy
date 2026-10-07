@@ -197,7 +197,7 @@ func TestPredictionOwnershipEveryOrder(t *testing.T) {
 		CargoOrder{Fleet: 3, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-1}},
 		MergeOrder{Into: 1, From: []int{3}},
 		QueueOrder{Planet: 2},
-		PlanetFlagsOrder{Planet: 2, LeftoverOnly: true},
+		PlanetSettingsOrder{Planet: 2, LeftoverOnly: true},
 	)
 	for i, err := range errs {
 		if err == nil || (i != 4 && !errors.Is(err, ErrNotYours)) {
@@ -209,15 +209,93 @@ func TestPredictionOwnershipEveryOrder(t *testing.T) {
 	}
 }
 
-func TestPlaceholderOrders(t *testing.T) {
-	// The production queue, planet flags and settings orders wait on
-	// their stars-elegy spec; minefields are not modelled.
+func TestDetonateNotModelled(t *testing.T) {
 	g := ordersGame()
-	errs, _ := apply(g, 0, QueueOrder{Planet: 1}, PlanetFlagsOrder{Planet: 1}, SettingsOrder{}, DetonateOrder{Minefield: 1})
-	for i, want := range []error{ErrAwaitingSpec, ErrAwaitingSpec, ErrAwaitingSpec, ErrNotModelled} {
-		if !errors.Is(errs[i], want) {
-			t.Errorf("order %d: %v, want %v", i, errs[i], want)
+	if errs, _ := apply(g, 0, DetonateOrder{Minefield: 1}); !errors.Is(errs[0], ErrNotModelled) {
+		t.Errorf("detonate: %v", errs[0])
+	}
+}
+
+func TestConfirmedQueueReplace(t *testing.T) {
+	// LIMITS.md "Production-queue replace" (stars-elegy #65, CONFIRMED
+	// LQ-1..LQ-4) with its chosen rule (the old percentage is kept). The
+	// base queue is Factory ×5 at 49%, Mine ×5 at 30%, Defenses ×5,
+	// Factory ×5 at 20%.
+	//
+	// Where two items of one kind have progress, the chosen rule and the
+	// original differ even for a legal client: the original keeps the sent
+	// percentage, the chosen rule the first matching old item's. LQ-2 sent
+	// the second Factory at 20 and the original kept 20; the chosen rule
+	// gives it 49. Question Q21 to stars-elegy; the rule is followed as
+	// written meanwhile.
+	base := []QueueItem{{ItemFactory, 5, 49}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}
+	for _, tt := range []struct {
+		name      string
+		sent      []QueueItem
+		want      []QueueItem
+		wantQueue bool
+	}{
+		// Moved and recounted items keep progress (LQ-1: Mine ×5 → ×3).
+		{"moved", []QueueItem{{ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}, {ItemFactory, 5, 20}},
+			[]QueueItem{{ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}, {ItemFactory, 5, 20}}, true},
+		// LQ-2: the 49% Factory removed, a new Factory at the top sent at
+		// 0; the other Factory, sent at 20, matches the old 49% item.
+		{"LQ-2", []QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}},
+			[]QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}}, true},
+		// LQ-4: an empty list removes the queue.
+		{"LQ-4", nil, nil, false},
+	} {
+		g := ordersGame()
+		p := &g.Planets[0]
+		p.HasQueue, p.Queue = true, append([]QueueItem(nil), base...)
+		if errs, _ := apply(g, 0, QueueOrder{Planet: 1, Queue: tt.sent}); errs[0] != nil {
+			t.Fatalf("%s: %v", tt.name, errs[0])
 		}
+		if p.HasQueue != tt.wantQueue || !reflect.DeepEqual(p.Queue, tt.want) {
+			t.Errorf("%s: queue %v %+v, want %+v", tt.name, p.HasQueue, p.Queue, tt.want)
+		}
+	}
+}
+
+func TestPredictionQueueKeepsOldPercent(t *testing.T) {
+	// LIMITS.md chosen rule: a matched item keeps the old percentage, not
+	// the one sent (LQ-3 setup: old Factory 0, Mine 0, Factory 20; the
+	// client sends 49, 30, 20). Bad items are refused (L14).
+	g := ordersGame()
+	p := &g.Planets[0]
+	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}
+	errs, _ := apply(g, 0,
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemFactory, 9, 49}, {ItemMine, 5, 30}, {ItemFactory, 9, 20}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 0, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 1024, 0}}},
+	)
+	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrOutOfRange) {
+		t.Fatal(errs)
+	}
+	if want := []QueueItem{{ItemFactory, 9, 20}, {ItemMine, 5, 0}, {ItemFactory, 9, 0}}; !reflect.DeepEqual(p.Queue, want) {
+		t.Errorf("queue %+v, want %+v", p.Queue, want)
+	}
+}
+
+func TestPredictionSettingOrders(t *testing.T) {
+	// LIMITS.md "Setting orders" (BINARY-ONLY): planet settings on the
+	// sender's planet; relations change only the sender's row.
+	g := ordersGame()
+	errs, _ := apply(g, 0,
+		PlanetSettingsOrder{Planet: 1, LeftoverOnly: true, HasRoute: true, RouteTo: 3},
+		PlanetSettingsOrder{Planet: 1, HasRoute: true, RouteTo: 99},
+		RelationsOrder{Relations: []Relation{RelationEnemy, RelationEnemy}},
+		RelationsOrder{Relations: []Relation{RelationEnemy}},
+	)
+	if errs[0] != nil || !errors.Is(errs[1], ErrNoSuchObject) || errs[2] != nil || !errors.Is(errs[3], ErrOutOfRange) {
+		t.Fatal(errs)
+	}
+	p := g.Planets[0]
+	if !p.LeftoverOnly || !p.HasRoute || p.RouteTo != 3 {
+		t.Errorf("planet %+v", p)
+	}
+	if !reflect.DeepEqual(g.Players[0].Relations, []Relation{RelationFriend, RelationEnemy}) || g.Players[1].Relations != nil {
+		t.Errorf("relations %v / %v", g.Players[0].Relations, g.Players[1].Relations)
 	}
 }
 
