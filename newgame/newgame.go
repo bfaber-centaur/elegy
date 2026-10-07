@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 	"github.com/bfaber-centaur/elegy/races"
 )
 
@@ -139,19 +140,12 @@ func (s Settings) Width() int { return (int(s.Size) + 1) * 400 }
 // Origin is the galaxy's lowest coordinate on both axes.
 const Origin = 1000
 
-// Wormhole is a pair of linked wormhole ends.
-type Wormhole struct {
-	Ends [2]WormholeEnd
-}
-
-// WormholeEnd is one end of a wormhole (OBJECTS.md "Wormholes").
-type WormholeEnd struct {
-	Pos engine.Point
-	// Stability is the end's stability class, 0..2 at creation.
-	Stability int
-	// Years since the end last jumped.
-	Years int
-}
+// Wormhole and WormholeEnd are the space objects package's (OBJECTS.md
+// "Wormholes").
+type (
+	Wormhole    = objects.Wormhole
+	WormholeEnd = objects.WormholeEnd
+)
 
 // PlayerStart is where a player's starting objects are in the Game.
 type PlayerStart struct {
