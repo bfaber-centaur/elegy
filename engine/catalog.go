@@ -255,6 +255,10 @@ var partStats = map[string]bool{
 	"accuracy_pct": true, "computer_pct": true, "beam_damage_pct": true,
 	"beam_deflection_pct": true, "battle_speed": true, "battle_speed_half_steps": true,
 	"tachyon": true, "fuel_capacity": true, "cargo_capacity": true,
+	// Bombs and colonizers (TAKEOVER.md).
+	"kill_tenths_pct": true, "installations": true, "min_kill": true,
+	"bomb_kill_tenths_pct": true, "bomb_installations": true, "bomb_min_kill": true,
+	"colonizes": true,
 	// Engines: fuel_table, warp10_rated and battle_warp go to Engine.
 	"fuel_table": true, "warp10_rated": true, "battle_warp": true, "free_warps": true,
 }
@@ -262,13 +266,13 @@ var partStats = map[string]bool{
 var deferredStats = map[string]bool{
 	// Mine sweeping, laying and fields; remote mining; terraforming by
 	// ship; bombs; colonizing; stargates and mass drivers; fuel
-	// generation; jump gates. Elegy has none of these rules yet.
+	// generation; jump gates. Elegy has none of these rules yet. The
+	// Orbital Construction Module's own flag: Elegy reads its colonizing
+	// and bomb values, which are columns of their own.
 	"mines_swept": true, "mines_laid": true, "mines_per_year": true, "field": true,
 	"mining_rate": true, "terraform_pct": true,
-	"kill_tenths_pct": true, "installations": true, "min_kill": true,
-	"bomb_kill_tenths_pct": true, "bomb_installations": true, "bomb_min_kill": true,
-	"colonizes": true, "orbital_construction": true,
-	"safe_mass": true, "safe_range": true, "warp": true,
+	"orbital_construction": true,
+	"safe_mass":            true, "safe_range": true, "warp": true,
 	"fuel_per_year": true, "jump_gate": true,
 }
 
@@ -347,6 +351,27 @@ func (c Component) Part() (Part, error) {
 	p.HalfThrust = c.flagOrOne("battle_speed_half_steps") && c.Category != CatEngine
 	p.Tachyon = c.flag("tachyon")
 	p.FuelCapacity, p.CargoCapacity = c.num("fuel_capacity"), c.num("cargo_capacity")
+	// Bombing (TAKEOVER.md "Bomb totals"): bomb rows, and the bomb values
+	// of the Multi Contained Munition and Orbital Construction Module,
+	// which count as normal bombs.
+	switch {
+	case c.Category == CatBomb:
+		switch c.str("kind") {
+		case "normal":
+			p.Bomb = BombNormal
+		case "smart":
+			p.Bomb = BombSmart
+		case "retro":
+			p.Bomb = BombRetro
+		default:
+			return Part{}, fmt.Errorf("%s: unknown bomb kind %q", c.Name, c.str("kind"))
+		}
+		p.KillRate, p.InstallKill, p.MinKill = c.num("kill_tenths_pct"), c.num("installations"), c.num("min_kill")
+	case c.has("bomb_kill_tenths_pct") || c.has("bomb_installations") || c.has("bomb_min_kill"):
+		p.Bomb = BombNormal
+		p.KillRate, p.InstallKill, p.MinKill = c.num("bomb_kill_tenths_pct"), c.num("bomb_installations"), c.num("bomb_min_kill")
+	}
+	p.Colonizer = c.flag("colonizes")
 	return p, nil
 }
 

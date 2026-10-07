@@ -575,20 +575,8 @@ func (g *Game) defenseEstimate(p *Planet) int {
 		return 0
 	}
 	pl := &g.Players[p.Owner]
-	v := -1
-	for _, d := range g.Defenses {
-		ok := true
-		for f := range NumFields {
-			if pl.Research.Levels[f] < d.TechReq[f] {
-				ok = false
-			}
-		}
-		if ok {
-			v = max(v, d.Coverage)
-		}
-	}
 	s := 1.0
-	if v >= 0 {
+	if v, ok := g.bestDefense(p.Owner); ok {
 		n := min(p.Defenses, NewColony(p, pl).OperableDefenses(p.Population))
 		s = math.Pow(1-float64(v)/1000, float64(n)) // 1 − DefenseCoverage(n, v)
 	}

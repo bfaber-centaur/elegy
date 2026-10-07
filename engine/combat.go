@@ -19,9 +19,11 @@ type battleResult struct {
 
 // battles fights every battle of the turn, location by location
 // (COMBAT.md "Where battles happen in the turn", BINARY-ONLY order).
-func battles(g *Game, rng Rand) battleResult {
+//
+// gained holds the players that gained tech this turn, from a battle or a
+// capture (TAKEOVER.md "Capture").
+func battles(g *Game, rng Rand, gained map[int]bool) battleResult {
 	res := battleResult{fleets: map[int]bool{}, bases: map[int]bool{}}
-	gained := map[int]bool{} // players that gained tech from a battle this turn
 	var prev locationHistory
 	for _, loc := range g.locations() {
 		sets, inv, n := g.whoFights(loc, prev)
@@ -80,8 +82,9 @@ func (b *battle) finish() {
 		pl.HasStarbase, pl.StarbaseHull, pl.StarbaseDock, pl.StarbaseDamage = false, 0, false, 0
 		if g.Players[t.player].Race.PRT == PRTAlternateReality {
 			// An Alternate Reality planet without its starbase is left
-			// uninhabited (BINARY-ONLY).
-			pl.Owner, pl.Population, pl.GrowthCarry = NoOwner, 0, 0
+			// uninhabited (BINARY-ONLY), and emptied as TAKEOVER.md
+			// "Capture" lists: the growth carry stays.
+			g.emptyPlanet(t.planet)
 		}
 	}
 	// Deep-space salvage, after the tech attempts in the draw order.
@@ -160,29 +163,31 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 			attempt = mask&observers != 0 && present[p]
 		}
 		if attempt {
-			events = append(events, b.techAttempt(p, gained)...)
+			events = append(events, techAttempt(g, b.rng, p, b.seen, gained)...)
 		}
 	}
 	return events
 }
 
-// techAttempt is one player's attempt. Mystery Trader items are not
-// modelled, so the 13 item tries draw but never give an item.
-func (b *battle) techAttempt(p int, gained map[int]bool) []Event {
+// techAttempt is one player's tech attempt against the seen levels
+// (COMBAT.md "Tech from battle" steps 1–5; also a capture's attempt,
+// TAKEOVER.md "Capture"). Mystery Trader items are not modelled, so the
+// 13 item tries draw but never give an item.
+func techAttempt(g *Game, rng Rand, p int, seen [NumFields]int, gained map[int]bool) []Event {
 	if gained[p] {
 		return nil
 	}
-	if b.rng.Intn(100) < 50 {
+	if rng.Intn(100) < 50 {
 		return nil
 	}
 	for range 13 {
-		b.rng.Intn(13)
+		rng.Intn(13)
 	}
-	pl := &b.g.Players[p]
+	pl := &g.Players[p]
 	for range 6 {
-		f := b.rng.Intn(NumFields)
+		f := rng.Intn(NumFields)
 		lvl := pl.Research.Levels[f]
-		if lvl >= b.seen[f] {
+		if lvl >= seen[f] {
 			continue
 		}
 		// The cost of the next level at the normal speed, even under

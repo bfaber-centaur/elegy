@@ -2,36 +2,39 @@
 
 ## Current question
 
-Load the component table into the engine, then implement TAKEOVER.md.
+Implement TAKEOVER.md (bombing, invasion, colonization, capture) on top of
+the component table.
 
 ## State
 
-- Kernel, movement, battles and scanning are merged (elegy #1–#6).
-- This branch adds `engine/catalog.go` and a verbatim copy of stars-elegy
-  `data/components.json` (`engine/data/`). Parts, hulls, engines,
-  planetary scanners and defenses, build rules and owner costs come from
-  it. `docs/COMPONENTS-STATUS.md` maps rules, tests and unused columns.
-- The FM movement corpus now takes its engine fuel tables from the table
-  (CS-002) instead of third-party values.
-- `go vet ./...` and `go test ./...` are green.
+- Kernel, movement, battles and scanning are merged (elegy #1–#6). The
+  component table is elegy #7.
+- This branch adds `engine/takeover.go`, stacked on #7, following
+  stars-elegy TAKEOVER.md with the answers in stars-elegy #34 (order inside
+  a phase, unload amounts, capture tech, colonize retries).
+  `docs/TAKEOVER-STATUS.md` maps rules, tests and assumptions.
+- Fleets now carry a waypoint-0 task (`Fleet.Task`, `Waypoint.Task`):
+  transport unload actions and colonize.
+- `go vet ./...` and `go test ./...` are green. Every TK vector that
+  Elegy's state can express is a `TestConfirmed*` test.
 
 ## What we know
 
-- The table's CONFIRMED vectors pass: starbase build costs, defense
-  coverage, token values from catalogue parts. COMBAT.md's battle-warp
-  rule agrees with the table's (BINARY-ONLY) battle_warp column.
-- Combat keeps one marked placeholder: A6, the plan-0 X on a turn's first
+- One Elegy assumption remains (TAKEOVER-STATUS.md T1): anything
+  unloaded in deep space stays aboard.
+- Combat keeps one placeholder: A6, the plan-0 X on a turn's first
   location (COMBAT-STATUS.md).
 
 ## What still matters
 
-- Columns for mines, remote mining, bombs, colonizing and stargates are
-  loaded but unused (`deferredStats`); TAKEOVER.md needs bombs and
-  colonizers next.
+- Load actions, merges, transfers, scrap and remote mining are not
+  modelled; TAKEOVER.md and #34 specify them.
+- An Alternate Reality colony gets no starbase yet (designs have no owner),
+  so the next year is refused.
 - KERNEL.md's BINARY-ONLY movement rules for IFE, Cheap Engines and others
-  are still not applied (KERNEL-STATUS.md); the LRT fields now exist.
+  are still not applied (KERNEL-STATUS.md).
 
 ## Best next move
 
-Implement TAKEOVER.md (bombing, invasion, colonization, capture) on top of
-the catalogue's bomb and colonizer values.
+Universe objects (stars-elegy OBJECTS.md), then turn orders (ORDERS.md),
+which would also give designs an owner.

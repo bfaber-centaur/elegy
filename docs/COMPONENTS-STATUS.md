@@ -24,6 +24,7 @@ BINARY-ONLY columns) from the table.
 | Starbase build cost (ISB/AR, halved) | `StarbaseBuildCost` | CONFIRMED (CS-001 designer) | `TestConfirmedStarbaseBuildCost` |
 | Planetary scanners and defenses | `Catalog.PlanetScanners`, `Defenses` | CONFIRMED | `TestConfirmedPlanetaryCatalogue` |
 | Defense coverage `1 − (1 − c/1000)^n` | `DefenseCoverage` | CONFIRMED (CS-001) | `TestConfirmedPlanetaryCatalogue` |
+| Bomb values (`kind`, kill, installations, minimum kill; the MCM's and OCM's bomb columns) and colonizing modules | `Component.Part` (`Bomb`, `KillRate`, `InstallKill`, `MinKill`, `Colonizer`) | per row; TAKEOVER.md uses them | `TestConfirmedBombingVectors`, `TestConfirmedColonyMinerals` |
 
 Values that come from other specs, not from a table column:
 
@@ -53,7 +54,6 @@ listed in `deferredStats` and kept in `Component.Stats`:
 
 - mine sweeping, laying and fields;
 - remote mining and the Orbital Adjuster;
-- bombs and colonizing modules (TAKEOVER.md);
 - stargates, mass drivers and jump gates;
 - the Anti-matter Generator's fuel per year;
 - the mine-layer hull multiplier.
