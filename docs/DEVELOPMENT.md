@@ -55,49 +55,26 @@ Likely long-term rulesets include:
 
 Favor straightforward data structures and testable transformations. Split packages when real subsystem boundaries appear rather than pre-creating a large architecture.
 
-## Current skeleton
+## Current state
 
-The initial code was moved from the earlier `stars-elegy` prototype.
+`engine/` implements the J-RC3 peaceful kernel and ordinary fleet movement
+from the public stars-elegy specification (`docs/KERNEL.md` there):
+habitability, maximum population, growth with the persistent carry,
+resources and installation caps, mining and depletion, research, production
+queues, fleet movement, fuel, fleet chases and starbase refuelling.
+`GenerateTurn` runs them in KERNEL.md's turn order.
 
-It currently demonstrates only:
-
-- constructing a minimal game state;
-- advancing a year;
-- standard-race population capacity on positive-habitability worlds;
-- simple uncrowded population-growth scaling.
-
-That is scaffolding, not a claim of complete parity. In particular, the current growth function does not yet model the persistent J-RC3 growth remainder or crowding behavior already under investigation in `stars-elegy`.
+See [KERNEL-STATUS.md](KERNEL-STATUS.md) for what is implemented, which
+tests are ground truth and which are predictions, and the open spec gaps.
 
 ## Near-term milestones
 
-### 1. Exact population model
+### 1–2. Population and peaceful economy (implemented)
 
-Promote settled population findings from `stars-elegy`:
-
-- representation / fractional growth carry;
-- positive-habitability scaling;
-- crowding above 25% capacity;
-- behavior at capacity and overcrowding;
-- hostile-world deaths;
-- relevant racial modifiers.
-
-Every promoted rule should have evidence-backed tests.
-
-### 2. Peaceful economy vertical slice
-
-Once population is trustworthy, add only enough state for:
-
-```text
-race
-→ planet environment
-→ population
-→ resources
-→ factories / mines
-→ production
-→ research
-```
-
-A useful checkpoint is a deterministic homeworld scenario that can be simulated for decades with every yearly value explained.
+The population model and the peaceful economy vertical slice are in place,
+with a deterministic homeworld scenario simulated 2407–2436 against oracle
+values. Remaining work there is the spec gaps in KERNEL-STATUS.md and the
+items it lists as not modelled.
 
 ### 3. Expansion
 
