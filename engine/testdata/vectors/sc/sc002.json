@@ -1,0 +1,1951 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "SC-002",
+ "title": "scanning run sc002",
+ "source": {
+  "experiment": "experiments/sc",
+  "spec_rules": "docs/SCANNING.md",
+  "parity": "docs/PARITY.md \"Scanning\"",
+  "raw_evidence": "stars-oracle-apparatus evidence/sc/{sc002} (private)"
+ },
+ "years": 1,
+ "random": "single_stream",
+ "streams": 1,
+ "initial_state": {
+  "year": 2400,
+  "game": {
+   "name": "Combat Lab",
+   "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "sparse",
+   "players": 2,
+   "slower_tech": false,
+   "random_events": false,
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 30
+    }
+   }
+  },
+  "players": [
+   {
+    "id": 0,
+    "tech": {
+     "energy": 26,
+     "weapons": 26,
+     "propulsion": 26,
+     "construction": 26,
+     "electronics": 26,
+     "biotechnology": 26
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 0,
+    "research_field": "energy",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 4,
+     "starbase_designs": 1
+    }
+   },
+   {
+    "id": 1,
+    "tech": {
+     "energy": 26,
+     "weapons": 26,
+     "propulsion": 26,
+     "construction": 26,
+     "electronics": 26,
+     "biotechnology": 26
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 0,
+    "research_field": "energy",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 6,
+     "starbase_designs": 1
+    }
+   }
+  ],
+  "planets": [
+   {
+    "id": 0,
+    "x": 1045,
+    "y": 1291,
+    "owner": -1,
+    "concentrations": [
+     20,
+     17,
+     89
+    ],
+    "environment": [
+     88,
+     79,
+     69
+    ]
+   },
+   {
+    "id": 1,
+    "x": 1071,
+    "y": 1087,
+    "owner": -1,
+    "concentrations": [
+     73,
+     9,
+     47
+    ],
+    "environment": [
+     19,
+     23,
+     64
+    ]
+   },
+   {
+    "id": 2,
+    "x": 1090,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     112,
+     84,
+     56
+    ],
+    "environment": [
+     40,
+     7,
+     9
+    ]
+   },
+   {
+    "id": 3,
+    "x": 1129,
+    "y": 1265,
+    "owner": -1,
+    "concentrations": [
+     88,
+     14,
+     7
+    ],
+    "environment": [
+     41,
+     11,
+     62
+    ]
+   },
+   {
+    "id": 4,
+    "x": 1143,
+    "y": 1103,
+    "owner": -1,
+    "concentrations": [
+     62,
+     10,
+     87
+    ],
+    "environment": [
+     46,
+     74,
+     22
+    ]
+   },
+   {
+    "id": 5,
+    "x": 1146,
+    "y": 1180,
+    "owner": -1,
+    "concentrations": [
+     13,
+     89,
+     87
+    ],
+    "environment": [
+     63,
+     78,
+     91
+    ]
+   },
+   {
+    "id": 6,
+    "x": 1166,
+    "y": 1017,
+    "owner": -1,
+    "concentrations": [
+     4,
+     50,
+     71
+    ],
+    "environment": [
+     58,
+     4,
+     63
+    ]
+   },
+   {
+    "id": 7,
+    "x": 1166,
+    "y": 1382,
+    "owner": -1,
+    "concentrations": [
+     81,
+     25,
+     78
+    ],
+    "environment": [
+     8,
+     23,
+     93
+    ]
+   },
+   {
+    "id": 8,
+    "x": 1169,
+    "y": 1145,
+    "owner": 1,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": null,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 9,
+    "x": 1208,
+    "y": 1297,
+    "owner": -1,
+    "concentrations": [
+     100,
+     86,
+     95
+    ],
+    "environment": [
+     20,
+     39,
+     47
+    ]
+   },
+   {
+    "id": 10,
+    "x": 1224,
+    "y": 1359,
+    "owner": -1,
+    "concentrations": [
+     94,
+     104,
+     24
+    ],
+    "environment": [
+     84,
+     13,
+     35
+    ]
+   },
+   {
+    "id": 11,
+    "x": 1243,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     79,
+     49,
+     13
+    ],
+    "environment": [
+     85,
+     20,
+     63
+    ]
+   },
+   {
+    "id": 12,
+    "x": 1245,
+    "y": 1158,
+    "owner": -1,
+    "concentrations": [
+     15,
+     82,
+     45
+    ],
+    "environment": [
+     95,
+     10,
+     52
+    ]
+   },
+   {
+    "id": 13,
+    "x": 1249,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     114,
+     97,
+     14
+    ],
+    "environment": [
+     54,
+     61,
+     50
+    ]
+   },
+   {
+    "id": 14,
+    "x": 1268,
+    "y": 1317,
+    "owner": -1,
+    "concentrations": [
+     68,
+     78,
+     76
+    ],
+    "environment": [
+     70,
+     71,
+     98
+    ]
+   },
+   {
+    "id": 15,
+    "x": 1281,
+    "y": 1064,
+    "owner": -1,
+    "concentrations": [
+     89,
+     53,
+     71
+    ],
+    "environment": [
+     88,
+     82,
+     1
+    ]
+   },
+   {
+    "id": 16,
+    "x": 1284,
+    "y": 1383,
+    "owner": -1,
+    "concentrations": [
+     27,
+     49,
+     53
+    ],
+    "environment": [
+     75,
+     47,
+     62
+    ]
+   },
+   {
+    "id": 17,
+    "x": 1306,
+    "y": 1060,
+    "owner": 0,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": null,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 18,
+    "x": 1324,
+    "y": 1192,
+    "owner": -1,
+    "concentrations": [
+     57,
+     27,
+     81
+    ],
+    "environment": [
+     25,
+     31,
+     17
+    ]
+   },
+   {
+    "id": 19,
+    "x": 1342,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     23,
+     38,
+     74
+    ],
+    "environment": [
+     52,
+     78,
+     29
+    ]
+   },
+   {
+    "id": 20,
+    "x": 1348,
+    "y": 1290,
+    "owner": -1,
+    "concentrations": [
+     1,
+     57,
+     30
+    ],
+    "environment": [
+     72,
+     44,
+     10
+    ]
+   },
+   {
+    "id": 21,
+    "x": 1359,
+    "y": 1121,
+    "owner": -1,
+    "concentrations": [
+     10,
+     7,
+     62
+    ],
+    "environment": [
+     41,
+     43,
+     64
+    ]
+   },
+   {
+    "id": 22,
+    "x": 1368,
+    "y": 1292,
+    "owner": -1,
+    "concentrations": [
+     70,
+     52,
+     88
+    ],
+    "environment": [
+     22,
+     10,
+     84
+    ]
+   },
+   {
+    "id": 23,
+    "x": 1380,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     91,
+     70,
+     3
+    ],
+    "environment": [
+     75,
+     59,
+     96
+    ]
+   }
+  ],
+  "designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     null,
+     null
+    ],
+    "mass": 29
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Bat Scanner"
+     },
+     null
+    ],
+    "mass": 31
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Pick Pocket Scanner"
+     },
+     null
+    ],
+    "mass": 44
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     null
+    ],
+    "mass": 34
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     null,
+     null
+    ],
+    "mass": 29
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Stealth Cloak"
+     },
+     null
+    ],
+    "mass": 31
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Super-Stealth Cloak"
+     },
+     null
+    ],
+    "mass": 32
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Ultra-Stealth Cloak"
+     },
+     null
+    ],
+    "mass": 34
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "hull": "Small Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 1,
+      "part": "Transport Cloaking"
+     },
+     null
+    ],
+    "mass": 30
+   },
+   {
+    "owner": 1,
+    "slot": 5,
+    "hull": "Super Freighter",
+    "slots": [
+     {
+      "count": 3,
+      "part": "Quick Jump 5"
+     },
+     {
+      "count": 3,
+      "part": "Ultra-Stealth Cloak"
+     },
+     null,
+     {
+      "count": 2,
+      "part": "Ultra-Stealth Cloak"
+     }
+    ],
+    "mass": 212
+   }
+  ],
+  "starbase_designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   }
+  ],
+  "battle_plans": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   }
+  ],
+  "fleets": [
+   {
+    "owner": 0,
+    "id": 0,
+    "x": 1100,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 1,
+    "x": 1180,
+    "y": 1240,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 1,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1180,
+      "y": 1240,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 2,
+    "x": 1090,
+    "y": 1295,
+    "orbiting": 2,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1090,
+      "y": 1295,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 2
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 3,
+    "x": 1224,
+    "y": 1359,
+    "orbiting": 10,
+    "ships": [
+     {
+      "design": 1,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1224,
+      "y": 1359,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 10
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 4,
+    "x": 1060,
+    "y": 1060,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 2,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1060,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 0,
+    "id": 5,
+    "x": 1330,
+    "y": 1350,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 3,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1330,
+      "y": 1350,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 0,
+    "x": 1100,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 5,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 1,
+    "x": 1100,
+    "y": 1231,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1100,
+      "y": 1231,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 2,
+    "x": 1180,
+    "y": 1240,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 3,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1180,
+      "y": 1240,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 3,
+    "x": 1180,
+    "y": 1241,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1180,
+      "y": 1241,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 4,
+    "x": 1090,
+    "y": 1295,
+    "orbiting": 2,
+    "ships": [
+     {
+      "design": 5,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1090,
+      "y": 1295,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 2
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 5,
+    "x": 1224,
+    "y": 1359,
+    "orbiting": 10,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1224,
+      "y": 1359,
+      "warp": 0,
+      "target": {
+       "kind": "planet",
+       "id": 10
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 6,
+    "x": 1060,
+    "y": 1060,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 11,
+     "boranium": 12,
+     "germanium": 13,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1060,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 7,
+    "x": 1060,
+    "y": 1090,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 21,
+     "boranium": 22,
+     "germanium": 23,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1060,
+      "y": 1090,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 8,
+    "x": 1330,
+    "y": 1350,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 31,
+     "boranium": 32,
+     "germanium": 33,
+     "colonists": 0
+    },
+    "fuel": 50,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1330,
+      "y": 1350,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   }
+  ],
+  "objects": [],
+  "production_queues": []
+ },
+ "cases": [
+  {
+   "id": "SC002-blind-coloc98",
+   "rule": "SCANNING S-15",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 0
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-blind-d1",
+   "rule": "SCANNING S-4",
+   "setup": "d2=1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 1
+     },
+     "equals": {
+      "level": 0
+     }
+    }
+   ],
+   "prediction": "0"
+  },
+  {
+   "id": "SC002-p1-coloc-blind",
+   "rule": "SCANNING S-15",
+   "setup": "blind Ghost sees the co-located viewer",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 1,
+     "subject": {
+      "kind": "fleet",
+      "owner": 0,
+      "id": 0
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-bat-coloc85",
+   "rule": "SCANNING S-4,S-15",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 2
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-bat-d1",
+   "rule": "SCANNING S-4",
+   "setup": "d2=1",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 3
+     },
+     "equals": {
+      "level": 0
+     }
+    }
+   ],
+   "prediction": "0"
+  },
+  {
+   "id": "SC002-blind-orbit",
+   "rule": "SCANNING S-4",
+   "setup": "orbited by a blind fleet",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "planet",
+      "id": 2
+     },
+     "equals": {
+      "level": 1
+     }
+    }
+   ],
+   "prediction": "1"
+  },
+  {
+   "id": "SC002-blind-orbit-coloc98",
+   "rule": "SCANNING S-15",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 4
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-bat-orbit",
+   "rule": "SCANNING S-4",
+   "setup": "orbited by a Bat fleet",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "planet",
+      "id": 10
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-bat-orbit-coloc",
+   "rule": "SCANNING S-4,S-15",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 5
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-pp-coloc",
+   "rule": "SCANNING S-20",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 6
+     },
+     "equals": {
+      "level": 4
+     }
+    }
+   ],
+   "prediction": "4"
+  },
+  {
+   "id": "SC002-pp-d30",
+   "rule": "SCANNING S-20",
+   "setup": "d2=900",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 7
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC002-rhino-coloc",
+   "rule": "SCANNING S-20",
+   "setup": "d2=0",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "fleet",
+      "owner": 1,
+      "id": 8
+     },
+     "equals": {
+      "level": 3
+     }
+    }
+   ],
+   "prediction": "3"
+  },
+  {
+   "id": "SC-002-designs-p0",
+   "rule": "SCANNING",
+   "setup": "foreign designs known partially / fully",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "other_players"
+     },
+     "equals": {
+      "foreign_designs": {
+       "partial": 3,
+       "full": 0
+      }
+     }
+    }
+   ],
+   "prediction": "{\"partial\": 3, \"full\": 0}"
+  },
+  {
+   "id": "SC-002-sbdesigns-p0",
+   "rule": "SCANNING",
+   "setup": "foreign sbdesigns known partially / fully",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "other_players"
+     },
+     "equals": {
+      "foreign_starbase_designs": {
+       "partial": 0,
+       "full": 0
+      }
+     }
+    }
+   ],
+   "prediction": "{\"partial\": 0, \"full\": 0}"
+  },
+  {
+   "id": "SC-002-block-p0-p1",
+   "rule": "SCANNING",
+   "setup": "player 0's knowledge of player 1's player block",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 0,
+     "subject": {
+      "kind": "player",
+      "id": 1
+     },
+     "equals": {
+      "player_block": "partial"
+     }
+    }
+   ],
+   "prediction": "\"partial\""
+  },
+  {
+   "id": "SC-002-designs-p1",
+   "rule": "SCANNING",
+   "setup": "foreign designs known partially / fully",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 1,
+     "subject": {
+      "kind": "other_players"
+     },
+     "equals": {
+      "foreign_designs": {
+       "partial": 4,
+       "full": 0
+      }
+     }
+    }
+   ],
+   "prediction": "{\"partial\": 4, \"full\": 0}"
+  },
+  {
+   "id": "SC-002-sbdesigns-p1",
+   "rule": "SCANNING",
+   "setup": "foreign sbdesigns known partially / fully",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 1,
+     "subject": {
+      "kind": "other_players"
+     },
+     "equals": {
+      "foreign_starbase_designs": {
+       "partial": 0,
+       "full": 0
+      }
+     }
+    }
+   ],
+   "prediction": "{\"partial\": 0, \"full\": 0}"
+  },
+  {
+   "id": "SC-002-block-p1-p0",
+   "rule": "SCANNING",
+   "setup": "player 1's knowledge of player 0's player block",
+   "tag": "CONFIRMED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 1,
+     "kind": "view",
+     "viewer": 1,
+     "subject": {
+      "kind": "player",
+      "id": 0
+     },
+     "equals": {
+      "player_block": "partial"
+     }
+    }
+   ],
+   "prediction": "\"partial\""
+  }
+ ]
+}

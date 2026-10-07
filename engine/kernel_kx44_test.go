@@ -76,7 +76,7 @@ func TestPredictionFuelTermForms(t *testing.T) {
 }
 
 func TestConfirmedARColonistsAtWarp(t *testing.T) {
-	// OT-6 (stars-elegy #53): the loss applies whenever the next waypoint
+	// KERNEL.md, CONFIRMED OT-6: the loss applies whenever the next waypoint
 	// has a warp above 0, also on the fleet's own position or with no fuel.
 	for _, c := range []struct {
 		name string

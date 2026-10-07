@@ -89,8 +89,8 @@ func TestConfirmedMergeTask(t *testing.T) {
 }
 
 func TestPredictionMergeTaskForeignTarget(t *testing.T) {
-	// TAKEOVER.md "Other waypoint tasks": the ordering fleet merges into
-	// its own fleet. ASSUMPTION O2: another player's fleet is refused.
+	// ORDERS.md "Merge" (BINARY-ONLY): a target owned by another player is
+	// refused with no change.
 	g := opsGame()
 	g.Fleets = []Fleet{
 		{ID: 1, Owner: 1, Stacks: []Stack{{Design: 0, Count: 2}}},

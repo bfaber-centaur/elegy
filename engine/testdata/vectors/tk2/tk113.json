@@ -22,8 +22,49 @@
     1400,
     1400
    ],
+   "players": 3,
+   "slower_tech": false,
    "random_events": false,
-   "players": 3
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 8,
+     "enabled": false
+    },
+    "tech_fields": {
+     "value": 2
+    },
+    "score": {
+     "value": 1000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 20,
+     "enabled": false
+    },
+    "resources_thousands": {
+     "value": 10,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 10,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 30,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 50
+    }
+   }
   },
   "players": [
    {
@@ -92,6 +133,8 @@
       "electronics": "normal",
       "biotechnology": "normal"
      },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
      "techs_start_high": false,
      "factories_cost_less": false
     },
@@ -166,6 +209,8 @@
       "electronics": "normal",
       "biotechnology": "normal"
      },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
      "techs_start_high": false,
      "factories_cost_less": false
     },
@@ -240,6 +285,8 @@
       "electronics": "normal",
       "biotechnology": "normal"
      },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
      "techs_start_high": false,
      "factories_cost_less": false
     },

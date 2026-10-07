@@ -425,8 +425,8 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 	// battle or hit by mines", BINARY-ONLY).
 	//
 	// "Fought it" is every other player in the battle's player list P,
-	// allies included, and each becomes a known player (stars-elegy #57,
-	// BINARY-ONLY, prediction SC-036).
+	// allies included, and each becomes a known player (SCANNING.md
+	// "Designs" and "Players", CONFIRMED SC-036).
 	fullDesigns := map[int]bool{}
 	battlePlanets := map[int]bool{}
 	leftOutPlanets := map[int]bool{}
@@ -580,7 +580,7 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 // bombChecks is, per viewer, the planets it would bomb (bombCheck), taken
 // at the bombing step right after battles. The report itself is written
 // from the end-of-year state, so a planet bombing empties still gets its
-// normal report (stars-elegy #57, BINARY-ONLY, prediction SC-035).
+// normal report (SCANNING.md "Bombing", CONFIRMED SC-035).
 func (g *Game) bombChecks() []map[int]bool {
 	out := make([]map[int]bool, len(g.Players))
 	for v := range g.Players {

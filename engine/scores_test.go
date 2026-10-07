@@ -108,7 +108,7 @@ func TestPredictionDecide(t *testing.T) {
 	if !reflect.DeepEqual(ev, want) || !g.Players[1].Dead || !g.Decided {
 		t.Errorf("events %+v dead %v decided %v", ev, g.Players[1].Dead, g.Decided)
 	}
-	// Decided again the next year, with the messages again (K6, #53).
+	// Decided again the next year, with the messages again (KERNEL.md "Scores and victory conditions").
 	if ev := g.decide(g.scores()); len(ev) != 2 || !g.Decided {
 		t.Errorf("next year: events %+v", ev)
 	}
@@ -146,7 +146,7 @@ func TestConfirmedPublicScores(t *testing.T) {
 }
 
 func TestPredictionVictoryAnswers(t *testing.T) {
-	// stars-elegy #53: needed 0 means nobody wins by conditions; a tie
+	// KERNEL.md: needed 0 means nobody wins by conditions; a tie
 	// for the top score flags nobody for the lead; the record's starbase
 	// count leaves out Orbital Forts (no dock).
 	g := Game{Year: 2440, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}}}

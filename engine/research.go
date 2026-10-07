@@ -58,8 +58,9 @@ func (s ResearchState) levelSum() int {
 // given the sum of the player's six current levels.
 //
 // KERNEL.md "Level cost": CONFIRMED for the normal setting (levels 3–9 of
-// one field, PG) and the other two settings (KX-002 R1, R2); slower tech is
-// BINARY-ONLY.
+// one field, PG) and the other two settings (KX-002 R1, R2); slower tech's
+// doubling with the half-scale storage of AddResearch is CONFIRMED (KX-003
+// S2).
 func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech bool) int {
 	c := researchBase[level] + 10*levelSum
 	switch setting {
@@ -84,7 +85,20 @@ func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech boo
 // Research, and the level-10 cap, are BINARY-ONLY. With Generalized
 // Research every field is checked before any switch (the order is the
 // code's choice; KERNEL.md does not give it).
+//
+// Under slower tech the stored accumulation is kept at half scale
+// (KERNEL.md "Slower tech", CONFIRMED KX-003 S2, KX-005 R2): the year works
+// on twice the stored value plus the research, against the doubled cost,
+// and stores half of what is left, rounded up. A Generalized Research
+// share for another field adds half of it, rounded down.
 func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) ResearchState {
+	scale := 1
+	if slowerTech {
+		scale = 2
+		for f := range NumFields {
+			s.Accumulated[f] *= 2
+		}
+	}
 	add := func(field, amount int) {
 		if s.Levels[field] >= s.maxLevel() {
 			return // research into a maxed field is lost
@@ -96,7 +110,8 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 			if f == s.Current {
 				add(f, (resources+1)/2)
 			} else {
-				add(f, (3*resources+19)/20)
+				share := (3*resources + 19) / 20
+				add(f, share/scale*scale)
 			}
 		}
 	} else {
@@ -148,6 +163,11 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		s.Current = next
 		gained = levelUp(s.Current)
 	}
+	if slowerTech {
+		for f := range NumFields {
+			s.Accumulated[f] = (s.Accumulated[f] + 1) / 2
+		}
+	}
 	return s
 }
 
@@ -158,7 +178,8 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 func LevelUpCheck(s ResearchState, race Race, slowerTech bool) ResearchState {
 	for f := range NumFields {
 		for s.Levels[f] < s.maxLevel() {
-			cost := ResearchLevelCost(s.Levels[f]+1, s.levelSum(), race.ResearchCosts[f], slowerTech)
+			// The stored value is at half scale under slower tech.
+			cost := ResearchLevelCost(s.Levels[f]+1, s.levelSum(), race.ResearchCosts[f], false)
 			if s.Accumulated[f] < cost {
 				break
 			}
