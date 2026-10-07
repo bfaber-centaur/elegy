@@ -58,8 +58,8 @@ type Game struct {
 	Size int
 	// PublicScores is the game's public player scores option.
 	PublicScores bool
-	// Victory is the game's victory settings; Decided is set once a
-	// player has won.
+	// Victory is the game's victory settings; Decided is set in a year in
+	// which a player won (recomputed every year).
 	Victory Victory
 	Decided bool
 

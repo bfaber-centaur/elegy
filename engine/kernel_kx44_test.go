@@ -74,3 +74,23 @@ func TestPredictionFuelTermForms(t *testing.T) {
 		t.Error("empty engine slot")
 	}
 }
+
+func TestConfirmedARColonistsAtWarp(t *testing.T) {
+	// OT-6 (stars-elegy #53): the loss applies whenever the next waypoint
+	// has a warp above 0, also on the fleet's own position or with no fuel.
+	for _, c := range []struct {
+		name string
+		dest Point
+		fuel int
+	}{{"own position", Point{100, 100}, 300}, {"no fuel", Point{400, 100}, 0}} {
+		g := scoutGame(Engine{}, 1, Fleet{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Pos: Point{100, 100}, Fuel: c.fuel,
+			Cargo: Cargo{Colonists: 200}, Waypoints: []Waypoint{{Pos: c.dest, Warp: 5}}})
+		g.Designs[0].CargoCapacity = 1000
+		g.Designs[0].Engine.Fuel[5] = 100
+		g.Players = []Player{{Race: Race{PRT: PRTAlternateReality}}}
+		moveFleets(&g)
+		if got := g.Fleets[0].Cargo.Colonists; got != 194 {
+			t.Errorf("%s: %d, want 194", c.name, got)
+		}
+	}
+}

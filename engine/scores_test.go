@@ -53,11 +53,11 @@ func TestConfirmedShipClasses(t *testing.T) {
 		slots []Slot
 		want  int
 	}{{[]Slot{{omega, 4}}, 1896}, {[]Slot{{omega, 5}}, 2370}, {[]Slot{{cherry, 2}}, 140}, {nil, 0}} {
-		if got := shipPower(Design{Slots: c.slots}, Race{}); got != c.want {
+		if got := shipPower(Design{Slots: c.slots}); got != c.want {
 			t.Errorf("%v: power %d, want %d", c.slots, got, c.want)
 		}
 	}
-	if got := shipPower(Design{Slots: []Slot{{xray, 1}}}, Race{}); got <= 0 || got >= 2000 {
+	if got := shipPower(Design{Slots: []Slot{{xray, 1}}}); got <= 0 || got >= 2000 {
 		t.Errorf("X-Ray Laser: power %d, want an escort", got)
 	}
 }
@@ -68,11 +68,11 @@ func TestPredictionBeamPower(t *testing.T) {
 	// 48 = 72. A sapper divides the beam term by 3.
 	beam := Part{Kind: PartBeam, Range: 2, Damage: 40}
 	capac := Part{Kind: PartElectrical, Capacitor: 20}
-	if got := shipPower(Design{Slots: []Slot{{beam, 2}, {capac, 1}}}, Race{}); got != 72 {
+	if got := shipPower(Design{Slots: []Slot{{beam, 2}, {capac, 1}}}); got != 72 {
 		t.Errorf("beam with capacitor: %d, want 72", got)
 	}
 	beam.Sapper = true
-	if got := shipPower(Design{Slots: []Slot{{beam, 2}}}, Race{}); got != 33-13 {
+	if got := shipPower(Design{Slots: []Slot{{beam, 2}}}); got != 33-13 {
 		t.Errorf("sapper: %d, want 20", got)
 	}
 }
@@ -108,8 +108,9 @@ func TestPredictionDecide(t *testing.T) {
 	if !reflect.DeepEqual(ev, want) || !g.Players[1].Dead || !g.Decided {
 		t.Errorf("events %+v dead %v decided %v", ev, g.Players[1].Dead, g.Decided)
 	}
-	if ev := g.decide(g.scores()); ev != nil {
-		t.Errorf("decided again: %+v", ev)
+	// Decided again the next year, with the messages again (K6, #53).
+	if ev := g.decide(g.scores()); len(ev) != 2 || !g.Decided {
+		t.Errorf("next year: events %+v", ev)
 	}
 
 	// Two live players: an enabled condition met wins only from the
@@ -119,7 +120,7 @@ func TestPredictionDecide(t *testing.T) {
 		won  bool
 	}{{2429, false}, {2430, true}} {
 		g := Game{Year: c.year, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}},
-			Victory: Victory{Planets: 2, Needed: 1}}
+			Victory: Victory{Planets: 2, Needed: 3}} // needed capped at 1 enabled
 		g.Victory.Enabled[VictoryPlanets] = true // 30%: 1 of 2 planets → round(0.6) = 1 each
 		ev := g.decide(g.scores())
 		if g.Decided != c.won || c.won && (len(ev) != 2 || ev[0].Kind != EventGameWon || ev[0].Count != 2) {
@@ -141,5 +142,26 @@ func TestConfirmedPublicScores(t *testing.T) {
 		if got := len(g.visibleScores(0, recs)); got != c.want {
 			t.Errorf("%d public %v: %d records, want %d", c.year, c.public, got, c.want)
 		}
+	}
+}
+
+func TestPredictionVictoryAnswers(t *testing.T) {
+	// stars-elegy #53: needed 0 means nobody wins by conditions; a tie
+	// for the top score flags nobody for the lead; the record's starbase
+	// count leaves out Orbital Forts (no dock).
+	g := Game{Year: 2440, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}}}
+	g.Victory.Enabled[VictoryPlanets] = true
+	if ev := g.decide(g.scores()); len(ev) != 0 || g.Decided {
+		t.Errorf("needed 0: %+v", ev)
+	}
+	recs := []ScoreRecord{{Player: 0, Score: 50, Rank: 1}, {Player: 1, Score: 50, Rank: 1}}
+	g.victoryFlags(recs)
+	if recs[0].Flags&(0x40<<VictoryLead) != 0 || recs[1].Flags&(0x40<<VictoryLead) != 0 {
+		t.Errorf("tie flagged lead: %#x %#x", recs[0].Flags, recs[1].Flags)
+	}
+	g.Planets[0].HasStarbase, g.Planets[0].StarbaseHull = true, 1 // Orbital Fort
+	g.Planets[1].HasStarbase, g.Planets[1].StarbaseDock = true, true
+	if r := g.scores(); r[0].Starbases != 0 || r[1].Starbases != 1 || r[1].Score != 3 {
+		t.Errorf("starbases %+v", r)
 	}
 }

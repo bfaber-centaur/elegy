@@ -155,25 +155,17 @@ Places where the original has no behavior to copy, and Elegy chose one.
 
 ## Open spec questions
 
-- **K1 (ASSUMPTION), AR colonists in flight.** KERNEL.md says the loss
-  applies "in each year it moves". Elegy counts a fleet as moving when it
-  has a waypoint at a non-zero warp whose destination is not its own
-  position, and sends no message when the loss rounds to 0 kT (11..21 kT).
-
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
 
-- **K3 (ASSUMPTION), ship power.** Each slot's beam and torpedo terms
-  are truncated before summing; the speed code is the design's own (empty
-  mass, owner's race, no cargo dumped).
-- **K4 (ASSUMPTION), record starbase count.** Every owned starbase,
-  Orbital Forts included; only the score term needs a dock.
-- **K5 (ASSUMPTION), victory tests.** "round" in the planets test rounds
-  halves up; the lead test flags every player with the top score.
-- **K6 (ASSUMPTION), deciding.** A decided game is not decided again, a
-  dead player also gets the loss message, `Needed` below 1 counts as 1,
-  and the victory settings use the dialog encoding `v` in `Victory`.
+- **K1, K3–K6** were answered by stars-elegy #53 (OT-6, KX-003): the AR
+  loss applies whenever the next waypoint's warp is above 0; ship power
+  uses the design's own speed code without the War Monger bonus; Orbital
+  Forts are left out of the starbase count; a tie for the top score flags
+  nobody for the lead; the needed count is capped at the enabled
+  conditions (0: nobody wins by conditions); the game is decided again
+  every year the conditions hold.
 
 Choices the code makes where KERNEL.md is silent:
 

@@ -329,19 +329,18 @@ func (g *Game) arrive(f *Fleet) []Event {
 const EventColonistsLostInFlight EventKind = EventMergeRefused + 1
 
 // arColonistLoss is KERNEL.md "Alternate Reality colonists in flight"
-// (CONFIRMED, TK-117): an AR fleet with more than 10 kT of colonists loses
-// trunc((C+11)·3/100) kT in a year it moves, before the move.
-//
-// ASSUMPTION K1: a fleet "moves" when it has a waypoint at a non-zero warp
-// whose destination is not its own position, and a loss of 0 kT sends no
-// message.
+// (CONFIRMED, TK-117, OT-6): an AR fleet with more than 10 kT of colonists
+// loses trunc((C+11)·3/100) kT, before movement, in every year its next
+// waypoint has a warp above 0: also when that waypoint is its own
+// position, when it has no fuel to move, and once a year for a chaser. A
+// loss of 0 kT sends no message.
 func (g *Game) arColonistLoss(f *Fleet) []Event {
 	c := f.Cargo.Colonists
-	if c <= 10 || f.Owner < 0 || f.Owner >= len(g.Players) || g.Players[f.Owner].Race.PRT != PRTAlternateReality || g.destination(f.Waypoints[0]) == f.Pos {
+	if c <= 10 || f.Owner < 0 || f.Owner >= len(g.Players) || g.Players[f.Owner].Race.PRT != PRTAlternateReality {
 		return nil
 	}
 	lost := (c + 11) * 3 / 100
-	if lost == 0 { // 11..21 kT lose nothing (TK-117: 11 → 11); no message (ASSUMPTION K1)
+	if lost == 0 { // 11..21 kT lose nothing (TK-117: 11 → 11) and get no message
 		return nil
 	}
 	f.Cargo.Colonists -= lost
