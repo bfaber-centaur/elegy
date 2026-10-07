@@ -171,7 +171,8 @@ type TurnResult struct {
 // Not yet modelled: order application, waypoint tasks other than
 // unloads and colonize, space objects
 // other than battle salvage, the Mystery Trader, fuel generators, mine
-// sweeping, terraforming and remote mining. Scores and victory come after
+// sweeping, terraforming other than the Claim Adjuster's year-end step,
+// and remote mining. Scores and victory come after
 // the year advances.
 //
 // rng must not be nil: the turn's random draws (mining's +1, random events, battles) come only from
@@ -326,6 +327,9 @@ func GenerateTurn(
 		}
 	}
 	repair(&g, moved, fights)
+	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
+	// order" step 7.3), with the levels reached this year.
+	events = append(events, g.claimAdjusterYearEnd(rng)...)
 
 	g.Year++
 	scores := g.scores()

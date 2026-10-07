@@ -35,6 +35,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
 | Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in stars-elegy #53 "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
+| Claim Adjuster year-end step: original-value drift, then every axis to its limit with the reach just researched; terraform reach per axis | `terraform.go` `claimAdjusterYearEnd`, `terraformReach` | KX-003 S3/S3L; capture examples for TK-108, TK-118..121 (stars-elegy #53 24d4c09); parity vectors TK-108-A, TK-118-A, TK-119-A now match | the drift's draw sequence, CONFIRMED by KX-005 replays but tested here only with scripted draws |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
@@ -53,7 +54,8 @@ before-movement takeover tasks (unloads, colonize, drops) come first.
 Not modelled yet: order application, waypoint tasks other than unloads and
 colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
 sweeping,
-terraforming, remote mining, Super Stealth research stealing, the
+terraforming other than the Claim Adjuster's year-end step (production
+items, Orbital Adjusters), remote mining, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
 friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
 Engines, warp-10 losses, Radiating Hydro-Ram colonist
