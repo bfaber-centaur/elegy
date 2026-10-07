@@ -3,9 +3,8 @@
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001) and the public FM-001..004 movement
-corpus (`experiments/fm00N`), as of stars-elegy `main` at `46db4d9` (after PR #16) plus open
-stars-elegy PR #18 (partial percentage, limiting component, prefix after an
-auto item; branch `claude/project-thread-57v9tt` at `984ad8b`).
+corpus (`experiments/fm00N`), as of stars-elegy `main` at `6d86846` (after PR #18: partial
+percentage, limiting component, and prefix-after-auto-item rules).
 Nothing here comes from the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
