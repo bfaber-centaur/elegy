@@ -31,6 +31,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Starbase refuelling | `movement.go` | FM-004 DK | |
 | AR colonists in flight | `movement.go` `arColonistLoss` | TK-117, TK-107 (stars-elegy #44) | |
 | Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, switch `legacyFuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
+| Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
@@ -41,12 +42,12 @@ KERNEL.md gives every rule a status. Test names follow it:
 fleet chasers in rounds, then waypoint settlement); mining for every planet
 in id order (population before growth); per planet in id order: resources,
 research tax, production queue (caps use the grown population); population growth for every planet; starbase refuelling;
-research level-ups; battles, bombing and the after-movement takeover tasks
+research level-ups; random events (when `Game.RandomEvents` is on); battles, bombing and the after-movement takeover tasks
 (COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1. The
 before-movement takeover tasks (unloads, colonize, drops) come first.
 
 Not modelled yet: order application, waypoint tasks other than unloads and
-colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects, random events, mine
+colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
 sweeping,
 terraforming, remote mining, scores, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
@@ -155,6 +156,10 @@ Places where the original has no behavior to copy, and Elegy chose one.
   applies "in each year it moves". Elegy counts a fleet as moving when it
   has a waypoint at a non-zero warp whose destination is not its own
   position, and sends no message when the loss rounds to 0 kT (11..21 kT).
+
+- **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
+  `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
+  size until new-game settings land; their names are Elegy's own.
 
 Choices the code makes where KERNEL.md is silent:
 
