@@ -33,16 +33,17 @@ const (
 // Another owner: only giving is allowed; taking from another player's
 // planet or fleet acts on a foreign object and is rejected (ORDERS.md
 // "Ownership", chosen rule). What is given is taken from the fleet as the
-// order applies; relations do not matter (TAKEOVER.md "Manual cargo
-// transfers to other players", CONFIRMED TK-501, TK-502):
+// order applies; relations do not matter (ORDERS.md "Cross-owner cargo";
+// TAKEOVER.md "Manual cargo transfers to other players", CONFIRMED TK-501,
+// TK-502):
 //   - colonists onto another player's planet without a starbase are a
 //     drop, resolved with the before-movement unloads;
 //   - colonists onto an unowned planet, or a planet with a starbase, are
 //     lost and the giver is told;
-//   - minerals (and fuel, to a fleet) are credited once every player's
-//     orders have applied (creditGifts; MEASURED for planets, TK-405,
-//     TK-412, and for fleets, TK-406, TK-407, TK-409,
-//     with no message).
+//   - minerals (and fuel, to a fleet) are credited in place in the
+//     orders step's credit pass, after every debit and before movement
+//     (creditGifts; ORDERS.md "Two passes, in place"; MEASURED for
+//     planets, TK-405, TK-412, and for fleets, TK-406, TK-407, TK-409).
 //
 // Colonists given to another player's fleet are rejected: a legal client
 // never writes such an order (TAKEOVER.md, TK-408,
@@ -226,19 +227,26 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 	}
 }
 
-// creditGifts is the second pass of the replay (TAKEOVER.md "Manual cargo
-// transfers to other players"): each gift, in the order
-// given, is credited in place. A planet takes all its minerals with no
-// message (MEASURED, TK-405, TK-412). A fleet takes what fits its free
-// hold and tank (MEASURED, TK-406, TK-407, TK-409); the
-// giver has already lost the whole amount, the rest is lost and the giver
-// is told (CONFIRMED).
+// creditGifts is the second pass of the replay (ORDERS.md "Cross-owner
+// cargo", "Two passes, in place"; TAKEOVER.md "Manual cargo transfers to
+// other players"): every debit was taken as its order applied, and each
+// gift, in the order given, is now credited in place, still within the
+// orders step and before movement. There is no relation check. A planet
+// takes all its minerals with no message (MEASURED, TK-405, TK-412). A
+// fleet takes what fits its free hold and tank (MEASURED, TK-406, TK-407,
+// TK-409); the remainder is lost, not returned, and the giver is told
+// (ORDERS.md "Receiver short of room", CONFIRMED).
 //
-// ASSUMPTION L9: a receiving fleet that a later order in the replay
-// removed (a merge, or deleting its design) gets nothing, and the whole
-// gift is lost. The original skips a record whose receiver is missing at
-// replay (TAKEOVER.md); a receiver removed between the passes is not
-// covered.
+// A gift naming a receiver that is missing when its order applies is
+// rejected there, so neither side changes (ORDERS.md "Missing endpoint").
+//
+// ASSUMPTION L9: a receiving fleet that a later order in the same replay
+// removed (a merge, or deleting its design) is treated as a missing
+// endpoint: what was taken goes back to the giver's fleet, as much as fits
+// it now, and anything that cannot go back (the giver's fleet is gone, or
+// has filled up since) is lost and the giver told. ORDERS.md skips a
+// record whose endpoint is missing; it does not cover an endpoint removed
+// between the two passes.
 func (g *Game) creditGifts(gifts []CargoGift) []Event {
 	var events []Event
 	for _, gift := range gifts {
@@ -251,6 +259,9 @@ func (g *Game) creditGifts(gifts []CargoGift) []Event {
 		}
 		lost := 0
 		ti := g.fleetIndex(gift.ID)
+		if ti < 0 {
+			ti = g.fleetIndex(gift.FromFleet)
+		}
 		if ti < 0 {
 			for _, v := range gift.Amounts {
 				lost += v

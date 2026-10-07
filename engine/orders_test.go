@@ -445,6 +445,23 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 	}
 }
 
+func TestGiftToFleetMergedAway(t *testing.T) {
+	// ASSUMPTION L9: the receiver merged away after the debit is a missing
+	// endpoint (ORDERS.md "Missing endpoint"): the cargo goes back to the
+	// giver's fleet.
+	g := ordersGame()
+	g.Fleets[0].Pos = g.Fleets[2].Pos
+	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
+	files := []PlayerOrders{
+		{Player: 0, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}}},
+		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
+	}
+	a := ApplyOrders(g, files, []int{0, 1})
+	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Events) != 0 {
+		t.Errorf("giver Fe %d, events %+v; want 30 and none", g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
+	}
+}
+
 func TestCargoChecks(t *testing.T) {
 	// ORDERS.md Q4 (chosen rules): the fleet must be at the target;
 	// fuel to a planet is dropped from the order and its minerals still
