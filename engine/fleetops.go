@@ -62,7 +62,7 @@ func mergeDamage(a, b Stack, dilute bool) Damage {
 // and the ships above it are lost; a total of exactly 32767 is kept
 // (ORDERS.md "Merge order", BINARY-ONLY). With overflow, a stack above
 // 32767 empties dst of ships (the Merge with Fleet task's LEGACY BUG).
-func absorb(dst, src *Fleet, overflow, dilute bool) {
+func (g *Game) absorb(dst, src *Fleet, overflow, dilute bool) {
 	for _, s := range src.Stacks {
 		if s.Count <= 0 {
 			continue
@@ -75,17 +75,7 @@ func absorb(dst, src *Fleet, overflow, dilute bool) {
 			}
 		}
 		if j < 0 {
-			// A fleet keeps its stacks in design-slot order
-			// (PRODUCTION-LAUNCH.md, stars-elegy #57, BINARY-ONLY); Elegy's
-			// design index stands for the slot.
-			j = len(dst.Stacks)
-			for k, d := range dst.Stacks {
-				if d.Design > s.Design {
-					j = k
-					break
-				}
-			}
-			dst.Stacks = slices.Insert(dst.Stacks, j, s)
+			j = g.insertStack(dst, s)
 		} else {
 			d := &dst.Stacks[j]
 			d.Damage = mergeDamage(*d, s, dilute)
@@ -109,6 +99,29 @@ func absorb(dst, src *Fleet, overflow, dilute bool) {
 		}
 	}
 }
+
+// insertStack adds a stack of a design the fleet lacks in its owner's
+// design-slot order and returns its index: a fleet keeps one count per
+// design slot, so the new stack takes its slot's place
+// (PRODUCTION-LAUNCH.md, stars-elegy #57, BINARY-ONLY). Merges and the
+// orders layer's launch share it.
+func (g *Game) insertStack(f *Fleet, s Stack) int {
+	slot := g.shipSlot(f.Owner, s.Design)
+	at := len(f.Stacks)
+	for k, t := range f.Stacks {
+		if g.shipSlot(f.Owner, t.Design) > slot {
+			at = k
+			break
+		}
+	}
+	f.Stacks = slices.Insert(f.Stacks, at, s)
+	return at
+}
+
+// shipSlot is the owner's ship-design slot holding design d, which orders
+// a fleet's stacks. Until the orders layer records each player's slots,
+// Elegy's design index stands for the slot.
+func (g *Game) shipSlot(owner, d int) int { return d }
 
 // MergeFleets is the merge order (ORDERS.md "Merge order", BINARY-ONLY):
 // the fleets with ids from join the fleet with id into, all at one
@@ -135,7 +148,7 @@ func (g *Game) MergeFleets(owner, into int, from []int) error {
 		ids[id] = true
 	}
 	for _, id := range from {
-		absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, false)
+		g.absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, false)
 	}
 	g.removeFleets(ids)
 	return nil
@@ -175,7 +188,7 @@ func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}
-	absorb(&g.Fleets[t], f, legacyMergeOverflow, legacyMergeDilution)
+	g.absorb(&g.Fleets[t], f, legacyMergeOverflow, legacyMergeDilution)
 	return Event{}, true
 }
 

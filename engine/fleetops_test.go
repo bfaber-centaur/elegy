@@ -44,7 +44,7 @@ func TestConfirmedMergeTaskOverflow(t *testing.T) {
 		for _, overflow := range []bool{true, false} {
 			dst := Fleet{Stacks: []Stack{{Design: 0, Count: 32000}}, Fuel: 10, Cargo: Cargo{Minerals: Minerals{5, 0, 0}}}
 			src := Fleet{Stacks: []Stack{{Design: 0, Count: tt.add}}, Fuel: 20, Cargo: Cargo{Colonists: 7}}
-			absorb(&dst, &src, overflow, true)
+			(&Game{}).absorb(&dst, &src, overflow, true)
 			want := tt.chosen
 			if overflow {
 				want = tt.legacy
@@ -235,7 +235,7 @@ func TestPredictionDesignHullAndEngine(t *testing.T) {
 func TestPredictionMergeStackOrder(t *testing.T) {
 	// Stacks stay in design-slot order (design index) after a merge.
 	dst := Fleet{Stacks: []Stack{{Design: 0, Count: 1}, {Design: 3, Count: 1}}}
-	absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, true)
+	(&Game{}).absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, true)
 	var got []int
 	for _, s := range dst.Stacks {
 		got = append(got, s.Design)
