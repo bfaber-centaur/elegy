@@ -75,11 +75,11 @@ Elegy's game has none of these yet, so their rules are not implemented:
   planet.
 - The heading's warp is the warp of the waypoint the fleet moved toward
   in its last movement step.
-- ASSUMPTION S1: the bombing check uses the end-of-year state, like the
-  rest of the view, not the state at the bombing step.
-- ASSUMPTION S2: "every player whose forces fought it" is read as every
-  other player in the battle's player list, so a friend fighting beside
-  the viewer also learns the design. A battle reveals its other players
-  as known players.
+- S1 and S2 were answered by stars-elegy #57 (open; BINARY-ONLY,
+  predictions SC-035 and SC-036). The bombing check is taken at the
+  bombing step and the report written from the end-of-year state
+  (`bombChecks`, `TestPredictionBombingCheckAtBombingStep`). Every other
+  battle participant, allies included, gets the designs in full and
+  becomes a known player.
 - Penetration needing `P > 0` and the estimate timing (end of the turn,
   after every battle draw) are now spec (#26).

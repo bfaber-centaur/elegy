@@ -301,6 +301,7 @@ func GenerateTurn(
 	owned := g.phaseStart()
 	fights := battles(&g, rng, gained)
 	events = append(events, fights.events...)
+	bombs := g.bombChecks()
 	events = append(events, bombing(&g, rng)...)
 	queue, ev = g.unloadPhase(owned)
 	events = append(events, ev...)
@@ -324,7 +325,7 @@ func GenerateTurn(
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
-	views := views(g, PopulationEstimates(g, rng), fights.seen)
+	views := views(g, PopulationEstimates(g, rng), fights.seen, bombs)
 	for v := range views {
 		views[v].Scores = g.visibleScores(v, scores)
 	}

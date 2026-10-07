@@ -397,20 +397,21 @@ func PopulationEstimates(g Game, rng Rand) map[int]int {
 // Views computes every player's view of the post-turn game (SCANNING.md),
 // with the year's population estimates.
 func Views(g Game, estimates map[int]int) []PlayerView {
-	return views(g, estimates, nil)
+	return views(g, estimates, nil, g.bombChecks())
 }
 
 // views is Views with the year's battles, which give their players
-// planet reports and designs.
-func views(g Game, estimates map[int]int, battles []battleSeen) []PlayerView {
+// planet reports and designs, and the bombing checks made at the bombing
+// step (bombs[v] holds the planet indexes viewer v would bomb).
+func views(g Game, estimates map[int]int, battles []battleSeen, bombs []map[int]bool) []PlayerView {
 	out := make([]PlayerView, len(g.Players))
 	for v := range g.Players {
-		out[v] = g.view(v, estimates, battles)
+		out[v] = g.view(v, estimates, battles, bombs[v])
 	}
 	return out
 }
 
-func (g *Game) view(v int, estimates map[int]int, battles []battleSeen) PlayerView {
+func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs map[int]bool) PlayerView {
 	view := PlayerView{Player: v}
 	scs := g.scanners(v)
 	known := map[int]bool{}
@@ -423,8 +424,9 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen) PlayerVi
 	// battle's size limit, a normal report (SCANNING.md "Left out of a
 	// battle or hit by mines", BINARY-ONLY).
 	//
-	// ASSUMPTION S2: "fought it" is read as being in the same battle's
-	// player list P, so a friend in the battle also learns the design.
+	// "Fought it" is every other player in the battle's player list P,
+	// allies included, and each becomes a known player (stars-elegy #57,
+	// BINARY-ONLY, prediction SC-036).
 	fullDesigns := map[int]bool{}
 	battlePlanets := map[int]bool{}
 	leftOutPlanets := map[int]bool{}
@@ -512,7 +514,7 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen) PlayerVi
 			level = max(level, ReportPosition)
 			sbShown = true
 		}
-		if leftOutPlanets[i] || g.bombCheck(v, i) {
+		if leftOutPlanets[i] || bombs[i] {
 			level = max(level, ReportNormal)
 		}
 		for _, s := range scs {
@@ -575,15 +577,29 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen) PlayerVi
 	return view
 }
 
+// bombChecks is, per viewer, the planets it would bomb (bombCheck), taken
+// at the bombing step right after battles. The report itself is written
+// from the end-of-year state, so a planet bombing empties still gets its
+// normal report (stars-elegy #57, BINARY-ONLY, prediction SC-035).
+func (g *Game) bombChecks() []map[int]bool {
+	out := make([]map[int]bool, len(g.Players))
+	for v := range g.Players {
+		out[v] = map[int]bool{}
+		for i := range g.Planets {
+			if g.bombCheck(v, i) {
+				out[v][i] = true
+			}
+		}
+	}
+	return out
+}
+
 // bombCheck reports whether viewer v would bomb planet p by TAKEOVER.md
 // "Who bombs": another player owns it, it has no starbase, and one of v's
 // fleets in orbit has a battle plan that attacks the owner. Such a planet
 // gets a normal report whatever v's scanners and whether or not any fleet
 // carries bombs (SCANNING.md "Bombing check", CONFIRMED for scannerless
 // fleets without bombs, SC-024, SC-031, SC-032; mechanism BINARY-ONLY).
-//
-// ASSUMPTION S1: the check is made on the end-of-year state, like the
-// rest of the view, rather than at the bombing step.
 func (g *Game) bombCheck(v, pi int) bool {
 	p := &g.Planets[pi]
 	if p.Owner == NoOwner || p.Owner == v || g.hasStarbase(pi) {
