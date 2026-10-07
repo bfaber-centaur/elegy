@@ -117,23 +117,32 @@ func (g *Game) routeWarp(f *Fleet, src, dst int) int {
 	return w
 }
 
-// lowestFreeFleetID is the number of a player's next new fleet
+// lowestFreeFleetNumber is the number of a player's next new fleet
 // (PRODUCTION-LAUNCH.md "The new fleet", CONFIRMED SL-02: the owner's
-// lowest unused fleet number, counting from 1).
-//
-// ASSUMPTION L13: Elegy's fleet ids are unique across players, so the
-// new id is the lowest one no fleet of any player uses. That equals the
-// spec's number when the other players' fleets do not use it.
-func (g *Game) lowestFreeFleetID() int {
+// lowest unused fleet number, counting from 1). It sorts among the
+// owner's fleets by that number (stars-elegy #57 2496594, BINARY-ONLY;
+// Game.fleetOrder).
+func (g *Game) lowestFreeFleetNumber(owner int) int {
 	used := map[int]bool{}
 	for _, f := range g.Fleets {
-		used[f.ID] = true
+		if f.Owner == owner {
+			used[f.Number] = true
+		}
 	}
-	id := 1
-	for used[id] {
-		id++
+	n := 1
+	for used[n] {
+		n++
 	}
-	return id
+	return n
+}
+
+// newFleetID is an unused Fleet.ID, Elegy's internal key.
+func (g *Game) newFleetID() int {
+	id := 0
+	for _, f := range g.Fleets {
+		id = max(id, f.ID)
+	}
+	return id + 1
 }
 
 // joinDamage is the damage of a stack of n ships, damage dmg and armor
@@ -199,7 +208,7 @@ func (g *Game) Launch(pi, design, count int) ([]Event, int) {
 	if fleets >= maxFleets {
 		return g.joinAtLimit(pi, design, count)
 	}
-	f := Fleet{ID: g.lowestFreeFleetID(), Owner: owner, Pos: p.Pos, Stacks: []Stack{{Design: design, Count: count}}}
+	f := Fleet{ID: g.newFleetID(), Number: g.lowestFreeFleetNumber(owner), Owner: owner, Pos: p.Pos, Stacks: []Stack{{Design: design, Count: count}}}
 	f.Fuel = g.tankCapacity(&f)
 	events := []Event{{Kind: EventShipsBuilt, Player: owner, Planet: p.ID, Fleet: f.ID, Count: count}}
 	if p.HasRoute {

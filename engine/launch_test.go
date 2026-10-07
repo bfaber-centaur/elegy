@@ -163,16 +163,17 @@ func TestConfirmedLaunchNewFleets(t *testing.T) {
 	// the next is #3, then #5), full tanks, no cargo, no task, plan 0, no
 	// name.
 	g := launchGame(t)
-	g.Fleets = []Fleet{{ID: 1, Owner: 0}, {ID: 2, Owner: 0}, {ID: 4, Owner: 0}}
-	var ids []int
+	// Player 1's fleets do not take player 0's numbers.
+	g.Fleets = []Fleet{{ID: 1, Number: 1, Owner: 0}, {ID: 2, Number: 2, Owner: 0}, {ID: 3, Number: 4, Owner: 0}, {ID: 4, Number: 3, Owner: 1}}
+	var numbers []int
 	for _, n := range []int{2, 1} {
 		_, id := g.Launch(0, 0, n)
-		ids = append(ids, id)
+		numbers = append(numbers, g.Fleets[g.fleetIndex(id)].Number)
 	}
-	if ids[0] != 3 || ids[1] != 5 {
-		t.Fatalf("new fleet ids %v, want 3 and 5", ids)
+	if numbers[0] != 3 || numbers[1] != 5 {
+		t.Fatalf("new fleet numbers %v, want 3 and 5", numbers)
 	}
-	f := g.Fleets[g.fleetIndex(3)]
+	f := g.Fleets[len(g.Fleets)-2]
 	if f.Pos != g.Planets[0].Pos || f.Fuel != 100 || f.Cargo != (Cargo{}) || f.Plan != 0 || f.Name != "" ||
 		f.Task.Kind != TaskNone || len(f.Waypoints) != 0 || f.Stacks[0] != (Stack{Design: 0, Count: 2}) {
 		t.Errorf("new fleet %+v", f)
@@ -220,11 +221,11 @@ func TestConfirmedFleetLimit(t *testing.T) {
 	// that qualifies the ships are lost.
 	g := launchGame(t)
 	for i := range maxFleets - 1 {
-		g.Fleets = append(g.Fleets, Fleet{ID: i + 1, Owner: 0, Pos: Point{1500, 1500}})
+		g.Fleets = append(g.Fleets, Fleet{ID: i + 1, Number: i + 1, Owner: 0, Pos: Point{1500, 1500}})
 	}
 	_, first := g.Launch(0, 0, 2)
 	ev, second := g.Launch(0, 0, 1)
-	if first != maxFleets || second != first || ev[0].Kind != EventShipsJoinedFleet {
+	if g.Fleets[g.fleetIndex(first)].Number != maxFleets || second != first || ev[0].Kind != EventShipsJoinedFleet {
 		t.Fatalf("first %d, second %d, events %+v", first, second, ev)
 	}
 	if s := g.Fleets[g.fleetIndex(first)].Stacks; len(s) != 1 || s[0].Count != 3 {
