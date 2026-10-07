@@ -1,6 +1,12 @@
 package engine
 
-import "sort"
+import (
+	"errors"
+	"sort"
+)
+
+// ErrNilRand is returned by GenerateTurn when no random source is given.
+var ErrNilRand = errors.New("engine: GenerateTurn needs a non-nil Rand")
 
 // NoOwner marks an unowned planet.
 const NoOwner = -1
@@ -73,6 +79,10 @@ type TurnResult struct {
 // random events, fuel generators, battles, mine sweeping, repair, terraforming,
 // remote mining and scores.
 //
+// rng must not be nil: the turn's random draws (mining's +1) come only from
+// it, and there is deliberately no hidden default generator. A nil rng
+// returns ErrNilRand.
+//
 // game is not modified; the returned Game is independent of it.
 func GenerateTurn(
 	game Game,
@@ -80,6 +90,9 @@ func GenerateTurn(
 	rules Ruleset,
 	rng Rand,
 ) (TurnResult, error) {
+	if rng == nil {
+		return TurnResult{}, ErrNilRand
+	}
 	g := game.clone()
 	var events []Event
 

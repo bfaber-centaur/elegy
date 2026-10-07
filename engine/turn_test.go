@@ -7,13 +7,19 @@ func TestGenerateTurnAdvancesYear(t *testing.T) {
 		Year: 2400,
 	}
 
-	result, err := GenerateTurn(game, nil, nil, nil)
+	result, err := GenerateTurn(game, nil, nil, highRand{})
 	if err != nil {
 		t.Fatalf("GenerateTurn() error = %v", err)
 	}
 
 	if got, want := result.Game.Year, 2401; got != want {
 		t.Errorf("year = %d, want %d", got, want)
+	}
+}
+
+func TestGenerateTurnRejectsNilRand(t *testing.T) {
+	if _, err := GenerateTurn(pgHomeworld(), nil, Jrc3(), nil); err != ErrNilRand {
+		t.Errorf("err = %v, want ErrNilRand", err)
 	}
 }
 
