@@ -254,33 +254,6 @@ func (g *Game) joinAtLimit(pi, design, count int) ([]Event, int) {
 	return []Event{{Kind: EventShipsLostFleetLimit, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: count}}, -1
 }
 
-// insertStack adds a stack to a fleet in its owner's design-slot order: a
-// fleet keeps one count per design slot, so ships of a design the fleet
-// lacks take their slot's place (PRODUCTION-LAUNCH.md, answer to Elegy's
-// question Q18, stars-elegy #57 2496594, BINARY-ONLY). A design with no
-// slot of the owner goes last.
-//
-// The order of a fleet's stacks elsewhere is the kernel lane's
-// representation; this keeps the build path consistent with the rule.
-func (g *Game) insertStack(f *Fleet, s Stack) {
-	slot := func(d int) int {
-		for _, ds := range g.DesignSlots {
-			if ds.Owner == f.Owner && ds.Design == d && !ds.Starbase {
-				return ds.Slot
-			}
-		}
-		return maxShipDesigns
-	}
-	at := len(f.Stacks)
-	for k, t := range f.Stacks {
-		if slot(t.Design) > slot(s.Design) {
-			at = k
-			break
-		}
-	}
-	f.Stacks = append(f.Stacks[:at:at], append([]Stack{s}, f.Stacks[at:]...)...)
-}
-
 // DockAllows is the production-queue check for a ship item (ORDERS.md
 // "Production queue (starbase dock)" and PRODUCTION-LAUNCH.md "Can the
 // planet build it", Elegy's chosen rule; the original host builds any
