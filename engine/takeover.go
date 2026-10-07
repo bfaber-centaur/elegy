@@ -27,11 +27,13 @@ const (
 	TaskNone      TaskKind = iota
 	TaskTransport          // unload actions per cargo type
 	TaskColonize
+	TaskMerge // Merge with Fleet: join the fleet with id Task.Fleet
 )
 
 // Cargo types of a transport order: the three minerals by their Minerals
-// index, then colonists. Fuel is never unloaded to a planet (TAKEOVER.md,
-// BINARY-ONLY), so it has no action here.
+// index, then colonists. Fuel is never unloaded to a planet (KERNEL.md
+// "Fuel cannot be unloaded onto a planet", CONFIRMED FM-101..105), so it
+// has no action here.
 const (
 	CargoColonists = NumMinerals
 	NumCargo       = NumMinerals + 1
@@ -60,6 +62,7 @@ type Transport struct {
 type Task struct {
 	Kind      TaskKind
 	Transport [NumCargo]Transport // for TaskTransport
+	Fleet     int                 // target fleet id, for TaskMerge
 }
 
 // planetOrder is the planet indices in planet-id order.
@@ -83,6 +86,9 @@ func (g *Game) fleetOrder() []int {
 		fa, fb := &g.Fleets[order[a]], &g.Fleets[order[b]]
 		if fa.Owner != fb.Owner {
 			return fa.Owner < fb.Owner
+		}
+		if fa.Number != fb.Number {
+			return fa.Number < fb.Number
 		}
 		return fa.ID < fb.ID
 	})
@@ -353,10 +359,9 @@ func (g *Game) phaseStart() []bool {
 // task happens", steps 2 and 5): each fleet in fleet order carries out its
 // whole task. It returns the drops queued, in the order they were made.
 //
-// Not modelled: scrap, remote mining, mine laying, colonists given by
-// manual cargo transfers (which would start the queue before movement),
-// and the load pass (loads, merges, fleet transfers, cargo given to
-// other players' fleets).
+// Not modelled: scrap, remote mining, mine laying, and colonists given by
+// manual cargo transfers (which would start the queue before movement).
+// The load pass is loadPass.
 func (g *Game) unloadPhase(owned []bool) (queue []drop, events []Event) {
 	consumed := map[int]bool{}
 	for _, i := range g.fleetOrder() {

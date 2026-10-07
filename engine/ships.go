@@ -80,6 +80,8 @@ type Part struct {
 	// fuel tanks, Anti-matter Generator, cargo pods.
 	FuelCapacity  int
 	CargoCapacity int
+	// FuelPerYear is the fuel (mg) a fuel generator adds each year.
+	FuelPerYear int
 
 	// Bombing (TAKEOVER.md "Bomb totals"). KillRate is in tenths of a
 	// percent; InstallKill is installations destroyed; MinKill is the

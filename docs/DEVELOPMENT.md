@@ -76,6 +76,7 @@ See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
 [SCANNING-STATUS.md](SCANNING-STATUS.md),
 [COMPONENTS-STATUS.md](COMPONENTS-STATUS.md),
 [TAKEOVER-STATUS.md](TAKEOVER-STATUS.md),
+[ORDERS-STATUS.md](ORDERS-STATUS.md),
 [UNIVERSE-STATUS.md](UNIVERSE-STATUS.md) and
 [RACES-STATUS.md](RACES-STATUS.md) for what is implemented, which
 tests are ground truth and which are predictions, and the open spec gaps.
@@ -116,6 +117,24 @@ Use several layers:
 - complete turn tests;
 - multi-turn deterministic scenarios;
 - J-RC3 parity tests promoted from the research repository.
+
+The stars-elegy parity vectors are copied into `engine/testdata/vectors`
+and run by `TestParityVectors` (`engine/parity_test.go`). Each vector's
+start becomes an Elegy game. The harness generates the run's years and
+checks every case's expectations:
+
+- CONFIRMED and LEGACY BUG cases are exact-match targets.
+- MEASURED cases are reported only.
+- Cases are skipped for an order, object or expectation Elegy does not
+  model yet, or for a random outcome.
+- A LEGACY BUG case whose switch is off by default is reported as
+  "differs".
+
+`go test -run TestParityVectors -v ./engine` prints the per-corpus tally
+and every case that does not pass. `baseline.txt` lists the passing
+cases, and the test fails if one of them regresses. After a change that
+makes more cases pass, refresh the list with
+`PARITY_BASELINE=write go test -run TestParityVectors ./engine`.
 
 For uncertain compatibility behavior:
 
