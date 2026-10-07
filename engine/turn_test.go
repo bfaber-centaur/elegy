@@ -1,6 +1,9 @@
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestGenerateTurnAdvancesYear(t *testing.T) {
 	game := Game{
@@ -87,5 +90,55 @@ func TestGenerateTurnDoesNotModifyInput(t *testing.T) {
 	}
 	if g.Planets[0].Factories != 0 || g.Planets[0].Queue[0].Count != 20 || g.Planets[0].Population != 1050 {
 		t.Errorf("input game changed: %+v", g.Planets[0])
+	}
+}
+
+// recordRand records the bound of every draw and returns 0.
+type recordRand struct{ bounds []int }
+
+func (r *recordRand) Intn(n int) int {
+	r.bounds = append(r.bounds, n)
+	return 0
+}
+
+// TestPredictionTurnAppliesOrders: GenerateTurn applies the year's order
+// files first (KERNEL.md "Turn order" step 1): the player shuffle makes
+// the year's first draws, one per player, then each file applies, and a
+// colonist drop given by an order joins the before-movement drop
+// resolution (TAKEOVER.md "Manual cargo transfers to other players").
+func TestPredictionTurnAppliesOrders(t *testing.T) {
+	g := ordersGame()
+	for i := range g.Players {
+		g.Players[i].Race = pgRace()
+	}
+	g.Fleets[0].Pos = g.Planets[1].Pos
+	files := []PlayerOrders{
+		{Player: 0, GameID: g.ID, Year: g.Year, Orders: []Order{
+			ResearchOrder{Budget: 30, Field: Weapons, Next: NextSameField},
+			CargoOrder{Fleet: 1, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{0, 0, 0, -10}},
+		}},
+		{Player: 1, GameID: g.ID, Year: g.Year - 1},
+	}
+	rng := &recordRand{}
+	r, err := GenerateTurn(*g, files, Jrc3(), rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rng.bounds) < 2 || rng.bounds[0] != 2 || rng.bounds[1] != 1 {
+		t.Errorf("first draws %v, want the shuffle's Random(2), Random(1)", rng.bounds)
+	}
+	want := []OrderResult{{Player: 1, Index: -1, Err: ErrOutOfDate}, {Player: 0, Index: 0}, {Player: 0, Index: 1}}
+	if !reflect.DeepEqual(r.Orders, want) {
+		t.Errorf("order results %+v, want %+v", r.Orders, want)
+	}
+	if pl := r.Game.Players[0]; pl.ResearchBudget != 30 || pl.Research.Current != Weapons {
+		t.Errorf("research budget %d field %d, want 30 and weapons", pl.ResearchBudget, pl.Research.Current)
+	}
+	if got := r.Game.Fleets[0].Cargo.Colonists; got != 0 {
+		t.Errorf("fleet 1 colonists %d, want 0 (dropped)", got)
+	}
+	// The 10 attackers lose to planet 2's 80 units: the defenders stay.
+	if p := r.Game.Planets[1]; p.Owner != 1 {
+		t.Errorf("planet 2 owner %d, want 1", p.Owner)
 	}
 }

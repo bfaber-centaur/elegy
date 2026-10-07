@@ -16,9 +16,11 @@ The merge order and the design read are the kernel lane's
 `YearOrders` draws the replay order with `ShufflePlayers` (KERNEL.md
 "Turn order", 1. Orders, step 2: a forward shuffle,
 one draw per player, the first draws of the year) and applies the files.
-It is not called from `GenerateTurn` yet: that, and handing the orders'
-drops and gifts to the waypoint phases, is a turn change for the kernel
-lane.
+`GenerateTurn` calls it first (KERNEL.md step 1) and returns each
+order's result in `TurnResult.Orders`. The orders' colonist drops go to
+the front of the before-movement drop queue, in the order given
+(TAKEOVER.md "Order inside a phase", MEASURED TK-501); gifts are credited
+at the end of the replay, before any waypoint task.
 
 ## Orders and checks
 
@@ -99,8 +101,6 @@ record slot positions), mass drivers, and the route task on arrival.
 
 ## Not modelled
 
-- calling `YearOrders` from `GenerateTurn`, and putting its drops at the
-  front of the before-movement drop queue;
 - splits, and cargo to deep space;
 - the binary's separate queued cross-player credit routine, which no
   legal order is known to reach (ORDERS.md, stars-elegy #87:

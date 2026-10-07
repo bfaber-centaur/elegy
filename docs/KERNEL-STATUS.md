@@ -44,7 +44,9 @@ KERNEL.md gives every rule a status. Test names follow it:
 ## Turn order implemented
 
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
-models: the before-movement takeover tasks (unloads, colonize, drops, the
+models: the players' orders (`YearOrders`: the player shuffle, each
+file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); the
+before-movement takeover tasks (unloads, colonize, drops, the
 research level-up check, loads and merges); fleet movement (ordinary fleets in fleet order, owner
 then fleet number, then fleet chasers in rounds, then waypoint
 settlement), Radiating Hydro-Ram Scoop losses and fuel generation;
@@ -58,7 +60,8 @@ year-end step; year + 1; scores, victory flags and deciding the game
 (`TurnResult.Scores`, each view's visible records). Its random draws
 follow KERNEL.md "Random draws" for the same steps.
 
-Not modelled yet: order application, waypoint tasks other than unloads and
+Not modelled yet: following fleets and the waypoint check after the
+orders (step 1a.3), waypoint tasks other than unloads and
 colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
 sweeping,
 terraforming other than the Claim Adjuster's year-end step (production

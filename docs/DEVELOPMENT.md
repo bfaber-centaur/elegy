@@ -124,17 +124,25 @@ start becomes an Elegy game. The harness generates the run's years and
 checks every case's expectations:
 
 - CONFIRMED and LEGACY BUG cases are exact-match targets.
-- MEASURED cases are reported only.
+- MEASURED cases are tallied apart.
 - Cases are skipped for an order, object or expectation Elegy does not
-  model yet, or for a random outcome.
+  model yet, or when the vector marks the outcome as varying by stream.
 - A LEGACY BUG case whose switch is off by default is reported as
   "differs".
+- Each vector runs with 8 seed variants. The harness's random stream is
+  not the original's, so a case whose result changes with the seed only
+  matches by chance. It is reported as "random", with how many seeds it
+  passes with and the reference seed's comparison.
 
 `go test -run TestParityVectors -v ./engine` prints the per-corpus tally
 and every case that does not pass. `baseline.txt` lists the passing
-cases, and the test fails if one of them regresses. After a change that
-makes more cases pass, refresh the list with
-`PARITY_BASELINE=write go test -run TestParityVectors ./engine`.
+cases, MEASURED ones included, and each random case with its pass count.
+The test fails if a listed case stops passing or a random one passes with
+fewer seeds. After a change that moves the results, check each change
+and then refresh the list with
+`PARITY_BASELINE=write go test -run TestParityVectors ./engine`. A change
+in how many draws the turn makes (the player shuffle, for one) moves
+every random case's count.
 
 For uncertain compatibility behavior:
 

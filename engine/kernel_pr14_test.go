@@ -162,7 +162,8 @@ func TestPredictionMiningDrawOrder(t *testing.T) {
 	one.ID, two.ID = 1, 2
 	two.Pos = Point{1, 1}
 	g.Planets = []Planet{two, one}
-	r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 99, 99, 99, 0}})
+	// The player shuffle's draw comes first.
+	r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 0, 99, 99, 99, 0}})
 	if err != nil {
 		t.Fatal(err)
 	}
