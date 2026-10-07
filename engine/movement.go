@@ -82,7 +82,8 @@ type Waypoint struct {
 	Pos    Point
 	Warp   int
 	Target TargetKind
-	ID     int // planet or fleet id for TargetPlanet / TargetFleet
+	ID     int  // planet or fleet id for TargetPlanet / TargetFleet
+	Task   Task // the task the fleet takes up on arriving
 }
 
 type Fleet struct {
@@ -94,6 +95,10 @@ type Fleet struct {
 	Cargo     Cargo
 	Waypoints []Waypoint
 	Plan      int // battle plan index in the owner's Plans
+	// Task is the task at the fleet's current location (the original's
+	// waypoint 0). A fleet that moves leaves it, and takes up the task of
+	// the waypoint it arrives at.
+	Task Task
 	// Heading and HeadingWarp are the direction of this year's last
 	// movement step (halved until each component fits in ±127) and its
 	// warp, as other players see them (SCANNING.md "Heading"). Both are
@@ -274,6 +279,7 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 
 // arrive completes a fleet's current waypoint.
 func (g *Game) arrive(f *Fleet) []Event {
+	f.Task = f.Waypoints[0].Task
 	f.Waypoints = f.Waypoints[1:]
 	if len(f.Waypoints) == 0 {
 		f.Waypoints = nil
@@ -306,6 +312,7 @@ func moveFleets(g *Game) []Event {
 		if !moving(f) {
 			continue
 		}
+		f.Task = Task{}
 		if f.Waypoints[0].Target == TargetFleet && g.fleetIndex(f.Waypoints[0].ID) >= 0 {
 			chasers = append(chasers, i)
 			continue

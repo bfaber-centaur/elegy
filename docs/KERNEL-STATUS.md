@@ -38,10 +38,13 @@ KERNEL.md gives every rule a status. Test names follow it:
 fleet chasers in rounds, then waypoint settlement); mining for every planet
 in id order (population before growth); per planet in id order: resources,
 research tax, production queue (caps use the grown population); population growth for every planet; starbase refuelling;
-research level-ups; year + 1.
+research level-ups; battles, bombing and the after-movement takeover tasks
+(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; year + 1. The
+before-movement takeover tasks (unloads, colonize, drops) come first.
 
-Not modelled yet: order application, waypoint tasks (load, unload, colonize,
-scrap), space objects, random events, battles, mine sweeping, repair,
+Not modelled yet: order application, waypoint tasks other than unloads and
+colonize (load, scrap, merge, transfer), space objects, random events, mine
+sweeping,
 terraforming, remote mining, scores, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
 friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap

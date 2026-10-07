@@ -47,11 +47,11 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Torpedoes and missiles | `hitChance`, `torpedoes` | CONFIRMED | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestPredictionTorpedoHitsPerTarget` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
 | Starbase damage | `starbaseDamage` | CONFIRMED in part | `TestConfirmedStarbaseDamageSteps` |
-| Starbase loss, AR planet uninhabited | `combat.go` `finish` | BINARY-ONLY | `TestPredictionAlternateRealityStarbaseLoss` |
+| Starbase loss, AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `emptyPlanet` | BINARY-ONLY | `TestPredictionAlternateRealityStarbaseLoss` |
 | Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each); cargo and fuel share, empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
 | Dump cargo (full amount; first salvage addition in deep space) | `setup` | BINARY-ONLY | `TestPredictionDumpCargo` |
 | Repair | `repair` | CONFIRMED; moved, Inner Strength, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
-| Tech from battle, same-turn level | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
+| Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | BINARY-ONLY (CB-021, CB-012 cases CONFIRMED) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, BINARY-ONLY | `TestPredictionTechAttemptRules` |
 
