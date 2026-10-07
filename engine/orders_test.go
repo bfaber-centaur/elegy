@@ -419,9 +419,10 @@ func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
 }
 
 func TestPredictionCargoToForeignFleet(t *testing.T) {
-	// stars-elegy #69 (BINARY-ONLY for fleets): no relation check; the
-	// receiver takes what fits and the rest is lost, the giver told.
-	// Colonists are not given to another player's fleet (L8).
+	// stars-elegy #76 (MEASURED TK-406/407/409, over-full CONFIRMED): no
+	// relation check; the receiver takes what fits and the rest is lost,
+	// the giver told. Colonists to another player's fleet are rejected
+	// (chosen rule; no legal client writes them, TK-408, TK-414).
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets[2].Cargo.Minerals[Germanium] = 90

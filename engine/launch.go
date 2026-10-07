@@ -10,13 +10,13 @@ package engine
 
 // Launch and starbase messages.
 const (
-	EventShipsBuilt          EventKind = iota + EventCargoGiftLost + 1 // Planet, Fleet = the new or joined fleet, Count = ships
-	EventFleetRouted                                                   // Planet = the destination, Fleet, Count = warp
-	EventFleetNotRouted                                                // Planet = the destination, Fleet: no warp with fuel
-	EventShipsJoinedFleet                                              // Planet, Fleet = the fleet joined, Count = ships
-	EventShipsLostFleetLimit                                           // Planet, Count = ships lost at the 512-fleet limit
-	EventPlansLost                                                     // Planet: the owner lacks the tech for the design
-	EventStarbaseBuilt                                                 // Planet, Count = the dock limit in kT, DockUnlimited, or 0 without a dock
+	EventShipsBuilt          EventKind = iota + EventColonistsLostGiven + 1 // Planet, Fleet = the new or joined fleet, Count = ships
+	EventFleetRouted                                                        // Planet = the destination, Fleet, Count = warp
+	EventFleetNotRouted                                                     // Planet = the destination, Fleet: no warp with fuel
+	EventShipsJoinedFleet                                                   // Planet, Fleet = the fleet joined, Count = ships
+	EventShipsLostFleetLimit                                                // Planet, Count = ships lost at the 512-fleet limit
+	EventPlansLost                                                          // Planet: the owner lacks the tech for the design
+	EventStarbaseBuilt                                                      // Planet, Count = the dock limit in kT, DockUnlimited, or 0 without a dock
 )
 
 // TaskRoute is the route task a routed fleet carries on its second

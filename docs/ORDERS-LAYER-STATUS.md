@@ -8,7 +8,7 @@ battle plans from `docs/COMBAT.md` at PR #59 head `1026471`, research
 from `docs/KERNEL.md` "Research", battle-plan order validation from
 `docs/COMBAT.md` "Order validation" (PR #72), the replay shuffle from
 `docs/KERNEL.md` "Turn order" (PR #53), manual transfers to other
-players from `docs/TAKEOVER.md` (PR #69, `9cef650`), queue replace, setting
+players from `docs/TAKEOVER.md` (PR #69, `9cef650`, and PR #76), queue replace, setting
 orders, names and design slots from `docs/LIMITS.md` (PR #65, `74e4e94`), and the planet side of cargo from
 `docs/TAKEOVER.md` on main `09e94c4`. Nothing else was used.
 
@@ -39,7 +39,7 @@ lane.
 | `DeleteDesignOrder` | the design's starbase is removed, the population stays | KERNEL.md "Maximum population" | BINARY-ONLY | `TestPredictionDesignOrders` |
 | `CargoOrder`, same owner | clamped to source, hold and tank (independent); own planet takes colonists at once | ORDERS.md "Cargo amounts and clamps"; TAKEOVER.md "Unload and load amounts" | CONFIRMED (FO-01..07, TK-201) | `TestConfirmedCargoClamps`, `TestConfirmedCargoOwnPlanet` |
 | `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited after every file, no message; relations do not matter | TAKEOVER.md "Manual cargo transfers to other players" (#69) | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestPredictionGiftsCreditedAfterReplay` |
-| `CargoOrder`, another player's fleet | giving only, no colonists (L8); credited after every file, what does not fit is lost and the giver told; no relation check | #69 (answer to Q1, Q5, Q6) | BINARY-ONLY | `TestPredictionCargoToForeignFleet` |
+| `CargoOrder`, another player's fleet | giving only; colonists rejected (no legal client writes them, TK-408, TK-414); credited after every file, what does not fit is lost and the giver told; no relation check | TAKEOVER.md #76 (answer to Q1, Q5, Q6) | MEASURED (TK-406, TK-407, TK-409); over-full gift CONFIRMED; colonists chosen rule | `TestPredictionCargoToForeignFleet` |
 | `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position | ORDERS.md "Waypoint coordinates"; UNIVERSE.md | BINARY-ONLY | `TestPredictionWaypointClamp` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
@@ -63,7 +63,7 @@ and has been sent to stars-elegy as a question.
 | L5 | (settled: COMBAT.md #72, a definition is accepted only for k ≤ count) | |
 | L6 | A warp outside 0..10, a negative transport amount, an unmodelled task, or a target planet or fleet that does not exist rejects a waypoint order. | ORDERS.md gives no other waypoint checks. |
 | L7 | A cargo order needs the fleet at its target; fuel to or from a planet rejects it; any failed check rejects the whole order; any fleet with a hold may carry colonists. | ORDERS.md and KERNEL.md cover the waypoint unload of fuel, not a direct transfer, and leave the colonist condition unpinned. |
-| L8 | Colonists are not given to another player's fleet by a manual transfer. | TAKEOVER.md says so for the waypoint task; #69 does not cover the manual transfer. |
+| L8 | (settled: TAKEOVER.md #76, a legal client never gives colonists to another player's fleet; Elegy rejects it under "Ownership") | |
 | L9 | Cargo given to a fleet that a later order in the same replay removed (merge, design delete) is lost. | #69 covers a receiver missing at replay, not one removed between the passes. |
 | L10 | (settled: LIMITS.md, #65, 16 ship and 10 starbase slots) | |
 | L11 | A design slot out of range, a hull of the wrong kind for the slot, and a new design for a slot whose design is in play are rejected. | ORDERS.md does not say what replacing a design in use does. |

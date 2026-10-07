@@ -41,11 +41,13 @@ const (
 //     lost and the giver is told;
 //   - minerals (and fuel, to a fleet) are credited once every player's
 //     orders have applied (creditGifts; MEASURED for planets, TK-405,
-//     TK-412, with no message; BINARY-ONLY for fleets).
+//     TK-412, and for fleets, TK-406, TK-407, TK-409, stars-elegy #76,
+//     with no message).
 //
-// ASSUMPTION L8: colonists are not given to another player's fleet
-// (TAKEOVER.md says so for the waypoint task; #69 does not cover a manual
-// transfer).
+// Colonists given to another player's fleet are rejected: a legal client
+// never writes such an order (TAKEOVER.md, stars-elegy #76, TK-408,
+// TK-414), so Elegy treats it as acting on a foreign object (ORDERS.md
+// "Ownership", chosen rule).
 //
 // ASSUMPTION L7: the fleet must be at the target's position (in orbit
 // of the planet); fuel to or from a planet rejects the order (KERNEL.md
@@ -221,7 +223,9 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 // transfers to other players", stars-elegy #69): each gift, in the order
 // given, is credited in place. A planet takes all its minerals with no
 // message (MEASURED, TK-405, TK-412). A fleet takes what fits its free
-// hold and tank, the rest is lost and the giver is told (BINARY-ONLY).
+// hold and tank (MEASURED, TK-406, TK-407, TK-409, stars-elegy #76); the
+// giver has already lost the whole amount, the rest is lost and the giver
+// is told (CONFIRMED, #76).
 //
 // ASSUMPTION L9: a receiving fleet that a later order in the replay
 // removed (a merge, or deleting its design) gets nothing, and the whole
