@@ -684,7 +684,7 @@ func TestConfirmedBattleDisclosure(t *testing.T) {
 	l.fleet(1, Point{900, 900}, Stack{Design: far, Count: 1})
 	p := l.planet(NoOwner, Point{40, 40})
 	b := []battleSeen{{planet: 0, players: []int{0, 1}, designs: map[int][]int{0: {mine}, 1: {theirs}}}}
-	v := views(l.g, nil, b)[0]
+	v := views(l.g, nil, b, l.g.bombChecks())[0]
 	if len(v.Designs) != 1 || v.Designs[0].Design != theirs || !v.Designs[0].Full {
 		t.Errorf("designs %+v, want %d in full", v.Designs, theirs)
 	}
@@ -701,7 +701,7 @@ func TestConfirmedBattleDisclosure(t *testing.T) {
 		t.Errorf("battle planet: planets %+v", v.Planets)
 	}
 	// A player not in the battle learns nothing from it.
-	if v := views(l.g, nil, []battleSeen{{planet: 0, players: []int{1}, designs: map[int][]int{1: {theirs}}}})[0]; len(v.Designs) != 0 || len(v.Planets) != 0 {
+	if v := views(l.g, nil, []battleSeen{{planet: 0, players: []int{1}, designs: map[int][]int{1: {theirs}}}}, l.g.bombChecks())[0]; len(v.Designs) != 0 || len(v.Planets) != 0 {
 		t.Errorf("outsider %+v", v)
 	}
 }
@@ -715,7 +715,7 @@ func TestPredictionLeftOutOfBattle(t *testing.T) {
 	p := l.planet(1, Point{40, 40})
 	b := []battleSeen{{planet: 0, players: []int{0, 1}, designs: map[int][]int{}, leftOut: []int{0}}}
 	level := ReportNone
-	for _, r := range views(l.g, nil, b)[0].Planets {
+	for _, r := range views(l.g, nil, b, l.g.bombChecks())[0].Planets {
 		if r.Planet == p {
 			level = r.Level
 		}
@@ -764,5 +764,30 @@ func TestConfirmedHeadingVectors(t *testing.T) {
 		if got := scanHeading(c.in.X, c.in.Y); got != c.want {
 			t.Errorf("scanHeading(%v) = %v, want %v", c.in, got, c.want)
 		}
+	}
+}
+
+func TestPredictionBombingCheckAtBombingStep(t *testing.T) {
+	// SC-035 (stars-elegy #57): the check is taken at the bombing step and
+	// the report written from the end-of-year state, so a planet bombing
+	// empties is still reported at the normal level, now unowned.
+	l := newScanLab()
+	l.g.Players[0].Plans = []BattlePlan{{Attack: AttackNeutralsAndEnemies}}
+	blind := l.design(hFreight, 25)
+	l.fleet(0, Point{40, 40}, Stack{Design: blind, Count: 1})
+	p := l.planet(1, Point{40, 40})
+	bombs := l.g.bombChecks()
+	l.g.Planets[0].Owner = NoOwner // emptied by bombing
+	level := ReportNone
+	for _, r := range views(l.g, nil, nil, bombs)[0].Planets {
+		if r.Planet == p {
+			level = r.Level
+			if r.Owner != NoOwner {
+				t.Errorf("owner %d, want none", r.Owner)
+			}
+		}
+	}
+	if level != ReportNormal {
+		t.Errorf("level %d, want normal", level)
 	}
 }

@@ -60,8 +60,8 @@ type Game struct {
 	Size int
 	// PublicScores is the game's public player scores option.
 	PublicScores bool
-	// Victory is the game's victory settings; Decided is set once a
-	// player has won.
+	// Victory is the game's victory settings; Decided is set in a year in
+	// which a player won (recomputed every year).
 	Victory Victory
 	Decided bool
 
@@ -221,6 +221,12 @@ func GenerateTurn(
 		start[f.ID] = f.Pos
 	}
 	events = append(events, moveFleets(&g)...)
+	for i := range g.Fleets {
+		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
+			events = append(events, g.radiatingColonists(f)...)
+		}
+	}
+	g.generateFuel()
 
 	type growth struct{ pop, carry int }
 	grown := make([]growth, len(g.Planets))
@@ -312,6 +318,7 @@ func GenerateTurn(
 	owned := g.phaseStart()
 	fights := battles(&g, rng, gained)
 	events = append(events, fights.events...)
+	bombs := g.bombChecks()
 	events = append(events, bombing(&g, rng)...)
 	queue, ev = g.unloadPhase(owned)
 	events = append(events, ev...)
@@ -323,7 +330,9 @@ func GenerateTurn(
 	events = append(events, g.loadPass()...)
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
-		if p, ok := start[f.ID]; ok && p != f.Pos {
+		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
+		// SL-03).
+		if p, ok := start[f.ID]; !ok || p != f.Pos {
 			moved[f.ID] = true
 		}
 	}
@@ -335,7 +344,7 @@ func GenerateTurn(
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
-	views := views(g, PopulationEstimates(g, rng), fights.seen)
+	views := views(g, PopulationEstimates(g, rng), fights.seen, bombs)
 	for v := range views {
 		views[v].Scores = g.visibleScores(v, scores)
 	}

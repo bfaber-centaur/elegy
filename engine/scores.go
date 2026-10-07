@@ -72,12 +72,11 @@ func techScore(l int) int {
 }
 
 // shipPower is a design's power for the ship classes (KERNEL.md "Score";
-// class boundaries CONFIRMED, capacitors, sappers and speed BINARY-ONLY).
-//
-// ASSUMPTION K3: each slot's beam and torpedo terms are truncated before
-// summing, and the speed code is the design's own: its empty mass, the
-// owner's race, no cargo dumped.
-func shipPower(d Design, race Race) int {
+// class boundaries CONFIRMED, capacitors and sappers BINARY-ONLY). The
+// speed code is the design's own: empty mass, no cargo, no War Monger
+// bonus (CONFIRMED, OT-6). Each slot's term is truncated before summing
+// (BINARY-ONLY).
+func shipPower(d Design) int {
 	beam, torp, bomb := 0, 0, 0
 	factor := 1000
 	for _, s := range d.Slots {
@@ -103,7 +102,7 @@ func shipPower(d Design, race Race) int {
 	if factor != 1000 {
 		beam = beam * min(255, factor/10) / 100
 	}
-	beam += beam * (speedCode(d, race, d.Mass, false) - 4) / 10
+	beam += beam * (speedCode(d, Race{}, d.Mass, false) - 4) / 10
 	return beam + torp + bomb
 }
 
@@ -118,13 +117,11 @@ func shipsScore(n, u, e, c int) int {
 
 // scores computes every player's record for the year (KERNEL.md "Score",
 // CONFIRMED KX-003; rank and flags CONFIRMED S1, S2, S3L).
-//
-// ASSUMPTION K4: the record's starbase count is every owned starbase
-// (Orbital Forts included); only the score term needs a dock.
+// The record's starbase count and the score's starbase term both count
+// the starbases with a dock, so not Orbital Forts (CONFIRMED, KX-003).
 func (g *Game) scores() []ScoreRecord {
 	recs := make([]ScoreRecord, len(g.Players))
 	planetScore := make([]int, len(g.Players))
-	docks := make([]int, len(g.Players))
 	for i := range recs {
 		recs[i].Player = i
 	}
@@ -136,11 +133,8 @@ func (g *Game) scores() []ScoreRecord {
 		r := &recs[p.Owner]
 		r.Planets++
 		planetScore[p.Owner] += min(6, ceilDiv(p.Population, 1000))
-		if p.HasStarbase || p.StarbaseHull > 0 {
-			r.Starbases++
-		}
 		if p.StarbaseDock {
-			docks[p.Owner]++
+			r.Starbases++
 		}
 		r.Resources += NewColony(p, &g.Players[p.Owner]).Resources(p.Population, p.Factories)
 	}
@@ -150,7 +144,7 @@ func (g *Game) scores() []ScoreRecord {
 		}
 		r := &recs[f.Owner]
 		for _, s := range f.Stacks {
-			switch pw := shipPower(g.Designs[s.Design], g.Players[f.Owner].Race); {
+			switch pw := shipPower(g.Designs[s.Design]); {
 			case pw == 0:
 				r.Unarmed += s.Count
 			case pw < 2000:
@@ -167,7 +161,7 @@ func (g *Game) scores() []ScoreRecord {
 			tech += techScore(l)
 			r.TechSum += l
 		}
-		r.Score = planetScore[i] + 3*docks[i] + r.Resources/30 + tech + shipsScore(r.Planets, r.Unarmed, r.Escorts, r.Capital)
+		r.Score = planetScore[i] + 3*r.Starbases + r.Resources/30 + tech + shipsScore(r.Planets, r.Unarmed, r.Escorts, r.Capital)
 	}
 	for i := range recs {
 		recs[i].Rank = 1
@@ -185,8 +179,8 @@ func (g *Game) scores() []ScoreRecord {
 // conditions": planets, tech, lead and capital ships CONFIRMED S1; score,
 // resources and highest score BINARY-ONLY).
 //
-// ASSUMPTION K5: "round" in the planets test rounds halves up, and the
-// lead test flags every player with the top score.
+// The planets test rounds halves up, and a tie for the top score flags
+// nobody for the lead (BINARY-ONLY).
 func (g *Game) victoryFlags(recs []ScoreRecord) {
 	v := g.Victory
 	sorted := make([]int, len(recs))
@@ -207,7 +201,7 @@ func (g *Game) victoryFlags(recs []ScoreRecord) {
 		met := [NumVictory]bool{
 			VictoryPlanets:   r.Planets >= (len(g.Planets)*(v.Planets+4)*5+50)/100,
 			VictoryScore:     r.Score >= (v.Score+1)*1000,
-			VictoryLead:      r.Rank == 1 && second*(100+(v.Lead+2)*10)/100 <= r.Score,
+			VictoryLead:      r.Rank == 1 && firsts == 1 && second*(100+(v.Lead+2)*10)/100 <= r.Score,
 			VictoryResources: r.Resources/1000 >= (v.Resources+1)*10,
 			VictoryCapital:   r.Capital >= (v.Capital+1)*10,
 			VictoryHighest:   g.yearIndex() >= (v.Highest+3)*10 && firsts == 1 && r.Rank == 1,
@@ -229,13 +223,14 @@ func (g *Game) victoryFlags(recs []ScoreRecord) {
 }
 
 // decide applies KERNEL.md's "Deciding the game" (BINARY-ONLY) once the
-// year's records exist: new deaths, then a survivor or the winners.
-//
-// ASSUMPTION K6: a decided game is not decided again, a dead player gets
-// the loss message too, and Needed below 1 counts as 1 (so a game with no
-// enabled condition is decided only by survival).
+// year's records exist: new deaths, then a survivor or the winners. The
+// game is decided again every year the conditions hold, with the messages
+// each time, and a year without a winner leaves it undecided. Dead players
+// get the loss message too. The needed count is the raw setting capped at
+// the number of enabled conditions; 0 means nobody wins by conditions.
 func (g *Game) decide(recs []ScoreRecord) []Event {
-	if len(g.Players) <= 1 || g.Decided {
+	g.Decided = false
+	if len(g.Players) <= 1 {
 		return nil
 	}
 	var events []Event
@@ -266,6 +261,16 @@ func (g *Game) decide(recs []ScoreRecord) []Event {
 	case len(alive) == 1:
 		winners = alive
 	case g.yearIndex() >= (g.Victory.MinYears+3)*10:
+		enabled := 0
+		for _, on := range g.Victory.Enabled {
+			if on {
+				enabled++
+			}
+		}
+		needed := min(g.Victory.Needed, enabled)
+		if needed <= 0 {
+			break
+		}
 		for i, r := range recs {
 			n := 0
 			for c := range NumVictory {
@@ -273,7 +278,7 @@ func (g *Game) decide(recs []ScoreRecord) []Event {
 					n++
 				}
 			}
-			if n >= max(1, g.Victory.Needed) && !g.Players[i].Dead {
+			if n >= needed && !g.Players[i].Dead {
 				winners = append(winners, i)
 			}
 		}

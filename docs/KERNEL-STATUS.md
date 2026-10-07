@@ -34,6 +34,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
+| Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in stars-elegy #53 "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
@@ -155,25 +156,17 @@ Places where the original has no behavior to copy, and Elegy chose one.
 
 ## Open spec questions
 
-- **K1 (ASSUMPTION), AR colonists in flight.** KERNEL.md says the loss
-  applies "in each year it moves". Elegy counts a fleet as moving when it
-  has a waypoint at a non-zero warp whose destination is not its own
-  position, and sends no message when the loss rounds to 0 kT (11..21 kT).
-
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
 
-- **K3 (ASSUMPTION), ship power.** Each slot's beam and torpedo terms
-  are truncated before summing; the speed code is the design's own (empty
-  mass, owner's race, no cargo dumped).
-- **K4 (ASSUMPTION), record starbase count.** Every owned starbase,
-  Orbital Forts included; only the score term needs a dock.
-- **K5 (ASSUMPTION), victory tests.** "round" in the planets test rounds
-  halves up; the lead test flags every player with the top score.
-- **K6 (ASSUMPTION), deciding.** A decided game is not decided again, a
-  dead player also gets the loss message, `Needed` below 1 counts as 1,
-  and the victory settings use the dialog encoding `v` in `Victory`.
+- **K1, K3–K6** were answered by stars-elegy #53 (OT-6, KX-003): the AR
+  loss applies whenever the next waypoint's warp is above 0; ship power
+  uses the design's own speed code without the War Monger bonus; Orbital
+  Forts are left out of the starbase count; a tie for the top score flags
+  nobody for the lead; the needed count is capped at the enabled
+  conditions (0: nobody wins by conditions); the game is decided again
+  every year the conditions hold.
 
 Choices the code makes where KERNEL.md is silent:
 
