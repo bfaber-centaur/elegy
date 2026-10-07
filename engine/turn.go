@@ -143,6 +143,11 @@ type Planet struct {
 	HasQueue     bool
 	Queue        []QueueItem
 	LeftoverOnly bool // contribute only leftover resources to research
+
+	// HasRoute and RouteTo are the planet's route destination, a planet
+	// id (launch.go).
+	HasRoute bool
+	RouteTo  int
 }
 
 // Stubs: keep these small until real rules require shape. PlayerOrders

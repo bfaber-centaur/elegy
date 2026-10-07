@@ -61,6 +61,32 @@ and has been sent to stars-elegy as a question.
 | L10 | 16 ship and 10 starbase design slots per player. | No spec gives the number yet (COVERAGE.md lists it among the limits). |
 | L11 | A design slot out of range, a hull of the wrong kind for the slot, and a new design for a slot whose design is in play are rejected. | ORDERS.md does not say what replacing a design in use does. |
 | L12 | Deleting a design removes its ships, and fleets left empty. | No spec says what happens to them. |
+| L13 | A new fleet takes the lowest id no fleet of any player uses. | PRODUCTION-LAUNCH.md numbers fleets per owner; Elegy's fleet ids are unique across players. |
+
+## Ships leaving production
+
+`engine/launch.go` follows stars-elegy `docs/PRODUCTION-LAUNCH.md` at PR
+#57 head `30f3ca6`. Production has no ship or starbase items yet, so
+`Launch` and `BuildStarbase` are the build steps such an item will call.
+
+| Rule | Code | Status | Test |
+|---|---|---|---|
+| Ideal warp per engine | `idealWarp` | CONFIRMED for Long Hump 6 and Quick Jump 5 (SL-04..07), BINARY-ONLY otherwise | `TestIdealWarpPerEngine` |
+| Route warp: dock rule, step down, fuel | `routeWarp` | CONFIRMED (SL-04..07, every non-gate row) | `TestConfirmedRouteWarp`, `TestConfirmedRouteWarpTankScout` |
+| One fleet per build event, lowest free number, full tanks, plan 0, no task, no name | `Launch` | CONFIRMED (SL-01, SL-02) | `TestConfirmedLaunchNewFleets` |
+| Route destination: a second waypoint with the route task | `Launch` | CONFIRMED (SL-04..07) | `TestConfirmedLaunchRouted` |
+| No starbase, or no tech: nothing built | `Launch` | BINARY-ONLY | `TestPredictionLaunchNeedsStarbaseAndTech` |
+| 512 fleets: join the first fleet at the planet within 32765, or lose the ships | `joinAtLimit` | CONFIRMED (SL-08..10) | `TestConfirmedFleetLimit` |
+| Damage of the joined stack | `joinDamage` | CONFIRMED (SL-10) | `TestConfirmedJoinDamage` |
+| Dock check at order validation | `DockAllows` | chosen rule (host has none, SL-12) | `TestDockAllows` |
+| New starbase keeps damage units | `BuildStarbase` | CONFIRMED (SL-12) | `TestConfirmedStarbaseKeepsDamage` |
+| Replacement cost, different hull | `StarbaseReplacementCost` | MEASURED (SL-12) | `TestMeasuredStarbaseReplacementCost` |
+
+Not modelled there: stargate routing, the Alternate Reality remote-mining
+task, the "did not move" mark (GenerateTurn must not mark a fleet built
+this year as stationary), the queue changes when a starbase is replaced
+by an earlier hull, the same-hull replacement cost (Elegy's designs do not
+record slot positions), mass drivers, and the route task on arrival.
 
 ## Not modelled
 
