@@ -100,6 +100,8 @@ type Fleet struct {
 	Cargo     Cargo
 	Waypoints []Waypoint
 	Plan      int // battle plan index in the owner's Plans
+	// Name is the name the owner gave the fleet, or empty (orders.go).
+	Name string
 	// Task is the task at the fleet's current location (the original's
 	// waypoint 0). A fleet that moves leaves it, and takes up the task of
 	// the waypoint it arrives at.

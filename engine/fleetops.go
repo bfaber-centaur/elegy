@@ -119,9 +119,17 @@ func (g *Game) insertStack(f *Fleet, s Stack) int {
 }
 
 // shipSlot is the owner's ship-design slot holding design d, which orders
-// a fleet's stacks. Until the orders layer records each player's slots,
-// Elegy's design index stands for the slot.
-func (g *Game) shipSlot(owner, d int) int { return d }
+// a fleet's stacks: the slot from Game.DesignSlots (orders_design.go). A
+// design with no slot of the owner (states built without design orders)
+// sorts after every slot, by its design index.
+func (g *Game) shipSlot(owner, d int) int {
+	for _, ds := range g.DesignSlots {
+		if ds.Owner == owner && ds.Design == d && !ds.Starbase {
+			return ds.Slot
+		}
+	}
+	return maxShipDesigns + d
+}
 
 // MergeFleets is the merge order (ORDERS.md "Merge order", BINARY-ONLY):
 // the fleets with ids from join the fleet with id into, all at one

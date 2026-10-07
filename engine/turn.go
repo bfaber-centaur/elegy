@@ -47,6 +47,8 @@ func checkGenerable(g *Game) error {
 const NoOwner = -1
 
 type Game struct {
+	// ID identifies the game; order files carry it (orders.go).
+	ID   uint64
 	Year int
 
 	// SlowerTech is the game's slower-tech-advances option.
@@ -68,6 +70,10 @@ type Game struct {
 	Designs []Design
 	Fleets  []Fleet
 	Salvage []Salvage
+
+	// DesignSlots gives each player's design slots their designs
+	// (orders_design.go).
+	DesignSlots []DesignSlot
 
 	// PlanetScanners is the catalogue of planetary scanners; a planet
 	// with a scanner uses the best one its owner's tech allows.
@@ -137,10 +143,15 @@ type Planet struct {
 	HasQueue     bool
 	Queue        []QueueItem
 	LeftoverOnly bool // contribute only leftover resources to research
+
+	// HasRoute and RouteTo are the planet's route destination, a planet
+	// id (launch.go).
+	HasRoute bool
+	RouteTo  int
 }
 
-// Stubs: keep these small until real rules/orders require shape.
-type PlayerOrders struct{}
+// Stubs: keep these small until real rules require shape. PlayerOrders
+// is in orders.go.
 type Ruleset interface{}
 type JRC3Rules struct{}
 
@@ -363,6 +374,7 @@ func (g Game) clone() Game {
 	}
 	c.Salvage = append([]Salvage(nil), g.Salvage...)
 	c.Designs = append([]Design(nil), g.Designs...)
+	c.DesignSlots = append([]DesignSlot(nil), g.DesignSlots...)
 	c.Fleets = append([]Fleet(nil), g.Fleets...)
 	for i := range c.Fleets {
 		c.Fleets[i].Stacks = append([]Stack(nil), g.Fleets[i].Stacks...)

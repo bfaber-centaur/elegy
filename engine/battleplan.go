@@ -60,6 +60,7 @@ const (
 
 // BattlePlan is one of a player's battle plans.
 type BattlePlan struct {
+	Name               string
 	Tactic             Tactic
 	Primary, Secondary TargetType
 	Attack             AttackWho
