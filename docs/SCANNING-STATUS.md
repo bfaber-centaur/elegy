@@ -12,10 +12,12 @@ year's shared population estimates. `GenerateTurn` runs both last and
 returns the views in `TurnResult.Views`. Views are plain data; no file
 encoding is implied.
 
-Scanner ranges, cloak points and the planetary scanner catalogue are
-caller-supplied (`Part`, `Hull.JOATScanner`, `Game.PlanetScanners`,
-`Game.Defenses`) until
-the public component table lands.
+Scanner ranges, cloak points, JOAT hulls and the planetary scanner and
+defense catalogues come from the component table: `Components().NewDesign`,
+`Components().PlanetScanners()` and `Components().Defenses()` fill
+`Design`, `Game.PlanetScanners` and `Game.Defenses`
+(`docs/COMPONENTS-STATUS.md`). The game still takes them as data, so
+tests can supply their own.
 
 ## Rules and tests
 

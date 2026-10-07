@@ -560,6 +560,13 @@ func scanHeading(dx, dy int) Point {
 	return Point{dx, dy}
 }
 
+// DefenseCoverage is a planet's defense coverage, 0..1, for n defenses of
+// coverage c tenths of a percent each: 1 − (1 − c/1000)^n (COMPONENTS.md
+// "Defense coverage", CONFIRMED CS-001).
+func DefenseCoverage(n, c int) float64 {
+	return 1 - math.Pow(1-float64(c)/1000, float64(n))
+}
+
 // defenseEstimate is the planet's defense coverage estimate (SCANNING.md,
 // BINARY-ONLY): 0 without defenses, else 1..15 from the share of a bomb's
 // kill that gets through the best defense the owner's tech allows.
@@ -583,7 +590,7 @@ func (g *Game) defenseEstimate(p *Planet) int {
 	s := 1.0
 	if v >= 0 {
 		n := min(p.Defenses, NewColony(p, pl).OperableDefenses(p.Population))
-		s = math.Pow(1-float64(v)/1000, float64(n))
+		s = math.Pow(1-float64(v)/1000, float64(n)) // 1 − DefenseCoverage(n, v)
 	}
 	k := int(100*s + 0.5)
 	return max(1, min(15, (104-k)/6))

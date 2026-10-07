@@ -42,6 +42,15 @@ type LRTs struct {
 	BleedingEdgeTech      bool
 	NoAdvancedScanners    bool
 	ImprovedStarbases     bool
+
+	// Traits the component table's restrictions name (COMPONENTS.md "Who
+	// can build what"). Elegy uses them only for that so far.
+	ImprovedFuelEfficiency bool
+	TotalTerraforming      bool
+	AdvancedRemoteMining   bool
+	UltimateRecycling      bool
+	NoRamScoopEngines      bool
+	LowStartingPopulation  bool
 }
 
 // ResearchCost is a race's research-cost setting for one field.

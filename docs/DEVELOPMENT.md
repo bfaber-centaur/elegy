@@ -62,9 +62,13 @@ from the public stars-elegy specification (`docs/KERNEL.md` there):
 habitability, maximum population, growth with the persistent carry,
 resources and installation caps, mining and depletion, research, production
 queues, fleet movement, fuel, fleet chases and starbase refuelling.
-`GenerateTurn` runs them in KERNEL.md's turn order.
+`GenerateTurn` runs them in KERNEL.md's turn order, with battles
+(`COMBAT.md`) and per-player views (`SCANNING.md`). Parts, hulls and
+planetary items come from the measured component table (`COMPONENTS.md`).
 
-See [KERNEL-STATUS.md](KERNEL-STATUS.md) for what is implemented, which
+See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
+[SCANNING-STATUS.md](SCANNING-STATUS.md) and
+[COMPONENTS-STATUS.md](COMPONENTS-STATUS.md) for what is implemented, which
 tests are ground truth and which are predictions, and the open spec gaps.
 
 ## Near-term milestones

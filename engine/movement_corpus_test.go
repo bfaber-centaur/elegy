@@ -15,17 +15,22 @@ import (
 // One year of movement from the spec must reproduce the observed position,
 // fuel, remaining waypoints, next warp and events.
 
-// Engine fuel tables, warp 0..10, from stars-elegy experiments/fmlib.py
-// (StarsAPI UNEDITED.MOD values, DOCUMENTED there).
-var fmEngines = map[int]Engine{
-	1:  {Name: "Quick Jump 5", Fuel: [11]int{0, 0, 25, 100, 100, 100, 180, 500, 800, 900, 1080}},
-	3:  {Name: "Long Hump 6", Fuel: [11]int{0, 0, 20, 60, 100, 100, 105, 450, 750, 900, 1080}},
-	4:  {Name: "Daddy Long Legs 7", Fuel: [11]int{0, 0, 20, 60, 70, 100, 100, 110, 600, 750, 900}},
-	5:  {Name: "Alpha Drive 8", Fuel: [11]int{0, 0, 15, 50, 60, 70, 100, 100, 115, 700, 840}},
-	0:  {Name: "Settler's Delight", Fuel: [11]int{0, 0, 0, 0, 0, 0, 0, 140, 275, 480, 576}},
-	2:  {Name: "Fuel Mizer", Fuel: [11]int{0, 0, 0, 0, 0, 35, 120, 175, 235, 360, 420}},
-	10: {Name: "Radiating Hydro-Ram Scoop", Fuel: [11]int{0, 0, 0, 0, 0, 0, 0, 165, 375, 600, 720}},
-}
+// fmEngines are the FM corpus engines by catalogue index, with the fuel
+// tables of the component table (COMPONENTS.md "Fuel tables", CONFIRMED
+// CS-002).
+var fmEngines = func() map[int]Engine {
+	out := map[int]Engine{}
+	for _, c := range Components().Components {
+		if c.Category == CatEngine {
+			e, err := c.Engine()
+			if err != nil {
+				panic(err)
+			}
+			out[c.Index] = e
+		}
+	}
+	return out
+}()
 
 // fmDesigns: design id → design (fmlib.py DES; cargo capacities are the
 // game's documented hull values: Small Freighter 70 kT, Colony Ship 25 kT).

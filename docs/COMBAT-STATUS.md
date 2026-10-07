@@ -120,9 +120,9 @@ spec now determines them:
 
 ### Not implemented (no Elegy state yet)
 
-- **Part and hull values.** Elegy has no part catalogue yet; designs carry
-  their hull's and parts' values and base costs. The public component
-  table (stars-elegy `docs/COMPONENTS.md`) can fill `Design` when it lands.
+- **Part and hull values** come from the component table
+  (`engine/catalog.go`, `docs/COMPONENTS-STATUS.md`): `NewDesign` builds a
+  `Design` from catalogue names. Designs built by hand still work.
 - **Mystery Trader items** and **queued ships and packets** lost with a
   starbase: Elegy has no trader items, and its production queue has no
   ship items yet.

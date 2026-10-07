@@ -1,9 +1,10 @@
 package engine
 
-// Ship parts and hulls as battles need them. Elegy has no built-in part
-// catalogue yet: a design carries the values of its hull and parts.
+// Ship parts and hulls. A design carries the values of its hull and
+// parts; catalog.go builds them from the component table.
 
-// PartKind is a part's category as far as battle rules distinguish them.
+// PartKind is a part's category (COMPONENTS.md "category"). PartOther is
+// a part without a catalogue category, as tests build them.
 type PartKind int
 
 const (
@@ -17,6 +18,14 @@ const (
 	PartMechanical
 	PartEngine
 	PartStargate
+	PartScanner
+	PartMiningRobot
+	PartMineLayer
+	PartMassDriver
+	// PartPlanetary (planetary scanners, defenses, Genesis Device) and
+	// PartTerraform are not ship parts; they appear only for their cost.
+	PartPlanetary
+	PartTerraform
 )
 
 // Part is one ship part. Fields that do not apply are zero.
@@ -67,6 +76,11 @@ type Part struct {
 	CloakPoints        int
 	Tachyon            bool // Tachyon Detector
 
+	// FuelCapacity (mg) and CargoCapacity (kT) the part adds to a ship:
+	// fuel tanks, Anti-matter Generator, cargo pods.
+	FuelCapacity  int
+	CargoCapacity int
+
 	Cost    Cost
 	TechReq [NumFields]int
 }
@@ -91,14 +105,35 @@ type Hull struct {
 	JOATScanner bool
 	Cost        Cost
 	TechReq     [NumFields]int
+
+	// From the component table (COMPONENTS.md "Hull", "Starbase hull").
+	FuelCapacity  int // mg; ship hulls
+	CargoCapacity int // kT; ship hulls
+	Slots         []HullSlot
+	// Dock is a starbase's dock capacity in kT of hull mass: 0 without a
+	// dock, DockUnlimited for no limit.
+	Dock int
+	// StarbaseNumber is Planet.StarbaseHull for a starbase hull: its
+	// catalogue index + 1.
+	StarbaseNumber int
+}
+
+// DockUnlimited is Hull.Dock for a starbase whose dock has no limit.
+const DockUnlimited = -1
+
+// HullSlot is one slot of a hull: the part kinds it accepts and the most
+// parts it holds. A ship hull's first slot is its engine slot, which must
+// be filled to Max.
+type HullSlot struct {
+	Kinds []PartKind
+	Max   int
 }
 
 // designCost is a design's per-ship cost for an owner with race and
 // tech levels (COMBAT.md "Design cost", which points to stars-elegy
 // COMPONENTS.md "Cost for an owner", CONFIRMED CS-001): the hull plus each
 // slot's count × part cost, each adjusted for miniaturization, race and
-// Bleeding Edge Technology. The terraform and planetary cases of that
-// rule do not arise: ship and starbase designs have no such parts.
+// Bleeding Edge Technology.
 // A starbase token's cost for target choice is this plain owner cost; the
 // starbase build-cost reduction applies only to production (COMBAT.md
 // "Target choice", BINARY-ONLY).
@@ -114,8 +149,32 @@ func designCost(d Design, race Race, levels [NumFields]int) Cost {
 	return c
 }
 
-// itemCost is one hull's or part's adjusted cost.
+// StarbaseBuildCost is what production charges for a starbase design
+// (COMPONENTS.md "Starbases", CONFIRMED CS-001): the owner cost, then with
+// Improved Starbases or Alternate Reality each component c − c/5, then
+// halved rounding up.
+func StarbaseBuildCost(d Design, race Race, levels [NumFields]int) Cost {
+	c := designCost(d, race, levels)
+	isb := race.LRT.ImprovedStarbases || race.PRT == PRTAlternateReality
+	f := func(v int) int {
+		if isb {
+			v -= v / 5
+		}
+		return (v + 1) / 2
+	}
+	c.Resources = f(c.Resources)
+	for m := range NumMinerals {
+		c.Minerals[m] = f(c.Minerals[m])
+	}
+	return c
+}
+
+// itemCost is one hull's, part's or planetary item's cost for an owner
+// (COMPONENTS.md "Cost for an owner", CONFIRMED CS-001). Terraform and
+// planetary items skip miniaturization and are never doubled by Bleeding
+// Edge Technology.
 func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [NumFields]int) Cost {
+	exempt := kind == PartTerraform || kind == PartPlanetary
 	m, hasReq := 0, false
 	for f := range NumFields {
 		if req[f] > 0 {
@@ -140,7 +199,7 @@ func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [N
 			}
 		}
 	}
-	if m > 0 {
+	if m > 0 && !exempt {
 		d := min(75, 4*min(m, 19))
 		if bet {
 			d = min(80, 5*min(m, 19))
@@ -154,10 +213,12 @@ func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [N
 		adjust(func(c int) int { return c - c/4 })
 	case race.PRT == PRTInnerStrength && weapon:
 		adjust(func(c int) int { return c + c/4 })
+	case race.PRT == PRTClaimAdjuster && kind == PartTerraform:
+		base.Resources /= 2
 	case race.LRT.CheapEngines && kind == PartEngine:
 		adjust(func(c int) int { return c - c/2 })
 	}
-	if bet && m <= 0 && hasReq {
+	if bet && m <= 0 && hasReq && !exempt {
 		adjust(func(c int) int { return 2 * c })
 	}
 	return base

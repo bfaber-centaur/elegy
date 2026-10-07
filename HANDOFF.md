@@ -2,40 +2,36 @@
 
 ## Current question
 
-Land per-player knowledge (scanning), which implements stars-elegy
-`docs/SCANNING.md`, on top of the merged battle phase.
+Load the component table into the engine, then implement TAKEOVER.md.
 
 ## State
 
-- Kernel, movement and battles are merged (elegy #1–#5). Combat follows
-  stars-elegy `main` at `df57443` (`docs/COMBAT-STATUS.md`).
-- This branch adds `engine/scanning.go`: a pure `Views` function from the
-  post-turn game to one `PlayerView` per player, plus
-  `PopulationEstimates`. `GenerateTurn` returns the views in
-  `TurnResult.Views`. `docs/SCANNING-STATUS.md` maps rules, tests and gaps.
-- `go vet ./...` and `go test ./...` are green. `go test -run Confirmed
-  ./...` runs the CB and SC vectors.
+- Kernel, movement, battles and scanning are merged (elegy #1–#6).
+- This branch adds `engine/catalog.go` and a verbatim copy of stars-elegy
+  `data/components.json` (`engine/data/`). Parts, hulls, engines,
+  planetary scanners and defenses, build rules and owner costs come from
+  it. `docs/COMPONENTS-STATUS.md` maps rules, tests and unused columns.
+- The FM movement corpus now takes its engine fuel tables from the table
+  (CS-002) instead of third-party values.
+- `go vet ./...` and `go test ./...` are green.
 
 ## What we know
 
-- Every SC vector that needs no part catalogue passes. BINARY-ONLY rules
-  (population and defense estimates, headings, AR planet scanners) are
-  `TestPrediction*` tests. The co-location LEGACY BUG is behind
-  `legacyColocation`.
+- The table's CONFIRMED vectors pass: starbase build costs, defense
+  coverage, token values from catalogue parts. COMBAT.md's battle-warp
+  rule agrees with the table's (BINARY-ONLY) battle_warp column.
 - Combat keeps one marked placeholder: A6, the plan-0 X on a turn's first
-  location, which is an open experiment in COMBAT.md.
+  location (COMBAT-STATUS.md).
 
 ## What still matters
 
-- Scanner, cloak and planetary-scanner values are caller-supplied. The
-  component table (stars-elegy `data/components.json`, `COMPONENTS.md`)
-  has merged and can now fill `Design`, `Game.PlanetScanners` and
-  `Game.Defenses`.
-- Space objects (minefields, packets, wormholes, Mystery Trader,
-  stargates) are specified in stars-elegy `OBJECTS.md` and SCANNING.md
-  "Space objects", but Elegy has none yet.
+- Columns for mines, remote mining, bombs, colonizing and stargates are
+  loaded but unused (`deferredStats`); TAKEOVER.md needs bombs and
+  colonizers next.
+- KERNEL.md's BINARY-ONLY movement rules for IFE, Cheap Engines and others
+  are still not applied (KERNEL-STATUS.md); the LRT fields now exist.
 
 ## Best next move
 
-Load the component table into the engine. Then implement TAKEOVER.md
-(bombing, invasion, colonization) and the universe objects.
+Implement TAKEOVER.md (bombing, invasion, colonization, capture) on top of
+the catalogue's bomb and colonizer values.
