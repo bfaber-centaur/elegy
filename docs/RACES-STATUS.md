@@ -1,7 +1,7 @@
 # Race design: implementation status
 
 `races/` implements stars-elegy `docs/RACES.md` (stars-elegy PR #49,
-`5637e34`): the advantage points rule, repairs and legality at game
+`bf303f4`): the advantage points rule, repairs and legality at game
 creation, the wizard's Random race, and the yearly check of a running
 game. `newgame/` applies the creation rules to every player. Test vectors
 come from the public RD corpus (`experiments/rd/races.tsv`, copied to
@@ -12,32 +12,32 @@ come from the public RD corpus (`experiments/rd/races.tsv`, copied to
 | Rule (RACES.md) | Code | Ground truth |
 |---|---|---|
 | Advantage points | `points.go` | every RD race with a points value (RD-1..RD-4, 60 races) and the default race (25) |
-| Repairs | `points.go` | RD-4 d, e, f (centre, stat 15, growth 0); RD-P8 (low −5 → 0–85, centre 42) |
+| Repairs | `points.go` | RD-4 d, e, f (centre, stat 15, growth 0); RD-P8 (low −5 → 0–85, centre 42); immune marker and research clamp as predictions |
 | At game creation | `check.go`, `newgame/players.go` | RD-4 b, c (illegal → default race, L 25); computer races unchecked; L cap; spends 5 and 6 |
-| Yearly check and penalty | `check.go` | RD-P1..RD-P10 on the PG001 race (245 points): points after the edit, punished or not, colonists, growth and points after |
+| Yearly check and penalty | `check.go` | RD-P1..RD-P10 on the PG001 race (245 points): points after the edit, punished or not, colonists, growth and points after; computer races repaired and flagged, never punished (prediction) |
 | Random race | `random.go` | outcome only: 500 Elegy-seeded races all score 0..50 and keep their name |
 
-RD-P3's trait word `a000006d` is read as IFE, ARM, ISB, UR, MA, the
-"expensive fields start at 3" bit (29) and the germanium bit (31); that
-reading gives exactly the corpus's −3667 and 1457 points.
+RD-P3's trait word `a000006d` is IFE, ARM, ISB, UR, MA, the "expensive
+fields start at 3" bit (29, confirmed by RACES.md "Race file") and the
+germanium bit (31); it gives exactly the corpus's −3667 and 1457 points.
 
-## Assumptions (RACES.md leaves these open)
+## Settled by stars-elegy #49 `bf303f4`
 
-Marked `ASSUMPTION` in the code and sent to the spec author:
+The five open points sent to the spec author are now cited rules:
 
-1. RACES.md says an axis with a value outside 0..100 is made immune
-   (BINARY-ONLY), but RD-P8 clamped a low of −5 instead. Elegy clamps and
-   never makes an axis immune in a repair.
-2. Colonists per resource that are not a multiple of 100 are truncated to
-   one; a research cost outside the three settings becomes normal.
-3. The yearly check does nothing to a computer player's race beyond the
-   silent clamps (RACES.md names only human players for the punishment).
-4. Random race adjust step: research, economy and growth move in a
-   direction picked by a fair coin, with no change at a limit; an LRT is
-   toggled; "a setting among colonists, factories and mines" is uniform
-   over the seven economy settings.
-5. Random race economy: colonists per resource uniform over 700..2500 in
-   steps of 100.
+1. Only the immune marker in the low makes an axis immune; any other
+   out-of-range value is clamped (RD-P8). Elegy represents the marker as
+   `ImmuneMarker` (−1) and an immune axis as `EnvRange{Immune: true}`.
+2. Research costs outside the settings go to the nearest end; colonists
+   per resource are stored in hundreds, so Elegy truncates.
+3. A computer race in a running game gets the silent clamps and the
+   scoring repair, which sets the tampered flag, but no penalty.
+4. The Random race adjust step: one draw for the kind of change (3/10
+   research, 3/10 LRT, 3/10 economy, 1/20 axis, 1/20 growth), one for the
+   item, options tried in order, the first that brings the points strictly
+   closer to 0..50 kept.
+5. The Random race economy: the default economy with probability 1/3,
+   otherwise each setting uniform over its range.
 
 ## Not wired yet
 

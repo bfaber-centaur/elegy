@@ -195,7 +195,8 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 			}
 			// lrt=a000006d: bits 0, 2, 3, 5, 6 (IFE, ARM, ISB, UR,
 			// MA), 29 (expensive fields start at 3) and 31 (the
-			// germanium option).
+			// germanium option); RACES.md "Race file" confirms bit
+			// 29.
 			d.ExpensiveAt3 = true
 			for _, code := range []string{"IFE", "ARM", "ISB", "UR", "MA"} {
 				for i := range NumLRTs {
@@ -248,8 +249,42 @@ func TestConfirmedYearlyCheck(t *testing.T) {
 	d = pg001()
 	d.Race.FactoryCost, d.Race.MineCost = 5, 2
 	budget := 140
-	if res := YearlyCheck(&d, &budget, true); res.Punished || !res.Clamped || budget != 15 {
-		t.Errorf("computer: %+v budget %d", res, budget)
+	if res := YearlyCheck(&d, &budget, true); res.Punished || !res.Clamped || budget != 15 || d.Tampered {
+		t.Errorf("computer: %+v budget %d tampered %v", res, budget, d.Tampered)
+	}
+	// A computer race gets the scoring repair and the tampered flag, but
+	// no penalty (RACES.md "In a running game" step 5, BINARY-ONLY).
+	d = pg001()
+	d.Race.Env[engine.Gravity].Low, d.Race.Env[engine.Gravity].Center = -5, 40
+	before := d
+	if res := YearlyCheck(&d, nil, true); res.Punished {
+		t.Errorf("computer punished: %+v", res)
+	}
+	if e := d.Race.Env[engine.Gravity]; !d.Tampered || e.Low != 0 || e.Center != 42 ||
+		d.Race.GrowthRate != before.Race.GrowthRate || d.Race.ColonistsPerResource != before.Race.ColonistsPerResource {
+		t.Errorf("computer repair: tampered %v gravity %+v", d.Tampered, e)
+	}
+}
+
+// Repairs (RACES.md "Repairs", BINARY-ONLY): the immune marker in the low
+// makes an axis immune; research costs outside the settings go to the
+// nearest end.
+func TestPredictionRepairs(t *testing.T) {
+	d := Default()
+	d.Race.Env[engine.Radiation] = engine.EnvRange{Low: ImmuneMarker, Center: 50, High: 80}
+	if !scoringRepair(&d) || d.Race.Env[engine.Radiation] != (engine.EnvRange{Immune: true}) {
+		t.Errorf("immune marker: %+v", d.Race.Env[engine.Radiation])
+	}
+	d = Default()
+	d.Race.Env[engine.Radiation] = engine.EnvRange{Immune: true, Center: 3}
+	if !scoringRepair(&d) || d.Race.Env[engine.Radiation] != (engine.EnvRange{Immune: true}) {
+		t.Errorf("immune centre: %+v", d.Race.Env[engine.Radiation])
+	}
+	d = Default()
+	d.Race.ResearchCosts[0], d.Race.ResearchCosts[1] = -100, 1000
+	clampSettings(&d)
+	if d.Race.ResearchCosts[0] != engine.ResearchExpensive || d.Race.ResearchCosts[1] != engine.ResearchCheap {
+		t.Errorf("research clamp: %v", d.Race.ResearchCosts)
 	}
 }
 

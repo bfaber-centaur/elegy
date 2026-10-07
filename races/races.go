@@ -3,8 +3,7 @@
 // race, and the yearly check of a running game.
 //
 // Every rule comes from stars-elegy docs/RACES.md (habitability from
-// KERNEL.md); comments name the section and its status. What RACES.md
-// leaves open is marked ASSUMPTION.
+// KERNEL.md); comments name the section and its status.
 package races
 
 import (

@@ -9,9 +9,12 @@ import "github.com/bfaber-centaur/elegy/engine"
 // are clamped to 700–2500 (RD-P6), growth below 0 becomes 1 and above 20
 // becomes 20 (BINARY-ONLY). Growth 0 is left for the scoring repair.
 //
-// ASSUMPTION: colonists per resource is stored in units of 100 (7–25), so
-// a value that is not a multiple of 100 is truncated to one; a research
-// cost outside the three settings becomes normal.
+// Colonists per resource are stored in hundreds (7–25), so a value that
+// is not a multiple of 100 cannot occur in the original; Elegy truncates
+// it to one. A research cost below "costs 75% extra" stays "costs 75%
+// extra" and one above "costs 50% less" becomes "costs 50% less" (RACES.md
+// "Repairs"). Elegy's ResearchCost values are not the stored levels, so
+// any other negative value counts as below and any other value as above.
 func clampSettings(d *Design) bool {
 	before := *d
 	r := &d.Race
@@ -31,9 +34,13 @@ func clampSettings(d *Design) bool {
 	r.MineOutput = clamp(r.MineOutput, MinMineOutput, MaxMineOutput)
 	r.MineCost = clamp(r.MineCost, MinMineCost, MaxMineCost)
 	r.MinesOperated = clamp(r.MinesOperated, MinOperated, MaxOperated)
-	for f := range r.ResearchCosts {
-		if c := r.ResearchCosts[f]; c != engine.ResearchExpensive && c != engine.ResearchNormal && c != engine.ResearchCheap {
-			r.ResearchCosts[f] = engine.ResearchNormal
+	for f, c := range r.ResearchCosts {
+		switch {
+		case c == engine.ResearchExpensive || c == engine.ResearchNormal || c == engine.ResearchCheap:
+		case c < 0:
+			r.ResearchCosts[f] = engine.ResearchExpensive
+		default:
+			r.ResearchCosts[f] = engine.ResearchCheap
 		}
 	}
 	d.Spend = clamp(d.Spend, 0, MaxSpend)
@@ -41,20 +48,27 @@ func clampSettings(d *Design) bool {
 	return !equal(before, *d)
 }
 
+// ImmuneMarker is the immune marker value (the stored byte 255, read as
+// −1). Only the low decides immunity (RACES.md "Repairs").
+const ImmuneMarker = -1
+
 // scoringRepair is the repair the scoring itself makes (RACES.md
 // "Repairs"; "In a running game" step 2: "by now only the habitat, or
-// growth 0"): per non-immune axis `lo` clamped to 0..100, `hi` to
-// lo..100 and the centre forced to lo + (hi − lo)/2 (CONFIRMED RD-4,
-// RD-P4, RD-P8); growth below 1 becomes 1 (CONFIRMED RD-4).
-//
-// ASSUMPTION: RACES.md also says an axis with a value outside 0..100 is
-// made immune (BINARY-ONLY), but RD-P8 (gravity low −5) clamped the low
-// instead. Elegy follows RD-P8 and never makes an axis immune here.
+// growth 0"):
+//   - a low equal to the immune marker makes the axis immune, and a
+//     centre or high that is not also the marker is set to it
+//     (BINARY-ONLY). Elegy's immune axis is EnvRange.Immune with every
+//     value 0, so an immune axis with any other value is repaired to that;
+//   - otherwise `lo` is clamped to 0..100, `hi` to lo..100 and the centre
+//     forced to lo + (hi − lo)/2 (CONFIRMED RD-4, RD-P4; a low of −5
+//     became 0, RD-P8); a value outside 0..100 never becomes immunity;
+//   - growth below 1 becomes 1 (CONFIRMED RD-4).
 func scoringRepair(d *Design) bool {
 	before := *d
 	for a := range d.Race.Env {
 		e := &d.Race.Env[a]
-		if e.Immune {
+		if e.Immune || e.Low == ImmuneMarker {
+			*e = engine.EnvRange{Immune: true}
 			continue
 		}
 		e.Low = clamp(e.Low, 0, 100)

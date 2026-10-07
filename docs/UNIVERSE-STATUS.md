@@ -109,5 +109,5 @@ homeworld fallbacks, the second-planet band and wormhole badness.
 ## Not modelled
 
 Unseeded new-game wizard games (computer-player counts by size and
-difficulty), the tutorial galaxy, random races, logos, and the original's
+difficulty), the tutorial galaxy, logos, and the original's
 random stream.

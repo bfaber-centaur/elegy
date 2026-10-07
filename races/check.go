@@ -73,16 +73,13 @@ const penaltyTarget = 500
 //     (BINARY-ONLY).
 //  2. A human race is punished when its points are negative or the
 //     scoring repair (habitat, growth 0) changes something (RD-P1..P4,
-//     P8, P10); exactly 0 is left alone (RD-P9). Computer races are not
-//     punished.
+//     P8, P10); exactly 0 is left alone (RD-P9). A computer race gets
+//     the scoring repair, which sets the tampered flag, but no penalty
+//     and no message (BINARY-ONLY).
 //  3. Penalty: tampered; colonists per resource +100 until 500 points or
 //     2500; then growth −1 until 500 points or growth 1; then research
 //     fields one at a time to "costs 75% extra" in field order until more
 //     than 499 points (BINARY-ONLY).
-//
-// ASSUMPTION: the yearly check does not apply to computer players (RACES.md
-// says "for a human player" for the punishment only; Elegy also skips
-// the scoring repair for computers, as creation does).
 func YearlyCheck(d *Design, researchBudget *int, computer bool) YearResult {
 	var res YearResult
 	res.Clamped = clampSettings(d)
@@ -90,10 +87,13 @@ func YearlyCheck(d *Design, researchBudget *int, computer bool) YearResult {
 		*researchBudget = 15
 		res.Clamped = true
 	}
+	repaired := scoringRepair(d)
 	if computer {
+		if repaired {
+			d.Tampered = true
+		}
 		return res
 	}
-	repaired := scoringRepair(d)
 	if !repaired && rawPoints(*d)/3 >= 0 {
 		return res
 	}
