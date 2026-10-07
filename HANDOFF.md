@@ -9,9 +9,10 @@ subsystem the specification covers.
 
 ## State
 
-- Merged to `main` (elegy PR #1). The sync to stars-elegy PR #14
-  (BINARY-ONLY answers: chaser fuel per round, research switching, mining
-  pass) is on branch `claude/project-thread-8c4kqn`, in review.
+- Merged to `main`: elegy PR #1 (kernel) and PR #2 (stars-elegy PR #14
+  rules). The sync to stars-elegy PR #16 (KX-001: Auto Alchemy before a ×n
+  item, item costs, AR resources, the AR zero-maximum decision) is on
+  branch `claude/project-thread-8c4kqn`, in review.
 - `engine/` holds habitability, population, economy, mining, research,
   production, movement and `GenerateTurn`. `docs/KERNEL-STATUS.md` is the
   map: rules, tests, statuses, gaps.
@@ -22,20 +23,24 @@ subsystem the specification covers.
 
 - Every CONFIRMED vector in KERNEL.md passes, plus the full public oracle
   data behind them: PG-001..003 population/carry 2400–2436, PG research
-  and mining, all 15 PQ-001 production cases, and all 224 fleets of
+  and mining, all 15 PQ-001 production cases, KX-001 (Auto Alchemy, item
+  costs, AR), and all 224 fleets of
   FM-001..004 (copied into `engine/testdata/fm`).
 - Three KERNEL.md/corpus disagreements found here (auto-item caps, running
   dry with exact fuel, mutual chases) are corrected upstream in stars-elegy
-  PR #13 (merged); the code follows that text. PR #14 answered most open
-  questions; the remaining three are KERNEL.md "Open experiments" (Auto
-  Alchemy before a ×n item, zero max population, cost modifiers), with the
-  code's interim choices in KERNEL-STATUS.md.
+  PR #13 (merged); the code follows that text. PR #14 and PR #16 (KX-001)
+  settled every open question. The one Elegy decision (an AR planet with
+  maximum population 0 makes `GenerateTurn` return
+  `*ZeroMaxPopulationError`) and the code's remaining small choices are in
+  KERNEL-STATUS.md.
 - `PlayerOrders` and `Ruleset` are still stubs; RNG is injected as
   `engine.Rand`.
 
 ## What still matters
 
-- When an Open experiment is run, flip the matching interim choice.
+- Bobby has not yet picked the rule for the AR zero-maximum state; the
+  typed error is the recommended default. If he picks another, change
+  `checkGenerable`.
 - Combat is the likely next subsystem here, once stars-elegy has a public
   combat spec; build it only from that public text, like the kernel.
 - Not modelled: orders, waypoint tasks, colonization, ships and starbases

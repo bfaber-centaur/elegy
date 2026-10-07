@@ -24,8 +24,8 @@ func pgRace() Race {
 		FactoriesOperated:    10,
 		MinesOperated:        10,
 		MineOutput:           10,
-		FactoryCost:          Cost{Resources: 10, Minerals: Minerals{0, 0, 4}},
-		MineCost:             Cost{Resources: 5},
+		FactoryCost:          10,
+		MineCost:             5,
 	}
 	for i := range r.Env {
 		r.Env[i] = EnvRange{Center: 50, Low: 15, High: 85}
