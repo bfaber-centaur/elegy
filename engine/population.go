@@ -12,8 +12,10 @@ var alternateRealityMaxPop = [...]int{2500, 5000, 10000, 20000, 30000}
 // starbaseHull is 0 when the planet has no starbase of the owner's, else
 // 1..5 in hull order; it matters only for Alternate Reality.
 //
-// KERNEL.md "Maximum population": CONFIRMED for an ordinary race at hab 100;
-// racial modifiers and hab < 5 are BINARY-ONLY.
+// KERNEL.md "Maximum population": CONFIRMED for an ordinary race at hab
+// 100, 92, 58, 41 and 3 (500) and on hostile planets, and for HE, JOAT and
+// OBRM one at a time at hab 100 (KX-002); combined modifiers and AR are
+// BINARY-ONLY.
 func MaxPopulation(race Race, hab int, starbaseHull int) int {
 	var mp int
 	if race.PRT == PRTAlternateReality {
@@ -45,8 +47,9 @@ func MaxPopulation(race Race, hab int, starbaseHull int) int {
 //
 // KERNEL.md "Population growth". CONFIRMED for G 10, hab 100, max 10,000
 // (g = 1000, so the quantized g ≥ 1000 crowding branch), uncrowded and
-// crowded up to 54% of capacity. The g < 1000 crowding branch, the
-// within-10-of-max freeze, overcrowding and hostile deaths are BINARY-ONLY.
+// crowded up to 54% of capacity (PG), and by KX-002 for the g < 1000
+// crowding branch, HE's g = 2000, the within-10-of-max freeze, the
+// zero-growth carry, overcrowding (factor 4) and hostile deaths.
 func GrowPopulation(pop, carry, maxPop, growthRate, hab int) (newPop, newCarry int) {
 	if pop <= 0 {
 		// Growth and deaths act only on a non-zero population (KERNEL.md
@@ -71,7 +74,7 @@ func GrowPopulation(pop, carry, maxPop, growthRate, hab int) (newPop, newCarry i
 		case pop <= maxPop+10:
 			return pop, carry
 		default:
-			g = 2 * max(-300, c/-10+99)
+			g = 4 * max(-300, c/-10+99)
 		}
 	}
 
@@ -105,7 +108,7 @@ func crowdingPermille(pop, maxPop int) int {
 	return 1000 * pop / maxPop
 }
 
-// hostileDeaths is the hab < 0 branch (BINARY-ONLY).
+// hostileDeaths is the hab < 0 branch (CONFIRMED, KX-002 H5, H6).
 func hostileDeaths(pop, carry, hab int) (int, int) {
 	t := max(1, -hab*pop/10)
 	q, r := t/100, t%100

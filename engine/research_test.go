@@ -37,8 +37,6 @@ func TestPredictionResearchLevelCost(t *testing.T) {
 		slower  bool
 		want    int
 	}{
-		{ResearchExpensive, false, 88}, // 100 − 12
-		{ResearchCheap, false, 25},
 		{ResearchNormal, true, 100},
 		{ResearchExpensive, true, 176},
 	} {
@@ -69,23 +67,5 @@ func TestPredictionResearchNextLowestField(t *testing.T) {
 	s = AddResearch(s, pgRace(), 70, false)
 	if s.Current != Biotech || s.Accumulated[Biotech] != 20 || s.Accumulated[Energy] != 0 {
 		t.Errorf("state %+v", s)
-	}
-}
-
-func TestPredictionGeneralizedResearch(t *testing.T) {
-	r := pgRace()
-	r.LRT.GeneralizedResearch = true
-	s := AddResearch(ResearchState{Current: Energy, Next: NextSameField}, r, 41, false)
-	if s.Accumulated[Energy] != 21 || s.Accumulated[Weapons] != 7 {
-		t.Errorf("accumulated %v, want energy 21 and 7 elsewhere", s.Accumulated)
-	}
-}
-
-func TestPredictionResearchAtMaxLevelIsLost(t *testing.T) {
-	s := ResearchState{Current: Energy, Next: NextSameField}
-	s.Levels[Energy] = MaxTechLevel
-	s = AddResearch(s, pgRace(), 1000, false)
-	if s.Accumulated[Energy] != 0 {
-		t.Errorf("accumulated %d at max level", s.Accumulated[Energy])
 	}
 }

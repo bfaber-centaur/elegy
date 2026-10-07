@@ -43,7 +43,9 @@ func NewColony(p *Planet, player *Player) Colony {
 func (c Colony) alternateReality() bool { return c.Race.PRT == PRTAlternateReality }
 
 // MaxMines, MaxFactories and MaxDefenses are the planet maximums
-// (KERNEL.md "Caps", BINARY-ONLY).
+// (KERNEL.md "Caps": CONFIRMED for mines at hab 41, factories at hab 58 and
+// defenses at hab 3, KX-002 C1–C3; the floor of 10, the other defense
+// branches and AR are BINARY-ONLY).
 func (c Colony) MaxMines() int {
 	if c.alternateReality() {
 		return 0
@@ -90,7 +92,8 @@ func (c Colony) WorkingMines(pop, installed int) int {
 }
 
 // effectivePop is E: population above the maximum counts half, up to twice
-// the maximum (BINARY-ONLY above max).
+// the maximum (above max CONFIRMED, KX-002 G1, H5, H6; the 2·max limit
+// BINARY-ONLY).
 func (c Colony) effectivePop(pop int) int {
 	if pop <= c.MaxPop {
 		return pop
@@ -103,7 +106,7 @@ func (c Colony) effectivePop(pop int) int {
 //
 // KERNEL.md "Resources per planet": CONFIRMED for R0 10, F 10, 10 factories
 // (PG) and for no factories (PQ-001); AR CONFIRMED at one point (KX-001 Z2,
-// Z3); the over-max rule is BINARY-ONLY.
+// Z3); the over-max rule as effectivePop.
 func (c Colony) Resources(pop, factories int) int {
 	if pop <= 0 {
 		return 0

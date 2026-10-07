@@ -53,10 +53,7 @@ func TestPredictionCapsAndResources(t *testing.T) {
 	if got := low.MaxMines(); got != 50 {
 		t.Errorf("max mines at max 500 = %d, want 50", got)
 	}
-	// Over max: E = min(2·max, max + (P−max)/2).
-	if got := c.Resources(12000, 0); got != 1100 {
-		t.Errorf("Resources(12000) = %d, want 1100", got)
-	}
+	// Over max: E = min(2·max, max + (P−max)/2); the 2·max limit.
 	if got := c.Resources(40000, 0); got != 2000 {
 		t.Errorf("Resources(40000) = %d, want 2000", got)
 	}

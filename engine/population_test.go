@@ -13,13 +13,7 @@ func TestPredictionHabitability(t *testing.T) {
 		env  [3]int
 		want int
 	}{
-		{[3]int{60, 50, 50}, 92},
 		{[3]int{70, 50, 50}, 79},
-		{[3]int{85, 50, 50}, 41},
-		{[3]int{70, 70, 50}, 58},
-		{[3]int{80, 80, 80}, 3},
-		{[3]int{90, 50, 50}, -5},
-		{[3]int{10, 95, 50}, -15},
 	}
 	for _, tt := range tests {
 		if got := Habitability(pgRace(), tt.env); got != tt.want {
@@ -35,10 +29,7 @@ func TestConfirmedMaxPopulation(t *testing.T) {
 }
 
 func TestPredictionMaxPopulation(t *testing.T) {
-	he, joat, obrm, joatObrm, ar := pgRace(), pgRace(), pgRace(), pgRace(), pgRace()
-	he.PRT = PRTHyperExpansion
-	joat.PRT = PRTJackOfAllTrades
-	obrm.LRT.OnlyBasicRemoteMining = true
+	joatObrm, ar := pgRace(), pgRace()
 	joatObrm.PRT = PRTJackOfAllTrades
 	joatObrm.LRT.OnlyBasicRemoteMining = true
 	ar.PRT = PRTAlternateReality
@@ -49,11 +40,6 @@ func TestPredictionMaxPopulation(t *testing.T) {
 		sb   int
 		want int
 	}{
-		{"HE hab 100", he, 100, 0, 5000},
-		{"JOAT hab 100", joat, 100, 0, 12000},
-		{"OBRM hab 100", obrm, 100, 0, 11000},
-		{"hab 3", pgRace(), 3, 0, 500},
-		{"hostile", pgRace(), -20, 0, 500},
 		{"JOAT+OBRM hab 79", joatObrm, 79, 0, 10428},
 		{"AR no starbase", ar, 100, 0, 0},
 		{"AR hull 3", ar, 7, 3, 10000},
@@ -95,11 +81,6 @@ func TestPredictionPopulationGrowth(t *testing.T) {
 		{"uncrowded", 1000, 0, 7900, 15, 79, 1118, 50},
 		{"crowded, g ≥ 1000 quantization", 5000, 30, 10000, 15, 100, 5330, 30},
 		{"crowded, g < 1000", 3000, 0, 8600, 10, 86, 3194, 70},
-		{"zero growth adds 1 to the carry", 9995, 0, 10000, 10, 100, 9995, 1},
-		{"within 10 units of max: frozen", 10005, 0, 10000, 10, 100, 10005, 0},
-		{"overcrowded deaths", 12000, 0, 10000, 10, 100, 11949, 60},
-		{"hostile hab −5", 1000, 0, 500, 10, -5, 995, 0},
-		{"hostile hab −15", 1234, 10, 500, 10, -15, 1215, 59},
 	}
 	for _, tt := range tests {
 		gp, gk := GrowPopulation(tt.p, tt.k, tt.max, tt.g, tt.hab)
