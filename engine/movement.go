@@ -426,15 +426,12 @@ func moving(f *Fleet) bool {
 	return len(f.Waypoints) > 0 && f.Waypoints[0].Warp > 0
 }
 
-// moveFleets runs the movement phase: ordinary fleets in id order, then
-// fleets chasing other fleets in rounds, then waypoint settlement.
-// KERNEL.md "Fleet movement".
+// moveFleets runs the movement phase: ordinary fleets in fleet order
+// (owner, then fleet number), then fleets chasing other fleets in rounds,
+// then waypoint settlement. KERNEL.md "Turn order" step 3 and "Fleet
+// movement".
 func moveFleets(g *Game) []Event {
-	order := make([]int, len(g.Fleets))
-	for i := range order {
-		order[i] = i
-	}
-	sort.SliceStable(order, func(a, b int) bool { return g.Fleets[order[a]].ID < g.Fleets[order[b]].ID })
+	order := g.fleetOrder()
 
 	for i := range g.Fleets {
 		g.Fleets[i].Heading, g.Fleets[i].HeadingWarp = Point{}, 0

@@ -2,9 +2,8 @@
 
 Per-player knowledge in `engine/scanning.go` follows the public
 specification stars-elegy `docs/SCANNING.md` and the measured data in
-`docs/PARITY.md` "Scanning" (SC-001..SC-034), on stars-elegy `main` at
-`9569af3`, which includes the implementer answers merged in PR #26 and
-the SC-024..SC-034 batch merged in PR #50. Nothing else was used.
+`docs/PARITY.md` "Scanning" (SC-001..SC-036), on stars-elegy `main` at
+`63635f0`. Nothing else was used.
 
 `Views(game, estimates)` is a pure function from the post-turn game to
 one `PlayerView` per player. `GenerateTurn` also passes the year's
@@ -75,11 +74,11 @@ Elegy's game has none of these yet, so their rules are not implemented:
   planet.
 - The heading's warp is the warp of the waypoint the fleet moved toward
   in its last movement step.
-- S1 and S2 were answered by stars-elegy #57 (open; BINARY-ONLY,
-  predictions SC-035 and SC-036). The bombing check is taken at the
-  bombing step and the report written from the end-of-year state
-  (`bombChecks`, `TestPredictionBombingCheckAtBombingStep`). Every other
-  battle participant, allies included, gets the designs in full and
-  becomes a known player.
+- S1 and S2 are now spec, CONFIRMED by SC-035 and SC-036. The bombing
+  check is taken at the bombing step and the report written from the
+  end-of-year state (`bombChecks`,
+  `TestPredictionBombingCheckAtBombingStep`). Every other battle
+  participant, allies included, gets the designs in full and becomes a
+  known player.
 - Penetration needing `P > 0` and the estimate timing (end of the turn,
   after every battle draw) are now spec (#26).
