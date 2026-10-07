@@ -51,6 +51,17 @@ type Game struct {
 
 	// SlowerTech is the game's slower-tech-advances option.
 	SlowerTech bool
+	// RandomEvents is the game's random events option (KERNEL.md "Game
+	// options during a turn").
+	RandomEvents bool
+	// Size is the universe size, 0 tiny .. 4 huge (new-minerals chance).
+	Size int
+	// PublicScores is the game's public player scores option.
+	PublicScores bool
+	// Victory is the game's victory settings; Decided is set in a year in
+	// which a player won (recomputed every year).
+	Victory Victory
+	Decided bool
 
 	Players []Player
 	Planets []Planet
@@ -82,6 +93,10 @@ type Player struct {
 	// player starts with (TAKEOVER.md "Colonization").
 	DefaultQueue        []QueueItem
 	DefaultLeftoverOnly bool
+
+	// Dead is set when the player has no planets and no ships (KERNEL.md
+	// "Victory conditions").
+	Dead bool
 }
 
 type Planet struct {
@@ -139,6 +154,9 @@ type TurnResult struct {
 	// Views is each player's knowledge at the end of the year
 	// (SCANNING.md), by player index.
 	Views []PlayerView
+	// Scores is every player's score record for the year, by player.
+	// Views[v].Scores holds the ones player v may see.
+	Scores []ScoreRecord
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
@@ -146,16 +164,18 @@ type TurnResult struct {
 // (TAKEOVER.md), fleet movement, then mining for every planet,
 // then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
-// level-ups, then battles (COMBAT.md), bombing and the takeover tasks
+// level-ups and random events, then battles (COMBAT.md), bombing and the takeover tasks
 // after movement (TAKEOVER.md), a second research level-up check and
 // repair. Each player's view of the result (SCANNING.md) comes last.
 //
 // Not yet modelled: order application, waypoint tasks other than
 // unloads and colonize, space objects
-// other than battle salvage, random events, fuel generators, mine
-// sweeping, terraforming, remote mining and scores.
+// other than battle salvage, the Mystery Trader, fuel generators, mine
+// sweeping, terraforming other than the Claim Adjuster's year-end step,
+// and remote mining. Scores and victory come after
+// the year advances.
 //
-// rng must not be nil: the turn's random draws (mining's +1, battles) come only from
+// rng must not be nil: the turn's random draws (mining's +1, random events, battles) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
 // returns ErrNilRand. A state the original cannot generate from returns
 // a *ZeroMaxPopulationError (see checkGenerable).
@@ -184,12 +204,19 @@ func GenerateTurn(
 	queue, ev := g.unloadPhase(g.phaseStart())
 	events = append(events, ev...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
+	events = append(events, g.loadPass()...)
 
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
 		start[f.ID] = f.Pos
 	}
 	events = append(events, moveFleets(&g)...)
+	for i := range g.Fleets {
+		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
+			events = append(events, g.radiatingColonists(f)...)
+		}
+	}
+	g.generateFuel()
 
 	type growth struct{ pop, carry int }
 	grown := make([]growth, len(g.Planets))
@@ -269,6 +296,9 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 	}
+	// Random events end production (KERNEL.md "Turn order" step 4);
+	// starbase refuelling (step 5) above does not depend on them.
+	events = append(events, g.randomEvents(rng)...)
 
 	// Battles, bombing, the waypoint tasks after movement, then the
 	// post-movement research check, then repair (KERNEL.md "Turn order"
@@ -278,6 +308,7 @@ func GenerateTurn(
 	owned := g.phaseStart()
 	fights := battles(&g, rng, gained)
 	events = append(events, fights.events...)
+	bombs := g.bombChecks()
 	events = append(events, bombing(&g, rng)...)
 	queue, ev = g.unloadPhase(owned)
 	events = append(events, ev...)
@@ -286,24 +317,36 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
+	events = append(events, g.loadPass()...)
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
-		if p, ok := start[f.ID]; ok && p != f.Pos {
+		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
+		// SL-03).
+		if p, ok := start[f.ID]; !ok || p != f.Pos {
 			moved[f.ID] = true
 		}
 	}
 	repair(&g, moved, fights)
+	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
+	// order" step 7.3), with the levels reached this year.
+	events = append(events, g.claimAdjusterYearEnd(rng)...)
 
 	g.Year++
+	scores := g.scores()
+	events = append(events, g.decide(scores)...)
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
-	views := Views(g, PopulationEstimates(g, rng))
+	views := views(g, PopulationEstimates(g, rng), fights.seen, bombs)
+	for v := range views {
+		views[v].Scores = g.visibleScores(v, scores)
+	}
 
 	return TurnResult{
 		Game:   g,
 		Events: events,
 		Views:  views,
+		Scores: scores,
 	}, nil
 }
 

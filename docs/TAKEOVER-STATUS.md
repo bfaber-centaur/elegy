@@ -70,7 +70,7 @@ spec does not give the scan's start value. The code says so at
 Elegy has none of these yet:
 
 - load actions ("load all", "fill to", "wait for", "set amount to", "set
-  waypoint to"), merges, fleet transfers, scrap, remote mining, mine
+  waypoint to"), fleet transfers, scrap, remote mining, mine
   laying and cargo given to other players' fleets;
 - colonists given by manual cargo transfers in the orders, which would
   start the before-movement drop queue;
@@ -79,7 +79,6 @@ Elegy has none of these yet:
   starbase design (Elegy's designs have no owner), so a new AR colony has
   no starbase and the next year is refused (`ZeroMaxPopulationError`);
 - the design check at generation that drops parts above the owner's tech
-  (Elegy's designs have no owner; Elegy keeps and uses every part, which
-  is the original's behavior for race-restricted and Mystery Trader
-  parts);
+  (Elegy's designs have no owner, so every part is kept and used; the
+  design read for an owner is `Catalog.ReadDesign`, ORDERS-STATUS.md);
 - the old owner's message beyond `EventPlanetEmptied`.

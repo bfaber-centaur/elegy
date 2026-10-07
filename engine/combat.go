@@ -1,5 +1,7 @@
 package engine
 
+import "slices"
+
 // The battle phase of a turn (COMBAT.md), and repair.
 
 // Battle events.
@@ -15,6 +17,16 @@ type battleResult struct {
 	fleets map[int]bool // ids of fleets that fought
 	bases  map[int]bool // planet indices whose starbase fought
 	hits   [][]BattleHit
+	seen   []battleSeen // per battle, for the players' views
+}
+
+// battleSeen is what a battle tells its players (SCANNING.md): where it
+// was, its player list P and the designs each player had on the board.
+type battleSeen struct {
+	planet  int // planet index, or -1
+	players []int
+	designs map[int][]int // player → designs, in token order, repeats removed
+	leftOut []int         // players with a fleet in orbit left out by the token cap
 }
 
 // battles fights every battle of the turn, location by location
@@ -43,6 +55,21 @@ func battles(g *Game, rng Rand, gained map[int]bool) battleResult {
 			}
 		}
 		b.fight()
+		seen := battleSeen{planet: loc.planet, players: inv, designs: map[int][]int{}}
+		for _, t := range b.tokens {
+			if !slices.Contains(seen.designs[t.player], t.design) {
+				seen.designs[t.player] = append(seen.designs[t.player], t.design)
+			}
+		}
+		if loc.planet >= 0 {
+			for _, i := range loc.fleets {
+				o := g.Fleets[i].Owner
+				if !fought[i] && slices.Contains(inv, o) && !slices.Contains(seen.leftOut, o) {
+					seen.leftOut = append(seen.leftOut, o)
+				}
+			}
+		}
+		res.seen = append(res.seen, seen)
 		planetID := -1
 		if loc.planet >= 0 {
 			planetID = g.Planets[loc.planet].ID

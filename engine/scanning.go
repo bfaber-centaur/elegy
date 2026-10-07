@@ -2,6 +2,7 @@ package engine
 
 import (
 	"math"
+	"slices"
 	"sort"
 )
 
@@ -44,6 +45,7 @@ type PlayerView struct {
 	Planets []PlanetReport   // every planet with a report, by planet index
 	Designs []DesignSighting // other players' designs seen, by design index
 	Players []PlayerSighting // other known players, in player order
+	Scores  []ScoreRecord    // score records this player may see (scores.go)
 }
 
 // FleetSighting is another player's fleet as a player sees it.
@@ -365,7 +367,8 @@ func seesFleet(s scanner, pos Point, orbit bool, cloak int) bool {
 
 // PopulationEstimates draws the year's population estimate (colonists)
 // for every owned planet, in planet id order, shared by every viewer
-// (SCANNING.md "Population estimate", BINARY-ONLY). Alternate Reality
+// (SCANNING.md "Population estimate": the range CONFIRMED SC-024..SC-033,
+// the draw order BINARY-ONLY). Alternate Reality
 // planets get 0 without a draw. rand(0) for a population under 4 units
 // still consumes one draw and gives 0.
 func PopulationEstimates(g Game, rng Rand) map[int]int {
@@ -394,18 +397,60 @@ func PopulationEstimates(g Game, rng Rand) map[int]int {
 // Views computes every player's view of the post-turn game (SCANNING.md),
 // with the year's population estimates.
 func Views(g Game, estimates map[int]int) []PlayerView {
-	views := make([]PlayerView, len(g.Players))
-	for v := range g.Players {
-		views[v] = g.view(v, estimates)
-	}
-	return views
+	return views(g, estimates, nil, g.bombChecks())
 }
 
-func (g *Game) view(v int, estimates map[int]int) PlayerView {
+// views is Views with the year's battles, which give their players
+// planet reports and designs, and the bombing checks made at the bombing
+// step (bombs[v] holds the planet indexes viewer v would bomb).
+func views(g Game, estimates map[int]int, battles []battleSeen, bombs []map[int]bool) []PlayerView {
+	out := make([]PlayerView, len(g.Players))
+	for v := range g.Players {
+		out[v] = g.view(v, estimates, battles, bombs[v])
+	}
+	return out
+}
+
+func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs map[int]bool) PlayerView {
 	view := PlayerView{Player: v}
 	scs := g.scanners(v)
 	known := map[int]bool{}
 	designs := map[int]bool{}
+	// Designs disclosed in full: every other player's design that fought
+	// the viewer in a battle, even when all its ships were destroyed
+	// (SCANNING.md "Designs", CONFIRMED SC-031). battlePlanets get at
+	// least a position-only report (SCANNING.md "Battles", BINARY-ONLY);
+	// leftOutPlanets, where a viewer's fleet in orbit was left out by the
+	// battle's size limit, a normal report (SCANNING.md "Left out of a
+	// battle or hit by mines", BINARY-ONLY).
+	//
+	// "Fought it" is every other player in the battle's player list P,
+	// allies included, and each becomes a known player (stars-elegy #57,
+	// BINARY-ONLY, prediction SC-036).
+	fullDesigns := map[int]bool{}
+	battlePlanets := map[int]bool{}
+	leftOutPlanets := map[int]bool{}
+	for _, b := range battles {
+		if b.planet >= 0 && slices.Contains(b.leftOut, v) {
+			leftOutPlanets[b.planet] = true
+		}
+		if !slices.Contains(b.players, v) {
+			continue
+		}
+		if b.planet >= 0 {
+			battlePlanets[b.planet] = true
+		}
+		for p, ds := range b.designs {
+			if p == v {
+				continue
+			}
+			known[p] = true
+			for _, d := range ds {
+				designs[d] = true
+				fullDesigns[d] = true
+			}
+		}
+	}
 	planetOwner := map[Point]int{}
 	for i := range g.Planets {
 		planetOwner[g.Planets[i].Pos] = g.Planets[i].Owner
@@ -420,7 +465,7 @@ func (g *Game) view(v int, estimates map[int]int) PlayerView {
 		owner, orbit := planetOwner[f.Pos]
 		cloak := g.fleetCloak(f)
 		// Every enemy fleet orbiting the viewer's planet is seen
-		// (BINARY-ONLY).
+		// (SCANNING.md "Fleets at your planets", CONFIRMED SC-024, SC-026).
 		seen := orbit && owner == v
 		cargo := false
 		for _, s := range scs {
@@ -465,6 +510,13 @@ func (g *Game) view(v int, estimates map[int]int) PlayerView {
 		if p.HasStarbase && p.Owner != NoOwner {
 			sbCloak = g.starbaseCloak(p)
 		}
+		if battlePlanets[i] {
+			level = max(level, ReportPosition)
+			sbShown = true
+		}
+		if leftOutPlanets[i] || bombs[i] {
+			level = max(level, ReportNormal)
+		}
 		for _, s := range scs {
 			dd := d2(s.pos, p.Pos)
 			if s.P > 0 && dd <= s.P*s.P {
@@ -506,7 +558,7 @@ func (g *Game) view(v int, estimates map[int]int) PlayerView {
 	}
 	sort.Ints(ds)
 	for _, d := range ds {
-		view.Designs = append(view.Designs, DesignSighting{Design: d, Full: full, Hull: g.Designs[d].Hull.Name, Mass: g.Designs[d].Mass})
+		view.Designs = append(view.Designs, DesignSighting{Design: d, Full: full || fullDesigns[d], Hull: g.Designs[d].Hull.Name, Mass: g.Designs[d].Mass})
 	}
 
 	// Players: name only, plus habitability for a Claim Adjuster viewer.
@@ -523,6 +575,43 @@ func (g *Game) view(v int, estimates map[int]int) PlayerView {
 		view.Players = append(view.Players, ps)
 	}
 	return view
+}
+
+// bombChecks is, per viewer, the planets it would bomb (bombCheck), taken
+// at the bombing step right after battles. The report itself is written
+// from the end-of-year state, so a planet bombing empties still gets its
+// normal report (stars-elegy #57, BINARY-ONLY, prediction SC-035).
+func (g *Game) bombChecks() []map[int]bool {
+	out := make([]map[int]bool, len(g.Players))
+	for v := range g.Players {
+		out[v] = map[int]bool{}
+		for i := range g.Planets {
+			if g.bombCheck(v, i) {
+				out[v][i] = true
+			}
+		}
+	}
+	return out
+}
+
+// bombCheck reports whether viewer v would bomb planet p by TAKEOVER.md
+// "Who bombs": another player owns it, it has no starbase, and one of v's
+// fleets in orbit has a battle plan that attacks the owner. Such a planet
+// gets a normal report whatever v's scanners and whether or not any fleet
+// carries bombs (SCANNING.md "Bombing check", CONFIRMED for scannerless
+// fleets without bombs, SC-024, SC-031, SC-032; mechanism BINARY-ONLY).
+func (g *Game) bombCheck(v, pi int) bool {
+	p := &g.Planets[pi]
+	if p.Owner == NoOwner || p.Owner == v || g.hasStarbase(pi) {
+		return false
+	}
+	for i := range g.Fleets {
+		f := &g.Fleets[i]
+		if f.Owner == v && f.Pos == p.Pos && fleetShips(f) > 0 && g.bombsOwner(v, g.plan(v, f.Plan), p.Owner) {
+			return true
+		}
+	}
+	return false
 }
 
 // report builds a planet report at a level.
@@ -552,7 +641,8 @@ func (g *Game) report(p *Planet, level ReportLevel, starbase bool, estimates map
 }
 
 // scanHeading halves both components, truncating toward zero, while
-// either has magnitude 128 or more.
+// either has magnitude 128 or more (SCANNING.md "Heading", CONFIRMED
+// SC-027).
 func scanHeading(dx, dy int) Point {
 	for abs(dx) >= 128 || abs(dy) >= 128 {
 		dx, dy = dx/2, dy/2
@@ -568,7 +658,7 @@ func DefenseCoverage(n, c int) float64 {
 }
 
 // defenseEstimate is the planet's defense coverage estimate (SCANNING.md,
-// BINARY-ONLY): 0 without defenses, else 1..15 from the share of a bomb's
+// CONFIRMED SC-024..SC-033): 0 without defenses, else 1..15 from the share of a bomb's
 // kill that gets through the best defense the owner's tech allows.
 func (g *Game) defenseEstimate(p *Planet) int {
 	if p.Defenses <= 0 || p.Owner == NoOwner {

@@ -254,7 +254,7 @@ var partStats = map[string]bool{
 	"scanner_range": true, "penetrating_range": true, "steals_cargo": true,
 	"accuracy_pct": true, "computer_pct": true, "beam_damage_pct": true,
 	"beam_deflection_pct": true, "battle_speed": true, "battle_speed_half_steps": true,
-	"tachyon": true, "fuel_capacity": true, "cargo_capacity": true,
+	"tachyon": true, "fuel_capacity": true, "cargo_capacity": true, "fuel_per_year": true,
 	// Bombs and colonizers (TAKEOVER.md).
 	"kill_tenths_pct": true, "installations": true, "min_kill": true,
 	"bomb_kill_tenths_pct": true, "bomb_installations": true, "bomb_min_kill": true,
@@ -273,7 +273,7 @@ var deferredStats = map[string]bool{
 	"mining_rate": true, "terraform_pct": true,
 	"orbital_construction": true,
 	"safe_mass":            true, "safe_range": true, "warp": true,
-	"fuel_per_year": true, "jump_gate": true,
+	"jump_gate": true,
 }
 
 // Part converts a ship or starbase part row to a Part.
@@ -351,6 +351,7 @@ func (c Component) Part() (Part, error) {
 	p.HalfThrust = c.flagOrOne("battle_speed_half_steps") && c.Category != CatEngine
 	p.Tachyon = c.flag("tachyon")
 	p.FuelCapacity, p.CargoCapacity = c.num("fuel_capacity"), c.num("cargo_capacity")
+	p.FuelPerYear = c.num("fuel_per_year")
 	// Bombing (TAKEOVER.md "Bomb totals"): bomb rows, and the bomb values
 	// of the Multi Contained Munition and Orbital Construction Module,
 	// which count as normal bombs.
