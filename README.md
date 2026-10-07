@@ -4,7 +4,7 @@ Elegy is a modern, deterministic 4X game engine inspired by *Stars!*.
 
 The long-term goal is a complete game with a faithful J-RC3-compatible ruleset, room for explicitly modernized rulesets, and multiple front ends. The code here is the **canonical implementation**. It is intentionally separate from the archaeology used to learn how the original game behaves.
 
-Status: very early engine skeleton.
+Status: early engine. The J-RC3 peaceful turn (population, economy, research, production) and ordinary fleet movement are implemented and tested against original-game observations; see [docs/KERNEL-STATUS.md](docs/KERNEL-STATUS.md).
 
 ## Project split
 
