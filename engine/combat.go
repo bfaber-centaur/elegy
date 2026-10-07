@@ -113,8 +113,9 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 			continue
 		}
 		if !simple {
-			// Larger battles: only when another player's ships were
-			// destroyed (COMBAT.md: "probably", not fully settled).
+			// ASSUMPTION A9 (docs/COMBAT-STATUS.md): in larger battles,
+			// only when another player's ships were destroyed. COMBAT.md
+			// gives this as "probably" and "not fully settled".
 			other := false
 			for q := range b.killed {
 				if q != p {
@@ -202,6 +203,7 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		default:
 			r = 100
 		}
+		// COMBAT.md: "Interstellar Traveler doubles r" (see A8 below).
 		if g.Players[f.Owner].Race.PRT == PRTInterstellarTraveler {
 			r *= 2
 		}
@@ -221,8 +223,12 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		if !p.HasStarbase || res.bases[i] || p.Owner == NoOwner {
 			continue
 		}
+		// COMBAT.md: "repairs 50 units (IS 75)". The stars-elegy docs use
+		// IS for Inner Strength; the fleet rule above names Interstellar
+		// Traveler. ASSUMPTION A8 (docs/COMBAT-STATUS.md): each rule
+		// follows its own wording until the spec resolves the pair.
 		r := 50
-		if g.Players[p.Owner].Race.PRT == PRTInterstellarTraveler {
+		if g.Players[p.Owner].Race.PRT == PRTInnerStrength {
 			r = 75
 		}
 		p.StarbaseDamage = max(0, p.StarbaseDamage-r)

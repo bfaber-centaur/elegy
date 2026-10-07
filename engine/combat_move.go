@@ -34,6 +34,9 @@ func (b *battle) move() {
 
 // step makes one single-square move.
 func (b *battle) step(t *token) {
+	// ASSUMPTION A2 (docs/COMBAT-STATUS.md): every move the token is given
+	// counts against the disengage counter, including one that leaves it
+	// on its square (its own square scored best, or a blocked step).
 	if t.tactic == TacticDisengage {
 		if t.counter == 0 {
 			t.left = true // off the board: out of the battle, not destroyed
@@ -293,6 +296,9 @@ func (bt *battle) estimate(a, b *token, x int, ignoreRange bool) int {
 		if p.Kind == PartBeam {
 			v := p.Damage * w.count
 			v = v * a.capacitor / 100
+			// COMBAT.md: "If x > 0". The r > 0 test only guards the
+			// division for a range-0 beam, which COMBAT.md does not cover
+			// (ASSUMPTION A7, docs/COMBAT-STATUS.md).
 			if x > 0 && r > 0 {
 				v = v + (x*v)/(-10)/r
 			}

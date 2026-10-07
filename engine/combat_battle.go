@@ -104,6 +104,10 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		plan := g.plan(f.Owner, f.Plan)
 		race := g.Players[f.Owner].Race
 		dumped := false
+		// ASSUMPTION A3 (docs/COMBAT-STATUS.md): in deep space the dumped
+		// minerals are one addition to this battle's salvage object, with
+		// no quarter lost (COMBAT.md gives the quarter loss for kill
+		// events only), made before the kill events' additions.
 		if plan.DumpCargo && f.Cargo.Minerals != (Minerals{}) {
 			dumped = true
 			if b.loc.planet >= 0 {
@@ -145,7 +149,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		t.player, t.fleet, t.stack, t.planet, t.design = owner, -1, -1, b.loc.planet, pl.StarbaseDesign
 		t.ships, t.dmg = 1, Damage{Pct: 100, Units: pl.StarbaseDamage}
 		t.tactic, t.primary, t.secondary = TacticMaximizeDamage, TargetAny, TargetAny
-		t.mass = 65535
+		t.mass = 65535 // has no effect: only movement reads mass, and starbases never move
 		b.tokens = append(b.tokens, &t)
 	}
 
@@ -284,6 +288,10 @@ func (b *battle) fight() {
 // checkIn is round step 5: players with live tokens are checked in player
 // order, and a player whose attack set names no player still in is out.
 // A player removed earlier in the check no longer counts for later ones.
+//
+// ASSUMPTION A1 (docs/COMBAT-STATUS.md): each round's check starts again
+// from every player with a live token, so a player out in one round can
+// be in the next. With two players the battle ends at the first "out".
 func (b *battle) checkIn() {
 	b.in = map[int]bool{}
 	for _, t := range b.tokens {

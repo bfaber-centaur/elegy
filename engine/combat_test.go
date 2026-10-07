@@ -865,18 +865,21 @@ type countRand struct{ n int }
 func (c *countRand) Intn(int) int { c.n++; return 0 }
 
 func TestPredictionRepairOthers(t *testing.T) {
-	// "Moved" rate 5, Interstellar Traveler doubling, starbase repair 50
-	// (IS 75), and no repair after fighting.
+	// "Moved" rate 5, Interstellar Traveler doubling for fleets, starbase
+	// repair 50 (Inner Strength 75, assumption A8), and no repair after
+	// fighting.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
 	g := &Game{
-		Players: make([]Player, 2),
+		Players: make([]Player, 3),
 		Designs: d,
 		Planets: []Planet{
 			{Pos: Point{10, 0}, Owner: 0, HasStarbase: true, StarbaseDamage: 300},
-			{Pos: Point{20, 0}, Owner: 1, HasStarbase: true, StarbaseDamage: 300},
+			{Pos: Point{20, 0}, Owner: 2, HasStarbase: true, StarbaseDamage: 300},
+			{Pos: Point{30, 0}, Owner: 1, HasStarbase: true, StarbaseDamage: 300},
 		},
 	}
 	g.Players[1].Race.PRT = PRTInterstellarTraveler
+	g.Players[2].Race.PRT = PRTInnerStrength
 	dmg := Damage{Pct: 100, Units: 200}
 	g.Fleets = []Fleet{
 		{ID: 1, Owner: 0, Stacks: []Stack{{Design: 0, Count: 1, Damage: dmg}}},
@@ -885,8 +888,8 @@ func TestPredictionRepairOthers(t *testing.T) {
 	}
 	repair(g, map[int]bool{1: true}, battleResult{fleets: map[int]bool{3: true}, bases: map[int]bool{}})
 	got := []int{g.Fleets[0].Stacks[0].Damage.Units, g.Fleets[1].Stacks[0].Damage.Units, g.Fleets[2].Stacks[0].Damage.Units,
-		g.Planets[0].StarbaseDamage, g.Planets[1].StarbaseDamage}
-	if want := []int{195, 180, 200, 250, 225}; !reflect.DeepEqual(got, want) {
+		g.Planets[0].StarbaseDamage, g.Planets[1].StarbaseDamage, g.Planets[2].StarbaseDamage}
+	if want := []int{195, 180, 200, 250, 225, 250}; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }

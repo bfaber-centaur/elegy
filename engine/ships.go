@@ -92,6 +92,14 @@ func designCost(d Design, race Race, levels [NumFields]int) Cost {
 	return c
 }
 
+// bleedingEdgeSuppressed stands for the game-wide flag that COMBAT.md
+// ("Design cost" step 4) says suppresses the Bleeding Edge doubling
+// without identifying it.
+//
+// PLACEHOLDER A5 (docs/COMBAT-STATUS.md): Elegy has no such setting, so
+// the flag is off and the doubling always applies.
+const bleedingEdgeSuppressed = false
+
 // itemCost is one hull's or part's adjusted cost.
 func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [NumFields]int) Cost {
 	m, hasReq := 0, false
@@ -135,9 +143,7 @@ func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [N
 	case race.LRT.CheapEngines && kind == PartEngine:
 		adjust(func(c int) int { return c - c/2 })
 	}
-	// The game-wide flag that suppresses the doubling is not identified;
-	// Elegy always doubles.
-	if bet && m <= 0 && hasReq {
+	if bet && m <= 0 && hasReq && !bleedingEdgeSuppressed {
 		adjust(func(c int) int { return 2 * c })
 	}
 	return base

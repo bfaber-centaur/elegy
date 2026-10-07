@@ -132,9 +132,13 @@ func (g *Game) write(sets attackSets, x, owner int, plan BattlePlan) {
 // set is written to another player X (COMBAT.md "LEGACY BUG: plan 0 ...",
 // CONFIRMED CB-011..013, CB-022). X is player 0 when the previously
 // examined location had a battle, else the owner of that location's last
-// fleet. For the first location of a turn the original's X is left over
-// from earlier processing; CB-022 measured no effect, so Elegy gives none
-// (ok is false). Set legacyPlan0 to false to write to the owner instead.
+// fleet. Set legacyPlan0 to false to write to the owner instead.
+//
+// PLACEHOLDER A6 (docs/COMBAT-STATUS.md): for the first location of a
+// turn COMBAT.md says X is not determined (left over from earlier
+// processing; neither player in the two-player CB-022). Elegy treats it
+// as a value that is not a player, so plan 0 contributes nothing (ok is
+// false). With three or more players the original may differ.
 const legacyPlan0 = true
 
 type locationHistory struct {

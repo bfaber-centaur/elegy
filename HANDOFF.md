@@ -2,41 +2,38 @@
 
 ## Current question
 
-Implement the public combat specification (stars-elegy `docs/COMBAT.md`,
-merged in PR #19) as a battle phase of `GenerateTurn`, in the kernel's style.
+Land the battle phase (elegy PR #5), which implements stars-elegy
+`docs/COMBAT.md`. Then open the scanning PR, which is ready in a local
+commit and implements `docs/SCANNING.md`.
 
 ## State
 
-- Kernel and movement are merged (elegy #1–#4, following stars-elegy
-  through #18).
-- This branch adds the battle phase: `engine/ships.go` (parts, hulls),
-  `battleplan.go`, `combat_*.go`, and `docs/COMBAT-STATUS.md` (rules,
-  statuses, tests, choices). It follows #19 as merged (`3968ec2`), with
-  round 3 (CB-020..022) and the KERNEL.md second research check.
-- `go test ./...` is green; `go test -run Confirmed ./...` runs the
-  CB-000..CB-019 vectors.
+- Kernel and movement are merged (elegy #1–#4).
+- This branch adds the battle phase: `engine/ships.go` (parts, hulls,
+  design cost), `battleplan.go`, `combat_*.go`, and
+  `docs/COMBAT-STATUS.md`. It follows COMBAT.md on stars-elegy `main` at
+  `a6ac76e`, which includes the implementer answers merged in #24.
+- `go vet ./...` and `go test ./...` are green. `go test -run Confirmed
+  ./...` runs the CB vectors.
 
 ## What we know
 
-- Every CB vector stated in COMBAT.md/PARITY.md that needs no part
-  catalogue passes: token values, hit chances and 202-torpedo hit counts,
-  missile damage and one kill per missile, misses on shields, beam
-  dropoff (starbase uses the part range), carry R', gatling, sappers,
-  target choice, starbase damage steps, salvage, repair rates, plan-0
-  joining, and the same-turn tech gain of CB-018.
-- Choices where COMBAT.md is silent are listed in COMBAT-STATUS.md and
-  were raised with the spec author.
+- Every CB vector in COMBAT.md/PARITY.md that needs no part catalogue
+  passes, including the 132% capacitor of CB-002 C4. Capacitors compound
+  per item, as current COMBAT.md says.
+- Where COMBAT.md is silent or unsettled, the code makes nine explicit
+  assumptions or placeholders (A1–A9). They are marked in the code and
+  listed in COMBAT-STATUS.md. None is claimed as Stars! behavior.
 
 ## What still matters
 
-- Answers from the spec author may flip a default (COMBAT-STATUS.md
-  "Choices"); the capacitor 132% vs per-item compounding is the one that
-  contradicts a CONFIRMED number.
-- Round 3 (R-8..R-10) may change BINARY-ONLY statuses.
-- No part catalogue yet: a public component table (COMPONENTS.md) is
-  planned; plug it into `Design` when it lands.
+- Spec decisions are needed for A4 (destroyed ships' fuel) and A8 (IT vs
+  IS repair wording). The other items only matter for untested cases
+  (three or more players, dumped cargo, the Bleeding Edge flag).
+- No part catalogue yet. Plug the public component table into `Design`
+  when stars-elegy `docs/COMPONENTS.md` lands.
 
 ## Best next move
 
-Fold in COMBAT.md corrections as they land. After that, waypoint tasks,
-colonization and ships in production move toward a playable slice.
+Once #5 merges, open the scanning PR from a fresh branch off main. Then
+fold in spec answers for A1–A9 as they land.
