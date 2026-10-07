@@ -9,7 +9,7 @@ subsystem the specification covers.
 
 ## State
 
-- Branch: `claude/project-thread-8c4kqn` (PR open, not merged).
+- Merged to `main` (elegy PR #1).
 - `engine/` holds habitability, population, economy, mining, research,
   production, movement and `GenerateTurn`. `docs/KERNEL-STATUS.md` is the
   map: rules, tests, statuses, gaps.
@@ -24,15 +24,14 @@ subsystem the specification covers.
   FM-001..004 (copied into `engine/testdata/fm`).
 - Three KERNEL.md/corpus disagreements found here (auto-item caps, running
   dry with exact fuel, mutual chases) are corrected upstream in stars-elegy
-  PR #13; the code follows that text. Remaining open questions and the
+  PR #13 (merged); the code follows that text. Remaining open questions and the
   code's interim choices are in KERNEL-STATUS.md.
 - `PlayerOrders` and `Ruleset` are still stubs; RNG is injected as
   `engine.Rand`.
 
 ## What still matters
 
-- When stars-elegy PR #13 merges, re-point the KERNEL-STATUS.md citation at
-  `main`. Send the remaining open questions back to stars-elegy.
+- Send the remaining KERNEL-STATUS.md open questions back to stars-elegy.
 - Not modelled: orders, waypoint tasks, colonization, ships and starbases
   in production, terraforming, remote mining, random events, combat, and
   the BINARY-ONLY LRT/engine movement rules.

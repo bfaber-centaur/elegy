@@ -2,10 +2,9 @@
 
 The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
-`docs/KERNEL.md` (synced to stars-elegy PR #13 head `bda2c3b`, which
-corrects the three findings below), `docs/PARITY.md`, and the public
-FM-001..004 movement corpus (`experiments/fm00N`, `main` at `b927632`). Nothing here comes from
-the private archaeology repositories.
+`docs/KERNEL.md`, `docs/PARITY.md` and the public FM-001..004 movement
+corpus (`experiments/fm00N`), as of stars-elegy `main` at `f203a5c`.
+Nothing here comes from the private archaeology repositories.
 
 ## Tests: ground truth versus predictions
 
@@ -50,7 +49,7 @@ deaths and transport/lay-mines tasks.
 ## Corrected upstream
 
 This implementation surfaced three places where KERNEL.md disagreed with
-the public corpus. stars-elegy PR #13 corrects them, and the code and
+the public corpus. stars-elegy PR #13 (merged) corrects them, and the code and
 `TestConfirmed*` tests follow the corrected text:
 
 - **Caps by order kind.** Auto Mines/Factories/Defenses build at most
