@@ -70,8 +70,8 @@ type TurnResult struct {
 }
 
 // GenerateTurn advances the game one year with the J-RC3 peaceful kernel
-// (KERNEL.md "Turn order"): fleet movement, then production per planet
-// (mining, resources, research tax, production queue), then population
+// (KERNEL.md "Turn order"): fleet movement, then mining for every planet,
+// then per planet resources, research tax and production queue, then population
 // growth for every planet, then starbase refuelling, then research
 // level-ups.
 //
@@ -108,20 +108,16 @@ func GenerateTurn(
 	}
 	sort.SliceStable(order, func(a, b int) bool { return g.Planets[order[a]].ID < g.Planets[order[b]].ID })
 
+	// Every planet is mined before any planet's production, in id order
+	// (KERNEL.md "Mining", BINARY-ONLY draw order), with the population
+	// before growth.
 	for _, i := range order {
 		p := &g.Planets[i]
-		grown[i] = growth{p.Population, p.GrowthCarry}
 		if p.Owner == NoOwner || p.Population <= 0 {
 			continue
 		}
 		player := &g.Players[p.Owner]
 		col := NewColony(p, player)
-
-		// Growth is applied after every planet's production, but the
-		// production caps read the grown population.
-		gp, gc := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
-		grown[i] = growth{gp, gc}
-
 		eff := player.Race.MineOutput
 		if col.alternateReality() {
 			eff = 10
@@ -132,6 +128,23 @@ func GenerateTurn(
 			p.Surface[m] += gain
 			p.Deposits[m] = d
 		}
+	}
+
+	for _, i := range order {
+		p := &g.Planets[i]
+		grown[i] = growth{p.Population, p.GrowthCarry}
+		// Growth and deaths only act on owned planets with population
+		// (KERNEL.md "Population", BINARY-ONLY).
+		if p.Owner == NoOwner || p.Population <= 0 {
+			continue
+		}
+		player := &g.Players[p.Owner]
+		col := NewColony(p, player)
+
+		// Growth is applied after every planet's production, but the
+		// production caps read the grown population.
+		gp, gc := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
+		grown[i] = growth{gp, gc}
 
 		res := col.Resources(p.Population, p.Factories)
 		r, ev := RunProduction(p, ProductionInput{

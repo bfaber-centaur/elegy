@@ -101,7 +101,7 @@ func RunProduction(p *Planet, in ProductionInput) (research int, events []Event)
 		return in.Resources, nil
 	}
 	if len(p.Queue) == 0 {
-		return 0, nil // BINARY-ONLY: an empty queue block contributes nothing
+		return 0, nil // BINARY-ONLY: an empty queue contributes nothing, not even the tax
 	}
 	if in.Resources <= 0 {
 		return 0, nil // BINARY-ONLY: builds nothing, sends no messages

@@ -78,7 +78,9 @@ func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech boo
 //
 // KERNEL.md "Allocation": accumulation and single level-ups with "same
 // field" are CONFIRMED (PG); several levels per year, field switching,
-// Generalized Research and the level cap are BINARY-ONLY.
+// Generalized Research and the level cap are BINARY-ONLY. With Generalized
+// Research every field is checked before any switch (the order is the
+// code's choice; KERNEL.md does not give it).
 func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) ResearchState {
 	add := func(field, amount int) {
 		if s.Levels[field] >= s.maxLevel() {
@@ -112,14 +114,18 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		return gained
 	}
 
-	gainedCurrent := levelUp(s.Current)
+	gained := levelUp(s.Current)
 	for f := range NumFields {
 		if f != s.Current {
 			levelUp(f)
 		}
 	}
 
-	if gainedCurrent && s.Next != NextSameField {
+	// Only a level-up in the current field switches fields. The leftover
+	// moves to the new field, which is checked for level-ups the same
+	// year, and may switch again. An explicit next field is used once and
+	// then resets to "same field"; "lowest field" stays set.
+	for gained && s.Next != NextSameField {
 		next := s.Next
 		if next == NextLowestField {
 			next = 0
@@ -128,12 +134,16 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 					next = f
 				}
 			}
+		} else {
+			s.Next = NextSameField
 		}
-		if next != s.Current {
-			s.Accumulated[next] += s.Accumulated[s.Current]
-			s.Accumulated[s.Current] = 0
-			s.Current = next
+		if next == s.Current {
+			break
 		}
+		s.Accumulated[next] += s.Accumulated[s.Current]
+		s.Accumulated[s.Current] = 0
+		s.Current = next
+		gained = levelUp(s.Current)
 	}
 	return s
 }
