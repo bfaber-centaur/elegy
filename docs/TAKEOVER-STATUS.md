@@ -2,14 +2,12 @@
 
 Bombing, transport unloads, colonist drops, ground combat, colonization
 and capture in `engine/takeover.go` follow the public specification
-stars-elegy `docs/TAKEOVER.md` on `main` at `96fd2e7`, with the
-implementer answers of stars-elegy PR #34 at `8d9220d` (order inside a
-phase, unload amounts and foreign minerals, capture tech, colonize
-retries, the mines' loss clamp), and the TK-001..TK-007 cases in
+stars-elegy `docs/TAKEOVER.md` on `main` at `bd8f063`, which includes the
+implementer answers merged in PR #34 (order inside a phase, unload
+amounts and foreign minerals, capture tech, colonize retries, the mines'
+loss clamp), and the TK-001..TK-007 cases in
 `experiments/tk/README.md`. Bomb, colonizer and defense values come from
 the component table (`docs/COMPONENTS-STATUS.md`). Nothing else was used.
-
-**Merge order:** stars-elegy #34 before this work, which cites it.
 
 ## Where it runs
 
