@@ -2,9 +2,11 @@
 
 The battle phase in `engine/` follows the public combat specification,
 stars-elegy `docs/COMBAT.md` as of stars-elegy `main` at `a6ac76e` (PR #19
-plus the implementer answers merged in PR #24, `113a4d2`), the turn order
-in `docs/KERNEL.md`, and the measured data in `docs/PARITY.md` "Combat"
-(CB-000..CB-022). Nothing else was used.
+plus the implementer answers merged in PR #24, `113a4d2`) with the
+follow-up answers in open PR #31 (branch at `56f10c4`), the owner cost
+rule of `docs/COMPONENTS.md` in open PR #30 (branch at `f851a4b`), the
+turn order in `docs/KERNEL.md`, and the measured data in `docs/PARITY.md`
+"Combat" (CB-000..CB-022). Nothing else was used.
 
 `go test -run Confirmed ./...` runs the CB vectors; `TestPrediction*`
 tests pin BINARY-ONLY rules.
@@ -35,20 +37,21 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | LEGACY BUG starbase is always "armed" | `starbaseClass` (switch `legacyStarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
 | Speed code | `speedCode` | CONFIRMED by the designer; cargo, WM, dump BINARY-ONLY | `TestConfirmedEnergyDampener` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
-| Rounds, out-of-battle check in player order | `combat_battle.go` `fight`, `checkIn` | BINARY-ONLY ordering | `TestConfirmedPlan0OnePlayerBattle` |
+| Rounds, out-of-battle check in player order (ends the battle only) | `combat_battle.go` `fight`, `checkIn` | BINARY-ONLY ordering | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionOutPlayerStillFires` |
 | Movement order, square choice, square score, damage estimate | `combat_move.go` | BINARY-ONLY (one mover vs a station CONFIRMED, CB-012, CB-019..021) | `TestPredictionBattleTurn`, `TestPredictionEstimateDrawsAt200` |
-| Disengaging | `step` | CONFIRMED | `TestConfirmedDisengageLeavesOnEighthMove` |
+| Disengaging | `step` | CONFIRMED; a move that stays put counts, BINARY-ONLY | `TestConfirmedDisengageLeavesOnEighthMove` |
 | Regenerating Shields | `regenerate` | CONFIRMED | `TestConfirmedRegeneratingShields` |
-| Firing order, target choice | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED | `TestConfirmedTargetChoice` |
-| Design cost (miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | BINARY-ONLY | `TestPredictionDesignCost` |
+| Firing order, target choice; live-player check before each token | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED; the check BINARY-ONLY | `TestConfirmedTargetChoice`, `TestPredictionOutPlayerStillFires` |
+| Design cost (COMPONENTS.md owner cost: miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | CONFIRMED (CS-001) | `TestPredictionDesignCost` |
 | Beams, dropoff, carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
 | Gatling, sappers | `gatling`, `damage` | CONFIRMED | `TestConfirmedGatlingHitsEveryTarget`, `TestConfirmedSapperShieldsOnly` |
 | Torpedoes and missiles | `hitChance`, `torpedoes` | CONFIRMED | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestPredictionTorpedoHitsPerTarget` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
 | Starbase damage | `starbaseDamage` | CONFIRMED in part | `TestConfirmedStarbaseDamageSteps` |
 | Starbase loss, AR planet uninhabited | `combat.go` `finish` | BINARY-ONLY | `TestPredictionAlternateRealityStarbaseLoss` |
-| Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each); cargo share and empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
-| Repair | `repair` | CONFIRMED; moved, IS, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
+| Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each); cargo and fuel share, empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
+| Dump cargo (full amount; first salvage addition in deep space) | `setup` | BINARY-ONLY | `TestPredictionDumpCargo` |
+| Repair | `repair` | CONFIRMED; moved, Inner Strength, starbase BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
 | Tech from battle, same-turn level | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation` |
 
 ## Not tested against the oracle
@@ -59,10 +62,11 @@ Implemented as written, with no oracle data yet:
   jittered weight, square ties among many movers);
 - three or more players, start squares for other counts, friends joining,
   a starbase owner in P but not in Q;
-- the token cap, dump cargo, War Monger and cargo in the speed code;
-- design-cost race adjustments and Bleeding Edge doubling;
+- the token cap, War Monger and cargo in the speed code;
+- dump cargo, the fuel share, an out player still firing, and a
+  disengaging token that stays on its square;
 - the tech-attempt condition in larger battles and for outside players;
-- starbase loss side effects, the "moved", IS and starbase repair rates.
+- starbase loss side effects, the "moved", Inner Strength and starbase repair rates.
 
 The exact CB-019/CB-020 squares and the CB-021 per-stream gains depend on
 the original's random stream and part table, so they are not replayed
@@ -70,24 +74,24 @@ here; the stream-independent parts of CB-021 and CB-022 are tests.
 
 ## Implementation assumptions and placeholders
 
-These are Elegy's own choices where current COMBAT.md is silent,
-ambiguous or not settled. They are **not** established Stars! behavior.
-Each one is marked in the code with `ASSUMPTION An` or `PLACEHOLDER An`
-and was sent to the spec author for a decision. An ASSUMPTION is a
+These are Elegy's own choices where COMBAT.md is silent, ambiguous or not
+settled. They are **not** established Stars! behavior. Each one is marked
+in the code with `ASSUMPTION An` or `PLACEHOLDER An`. An ASSUMPTION is a
 reading of unclear text. A PLACEHOLDER stands in for a value or rule the
 spec says is unknown.
 
 | Id | What Elegy does | What COMBAT.md says | When it matters | Code |
 |---|---|---|---|---|
-| A1 | While firing, a player counts as "still in" only if it was in after step 5 **and** still has a live token. A player that is out at step 5 does not fire. Each round's step 5 starts again from every player with a live token. | Firing goes on "while at least two players are still in the battle"; "in" is defined only at round step 5. | Only with three or more players (with two, the battle ends at the first "out", and a side with no live tokens leaves nothing to target). Untested. | `fire`, `playersIn`, `checkIn` |
-| A2 | Every move a disengaging token is given lowers the counter, including a move that leaves it on its square. | "Each move it makes lowers the counter by 1"; it leaves on its 8th move (CONFIRMED, CB-003/004). Whether a move that stays on the same square counts is not stated. | A disengaging token that scores its own square best, or whose step is blocked by the board edge. | `step` |
-| A3 | Dumped cargo in deep space is one addition to the battle's salvage object, with no quarter lost, added before the kill events' additions. At a planet it all goes to the surface (spec). | "Its minerals go to the planet's surface, or to deep-space salvage." The quarter loss is stated for kill events only. Dump cargo is in "Open experiments". | Deep-space battles where a fleet's plan dumps cargo. | `setup` |
-| A4 | **Placeholder.** The fuel of destroyed ships stays in the fleet. | "The lost ships' share of fuel and colonists is destroyed", with a formula for cargo but none for fuel. | Partly destroyed fleets: survivors may keep more fuel than their tanks hold. **Needs a spec rule.** | `cargoShare` |
-| A5 | **Placeholder.** The Bleeding Edge doubling always applies. | "One game-wide flag, not identified, suppresses this." | Bleeding Edge races with parts at their tech requirement. | `bleedingEdgeSuppressed` |
 | A6 | **Placeholder.** On the first location of a turn, plan-0 LEGACY BUG X is treated as a non-player, so plan 0 adds nothing. | X is "not determined" there (leftover; neither player in two-player CB-022). An X that is not a player has no effect. | Three or more players, where the leftover X might be a real player. | `legacyPlan0Recipient` |
-| A7 | A range-0 beam skips the dropoff term in the damage estimate. | The formula divides by the range `r`; range-0 beams are not covered. | Only for a design with a range-0 beam, if one exists (no part table yet). | `estimate` |
-| A8 | Fleets: Interstellar Traveler doubles `r`. Starbases: Inner Strength repairs 75. | "Interstellar Traveler doubles `r`" and "repairs 50 units (IS 75)"; the stars-elegy docs use IS for Inner Strength, and "Open experiments" lists "IS repair". The two lines may mean one race. **Needs a spec decision.** | IT and IS races' repair. | `repair` |
+| A7 | A range-0 beam skips the dropoff term in the damage estimate. | The formula divides by the range `r`; range-0 beams are not covered. | Only for a design with a range-0 beam, if one exists. | `estimate` |
 | A9 | In battles other than two players with two tokens, a player attempts tech only when another player's ships were destroyed. | "Probably only when ships other than their own were destroyed; this condition is not fully settled." | Larger battles. | `techAttempts` |
+| A10 | A starbase token's cost for target choice is the plain owner cost. | "Design cost" points to COMPONENTS.md "Cost for an owner"; that section also gives a starbase design cost (ISB/AR `c − c/5`, then halved) without saying whether target choice uses it. | Ships choosing between a starbase and other targets. Raised with the spec author. | `designCost` |
+
+Resolved by stars-elegy #31 and now cited rules: A1 (step 5 only ends
+the battle; the live-player check before each token), A2 (every move
+counts), A3 (dump cargo), A4 (fuel share by fuel capacity), A8 (Inner
+Strength for both repair lines). A5 (the Bleeding Edge suppression flag)
+is gone: COMPONENTS.md's CONFIRMED rule has no such flag.
 
 ### Settled by current COMBAT.md
 

@@ -203,8 +203,8 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		default:
 			r = 100
 		}
-		// COMBAT.md: "Interstellar Traveler doubles r" (see A8 below).
-		if g.Players[f.Owner].Race.PRT == PRTInterstellarTraveler {
+		// Inner Strength doubles r, not f (BINARY-ONLY).
+		if g.Players[f.Owner].Race.PRT == PRTInnerStrength {
 			r *= 2
 		}
 		bonus := 0
@@ -223,10 +223,7 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		if !p.HasStarbase || res.bases[i] || p.Owner == NoOwner {
 			continue
 		}
-		// COMBAT.md: "repairs 50 units (IS 75)". The stars-elegy docs use
-		// IS for Inner Strength; the fleet rule above names Interstellar
-		// Traveler. ASSUMPTION A8 (docs/COMBAT-STATUS.md): each rule
-		// follows its own wording until the spec resolves the pair.
+		// 50 units, or 75 for Inner Strength (BINARY-ONLY).
 		r := 50
 		if g.Players[p.Owner].Race.PRT == PRTInnerStrength {
 			r = 75

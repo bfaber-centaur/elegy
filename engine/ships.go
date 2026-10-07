@@ -77,9 +77,15 @@ type Hull struct {
 }
 
 // designCost is a design's per-ship cost for an owner with race and
-// tech levels (COMBAT.md "Design cost", BINARY-ONLY): the hull plus each
+// tech levels (COMBAT.md "Design cost", which points to stars-elegy
+// COMPONENTS.md "Cost for an owner", CONFIRMED CS-001): the hull plus each
 // slot's count × part cost, each adjusted for miniaturization, race and
-// Bleeding Edge Technology.
+// Bleeding Edge Technology. The terraform and planetary cases of that
+// rule do not arise: ship and starbase designs have no such parts.
+//
+// ASSUMPTION A10 (docs/COMBAT-STATUS.md): a starbase token's cost for
+// target choice is this owner cost, without the starbase reduction
+// (ISB/AR, then halved) that COMPONENTS.md gives for starbase designs.
 func designCost(d Design, race Race, levels [NumFields]int) Cost {
 	c := itemCost(d.Hull.Cost, d.Hull.TechReq, PartOther, race, levels)
 	for _, s := range d.Slots {
@@ -91,14 +97,6 @@ func designCost(d Design, race Race, levels [NumFields]int) Cost {
 	}
 	return c
 }
-
-// bleedingEdgeSuppressed stands for the game-wide flag that COMBAT.md
-// ("Design cost" step 4) says suppresses the Bleeding Edge doubling
-// without identifying it.
-//
-// PLACEHOLDER A5 (docs/COMBAT-STATUS.md): Elegy has no such setting, so
-// the flag is off and the doubling always applies.
-const bleedingEdgeSuppressed = false
 
 // itemCost is one hull's or part's adjusted cost.
 func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [NumFields]int) Cost {
@@ -143,7 +141,7 @@ func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [N
 	case race.LRT.CheapEngines && kind == PartEngine:
 		adjust(func(c int) int { return c - c/2 })
 	}
-	if bet && m <= 0 && hasReq && !bleedingEdgeSuppressed {
+	if bet && m <= 0 && hasReq {
 		adjust(func(c int) int { return 2 * c })
 	}
 	return base

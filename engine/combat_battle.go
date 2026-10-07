@@ -104,10 +104,10 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		plan := g.plan(f.Owner, f.Plan)
 		race := g.Players[f.Owner].Race
 		dumped := false
-		// ASSUMPTION A3 (docs/COMBAT-STATUS.md): in deep space the dumped
-		// minerals are one addition to this battle's salvage object, with
-		// no quarter lost (COMBAT.md gives the quarter loss for kill
-		// events only), made before the kill events' additions.
+		// Dump cargo (COMBAT.md "Setup steps" 2, BINARY-ONLY): all three
+		// minerals; colonists and fuel stay aboard. At a planet the
+		// surface gains the full amount. In deep space the full amount,
+		// with no quarter lost, is the salvage object's first addition.
 		if plan.DumpCargo && f.Cargo.Minerals != (Minerals{}) {
 			dumped = true
 			if b.loc.planet >= 0 {
@@ -288,10 +288,9 @@ func (b *battle) fight() {
 // checkIn is round step 5: players with live tokens are checked in player
 // order, and a player whose attack set names no player still in is out.
 // A player removed earlier in the check no longer counts for later ones.
-//
-// ASSUMPTION A1 (docs/COMBAT-STATUS.md): each round's check starts again
-// from every player with a live token, so a player out in one round can
-// be in the next. With two players the battle ends at the first "out".
+// The check only decides whether the battle ends now (BINARY-ONLY): a
+// player found out keeps firing and moving, and the next round's check
+// starts again from every player with a live token.
 func (b *battle) checkIn() {
 	b.in = map[int]bool{}
 	for _, t := range b.tokens {

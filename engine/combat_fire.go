@@ -26,13 +26,23 @@ func (b *battle) fire() {
 	for _, level := range levels {
 		for i := len(b.tokens) - 1; i >= 0; i-- {
 			t := b.tokens[i]
+			acts := false
 			for _, w := range t.weapons {
-				// ASSUMPTION A1: a player out at step 5 does not fire.
-				if w.init != level || !t.live() || !b.in[t.player] {
-					continue
+				if w.init == level && t.live() {
+					acts = true
 				}
-				if b.playersIn() < 2 {
-					return
+			}
+			if !acts {
+				continue
+			}
+			// Checked again before each token acts (COMBAT.md "Firing",
+			// BINARY-ONLY): with one player left, no further token fires.
+			if b.livePlayers() < 2 {
+				return
+			}
+			for _, w := range t.weapons {
+				if w.init != level || !t.live() {
+					continue
 				}
 				switch {
 				case w.part.Kind == PartTorpedo:
@@ -45,27 +55,6 @@ func (b *battle) fire() {
 			}
 		}
 	}
-}
-
-// playersIn counts the players still in the battle while firing: those
-// in after round step 5 that still have a live token.
-//
-// ASSUMPTION A1 (docs/COMBAT-STATUS.md): COMBAT.md says firing continues
-// "while at least two players are still in the battle" but defines "in"
-// only at round step 5. Recounting live tokens here, and skipping the
-// tokens of a player that is out (see fire), are Elegy's reading. They
-// change nothing with two players and are untested with three or more.
-func (b *battle) playersIn() int {
-	n := 0
-	for p := range b.in {
-		for _, t := range b.tokens {
-			if t.live() && t.player == p {
-				n++
-				break
-			}
-		}
-	}
-	return n
 }
 
 // eligible returns the eligible targets of token t's weapon slot w, in
@@ -464,22 +453,26 @@ func (b *battle) addSalvage(add Minerals) {
 }
 
 // cargoShare removes the destroyed ships' share of their fleet's cargo
-// and returns its minerals (COMBAT.md "Salvage", BINARY-ONLY). The share
-// of colonists is destroyed. e.ships already excludes the kills.
-//
-// PLACEHOLDER A4 (docs/COMBAT-STATUS.md): COMBAT.md says the lost ships'
-// share of fuel is destroyed but gives no formula for that share, so
-// Elegy leaves the fleet's fuel unchanged until the spec does.
+// and fuel and returns the cargo's minerals (COMBAT.md "Salvage",
+// BINARY-ONLY). The shares of colonists and fuel are destroyed. Each kill
+// event takes its share from what the fleet holds at that moment.
+// e.ships already excludes the kills.
 func (b *battle) cargoShare(e *token, kills int) Minerals {
 	g := b.g
 	f := &g.Fleets[e.fleet]
 	lost := kills * g.Designs[e.design].CargoCapacity
-	before, fleetDead := lost, true
+	lostFuel := kills * g.Designs[e.design].FuelCapacity
+	before, beforeFuel, fleetDead := lost, lostFuel, true
 	for _, o := range b.tokens {
 		if o.fleet == e.fleet && !o.starbase && o.ships > 0 {
 			fleetDead = false
 			before += o.ships * g.Designs[o.design].CargoCapacity
+			beforeFuel += o.ships * g.Designs[o.design].FuelCapacity
 		}
+	}
+	// Fuel is shared like cargo, by fuel capacity: F · lost / before.
+	if beforeFuel > 0 {
+		f.Fuel -= f.Fuel * lostFuel / beforeFuel
 	}
 	cargo := [NumMinerals + 1]int{f.Cargo.Minerals[Ironium], f.Cargo.Minerals[Boranium], f.Cargo.Minerals[Germanium], f.Cargo.Colonists}
 	var share [NumMinerals + 1]int

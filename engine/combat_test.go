@@ -842,6 +842,83 @@ func TestPredictionCargoShare(t *testing.T) {
 	}
 }
 
+func TestPredictionFuelShare(t *testing.T) {
+	// COMBAT.md "Salvage" (stars-elegy #31): each kill event destroys
+	// F · lost fuel capacity / capacity before, from the fuel held then.
+	// 1 of 4 tankers (200 mg each) with 700 mg: 700·200/800 = 175 lost;
+	// then 1 of the 3 left: 525·200/600 = 175 lost.
+	tk := testDesign(Hull{Name: "Tanker", Armor: 25}, 10)
+	tk.FuelCapacity = 200
+	d := []Design{tk}
+	e := tok(d, 0, 1, 3)
+	e.fleet = 0
+	tb := newTestBattle(panicRand{}, d, e)
+	tb.g.Fleets = []Fleet{{Owner: 1, Fuel: 700, Stacks: []Stack{{Design: 0, Count: 4}}}}
+	tb.cargoShare(e, 1)
+	if got := tb.g.Fleets[0].Fuel; got != 525 {
+		t.Errorf("fuel after first kill %d, want 525", got)
+	}
+	e.ships = 2
+	tb.cargoShare(e, 1)
+	if got := tb.g.Fleets[0].Fuel; got != 350 {
+		t.Errorf("fuel after second kill %d, want 350", got)
+	}
+	e.ships = 0
+	tb.cargoShare(e, 2)
+	if got := tb.g.Fleets[0].Fuel; got != 0 {
+		t.Errorf("fuel after the fleet died %d, want 0", got)
+	}
+}
+
+func TestPredictionOutPlayerStillFires(t *testing.T) {
+	// COMBAT.md "Rounds" step 5 and "Firing" (stars-elegy #31): step 5
+	// only decides whether the battle ends. Player 0 attacks nobody and
+	// player 1 attacks only player 0, so both are out; players 2 and 3
+	// fight on. Player 1's token still fires, at player 0.
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Armor: 10000}, 10)}
+	p0, p1, p2, p3 := tok(d, 1, 0, 1), tok(d, 0, 1, 1), tok(d, 0, 2, 1), tok(d, 1, 3, 1)
+	tb := newTestBattle(panicRand{}, d, p0, p1, p2, p3)
+	tb.g.Players = make([]Player, 4)
+	tb.players = []int{0, 1, 2, 3}
+	tb.sets = attackSets{{}, {0: true}, {3: true}, {2: true}}
+	tb.checkIn()
+	if tb.in[0] || tb.in[1] || len(tb.in) != 2 {
+		t.Fatalf("in after step 5: %v, want only 2 and 3", tb.in)
+	}
+	tb.fire()
+	if p0.dmg.Units == 0 {
+		t.Errorf("player 1 (out) did not fire at player 0")
+	}
+	if p3.dmg.Units == 0 {
+		t.Errorf("player 2 did not fire at player 3")
+	}
+}
+
+func TestPredictionDumpCargo(t *testing.T) {
+	// COMBAT.md "Setup steps" 2 (stars-elegy #31): in deep space the full
+	// dump is the salvage object's first addition, no quarter lost, and
+	// the object exists with no kills. Colonists and fuel stay aboard.
+	fr := testDesign(Hull{Name: "Freighter", Armor: 25}, 10)
+	fr.CargoCapacity = 100
+	plan := []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies, DumpCargo: true}}
+	g := &Game{
+		Players: []Player{{Plans: plan}, {Plans: plan}},
+		Designs: []Design{fr},
+		Fleets: []Fleet{{ID: 1, Owner: 0, Fuel: 50, Cargo: Cargo{Minerals: Minerals{40, 0, 3}, Colonists: 5},
+			Stacks: []Stack{{Design: 0, Count: 1}}}},
+	}
+	b := &battle{g: g, rng: &seqRand{}, loc: location{planet: -1, fleets: []int{0}}, players: []int{0}, involved: 1, killed: map[int]bool{}}
+	b.setup(map[int]bool{})
+	b.finish()
+	f := g.Fleets[0]
+	if f.Cargo != (Cargo{Colonists: 5}) || f.Fuel != 50 {
+		t.Errorf("fleet after dump %+v fuel %d", f.Cargo, f.Fuel)
+	}
+	if len(g.Salvage) != 1 || g.Salvage[0].Minerals != (Minerals{40, 0, 3}) {
+		t.Errorf("salvage %+v", g.Salvage)
+	}
+}
+
 func TestPredictionEstimateDrawsAt200(t *testing.T) {
 	// One ship with one torpedo simulates exactly 200 torpedoes: 200 draws.
 	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 1}), testDesign(Hull{Armor: 10000}, 10)}
@@ -865,9 +942,9 @@ type countRand struct{ n int }
 func (c *countRand) Intn(int) int { c.n++; return 0 }
 
 func TestPredictionRepairOthers(t *testing.T) {
-	// "Moved" rate 5, Interstellar Traveler doubling for fleets, starbase
-	// repair 50 (Inner Strength 75, assumption A8), and no repair after
-	// fighting.
+	// "Moved" rate 5, Inner Strength doubling r for fleets, starbase
+	// repair 50 (Inner Strength 75, Interstellar Traveler 50), and no
+	// repair after fighting.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
 	g := &Game{
 		Players: make([]Player, 3),
@@ -878,8 +955,9 @@ func TestPredictionRepairOthers(t *testing.T) {
 			{Pos: Point{30, 0}, Owner: 1, HasStarbase: true, StarbaseDamage: 300},
 		},
 	}
-	g.Players[1].Race.PRT = PRTInterstellarTraveler
+	g.Players[1].Race.PRT = PRTInnerStrength
 	g.Players[2].Race.PRT = PRTInnerStrength
+	g.Players[0].Race.PRT = PRTInterstellarTraveler
 	dmg := Damage{Pct: 100, Units: 200}
 	g.Fleets = []Fleet{
 		{ID: 1, Owner: 0, Stacks: []Stack{{Design: 0, Count: 1, Damage: dmg}}},
@@ -889,7 +967,7 @@ func TestPredictionRepairOthers(t *testing.T) {
 	repair(g, map[int]bool{1: true}, battleResult{fleets: map[int]bool{3: true}, bases: map[int]bool{}})
 	got := []int{g.Fleets[0].Stacks[0].Damage.Units, g.Fleets[1].Stacks[0].Damage.Units, g.Fleets[2].Stacks[0].Damage.Units,
 		g.Planets[0].StarbaseDamage, g.Planets[1].StarbaseDamage, g.Planets[2].StarbaseDamage}
-	if want := []int{195, 180, 200, 250, 225, 250}; !reflect.DeepEqual(got, want) {
+	if want := []int{195, 180, 200, 250, 225, 225}; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }

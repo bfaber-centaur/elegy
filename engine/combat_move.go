@@ -34,9 +34,9 @@ func (b *battle) move() {
 
 // step makes one single-square move.
 func (b *battle) step(t *token) {
-	// ASSUMPTION A2 (docs/COMBAT-STATUS.md): every move the token is given
-	// counts against the disengage counter, including one that leaves it
-	// on its square (its own square scored best, or a blocked step).
+	// Every move the token is given counts, including one where it stays
+	// on its square; the counter is lowered before the square is chosen
+	// (COMBAT.md "Disengaging", BINARY-ONLY).
 	if t.tactic == TacticDisengage {
 		if t.counter == 0 {
 			t.left = true // off the board: out of the battle, not destroyed
