@@ -1,16 +1,32 @@
-# Parity cases Elegy passes (TestParityVectors). One case id per line.
-CB-007
-CB-008
-CB-011
-CB-013
-CB-014
-CB-016
-CB-017
-CB-022-everyone
-CB-022-nolone
-CB-022
+# Parity cases Elegy passes (TestParityVectors). One case id per line;
+# "random k" after an id: the case passes with k of the 8 seed variants.
+BP-1
+BP-L
+CB-002 random 3
+CB-003 random 2
+CB-004 random 5
+CB-005 random 3
+CB-006 random 7
+CB-007 random 7
+CB-008 random 3
+CB-011 random 7
+CB-013 random 7
+CB-014 random 7
+CB-015 random 5
+CB-016 random 7
+CB-017 random 7
+CB-018-control random 7
+CB-022-everyone random 7
+CB-022-nolone random 7
+CB-022 random 7
+CB-023-control random 7
 CB-024
 SC-035
+CO-04a
+CO-04b
+CO-05
+CO-05b
+CO-05c
 CS-003-W-E07
 CS-003-W-E08
 CS-003-W-E09
@@ -66,7 +82,9 @@ FM-105-B
 FM-105-C
 FO-03-A
 FO-03-B
+FO-03-C
 FO-03-D
+FO-03-F
 FO-03-G
 FO-03-H
 FO-04-D
@@ -74,6 +92,7 @@ FO-04-F
 FO-05-D
 FO-05-E
 FO-05-F
+FO-06-A
 FO-06-B
 FO-06-C
 FO-06-D
@@ -96,6 +115,7 @@ KX-001-Z3
 KX-002-C1
 KX-002-C2
 KX-002-C3
+KX-002-G1
 KX-002-G2
 KX-002-G3
 KX-002-H1
@@ -114,9 +134,12 @@ KX-002-R5
 KX-002-R6
 KX-003-r1
 KX-003-r2
+KX-003-r3
 KX-003-r3l
 PG-002-A
+PG-002-B
 PG-003-A
+PG-003-B
 PQ-001-C01
 PQ-001-C02
 PQ-001-C03
@@ -142,6 +165,9 @@ TK-106-A
 TK-106-B
 TK-106-C
 TK-106-D
+TK-107-A
+TK-107-B
+TK-108-A
 TK-108-B
 TK-108-C
 TK-109-A
@@ -152,6 +178,8 @@ TK-110-B
 TK-113-B1
 TK-113-B2
 TK-113-B3
+TK-113-R1
+TK-113-R2
 TK-114-PS1
 TK-114-PS2
 TK-114-U1
@@ -165,5 +193,40 @@ TK-117-B
 TK-117-C
 TK-117-D
 TK-117-E
+TK-118-A
+TK-118-B
+TK-119-A
+TK-119-B
+TK-120-B
 TK-121-A
 TK-121-B
+TK-501
+TK-502
+WU-A
+WU-B1
+WU-CP1
+WU-CP2
+WU-CP3
+WU-CP4
+WU-CP5
+WU-FALLBACK
+WU-FOLLOW
+WU-LP1
+WU-LP2
+WU-LP3
+WU-LP4
+WU-RNG20
+WU-ROUTE
+WU-SW40
+WU-SW50
+WU-SW55
+WU-SW70
+WU-SW85
+WU-TWO
+WU-TWOEQ
+WU-TWOEQ2
+WU-WARP40
+WU-WARP90
+WP-1-explore
+XF-1-explore
+XF-1

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -18,11 +19,13 @@ import (
 // expectations. A case is skipped, not failed, when it needs something
 // Elegy does not model yet (a task, target, object or expectation kind),
 // or when its outcome is random. CONFIRMED and LEGACY BUG cases are
-// exact-match targets; MEASURED ones are reported only.
+// exact-match targets; MEASURED ones are tallied apart.
 //
-// testdata/vectors/baseline.txt lists the cases that pass; the test fails
-// when one of them fails. Run with -v to see the per-corpus report, and
-// with PARITY_BASELINE=write to rewrite the baseline.
+// testdata/vectors/baseline.txt lists the cases that pass, MEASURED ones
+// included, and the "random" cases with how many seed variants they pass
+// with (pvSeeds); the test fails when a listed case no longer passes, or
+// a random one passes with fewer seeds. Run with -v to see the per-corpus
+// report, and with PARITY_BASELINE=write to rewrite the baseline.
 
 type pvVector struct {
 	ID           string   `json:"id"`
@@ -717,8 +720,9 @@ func loadVectors(t *testing.T) []*pvVector {
 // pvResult is one case's outcome.
 type pvResult struct {
 	id, corpus, tag string
-	status          string // pass, fail, skip
+	status          string // pass, fail, skip, differs, random
 	why             string
+	passes          int // seed variants the case passes with
 }
 
 // pvCheck compares one expectation with a generated game; "" passes, a
@@ -1056,7 +1060,9 @@ func pvKeys[V any](m map[string]V) []string {
 }
 
 // runVector generates the vector's years once and checks every case.
-func runVector(v *pvVector) []pvResult {
+// runVector generates v's years with the seed variant k (0 is the
+// harness's reference seeding) and checks its cases.
+func runVector(v *pvVector, k int) []pvResult {
 	var out []pvResult
 	res := func(c pvCase, status, why string) {
 		out = append(out, pvResult{id: c.ID, corpus: v.corpus, tag: c.Tag, status: status, why: why})
@@ -1090,7 +1096,7 @@ func runVector(v *pvVector) []pvResult {
 			}
 			return out
 		}
-		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y))))
+		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
 		if err != nil {
 			genErr = err
 			break
@@ -1175,12 +1181,51 @@ func pvUnique(xs []string) []string {
 	return out
 }
 
+// pvSeeds is how many seed variants each vector runs with. The harness's
+// random stream is not the original's (the oracle's seeds are not in the
+// vectors), so a case whose outcome depends on the draws matches only by
+// chance. Such a case passes with some seeds and fails with others; it is
+// reported as "random" with its pass count and the reference seed's
+// comparison kept, and it cannot sit in the baseline.
+const pvSeeds = 8
+
+// pvStreamCheck folds one vector's seed variants into one result per case.
+func pvStreamCheck(runs [][]pvResult) []pvResult {
+	out := runs[0]
+	for i, r := range out {
+		passes, same := 0, true
+		for _, run := range runs {
+			if run[i].id != r.id {
+				panic("parity: seed variants disagree on case order")
+			}
+			if run[i].status == "pass" {
+				passes++
+			}
+			same = same && run[i].status == r.status
+		}
+		if !same {
+			why := r.why
+			if why == "" {
+				why = "matches"
+			}
+			out[i].status = "random"
+			out[i].passes = passes
+			out[i].why = fmt.Sprintf("passes with %d of %d seeds; reference seed %s: %s", passes, len(runs), r.status, why)
+		}
+	}
+	return out
+}
+
 func TestParityVectors(t *testing.T) {
 	var all []pvResult
 	for _, v := range loadVectors(t) {
-		all = append(all, runVector(v)...)
+		runs := make([][]pvResult, pvSeeds)
+		for k := range runs {
+			runs[k] = runVector(v, k)
+		}
+		all = append(all, pvStreamCheck(runs)...)
 	}
-	type tally struct{ pass, fail, skip, measured, differs int }
+	type tally struct{ pass, fail, skip, measured, differs, random int }
 	per := map[string]*tally{}
 	var corpora []string
 	for _, r := range all {
@@ -1195,6 +1240,8 @@ func TestParityVectors(t *testing.T) {
 			tl.skip++
 		case r.status == "differs":
 			tl.differs++
+		case r.status == "random":
+			tl.random++
 		case r.tag == "MEASURED":
 			tl.measured++
 		case r.status == "pass":
@@ -1205,7 +1252,7 @@ func TestParityVectors(t *testing.T) {
 	}
 	for _, c := range corpora {
 		tl := per[c]
-		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.measured)
+		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.measured)
 	}
 	for _, r := range all {
 		if r.status != "pass" {
@@ -1219,10 +1266,14 @@ func TestParityVectors(t *testing.T) {
 			t.Fatal(err)
 		}
 		w := bufio.NewWriter(f)
-		fmt.Fprintln(w, "# Parity cases Elegy passes (TestParityVectors). One case id per line.")
+		fmt.Fprintln(w, "# Parity cases Elegy passes (TestParityVectors). One case id per line;")
+		fmt.Fprintf(w, "# \"random k\" after an id: the case passes with k of the %d seed variants.\n", pvSeeds)
 		for _, r := range all {
-			if r.status == "pass" && r.tag != "MEASURED" {
+			switch r.status {
+			case "pass":
 				fmt.Fprintln(w, r.id)
+			case "random":
+				fmt.Fprintf(w, "%s random %d\n", r.id, r.passes)
 			}
 		}
 		w.Flush()
@@ -1238,12 +1289,21 @@ func TestParityVectors(t *testing.T) {
 		status[r.id] = r
 	}
 	for _, line := range strings.Split(string(b), "\n") {
-		id := strings.TrimSpace(line)
-		if id == "" || strings.HasPrefix(id, "#") {
+		fields := strings.Fields(line)
+		if len(fields) == 0 || strings.HasPrefix(fields[0], "#") {
 			continue
 		}
-		if r := status[id]; r.status != "pass" {
-			t.Errorf("baseline case %s now %s: %s", id, r.status, r.why)
+		r := status[fields[0]]
+		want := pvSeeds
+		if len(fields) == 3 && fields[1] == "random" {
+			want, _ = strconv.Atoi(fields[2])
+		}
+		got := r.passes
+		if r.status == "pass" {
+			got = pvSeeds
+		}
+		if got < want {
+			t.Errorf("baseline case %s passes with %d of %d seeds, was %d: %s %s", fields[0], got, pvSeeds, want, r.status, r.why)
 		}
 	}
 }
