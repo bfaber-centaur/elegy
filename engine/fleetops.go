@@ -1,6 +1,9 @@
 package engine
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 // Fleet operations (stars-elegy ORDERS.md "Fleet operations") and the
 // design read (ORDERS.md "Range and legality clamps").
@@ -72,8 +75,17 @@ func absorb(dst, src *Fleet, overflow, dilute bool) {
 			}
 		}
 		if j < 0 {
-			dst.Stacks = append(dst.Stacks, s)
-			j = len(dst.Stacks) - 1
+			// A fleet keeps its stacks in design-slot order
+			// (PRODUCTION-LAUNCH.md, stars-elegy #57, BINARY-ONLY); Elegy's
+			// design index stands for the slot.
+			j = len(dst.Stacks)
+			for k, d := range dst.Stacks {
+				if d.Design > s.Design {
+					j = k
+					break
+				}
+			}
+			dst.Stacks = slices.Insert(dst.Stacks, j, s)
 		} else {
 			d := &dst.Stacks[j]
 			d.Damage = mergeDamage(*d, s, dilute)

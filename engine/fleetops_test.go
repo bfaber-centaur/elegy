@@ -231,3 +231,16 @@ func TestPredictionDesignHullAndEngine(t *testing.T) {
 		}
 	}
 }
+
+func TestPredictionMergeStackOrder(t *testing.T) {
+	// Stacks stay in design-slot order (design index) after a merge.
+	dst := Fleet{Stacks: []Stack{{Design: 0, Count: 1}, {Design: 3, Count: 1}}}
+	absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, true)
+	var got []int
+	for _, s := range dst.Stacks {
+		got = append(got, s.Design)
+	}
+	if !reflect.DeepEqual(got, []int{0, 1, 3, 4}) {
+		t.Errorf("order %v", got)
+	}
+}
