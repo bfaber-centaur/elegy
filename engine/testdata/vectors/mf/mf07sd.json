@@ -1221,7 +1221,7 @@
    "id": "MF-07sd",
    "rule": "OBJECTS MF-7",
    "setup": "MF 07sd",
-   "tag": "MEASURED",
+   "tag": "CONFIRMED",
    "prediction_held": true,
    "varies_by_stream": false,
    "expect": [
@@ -1335,41 +1335,6 @@
     {
      "kind": "message",
      "player": 0,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 169,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
      "message_id": 355,
      "present": true,
      "year": 1
@@ -1401,41 +1366,6 @@
       }
      },
      "seen_by": 0,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 169,
-     "present": true,
      "year": 1
     },
     {
@@ -1475,7 +1405,7 @@
      "year": 1
     }
    ],
-   "verdict": "MF-07sd-A OBSERVED (MF-7): Scoop Tank dmg 93/100% (600), Shield Tank 39/100% (250); player 0's .M carries full designs of both; field 1000 -> 730 (SD: 1*0+2+25 = 27%)"
+   "verdict": "MF-07sd-A HELD (MF-7): Scoop Tank dmg 93/100% (600), Shield Tank 39/100% (250); player 0's .M carries full designs of both; field 1000 -> 730 (SD: 1*0+2+25 = 27%) | held: every value compared by hand with the predictions committed before the run (stars-oracle-apparatus evidence/mf/README.md verdict note)"
   }
  ],
  "source": {

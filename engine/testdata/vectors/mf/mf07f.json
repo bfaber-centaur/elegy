@@ -1187,7 +1187,7 @@
    "id": "MF-07f",
    "rule": "OBJECTS MF-7",
    "setup": "MF 07f",
-   "tag": "MEASURED",
+   "tag": "CONFIRMED",
    "prediction_held": true,
    "varies_by_stream": false,
    "expect": [
@@ -1273,41 +1273,6 @@
     {
      "kind": "message",
      "player": 0,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
-     "message_id": 169,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 0,
      "message_id": 355,
      "present": true,
      "year": 1
@@ -1339,41 +1304,6 @@
       }
      },
      "seen_by": 0,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 127,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 128,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 129,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 130,
-     "present": true,
-     "year": 1
-    },
-    {
-     "kind": "message",
-     "player": 1,
-     "message_id": 169,
-     "present": true,
      "year": 1
     },
     {
@@ -1413,7 +1343,7 @@
      "year": 1
     }
    ],
-   "verdict": "MF-07f-A OBSERVED (MF-7): Tank dmg 312/100%; field 730"
+   "verdict": "MF-07f-A HELD (MF-7): Tank dmg 312/100%; field 730 | held: every value compared by hand with the predictions committed before the run (stars-oracle-apparatus evidence/mf/README.md verdict note)"
   }
  ],
  "source": {
