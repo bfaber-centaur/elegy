@@ -29,6 +29,9 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Production queue | `production.go` | PQ-001 C01–C14 (15 cases); KX-001 A1–A4 (Auto Alchemy before a ×n item), M1–M4 (item costs) | empty queue (no tax), zero resources |
 | Movement and fuel | `movement.go` | all 224 fleets of FM-001..004 (position, fuel, waypoints, warp, orbit, events), KERNEL fuel/range/chase vectors | no free warp, more than one engine per ship, cargo ties, chaser fuel per round (R, running dry, top-up, ram scoop) |
 | Starbase refuelling | `movement.go` | FM-004 DK | |
+| AR colonists in flight | `movement.go` `arColonistLoss` | TK-117, TK-107 (stars-elegy #44) | |
+| Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, switch `legacyFuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
+| Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
 
@@ -48,7 +51,7 @@ sweeping,
 terraforming, remote mining, scores, Super Stealth research stealing, the
 duplicate-serial penalty, ships/starbases in the queue, fuel generators,
 friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
-Engines, warp-10 losses, AR colonist losses, Radiating Hydro-Ram colonist
+Engines, warp-10 losses, Radiating Hydro-Ram colonist
 deaths and transport/lay-mines tasks.
 
 ## Corrected upstream
@@ -148,8 +151,12 @@ Places where the original has no behavior to copy, and Elegy chose one.
 
 ## Open spec questions
 
-None from KERNEL.md's current text. Choices the code makes where KERNEL.md
-is silent:
+- **K1 (ASSUMPTION), AR colonists in flight.** KERNEL.md says the loss
+  applies "in each year it moves". Elegy counts a fleet as moving when it
+  has a waypoint at a non-zero warp whose destination is not its own
+  position, and sends no message when the loss rounds to 0 kT (11..21 kT).
+
+Choices the code makes where KERNEL.md is silent:
 
 - **Generalized Research order.** Every field is checked for level-ups
   before any switch.

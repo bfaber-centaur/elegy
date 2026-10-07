@@ -130,7 +130,7 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 		out = append(out, fleetDesign{d: g.Designs[s.Design], n: s.Count})
 	}
 	sort.SliceStable(out, func(a, b int) bool {
-		return out[a].d.Engine.Fuel[warp] < out[b].d.Engine.Fuel[warp]
+		return engineFactor(out[a].d, warp) < engineFactor(out[b].d, warp)
 	})
 	left := f.Cargo.mass()
 	for i := range out {
@@ -146,9 +146,45 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
 	tenths := 0
 	for _, gr := range g.groups(f, warp) {
-		tenths += gr.d.Engine.Fuel[warp] * dist * (gr.n*gr.d.Mass + gr.cargo) / 2000
+		tenths += fuelTerm(engineFactor(gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
 	}
 	return (tenths + 9) / 10
+}
+
+// underEngined is the engine factor of a ship design whose engine slot is
+// empty or not filled to the hull's maximum (KERNEL.md "Designs without a
+// full set of engines", CONFIRMED FM-105). NewDesign refuses such designs;
+// the rule covers designs made any other way.
+const underEngined = 99999
+
+// engineFactor is f, the design's fuel factor at warp.
+func engineFactor(d Design, warp int) int {
+	if !d.Hull.Starbase && len(d.Hull.Slots) > 0 && d.Engines < d.Hull.Slots[0].Max {
+		return underEngined
+	}
+	return d.Engine.Fuel[warp]
+}
+
+// legacyFuelWrap reproduces the original's LEGACY BUG in the fuel term
+// (KERNEL.md "Designs without a full set of engines", CONFIRMED FM-105):
+// in its integer form the product f·L·M keeps its low 32 bits and is
+// divided as a signed 32-bit number. Only an under-engined design's
+// factor makes it wrap. Set it to false for the exact product.
+const legacyFuelWrap = true
+
+// fuelTerm is one stack's fuel term trunc(f·L·M/2000) in tenths of a mg
+// (KERNEL.md "Fuel cost"), for factor f, L light-years and mass M (ships
+// plus cargo, kT).
+func fuelTerm(f, l, m int) int {
+	return fuelTermWrap(f, l, m, legacyFuelWrap)
+}
+
+func fuelTermWrap(f, l, m int, wrap bool) int {
+	integer := m < 200 || f*l < 500000 && m < 4000 || f*l < 100000 && m < 20000
+	if wrap && integer {
+		return int(int32(uint32(f*l*m)) / 2000)
+	}
+	return f * l * m / 2000
 }
 
 // fuelRange is R, the distance the fleet's fuel pays for at warp, and
@@ -156,7 +192,7 @@ func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
 func (g *Game) fuelRange(f *Fleet, warp int) (r int, unlimited bool) {
 	sum := 0
 	for _, gr := range g.groups(f, warp) {
-		sum += gr.d.Engine.Fuel[warp] * 1000 * (gr.n*gr.d.Mass + gr.cargo) / 2000
+		sum += fuelTerm(engineFactor(gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
 	}
 	c1000 := sum / 10
 	switch {
@@ -197,7 +233,7 @@ func (g *Game) ramScoopGain(f *Fleet, warp, dist int) int {
 	gain := 0
 	for _, s := range f.Stacks {
 		d := g.Designs[s.Design]
-		if d.Engine.Fuel[warp] != 0 {
+		if engineFactor(d, warp) != 0 {
 			continue
 		}
 		free := 0
@@ -288,6 +324,30 @@ func (g *Game) arrive(f *Fleet) []Event {
 	return nil
 }
 
+// EventColonistsLostInFlight: Count = kT of colonists an Alternate Reality
+// fleet lost before moving.
+const EventColonistsLostInFlight EventKind = EventMergeRefused + 1
+
+// arColonistLoss is KERNEL.md "Alternate Reality colonists in flight"
+// (CONFIRMED, TK-117): an AR fleet with more than 10 kT of colonists loses
+// trunc((C+11)·3/100) kT in a year it moves, before the move.
+//
+// ASSUMPTION K1: a fleet "moves" when it has a waypoint at a non-zero warp
+// whose destination is not its own position, and a loss of 0 kT sends no
+// message.
+func (g *Game) arColonistLoss(f *Fleet) []Event {
+	c := f.Cargo.Colonists
+	if c <= 10 || f.Owner < 0 || f.Owner >= len(g.Players) || g.Players[f.Owner].Race.PRT != PRTAlternateReality || g.destination(f.Waypoints[0]) == f.Pos {
+		return nil
+	}
+	lost := (c + 11) * 3 / 100
+	if lost == 0 { // 11..21 kT lose nothing (TK-117: 11 → 11); no message (ASSUMPTION K1)
+		return nil
+	}
+	f.Cargo.Colonists -= lost
+	return []Event{g.fleetEvent(f, EventColonistsLostInFlight, lost)}
+}
+
 func moving(f *Fleet) bool {
 	return len(f.Waypoints) > 0 && f.Waypoints[0].Warp > 0
 }
@@ -313,6 +373,7 @@ func moveFleets(g *Game) []Event {
 			continue
 		}
 		f.Task = Task{}
+		events = append(events, g.arColonistLoss(f)...)
 		if f.Waypoints[0].Target == TargetFleet && g.fleetIndex(f.Waypoints[0].ID) >= 0 {
 			chasers = append(chasers, i)
 			continue

@@ -31,8 +31,9 @@ const (
 )
 
 // Cargo types of a transport order: the three minerals by their Minerals
-// index, then colonists. Fuel is never unloaded to a planet (TAKEOVER.md,
-// BINARY-ONLY), so it has no action here.
+// index, then colonists. Fuel is never unloaded to a planet (KERNEL.md
+// "Fuel cannot be unloaded onto a planet", CONFIRMED FM-101..105), so it
+// has no action here.
 const (
 	CargoColonists = NumMinerals
 	NumCargo       = NumMinerals + 1
