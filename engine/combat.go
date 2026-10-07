@@ -77,12 +77,12 @@ func (b *battle) finish() {
 			pl.StarbaseDamage = t.dmg.Units
 			continue
 		}
-		// Destroyed (BINARY-ONLY): the planet has no starbase. Queued ships
+		// Destroyed: the planet has no starbase. Queued ships
 		// and packets are not modelled in Elegy's queue yet.
 		pl.HasStarbase, pl.StarbaseHull, pl.StarbaseDock, pl.StarbaseDamage = false, 0, false, 0
 		if g.Players[t.player].Race.PRT == PRTAlternateReality {
 			// An Alternate Reality planet without its starbase is left
-			// uninhabited (BINARY-ONLY), and emptied as TAKEOVER.md
+			// uninhabited (CONFIRMED, CB-041), and emptied as TAKEOVER.md
 			// "Capture" lists: the growth carry stays.
 			g.emptyPlanet(t.planet)
 		}
@@ -98,14 +98,17 @@ func (b *battle) finish() {
 
 // legacyObserverTechMask reproduces the original's LEGACY BUG in the
 // tech attempt of players outside the battle (COMBAT.md "Tech from
-// battle", BINARY-ONLY): it tests the player's number against the
+// battle", CONFIRMED, CB-031-obs, CB-037): it tests the player's number against the
 // observer bitmask instead of the player's bit. Set it to false to test
 // the bit, as the game means to.
 const legacyObserverTechMask = true
 
 // techAttempts makes the battle's tech-from-battle attempts (COMBAT.md
-// "Tech from battle", BINARY-ONLY in detail): every player of the game is
-// considered once, in player-number order.
+// "Tech from battle"): every player of the game is considered once, in
+// player-number order. A wiped-out participant of a two-player battle makes
+// no attempt (CONFIRMED, CB-029), nor does any participant when an
+// Alternate Reality starbase was destroyed (CONFIRMED, CB-041); with n ≠ 2
+// every participant attempts (CONFIRMED, CB-031-n3).
 func (b *battle) techAttempts(gained map[int]bool) []Event {
 	g := b.g
 	owner, sbOwnerless := NoOwner, false
@@ -133,7 +136,7 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 	}
 	// Observers: players present but not in the battle, and the owner of
 	// a planet there without a starbase, even when that owner is a
-	// participant (BINARY-ONLY): its bit counts for other players, though
+	// participant (CONFIRMED, CB-037-owner): its bit counts for other players, though
 	// a participant never gets the observer attempt itself.
 	observers := 0
 	present := map[int]bool{}
@@ -240,7 +243,7 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		default:
 			r = 100
 		}
-		// Inner Strength doubles r, not f (BINARY-ONLY).
+		// Inner Strength doubles r, not f (CONFIRMED, CB-024).
 		if g.Players[f.Owner].Race.PRT == PRTInnerStrength {
 			r *= 2
 		}
@@ -260,7 +263,7 @@ func repair(g *Game, moved map[int]bool, res battleResult) {
 		if !p.HasStarbase || res.bases[i] || p.Owner == NoOwner {
 			continue
 		}
-		// 50 units, or 75 for Inner Strength (BINARY-ONLY).
+		// 50 units, or 75 for Inner Strength (CONFIRMED, CB-024).
 		r := 50
 		if g.Players[p.Owner].Race.PRT == PRTInnerStrength {
 			r = 75

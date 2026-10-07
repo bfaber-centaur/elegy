@@ -1,9 +1,12 @@
 package engine
 
+import "slices"
+
 // A battle's board, setup and rounds (COMBAT.md "Board setup", "Rounds").
 
 // startSquares are the start squares by rank among n involved players
-// (CONFIRMED for two players, CB-001..CB-019; BINARY-ONLY otherwise).
+// (CONFIRMED for one to six involved players, CB-001..CB-036; BINARY-ONLY
+// otherwise).
 var startSquares = [17][][2]int{
 	1:  {{4, 4}},
 	2:  {{1, 4}, {8, 5}},
@@ -26,7 +29,7 @@ var startSquares = [17][][2]int{
 const (
 	boardSize  = 10
 	maxRounds  = 16
-	maxTokens  = 256
+	maxTokens  = 255
 	jitterSpan = 15
 )
 
@@ -93,7 +96,9 @@ func (b *battle) setup(fought map[int]bool) []Event {
 			fleets = append(fleets, i)
 		}
 	}
-	fleets, missed := b.capTokens(fleets)
+	sbOwner, hasSB := g.battleStarbase(b.loc.planet)
+	hasSB = hasSB && isInvolved[sbOwner]
+	fleets, missed := b.capTokens(fleets, hasSB)
 	for _, p := range missed {
 		events = append(events, Event{Kind: EventFleetsMissedBattle, Player: p, Planet: -1, Fleet: -1})
 	}
@@ -104,7 +109,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		plan := g.plan(f.Owner, f.Plan)
 		race := g.Players[f.Owner].Race
 		dumped := false
-		// Dump cargo (COMBAT.md "Setup steps" 2, BINARY-ONLY): all three
+		// Dump cargo (COMBAT.md "Setup steps" 2, CONFIRMED, CB-025): all three
 		// minerals; colonists and fuel stay aboard. At a planet the
 		// surface gains the full amount. In deep space the full amount,
 		// with no quarter lost, is the salvage object's first addition.
@@ -128,10 +133,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 			t := tokenValues(d, race, false, designCost(d, race, g.Players[f.Owner].Research.Levels))
 			t.player, t.fleet, t.stack, t.planet, t.design = f.Owner, i, si, -1, s.Design
 			t.ships, t.dmg = s.Count, s.Damage
-			t.mass = d.Mass
-			if capacity > 0 {
-				t.mass += f.Cargo.mass() * d.CargoCapacity / capacity
-			}
+			t.mass = battleMass(d, f.Cargo.mass(), capacity)
 			t.speed = speedCode(d, race, t.mass, dumped)
 			if t.armed() {
 				t.tactic, t.primary, t.secondary = plan.Tactic, plan.Primary, plan.Secondary
@@ -142,7 +144,8 @@ func (b *battle) setup(fought map[int]bool) []Event {
 			b.tokens = append(b.tokens, &t)
 		}
 	}
-	if owner, ok := g.battleStarbase(b.loc.planet); ok && isInvolved[owner] {
+	if hasSB {
+		owner := sbOwner
 		pl := &g.Planets[b.loc.planet]
 		sd, race := g.Designs[pl.StarbaseDesign], g.Players[owner].Race
 		t := tokenValues(sd, race, true, designCost(sd, race, g.Players[owner].Research.Levels))
@@ -187,6 +190,16 @@ func (b *battle) setup(fought map[int]bool) []Event {
 	return events
 }
 
+// battleMass is a ship's mass in battle: design mass + C·c/F, truncated,
+// with C the fleet's cargo, c one ship's cargo capacity and F the fleet's
+// cargo capacity (COMBAT.md "Token values", CONFIRMED, CB-038).
+func battleMass(d Design, cargo, capacity int) int {
+	if capacity <= 0 {
+		return d.Mass
+	}
+	return d.Mass + cargo*d.CargoCapacity/capacity
+}
+
 func (g *Game) fleetCargoCapacity(f *Fleet) int {
 	c := 0
 	for _, s := range f.Stacks {
@@ -195,11 +208,18 @@ func (g *Game) fleetCargoCapacity(f *Fleet) int {
 	return c
 }
 
-// capTokens applies the 256-token cap (BINARY-ONLY): each player gets
-// 255/players stacks, fleets beyond the quota are left out, then left-out
-// fleets are added back while room remains. It returns the fleets that
-// fight and the players with a fleet left out.
-func (b *battle) capTokens(fleets []int) ([]int, []int) {
+// capTokens applies the token cap (COMBAT.md "Who fights" step 7,
+// CONFIRMED, CB-039): at most 255 tokens, a starbase counting 1. Over the
+// cap, each involved player gets a quota of 255/n stacks; the starbase
+// counts toward the total but not toward its owner's quota. The first
+// pass takes the location's fleets in this order: the location's first
+// fleet (lowest by owner, then fleet number), then the others from the
+// highest to the lowest; a fleet joins whole if its owner's count plus
+// its stacks is within the quota. The second pass, in the same order,
+// adds back each left-out fleet that still fits under 255. fleets are
+// the candidate fleets, in location order. It returns the fleets that
+// fight, in location order, and the players with a fleet left out.
+func (b *battle) capTokens(fleets []int, starbase bool) ([]int, []int) {
 	g := b.g
 	stacks := func(i int) int {
 		n := 0
@@ -211,20 +231,34 @@ func (b *battle) capTokens(fleets []int) ([]int, []int) {
 		return n
 	}
 	total := 0
+	if starbase {
+		total = 1
+	}
+	base := total
 	for _, i := range fleets {
 		total += stacks(i)
-	}
-	if _, ok := g.battleStarbase(b.loc.planet); ok {
-		total++
 	}
 	if total <= maxTokens {
 		return fleets, nil
 	}
-	quota := 255 / len(b.players)
+	candidate := map[int]bool{}
+	for _, i := range fleets {
+		candidate[i] = true
+	}
+	var order []int
+	for k, i := range slices.Backward(b.loc.fleets) {
+		if k > 0 && candidate[i] {
+			order = append(order, i)
+		}
+	}
+	if first := b.loc.fleets[0]; candidate[first] {
+		order = slices.Insert(order, 0, first)
+	}
+	quota := maxTokens / b.involved
 	used := map[int]int{}
 	in := map[int]bool{}
-	count := 0
-	for _, i := range fleets {
+	count := base
+	for _, i := range order {
 		o := g.Fleets[i].Owner
 		if used[o]+stacks(i) <= quota {
 			used[o] += stacks(i)
@@ -232,8 +266,8 @@ func (b *battle) capTokens(fleets []int) ([]int, []int) {
 			count += stacks(i)
 		}
 	}
-	for _, i := range fleets {
-		if !in[i] && count+stacks(i) <= maxTokens-1 {
+	for _, i := range order {
+		if !in[i] && count+stacks(i) <= maxTokens {
 			in[i] = true
 			count += stacks(i)
 		}
@@ -288,7 +322,7 @@ func (b *battle) fight() {
 // checkIn is round step 5: players with live tokens are checked in player
 // order, and a player whose attack set names no player still in is out.
 // A player removed earlier in the check no longer counts for later ones.
-// The check only decides whether the battle ends now (BINARY-ONLY): a
+// The check only decides whether the battle ends now (CONFIRMED, CB-033): a
 // player found out keeps firing and moving, and the next round's check
 // starts again from every player with a live token.
 func (b *battle) checkIn() {

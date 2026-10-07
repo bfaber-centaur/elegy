@@ -638,26 +638,83 @@ func TestPredictionBattleTurn(t *testing.T) {
 	}
 }
 
-func TestPredictionTokenCap(t *testing.T) {
-	// 256 tokens at most: 255/players stacks per player, then left-out
-	// fleets added back while room remains.
+func TestConfirmedTokenCap(t *testing.T) {
+	// CB-039: 140 one-ship fleets each for players 0 and 1, n = 2, quota
+	// 127. Player 0's first fleet, then player 1's 139..13 and player 0's
+	// 139..14 (254 stacks); the second pass adds player 1's fleet 12.
+	// Player 0's 1..13 and player 1's 0..11 sit out.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
 	g := &Game{Players: make([]Player, 2), Designs: d}
 	var fleets []int
-	for i := range 300 {
-		owner := 0
-		if i >= 200 {
-			owner = 1
+	for o := range 2 {
+		for id := range 140 {
+			g.Fleets = append(g.Fleets, Fleet{ID: id, Owner: o, Stacks: []Stack{{Design: 0, Count: 1}}})
+			fleets = append(fleets, len(g.Fleets)-1)
 		}
-		g.Fleets = append(g.Fleets, Fleet{ID: i, Owner: owner, Stacks: []Stack{{Design: 0, Count: 1}}})
-		fleets = append(fleets, i)
 	}
-	b := &battle{g: g, loc: location{planet: -1}, players: []int{0, 1}}
-	in, missed := b.capTokens(fleets)
-	// Quota 127 each: 127 of player 0 and all 100 of player 1, then 28
-	// more of player 0 up to 255.
-	if len(in) != 255 || !reflect.DeepEqual(missed, []int{0}) {
-		t.Errorf("%d fleets in, missed %v; want 255 and [0]", len(in), missed)
+	b := &battle{g: g, loc: location{planet: -1, fleets: fleets}, players: []int{0, 1}, involved: 2}
+	in, missed := b.capTokens(fleets, false)
+	joined := map[[2]int]bool{}
+	for _, i := range in {
+		joined[[2]int{g.Fleets[i].Owner, g.Fleets[i].ID}] = true
+	}
+	for o := range 2 {
+		for id := range 140 {
+			want := id >= 12
+			if o == 0 {
+				want = id == 0 || id >= 14
+			}
+			if joined[[2]int{o, id}] != want {
+				t.Errorf("player %d fleet %d: joined %v, want %v", o, id, !want, want)
+			}
+		}
+	}
+	if len(in) != 255 || !reflect.DeepEqual(missed, []int{0, 1}) {
+		t.Errorf("%d fleets in, missed %v; want 255 and [0 1]", len(in), missed)
+	}
+}
+
+func TestPredictionTokenCapStarbase(t *testing.T) {
+	// A starbase counts toward the total, not toward its owner's quota;
+	// the second pass skips a fleet that no longer fits and goes on.
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
+	g := &Game{Players: make([]Player, 2), Designs: d}
+	var fleets []int
+	add := func(o, id, stacks int) {
+		f := Fleet{ID: id, Owner: o}
+		for range stacks {
+			f.Stacks = append(f.Stacks, Stack{Design: 0, Count: 1})
+		}
+		g.Fleets = append(g.Fleets, f)
+		fleets = append(fleets, len(g.Fleets)-1)
+	}
+	for id := range 122 {
+		add(0, id, 1)
+	}
+	for id := range 131 {
+		stacks := 1
+		if id == 2 {
+			stacks = 5
+		}
+		add(1, id, stacks)
+	}
+	b := &battle{g: g, loc: location{planet: -1, fleets: fleets}, players: []int{0, 1}, involved: 2}
+	in, _ := b.capTokens(fleets, true)
+	// First pass, quota 127: player 0's fleet 0, player 1's 130..4 (127),
+	// player 0's 121..1 (121): 250 with the starbase. Second pass: player
+	// 1's fleet 3 (251), fleet 2 skipped (5 stacks would make 256), fleets
+	// 1 and 0 (253).
+	joined := map[int]bool{}
+	count := 1
+	for _, i := range in {
+		count += len(g.Fleets[i].Stacks)
+		if g.Fleets[i].Owner == 1 {
+			joined[g.Fleets[i].ID] = true
+		}
+	}
+	if count != 253 || joined[2] || !joined[3] || !joined[1] || !joined[0] {
+		t.Errorf("total %d, player 1 fleets 0..3 joined %v %v %v %v; want 253, true true false true",
+			count, joined[0], joined[1], joined[2], joined[3])
 	}
 }
 
@@ -822,10 +879,12 @@ func TestPredictionTechAttemptRules(t *testing.T) {
 	}
 }
 
-func TestPredictionStartSquareFlatTable(t *testing.T) {
+func TestConfirmedStartSquareFlatTable(t *testing.T) {
 	// Entry n(n−1)/2 + rank of the flattened table: n = 1 gives (4,4) then
-	// (1,4); a third player in P with n = 2 runs into row 3.
-	for _, c := range []struct{ n, r, x, y int }{{1, 0, 4, 4}, {1, 1, 1, 4}, {2, 1, 8, 5}, {2, 2, 4, 1}} {
+	// (1,4) (CB-022); with n = 2, an uninvolved starbase owner took (1,4)
+	// and the involved players (8,5) and (4,1), running into row 3
+	// (CB-036).
+	for _, c := range []struct{ n, r, x, y int }{{1, 0, 4, 4}, {1, 1, 1, 4}, {2, 0, 1, 4}, {2, 1, 8, 5}, {2, 2, 4, 1}} {
 		if got := startSquare(c.n, c.r); got != [2]int{c.x, c.y} {
 			t.Errorf("startSquare(%d, %d) = %v, want (%d,%d)", c.n, c.r, got, c.x, c.y)
 		}
@@ -1026,6 +1085,17 @@ func TestPredictionEmptySalvageGetsTokenAmount(t *testing.T) {
 	}
 }
 
+func TestConfirmedSalvageOverflow(t *testing.T) {
+	// CB-040: 36098 kT of ironium and 50 kT of germanium went into one
+	// object of 30000 ironium and a second of 6098 ironium and 50
+	// germanium.
+	tb := newTestBattle(panicRand{}, nil)
+	tb.addSalvage(Minerals{36098, 0, 50})
+	if want := []Minerals{{30000, 0, 0}, {6098, 0, 50}}; !reflect.DeepEqual(tb.salvage, want) {
+		t.Errorf("salvage %v, want %v", tb.salvage, want)
+	}
+}
+
 func TestPredictionSalvageLimit(t *testing.T) {
 	// 3000 steps of 10 kT per object; a mineral that does not fit fills
 	// the object and the rest goes into a new object.
@@ -1127,5 +1197,49 @@ func TestPredictionPlan0AbsentPlayer(t *testing.T) {
 	b.fight()
 	if len(b.hits) != 0 || b.round != 0 {
 		t.Errorf("%d hits, ended in round %d; want none in round 0", len(b.hits), b.round)
+	}
+}
+
+func TestConfirmedTorpedoHitRounding(t *testing.T) {
+	// CS-003-C2: one Alpha Torpedo hit (d = 5) on an unshielded target did
+	// 4: h = trunc(1·5/2) = 2 to shields (none, so it passes on) and 2 to
+	// armor.
+	alpha := Part{Name: "Alpha Torpedo", Kind: PartTorpedo, Damage: 5, Range: 4, Accuracy: 35}
+	d := []Design{testDesign(tFrigate, 10, Slot{alpha, 1}), testDesign(Hull{Armor: 1000}, 10)}
+	f, e := tok(d, 0, 0, 1), tok(d, 1, 1, 1)
+	tb := newTestBattle(&seqRand{draws: []int{0}}, d, f, e)
+	tb.torpedoes(0, f.weapons[0])
+	if len(tb.hits) != 1 || tb.hits[0].Hits != 1 || tb.hits[0].Armor != 4 {
+		t.Errorf("hits %+v, want one hit doing 4", tb.hits)
+	}
+}
+
+func TestPredictionTorpedoZeroHitRecord(t *testing.T) {
+	// COMBAT.md "Torpedoes and missiles" step 4: every target a salvo
+	// reaches gets a hit record, even with 0 hits; misses on a target
+	// without shields do nothing.
+	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 1}), testDesign(Hull{Armor: 1000}, 10)}
+	f, e := tok(d, 0, 0, 3), tok(d, 1, 1, 1)
+	tb := newTestBattle(highRand{}, d, f, e) // every torpedo misses
+	tb.torpedoes(0, f.weapons[0])
+	want := BattleHit{Firer: 0, Target: 1, Misses: 3}
+	if len(tb.hits) != 1 || tb.hits[0] != want || e.dmg != (Damage{}) {
+		t.Errorf("hits %+v, damage %+v; want one 0-hit record and no damage", tb.hits, e.dmg)
+	}
+}
+
+func TestConfirmedCargoMassPerShip(t *testing.T) {
+	// CB-038: 1 kT in a fleet of two Medium Freighters leaves each at mass
+	// 69, code 2; in a one-ship fleet, 70, code 1. (Long Hump 6 is the
+	// catalogue's mass-9 engine: 60 + 9 = 69.)
+	d, err := Components().NewDesign("MF", "Medium Freighter", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range []struct{ ships, mass, code int }{{2, 69, 2}, {1, 70, 1}} {
+		m := battleMass(d, 1, tt.ships*d.CargoCapacity)
+		if c := speedCode(d, Race{}, m, false); m != tt.mass || c != tt.code {
+			t.Errorf("%d ships: mass %d code %d, want %d %d", tt.ships, m, c, tt.mass, tt.code)
+		}
 	}
 }

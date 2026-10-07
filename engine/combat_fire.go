@@ -164,7 +164,7 @@ func (b *battle) beam(fi int, w weaponSlot) {
 		e := b.tokens[ti]
 		dp := R * t.capacitor / 100 * e.deflector / 100
 		// Dropoff uses the part's own range, without the starbase +1; a
-		// range-0 beam has none (BINARY-ONLY).
+		// range-0 beam has none (CONFIRMED, CB-026).
 		if x := dist(t.x, t.y, e.x, e.y); x > 0 && p.Range > 0 {
 			dp = (100 - x*10/p.Range) * dp / 100
 		}
@@ -253,23 +253,23 @@ func (b *battle) torpedoes(fi int, w weaponSlot) {
 		}
 		misses := n - hits
 		var h BattleHit
-		recorded := false
-		if misses > 0 && S > 0 {
-			if mh, ok := b.damage(e, misses*d/8, 0, true, -1); ok {
-				h.Shield += mh.Shield
-				recorded = true
-			}
+		// Misses do misses·d/8 to shields only, when that is above 0 and
+		// the target has shields left (COMBAT.md "Torpedoes and missiles"
+		// step 3).
+		if dm := misses * d / 8; dm > 0 && S > 0 {
+			mh, _ := b.damage(e, dm, 0, true, -1)
+			h.Shield += mh.Shield
 		}
-		if hits > 0 && e.live() {
+		// Hits: h = hits·d/2, truncated once, to shields and again to
+		// armor (step 4, CONFIRMED, CS-003-C2). Every target the salvo
+		// reaches gets a hit record, even with 0 hits (BINARY-ONLY).
+		if hits > 0 {
 			hh, _ := b.damage(e, hits*d/2, hits*d/2, false, n)
 			h.Shield += hh.Shield
 			h.Armor, h.Kills = hh.Armor, hh.Kills
-			recorded = true
 		}
-		if recorded {
-			h.Hits, h.Misses = hits, misses
-			b.record(fi, ti, h)
-		}
+		h.Hits, h.Misses = hits, misses
+		b.record(fi, ti, h)
 		N -= n
 	}
 }
@@ -406,7 +406,8 @@ func (b *battle) killEvent(e *token, kills int) {
 const salvageSteps = 3000
 
 // addSalvage adds minerals to this battle's deep-space salvage (COMBAT.md
-// "Salvage", BINARY-ONLY in detail). An all-zero addition becomes rand(10)
+// "Salvage", BINARY-ONLY in detail; the 30000 kT overflow CONFIRMED,
+// CB-040). An all-zero addition becomes rand(10)
 // of each, redrawn until above 0. The open object's minerals are taken
 // out and re-added with the new ones, ironium, boranium, germanium; a
 // mineral that does not fit fills the object to exactly 3000 steps, and
@@ -455,7 +456,8 @@ func (b *battle) addSalvage(add Minerals) {
 
 // cargoShare removes the destroyed ships' share of their fleet's cargo
 // and fuel and returns the cargo's minerals (COMBAT.md "Salvage",
-// BINARY-ONLY). The shares of colonists and fuel are destroyed. Each kill
+// the cargo share BINARY-ONLY; the fuel share CONFIRMED, CB-023). The
+// shares of colonists and fuel are destroyed. Each kill
 // event takes its share from what the fleet holds at that moment.
 // e.ships already excludes the kills.
 func (b *battle) cargoShare(e *token, kills int) Minerals {

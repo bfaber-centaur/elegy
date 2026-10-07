@@ -4,7 +4,8 @@ import "sort"
 
 // Battle movement (COMBAT.md "Movement order", "Disengaging", "Choosing a
 // square", "Square score"). BINARY-ONLY except the moves per round, the
-// disengage counter, and one mover against a station (CB-012, CB-019).
+// disengage counter (a stay counts, CB-034), the movement order (CB-030)
+// and one mover against a station (CB-012, CB-019).
 
 // move runs one round's movement: three phases a = 3, 2, 1, tokens in
 // descending jittered weight (ties keep token order).
@@ -36,7 +37,7 @@ func (b *battle) move() {
 func (b *battle) step(t *token) {
 	// Every move the token is given counts, including one where it stays
 	// on its square; the counter is lowered before the square is chosen
-	// (COMBAT.md "Disengaging", BINARY-ONLY).
+	// (COMBAT.md "Disengaging", CONFIRMED, CB-034).
 	if t.tactic == TacticDisengage {
 		if t.counter == 0 {
 			t.left = true // off the board: out of the battle, not destroyed
@@ -298,7 +299,7 @@ func (bt *battle) estimate(a, b *token, x int, ignoreRange bool) int {
 			v = v * a.capacitor / 100
 			// r includes the starbase +1; with r = 0 (a ship's range-0
 			// beam, reached only when ignoring range) there is no dropoff
-			// (BINARY-ONLY).
+			// (CONFIRMED, CB-026).
 			if x > 0 && r > 0 {
 				v = v + (x*v)/(-10)/r
 			}
