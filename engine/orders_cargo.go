@@ -10,10 +10,10 @@ import "fmt"
 // colonists.
 const CargoFuel = NumCargo
 
-// Messages for cargo given to another player.
+// Messages for cargo given to another player. Elegy's wording.
 const (
-	EventCargoGiven    EventKind = iota + EventGameLost + 1 // Player = receiver, Fleet = giver's fleet, Count = kT or mg credited
-	EventCargoGiftLost                                      // Player = giver, Fleet = giver's fleet, Count = kT or mg lost
+	EventCargoGiftLost      EventKind = iota + EventGameLost + 1 // Player = giver, Fleet = giver's fleet, Count = kT or mg that did not fit
+	EventColonistsLostGiven                                      // Player = giver, Planet, Count = colonists (units of 100) put onto an unowned planet or a starbase's planet
 )
 
 // CargoOrder moves cargo between one of the player's fleets and a planet
@@ -32,14 +32,20 @@ const (
 //
 // Another owner: only giving is allowed; taking from another player's
 // planet or fleet acts on a foreign object and is rejected (ORDERS.md
-// "Ownership", chosen rule). Colonists given to a planet the player does
-// not own become a colonist drop at the front of the before-movement drop
-// queue (ORDERS.md "Cross-owner cargo" and TAKEOVER.md "Order inside a
-// phase", BINARY-ONLY). Minerals and fuel given to another owner are
-// taken from the fleet now and credited later (Applied.Gifts,
-// DeliverGifts). Colonists are never given to another player's fleet,
-// and nothing is given to a fleet whose owner regards the giver as an
-// enemy (TAKEOVER.md "Other waypoint tasks").
+// "Ownership", chosen rule). What is given is taken from the fleet as the
+// order applies; relations do not matter (TAKEOVER.md "Manual cargo
+// transfers to other players", stars-elegy #69, CONFIRMED TK-501, TK-502):
+//   - colonists onto another player's planet without a starbase are a
+//     drop, resolved with the before-movement unloads;
+//   - colonists onto an unowned planet, or a planet with a starbase, are
+//     lost and the giver is told;
+//   - minerals (and fuel, to a fleet) are credited once every player's
+//     orders have applied (creditGifts; MEASURED for planets, TK-405,
+//     TK-412, with no message; BINARY-ONLY for fleets).
+//
+// ASSUMPTION L8: colonists are not given to another player's fleet
+// (TAKEOVER.md says so for the waypoint task; #69 does not cover a manual
+// transfer).
 //
 // ASSUMPTION L7: the fleet must be at the target's position (in orbit
 // of the planet); fuel to or from a planet rejects the order (KERNEL.md
@@ -47,9 +53,6 @@ const (
 // a direct transfer); any failed check rejects the whole order; and any
 // fleet with cargo space may carry colonists (ORDERS.md says the
 // condition exists but is not pinned).
-//
-// ASSUMPTION L8: the relation check is made when the order is applied,
-// so nothing is taken from the giver.
 type CargoOrder struct {
 	Fleet   int
 	Target  TargetKind // TargetPlanet or TargetFleet
@@ -140,7 +143,7 @@ func (o CargoOrder) apply(g *Game, player int, a *Applied) error {
 			switch {
 			case taking:
 				return fmt.Errorf("cargo: fleet %d: %w", t.ID, ErrNotYours)
-			case o.Amounts[CargoColonists] != 0, g.relation(t.Owner, player) == RelationEnemy:
+			case o.Amounts[CargoColonists] != 0:
 				return fmt.Errorf("cargo: fleet %d: %w", t.ID, ErrRefusedByOwner)
 			}
 			gift := CargoGift{From: player, FromFleet: f.ID, Target: TargetFleet, ID: t.ID}
@@ -187,9 +190,10 @@ func (g *Game) exchangeWithPlanet(f *Fleet, p *Planet, amounts [NumCargo + 1]int
 }
 
 // giveToPlanet gives cargo to a planet the player does not own: colonists
-// become a drop, minerals a gift.
+// become a drop or are lost, minerals a gift.
 func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Applied) {
-	gift := CargoGift{From: f.Owner, FromFleet: f.ID, Target: TargetPlanet, ID: g.Planets[pi].ID}
+	p := &g.Planets[pi]
+	gift := CargoGift{From: f.Owner, FromFleet: f.ID, Target: TargetPlanet, ID: p.ID}
 	any := false
 	for c := range NumCargo {
 		n := min(-amounts[c], *held(f, c))
@@ -197,68 +201,57 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 			continue
 		}
 		*held(f, c) -= n
-		if c == CargoColonists {
-			a.drops = append(a.drops, drop{planet: pi, player: f.Owner, troops: n})
+		if c != CargoColonists {
+			gift.Amounts[c] = n
+			any = true
 			continue
 		}
-		gift.Amounts[c] = n
-		any = true
+		if p.Owner == NoOwner || g.hasStarbase(pi) {
+			a.Events = append(a.Events, Event{Kind: EventColonistsLostGiven, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: n})
+		} else {
+			a.drops = append(a.drops, drop{planet: pi, player: f.Owner, troops: n})
+		}
 	}
 	if any {
 		a.Gifts = append(a.Gifts, gift)
 	}
 }
 
-// DeliverGifts credits cargo given to other owners (ORDERS.md "Cross-owner
-// cargo", BINARY-ONLY): a planet takes all of it; a fleet takes what fits
-// its free hold and tank, and the rest is lost. The receiver is told what
-// arrived, the giver what was lost.
+// creditGifts is the second pass of the replay (TAKEOVER.md "Manual cargo
+// transfers to other players", stars-elegy #69): each gift, in the order
+// given, is credited in place. A planet takes all its minerals with no
+// message (MEASURED, TK-405, TK-412). A fleet takes what fits its free
+// hold and tank, the rest is lost and the giver is told (BINARY-ONLY).
 //
-// When this runs in the year is open: ORDERS.md says after movement,
-// TAKEOVER.md "Where each task happens" step 2 says before movement,
-// after loads and merges. GenerateTurn does not call it yet.
-//
-// ASSUMPTION L9: cargo for a fleet or planet that no longer exists is
-// lost.
-func (g *Game) DeliverGifts(gifts []CargoGift) []Event {
+// ASSUMPTION L9: a receiving fleet that a later order in the replay
+// removed (a merge, or deleting its design) gets nothing, and the whole
+// gift is lost. The original skips a record whose receiver is missing at
+// replay (stars-elegy #69); a receiver removed between the passes is not
+// covered.
+func (g *Game) creditGifts(gifts []CargoGift) []Event {
 	var events []Event
 	for _, gift := range gifts {
-		credited, lost := 0, 0
-		var receiver int
-		switch gift.Target {
-		case TargetPlanet:
-			pi := g.planetIndex(gift.ID)
-			if pi < 0 {
-				for _, v := range gift.Amounts {
-					lost += v
-				}
-				break
-			}
-			p := &g.Planets[pi]
-			receiver = p.Owner
+		if gift.Target == TargetPlanet {
+			p := &g.Planets[g.planetIndex(gift.ID)]
 			for m := range NumMinerals {
 				p.Surface[m] += gift.Amounts[m]
-				credited += gift.Amounts[m]
 			}
-		case TargetFleet:
-			ti := g.fleetIndex(gift.ID)
-			if ti < 0 {
-				for _, v := range gift.Amounts {
-					lost += v
-				}
-				break
-			}
-			t := &g.Fleets[ti]
-			receiver = t.Owner
-			for c, v := range gift.Amounts {
-				n := min(v, g.free(t, c))
-				*held(t, c) += n
-				credited += n
-				lost += v - n
-			}
+			continue
 		}
-		if credited > 0 && receiver != NoOwner {
-			events = append(events, Event{Kind: EventCargoGiven, Player: receiver, Planet: -1, Fleet: gift.FromFleet, Count: credited})
+		lost := 0
+		ti := g.fleetIndex(gift.ID)
+		if ti < 0 {
+			for _, v := range gift.Amounts {
+				lost += v
+			}
+			events = append(events, Event{Kind: EventCargoGiftLost, Player: gift.From, Planet: -1, Fleet: gift.FromFleet, Count: lost})
+			continue
+		}
+		t := &g.Fleets[ti]
+		for c, v := range gift.Amounts {
+			n := min(v, g.free(t, c))
+			*held(t, c) += n
+			lost += v - n
 		}
 		if lost > 0 {
 			events = append(events, Event{Kind: EventCargoGiftLost, Player: gift.From, Planet: -1, Fleet: gift.FromFleet, Count: lost})

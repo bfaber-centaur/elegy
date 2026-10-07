@@ -298,44 +298,61 @@ func TestConfirmedCargoOwnPlanet(t *testing.T) {
 	}
 }
 
-func TestPredictionCrossOwnerCargo(t *testing.T) {
-	// ORDERS.md "Cross-owner cargo" (BINARY-ONLY): colonists given to a
-	// planet the giver does not own become a drop; minerals given to
-	// another owner leave the giver now and are credited later; taking
-	// from another owner is rejected (chosen rule).
+func TestConfirmedManualTransfersToOthers(t *testing.T) {
+	// TAKEOVER.md "Manual cargo transfers to other players" (stars-elegy
+	// #69, CONFIRMED TK-501, TK-502; minerals MEASURED TK-405, TK-412):
+	// colonists onto another player's planet are a drop, whatever the
+	// relations; onto an unowned planet they are lost and the giver is
+	// told; minerals join the surface once every file has applied, with no
+	// message. Taking from another owner is rejected (chosen rule).
 	g := ordersGame()
+	g.Fleets[0].Pos = g.Planets[1].Pos
+	g.Players[1].Relations = []Relation{RelationFriend, RelationFriend}
 	errs, a := apply(g, 0,
 		CargoOrder{Fleet: 4, Target: TargetPlanet, ID: 3, Amounts: [NumCargo + 1]int{0, -15, 0, -25}},
 		CargoOrder{Fleet: 4, Target: TargetPlanet, ID: 3, Amounts: [NumCargo + 1]int{0, 1, 0, 0}},
+		CargoOrder{Fleet: 1, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-100, 0, 0, -10}},
 	)
-	if errs[0] != nil || !errors.Is(errs[1], ErrNotYours) {
+	if errs[0] != nil || !errors.Is(errs[1], ErrNotYours) || errs[2] != nil {
 		t.Fatal(errs)
 	}
-	f := g.Fleets[3]
-	if f.Cargo != (Cargo{Minerals: Minerals{0, 5, 0}, Colonists: 5}) {
+	if f := g.Fleets[3]; f.Cargo != (Cargo{Minerals: Minerals{0, 5, 0}, Colonists: 5}) {
 		t.Errorf("giver's cargo %+v", f.Cargo)
 	}
-	if !reflect.DeepEqual(a.drops, []drop{{planet: 2, player: 0, troops: 25}}) {
-		t.Errorf("drops %+v", a.drops)
+	if !reflect.DeepEqual(a.drops, []drop{{planet: 1, player: 0, troops: 10}}) {
+		t.Errorf("drops %+v, want 10 onto planet 2", a.drops)
 	}
-	if len(a.Gifts) != 1 || a.Gifts[0].Amounts != [NumCargo + 1]int{0, 15, 0, 0, 0} || g.Planets[2].Surface != (Minerals{}) {
-		t.Fatalf("gifts %+v, planet %+v", a.Gifts, g.Planets[2].Surface)
+	if len(a.Events) != 1 || a.Events[0].Kind != EventColonistsLostGiven || a.Events[0].Count != 25 {
+		t.Errorf("events %+v, want 25 colonists lost on the unowned planet", a.Events)
 	}
-	g.DeliverGifts(a.Gifts)
-	if g.Planets[2].Surface != (Minerals{0, 15, 0}) {
-		t.Errorf("planet after delivery %+v", g.Planets[2].Surface)
+	if g.Planets[2].Surface != (Minerals{0, 15, 0}) || g.Planets[1].Surface != (Minerals{30, 0, 0}) {
+		t.Errorf("surfaces %+v and %+v", g.Planets[2].Surface, g.Planets[1].Surface)
+	}
+}
+
+func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
+	// stars-elegy #69: replay is two passes, debits then credits. Player 1
+	// replays first and cannot use what player 0 gives it this year.
+	g := ordersGame()
+	g.Fleets[0].Pos = g.Fleets[2].Pos
+	files := []PlayerOrders{
+		{Player: 0, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}}},
+		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 3, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-30}}}},
+	}
+	ApplyOrders(g, files, []int{0, 1})
+	if g.Planets[1].Surface[Ironium] != 0 || g.Fleets[2].Cargo.Minerals[Ironium] != 30 {
+		t.Errorf("planet %d Fe, fleet %d Fe; want 0 and 30", g.Planets[1].Surface[Ironium], g.Fleets[2].Cargo.Minerals[Ironium])
 	}
 }
 
 func TestPredictionCargoToForeignFleet(t *testing.T) {
-	// TAKEOVER.md "Other waypoint tasks": colonists are never given to
-	// another player's fleet, and nothing moves to a receiver that
-	// regards the giver as an enemy. A gift that does not fit the
-	// receiver's hold is lost on delivery (ORDERS.md "Cross-owner
-	// cargo").
+	// stars-elegy #69 (BINARY-ONLY for fleets): no relation check; the
+	// receiver takes what fits and the rest is lost, the giver told.
+	// Colonists are not given to another player's fleet (L8).
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets[2].Cargo.Minerals[Germanium] = 90
+	g.Players[1].Relations = []Relation{RelationEnemy, RelationFriend}
 	errs, a := apply(g, 0,
 		CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{0, 0, 0, -5}},
 		CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30, 0, 0, 0, -10}},
@@ -343,18 +360,11 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 	if !errors.Is(errs[0], ErrRefusedByOwner) || errs[1] != nil {
 		t.Fatal(errs)
 	}
-	ev := g.DeliverGifts(a.Gifts)
 	if g.Fleets[2].Cargo.Minerals != (Minerals{10, 0, 90}) || g.Fleets[2].Fuel != 110 || g.Fleets[0].Cargo.Minerals[Ironium] != 0 {
 		t.Errorf("receiver %+v %d mg", g.Fleets[2].Cargo, g.Fleets[2].Fuel)
 	}
-	if len(ev) != 2 || ev[0].Kind != EventCargoGiven || ev[0].Count != 20 || ev[1].Kind != EventCargoGiftLost || ev[1].Count != 20 {
-		t.Errorf("events %+v", ev)
-	}
-	g = ordersGame()
-	g.Fleets[0].Pos = g.Fleets[2].Pos
-	g.Players[1].Relations = []Relation{RelationEnemy, RelationFriend}
-	if errs, _ := apply(g, 0, CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}); !errors.Is(errs[0], ErrRefusedByOwner) || g.Fleets[0].Cargo.Minerals[Ironium] != 30 {
-		t.Errorf("enemy receiver: %v, giver kept %d", errs[0], g.Fleets[0].Cargo.Minerals[Ironium])
+	if len(a.Events) != 1 || a.Events[0].Kind != EventCargoGiftLost || a.Events[0].Count != 20 {
+		t.Errorf("events %+v", a.Events)
 	}
 }
 

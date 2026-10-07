@@ -6,8 +6,9 @@ Elegy applies when it accepts the orders. It follows the public
 specification stars-elegy `docs/ORDERS.md` at PR #51 head `14e3c10`, with
 battle plans from `docs/COMBAT.md` at PR #59 head `1026471`, research
 from `docs/KERNEL.md` "Research", battle-plan order validation from
-`docs/COMBAT.md` "Order validation" (PR #71), the replay shuffle from
-`docs/KERNEL.md` "Turn order" (PR #53), and the planet side of cargo from
+`docs/COMBAT.md` "Order validation" (PR #72), the replay shuffle from
+`docs/KERNEL.md` "Turn order" (PR #53), manual transfers to other
+players from `docs/TAKEOVER.md` (PR #69, `9cef650`), and the planet side of cargo from
 `docs/TAKEOVER.md` on main `09e94c4`. Nothing else was used.
 
 The merge order and the design read are the kernel lane's
@@ -36,8 +37,8 @@ lane.
 | `DesignOrder` | read by `ReadDesign` against the player's race and tech | ORDERS.md "Design legality" | chosen rule | `TestPredictionDesignOrders` |
 | `DeleteDesignOrder` | the design's starbase is removed, the population stays | KERNEL.md "Maximum population" | BINARY-ONLY | `TestPredictionDesignOrders` |
 | `CargoOrder`, same owner | clamped to source, hold and tank (independent); own planet takes colonists at once | ORDERS.md "Cargo amounts and clamps"; TAKEOVER.md "Unload and load amounts" | CONFIRMED (FO-01..07, TK-201) | `TestConfirmedCargoClamps`, `TestConfirmedCargoOwnPlanet` |
-| `CargoOrder`, other owner | giving only; colonists to a planet become a drop; minerals and fuel are taken now and credited by `DeliverGifts`, the rest lost if it does not fit | ORDERS.md "Cross-owner cargo" | BINARY-ONLY | `TestPredictionCrossOwnerCargo`, `TestPredictionCargoToForeignFleet` |
-| `CargoOrder` to another player's fleet | no colonists; nothing to a receiver that regards the giver as an enemy | TAKEOVER.md "Other waypoint tasks" | as there | `TestPredictionCargoToForeignFleet` |
+| `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited after every file, no message; relations do not matter | TAKEOVER.md "Manual cargo transfers to other players" (#69) | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestPredictionGiftsCreditedAfterReplay` |
+| `CargoOrder`, another player's fleet | giving only, no colonists (L8); credited after every file, what does not fit is lost and the giver told; no relation check | #69 (answer to Q1, Q5, Q6) | BINARY-ONLY | `TestPredictionCargoToForeignFleet` |
 | `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position | ORDERS.md "Waypoint coordinates"; UNIVERSE.md | BINARY-ONLY | `TestPredictionWaypointClamp` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
@@ -53,15 +54,15 @@ and has been sent to stars-elegy as a question.
 
 | Id | What Elegy does | Why |
 |---|---|---|
-| L1 | Fleet and design names follow COMBAT.md's battle-plan name rule (#71): at most 31 characters, any text. | No spec gives their limit. |
+| L1 | Fleet and design names follow COMBAT.md's battle-plan name rule (#72): at most 31 characters, any text. | No spec gives their limit. |
 | L2 | A player's second file in a year is refused; the first applies. | ORDERS.md has one file per player. |
-| L3 | (settled: COMBAT.md #71 sets Elegy's limit at 16) | |
-| L4 | An attack-who value outside Elegy's five rejects the plan. ("Attack a player" naming itself or no player in the game is now COMBAT.md #71's Elegy rule.) | COMBAT.md describes the host's stored values; Elegy's type has no others. |
-| L5 | (settled: COMBAT.md #71, a definition is accepted only for k ≤ count) | |
+| L3 | (settled: COMBAT.md #72 sets Elegy's limit at 16) | |
+| L4 | An attack-who value outside Elegy's five rejects the plan. ("Attack a player" naming itself or no player in the game is now COMBAT.md #72's Elegy rule.) | COMBAT.md describes the host's stored values; Elegy's type has no others. |
+| L5 | (settled: COMBAT.md #72, a definition is accepted only for k ≤ count) | |
 | L6 | A warp outside 0..10, a negative transport amount, an unmodelled task, or a target planet or fleet that does not exist rejects a waypoint order. | ORDERS.md gives no other waypoint checks. |
 | L7 | A cargo order needs the fleet at its target; fuel to or from a planet rejects it; any failed check rejects the whole order; any fleet with a hold may carry colonists. | ORDERS.md and KERNEL.md cover the waypoint unload of fuel, not a direct transfer, and leave the colonist condition unpinned. |
-| L8 | The enemy check on cargo for another player's fleet is made when the order applies. | TAKEOVER.md says nothing moves, not when it is checked. |
-| L9 | Cargo given to a fleet or planet that no longer exists is lost. | ORDERS.md "Cross-owner cargo" does not say. |
+| L8 | Colonists are not given to another player's fleet by a manual transfer. | TAKEOVER.md says so for the waypoint task; #69 does not cover the manual transfer. |
+| L9 | Cargo given to a fleet that a later order in the same replay removed (merge, design delete) is lost. | #69 covers a receiver missing at replay, not one removed between the passes. |
 | L10 | 16 ship and 10 starbase design slots per player. | No spec gives the number yet (COVERAGE.md lists it among the limits). |
 | L11 | A design slot out of range, a hull of the wrong kind for the slot, and a new design for a slot whose design is in play are rejected. | ORDERS.md does not say what replacing a design in use does. |
 | L12 | Deleting a design removes its ships, and fleets left empty. | No spec says what happens to them. |
@@ -70,7 +71,7 @@ and has been sent to stars-elegy as a question.
 ## Ships leaving production
 
 `engine/launch.go` follows stars-elegy `docs/PRODUCTION-LAUNCH.md` at PR
-#57 head `30f3ca6`. Production has no ship or starbase items yet, so
+#57 head `2496594`. Production has no ship or starbase items yet, so
 `Launch` and `BuildStarbase` are the build steps such an item will call.
 
 | Rule | Code | Status | Test |
@@ -83,7 +84,8 @@ and has been sent to stars-elegy as a question.
 | 512 fleets: join the first fleet at the planet within 32765, or lose the ships | `joinAtLimit` | CONFIRMED (SL-08..10) | `TestConfirmedFleetLimit` |
 | Damage of the joined stack | `joinDamage` | CONFIRMED (SL-10) | `TestConfirmedJoinDamage` |
 | Dock check at order validation | `DockAllows` | chosen rule (host has none, SL-12) | `TestDockAllows` |
-| New starbase keeps damage units | `BuildStarbase` | CONFIRMED (SL-12) | `TestConfirmedStarbaseKeepsDamage` |
+| New starbase keeps damage units; the owner is told no ships / up to N kT / any size | `BuildStarbase` | CONFIRMED (SL-12); message BINARY-ONLY | `TestConfirmedStarbaseKeepsDamage` |
+| At the limit, ships of a design the fleet lacks take their design slot's place | `insertStack` | BINARY-ONLY (#57 2496594) | `TestPredictionJoinTakesSlotPlace` |
 | Replacement cost, different hull | `StarbaseReplacementCost` | MEASURED (SL-12) | `TestMeasuredStarbaseReplacementCost` |
 
 Not modelled there: stargate routing, the Alternate Reality remote-mining
@@ -94,9 +96,8 @@ record slot positions), mass drivers, and the route task on arrival.
 
 ## Not modelled
 
-- calling `YearOrders` from `GenerateTurn`;
-  `DeliverGifts` is not called either (ORDERS.md puts the credit after
-  movement, TAKEOVER.md step 2 before it);
+- calling `YearOrders` from `GenerateTurn`, and putting its drops at the
+  front of the before-movement drop queue;
 - splits, the transfer-balance between the player's own fleets, and
   cargo to deep space;
 - Mystery Trader items (the player owns none), minefields, stargates;

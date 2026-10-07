@@ -1,6 +1,9 @@
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestIdealWarpPerEngine(t *testing.T) {
 	// PRODUCTION-LAUNCH.md "Ideal warp of the fleet": results for one
@@ -282,7 +285,7 @@ func TestDockAllows(t *testing.T) {
 func TestMeasuredStarbaseReplacementCost(t *testing.T) {
 	// PRODUCTION-LAUNCH.md "Cost of a replacement" (MEASURED SL-12): a JOAT
 	// + ISB Space Dock replaced by a Space Station design of 92/72/157/364
-	// costs 35/29/61 kT and 136 resources (fresh: 37/29/63 and 149). The
+	// costs 35/29/61 kT and 136 resources (fresh: 37/29/63 and 146). The
 	// old design's cost is not given; 10/0/10/50 is one the measurement
 	// allows.
 	isb := Race{LRT: LRTs{ImprovedStarbases: true}}
@@ -291,10 +294,9 @@ func TestMeasuredStarbaseReplacementCost(t *testing.T) {
 	if got != (Cost{Resources: 136, Minerals: Minerals{35, 29, 61}}) {
 		t.Errorf("replacement %+v, want 35/29/61 and 136", got)
 	}
-	// The fresh minerals agree. The fresh 149 resources do not follow from
-	// 364 (that gives 146; 149 needs 371 or 372), so only the minerals are
-	// checked: question sent to stars-elegy.
-	if fresh := starbaseCharge(c, isb); fresh.Minerals != (Minerals{37, 29, 63}) {
+	// The fresh resources are 146 (the spec's 149 was a typo, corrected on
+	// stars-elegy #57 2496594).
+	if fresh := starbaseCharge(c, isb); fresh != (Cost{Resources: 146, Minerals: Minerals{37, 29, 63}}) {
 		t.Errorf("fresh %+v", fresh)
 	}
 }
@@ -313,5 +315,17 @@ func TestConfirmedStarbaseKeepsDamage(t *testing.T) {
 	p := g.Planets[0]
 	if p.StarbaseDesign != 3 || p.StarbaseHull != 2 || !p.StarbaseDock || p.StarbaseDamage != 200 || len(ev) != 1 || ev[0].Count != 200 {
 		t.Errorf("planet %+v, events %+v", p, ev)
+	}
+}
+
+func TestPredictionJoinTakesSlotPlace(t *testing.T) {
+	// stars-elegy #57 2496594 (BINARY-ONLY): at the fleet limit, ships of
+	// a design the fleet lacks take their design slot's place.
+	g := launchGame(t)
+	g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: 0}, {Owner: 0, Slot: 1, Design: 1}, {Owner: 0, Slot: 2, Design: 2}}
+	f := Fleet{Owner: 0, Stacks: []Stack{{Design: 0, Count: 1}, {Design: 2, Count: 1}}}
+	g.insertStack(&f, Stack{Design: 1, Count: 4})
+	if want := []Stack{{Design: 0, Count: 1}, {Design: 1, Count: 4}, {Design: 2, Count: 1}}; !reflect.DeepEqual(f.Stacks, want) {
+		t.Errorf("stacks %+v, want %+v", f.Stacks, want)
 	}
 }

@@ -56,24 +56,24 @@ type OrderResult struct {
 }
 
 // Applied is what applying a year's orders produced besides the changes to
-// the game: every order's result, and the cross-owner cargo that ORDERS.md
-// "Cross-owner cargo" defers to later phases of the year.
+// the game: every order's result, the events, and the colonist drops the
+// orders made.
 type Applied struct {
 	Results []OrderResult
-	// Gifts is non-colonist cargo given to another owner's planet or
-	// fleet: already taken from the giver, credited later
-	// (DeliverGifts).
+	Events  []Event
+	// Gifts is cargo given to another owner's planet or fleet, taken from
+	// the giver in the first pass and credited in the second.
 	Gifts []CargoGift
-	// drops is colonists unloaded onto planets the giver does not own, in
-	// the order given. TAKEOVER.md "Order inside a phase" puts them at
-	// the front of the before-movement drop queue (BINARY-ONLY for manual
-	// transfers).
+	// drops is colonists put onto another player's planet, in the order
+	// given. They join the before-movement drop resolution (TAKEOVER.md
+	// "Manual cargo transfers to other players", CONFIRMED TK-501) at the
+	// front of its queue (TAKEOVER.md "Order inside a phase").
 	drops []drop
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
 // accepts. For battle plans it is COMBAT.md "Order validation" (stars-elegy
-// #71), Elegy's rule: a name over 31 characters is refused, any text and
+// #72), Elegy's rule: a name over 31 characters is refused, any text and
 // the empty name are accepted.
 //
 // ASSUMPTION L1: fleet and design names follow the same rule; no public
@@ -99,7 +99,11 @@ func (g *Game) acceptFile(o PlayerOrders) error {
 }
 
 // ApplyOrders applies a year's order files, KERNEL.md "Turn order" step 1:
-// one player at a time, in the replay order given (player indices). Each
+// one player at a time, in the replay order given (player indices). Cargo
+// given to another owner is taken from the giver as each order applies,
+// and credited only after every file has been replayed (TAKEOVER.md
+// "Manual cargo transfers to other players", stars-elegy #69: replay is
+// two passes, debits then credits; creditGifts). Each
 // order is validated on its own; a rejected order is dropped and the rest
 // of the file still applies (ORDERS.md "Per-order validation"). When two
 // players' orders act on one object, the later one in the replay order
@@ -138,6 +142,7 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 			a.Results = append(a.Results, OrderResult{Player: p, Index: k, Err: err})
 		}
 	}
+	a.Events = append(a.Events, g.creditGifts(a.Gifts)...)
 	return a
 }
 
@@ -224,12 +229,12 @@ func (o ResearchOrder) apply(g *Game, player int, _ *Applied) error {
 }
 
 // maxBattlePlans is the battle-plan limit (COMBAT.md "Order validation",
-// stars-elegy #71, BINARY-ONLY): Elegy enforces the host's 16; the
+// stars-elegy #72, BINARY-ONLY): Elegy enforces the host's 16; the
 // client's 15 is a client limit (MEASURED, BP-L).
 const maxBattlePlans = 16
 
 // validPlan checks a battle plan's fields (ORDERS.md "Battle-plan
-// fields" and COMBAT.md "Order validation", stars-elegy #71, Elegy's
+// fields" and COMBAT.md "Order validation", stars-elegy #72, Elegy's
 // rules; the original lets a tactic of 6, a target of 8 and any
 // attack-who through, BINARY-ONLY): tactic and targets in their legal
 // sets, and a plan that attacks a player must name another player in the
@@ -251,7 +256,7 @@ func (g *Game) validPlan(player int, p BattlePlan) error {
 }
 
 // BattlePlanOrder defines battle plan Index (COMBAT.md "Adding, replacing
-// and deleting" and "Order validation", stars-elegy #71, BINARY-ONLY):
+// and deleting" and "Order validation", stars-elegy #72, BINARY-ONLY):
 // Index below the count replaces, Index equal to the count adds, anything
 // else, and a 17th plan, is refused.
 type BattlePlanOrder struct {

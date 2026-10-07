@@ -1,7 +1,7 @@
 package engine
 
 // Ships and starbases leaving production: stars-elegy
-// docs/PRODUCTION-LAUNCH.md (PR #57 head 30f3ca6). Rules are tagged as
+// docs/PRODUCTION-LAUNCH.md (PR #57 head 2496594). Rules are tagged as
 // there; Elegy's own choices are ASSUMPTION Ln (docs/ORDERS-LAYER-STATUS.md).
 //
 // Elegy's production queue has no ship or starbase items yet, so nothing
@@ -231,7 +231,7 @@ func (g *Game) joinAtLimit(pi, design, count int) ([]Event, int) {
 			}
 		}
 		if j < 0 {
-			f.Stacks = append(f.Stacks, Stack{Design: design, Count: count})
+			g.insertStack(f, Stack{Design: design, Count: count})
 		} else {
 			s := &f.Stacks[j]
 			if s.Count+count > joinLimit {
@@ -243,6 +243,33 @@ func (g *Game) joinAtLimit(pi, design, count int) ([]Event, int) {
 		return []Event{{Kind: EventShipsJoinedFleet, Player: p.Owner, Planet: p.ID, Fleet: f.ID, Count: count}}, f.ID
 	}
 	return []Event{{Kind: EventShipsLostFleetLimit, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: count}}, -1
+}
+
+// insertStack adds a stack to a fleet in its owner's design-slot order: a
+// fleet keeps one count per design slot, so ships of a design the fleet
+// lacks take their slot's place (PRODUCTION-LAUNCH.md, answer to Elegy's
+// question Q18, stars-elegy #57 2496594, BINARY-ONLY). A design with no
+// slot of the owner goes last.
+//
+// The order of a fleet's stacks elsewhere is the kernel lane's
+// representation; this keeps the build path consistent with the rule.
+func (g *Game) insertStack(f *Fleet, s Stack) {
+	slot := func(d int) int {
+		for _, ds := range g.DesignSlots {
+			if ds.Owner == f.Owner && ds.Design == d && !ds.Starbase {
+				return ds.Slot
+			}
+		}
+		return maxShipDesigns
+	}
+	at := len(f.Stacks)
+	for k, t := range f.Stacks {
+		if slot(t.Design) > slot(s.Design) {
+			at = k
+			break
+		}
+	}
+	f.Stacks = append(f.Stacks[:at:at], append([]Stack{s}, f.Stacks[at:]...)...)
 }
 
 // DockAllows is the production-queue check for a ship item (ORDERS.md
@@ -263,7 +290,9 @@ func (g *Game) DockAllows(pi, design int) bool {
 // (PRODUCTION-LAUNCH.md "Starbases"): without the tech nothing is built
 // and there is no message (BINARY-ONLY); otherwise the new starbase
 // replaces the old one, keeps its damage units (CONFIRMED SL-12), and the
-// owner is told the dock limit.
+// owner is told what it can build, by its dock (stars-elegy #57 2496594,
+// BINARY-ONLY): no ships (Orbital Fort, Count 0), ships up to N kT (Space
+// Dock, Count N), or any size (Count DockUnlimited).
 //
 // Not modelled: removing queued ship items and resetting starbase items
 // when the new hull is earlier in the hull list (CONFIRMED SL-12; the
