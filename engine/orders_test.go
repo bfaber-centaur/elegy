@@ -446,9 +446,9 @@ func TestPredictionCargoToForeignFleet(t *testing.T) {
 }
 
 func TestGiftToFleetMergedAway(t *testing.T) {
-	// ASSUMPTION L9: the receiver merged away after the debit is a missing
-	// endpoint (ORDERS.md "Missing endpoint"): the cargo goes back to the
-	// giver's fleet.
+	// ASSUMPTION L9 (an Elegy choice, giftReturnsToGiver): the receiver
+	// merged away after the debit is treated as a missing endpoint, and the
+	// cargo goes back to the giver's fleet.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
@@ -457,8 +457,29 @@ func TestGiftToFleetMergedAway(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
 	}
 	a := ApplyOrders(g, files, []int{0, 1})
+	if !giftReturnsToGiver {
+		t.Skip("giftReturnsToGiver is off")
+	}
 	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Events) != 0 {
 		t.Errorf("giver Fe %d, events %+v; want 30 and none", g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
+	}
+}
+
+func TestConfirmedOwnFleetTransferExplicit(t *testing.T) {
+	// ORDERS.md "Transfer between the player's own fleets" (CONFIRMED
+	// CO-04): the amount given moves, not a capacity rebalance (which
+	// would even two equal holds), and an amount over what is aboard
+	// moves what is aboard.
+	g := ordersGame()
+	errs, _ := apply(g, 0,
+		CargoOrder{Fleet: 1, Target: TargetFleet, ID: 2, Amounts: [NumCargo + 1]int{-20}},
+		CargoOrder{Fleet: 1, Target: TargetFleet, ID: 2, Amounts: [NumCargo + 1]int{0, 0, 0, -300}},
+	)
+	if errs[0] != nil || errs[1] != nil {
+		t.Fatal(errs)
+	}
+	if a, b := g.Fleets[0].Cargo, g.Fleets[1].Cargo; a.Minerals[Ironium] != 10 || b.Minerals[Ironium] != 20 || a.Colonists != 0 || b.Colonists != 10 {
+		t.Errorf("fleets %+v and %+v; want Fe 10/20, colonists 0/10", a, b)
 	}
 }
 
@@ -486,7 +507,7 @@ func TestPredictionDesignOrders(t *testing.T) {
 	// ORDERS.md "Design legality" (chosen rule, through ReadDesign): a
 	// part above the owner's tech is dropped and the design stored; a
 	// hull the owner may not build rejects it. Deleting a design removes
-	// its starbase (KERNEL.md, BINARY-ONLY) and its ships (L12).
+	// its starbase (KERNEL.md, BINARY-ONLY) and its ships (CO-07).
 	g := ordersGame()
 	g.Players[0].Research.Levels[Construction] = 3
 	errs, _ := apply(g, 0,
@@ -507,7 +528,8 @@ func TestPredictionDesignOrders(t *testing.T) {
 	g.Planets[0].HasStarbase, g.Planets[0].StarbaseDesign, g.Planets[0].StarbaseHull = true, sb, 1
 	g.Fleets[1].Stacks = []Stack{{Design: di, Count: 2}}
 	g.Fleets[0].Stacks = append(g.Fleets[0].Stacks, Stack{Design: di, Count: 1})
-	// In use: a new design for slot 0 is refused (L11).
+	// In use by ships and a starbase: a change to slot 0 is refused
+	// (ORDERS.md "Design change into an occupied slot", Elegy's rule).
 	if errs, _ := apply(g, 0, DesignOrder{Slot: 0, Name: "D2", Hull: "Scout", Fills: []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}}); errs[0] == nil {
 		t.Error("replacing a design in use: want refused")
 	}
@@ -543,29 +565,64 @@ func TestDesignMalformedFills(t *testing.T) {
 	}
 }
 
-func TestDesignDeleteRenumbers(t *testing.T) {
-	// ORDERS.md "Design delete effect": later slots move down one,
-	// as battle plans do; the other kind's slots stay.
+func TestMeasuredDesignDeleteInPlace(t *testing.T) {
+	// ORDERS.md "Design delete effect" (MEASURED CO-07): the slot is
+	// cleared in place and later slots keep their numbers.
 	g := ordersGame()
 	fill := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
 	apply(g, 0,
 		DesignOrder{Slot: 0, Name: "A", Hull: "Scout", Fills: fill},
 		DesignOrder{Slot: 1, Name: "B", Hull: "Scout", Fills: fill},
 		DesignOrder{Slot: 2, Name: "C", Hull: "Scout", Fills: fill},
-		DesignOrder{Starbase: true, Slot: 1, Name: "Fort", Hull: "Orbital Fort"},
 	)
 	c, _ := g.PlayerDesign(0, false, 2)
 	if errs, _ := apply(g, 0, DeleteDesignOrder{Slot: 1}); errs[0] != nil {
 		t.Fatal(errs[0])
 	}
-	if got, ok := g.PlayerDesign(0, false, 1); !ok || got != c {
-		t.Errorf("slot 1 holds %d (%v), want %d", got, ok, c)
+	if _, ok := g.PlayerDesign(0, false, 1); ok {
+		t.Error("slot 1 still filled")
 	}
-	if _, ok := g.PlayerDesign(0, false, 2); ok {
-		t.Error("slot 2 still filled")
+	if got, ok := g.PlayerDesign(0, false, 2); !ok || got != c {
+		t.Errorf("slot 2 holds %d (%v), want %d", got, ok, c)
 	}
-	if _, ok := g.PlayerDesign(0, true, 1); !ok {
-		t.Error("starbase slot 1 moved")
+}
+
+func TestMeasuredDesignDeleteSharesFuel(t *testing.T) {
+	// ORDERS.md "Design delete effect" (MEASURED CO-07c): a 500 mg fleet
+	// of tank 950 losing a 900 mg design keeps 500 − ⌊500·900÷950⌋ = 27
+	// mg; cargo is shared by hold the same way, so a hold that was all the
+	// deleted design's leaves no iron.
+	g := ordersGame()
+	g.Designs = append(g.Designs,
+		Design{Name: "Keep", FuelCapacity: 50},
+		Design{Name: "Gone", FuelCapacity: 900, CargoCapacity: 900})
+	keep, gone := len(g.Designs)-2, len(g.Designs)-1
+	g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: keep}, {Owner: 0, Slot: 1, Design: gone}}
+	f := &g.Fleets[0]
+	f.Stacks = []Stack{{Design: keep, Count: 1}, {Design: gone, Count: 1}}
+	f.Fuel, f.Cargo = 500, Cargo{Minerals: Minerals{100, 0, 0}}
+	if errs, _ := apply(g, 0, DeleteDesignOrder{Slot: 1}); errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	f = &g.Fleets[g.fleetIndex(1)]
+	if f.Fuel != 27 || f.Cargo.Minerals[Ironium] != 0 || len(f.Stacks) != 1 {
+		t.Errorf("fleet %+v, want 27 mg, no iron, one stack", *f)
+	}
+}
+
+func TestMeasuredDesignEditQueueOnly(t *testing.T) {
+	// ORDERS.md "Design change into an occupied slot" (MEASURED CO-08): a
+	// design with nothing in play is overwritten in place, so what refers
+	// to it gets the edited design.
+	g := ordersGame()
+	fill := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
+	apply(g, 0, DesignOrder{Slot: 0, Name: "A", Hull: "Scout", Fills: fill})
+	before, _ := g.PlayerDesign(0, false, 0)
+	if errs, _ := apply(g, 0, DesignOrder{Slot: 0, Name: "A2", Hull: "Scout", Fills: fill}); errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	if after, _ := g.PlayerDesign(0, false, 0); after != before || g.Designs[before].Name != "A2" {
+		t.Errorf("slot 0 now %d (%q), want %d edited in place", after, g.Designs[after].Name, before)
 	}
 }
 

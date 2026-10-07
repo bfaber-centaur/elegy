@@ -58,11 +58,14 @@ const (
 // Any fleet with free cargo space may carry colonists (ORDERS.md "Elegy
 // implementation Q3", chosen rule).
 //
-// ASSUMPTION L7: a transfer between the player's own fleets moves the
-// amounts given, clamped to source and free space. ORDERS.md "Transfer
-// between the player's own fleets" reads the original's order as a
-// capacity rebalance (BINARY-ONLY); the contradiction is open until
-// oracle case CO-04. Any other failed check rejects the whole order.
+// A transfer between the player's own fleets moves the amounts given,
+// not a capacity rebalance (ORDERS.md "Transfer between the player's own
+// fleets", CONFIRMED CO-04). The client caps the amount by the receiver's
+// free hold and what the source holds; Elegy applies the same caps to
+// any order.
+//
+// ASSUMPTION L7: any failed check other than planet fuel rejects the
+// whole order.
 type CargoOrder struct {
 	Fleet   int
 	Target  TargetKind // TargetPlanet or TargetFleet
@@ -240,13 +243,18 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 // A gift naming a receiver that is missing when its order applies is
 // rejected there, so neither side changes (ORDERS.md "Missing endpoint").
 //
-// ASSUMPTION L9: a receiving fleet that a later order in the same replay
-// removed (a merge, or deleting its design) is treated as a missing
-// endpoint: what was taken goes back to the giver's fleet, as much as fits
-// it now, and anything that cannot go back (the giver's fleet is gone, or
-// has filled up since) is lost and the giver told. ORDERS.md skips a
-// record whose endpoint is missing; it does not cover an endpoint removed
-// between the two passes.
+// ASSUMPTION L9, an Elegy choice and not observed Stars! behaviour: a
+// receiving fleet that a later order in the same replay removed (a merge,
+// or deleting its design) is treated as a missing endpoint, and what was
+// taken goes back to the giver's fleet, as much as fits it now; anything
+// that cannot go back (the giver's fleet is gone, or has filled up since)
+// is lost and the giver told. No measurement covers a receiver removed
+// between the debit and the credit; the public reading of this case is
+// being reconciled on stars-elegy, and BINARY-ONLY analysis there says the
+// cargo is lost. giftReturnsToGiver isolates the choice: false loses the
+// whole gift with the message instead.
+const giftReturnsToGiver = true
+
 func (g *Game) creditGifts(gifts []CargoGift) []Event {
 	var events []Event
 	for _, gift := range gifts {
@@ -259,7 +267,7 @@ func (g *Game) creditGifts(gifts []CargoGift) []Event {
 		}
 		lost := 0
 		ti := g.fleetIndex(gift.ID)
-		if ti < 0 {
+		if ti < 0 && giftReturnsToGiver {
 			ti = g.fleetIndex(gift.FromFleet)
 		}
 		if ti < 0 {

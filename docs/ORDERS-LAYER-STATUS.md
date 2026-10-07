@@ -32,10 +32,11 @@ lane.
 | `BattlePlanOrder` | replaces a plan or adds the next one, at most 16; tactic and targets in range | COMBAT.md "Adding, replacing and deleting"; ORDERS.md "Battle-plan fields" | BINARY-ONLY; chosen rule | `TestPredictionBattlePlanOrders` |
 | `DeletePlanOrder` | never plan 0; later plans and fleets on them move down one | COMBAT.md (BP-1); ORDERS.md | CONFIRMED; chosen rule | `TestConfirmedDeletePlanRenumbers` |
 | `FleetPlanOrder` | own fleet, a plan the player has | ORDERS.md "Battle-plan fields" | chosen rule | `TestPredictionBattlePlanOrders` |
-| `DesignOrder` | read by `ReadDesign` against the player's race and tech; a slot in use is refused | ORDERS.md "Design legality", "Design change into an occupied slot" (Q10) | chosen rule (original BINARY-ONLY) | `TestPredictionDesignOrders` |
+| `DesignOrder` | read by `ReadDesign` against the player's race and tech; a slot whose design has ships or a starbase is refused; any other filled slot is overwritten in place | ORDERS.md "Design legality", "Design change into an occupied slot" | queue-only edit MEASURED (CO-08); refusal is Elegy's rule (the client cannot edit such a design) | `TestPredictionDesignOrders`, `TestMeasuredDesignEditQueueOnly` |
 | `DesignOrder`, malformed fills | a part the slot does not take dropped, a count over capacity cut, parts above tech stripped, an empty engine slot back-filled with Quick Jump 5 | ORDERS.md "Design read, four malformed cases" (Q12) | BINARY-ONLY | `TestDesignMalformedFills` |
-| `DeleteDesignOrder` | the design's ships, fleets left empty and starbase removed, the population stays; later slots move down one | ORDERS.md "Design delete effect" (Q11); KERNEL.md "Maximum population" | chosen rule; BINARY-ONLY | `TestPredictionDesignOrders`, `TestDesignDeleteRenumbers` |
+| `DeleteDesignOrder` | the design's ships, fleets left empty and starbase removed, the population stays; the slot cleared in place, later slots keep their numbers; removed ships take ⌊amount × their capacity ÷ fleet capacity⌋ of the fleet's fuel and cargo | ORDERS.md "Design delete effect"; KERNEL.md "Maximum population" | MEASURED (CO-07, CO-07b, CO-07c); population BINARY-ONLY | `TestPredictionDesignOrders`, `TestMeasuredDesignDeleteInPlace`, `TestMeasuredDesignDeleteSharesFuel` |
 | `CargoOrder`, same owner | clamped to source, hold and tank (independent); own planet takes colonists at once | ORDERS.md "Cargo amounts and clamps"; TAKEOVER.md "Unload and load amounts" | CONFIRMED (FO-01..07, TK-201) | `TestConfirmedCargoClamps`, `TestConfirmedCargoOwnPlanet` |
+| `CargoOrder`, own fleets | the amount given moves (not a rebalance), capped by what the source holds and the receiver's free space | ORDERS.md "Transfer between the player's own fleets" | CONFIRMED (CO-04) | `TestConfirmedOwnFleetTransferExplicit` |
 | `CargoOrder`, preconditions | fleet at the target or refused; no jettison; planet fuel dropped, the rest moves; any fleet with free hold carries colonists | ORDERS.md "Elegy implementation Q3", "Q4" | chosen rules | `TestCargoChecks` |
 | `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited after every file, no message; relations do not matter | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestPredictionGiftsCreditedAfterReplay` |
 | `CargoOrder`, another player's fleet | giving only; colonists rejected (no legal client writes them, TK-408, TK-414); debits first, then credits in place during the orders step; what does not fit is lost and the giver told; no relation check | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | MEASURED (TK-406, TK-407, TK-409); over-full gift CONFIRMED; colonists chosen rule | `TestPredictionCargoToForeignFleet`, `TestGiftToFleetMergedAway` |
@@ -61,9 +62,9 @@ and has been sent to stars-elegy as a question.
 | L4 | An attack-who value outside Elegy's five rejects the plan. ("Attack a player" naming itself or no player in the game is now COMBAT.md's Elegy rule.) | COMBAT.md describes the host's stored values; Elegy's type has no others. |
 | L5 | (settled: COMBAT.md, a definition is accepted only for k ≤ count) | |
 | L6 | An unmodelled task rejects a waypoint order. (Warp, target and transport checks settled: ORDERS.md Q13.) | Elegy does not model every task. |
-| L7 | A transfer between the player's own fleets moves the amounts given, clamped; any failed check other than planet fuel rejects the whole order. (Co-location, planet fuel, jettison and the colonist gate settled: ORDERS.md Q3, Q4.) | ORDERS.md reads the original's own-fleet transfer as a capacity rebalance (BINARY-ONLY); the contradiction is open until oracle case CO-04. |
+| L7 | Any failed cargo check other than planet fuel rejects the whole order. (Explicit own-fleet amounts settled: CONFIRMED CO-04. Co-location, planet fuel, jettison and the colonist gate settled: ORDERS.md Q3, Q4.) | ORDERS.md does not say whether one bad cargo kind spoils the rest. |
 | L8 | (settled: TAKEOVER.md, a legal client never gives colonists to another player's fleet; Elegy rejects it under "Ownership") | |
-| L9 | A receiving fleet that a later order in the same replay removed (merge, design delete) counts as a missing endpoint: the cargo goes back to the giver's fleet, as much as fits, and the rest is lost with a message. | ORDERS.md "Missing endpoint" skips a record whose endpoint is missing; it does not cover one removed between the debit and credit passes. |
+| L9 | **Elegy choice, not observed behaviour** (switch `giftReturnsToGiver`): a receiving fleet that a later order in the same replay removed (merge, design delete) counts as a missing endpoint; the cargo goes back to the giver's fleet, as much as fits, and the rest is lost with a message. | No measurement covers a receiver removed between debit and credit. BINARY-ONLY analysis on stars-elegy says the cargo is lost; that cargo path is being reconciled there, and Elegy follows the settled rule when it lands. |
 | L10 | (settled: LIMITS.md, 16 ship and 10 starbase slots) | |
 | L11 | A hull of the wrong kind for the slot rejects a design; a fill naming a slot the hull lacks, or a count below 1, is dropped; two fills for one slot, or an engine slot short of capacity, reject it. (Occupied slot and the four malformed cases settled: ORDERS.md Q10, Q12.) | ORDERS.md's four cases do not cover these. |
 | L12 | (settled: ORDERS.md "Design delete effect", Q11) | |
@@ -100,10 +101,10 @@ record slot positions), mass drivers, and the route task on arrival.
 
 - calling `YearOrders` from `GenerateTurn`, and putting its drops at the
   front of the before-movement drop queue;
-- splits, the transfer-balance between the player's own fleets, and
-  cargo to deep space;
+- splits, and cargo to deep space;
 - Mystery Trader items (the player owns none), minefields, stargates;
 - mass drivers and packets in planet settings, and ship and starbase
-  items in the queue (so a queued design neither blocks a design change
-  nor is dropped when its design is deleted);
+  items in the queue: so a queue entry is not dropped when its design is
+  deleted (CO-07), and the queue-only design edit (CO-08) is reached only
+  as a slot with nothing in play;
 - stargate hops (waypoint warp 11).

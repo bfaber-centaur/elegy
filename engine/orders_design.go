@@ -68,11 +68,17 @@ func (g *Game) designInUse(d int) bool {
 // rejected (ORDERS.md "Design legality", Elegy's chosen rule).
 //
 // A slot number outside the player's slots (LIMITS.md) and a name longer
-// than maxNameLength are rejected. A new design for a slot whose design
-// has ships or a starbase in play is refused (ORDERS.md "Design change
-// into an occupied slot", chosen rule; the original is
-// BINARY-ONLY). Production has no ship items yet, so a queued design does
-// not count.
+// than maxNameLength are rejected. A change to a slot whose design has
+// ships or a starbase in play is refused; any other filled slot is
+// overwritten in place, so whatever refers to the design (a queue entry
+// building it) gets the edited design (ORDERS.md "Design change into an
+// occupied slot": MEASURED CO-08 for the queue-only case; the client
+// cannot edit a design in use by ships or a starbase, so that refusal is
+// Elegy's rule and never fires on a legal order).
+//
+// Not modelled: production has no ship or starbase items yet, so no
+// queue entry builds a design and the queue-only case is reached only as
+// a slot with nothing in play.
 //
 // Malformed fills are dropped or cut, never rejecting the design
 // (ORDERS.md "Design read, four malformed cases"): a part the slot
@@ -115,17 +121,37 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		return err
 	}
 	if i := g.designSlot(player, o.Starbase, o.Slot); i >= 0 {
-		if g.designInUse(g.DesignSlots[i].Design) {
+		old := g.DesignSlots[i].Design
+		if g.designInUse(old) {
 			return fmt.Errorf("design slot %d: the design in it is in use: %w", o.Slot, ErrOutOfRange)
 		}
-		g.Designs = append(g.Designs[:len(g.Designs):len(g.Designs)], d)
-		g.DesignSlots[i].Design = len(g.Designs) - 1
+		if g.designShared(old, i) {
+			// A design index another slot also names (a state built
+			// without design orders) is not overwritten under it.
+			g.Designs = append(g.Designs[:len(g.Designs):len(g.Designs)], d)
+			g.DesignSlots[i].Design = len(g.Designs) - 1
+			return nil
+		}
+		designs := append([]Design(nil), g.Designs...)
+		designs[old] = d
+		g.Designs = designs
 		return nil
 	}
 	g.Designs = append(g.Designs[:len(g.Designs):len(g.Designs)], d)
 	g.DesignSlots = append(g.DesignSlots[:len(g.DesignSlots):len(g.DesignSlots)],
 		DesignSlot{Owner: player, Starbase: o.Starbase, Slot: o.Slot, Design: len(g.Designs) - 1})
 	return nil
+}
+
+// designShared reports whether a design slot other than the one at index
+// skip names design d.
+func (g *Game) designShared(d, skip int) bool {
+	for i, s := range g.DesignSlots {
+		if i != skip && s.Design == d {
+			return true
+		}
+	}
+	return false
 }
 
 // fitFills drops each fill whose part the hull's slot does not take and
@@ -163,13 +189,19 @@ func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
 }
 
 // DeleteDesignOrder empties one of the player's design slots (ORDERS.md
-// "Design delete effect", chosen rule): ships of the
+// "Design delete effect", MEASURED CO-07/CO-07b/CO-07c): ships of the
 // design are removed, a fleet left without ships is removed, and a
 // starbase of the design is removed from its planet, which keeps its
-// population (KERNEL.md "Maximum population", BINARY-ONLY). The player's
-// later slots of the same kind move down one, as later battle plans do.
-// Production has no ship items yet, so no queue entry is dropped. The
-// entry in Game.Designs stays, so other indices do not move.
+// population (KERNEL.md "Maximum population", BINARY-ONLY). The slot is
+// cleared in place; later slots keep their numbers. When the removed
+// ships shared a fleet with survivors, they take their share of its fuel
+// and cargo as a ship move does: floor(amount × their capacity ÷ the
+// fleet's capacity) of each, fuel by tank and cargo by hold, and the rest
+// stays with the survivors unclamped (CO-07c).
+//
+// Not modelled: production has no ship or starbase items yet, so no queue
+// entry building the design is dropped. The entry in Game.Designs stays,
+// so other indices do not move.
 type DeleteDesignOrder struct {
 	Starbase bool
 	Slot     int
@@ -182,11 +214,6 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	d := g.DesignSlots[i].Design
 	g.DesignSlots = append(g.DesignSlots[:i:i], g.DesignSlots[i+1:]...)
-	for k := range g.DesignSlots {
-		if s := &g.DesignSlots[k]; s.Owner == player && s.Starbase == o.Starbase && s.Slot > o.Slot {
-			s.Slot--
-		}
-	}
 	for k := range g.Planets {
 		p := &g.Planets[k]
 		if p.Owner == player && p.HasStarbase && p.StarbaseDesign == d {
@@ -206,10 +233,29 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 			}
 		}
 		if len(stacks) != len(f.Stacks) {
-			f.Stacks = stacks
 			if len(stacks) == 0 {
 				empty[f.ID] = true
+				f.Stacks = stacks
+				continue
 			}
+			tank, hold := g.tankCapacity(f), g.cargoCapacity(f)
+			gone := 0
+			for _, s := range f.Stacks {
+				if s.Design == d {
+					gone += s.Count
+				}
+			}
+			goneTank, goneHold := gone*g.Designs[d].FuelCapacity, gone*g.Designs[d].CargoCapacity
+			if tank > 0 {
+				f.Fuel -= f.Fuel * goneTank / tank
+			}
+			if hold > 0 {
+				for m := range NumMinerals {
+					f.Cargo.Minerals[m] -= f.Cargo.Minerals[m] * goneHold / hold
+				}
+				f.Cargo.Colonists -= f.Cargo.Colonists * goneHold / hold
+			}
+			f.Stacks = stacks
 		}
 	}
 	g.removeFleets(empty)
