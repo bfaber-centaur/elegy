@@ -7,21 +7,19 @@ import (
 
 // NewView builds a planner's View from a player's game.Report.
 //
-// The report does not carry three things a planner needs yet; the caller
-// supplies them:
+// The caller supplies two things the report holds in another shape:
 //   - universe, every planet's id and position (the map every player has);
 //   - history, the player's latest report of each planet from earlier
 //     years (AI.md §1 "What it sees"); this year's reports replace older
-//     ones;
-//   - created, the creation year and picture of designs the planner stored
-//     in earlier years, by slot. A design missing from it counts
-//     as created in the first year with picture 0: true of the starting
-//     designs (UNIVERSE.md), and a placeholder for others.
+//     ones.
 //
-// Wormholes and other players' PRT are left empty: a Rototill without
-// them never takes a wormhole and treats every owner as not Alternate
-// Reality. docs/AI-STATUS.md tracks these inputs.
-func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]engine.PlanetReport, created map[SlotKey]NewDesign) *View {
+// Each design's creation year and picture come from the report's design
+// slots (engine.DesignSlot Created, Picture), which the game stores and
+// saves, so a planner keeps nothing between years.
+//
+// Wormholes and other players' PRT are left empty here; ViewOf adds the
+// report's wormholes. docs/AI-STATUS.md tracks these inputs.
+func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]engine.PlanetReport) *View {
 	v := &View{
 		Year: r.Year, Player: r.Player, Level: lvl, Rules: r.Rules,
 		Self: r.Self, Planets: r.Planets, Fleets: r.Fleets,
@@ -39,10 +37,7 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 		v.Seen[rep.Planet] = true
 	}
 	for _, d := range r.Designs {
-		od := Design{Slot: d.Slot.Slot, Index: d.Index, Design: d.Design, Created: FirstYear}
-		if c, ok := created[SlotKey{d.Slot.Starbase, d.Slot.Slot}]; ok {
-			od.Created, od.Picture = c.Created, c.Picture
-		}
+		od := Design{Slot: d.Slot.Slot, Index: d.Index, Design: d.Design, Created: d.Slot.Created, Picture: d.Slot.Picture}
 		if d.Slot.Starbase {
 			v.Starbases = append(v.Starbases, od)
 		} else {
@@ -50,10 +45,4 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 		}
 	}
 	return v
-}
-
-// SlotKey names one of a player's design slots.
-type SlotKey struct {
-	Starbase bool
-	Slot     int
 }

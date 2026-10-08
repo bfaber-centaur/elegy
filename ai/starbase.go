@@ -213,7 +213,7 @@ func (s *starbaseRun) create(slot, v int) {
 	pic := s.picture(slot, hullName)
 	name := s.name(slot, hullName)
 	s.designs[slot] = &SlotDesign{Hull: hullName, Name: name, Created: s.in.Year, Picture: pic}
-	s.orders = append(s.orders, engine.DesignOrder{Starbase: true, Slot: slot, Name: name, Hull: hullName, Fills: fills})
+	s.orders = append(s.orders, engine.DesignOrder{Starbase: true, Slot: slot, Name: name, Hull: hullName, Fills: fills, Picture: pic})
 	s.made = append(s.made, NewDesign{Starbase: true, Slot: slot, Name: name, Picture: pic, Created: s.in.Year})
 }
 

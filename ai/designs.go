@@ -100,7 +100,7 @@ func (s *shipDesigns) store(k int, hull string, classes []int) bool {
 	pic := s.picture(hull)
 	name := s.name(hull)
 	s.slots[k] = shipSlot{present: true, hull: hull, name: name, created: s.year, picture: pic, fills: fills}
-	s.res.Orders = append(s.res.Orders, engine.DesignOrder{Slot: k, Name: name, Hull: hull, Fills: fills})
+	s.res.Orders = append(s.res.Orders, engine.DesignOrder{Slot: k, Name: name, Hull: hull, Fills: fills, Picture: pic})
 	s.res.Designs = append(s.res.Designs, NewDesign{Slot: k, Name: name, Picture: pic, Created: s.year})
 	return true
 }

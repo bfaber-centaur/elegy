@@ -45,9 +45,8 @@ func aiGame(t *testing.T, seed uint64, years int, ais ...aiPlayer) (engine.Game,
 		universe = append(universe, PlanetPos{ID: p.ID, Pos: p.Pos})
 	}
 	history := make([]map[int]engine.PlanetReport, len(ais))
-	created := make([]map[SlotKey]NewDesign, len(ais))
 	for i := range ais {
-		history[i], created[i] = map[int]engine.PlanetReport{}, map[SlotKey]NewDesign{}
+		history[i] = map[int]engine.PlanetReport{}
 	}
 	views := engine.Views(g, engine.PopulationEstimates(g, rng))
 	var events []engine.Event
@@ -61,11 +60,8 @@ func aiGame(t *testing.T, seed uint64, years int, ais ...aiPlayer) (engine.Game,
 			if err != nil {
 				t.Fatal(err)
 			}
-			v := NewView(r, Expert, universe, history[i], created[i])
+			v := NewView(r, Expert, universe, history[i])
 			out := a.play(v, rng)
-			for _, d := range out.Designs {
-				created[i][SlotKey{d.Starbase, d.Slot}] = d
-			}
 			problems = append(problems, out.Unsupported...)
 			for _, rep := range r.View.Planets {
 				history[i][rep.Planet] = rep
