@@ -33,8 +33,11 @@ type turn struct {
 }
 
 func newTurn(v *View, rng engine.Rand, res *Result) *turn {
-	return &turn{v: v, rng: rng, res: res, y: v.Year - FirstYear, lvl: v.Level, q: &queues{v: v},
-		sd: newShipDesigns(v, rng, res), obsolete: map[int]bool{}, threat: map[int]int{}, targeted: map[int]bool{}}
+	q := &queues{v: v}
+	sd := newShipDesigns(v, rng, res)
+	sd.q = q
+	return &turn{v: v, rng: rng, res: res, y: v.Year - FirstYear, lvl: v.Level, q: q,
+		sd: sd, obsolete: map[int]bool{}, threat: map[int]int{}, targeted: map[int]bool{}}
 }
 
 // emit appends an order for a fleet. A fleet split off this turn has the

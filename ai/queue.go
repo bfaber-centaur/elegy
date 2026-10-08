@@ -71,6 +71,21 @@ func (q *queues) canBuild(p *engine.Planet, it engine.QueueItem) bool {
 	return true
 }
 
+// dropShip is a design delete's effect on the queues (ORDERS.md "Design
+// delete effect", MEASURED CO-07): every queue entry that builds the slot
+// is dropped, even with progress, on the queues changed so far and on the
+// rest alike, so queue orders written later in the turn do not name it.
+func (q *queues) dropShip(slot int) {
+	drop := func(it engine.QueueItem) bool { return it.Kind == engine.ItemShip && it.Slot == slot }
+	for id, l := range q.m {
+		q.m[id] = slices.DeleteFunc(l, drop) // add made each list; queues owns it
+	}
+	for i := range q.v.Planets { // the report's queues: copied, not written through
+		p := &q.v.Planets[i]
+		p.Queue = slices.DeleteFunc(slices.Clone(p.Queue), drop)
+	}
+}
+
 // count is the units of kind k queued at p.
 func (q *queues) count(p *engine.Planet, k engine.ItemKind) int {
 	n := 0

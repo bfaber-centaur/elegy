@@ -30,6 +30,8 @@ type shipDesigns struct {
 	trader map[string]bool
 	rng    engine.Rand
 	res    *Result
+	// q is the turn's queues, which a delete changes; nil leaves them.
+	q *queues
 }
 
 func newShipDesigns(v *View, rng engine.Rand, res *Result) *shipDesigns {
@@ -48,13 +50,17 @@ func newShipDesigns(v *View, rng engine.Rand, res *Result) *shipDesigns {
 // age is the year index minus the slot's creation year index.
 func (s *shipDesigns) age(k int) int { return s.year - s.slots[k].created }
 
-// delete writes a delete order for a present slot.
+// delete writes a delete order for a present slot, and drops the slot's
+// queue entries as the order will (queues.dropShip).
 func (s *shipDesigns) delete(k int) {
 	if !s.slots[k].present {
 		return
 	}
 	s.slots[k].present = false
 	s.res.Orders = append(s.res.Orders, engine.DeleteDesignOrder{Slot: k})
+	if s.q != nil {
+		s.q.dropShip(k)
+	}
 }
 
 // build is the ship-design builder (AI.md §10 "Builder"): the hull must be
