@@ -49,6 +49,7 @@ unless the project decides otherwise.
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
 | Lay-mines tasks: Robotoid's idle scouts from year index 41, Cybertron's slot-0 fleets (here, or at a random nearby planet) | robotoid.md §4, cybertron.md §5 | Robotoid's duration MEASURED AI-25; the rest BINARY-ONLY (Cybertron's not exercised) | `ai/fleet.go` `layMines` | `TestDriversLayMines`, `TestCybertronMinelayer` |
 | Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestHubLoad`, `TestArmadaDrop`, `TestArmadaInvades`, `TestDriversOrderSplitFleets` |
+| Wormhole preference after a colonizable planet search, with the 16-bit distance wrap behind the `ai_wormhole_distance_wrap` switch (on in both built-ins) | AI.md §11 "Wormhole distance arithmetic" | LEGACY BUG, BINARY-ONLY | `ai/shared.go` `preferWormhole`, `wormholeD2` | `TestPreferWormhole`, `TestPreferWormholeBuiltins`, `TestPreferWormholeYear` |
 | Warp re-pick: every fleet's first waypoint; inside another player's enlarged minefield 4, 5 or 6 (+1 SS), otherwise from 9 down while short of fuel, the raw cap and its exceptions, the slowest warp with the same years | AI.md §7 step 1, §11 "Warp choice" | CONFIRMED AI-11 (rule) | `ai/warp.go` (minefields from `game.Report.Objects`, MEASURED SC-038) | `TestWarpChoice*`, `TestMinefieldWarp`, `TestRototillScout`, `TestRototillEmptyColonyShipGoesHome` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
@@ -139,6 +140,7 @@ them it stayed on its homeworld.
 | A61 | Under attack: when n ≤ m (§7 names only n > m), the n defenses go to the front. "None queued" is no defense item in the queue; resources and minerals are the planet's available ones (§7 "available"), and the defense room is A14's. |
 | A62 | Completion estimate (ESTIMATES.md "Production completion"): the walk stops at the head, leaving out the items behind it; the head finishes when its count reaches 0, or when an automatic head builds its whole count in a year; a starbase costs its full build cost (as A12); a packet head is built as a plain item. |
 | A63 | Blocked queues (AI.md §7 step 5): "years" is the year the head's last unit finishes; "mines" and "terraforming" include their automatic items; the head's resource cost is what is left of it, counted as in `queueCost`; the planet's resources are its available resources (A15), with no research share on a planet that sends only leftover resources to research (as in the completion estimate); the mine room is that of the mines-and-factories fill. |
+| A64 | Wormhole preference (AI.md §11): among ends with the same score and the same squared distance `w`, the first in the view's order wins; §11 gives only "ties: smaller w". §11's second distance test, `w ≤ 46,656` (216²), is applied in both modes: with the wrap on it always passes, as §11 says, and with it off it caps the exact distance at 216 ly. |
 
 ## Spec questions
 
@@ -146,12 +148,7 @@ None open.
 
 ## Decisions pending
 
-- Wormhole distance overflow (AI.md §11, LEGACY BUG: wormholes about
-  182 ly or more away count as near). The planner compares exact
-  distances. It has no effect until the game supplies wormholes; before
-  then the project chooses between reproducing it behind the legacy
-  switch (the exact arithmetic would need a research answer) and the
-  fixed rule (INTENTIONALLY DIFFERENT, Bobby's call).
+None.
 
 ## Game-loop driver
 

@@ -85,7 +85,7 @@ switch as a parameter from a caller that does.
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
 | `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
 | `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
-| `ai_wormhole_distance_wrap` | `AIWormholeDistanceWrap` | on (off in v1, v2) | on (off in v1, v2) | Not read yet; the computer opponents will read it from `Report.Rules` | stars-elegy `docs/AI.md` §11 "Wormhole distance arithmetic": the wormhole preference compares a 16-bit wrapped, signed squared distance, so an end about 182 to 255 ly away counts as near, LEGACY BUG, BINARY-ONLY |
+| `ai_wormhole_distance_wrap` | `AIWormholeDistanceWrap` | on (off in v1, v2) | on (off in v1, v2) | `ai/shared.go` `preferWormhole` (from `Report.Rules`) | stars-elegy `docs/AI.md` §11 "Wormhole distance arithmetic": the wormhole preference compares a 16-bit wrapped, signed squared distance, so an end about 182 to 255 ly away counts as near, LEGACY BUG, BINARY-ONLY |
 
 ## Alternate Reality with maximum population 0
 
