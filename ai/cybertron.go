@@ -212,15 +212,6 @@ func (t *cyberTurn) passA() {
 	}
 }
 
-// headsTo is the planet a fleet heads to, or orbits when idle.
-func (t *cyberTurn) headsTo(f *engine.Fleet) (int, bool) {
-	if len(f.Waypoints) > 0 {
-		w := f.Waypoints[0]
-		return w.ID, w.Target == engine.TargetPlanet
-	}
-	return t.v.planetAt(f.Pos)
-}
-
 // passB is §5 pass B: every own fleet, first rule that applies.
 func (t *cyberTurn) passB() {
 	v := t.v
@@ -636,7 +627,7 @@ func (t *cyberTurn) produce(p *engine.Planet, budget int) {
 			}
 		}
 	}
-	t.attackFleet(p, add)
+	t.queueAttackFleet(p, add)
 }
 
 // colonizer is §4.2's colonizer test.
@@ -667,12 +658,12 @@ func (t *cyberTurn) takesColonists(p *engine.Planet) bool {
 	return false
 }
 
-// attackFleet is §4.2 step 2.4.
+// queueAttackFleet is §4.2 step 2.4.
 //
 // ASSUMPTION A27: the guard draw is made only when GG holds a design and
 // fewer than 40 guard fleets exist; the third and fourth group draws are
 // made whether or not those slots hold designs.
-func (t *cyberTurn) attackFleet(p *engine.Planet, add func(engine.QueueItem)) {
+func (t *cyberTurn) queueAttackFleet(p *engine.Planet, add func(engine.QueueItem)) {
 	v := t.v
 	guard := -1
 	if t.gg >= 0 && t.sd.slots[t.gg].present && t.guardFleets < 40 {

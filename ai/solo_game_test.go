@@ -82,6 +82,12 @@ func TestCybertronPlaysAlone(t *testing.T) {
 	soloCheck(t, "Cybertron", 5, PlayCybertron, 60)
 }
 
+// A Robotoid game runs 60 years with every order accepted, and replays
+// identically from the same seed.
+func TestRobotoidPlaysAlone(t *testing.T) {
+	soloCheck(t, "Robotoid", 1, PlayRobotoid, 60)
+}
+
 func soloCheck(t *testing.T, name string, typ int, play func(*View, engine.Rand) Result, years int) {
 	g, problems := soloGame(t, typ, play, 11, years)
 	for _, p := range problems {
