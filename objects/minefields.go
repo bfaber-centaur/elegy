@@ -36,6 +36,9 @@ type Minefield struct {
 	Pos      engine.Point
 	Count    int
 	Detonate bool
+	// Known marks the players who know the field: seen, hit by it or
+	// swept it (SCANNING.md "Space objects"). Its owner always knows it.
+	Known []bool
 }
 
 // Contains reports whether p is inside the field.
@@ -407,7 +410,8 @@ func fleetPlan(g *engine.Game, f *engine.Fleet) engine.BattlePlan {
 }
 
 // Swept is one sweep: who swept which field and how many mines it lost.
-// The sweeper's owner learns the field.
+// The sweeper's owner learns the field (Minefield.Known; SCANNING.md
+// "Space objects", BINARY-ONLY).
 type Swept struct {
 	Sweeper int // owner of the sweeping fleet or starbase
 	Fleet   int // index into Game.Fleets, or -1 for a starbase
@@ -442,6 +446,7 @@ func (s *Space) Sweep(g *engine.Game) []Swept {
 			}
 			a = min(a, m.Count)
 			m.Count -= a
+			m.Known = mark(m.Known, owner)
 			out = append(out, Swept{Sweeper: owner, Fleet: fi, Planet: pi, Field: *m, Mines: a})
 		}
 	}

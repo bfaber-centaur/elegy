@@ -266,3 +266,48 @@ Still open:
   messages the source planet's owner.
 - Orders: accept waypoint warp 11 (now refused as not modelled), and let
   routing pick it when both ends are gated and the jump is safe.
+
+## Visibility
+
+Who sees which space object comes from stars-elegy `docs/SCANNING.md`,
+"Space objects" (as of stars-elegy `main` at `55078ed`). The turn engine
+keeps the fleet and planet sightings; these functions cover the objects.
+
+| Rule (SCANNING.md) | Function | Status |
+|---|---|---|
+| Minefields: own; `P`, `R/4`; inside (fleets only); known within `R` | `Space.Scan` | CONFIRMED (OB-018, OB-018-C, E–G); fleets-only inside BINARY-ONLY |
+| Minefield knowledge from sight, sweeps and hits | `Space.Scan`, `Space.Sweep`, `Space.LearnHit` | sight CONFIRMED; sweeps and hits BINARY-ONLY |
+| Wormhole ends: within `R` only; known, `P` or `R/4`; known once seen | `Space.Scan` | CONFIRMED (OB-011-H, OB-017, OB-018 H, I, WT batch); the known band BINARY-ONLY |
+| Packets within `R`; PP sees all | `Space.Scan` | CONFIRMED (OB-018 J, K, OB-012) |
+| Mystery Trader seen by all | `Space.Scan` | CONFIRMED (OB-011-J) |
+| Owners made known by minefields and packets | `Sightings.Owners` | CONFIRMED (OB-011, OB-017, OB-018) |
+| PP packet scanners, `R = P = warp²` | `Space.PacketScanners` | CONFIRMED (OB-012) |
+| SD minefields see fleets inside, not orbiting | `Space.DemolitionSightings` | CONFIRMED (OB-014-B); the cloak draw BINARY-ONLY |
+
+### Assumptions (spec gaps)
+
+1. **V1** Every packet a PP player owns at the end of the year scans,
+   including one launched this year.
+2. **V2** Overlapping fields of one kind are one stretch in `CheckStep`,
+   so a hit teaches every field of that kind that contains the stop point
+   and could stop the fleet.
+3. **V3** For SD fields, "enemy" means any other player's fleet, as
+   elsewhere in SCANNING.md. A fleet at a planet's position is in orbit.
+   Fleets are taken in fleet order, and each makes at most one cloak draw
+   however many fields it is inside.
+
+Not covered yet: knowledge from a detonating SD field's hit, and dropping
+or keeping waypoints on objects no longer seen (SCANNING.md "Orders that
+depend on sight").
+
+### What the turn engine needs to call (visibility)
+
+- Knowledge step, per player `v`: build the fleet and planet scanners
+  (`Scanner`, `Fleet` set for fleets), add `Space.PacketScanners(g, v)`
+  to the scanners used for fleets and planets (they see orbiting fleets,
+  with the cloak rule), and call `Space.Scan` for the objects.
+- Add `Sightings.Owners` to the players `v` knows.
+- For an SD player, add `Space.DemolitionSightings` to the fleets `v`
+  sees, passing the engine's cloak percent.
+- Movement: after a mine hit, call `Space.LearnHit` with the fleet's stop
+  point.
