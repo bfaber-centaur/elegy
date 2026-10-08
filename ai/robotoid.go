@@ -664,7 +664,7 @@ func (t *robotoidTurn) assignHubs() map[int]int {
 // empty each year), Robotoid's small foreign colonies (their fixed values
 // are not published), salvage (not in the view), and the colonist
 // rules (ASSUMPTION A41: robotoid.md gives no amounts beyond ranges).
-// A load at an own target is ordered by hubLoad (A56).
+// Every target is an own planet; hubLoad gives its mineral orders.
 func (t *robotoidTurn) hubFreighter(f *engine.Fleet, src int) {
 	v := t.v
 	sp := v.ownPlanet(src)
@@ -754,28 +754,33 @@ func (t *robotoidTurn) hubFreighter(f *engine.Fleet, src int) {
 			task.Transport[c] = engine.Transport{Action: engine.UnloadAll}
 		}
 	} else {
-		task = hubLoad(mode, scarce, capacity-held)
+		task = hubLoad(mode, scarce, v.ownPlanet(best).Surface[scarce], capacity-held, true)
 	}
 	t.emit(f, moveOrder(f, toPlanet(best, pos, 4, task)))
 }
 
-// hubLoad is AI.md §11's hub-freighter load task at an own planet: load
-// all three minerals in mode 0; in mode 1 or 2 fill 66 % of the room with
-// the scarce mineral and 33 % with the others.
-//
-// ASSUMPTION A56: the percentages are of the room left in the hold (kT),
-// rounded down, and the others' 33 % is split evenly between the two,
-// each loaded exactly.
-func hubLoad(mode, scarce, room int) engine.Task {
+// hubLoad is AI.md §11 "Hub freighters" step 3's mineral orders away
+// from the source (MEASURED for Robotoid, AI-26): mode 0 loads all of
+// each; mode 2 loads all of the scarce mineral and gives the others no
+// order; mode 1 does the same when the target holds at least the fleet's
+// free hold of the scarce mineral, else, at a planet some player owns,
+// fills to 66 % of the hold with the scarce mineral and to 33 % with each
+// other one, and at an unowned planet loads all of each (BINARY-ONLY).
+// No colonist or fuel order.
+func hubLoad(mode, scarce, have, free int, owned bool) engine.Task {
 	task := engine.Task{Kind: engine.TaskTransport}
 	for _, m := range []int{engine.Ironium, engine.Boranium, engine.Germanium} {
 		switch {
-		case mode == 0:
+		case mode == 0 || mode == 1 && have < free && !owned:
 			task.Transport[m] = engine.Transport{Action: engine.LoadAll}
+		case mode == 2 || have >= free:
+			if m == scarce {
+				task.Transport[m] = engine.Transport{Action: engine.LoadAll}
+			}
 		case m == scarce:
-			task.Transport[m] = engine.Transport{Action: engine.LoadExactly, Amount: room * 66 / 100}
+			task.Transport[m] = engine.Transport{Action: engine.FillTo, Amount: 66}
 		default:
-			task.Transport[m] = engine.Transport{Action: engine.LoadExactly, Amount: room * 33 / 100 / 2}
+			task.Transport[m] = engine.Transport{Action: engine.FillTo, Amount: 33}
 		}
 	}
 	return task
