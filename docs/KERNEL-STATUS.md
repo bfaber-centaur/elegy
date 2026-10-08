@@ -302,7 +302,7 @@ Places where the original has no behavior to copy, and Elegy chose one.
   BUG). Elegy's ruleset switch `Legacy.ZeroMaxPopulationStop` decides:
   on (`jrc3-faithful`, `elegy` v1), `GenerateTurn` returns a
   `*ZeroMaxPopulationError` naming the planet before changing anything;
-  off (`elegy` v2, the default; INTENTIONALLY DIFFERENT, Bobby's "Keep
+  off (`elegy` v2 and later, the default; INTENTIONALLY DIFFERENT, Bobby's "Keep
   going"), the year is generated and the planet's growth treats it as
   maximally overcrowded (`crowdingPermille`): more than 10 units lose 12%
   a year, 10 or fewer stay. See RULESET.md. A hostile planet in the same

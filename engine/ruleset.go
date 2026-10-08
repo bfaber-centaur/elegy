@@ -147,6 +147,13 @@ type Legacy struct {
 	// shot" step 5, LEGACY BUG, BINARY-ONLY). ai/packets.go scannerShot,
 	// from Report.Rules.
 	CybertronScannerShotOverflow bool `json:"cybertron_scanner_shot_overflow"`
+	// AIWormholeDistanceWrap: the computer players' wormhole preference
+	// measures each wormhole end's squared distance in 16 bits, wrapped
+	// and read as signed, so an end about 182 to 255 ly away counts as
+	// near (stars-elegy docs/AI.md §11 "Wormhole distance arithmetic",
+	// LEGACY BUG, BINARY-ONLY). Not read yet; the computer opponents will
+	// read it from Report.Rules.
+	AIWormholeDistanceWrap bool `json:"ai_wormhole_distance_wrap"`
 }
 
 // Built-in ruleset identities.
@@ -159,15 +166,25 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, its latest version: version 2.
+// ElegyRules is Elegy's default ruleset, its latest version: version 3.
 // Four switches are off, where Elegy has chosen its own rule over the
 // original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
-// ZeroMaxPopulationStop.
+// ZeroMaxPopulationStop. So are the two Cybertron switches, which version
+// 2 predates.
 //
-// Version 2 differs from version 1 only in ZeroMaxPopulationStop: an
-// Alternate Reality planet with population and no starbase no longer
-// stops the year (Bobby's decision, 2026-10-08, "Keep going").
+// Version 3 adds AIWormholeDistanceWrap, on; version 2 predates it.
 func ElegyRules() Ruleset {
+	r := elegyRulesV2()
+	r.Version = 3
+	r.Legacy.AIWormholeDistanceWrap = true
+	return r
+}
+
+// elegyRulesV2 is the Elegy ruleset, version 2. It differs from version 1
+// only in ZeroMaxPopulationStop: an Alternate Reality planet with
+// population and no starbase no longer stops the year (Bobby's decision,
+// 2026-10-08, "Keep going").
+func elegyRulesV2() Ruleset {
 	r := elegyRulesV1()
 	r.Version = 2
 	r.Legacy.ZeroMaxPopulationStop = false
@@ -201,14 +218,23 @@ func elegyRulesV1() Ruleset {
 }
 
 // FaithfulRules is the faithful J-RC3 ruleset, its latest version:
-// version 2, every legacy switch on. It differs from ElegyRules only in
+// version 3, every legacy switch on. It differs from ElegyRules only in
 // FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
-// and the two Cybertron switches. It is only as faithful as the switches go: behaviour Elegy has not modelled, or
-// models differently without a switch, is the same in both.
+// and the two Cybertron switches. It is only as faithful as the switches
+// go: behaviour Elegy has not modelled, or models differently without a
+// switch, is the same in both.
 //
-// Version 2 adds CybertronPacketMarkNextID and CybertronScannerShotOverflow,
-// both on; version 1 predates them.
+// Version 3 adds AIWormholeDistanceWrap, on; version 2 predates it.
 func FaithfulRules() Ruleset {
+	r := faithfulRulesV2()
+	r.Version = 3
+	r.Legacy.AIWormholeDistanceWrap = true
+	return r
+}
+
+// faithfulRulesV2 is the faithful ruleset, version 2: version 1 with
+// CybertronPacketMarkNextID and CybertronScannerShotOverflow on.
+func faithfulRulesV2() Ruleset {
 	r := faithfulRulesV1()
 	r.Version = 2
 	r.Legacy.CybertronPacketMarkNextID = true
@@ -232,7 +258,7 @@ func faithfulRulesV1() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), ElegyRules(), faithfulRulesV1(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), elegyRulesV2(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).
