@@ -176,7 +176,8 @@ type Result struct {
 	// spec; PlanetName gives Elegy's placeholder text.
 	NameIndex []int
 	// Artifact marks planets that carry an artifact.
-	Artifact  []bool
+	Artifact []bool
+	// Wormholes are the new game's wormholes, also held by Game.Objects.
 	Wormholes []Wormhole
 	Players   []PlayerStart
 }
@@ -272,6 +273,9 @@ func (g *generator) run() (Result, error) {
 		return Result{}, err
 	}
 	g.makeWormholes()
+	// The game carries its space objects into the turn (engine.Game.Objects);
+	// a new game has only its wormholes. Result.Wormholes is the same slice.
+	g.res.Game.Objects = &objects.Space{Wormholes: g.res.Wormholes}
 	return g.res, nil
 }
 

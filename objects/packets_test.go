@@ -259,6 +259,11 @@ func TestConfirmedPacketFlight(t *testing.T) {
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoRoom || r.Spend[0] != 110 || len(full.Packets) != 511 {
 		t.Errorf("no room: %+v", r)
 	}
+	// A destination naming no planet counts as none (ASSUMPTION P6).
+	n := len(s.Packets)
+	if r := s.Launch(l.g, 0, PacketOrder{Dest: 9999}, engine.Ironium, 1); !r.NoDriver || len(s.Packets) != n {
+		t.Errorf("missing destination: %+v", r)
+	}
 	// No driver or no destination: nothing launched (OB-028-F).
 	l.g.Planets[0].StarbaseDesign = station(t, l, "", "")
 	if r := s.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoDriver || len(s.Packets) != 0 {

@@ -315,6 +315,10 @@ func TestConfirmedSweep(t *testing.T) {
 		if swept := len(s.Sweep(l.g)) > 0; swept != p.swept {
 			t.Errorf("plan %d (player %d) vs %d: swept %v, want %v", p.attack, p.player, p.rel, swept, p.swept)
 		}
+		// The sweeper's owner learns the field (SCANNING.md, BINARY-ONLY).
+		if s.Minefields[0].KnownBy(0) != p.swept {
+			t.Errorf("plan %d vs %d: known %v", p.attack, p.rel, s.Minefields[0].KnownBy(0))
+		}
 	}
 
 	// Starbases: a Laser Fort sweeps 80 (OB-007-C), not a friend's field
