@@ -45,7 +45,7 @@ unless the project decides otherwise.
 | Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
 | Lay-mines tasks: Robotoid's idle scouts from year index 41, Cybertron's slot-0 fleets (here, or at a random nearby planet) | robotoid.md §4, cybertron.md §5 | Robotoid's duration MEASURED AI-25; the rest BINARY-ONLY (Cybertron's not exercised) | `ai/fleet.go` `layMines` | `TestDriversLayMines`, `TestCybertronMinelayer` |
-| Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestHubLoad`, `TestDriversOrderSplitFleets` |
+| Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestHubLoad`, `TestArmadaDrop`, `TestArmadaInvades`, `TestDriversOrderSplitFleets` |
 | Warp re-pick: every fleet's first waypoint; inside another player's enlarged minefield 4, 5 or 6 (+1 SS), otherwise from 9 down while short of fuel, the raw cap and its exceptions, the slowest warp with the same years | AI.md §7 step 1, §11 "Warp choice" | CONFIRMED AI-11 (rule) | `ai/warp.go` (minefields from `game.Report.Objects`, MEASURED SC-038) | `TestWarpChoice*`, `TestMinefieldWarp`, `TestRototillScout`, `TestRototillEmptyColonyShipGoesHome` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
@@ -104,7 +104,7 @@ them it stayed on its homeworld.
 | A29 | "Power > 0" in the fleet classes is tested as "some beam, torpedo or bomb term > 0" (KERNEL.md "Power of a design"): capacitors and the speed factor never take a positive beam term to zero. |
 | A30 | Robotoid's "merge the slots 2–7 and 9–10" is one merge over those slots. |
 | A31 | An armada not at a planet with no other player's planet within 150 ly goes to the nearest planet ("the nearest object of interest"). |
-| A32 | An armada launched by chance loads colonists as a normal launch does; the invasion step at another player's planet is reported as unsupported (no defense-percentage estimate yet). |
+| A32 | An armada launched by chance loads colonists as a normal launch does. |
 | A33 | Armada launch target: planets chosen earlier this turn are drawn in planet-id order and the first that draws 0 wins. |
 | A34 | Robotoid's colonizer step checks y > 4 first, and with no hubs the `Random(8 × hubs)` draw is not made. |
 | A35 | "Population × max growth %" uses the population in hundreds; "the planet's resources" are this year's. |
@@ -131,6 +131,7 @@ them it stayed on its homeworld.
 | A56 | A hub freighter's load task at an own planet in mode 1 or 2 (AI.md §11 "fills 66 % scarce, 33 % others") loads exactly 66 % of the room left in the hold in the scarce mineral and 33 % split evenly between the other two, rounded down. |
 | A57 | Retired: the warp re-pick's minefield rule is implemented from the minefields in the player's report (`game.Report.Objects`). |
 | A58 | The raw-cap exception for an own planet at the waypoint reads the planet's starbase design index even when it has no starbase (§11: the slot is read). Such a planet holds its last starbase's design (the engine keeps it when a starbase is destroyed or scrapped), or 0 if it never had one. The index is looked up only among the player's starbase designs; any other index (a ship design, or a deleted starbase design) counts as no design, so the cap stays. |
+| A59 | Robotoid's armada invasion at another player's planet (AI.md §11 "Armada (invasion) fleets", BINARY-ONLY) uses `need` (colonists) and the cargo `c` (kT) as plain numbers, with no conversion between them, as §11 reads; §11 marks the mix UNRESOLVED (a probable unit slip). The drop is a waypoint-0 unload-exactly task, with no move that turn. |
 
 ## Spec questions
 
