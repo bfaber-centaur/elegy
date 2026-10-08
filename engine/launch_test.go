@@ -425,3 +425,35 @@ func TestRouteWarpGateConditions(t *testing.T) {
 		}
 	}
 }
+
+// RawWarp leaves out only the free-warp step-down (AI.md §11 `raw`;
+// PRODUCTION-LAUNCH.md "Ideal warp of the fleet" step 3): for one design
+// it is never below IdealWarp, its fuel figure is below 121 mg, and the
+// two engines exempt from the step-down give the same value.
+func TestRawWarpWithoutStepDown(t *testing.T) {
+	c := Components()
+	for _, engine := range []string{"Settler's Delight", "Quick Jump 5", "Fuel Mizer", "Long Hump 6",
+		"Daddy Long Legs 7", "Alpha Drive 8", "Trans-Galactic Drive", "Interspace-10", "Enigma Pulsar",
+		"Trans-Star 10", "Radiating Hydro-Ram Scoop", "Sub-Galactic Fuel Scoop", "Trans-Galactic Fuel Scoop",
+		"Trans-Galactic Super Scoop", "Trans-Galactic Mizer Scoop", "Galaxy Scoop"} {
+		d, err := c.NewDesign(engine, "Scout", []SlotFill{{Slot: 0, Part: engine, Count: 1}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		s, err := NewFleetShips(ElegyRules(), []ShipStack{{Design: d, Count: 1}}, 0, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, ideal := s.RawWarp(), s.IdealWarp()
+		if raw < ideal || d.Engine.Fuel[raw] >= 121 {
+			t.Errorf("%s: raw %d (fuel %d), ideal %d", engine, raw, d.Engine.Fuel[raw], ideal)
+		}
+		if noFuelWarpEngines[engine] && raw != ideal {
+			t.Errorf("%s: raw %d, ideal %d", engine, raw, ideal)
+		}
+	}
+	none, _ := NewFleetShips(ElegyRules(), nil, 0, false)
+	if none.RawWarp() != none.IdealWarp() {
+		t.Error("no ships")
+	}
+}
