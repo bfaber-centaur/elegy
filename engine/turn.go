@@ -51,6 +51,10 @@ type Game struct {
 	ID   uint64
 	Year int
 
+	// Rules is the game's ruleset (ruleset.go), fixed for the whole game.
+	// GenerateTurn refuses a game without one and passes it on unchanged.
+	Rules Ruleset
+
 	// SlowerTech is the game's slower-tech-advances option.
 	SlowerTech bool
 	// RandomEvents is the game's random events option (KERNEL.md "Game
@@ -182,15 +186,6 @@ type Planet struct {
 	PacketSpeed   int
 }
 
-// Stubs: keep these small until real rules require shape. PlayerOrders
-// is in orders.go.
-type Ruleset interface{}
-type JRC3Rules struct{}
-
-func Jrc3() Ruleset {
-	return JRC3Rules{}
-}
-
 type TurnResult struct {
 	Game   Game
 	Events []Event
@@ -223,6 +218,9 @@ type TurnResult struct {
 // and remote mining. Scores and victory come after
 // the year advances.
 //
+// The year runs under the game's own ruleset, game.Rules; a game without
+// a valid one returns its Validate error (ErrNoRuleset for none).
+//
 // rng must not be nil: the turn's random draws (mining's +1, random events, battles) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
 // returns ErrNilRand. A state the original cannot generate from returns
@@ -232,11 +230,13 @@ type TurnResult struct {
 func GenerateTurn(
 	game Game,
 	orders []PlayerOrders,
-	rules Ruleset,
 	rng Rand,
 ) (TurnResult, error) {
 	if rng == nil {
 		return TurnResult{}, ErrNilRand
+	}
+	if err := game.Rules.Validate(); err != nil {
+		return TurnResult{}, err
 	}
 	if err := checkGenerable(&game); err != nil {
 		return TurnResult{}, err

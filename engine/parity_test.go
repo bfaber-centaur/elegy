@@ -1541,7 +1541,7 @@ func runVector(v *pvVector, k int) []pvResult {
 			}
 			return out
 		}
-		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
+		r, err := GenerateTurn(withRules(g), files, rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
 		if err != nil {
 			genErr = err
 			break
@@ -1704,8 +1704,8 @@ const pvBaseline = "testdata/vectors/baseline.txt"
 // pvLegacyOff names the LEGACY BUG cases whose switch is off by default,
 // where Elegy's chosen rule intentionally differs from the original.
 var pvLegacyOff = map[string]string{
-	"FO-03-E": "legacyMergeOverflow off",
-	"FO-06-G": "legacyMergeOverflow off",
+	"FO-03-E": "Legacy.MergeOverflow off",
+	"FO-06-G": "Legacy.MergeOverflow off",
 }
 
 // pvNotModelled skips cases that need state the vector does not carry or

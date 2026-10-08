@@ -13,7 +13,7 @@ import (
 // twoPlayers is a small two-player new game and the views of its start.
 func twoPlayers(t *testing.T) (engine.Game, []engine.PlayerView) {
 	t.Helper()
-	s := newgame.Settings{Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate}
+	s := newgame.Settings{Rules: engine.ElegyRules(), Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate}
 	for range 2 {
 		s.Players = append(s.Players, newgame.PlayerSetup{Race: races.Default()})
 	}

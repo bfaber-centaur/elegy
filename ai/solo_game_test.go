@@ -21,7 +21,7 @@ func soloGame(t *testing.T, typ int, play func(*View, engine.Rand) Result, seed 
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := newgame.Settings{Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate,
+	s := newgame.Settings{Rules: engine.ElegyRules(), Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate,
 		Players: []newgame.PlayerSetup{{Race: races.Default()}, ca}}
 	rng := newgame.NewRand(seed)
 	res, err := newgame.Generate(s, rng)
@@ -55,7 +55,7 @@ func soloGame(t *testing.T, typ int, play func(*View, engine.Rand) Result, seed 
 			history[rep.Planet] = rep
 		}
 		file := engine.PlayerOrders{Player: me, GameID: g.ID, Year: g.Year, Orders: out.Orders}
-		tr, err := engine.GenerateTurn(g, []engine.PlayerOrders{file}, engine.Jrc3(), rng)
+		tr, err := engine.GenerateTurn(g, []engine.PlayerOrders{file}, rng)
 		if err != nil {
 			t.Fatalf("year %d: %v", g.Year, err)
 		}

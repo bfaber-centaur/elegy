@@ -161,7 +161,7 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
 	tenths := 0
 	for _, gr := range g.groups(f, warp) {
-		tenths += fuelTerm(g.fleetFactor(f, gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
+		tenths += g.fuelTerm(g.fleetFactor(f, gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
 	}
 	return (tenths + 9) / 10
 }
@@ -192,20 +192,19 @@ func (g *Game) fleetFactor(f *Fleet, d Design, warp int) int {
 	return e
 }
 
-// legacyFuelWrap reproduces the original's LEGACY BUG in the fuel term
-// (KERNEL.md "Designs without a full set of engines", CONFIRMED FM-105):
-// in its integer form the product f·L·M keeps its low 32 bits and is
-// divided as a signed 32-bit number. Only an under-engined design's
-// factor makes it wrap. Set it to false for the exact product.
-const legacyFuelWrap = true
-
 // fuelTerm is one stack's fuel term trunc(f·L·M/2000) in tenths of a mg
 // (KERNEL.md "Fuel cost"), for factor f, L light-years and mass M (ships
-// plus cargo, kT).
-func fuelTerm(f, l, m int) int {
-	return fuelTermWrap(f, l, m, legacyFuelWrap)
+// plus cargo, kT), under the game's FuelWrap switch.
+func (g *Game) fuelTerm(f, l, m int) int {
+	return fuelTermWrap(f, l, m, g.Rules.Legacy.FuelWrap)
 }
 
+// fuelTermWrap is the fuel term; wrap reproduces the original's LEGACY
+// BUG (Legacy.FuelWrap; KERNEL.md "Designs without a full set of
+// engines", CONFIRMED FM-105): in its integer form the product f·L·M
+// keeps its low 32 bits and is divided as a signed 32-bit number. Only an
+// under-engined design's factor makes it wrap. Without wrap the product
+// is exact.
 func fuelTermWrap(f, l, m int, wrap bool) int {
 	integer := m < 200 || f*l < 500000 && m < 4000 || f*l < 100000 && m < 20000
 	if wrap && integer {
@@ -219,7 +218,7 @@ func fuelTermWrap(f, l, m int, wrap bool) int {
 func (g *Game) fuelRange(f *Fleet, warp int) (r int, unlimited bool) {
 	sum := 0
 	for _, gr := range g.groups(f, warp) {
-		sum += fuelTerm(g.fleetFactor(f, gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
+		sum += g.fuelTerm(g.fleetFactor(f, gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
 	}
 	c1000 := sum / 10
 	switch {

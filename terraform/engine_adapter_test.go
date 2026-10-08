@@ -12,6 +12,7 @@ import (
 func tfGame(env [3]int, queue ...engine.QueueItem) *engine.Game {
 	r := race()
 	g := &engine.Game{
+		Rules:     engine.ElegyRules(),
 		Players:   []engine.Player{{Race: r, Research: engine.ResearchState{Levels: levels(1, 1, 1, 1, 1, 1)}}},
 		Planets:   []engine.Planet{{ID: 1, Owner: 0, Env: env, OrigEnv: env, Population: 1000, HasQueue: true, Queue: queue}},
 		Terraform: Rules{},

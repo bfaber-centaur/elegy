@@ -175,14 +175,14 @@ func pqGame(pop int, queue []QueueItem) Game {
 		Population: pop, GrowthCarry: 80, Defenses: 10,
 		Surface: Minerals{500, 500, 500}, HasQueue: true, Queue: queue,
 	}
-	return Game{Year: 2407, Players: []Player{{Race: race}}, Planets: []Planet{p}}
+	return Game{Rules: ElegyRules(), Year: 2407, Players: []Player{{Race: race}}, Planets: []Planet{p}}
 }
 
 func TestConfirmedProductionPQ001TwoYears(t *testing.T) {
 	t.Run("C01 year 2", func(t *testing.T) {
 		g := pqGame(1050, []QueueItem{q(ItemFactory, 20, 0)})
 		for range 2 {
-			r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+			r, err := GenerateTurn(withRules(g), nil, highRand{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -199,8 +199,8 @@ func TestConfirmedProductionPQ001TwoYears(t *testing.T) {
 	})
 	t.Run("C14", func(t *testing.T) {
 		g := pqGame(230, []QueueItem{q(ItemAutoMines, 100, 0)})
-		r, _ := GenerateTurn(g, nil, Jrc3(), highRand{})
-		r, _ = GenerateTurn(r.Game, nil, Jrc3(), highRand{})
+		r, _ := GenerateTurn(withRules(g), nil, highRand{})
+		r, _ = GenerateTurn(withRules(r.Game), nil, highRand{})
 		p := r.Game.Planets[0]
 		want := []QueueItem{q(ItemMine, 1, 79), q(ItemAutoMines, 100, 0)}
 		if p.Mines != 9 || !reflect.DeepEqual(p.Queue, want) {

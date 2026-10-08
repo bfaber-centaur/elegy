@@ -68,7 +68,7 @@ func TestPredictionTerraformInTurn(t *testing.T) {
 	}
 	stub := &stubTerraform{}
 	g.Terraform = stub
-	r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestPredictionTerraformInTurn(t *testing.T) {
 // full the starbase design that caught its packet.
 func TestPredictionPacketDesignSeen(t *testing.T) {
 	scout, _ := slScouts(t)
-	g := Game{Players: make([]Player, 2), Designs: []Design{scout}}
+	g := Game{Rules: ElegyRules(), Players: make([]Player, 2), Designs: []Design{scout}}
 	sights := []ObjectSight{{Designs: []int{0}}, {}}
 	views := viewsWith(g, nil, nil, make([]map[int]bool, 2), sights)
 	if want := []DesignSighting{{Design: 0, Full: true, Hull: "Scout", Mass: scout.Mass}}; !slices.Equal(views[0].Designs, want) || len(views[1].Designs) != 0 {

@@ -22,7 +22,7 @@ func TestIdealWarpPerEngine(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		g := &Game{Designs: []Design{d}}
+		g := &Game{Rules: ElegyRules(), Designs: []Design{d}}
 		if got := g.idealWarp(&Fleet{Stacks: []Stack{{Design: 0, Count: 1}}}); got != w {
 			t.Errorf("%s: warp %d, want %d", engine, got, w)
 		}
@@ -81,6 +81,7 @@ func TestConfirmedRouteWarp(t *testing.T) {
 	} {
 		for k, want := range []int{tt.scout, tt.qj5Got} {
 			g := &Game{
+				Rules:   ElegyRules(),
 				Players: make([]Player, 2),
 				Designs: []Design{scout, qj5, station, fort},
 				Planets: []Planet{
@@ -119,7 +120,7 @@ func TestConfirmedRouteWarpTankScout(t *testing.T) {
 		t.Fatal(err)
 	}
 	scout, _ := slScouts(t)
-	g := &Game{Players: make([]Player, 1), Designs: []Design{tank, scout},
+	g := &Game{Rules: ElegyRules(), Players: make([]Player, 1), Designs: []Design{tank, scout},
 		Planets: []Planet{{ID: 1, Owner: 0, Pos: Point{1000, 1000}, HasStarbase: true, StarbaseHull: 3}, {ID: 2, Owner: NoOwner, Pos: Point{1133, 1000}}, {ID: 3, Owner: NoOwner, Pos: Point{1000, 1041}}}}
 	f := Fleet{Owner: 0, Pos: Point{1000, 1000}, Stacks: []Stack{{Design: 0, Count: 2}}}
 	f.Fuel = g.tankCapacity(&f)
@@ -144,6 +145,7 @@ func launchGame(t *testing.T) *Game {
 		t.Fatal(err)
 	}
 	g := &Game{
+		Rules:   ElegyRules(),
 		Players: make([]Player, 2),
 		Designs: []Design{scout, qj5, station},
 		Planets: []Planet{
@@ -272,7 +274,7 @@ func TestDockAllows(t *testing.T) {
 	heavy := scout
 	heavy.Hull.Mass = 201
 	designs = append(designs, scout, heavy)
-	g := &Game{Designs: designs, Planets: []Planet{{HasStarbase: true}}}
+	g := &Game{Rules: ElegyRules(), Designs: designs, Planets: []Planet{{HasStarbase: true}}}
 	for sb, want := range [][2]bool{{false, false}, {true, false}, {true, true}} {
 		g.Planets[0].StarbaseDesign = sb
 		for k, w := range want {
@@ -363,6 +365,7 @@ func TestConfirmedRouteWarpGates(t *testing.T) {
 				src = 3
 			}
 			g := &Game{
+				Rules:   ElegyRules(),
 				Players: make([]Player, 2),
 				Designs: []Design{scout, qj5, station, gated},
 				Planets: []Planet{
@@ -393,6 +396,7 @@ func TestRouteWarpGateConditions(t *testing.T) {
 	heavy.Mass = 101
 	setup := func() (*Game, Fleet) {
 		g := &Game{
+			Rules:   ElegyRules(),
 			Players: make([]Player, 2),
 			Designs: []Design{scout, heavy, gated},
 			Planets: []Planet{

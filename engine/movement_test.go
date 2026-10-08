@@ -8,11 +8,11 @@ import "testing"
 
 func scoutGame(engine Engine, engines int, fleets ...Fleet) Game {
 	d := Design{Name: "scout", Mass: 18, Engine: engine, Engines: engines, FuelCapacity: 300}
-	return Game{Designs: []Design{d}, Fleets: fleets}
+	return Game{Rules: ElegyRules(), Designs: []Design{d}, Fleets: fleets}
 }
 
 func TestConfirmedFuelCostVectors(t *testing.T) {
-	g := Game{Designs: fmDesigns()}
+	g := Game{Rules: ElegyRules(), Designs: fmDesigns()}
 	tests := []struct {
 		name string
 		f    Fleet
@@ -37,7 +37,7 @@ func TestConfirmedFuelCostVectors(t *testing.T) {
 }
 
 func TestConfirmedFuelRangeVectors(t *testing.T) {
-	g := Game{Designs: fmDesigns()}
+	g := Game{Rules: ElegyRules(), Designs: fmDesigns()}
 	// FM-004 LR first row: LH6 scout, warp 6, fuel 3: C1000 120, R 25.
 	f := Fleet{Stacks: []Stack{{Design: 3, Count: 1}}, Fuel: 3}
 	if r, _ := g.fuelRange(&f, 6); r != 25 {
