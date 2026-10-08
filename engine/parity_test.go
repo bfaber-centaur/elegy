@@ -705,6 +705,8 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 // pvItemKinds maps the planetary queue item ids Elegy builds to its
 // items (FORMAT.md "Queue items"). The packet items (6, 14–17) stay unmapped: a
 // vector's planet carries no packet destination or speed, which they need.
+// Terraform items (4, 5, 12) stay unmapped until the loader sets
+// Game.Terraform: without it they stop the queue.
 var pvItemKinds = map[int]ItemKind{
 	0: ItemAutoMines, 1: ItemAutoFactories, 2: ItemAutoDefenses, 3: ItemAutoAlchemy,
 	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy,

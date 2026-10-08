@@ -1,7 +1,7 @@
 package engine
 
-// ItemKind is a production-queue item type. Terraforming and scanners are
-// not modelled yet.
+// ItemKind is a production-queue item type. Scanners are not modelled
+// yet.
 type ItemKind int
 
 const (
@@ -25,6 +25,11 @@ const (
 	ItemGermaniumPacket
 	ItemMixedPacket
 	ItemAutoPackets
+	// Terraform Environment and the auto items that build it (KERNEL.md
+	// "Terraforming"; production_terraform.go).
+	ItemTerraform
+	ItemAutoMinTerraform
+	ItemAutoMaxTerraform
 )
 
 // maxAutoPackets is the most units Auto Mineral Packets builds in a year
@@ -32,7 +37,7 @@ const (
 const maxAutoPackets = 1000
 
 func (k ItemKind) auto() bool {
-	return k >= ItemAutoMines && k <= ItemAutoAlchemy || k == ItemAutoPackets
+	return k >= ItemAutoMines && k <= ItemAutoAlchemy || k == ItemAutoPackets || k == ItemAutoMinTerraform || k == ItemAutoMaxTerraform
 }
 
 // packet reports whether k builds mineral packets.
@@ -62,6 +67,8 @@ func (k ItemKind) real() ItemKind {
 		return ItemMineralAlchemy
 	case ItemAutoPackets:
 		return ItemMixedPacket
+	case ItemAutoMinTerraform, ItemAutoMaxTerraform:
+		return ItemTerraform
 	}
 	return k
 }
@@ -87,7 +94,13 @@ type QueueItem struct {
 // resources (Packet Physics 5), and 110 kT of the item's mineral
 // (Interstellar Traveler 120, PP 70) or 44 kT of each for a mixed item
 // (IT 48, PP 25).
+//
+// A Terraform Environment unit's cost is the game's terraforming rules'
+// (Terraformer.UnitCost); ItemCost gives none for it.
 func ItemCost(race Race, k ItemKind) Cost {
+	if k.terraform() {
+		return Cost{}
+	}
 	if k.packet() {
 		res, one, each := 10, 110, 44
 		switch race.PRT {
@@ -261,6 +274,9 @@ func (pr *production) event(kind EventKind, item ItemKind, count int) {
 }
 
 func (pr *production) cost(k ItemKind) Cost {
+	if k.terraform() {
+		return Cost{Resources: pr.g.Terraform.UnitCost(pr.in.Colony.Race)}
+	}
 	return ItemCost(pr.in.Colony.Race, k)
 }
 
@@ -367,6 +383,10 @@ func (pr *production) complete(k ItemKind, n int) {
 		pr.launchPackets(k, n)
 		return
 	}
+	if k.terraform() {
+		pr.terraformUnits(n)
+		return
+	}
 	if inst := pr.installed(k); inst != nil {
 		*inst += n
 		pr.event(EventBuilt, k.real(), n)
@@ -432,6 +452,19 @@ func (pr *production) plain(i int, alch bool) bool {
 			it.Count = 0
 			pr.cancelled = true
 			return true
+		}
+	}
+	if it.Kind == ItemTerraform {
+		if !pr.terraformModelled() {
+			pr.stopped = true
+			return false
+		}
+		if capacity := pr.terraformCapacity(); it.Count > capacity {
+			it.Count = capacity
+			pr.event(EventOrderClipped, it.Kind, it.Count)
+			if capacity == 0 {
+				return true
+			}
 		}
 	}
 	c := pr.cost(it.Kind)
@@ -606,15 +639,17 @@ func (pr *production) autoInstall(i int, alch bool) int {
 	c := pr.cost(it.Kind)
 	var limit int
 	switch {
-	case !it.Kind.packet():
-		limit = min(it.Count, pr.operable(it.Kind)-*pr.installed(it.Kind))
-	case !pr.packetsModelled():
+	case it.Kind.packet() && !pr.packetsModelled(), it.Kind.terraform() && !pr.terraformModelled():
 		pr.stopped = true
 		return i + 1
-	default:
+	case it.Kind.packet():
 		if _, ok := pr.packetDest(); ok {
 			limit = min(it.Count, maxAutoPackets)
 		}
+	case it.Kind.terraform():
+		limit = pr.autoTerraformUnits(it.Kind, it.Count)
+	default:
+		limit = min(it.Count, pr.operable(it.Kind)-*pr.installed(it.Kind))
 	}
 	built := 0
 	for built < limit {

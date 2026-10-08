@@ -89,6 +89,10 @@ type Game struct {
 	// A checker that keeps state of its own implements RaceCloner, so
 	// GenerateTurn leaves the input game's checker unchanged.
 	Races RaceChecker
+	// Terraform is the terraforming rules production uses for terraform
+	// items (production_terraform.go), or nil: those items then stop the
+	// queue.
+	Terraform Terraformer
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies

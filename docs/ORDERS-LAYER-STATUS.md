@@ -124,6 +124,8 @@ item.
 | Packet items: unit loop, one launch per item per year | `PlanetProduction`, `launchPackets` | BINARY-ONLY (KERNEL.md "Packet items") | `TestPacketItemUnitLoop` |
 | No driver or destination: the item removed, cancel then "completed its orders" | `plain` | MEASURED (OB-028-F) | `TestMeasuredPacketItemNoDestination` |
 | Auto Mineral Packets: mixed units up to the count (at most 1000), auto skip and partial rules, nothing without a driver | `autoInstall` | BINARY-ONLY (KERNEL.md "Packet items") | `TestAutoMineralPackets` |
+| Terraform Environment: unit cost, the order cut to the capacity with a message or removed at 0 when the queue reaches it, one improving click per unit at the levels before research | `plain`, `production_terraform.go` via `Game.Terraform` (`terraform.Rules`) | CONFIRMED (KX-002 T1–T3, KB-2C, KX-005; KERNEL.md "Terraforming") | `TestConfirmedTerraformItemClipAndClicks`, `TestConfirmedTerraformItemNoCapacity` |
+| Auto Max / Auto Min Terraform: `AutoUnits` with this year's population change (production runs before the year's population is written, engine/turn.go) | `autoInstall` | CONFIRMED (KX-005) | `TestConfirmedAutoTerraform` |
 
 Production assumptions:
 
@@ -140,8 +142,8 @@ Production assumptions:
 Not modelled there: the Alternate Reality remote-mining
 task, the "did not move" mark (GenerateTurn must not mark a fleet built
 this year as stationary), and the route task on arrival. Packet items
-need `Game.Objects`; without it, and in `RunProduction`, they stop the
-queue.
+need `Game.Objects` and terraform items `Game.Terraform`; without them,
+and in `RunProduction`, they stop the queue.
 
 ## Not modelled
 
