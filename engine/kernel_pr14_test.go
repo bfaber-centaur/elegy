@@ -138,7 +138,7 @@ func TestPredictionCargoTiesKeepDesignOrder(t *testing.T) {
 	// tenths (2 mg); heavy first → 10 + 0 = 10 tenths (1 mg).
 	var e Engine
 	e.Fuel[6] = 100
-	g := Game{Designs: []Design{
+	g := Game{Rules: ElegyRules(), Designs: []Design{
 		{Name: "light", Mass: 1, Engine: e, Engines: 1, CargoCapacity: 10},
 		{Name: "heavy", Mass: 20, Engine: e, Engines: 1, CargoCapacity: 10},
 	}}

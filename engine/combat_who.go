@@ -127,28 +127,27 @@ func (g *Game) write(sets attackSets, x, owner int, plan BattlePlan) {
 	}
 }
 
-// legacyPlan0Recipient reproduces the original's LEGACY BUG for a
-// starbase whose owner's plan 0 attacks "everyone" or a named player: the
-// set is written to another player X (COMBAT.md "LEGACY BUG: plan 0 ...",
-// CONFIRMED CB-011..013, CB-022, CB-035). X is player 0 when the previously
-// examined location had a battle, else the owner of that location's last
-// fleet. Set legacyPlan0 to false to write to the owner instead.
-//
-// For the first location of a turn X is not determined (COMBAT.md,
-// BINARY-ONLY; never a player of the game in CB-022 and in 36 runs of
-// CB-035). COMBAT.md's chosen rule for Elegy: there plan 0 contributes
-// nothing (ok is false).
-const legacyPlan0 = true
-
 type locationHistory struct {
 	any       bool // a location was examined before
 	battle    bool // it had a battle
 	lastOwner int  // owner of its last fleet
 }
 
-func legacyPlan0Recipient(owner int, prev locationHistory) (x int, ok bool) {
+// legacyPlan0Recipient reproduces the original's LEGACY BUG for a
+// starbase whose owner's plan 0 attacks "everyone" or a named player: the
+// set is written to another player X (COMBAT.md "LEGACY BUG: plan 0 ...",
+// CONFIRMED CB-011..013, CB-022, CB-035). X is player 0 when the previously
+// examined location had a battle, else the owner of that location's last
+// fleet. legacy is Legacy.Plan0Recipient; without it the set is written to
+// the owner.
+//
+// For the first location of a turn X is not determined (COMBAT.md,
+// BINARY-ONLY; never a player of the game in CB-022 and in 36 runs of
+// CB-035). COMBAT.md's chosen rule for Elegy: there plan 0 contributes
+// nothing (ok is false).
+func legacyPlan0Recipient(owner int, prev locationHistory, legacy bool) (x int, ok bool) {
 	switch {
-	case !legacyPlan0:
+	case !legacy:
 		return owner, true
 	case !prev.any:
 		return 0, false
@@ -181,7 +180,7 @@ func (g *Game) whoFights(loc location, prev locationHistory) (attackSets, []int,
 		case AttackEnemies, AttackNeutralsAndEnemies:
 			g.write(sets, sbOwner, sbOwner, plan)
 		case AttackEveryone, AttackPlayer:
-			if x, ok := legacyPlan0Recipient(sbOwner, prev); ok && x >= 0 && x < np {
+			if x, ok := legacyPlan0Recipient(sbOwner, prev, g.Rules.Legacy.Plan0Recipient); ok && x >= 0 && x < np {
 				g.write(sets, x, sbOwner, plan)
 			}
 		}

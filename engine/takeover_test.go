@@ -29,6 +29,7 @@ type tkLab struct {
 
 func newTKLab(t *testing.T, energy int) *tkLab {
 	l := &tkLab{t: t}
+	l.g.Rules = ElegyRules()
 	for range 2 {
 		pl := Player{Race: tkRace(), Research: ResearchState{Current: Biotech, Next: NextSameField}}
 		pl.Relations = []Relation{RelationEnemy, RelationEnemy}

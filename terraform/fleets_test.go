@@ -15,7 +15,7 @@ type lab struct {
 // and enemies of each other, one planet per call to l.planet.
 func newLab(t *testing.T) *lab {
 	t.Helper()
-	g := &engine.Game{Players: []engine.Player{
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{
 		{Race: race(), Relations: []engine.Relation{engine.RelationFriend, engine.RelationEnemy}},
 		{Race: race(), Relations: []engine.Relation{engine.RelationEnemy, engine.RelationFriend}},
 	}}
