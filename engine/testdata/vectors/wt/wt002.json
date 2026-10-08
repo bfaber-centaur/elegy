@@ -168,7 +168,9 @@
     "relations": {
      "0": "enemy"
     },
-    "mystery_trader_items": [],
+    "mystery_trader_items": [
+     "Anti Matter Torpedo"
+    ],
     "race": {
      "prt": "JOAT",
      "lrt": [],
