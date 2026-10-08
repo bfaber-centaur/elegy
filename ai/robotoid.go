@@ -660,8 +660,7 @@ func (t *robotoidTurn) assignHubs() map[int]int {
 // empty each year), Robotoid's small foreign colonies (their fixed values
 // are not published), salvage (not in the view), and the colonist
 // rules (ASSUMPTION A41: robotoid.md gives no amounts beyond ranges).
-// Elegy's transport task can unload but not load, so a load at the target
-// is reported as unsupported and the fleet moves with no task.
+// A load at an own target is ordered by hubLoad (A56).
 func (t *robotoidTurn) hubFreighter(f *engine.Fleet, src int) {
 	v := t.v
 	sp := v.ownPlanet(src)
