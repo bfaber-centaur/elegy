@@ -23,8 +23,9 @@ Each case is played three times in lockstep:
   that, and right after the load.
 
 Every primary year must pass `game.Check` (`game.Advance` refuses a year
-that fails it) and every extra year check in `regress/checks.go`. The
-engine's year check joins that list when it lands.
+that fails it) and the extra year checks in `regress/checks.go`: the
+engine's structural invariants from the year before to the year
+generated (`engine.CheckYear`, each invariant cited in its doc).
 
 ## Categories
 
