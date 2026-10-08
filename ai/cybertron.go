@@ -28,7 +28,6 @@ import (
 // original's inherited values, which kept AIX's armadas at home (AI-18),
 // would come only from a legacy ruleset switch, which is not implemented.
 //
-// Not yet run: automation step 5; docs/AI-STATUS.md lists them.
 // Steps it cannot order yet go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
