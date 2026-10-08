@@ -77,8 +77,8 @@ func TestRulesetValidate(t *testing.T) {
 	}
 }
 
-// docs/RULESET.md is the inventory: it names every switch by its saved
-// name.
+// docs/RULESET.md is the inventory: it has a table row for every switch,
+// starting with its saved name.
 func TestRulesetInventoryDocumentsEverySwitch(t *testing.T) {
 	doc, err := os.ReadFile("../docs/RULESET.md")
 	if err != nil {
@@ -87,7 +87,7 @@ func TestRulesetInventoryDocumentsEverySwitch(t *testing.T) {
 	typ := reflect.TypeOf(Legacy{})
 	for i := range typ.NumField() {
 		tag := typ.Field(i).Tag.Get("json")
-		if !strings.Contains(string(doc), "`"+tag+"`") {
+		if !strings.Contains(string(doc), "\n| `"+tag+"` |") {
 			t.Errorf("docs/RULESET.md does not list %s", tag)
 		}
 	}
@@ -220,6 +220,10 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 		t.Errorf("jrc3-faithful v2 differs from v1 beyond the Cybertron switches")
 	}
 	for _, c := range []struct{ v3, v2 Ruleset }{{ElegyRules(), elegyRulesV2()}, {FaithfulRules(), faithfulRulesV2()}} {
+		if !c.v3.Legacy.AIWormholeDistanceWrap || c.v2.Legacy.AIWormholeDistanceWrap {
+			t.Errorf("%s: ai_wormhole_distance_wrap is %v in v3 and %v in v2, want on and off",
+				c.v3.ID, c.v3.Legacy.AIWormholeDistanceWrap, c.v2.Legacy.AIWormholeDistanceWrap)
+		}
 		v3 := c.v3
 		v3.Version = 2
 		v3.Legacy.AIWormholeDistanceWrap = false
