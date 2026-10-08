@@ -106,11 +106,90 @@ func newLibraryGame(t *testing.T) *game.Game {
 func TestCLIPlay(t *testing.T) {
 	out := cli(t, "play", "-seed", "3", "-players", "3", "-years", "30")
 	lines := strings.Split(strings.TrimSpace(out), "\n")
-	if len(lines) != 31 || !strings.Contains(lines[30], "year 2430") {
-		t.Fatalf("play printed %d lines, last %q", len(lines), lines[len(lines)-1])
+	if len(lines) != 34 || !strings.Contains(lines[30], "year 2430") || !strings.HasPrefix(lines[33], "player 2 (human)") {
+		t.Fatalf("play printed %d lines:\n%s", len(lines), out)
 	}
 	if again := cli(t, "play", "-seed", "3", "-players", "3", "-years", "30"); again != out {
 		t.Fatal("two plays of the same seed differ")
+	}
+}
+
+// TestCLIComputerPlayers plays 40-year games against each approved
+// computer player alone, then all three together, through the command
+// line. Every computer player's order must be accepted, every computer
+// player must still hold a planet, and the same seed must replay to the
+// same hashes.
+func TestCLIComputerPlayers(t *testing.T) {
+	for _, opponents := range []string{"robotoid", "rototill", "cybertron", "robotoid,rototill:harder,cybertron:standard"} {
+		t.Run(opponents, func(t *testing.T) {
+			args := []string{"play", "-seed", "7", "-players", "1", "-size", "small", "-ai", opponents, "-years", "40"}
+			out := cli(t, args...)
+			if strings.Contains(out, "rejected") {
+				t.Errorf("rejected orders:\n%s", out)
+			}
+			n := strings.Count(opponents, ",") + 1
+			lines := strings.Split(strings.TrimSpace(out), "\n")
+			summary := lines[len(lines)-1-n:]
+			if !strings.Contains(lines[len(lines)-2-n], "year 2440") || !strings.HasPrefix(summary[0], "player 0 (human)") {
+				t.Fatalf("play output ends:\n%s", strings.Join(lines[len(lines)-2-n:], "\n"))
+			}
+			for _, line := range summary[1:] {
+				t.Log(line)
+				if strings.Contains(line, "human") || strings.Contains(line, ": 0 planets") {
+					t.Errorf("computer player summary %q", line)
+				}
+			}
+			if again := cli(t, args...); again != out {
+				t.Fatal("two plays of the same seed differ")
+			}
+		})
+	}
+}
+
+// TestCLIPlayerOptions checks race files, random races and computer
+// players in new, and that turn runs a saved game's computer players.
+func TestCLIPlayerOptions(t *testing.T) {
+	dir := t.TempDir()
+	racePath := filepath.Join(dir, "race.json")
+	if err := os.WriteFile(racePath, []byte(cli(t, "race", "-name", "Testers")), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	save := filepath.Join(dir, "game.json")
+	cli(t, "new", "-seed", "9", "-size", "tiny", "-race", racePath, "-race", "random", "-ai", "rototill:easy", "-o", save)
+	g, err := readGame(save)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(g.State.Players) != 3 || g.State.Players[0].Race.PRT != engine.PRTJackOfAllTrades || g.State.Players[0].Computer || g.State.Players[1].Computer {
+		t.Fatalf("players %+v", g.State.Players)
+	}
+	if lvl, ok := g.ComputerLevel(2); !ok || lvl != newgame.Easy || g.State.Players[2].Race.PRT != engine.PRTClaimAdjuster {
+		t.Fatalf("player 2: level %v computer %v PRT %v", lvl, ok, g.State.Players[2].Race.PRT)
+	}
+	designs := g.State.Races.(*races.GameRaces).Designs
+	if designs[0].Name != "Testers" || designs[1].Random {
+		t.Fatalf("race 0 named %q; race 1 still the Random template: %v", designs[0].Name, designs[1].Random)
+	}
+
+	// turn plays the computer player; an order file for it is refused.
+	cli(t, "turn", "-game", save)
+	var tmpl bytes.Buffer
+	if err := run([]string{"orders", "-game", save, "-player", "2"}, &tmpl); err != nil {
+		t.Fatal(err)
+	}
+	orders := filepath.Join(dir, "orders2.json")
+	if err := os.WriteFile(orders, tmpl.Bytes(), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run([]string{"turn", "-game", save, orders}, &bytes.Buffer{}); err == nil || !strings.Contains(err.Error(), "computer player") {
+		t.Fatalf("order file for a computer player: err = %v", err)
+	}
+	g, err = readGame(save)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.State.Year != 2401 {
+		t.Fatalf("year %d after one turn", g.State.Year)
 	}
 }
 
@@ -119,6 +198,10 @@ func TestCLIErrors(t *testing.T) {
 		nil,
 		{"fly"},
 		{"new", "-size", "enormous"},
+		{"new", "-ai", "macinti"},
+		{"new", "-ai", "rototill:hardest"},
+		{"new", "-players", "2", "-race", "default"},
+		{"new", "-race", filepath.Join(t.TempDir(), "missing.json")},
 		{"hash", "-game", filepath.Join(t.TempDir(), "missing.json")},
 	} {
 		if err := run(args, &bytes.Buffer{}); err == nil {

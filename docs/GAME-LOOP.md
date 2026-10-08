@@ -100,7 +100,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 2, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 3, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:
@@ -110,6 +110,8 @@ file formats. It holds:
   and whether terraforming is on;
 - the generator state;
 - the planet name indexes;
+- each computer player's level (`Game.ComputerLevel`), so a loaded game
+  can run its computer players again;
 - what the last year told each player (views, events, order outcomes,
   planet histories, wormhole sightings).
 
@@ -172,20 +174,57 @@ picks one.
 
 ```sh
 go run ./cmd/elegy new -seed 1 -players 3 -size small -rules elegy -o game.json   # or -rules jrc3-faithful
+go run ./cmd/elegy new -race default -race me.json -race random -ai rototill:expert,cybertron -o game.json
+go run ./cmd/elegy race -name Testers > me.json                     # a race file to edit
 go run ./cmd/elegy orders -game game.json -player 0 > orders0.json   # an empty file to fill
 go run ./cmd/elegy turn -game game.json orders0.json                # players without a file keep standing orders
 go run ./cmd/elegy report -game game.json -player 0                 # the player's Report as JSON
 go run ./cmd/elegy hash -game game.json
-go run ./cmd/elegy play -seed 1 -players 3 -years 40                # idle players; one hash per year
+go run ./cmd/elegy play -seed 1 -players 1 -ai robotoid,rototill,cybertron -years 40
 ```
+
+Players:
+
+- `-players N` makes N human players with `races.Default()`.
+- `-race` makes one human player per use. Its value is `default`,
+  `random` (the wizard's Random race, generated at creation, RACES.md
+  "Random race") or a race file.
+- `-ai` adds computer players after the humans, in the order given:
+  `robotoid`, `rototill` or `cybertron`, each with an optional level,
+  `easy`, `standard`, `harder` or `expert`. Each gets its type's built-in
+  race (AI.md "Built-in races"). These are the three personalities the
+  project implements (AI.md "Project policy"). **ELEGY CHOICE:** the level
+  defaults to expert, the level the `ai` package's own long games play.
+
+`turn` and `play` run every computer player with `ai.Driver`. The
+personality comes from the player's PRT (AI.md table: HE Robotoid, CA
+Rototill, PP Cybertron). `turn` refuses an order file for a computer
+player.
+
+`turn` loads the game for every year, so its computer players start
+each year with fresh drivers. `ai.Driver` keeps the creation year and
+picture of the designs it stores, and that state does not survive a save
+and load (its ELEGY CHOICE, until the engine's designs carry the two
+values). So a game advanced year by year with `turn` can differ from the
+same game run in one `play`. Each path on its own is deterministic.
+
+**ELEGY CHOICE:** a race file is Elegy's own versioned JSON document,
+`{"format": "elegy-race", "version": 1, "race": {...}}`, holding a
+`races.Design`.
 
 `turn` refuses an order file for another game, another year or a
 missing player before anything runs. It prints each rejected order and
 writes the next year back to the save file, through a temporary file.
-Players are created with `races.Default()`. Choosing races and computer
-players from the command line is still to do.
+`play` prints each year's hash, each rejected order and, at the end,
+every player's planets and ships, with the number of computer-player
+steps Elegy cannot order yet (`ai.Result.Unsupported`).
+
+`cmd/elegy`'s tests play 40 years against each computer player alone
+and against all three together. Every computer player's order must be
+accepted, every computer player must keep a planet, and the same seed
+must give the same hashes.
 
 ## Not done yet
 
-- Races and computer players chosen on the command line.
-- Computer opponents (lane C implements them as drivers).
+- Computer players' design creation years and pictures in the save (see
+  above).

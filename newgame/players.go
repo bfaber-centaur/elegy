@@ -238,6 +238,9 @@ func (g *generator) setUpPlayers(hws []int) error {
 			ResearchBudget: 15,
 			Research:       engine.ResearchState{Levels: levels, Current: engine.Energy, Next: engine.NextSameField},
 			Plans:          StartingPlans(),
+			// The engine's rules that name computer players (a gifted
+			// fleet is refused) read this flag.
+			Computer: ps.Computer,
 		}
 		// Relations (MEASURED): with exactly one human player every
 		// player starts as an enemy of every other; with two or more,
