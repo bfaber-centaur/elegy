@@ -76,8 +76,11 @@ type Report struct {
 	KnownDesigns []KnownDesign
 	// Objects is what the player is shown of the minefields, packets,
 	// Mystery Traders and salvage it saw in the year just generated
-	// (View.Objects; objects.Space.Report, ASSUMPTION V4). Wormhole ends
-	// are in Wormholes.
+	// (View.Objects; objects.Space.Report). A sighting shows the whole
+	// object (SCANNING.md "Space objects", MEASURED SC-038). ASSUMPTION
+	// V4 covers only what SC-038 leaves open: the player's own packets
+	// always being listed, the decay-state mapping and the missing seen
+	// marker. Wormhole ends are in Wormholes.
 	Objects objects.ObjectReport
 
 	// Rand draws from the game's random stream. The loop sets it; a
