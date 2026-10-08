@@ -72,7 +72,9 @@ designs, fleets and wormholes) from the stars-elegy `UNIVERSE.md` spec; it
 reads the engine's state types and leaves the engine unchanged. `races/`
 scores, repairs and generates race designs (`RACES.md`). `objects/`
 implements the space objects of `OBJECTS.md` as step and query functions
-the turn engine calls; minefields first.
+the turn engine calls; minefields first. `terraform/` implements
+terraforming (production units, Orbital Adjusters, PP packets) and
+remote mining (`KERNEL.md`, `OBJECTS.md`) the same way.
 
 See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
 [SCANNING-STATUS.md](SCANNING-STATUS.md),
@@ -80,8 +82,9 @@ See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
 [TAKEOVER-STATUS.md](TAKEOVER-STATUS.md),
 [ORDERS-STATUS.md](ORDERS-STATUS.md),
 [UNIVERSE-STATUS.md](UNIVERSE-STATUS.md),
-[RACES-STATUS.md](RACES-STATUS.md) and
-[OBJECTS-STATUS.md](OBJECTS-STATUS.md) for what is implemented, which
+[RACES-STATUS.md](RACES-STATUS.md),
+[OBJECTS-STATUS.md](OBJECTS-STATUS.md) and
+[TERRAFORM-STATUS.md](TERRAFORM-STATUS.md) for what is implemented, which
 tests are ground truth and which are predictions, and the open spec gaps.
 
 ## Near-term milestones

@@ -142,7 +142,8 @@ the Trader like any fleet and refused (no minerals).
 | Decay by class, PP rates, minimum loss, partial years | `Decay`, `Space.DecayPackets` | CONFIRMED (OB-003, OB-023, OB-028) |
 | Catch share, minerals added | `CatcherWarp`, impact | CONFIRMED (OB-003, OB-009, OB-022) |
 | Damage, kill, defenses lost; AR immune; own packets | impact | CONFIRMED (OB-009, OB-022, OB-030-A, OB-009-E) |
-| PP terraforming and starbase design disclosure | none yet | not modelled; `Impact.Unhandled` marks a PP launcher's uncaught impact |
+| PP terraforming | impact → `terraform.PacketTerraform`, `Impact.Terraform` | axes CONFIRMED (OB-029-T1..T3); draws BINARY-ONLY; see TERRAFORM-STATUS.md |
+| PP starbase design disclosure | `Impact.DiscloseDesign` | BINARY-ONLY; the turn engine records the design (not wired) |
 
 Packets sit in `Space.Packets` in object order (owner, then number) and
 count toward the object limit.
@@ -306,5 +307,7 @@ Not wired yet:
     its append, at the point `StopPoint` gives (`mineStop` places the
     fleet with its own rounding today).
   - Load and unload tasks use `SalvageLoad` and `SalvageRoom`.
+- **PP starbase design disclosure:** record the catcher's starbase
+  design for the launcher when `Impact.DiscloseDesign` is set.
 - **Computer players' planet trades** (`Space.Meet` needs their levels;
   PLACEHOLDER in the adapter).
