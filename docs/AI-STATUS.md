@@ -52,7 +52,11 @@ capture comparison.
 `TestRobotoidPlaysAlone` play one expert computer player against an idle
 human from a new game, for 40, 60 and 60 years: the computer player plans first each year on the game's random
 stream, every order it gives is accepted, and the same seed replays to
-an identical game. They are smoke tests, not parity checks.
+an identical game. `TestAllThreeTogether` plays Robotoid, Rototill and
+Cybertron in one game for 60 years, each planning in player order on the
+one random stream with its own report and history, with the same checks.
+They are smoke tests, not parity checks. These games run inside `ai/`'s
+tests; the game loop's driver for computer players is not built yet.
 
 Cybertron stays on its homeworld in its smoke game. It scraps its
 starting Scout (Elegy reports the scrap as unsupported), and its colony
