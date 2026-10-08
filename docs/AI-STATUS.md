@@ -43,6 +43,7 @@ unless the project decides otherwise.
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
 | Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
 | Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
+| Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
 | Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
@@ -60,9 +61,8 @@ They are smoke tests, not parity checks. The same three also play
 through the game loop (`ai.Driver`, below).
 
 Cybertron explores only with its scanner-shot packets (cybertron.md
-§6): it scraps its starting Scout (Elegy reports the scrap as
-unsupported), a non-penetrating planetary scanner reports no planets,
-and its colony ships take only planets it has seen. With the packets
+§6): it scraps its starting Scout (AI.md §8), a non-penetrating
+planetary scanner reports no planets, and its colony ships take only planets it has seen. With the packets
 built, `TestCybertronPlaysAlone` requires it to own more than its
 homeworld after 60 years (it logged 21 planets on this branch); before
 them it stayed on its homeworld.
@@ -172,9 +172,8 @@ test). It is a determinism check, not a parity check.
 - Orders to a fleet split off in the same turn: the engine gives the new
   fleet an id the order file cannot name yet (engine request open); such
   orders go to `Result.Unsupported`.
-- Orders the engine does not accept yet: scrap and load tasks, and
-  unloading colonists at another player's planet (freighter invasion). A
-  planner reports a scrap it cannot order in `Result.Unsupported`.
+- Orders the engine does not accept yet: load tasks, and unloading
+  colonists at another player's planet (freighter invasion).
 - The lay-mines steps: the engine now has a lay-mines task, but the
   planners do not order it yet and report the step as unsupported.
 - Battle plan 4 is ordered now that every new player starts with the

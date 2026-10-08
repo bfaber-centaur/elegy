@@ -165,3 +165,65 @@ func TestDriversSaveReload(t *testing.T) {
 		})
 	}
 }
+
+// scrapSpy records the fleets a driver orders scrapped.
+type scrapSpy struct {
+	d       *Driver
+	scraped map[int]bool
+}
+
+func (s *scrapSpy) Orders(r game.Report) ([]engine.Order, error) {
+	os, err := s.d.Orders(r)
+	for _, o := range os {
+		if w, ok := o.(engine.WaypointOrder); ok && w.Task.Kind == engine.TaskScrap {
+			s.scraped[w.Fleet] = true
+		}
+	}
+	return os, err
+}
+
+// AI.md §8 (captured 2400 orders): every expert type but Rototill scraps
+// a starting fleet at its homeworld. Robotoid scraps its fleets holding a
+// slot-0 ship until year index 20 (MEASURED AI-3), Cybertron its early
+// slot-0 fleets (cybertron.md §5); the fleets are gone the next year.
+func TestDriversScrapStartingScouts(t *testing.T) {
+	g, _ := loopSetup(t, engine.ElegyRules(), 1)
+	spies := []*scrapSpy{{d: NewDriver(Robotoid, Expert)}, {d: NewDriver(Rototill, Expert)}, {d: NewDriver(Cybertron, Expert)}}
+	var scouts []map[int]bool
+	for i, s := range spies {
+		s.scraped = map[int]bool{}
+		r, err := g.Report(i + 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		v := ViewOf(r, Expert)
+		m := map[int]bool{}
+		for j := range v.Fleets {
+			if v.holds(&v.Fleets[j], 0) {
+				m[v.Fleets[j].ID] = true
+			}
+		}
+		scouts = append(scouts, m)
+	}
+	advance(t, g, []game.Driver{game.Idle, spies[0], spies[1], spies[2]}, 1)
+	for i, s := range spies {
+		want := s.d.Personality != Rototill
+		if (len(s.scraped) > 0) != want {
+			t.Errorf("%v: scrapped %v in 2400, want a scrap %v", s.d.Personality, s.scraped, want)
+		}
+		r, err := g.Report(i + 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for id := range s.scraped {
+			if !scouts[i][id] {
+				t.Errorf("%v: fleet %d scrapped holds no slot-0 ship", s.d.Personality, id)
+			}
+			for _, f := range r.Fleets {
+				if f.ID == id {
+					t.Errorf("%v: fleet %d still there in 2401", s.d.Personality, id)
+				}
+			}
+		}
+	}
+}

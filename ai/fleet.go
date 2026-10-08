@@ -101,6 +101,14 @@ func toWormhole(w Wormhole, warp int) engine.Waypoint {
 	return engine.Waypoint{Pos: w.Pos, Warp: warp, Target: engine.TargetSpace}
 }
 
+// scrapOrder is AI.md §8's scrap order: waypoint 0's task becomes scrap
+// and the route stays; the fleet is scrapped where it is, before it moves
+// (TAKEOVER.md "Scrap", CONFIRMED T-34).
+func scrapOrder(f *engine.Fleet) engine.WaypointOrder {
+	f.Task = engine.Task{Kind: engine.TaskScrap}
+	return engine.WaypointOrder{Fleet: f.ID, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
+}
+
 // cutRoute cuts the route to waypoint 0 and clears its task.
 func cutRoute(f *engine.Fleet) engine.WaypointOrder {
 	f.Task, f.Waypoints = engine.Task{}, nil

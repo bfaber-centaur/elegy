@@ -24,8 +24,8 @@ import (
 //  9. planet automation (AI.md §7) and the queue fill.
 //
 // Not yet run: the warp re-pick (AI.md §11 "Warp choice") and automation
-// steps 4 and 5. Steps the engine cannot order (scrap, lay mines, load
-// tasks) go to Result.Unsupported.
+// steps 4 and 5. Steps the engine cannot order (lay mines, load tasks)
+// go to Result.Unsupported.
 func PlayRobotoid(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -471,7 +471,8 @@ func (t *robotoidTurn) ownFleetA(f *engine.Fleet) {
 		t.colonizer(f)
 	}
 	if t.y <= 20 && v.holds(f, 0) {
-		t.res.unsupported("fleet %d: scrap (robotoid.md §4, AI.md §8 AI-3)", f.ID)
+		// Scrap (robotoid.md §4, AI.md §8 AI-3).
+		t.emit(f, scrapOrder(f))
 	}
 }
 
@@ -508,7 +509,8 @@ func (t *robotoidTurn) colonizer(f *engine.Fleet) {
 	}
 	if target < 0 {
 		if orbits {
-			t.res.unsupported("fleet %d: scrap (robotoid.md §4, AI.md §8 AI-4)", f.ID)
+			// Scrap (robotoid.md §4, AI.md §8 AI-4).
+			t.emit(f, scrapOrder(f))
 		}
 		return
 	}
@@ -800,7 +802,8 @@ func (t *robotoidTurn) obsoleteFleet(f *engine.Fleet) bool {
 	if id, orbits := v.planetAt(f.Pos); orbits {
 		if p := v.ownPlanet(id); p != nil {
 			if p.HasStarbase || t.rng.Intn(5) == 0 {
-				t.res.unsupported("fleet %d: scrap (robotoid.md §4 pass C)", f.ID)
+				// Scrap (robotoid.md §4 pass C).
+				t.emit(f, scrapOrder(f))
 			}
 			return true
 		}

@@ -255,7 +255,8 @@ func (t *rototillTurn) colonyShip(f *engine.Fleet) {
 			return
 		}
 	}
-	t.res.unsupported("fleet %d: scrap (rototill.md §3 pass 2 step 1)", f.ID)
+	// Scrap (rototill.md §3 pass 2 step 1).
+	t.res.Orders = append(t.res.Orders, scrapOrder(f))
 }
 
 // load moves up to n units of colonists from an own planet into the
@@ -305,7 +306,8 @@ func (t *rototillTurn) scout(f *engine.Fleet) {
 	v := t.v
 	d, _ := v.ship(0)
 	if d.Design.Engine.Name == "Quick Jump 5" && f.Fuel < 2 {
-		t.res.unsupported("fleet %d: scrap (rototill.md §3 pass 2 step 4)", f.ID)
+		// Scrap (rototill.md §3 pass 2 step 4).
+		t.res.Orders = append(t.res.Orders, scrapOrder(f))
 		return
 	}
 	if armed(d.Design) {
