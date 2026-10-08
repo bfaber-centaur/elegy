@@ -128,9 +128,10 @@ type Player struct {
 	// Dead is set when the player has no planets and no ships (KERNEL.md
 	// "Victory conditions").
 	Dead bool
-	// Computer marks a computer player. Elegy runs no computer players
-	// yet; the flag decides only the rules that name them (a gifted
-	// fleet is refused; Mystery Trader trades).
+	// Computer marks a computer player, whose orders the game loop's
+	// driver writes (game/, ai/). The engine reads the flag only for the
+	// rules that name computer players (a gifted fleet is refused;
+	// Mystery Trader trades).
 	Computer bool
 }
 

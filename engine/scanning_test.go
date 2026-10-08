@@ -356,6 +356,32 @@ func TestConfirmedColocation(t *testing.T) {
 	}
 }
 
+func TestElegyDecisionColocationOff(t *testing.T) {
+	// With Legacy.Colocation off (RULESET.md), SCANNING.md's tests apply
+	// at distance 0 too: a fleet with no scanner sees nothing, even at an
+	// enemy's position; a Bat Scanner (range 0) still sees a 98% fleet
+	// there, since d² 0 is within every bound. The legacy setting sees
+	// both ways (TestConfirmedColocation).
+	for _, legacy := range []bool{true, false} {
+		l := newScanLab()
+		l.g.Rules.Legacy.Colocation = legacy
+		blind := l.design(hFreight, 25)
+		bat := l.design(hFreight, 25, Slot{sBat, 1})
+		cloaked := l.design(hFreight, 25, Slot{Part{CloakPoints: 2000}, 1})
+		l.fleet(0, Point{10, 10}, Stack{Design: blind, Count: 1})
+		target := l.fleet(1, Point{10, 10}, Stack{Design: cloaked, Count: 1})
+		if got := l.seesFleet(0, target); got != legacy {
+			t.Errorf("colocation %v: blind fleet sees the co-located fleet %v, want %v", legacy, got, legacy)
+		}
+		l.g.Fleets = nil
+		l.fleet(0, Point{10, 10}, Stack{Design: bat, Count: 1})
+		target = l.fleet(1, Point{10, 10}, Stack{Design: cloaked, Count: 1})
+		if !l.seesFleet(0, target) {
+			t.Errorf("colocation %v: a Bat Scanner does not see the co-located fleet", legacy)
+		}
+	}
+}
+
 func TestConfirmedOrbitReports(t *testing.T) {
 	// SC-002, SC-014 (S-15): an orbited planet is reported at position
 	// level by a scannerless fleet, normal by any scanner (Bat included),
