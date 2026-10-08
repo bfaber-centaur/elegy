@@ -103,3 +103,22 @@ func TestAssignHubs(t *testing.T) {
 		t.Errorf("assignment %v, want two at hub 1 and fleet 102 moved to hub 5", got)
 	}
 }
+
+// AI.md §11 hub freighters' load task at an own planet: mode 0 loads all
+// three minerals; mode 1 or 2 loads 66 % of the room in the scarce
+// mineral and 33 % in the others, split between them (ASSUMPTION A56).
+func TestHubLoad(t *testing.T) {
+	all := hubLoad(0, engine.Boranium, 300)
+	for m := range engine.NumMinerals {
+		if all.Kind != engine.TaskTransport || all.Transport[m] != (engine.Transport{Action: engine.LoadAll}) {
+			t.Errorf("mode 0 mineral %d: %+v, want load all", m, all.Transport[m])
+		}
+	}
+	got := hubLoad(2, engine.Boranium, 300)
+	want := [3]int{49, 198, 49}
+	for m, n := range want {
+		if got.Transport[m] != (engine.Transport{Action: engine.LoadExactly, Amount: n}) {
+			t.Errorf("mode 2 mineral %d: %+v, want load exactly %d", m, got.Transport[m], n)
+		}
+	}
+}
