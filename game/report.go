@@ -76,8 +76,11 @@ type Report struct {
 	KnownDesigns []KnownDesign
 	// Objects is what the player is shown of the minefields, packets,
 	// Mystery Traders and salvage it saw in the year just generated
-	// (View.Objects; objects.Space.Report, ASSUMPTION V4). Wormhole ends
-	// are in Wormholes.
+	// (View.Objects; objects.Space.Report). A sighting shows the whole
+	// object (SCANNING.md "Space objects", MEASURED SC-038). ASSUMPTION
+	// V4 covers only what SC-038 leaves open: the player's own packets
+	// always being listed, the decay-state mapping and the missing seen
+	// marker. Wormhole ends are in Wormholes.
 	Objects objects.ObjectReport
 
 	// Rand draws from the game's random stream. The loop sets it; a
@@ -100,26 +103,31 @@ type UniversePlanet struct {
 // KnownWormholeEnd is a wormhole end a player knows, as the player last
 // saw it. End is the end's object id (2 × wormhole + end,
 // objects.WormholeEndID). Year is the year of that sighting (the game
-// year whose start it shows), Pos where the end was then and Stability
-// the jump chance its report named then, 0 Rock Solid .. 6 Extremely
-// Volatile (OBJECTS.md "Stability", BINARY-ONLY); the end's own class is
-// not shown. Ends jiggle and their stability changes with age (OBJECTS.md
-// "Jiggle"), and a player learns where an end is only by seeing it
-// (SCANNING.md: a known end beyond normal range is not seen), so an end
-// not seen this year keeps its last-seen values. Destination is where the
-// end leads, set only when the player knows it and sees the other end
-// this year (OBJECTS.md "Destination knowledge",
-// objects.Space.Destination).
+// year whose start it shows), Pos where the end was then, Stability the
+// jump chance its report named then, 0 Rock Solid .. 6 Extremely
+// Volatile (OBJECTS.md "Stability", BINARY-ONLY), and Years the years
+// since it last jumped. A sighting shows the end's position, stability
+// and years since its last jump (SCANNING.md "Space objects", MEASURED
+// SC-038). Destination is where the end leads, set only when the player
+// knows it and sees the other end this year (OBJECTS.md "Destination
+// knowledge", CONFIRMED WT-001, WT-004; objects.Space.Destination).
 //
-// ASSUMPTION G2: the report lists an end while the player still knows it
-// (a jump makes everyone forget it, OBJECTS.md "Wormholes"), with its
-// last-seen position and stability. stars-elegy gives no rule for how the
-// original displays a known end it did not see this year.
+// A computer player's report lists only the ends it saw this year: in
+// computer players' history files nothing about an object carries over
+// after it leaves view (SCANNING.md "Space objects", MEASURED SC-038).
+//
+// ASSUMPTION G2: a human player's report also lists an end it knows but
+// did not see this year, until a jump makes the player forget it
+// (OBJECTS.md "Wormholes"), with the values it had when last seen. Ends
+// jiggle and age (OBJECTS.md "Jiggle"), so those values may be stale.
+// The original's client writes a human player's history, and what it
+// keeps is UNRESOLVED (SC-038).
 type KnownWormholeEnd struct {
 	End         int
 	Year        int
 	Pos         engine.Point
 	Stability   int
+	Years       int
 	Destination *engine.Point `json:",omitempty"`
 }
 

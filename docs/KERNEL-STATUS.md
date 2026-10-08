@@ -426,10 +426,18 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
   owner's tech or race, and extending it to a part in a slot of the wrong
   kind is inferred; CB-010 passing with the part kept supports it.
   CB-010 passes.
-  CB-009 is `random 1`: its `salvage_at` amounts follow which ships the
-  battle's draws killed (its `fleet_gone` expectations are samples), but
-  the salvage expectations are not marked `sample`; inferred from 1 of 8
-  seeds matching, reported to the vectors' owners.
+  CB-009 passes on all 8 seeds. Its salvage at (1060,1230) follows which
+  ships the battle's draws killed, and stars-elegy #119 (4587f7d) marks
+  that expectation `sample`, as its `fleet_gone` and `fleet` ones already
+  were. Of its 63 expectations, 32 carry a `stream` and are not compared
+  and 1 is a `battle` kind the harness does not compare. The pass rests
+  on the 9 compared exact expectations (7 salvage amounts, 2 planets),
+  which match on every seed. The 21 compared samples (16 `fleet_gone`,
+  4 `fleet`, the 1 salvage) never count toward the pass; a sample that
+  misses is skipped. Misses per seed, in seed order: 2, 2, 2, 2, 2, 1, 1,
+  1 (the sampled salvage misses on 7 seeds, a `fleet_gone` on 6). The
+  samples are not evidence of which fleets the battle destroys or of the
+  sampled salvage amount.
 
 **Expectations skipped inside checked cases** (reference seed, as of this
 list; `TestParityVectors -v` prints the current counts as "expectations
