@@ -26,7 +26,7 @@ func (g *generator) makeWormholes() {
 			if e == 1 {
 				partner = &wh.Ends[0].Pos
 			}
-			wh.Ends[e].Pos = g.surroundings(partner).Place(objects.UniformTry(g.w, g.rng), nil)
+			wh.Ends[e].Pos, _ = g.surroundings(partner).Place(objects.UniformTry(g.w, g.rng), nil)
 		}
 		g.res.Wormholes = append(g.res.Wormholes, wh)
 	}

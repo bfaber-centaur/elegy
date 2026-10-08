@@ -71,9 +71,12 @@ var LegacyEmptyFleetSalvage = true
 type Space struct {
 	Minefields []Minefield
 	Wormholes  []Wormhole
+	Traders    []Trader
+	// TraderParts is each player's Trader part word.
+	TraderParts TraderParts
 	// OtherObjects counts the space objects of kinds this package does
-	// not hold yet (packets, salvage, the Mystery Trader). Like
-	// wormhole ends, they sort after every minefield, count toward
+	// not hold yet (packets, salvage). Like wormhole ends and Traders,
+	// they sort after every minefield, count toward
 	// MaxObjects and, with LegacyFieldLimit511, hold every player to 511
 	// fields.
 	OtherObjects int
@@ -81,7 +84,7 @@ type Space struct {
 
 // otherObjects counts the space objects that are not minefields; each
 // wormhole end is one object.
-func (s *Space) otherObjects() int { return s.OtherObjects + 2*len(s.Wormholes) }
+func (s *Space) otherObjects() int { return s.OtherObjects + 2*len(s.Wormholes) + len(s.Traders) }
 
 // SortMinefields puts the minefields in object order: owner, then number.
 func (s *Space) SortMinefields() {
