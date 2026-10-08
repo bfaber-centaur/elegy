@@ -82,6 +82,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "1": "enemy"
     },
@@ -157,6 +158,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy"
     },
@@ -1074,7 +1076,7 @@
  "cases": [
   {
    "id": "WU-SW40",
-   "rule": "ORDERS",
+   "rule": "ORDERS \"Waypoint upkeep and the remaining tasks\"",
    "setup": "patrol: one enemy at 40 ly, 300 ly scanner",
    "tag": "MEASURED",
    "prediction_held": false,
@@ -1266,7 +1268,7 @@
  ],
  "source": {
   "experiment": "experiments/wu",
-  "spec_rules": "docs/ORDERS.md (waypoint upkeep and the remaining tasks)",
+  "spec_rules": "docs/ORDERS.md \"Waypoint upkeep and the remaining tasks\"",
   "parity": "experiments/wu/README.md (turn orders lane)",
   "raw_evidence": "stars-oracle-apparatus evidence/wu/wuSW40 (private)"
  }

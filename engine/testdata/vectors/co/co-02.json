@@ -82,6 +82,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -155,6 +156,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -1094,7 +1096,7 @@
  "cases": [
   {
    "id": "CO-02",
-   "rule": "ORDERS \"Fleet operations\"",
+   "rule": "ORDERS \"Split\"",
    "setup": "Split All of three ships",
    "tag": "MEASURED",
    "prediction_held": false,
@@ -1338,7 +1340,7 @@
  ],
  "source": {
   "experiment": "experiments/fc",
-  "spec_rules": "docs/ORDERS.md \"Fleet operations\"",
+  "spec_rules": "docs/ORDERS.md \"Split\"",
   "parity": "experiments/fc/README.md \"CO-01..06\"",
   "raw_evidence": "stars-oracle-apparatus evidence/co/co02/run (private)"
  }

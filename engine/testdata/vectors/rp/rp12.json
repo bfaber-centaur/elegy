@@ -74,6 +74,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -154,6 +155,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -234,6 +236,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -314,6 +317,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -394,6 +398,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -474,6 +479,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -4684,7 +4690,8 @@
        "construction": 2,
        "electronics": 0,
        "biotechnology": 0
-      }
+      },
+      "research_field": "construction"
      },
      "year": 1
     },

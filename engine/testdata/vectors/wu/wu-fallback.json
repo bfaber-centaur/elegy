@@ -82,6 +82,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -155,6 +156,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -1204,7 +1206,7 @@
  "cases": [
   {
    "id": "WU-FALLBACK",
-   "rule": "ORDERS",
+   "rule": "ORDERS \"Waypoint upkeep and the remaining tasks\"",
    "setup": "repeat fall-backs: one forward waypoint; two coincident waypoints",
    "tag": "MEASURED",
    "prediction_held": true,
@@ -1430,7 +1432,7 @@
  ],
  "source": {
   "experiment": "experiments/wu",
-  "spec_rules": "docs/ORDERS.md (waypoint upkeep and the remaining tasks)",
+  "spec_rules": "docs/ORDERS.md \"Waypoint upkeep and the remaining tasks\"",
   "parity": "experiments/wu/README.md (turn orders lane)",
   "raw_evidence": "stars-oracle-apparatus evidence/wu/wuFALLBACK (private)"
  }

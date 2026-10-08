@@ -82,6 +82,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -155,6 +156,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -1159,7 +1161,7 @@
  "cases": [
   {
    "id": "CO-08",
-   "rule": "ORDERS \"Fleet operations\"",
+   "rule": "ORDERS \"Range and legality clamps\"",
    "setup": "edit a design used only by a queue",
    "tag": "MEASURED",
    "prediction_held": true,
@@ -1296,11 +1298,13 @@
       {
        "id": 6,
        "count": 1,
-       "percent": 38
+       "percent": 38,
+       "kind": 2
       },
       {
        "id": 8,
-       "count": 1
+       "count": 1,
+       "kind": 2
       }
      ],
      "year": 1
@@ -1365,7 +1369,7 @@
  ],
  "source": {
   "experiment": "experiments/fc",
-  "spec_rules": "docs/ORDERS.md \"Fleet operations\"",
+  "spec_rules": "docs/ORDERS.md \"Range and legality clamps\"",
   "parity": "experiments/fc/README.md \"CO-07, CO-07b, CO-08\"",
   "raw_evidence": "stars-oracle-apparatus evidence/co/co08/run (private)"
  }

@@ -14,8 +14,15 @@
  "initial_state": {
   "year": 2407,
   "game": {
-   "name": "PG001",
+   "name": "A Barefoot JayWalk",
    "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "normal",
    "players": 1,
    "slower_tech": false,
    "random_events": false,
@@ -81,6 +88,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "lowest",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -977,7 +985,8 @@
        "construction": 0,
        "electronics": 0,
        "biotechnology": 0
-      }
+      },
+      "research_field": "propulsion"
      },
      "year": 1
     },

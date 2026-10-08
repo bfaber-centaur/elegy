@@ -104,9 +104,12 @@ func (b *battle) finish() {
 			pl.StarbaseDamage = t.dmg.Units
 			continue
 		}
-		// Destroyed: the planet has no starbase. Queued ships
-		// and packets are not modelled in Elegy's queue yet.
+		// Destroyed: the planet has no starbase, and its queue loses
+		// its ship items; planetary items stay (COMBAT.md, CONFIRMED
+		// CB-047). COMBAT.md does not name starbase items, so they stay;
+		// Elegy's queue has no packet items yet.
 		pl.HasStarbase, pl.StarbaseHull, pl.StarbaseDock, pl.StarbaseDamage = false, 0, false, 0
+		pl.Queue = slices.DeleteFunc(pl.Queue, func(it QueueItem) bool { return it.Kind == ItemShip })
 		if g.Players[t.player].Race.PRT == PRTAlternateReality {
 			// An Alternate Reality planet without its starbase is left
 			// uninhabited (CONFIRMED, CB-041), and emptied as TAKEOVER.md

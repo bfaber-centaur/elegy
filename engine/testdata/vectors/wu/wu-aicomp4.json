@@ -74,6 +74,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "1": "neutral",
      "2": "enemy",
@@ -161,6 +162,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "neutral",
      "2": "enemy",
@@ -247,6 +249,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy",
      "1": "enemy",
@@ -333,6 +336,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy",
      "1": "enemy",
@@ -419,6 +423,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy",
      "1": "enemy",
@@ -506,6 +511,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy",
      "1": "enemy",
@@ -594,6 +600,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy",
      "1": "enemy",
@@ -4826,7 +4833,7 @@
  "cases": [
   {
    "id": "WU-AICOMP4",
-   "rule": "ORDERS",
+   "rule": "ORDERS \"Waypoint upkeep and the remaining tasks\"",
    "setup": "transfer fleet to an expert computer player, both relations neutral",
    "tag": "MEASURED",
    "prediction_held": true,
@@ -4898,7 +4905,7 @@
  ],
  "source": {
   "experiment": "experiments/wu",
-  "spec_rules": "docs/ORDERS.md (waypoint upkeep and the remaining tasks)",
+  "spec_rules": "docs/ORDERS.md \"Waypoint upkeep and the remaining tasks\"",
   "parity": "experiments/wu/README.md (turn orders lane)",
   "raw_evidence": "stars-oracle-apparatus evidence/wu/wuAICOMP4 (private)"
  }

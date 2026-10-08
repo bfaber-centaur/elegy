@@ -88,6 +88,7 @@
     },
     "research_percent": 0,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -991,20 +992,24 @@
       {
        "id": 11,
        "count": 1,
-       "percent": 46
+       "percent": 46,
+       "kind": 1
       },
       {
        "id": 3,
-       "count": 1
+       "count": 1,
+       "kind": 1
       },
       {
        "id": 7,
        "count": 1,
-       "percent": 49
+       "percent": 49,
+       "kind": 1
       },
       {
        "id": 8,
-       "count": 2
+       "count": 2,
+       "kind": 1
       }
      ]
     },
