@@ -511,6 +511,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 7,
+    "packet_destination": 7,
     "starbase": {
      "design": 1,
      "damage": 0
@@ -559,6 +561,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 7,
+    "packet_destination": 9,
     "starbase": {
      "design": 1,
      "damage": 0

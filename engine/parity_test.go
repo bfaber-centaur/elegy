@@ -118,6 +118,8 @@ type pvPlanet struct {
 	PlanetaryScanner    *int  `json:"planetary_scanner"`
 	LeftoverToResearch  *bool `json:"leftover_to_research"`
 	RouteTo             *int  `json:"route_to"`
+	PacketDestination   *int  `json:"packet_destination"`
+	PacketWarp          *int  `json:"packet_warp"`
 	Starbase            *struct {
 		Design *int `json:"design"`
 		Damage int  `json:"damage"`
@@ -656,6 +658,13 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		if p.RouteTo != nil {
 			pl.HasRoute, pl.RouteTo = true, *p.RouteTo+1
 		}
+		// The mass driver's settings (vectors/README.md: absent means no
+		// destination and warp 4, a setting below 5 that counts as unset;
+		// OBJECTS.md "Launch", OB-028-C, D).
+		if p.PacketDestination != nil {
+			pl.HasPacketDest, pl.PacketDest = true, *p.PacketDestination+1
+		}
+		set(&pl.PacketSpeed, p.PacketWarp)
 		if pl.Owner != NoOwner {
 			// A planet the state lists no queue for has none: its
 			// resources all go to research (KERNEL.md "Production").
@@ -693,8 +702,8 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		l.global = "space objects (" + o.Kind + ")"
 	}
 	// Production queues (FORMAT.md "Queue items"). A queue holding an
-	// item Elegy does not build (designs, terraforming, packets, scanners,
-	// the Genesis Device) is not loaded: checks its planet, its owner or
+	// item Elegy does not build (item 10, the Genesis Device, scanners)
+	// is not loaded: checks its planet, its owner or
 	// ships it may build could see are skipped.
 	for _, q := range s.ProductionQueues {
 		pi := -1
@@ -767,12 +776,14 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 }
 
 // pvItemKinds maps the planetary queue item ids Elegy builds to its
-// items (FORMAT.md "Queue items"). The packet items (6, 14–17) stay unmapped: a
-// vector's planet carries no packet destination or speed, which they need.
+// items (vectors/README.md "Queue items"). The packet items 6 and 14–17
+// launch with the planet's packet_destination and packet_warp (stars-elegy
+// 4247afc); which mineral each of 14–17 launches is BINARY-ONLY there.
 var pvItemKinds = map[int]ItemKind{
 	0: ItemAutoMines, 1: ItemAutoFactories, 2: ItemAutoDefenses, 3: ItemAutoAlchemy,
-	4: ItemAutoMinTerraform, 5: ItemAutoMaxTerraform,
+	4: ItemAutoMinTerraform, 5: ItemAutoMaxTerraform, 6: ItemAutoPackets,
 	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy, 12: ItemTerraform,
+	14: ItemIroniumPacket, 15: ItemBoraniumPacket, 16: ItemGermaniumPacket, 17: ItemMixedPacket,
 }
 
 // queueEquals checks a planet's production queue (FORMAT.md
