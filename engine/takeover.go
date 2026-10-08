@@ -748,15 +748,14 @@ func (g *Game) loadSalvage(f *Fleet, after bool) []Event {
 }
 
 // settled ends a load pass for f at a source (planet id, or -1 for
-// salvage). After movement a "set amount to" still waiting because the
-// target holds less than it needs is told so each year (KERNEL.md "Which
-// loads are unmet"; MESSAGES.md 0x121, 0x122, BINARY-ONLY). A task left
-// with no action is no task.
+// salvage). After movement a "set amount to" still waiting, which loaded
+// leaves only while the target holds less than it needs, is told so each
+// year (KERNEL.md "Which loads are unmet"; MESSAGES.md 0x121, 0x122,
+// BINARY-ONLY). A task left with no action is no task.
 func (g *Game) settled(f *Fleet, after bool, planet int) []Event {
 	var events []Event
 	for c := range NumCargo {
-		t := f.Task.Transport[c]
-		if after && t.Action == SetAmount && g.targetHolds(f, c) < t.Amount-*held(f, c) {
+		if after && f.Task.Transport[c].Action == SetAmount {
 			events = append(events, g.loadWaiting(f, c, planet))
 		}
 	}
