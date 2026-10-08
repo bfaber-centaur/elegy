@@ -412,7 +412,7 @@ func (t *cyberTurn) colonyShip(f *engine.Fleet) {
 	}
 	if own != nil {
 		if w, ok := v.preferWormhole(t.y, t.rng, f.Pos, target, dd); ok {
-			t.emit(f, moveOrder(f, engine.Waypoint{Pos: w.Pos, Warp: v.idealWarp(f), Target: engine.TargetWormhole, ID: w.End}))
+			t.emit(f, moveOrder(f, toWormhole(w, v.idealWarp(f))))
 			return
 		}
 	}

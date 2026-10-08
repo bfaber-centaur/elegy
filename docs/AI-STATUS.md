@@ -113,6 +113,8 @@ yet.
 | A42 | Join-up: the `Random(20)` draw is made only when the count test says join and the fleet holds 20 or more D1415 ships. |
 | A43 | Player positions are never "close" (the view does not carry the setting). |
 | A44 | A Robotoid scout's random nearby pick that lands on the planet it orbits means no move (robotoid.md: "other than its current one"), at its ideal warp otherwise. |
+| A45 | A known wormhole end's reported stability stands for its movement class in the wormhole preference (AI.md §11), and counts as known. |
+| A46 | A wormhole order targets the point in space where the end was last seen: the engine's waypoints cannot target a wormhole end yet. |
 
 ## Spec questions
 
@@ -138,25 +140,38 @@ yet.
   switch (the exact arithmetic would need a research answer) and the
   fixed rule (INTENTIONALLY DIFFERENT, Bobby's call).
 
+## Game-loop driver
+
+`ai.Driver` implements `game.Driver` for Robotoid, Rototill and
+Cybertron. Each year it builds the player's View from the
+`game.Report` alone (universe map, planet history, known wormhole
+ends), and plays the turn on the report's random stream. The game loop
+asks the players in player order, so the computer players draw from one
+stream as AI.md §1 says. `TestDriversInGameLoop` plays an idle human and
+the three personalities for 50 years through `game.Game.Advance`: every
+order is accepted, each keeps a planet, and two runs from the same seed
+give the same state hash every year. It is a smoke test, not a parity
+check.
+
+The driver's only state is the creation year and picture of the designs
+it stored (AI.md §5, §10), which the engine's designs do not carry. It
+does not survive a save and load (`game.Driver`'s ELEGY CHOICE); after a
+load those designs count as created in the first year with picture 0.
+
 ## Inputs the planners need from outside `ai/`
 
-- The game's random stream, in player order, before the year (AI.md §1
-  "Random numbers"). The game loop's driver interface does not pass one
-  yet.
-- Each design's creation year and picture (AI.md §5, §10). The engine's
-  designs carry neither; `ai.SlotDesign` takes them from the caller and
-  `ai.NewDesign` returns them for the designs a planner stores.
-- Every planet's id and position, seen or not (rototill.md §3 scouts,
-  MEASURED AI-17; Robotoid colonizes planets it never scanned, AI.md §1).
-- The player's planet history: for each planet ever reported, the latest
-  report (AI.md §1 "What it sees", CONFIRMED AI-12; used by Rototill's
-  scouts and colonizers, AI-16, AI-17).
+- Each design's creation year and picture, in the game state, so that
+  the planners' ageing and picture rules survive a save and load.
+- Other players' PRT (the report withholds it; every other player counts
+  as not Alternate Reality).
+- The game's ruleset in the report (lane B is adding `Report.Rules`); the
+  design read passes the zero ruleset until then, which is safe because
+  the builder uses only parts the race can build.
 
 ## Not implemented yet
 
-- Hub freighter assignment (AI.md §6 steps 3–4), automation steps 1
-  (warp re-pick, AI.md §11 "Warp choice"), 4 (under attack) and 5
-  (blocked queues); the shared fleet rules of AI.md §11.
+- Automation steps 1 (warp re-pick, AI.md §11 "Warp choice"), 4 (under
+  attack) and 5 (blocked queues).
 - Cybertron's packets (§6: supply, attack, scanner shot) and its
   low-mineral notes (§4.1). The turn reports them as unsupported.
 - Orders to a fleet split off in the same turn: the engine gives the new
@@ -170,5 +185,6 @@ yet.
   remote miners (slots 7–8), slots 13–14, transports (hub freighters) and
   armed scouts. Rototill never designs those ships; the code reports them
   as unsupported or leaves the fleet alone.
-- Wormholes and other players' PRT in the view (the game loop's report
-  does not carry them yet).
+- Waypoints to a wormhole end: the engine's waypoints cannot target one
+  yet, so the planners send the fleet to the point where the end was last
+  seen (A46).

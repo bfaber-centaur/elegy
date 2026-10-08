@@ -234,7 +234,7 @@ func (t *rototillTurn) colonyShip(f *engine.Fleet) {
 		target, dd := t.nearestColonizable(f.Pos)
 		if d, _ := v.ship(1); engineRank(d.Design.Engine.Name) > engineRank("Quick Jump 5") && orbits && own != nil {
 			if w, ok := t.v.preferWormhole(t.y, t.rng, f.Pos, target, dd); ok {
-				t.res.Orders = append(t.res.Orders, moveOrder(f, engine.Waypoint{Pos: w.Pos, Warp: v.idealWarp(f), Target: engine.TargetWormhole, ID: w.End}))
+				t.res.Orders = append(t.res.Orders, moveOrder(f, toWormhole(w, v.idealWarp(f))))
 				return
 			}
 		}
@@ -325,13 +325,13 @@ func (t *rototillTurn) scout(f *engine.Fleet) {
 	warp := v.idealWarp(f)
 	if _, orbits := v.planetAt(f.Pos); orbits && best >= 0 {
 		if w, ok := t.nearestWormhole(f.Pos, bd); ok && t.rng.Intn(100) < 5 {
-			t.res.Orders = append(t.res.Orders, moveOrder(f, engine.Waypoint{Pos: w.Pos, Warp: warp, Target: engine.TargetWormhole, ID: w.End}))
+			t.res.Orders = append(t.res.Orders, moveOrder(f, toWormhole(w, warp)))
 			return
 		}
 	}
 	if best < 0 {
 		if w, ok := t.nearestWormhole(f.Pos, -1); ok {
-			t.res.Orders = append(t.res.Orders, moveOrder(f, engine.Waypoint{Pos: w.Pos, Warp: warp, Target: engine.TargetWormhole, ID: w.End}))
+			t.res.Orders = append(t.res.Orders, moveOrder(f, toWormhole(w, warp)))
 			return
 		}
 		best = t.bestDestination()
