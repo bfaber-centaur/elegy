@@ -247,7 +247,7 @@ keeps the fleet and planet sightings; these functions cover the objects.
 | Owners made known by minefields and packets | `Sightings.Owners` | CONFIRMED (OB-011, OB-017, OB-018) |
 | PP packet scanners, `R = P = warp²` | `Space.PacketScanners` | CONFIRMED (OB-012) |
 | SD minefields see fleets inside, not orbiting | `Space.DemolitionSightings` | CONFIRMED (OB-014-B); the cloak draw BINARY-ONLY |
-| What a sighting shows: minefields, packets, Traders, salvage | `Space.Report`, `ObjectReport` | ASSUMPTION V4 (stars-elegy does not say yet); not in `game.Report` yet |
+| What a sighting shows: minefields, packets, Traders, salvage | `Space.Report`, `ObjectReport` | ASSUMPTION V4 (stars-elegy does not say yet); reported as `game.Report.Objects` |
 
 ### Assumptions (spec gaps)
 

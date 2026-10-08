@@ -145,6 +145,7 @@ func (g *Game) Report(player int) (Report, error) {
 		r.Universe = append(r.Universe, u)
 	}
 	if sp, ok := g.State.Objects.(*objects.Space); ok {
+		r.Objects = sp.Report(&g.State, player, r.View.Objects)
 		seen := map[int]bool{}
 		for _, id := range r.View.Objects.Wormholes {
 			seen[id] = true
