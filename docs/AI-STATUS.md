@@ -140,6 +140,7 @@ them it stayed on its homeworld.
 | A61 | Under attack: when n ≤ m (§7 names only n > m), the n defenses go to the front. "None queued" is no defense item in the queue; resources and minerals are the planet's available ones (§7 "available"), and the defense room is A14's. |
 | A62 | Completion estimate (ESTIMATES.md "Production completion"): the walk stops at the head, leaving out the items behind it; the head finishes when its count reaches 0, or when an automatic head builds its whole count in a year; a starbase costs its full build cost (as A12); a packet head is built as a plain item. |
 | A63 | Blocked queues (AI.md §7 step 5): "years" is the year the head's last unit finishes; "mines" and "terraforming" include their automatic items; the head's resource cost is what is left of it, counted as in `queueCost`; the planet's resources are its available resources (A15), with no research share on a planet that sends only leftover resources to research (as in the completion estimate); the mine room is that of the mines-and-factories fill. |
+| A64 | Wormhole preference (AI.md §11): among ends with the same score and the same squared distance `w`, the first in the view's order wins; §11 gives only "ties: smaller w". §11's second distance test, `w ≤ 46,656` (216²), is applied in both modes: with the wrap on it always passes, as §11 says, and with it off it caps the exact distance at 216 ly. |
 
 ## Spec questions
 

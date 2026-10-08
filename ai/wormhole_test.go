@@ -48,6 +48,15 @@ func TestPreferWormhole(t *testing.T) {
 		{"no candidate, exact", false, []Wormhole{end(1, 100), end(2, 200)}, -1, []int{89}, 1, false},
 		{"no candidate, wrap", true, []Wormhole{end(1, 100), end(2, 200)}, -1, []int{89}, 2, false},
 		{"no candidate, exact, order", false, []Wormhole{end(2, 200), end(1, 100)}, -1, []int{89}, 1, false},
+		// Ties go to the smaller w: a wrapped −32,412 (182 ly) beats −511
+		// (255 ly) listed first.
+		{"wrapped tie", true, []Wormhole{end(1, 255), end(2, 182)}, 10, []int{89}, 2, false},
+		// Equal score and equal w: the first listed wins (ASSUMPTION A64).
+		{"equal w", false, []Wormhole{end(1, 100), {End: 2, Pos: engine.Point{X: 1000, Y: 1100}}}, -1, []int{89}, 1, false},
+		// The 216 ly cap binds on exact distances only.
+		{"216, exact, no candidate", false, []Wormhole{end(1, 216)}, -1, []int{89}, 1, false},
+		{"217, exact, no candidate", false, []Wormhole{end(1, 217)}, -1, nil, -1, true},
+		{"217, exact, far candidate", false, []Wormhole{end(1, 217)}, 200, nil, -1, true},
 		// A known end scores by its class, whatever w is.
 		{"known, wrap", true, []Wormhole{{End: 1, Pos: at(200), Known: true, Class: 3}}, 10, []int{39}, 1, false},
 		{"known, wrap, refused", true, []Wormhole{{End: 1, Pos: at(200), Known: true, Class: 3}}, 10, []int{40}, -1, false},
