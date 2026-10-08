@@ -70,7 +70,7 @@ Computer opponents, scripted players and front ends all implement
 | `Events`, `Orders` | the previous year's messages to the player, and the outcome of each of its orders | engine `TurnResult` |
 | `History` | for every planet ever reported to the player, the latest report and the year it describes; lost colonies stay recorded as the player's own | AI.md §1 "What it sees" (CONFIRMED AI-12); ASSUMPTION G1 below |
 | `Universe` | every planet's id, position and name index, seen or not | AI.md §1 (CONFIRMED AI-12: colonizers flown to never-scanned planets); ai/rototill.md §3 (MEASURED AI-17: scouts to the nearest never-seen planet) |
-| `Wormholes` | for a computer player, each wormhole end it saw this year; for a human player, also each end it still knows but did not see, as last seen. Each shows the year seen, position, the stability its report named and the years since its last jump, plus its destination when the player knows it and sees the other end this year | SCANNING.md "Space objects" (MEASURED SC-038: what a sighting shows; nothing carries over in computer players' history); OBJECTS.md "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); ASSUMPTION G2 below |
+| `Wormholes` | for a computer player, each wormhole end it saw this year; for a human player, also each end it still knows but did not see, as last seen. Each shows the year seen, position, the stability its report named and the years since its last jump, plus its destination when the player knows it and sees the other end this year | SCANNING.md "Space objects" (MEASURED SC-038: what a sighting shows; nothing carries over in computer players' history); OBJECTS.md "Stability" (display BINARY-ONLY; file holds class and years, MEASURED SC-038), "Destination knowledge" (CONFIRMED WT-001, WT-004; file holds the partner id and every player's entry, MEASURED SC-038); ASSUMPTION G2 and the display ELEGY CHOICE below |
 | `KnownDesigns` | other players' designs the player knows: hull and mass for every design seen; the whole design, parts included, once shown in full (a War Monger viewer, or a battle the player took part in); the last year seen | SCANNING.md "Designs" (CONFIRMED SC-001..SC-023, SC-015, SC-031, SC-036; MEASURED SC-037, computer players' files, for what later years keep); ASSUMPTION G3 below |
 | `Objects` | the minefields, packets, Mystery Traders and salvage the player saw this year, each shown whole (`objects.ObjectReport`) | SCANNING.md "Space objects" (CONFIRMED, who sees what; MEASURED SC-038, what a sighting shows); ASSUMPTION V4 in OBJECTS-STATUS.md for what SC-038 leaves open |
 | `Rand` | the game's stream, during `Advance` only | AI.md §1 "Random numbers" |
@@ -80,8 +80,9 @@ Not in the report:
 - Other players' primary racial traits. A known player is identified by
   name only (SCANNING.md "Players", CONFIRMED); a Claim Adjuster viewer
   also gets habitability ranges, which are in `View.Players`.
-- A wormhole end's own stability class. Its report names only the
-  current jump chance.
+- A wormhole end's own stability class, its partner's id and other
+  players' destination knowledge. The report gives the jump chance and
+  the destination as the original displays them (ELEGY CHOICE below).
 
 **ASSUMPTION G1:** a newer planet report replaces the whole history
 record, whatever its level. stars-elegy does not say how the original
@@ -96,6 +97,19 @@ SC-038).
 end the player did not see this year, with its last-seen values, until a
 jump makes the player forget it. The original's client writes a human
 player's history, and what it keeps is UNRESOLVED (SC-038).
+
+**ELEGY CHOICE:** the wormhole report follows the original's display,
+not its player file. The file carries each seen end's class and years
+since its last jump, its partner's id and every player's
+destination-known entry (OBJECTS.md "Destination knowledge" and
+"Stability", MEASURED SC-038). The display shows a stability name
+computed from class and years, and hides the pairing unless the viewer
+transited (BINARY-ONLY). So `Wormholes` gives the jump chance, not the
+class, and withholds the partner id and other players' transit entries.
+The Report is the player's view, and withholding them keeps one
+player's transits from leaking to another. The years since the last
+jump are the exception: the file carries them, and they say nothing
+about other players.
 
 A known design is reported as it was shown. An owner can put a new
 design in an unused slot under the same index (`engine.DesignOrder`),

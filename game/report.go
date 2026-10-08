@@ -106,11 +106,22 @@ type UniversePlanet struct {
 // year whose start it shows), Pos where the end was then, Stability the
 // jump chance its report named then, 0 Rock Solid .. 6 Extremely
 // Volatile (OBJECTS.md "Stability", BINARY-ONLY), and Years the years
-// since it last jumped. A sighting shows the end's position, stability
-// and years since its last jump (SCANNING.md "Space objects", MEASURED
-// SC-038). Destination is where the end leads, set only when the player
-// knows it and sees the other end this year (OBJECTS.md "Destination
-// knowledge", CONFIRMED WT-001, WT-004; objects.Space.Destination).
+// since it last jumped. Destination is where the end leads, set only when
+// the player knows it and sees the other end this year (OBJECTS.md
+// "Destination knowledge", CONFIRMED WT-001, WT-004;
+// objects.Space.Destination).
+//
+// ELEGY CHOICE: the report follows the original's display, not its player
+// file. The file carries each seen end's position, class and years since
+// its last jump, its partner's id and every player's destination-known
+// entry (SCANNING.md "Space objects"; OBJECTS.md "Destination knowledge"
+// and "Stability"; MEASURED SC-038). The display shows the stability name
+// computed from class and years, and the destination only under the rule
+// above (BINARY-ONLY). So the report gives the jump chance, not the
+// class, and withholds the partner id and other players' transit
+// entries. The Report is the player's view, and withholding them keeps
+// one player's transits from leaking to another. Years is the exception:
+// the file carries it, and it says nothing about other players.
 //
 // A computer player's report lists only the ends it saw this year: in
 // computer players' history files nothing about an object carries over
