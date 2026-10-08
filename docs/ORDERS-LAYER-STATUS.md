@@ -90,7 +90,7 @@ and has been sent to stars-elegy as a question.
 | L26 | A design edited in place takes the edit's year as its creation year, and the order's picture. | AI.md "Storing a design" covers a delete and a new design only. |
 | L27 | A wormhole-end or Mystery Trader waypoint target need not be known to the player. | As planet and fleet targets; ORDERS.md gives no knowledge check. |
 | L28 | A split may name its new fleet with a value below 0 that the file's later orders use for it; a name above 0 or used twice rejects the split, and a rejected split's name binds nothing. | ORDERS.md has no such names (the original's client knows a new fleet's number at once); computer players need one (AI.md §10). |
-| L29 | A design edited in place starts its built count (ships ever built) again at 0; starbase slots count nothing. | ai/turindrone.md defines the built count but not what an edit does to it. |
+| L29 | A design edited in place starts its built count (ships ever built) again at 0; ships lost at the fleet limit still count; starbase slots count nothing. | ai/turindrone.md defines the built count but not what an edit or the fleet limit does to it. |
 
 ## Ships leaving production
 
