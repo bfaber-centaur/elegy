@@ -474,6 +474,10 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 			}
 		}
 	}
+	for _, d := range sight.Designs {
+		designs[d] = true
+		fullDesigns[d] = true
+	}
 	planetOwner := map[Point]int{}
 	for i := range g.Planets {
 		planetOwner[g.Planets[i].Pos] = g.Planets[i].Owner

@@ -8,3 +8,7 @@ func SetParitySpace(s pvSpace) { pvSpaceObjects = s }
 // SetParityRaces installs the parity harness's race-check builder
 // (races_parity_test.go).
 func SetParityRaces(f func(g *Game, settings []PVRaceSettings) RaceChecker) { pvRaces = f }
+
+// SetParityTerraform installs the parity harness's remote mining and
+// Orbital Adjusters (terraform_parity_test.go).
+func SetParityTerraform(t Terraformer) { pvTerraform = t }

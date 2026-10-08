@@ -60,7 +60,9 @@ func impactContext(g *engine.Game) ImpactContext {
 }
 
 // impacts turns packet impacts into events and empties the planets a
-// packet left uninhabited (OBJECTS-STATUS.md, the packets' turn hooks).
+// packet left uninhabited (OBJECTS-STATUS.md, the packets' turn hooks). A
+// Packet Physics launcher learns the catcher's starbase design
+// (EventPacketDesignSeen; OBJECTS.md "Impact" step 4, BINARY-ONLY).
 func impacts(g *engine.Game, ims []Impact) []engine.Event {
 	var out []engine.Event
 	for _, im := range ims {
@@ -70,6 +72,9 @@ func impacts(g *engine.Game, ims []Impact) []engine.Event {
 			who = im.Owner
 		}
 		out = append(out, engine.Event{Kind: engine.EventPacketImpact, Player: who, Planet: p.ID, Fleet: -1, Count: im.Killed})
+		if im.DiscloseDesign {
+			out = append(out, engine.Event{Kind: engine.EventPacketDesignSeen, Player: im.Owner, Planet: p.ID, Fleet: -1, Count: p.StarbaseDesign})
+		}
 		if im.Emptied {
 			out = append(out, g.EmptyPlanet(im.Planet))
 		}

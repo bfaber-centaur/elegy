@@ -69,9 +69,10 @@ planet in id order: resources, research tax, production queue (caps use
 the grown population); population growth for every planet; research
 level-ups; random events (when `Game.RandomEvents` is on); starbase
 refuelling; battles, bombing and the after-movement waypoint tasks
-(unloads, colonize, route, drops, the research check, merges and fleet
-transfers; COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; the Claim
-Adjuster year-end step; the end-of-year waypoint check (step 7a.2); year
+(unloads, colonize, route, remote mining, drops, the research check,
+merges and fleet transfers; COMBAT-STATUS.md, TAKEOVER-STATUS.md);
+repair; the Claim Adjuster year-end step; the Orbital Adjusters; the
+end-of-year waypoint check (step 7a.2); year
 + 1; scores, victory flags and deciding the game
 (`TurnResult.Scores`, each view's visible records). Its random draws
 follow KERNEL.md "Random draws" for the same steps.
@@ -150,6 +151,21 @@ The race check (RACES.md "In a running game") runs at KERNEL.md step
 checker that keeps state implements `RaceCloner`, so `GenerateTurn`
 leaves the input game's checker unchanged.
 
+Remote mining and the Orbital Adjusters run through `Game.Terraform`
+(`terraform.Engine`); a nil `Game.Terraform` skips them. A fleet with
+the remote-mining task (`TaskRemoteMine`) that did not move this year
+mines in its place in fleet order at step 6c.2 (KERNEL.md "Remote
+mining", CONFIRMED T-35, KB-1B); a fleet built this year counts as moved
+(CONFIRMED SL-03). An Alternate Reality player's new fleet that can mine
+gets the task at its build planet (PRODUCTION-LAUNCH.md "Default task",
+CONFIRMED SL-11). The Orbital Adjusters run at step 7.4, after the Claim
+Adjuster step (CONFIRMED OT-4); a change of the planet owner's value
+tells the fleet owner, and the planet owner when it is someone else
+(MESSAGES.md 0x12c, 0x15a). A Packet Physics player whose packet a
+starbase caught learns that starbase's design in full that year
+(`EventPacketDesignSeen`; OBJECTS.md "Impact" step 4, SCANNING.md
+"Designs", BINARY-ONLY).
+
 An Interstellar Traveler gets a normal report of every planet whose
 starbase has a stargate within range of one of its own planets' gates
 (SCANNING.md, CONFIRMED OB-013).
@@ -186,9 +202,9 @@ lay mines (load, scrap and loading from or unloading into salvage;
 ORDERS-STATUS.md), the Trader's planet trades with computer players
 (their levels are a PLACEHOLDER), packet items in the production queue
 (the orders lane adds them; the harness skips packets of a player whose
-queue it did not load), terraforming other than the Claim
-Adjuster's year-end step (production items, Orbital Adjusters), remote
-mining, Super Stealth research stealing, the duplicate-serial penalty,
+queue it did not load), terraforming production items, the messages for
+an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
+0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
 ships/starbases in the queue, and the
 BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses,
 Radiating Hydro-Ram colonist deaths and transport tasks.
@@ -320,15 +336,6 @@ production queue on a planet that changed owner is skipped: it takes
 the new owner's default queue, which the vectors do not carry (TK-108-A
 and TK-108-C).
 
-- **SL-starbases** (CONFIRMED). With the race check, year 1 matches,
-  fleet numbers included. Year 2 fails on planet 4's surface minerals:
-  Elegy has 5, 1 and 7 kT less than the original. Not modelled: remote
-  mining. Player 1's Mini-Miner, built at planet 4 in year 1 with two
-  Robo-Mini-Miners (8 mining points), mines its owner's Alternate
-  Reality planet in year 2 as a separate mining step (KERNEL.md
-  "Owned planets", CONFIRMED KB-1B). That step gives trunc(conc·8/100)
-  plus the random remainder: 4 + 1, 0 + 1 and 6 + 1 at concentrations
-  62, 10 and 87, the observed gap.
 - **OB-030-A** (MEASURED). Not diagnostic: the AR planet's mining
   remainder is a random draw (KERNEL.md "Mining"), and the vector gives
   both planets' surface minerals exactly, with no mining tolerance.

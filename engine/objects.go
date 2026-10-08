@@ -122,6 +122,11 @@ type ObjectSight struct {
 	Owners   []int
 	// Seen is the space objects the player sees this year.
 	Seen ObjectsSeen
+	// Designs are other players' designs the player learns in full this
+	// year: the starbase that caught a Packet Physics player's packet
+	// (SCANNING.md "Designs", BINARY-ONLY). GenerateTurn fills it from
+	// the EventPacketDesignSeen events.
+	Designs []int
 }
 
 // ObjectsSeen names the space objects a player sees in a year

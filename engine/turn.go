@@ -89,6 +89,9 @@ type Game struct {
 	// A checker that keeps state of its own implements RaceCloner, so
 	// GenerateTurn leaves the input game's checker unchanged.
 	Races RaceChecker
+	// Terraform is the remote-mining and Orbital Adjuster rules
+	// (terraformer.go), or nil to skip them.
+	Terraform Terraformer
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -413,15 +416,25 @@ func GenerateTurn(
 				}
 			}
 		}
-		moved := map[int]bool{}
-		for _, f := range g.Fleets {
-			if p, ok := start[f.ID]; !ok || p != f.Pos {
-				moved[f.ID] = true
-			}
+	}
+	moved := map[int]bool{}
+	for _, f := range g.Fleets {
+		// A fleet built this year counts as moved (PRODUCTION-LAUNCH.md,
+		// CONFIRMED SL-03).
+		if p, ok := start[f.ID]; !ok || p != f.Pos {
+			moved[f.ID] = true
 		}
+	}
+	if g.Objects != nil {
 		layers = g.layers(moved)
 	}
-	queue, ev = g.unloadPhase(owned)
+	// Remote mining by a fleet that did not move this year, in its place
+	// in fleet order (KERNEL.md "Remote mining", CONFIRMED T-35, KB-1B).
+	queue, ev = g.unloadTasks(owned, func(i int) {
+		if g.Terraform != nil && !moved[g.Fleets[i].ID] {
+			g.Terraform.RemoteMine(&g, i, rng)
+		}
+	})
 	events = append(events, ev...)
 	if len(layers) > 0 {
 		events = append(events, g.Objects.LayMines(&g, layers)...)
@@ -437,7 +450,7 @@ func GenerateTurn(
 	if g.Objects != nil {
 		events = append(events, g.Objects.SweepMines(&g)...)
 	}
-	moved := map[int]bool{}
+	moved = map[int]bool{}
 	for _, f := range g.Fleets {
 		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
 		// SL-03).
@@ -454,6 +467,11 @@ func GenerateTurn(
 	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
 	// order" step 7.3), with the levels reached this year.
 	events = append(events, g.claimAdjusterYearEnd(rng)...)
+	// Remote terraforming by Orbital Adjusters (step 7.4), after the Claim
+	// Adjuster step (CONFIRMED OT-4).
+	if g.Terraform != nil {
+		events = append(events, g.Terraform.Adjust(&g)...)
+	}
 	// The end-of-year waypoint check (step 7a.2).
 	g.waypointCheck()
 
@@ -469,6 +487,14 @@ func GenerateTurn(
 	var sights []ObjectSight
 	if g.Objects != nil {
 		sights = g.Objects.SeeObjects(&g, g.ObjectScanners(), func(fi int) int { return g.fleetCloak(&g.Fleets[fi]) }, rng)
+	}
+	for _, e := range events {
+		if e.Kind == EventPacketDesignSeen && e.Player >= 0 && e.Player < len(g.Players) {
+			if len(sights) < len(g.Players) {
+				sights = append(sights, make([]ObjectSight, len(g.Players)-len(sights))...)
+			}
+			sights[e.Player].Designs = append(sights[e.Player].Designs, e.Count)
+		}
 	}
 	views := viewsWith(g, PopulationEstimates(g, rng), fights.seen, bombs, sights)
 	for v := range views {
