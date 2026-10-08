@@ -28,9 +28,8 @@ import (
 // original's inherited values, which kept AIX's armadas at home (AI-18),
 // would come only from a legacy ruleset switch, which is not implemented.
 //
-// Not yet run: automation steps 4 and 5, and the warp re-pick's
-// minefield rule (A57); docs/AI-STATUS.md lists them. Steps the
-// engine cannot order (invasion) go to Result.Unsupported.
+// Not yet run: automation steps 4 and 5; docs/AI-STATUS.md lists them.
+// Steps the engine cannot order (invasion) go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()

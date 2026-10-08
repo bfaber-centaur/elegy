@@ -4,38 +4,65 @@ import (
 	"math"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // repickWarps is AI.md §7 step 1 with §11 "Warp choice" (CONFIRMED,
 // AI-11): every own fleet with a waypoint after its position, in fleet
 // order, gets the warp of that waypoint re-picked; target and task stay,
-// and an order is written only when the warp changes.
-//
-// ASSUMPTION A57: the minefield rule (a fleet inside another player's
-// enlarged field gets warp 4, 5 or 6) is not taken: the report does not
-// carry minefield positions or sizes, so no fleet is known to be inside
-// one, and its Random(10) is not drawn. A turn with a fleet to re-pick
-// reports this in Result.Unsupported. A stargate route (warp 11, not yet
-// observed) is never re-picked here: the planners order no gate jumps.
+// and an order is written only when the warp changes. A fleet inside
+// another player's (enlarged) minefield takes the minefield warp, which
+// may draw Random(10); any other fleet takes warpChoice. A stargate route
+// (warp 11, not yet observed) is never re-picked here: the planners order
+// no gate jumps.
 func (a *automation) repickWarps() {
 	v := a.v
-	noted := false
 	for i := range v.Fleets {
 		f := &v.Fleets[i]
 		if len(f.Waypoints) == 0 || f.Waypoints[0].Warp == engine.StargateWarp {
 			continue
 		}
-		if !noted {
-			a.res.unsupported("warp re-pick: minefields are not in the report (ASSUMPTION A57)")
-			noted = true
+		w, inside := v.minefieldWarp(f, a.rng)
+		if !inside {
+			w = v.warpChoice(f)
 		}
-		w := v.warpChoice(f)
 		if w == f.Waypoints[0].Warp {
 			continue
 		}
 		f.Waypoints[0].Warp = w
 		a.res.Orders = append(a.res.Orders, engine.WaypointOrder{Fleet: f.ID, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)})
 	}
+}
+
+// minefieldWarp is §11's minefield rule: the computer player sees a field
+// of n mines as ⌊√n + 10.5⌋² in squared radius, and a fleet whose squared
+// distance from the centre of another player's field is below that, the
+// first such field in object order (the report's order), gets 6 for a
+// heavy field, or for a standard field 4 when Random(10) < 4 and 5
+// otherwise, plus 1 for an SS race. Speed bump fields are not considered.
+func (v *View) minefieldWarp(f *engine.Fleet, rng engine.Rand) (int, bool) {
+	for _, m := range v.Minefields {
+		if m.Owner == v.Player || m.Kind == objects.SpeedBump {
+			continue
+		}
+		r := int(math.Sqrt(float64(m.Mines)) + 10.5)
+		dx, dy := f.Pos.X-m.Pos.X, f.Pos.Y-m.Pos.Y
+		if dx*dx+dy*dy >= r*r {
+			continue
+		}
+		w := 6
+		if m.Kind == objects.Standard {
+			w = 5
+			if rng.Intn(10) < 4 {
+				w = 4
+			}
+		}
+		if v.Self.Race.PRT == engine.PRTSuperStealth {
+			w++
+		}
+		return w, true
+	}
+	return 0, false
 }
 
 // warpChoice is §11 "Warp choice" without the minefield rule for the leg
@@ -76,10 +103,14 @@ func (v *View) warpChoice(f *engine.Fleet) int {
 // construction module; or the player owns a planet exactly at waypoint
 // 1 whose starbase slot holds a design other than an Orbital Fort.
 //
-// ASSUMPTION A58: the planet's starbase slot is its StarbaseDesign,
-// read whether or not it has a starbase (§11: "the slot is read even
-// when the planet has no starbase"), and a design the view does not hold
-// counts as no design.
+// ASSUMPTION A58: the planet's starbase slot is its StarbaseDesign, read
+// whether or not it has a starbase (§11: "the slot is read even when the
+// planet has no starbase"). A planet without a starbase holds the design
+// of its last starbase (the engine keeps it when a starbase is destroyed
+// or scrapped) or, if it never had one, 0. The index is looked up only
+// among the player's starbase designs; one that is not among them (a
+// ship design, or a deleted starbase design) counts as no design, so the
+// cap stays.
 func (v *View) uncapped(f *engine.Fleet, wp engine.Waypoint) bool {
 	if wp.Task.Kind == engine.TaskColonize || wp.Task.Kind == engine.TaskScrap {
 		return true
@@ -97,8 +128,12 @@ func (v *View) uncapped(f *engine.Fleet, wp engine.Waypoint) bool {
 		if p.Pos != wp.Pos {
 			continue
 		}
-		d, ok := v.design(p.StarbaseDesign)
-		return ok && d.Hull.Name != orbitalFort
+		for _, d := range v.Starbases {
+			if d.Index == p.StarbaseDesign {
+				return d.Design.Hull.Name != orbitalFort
+			}
+		}
+		return false
 	}
 	return false
 }

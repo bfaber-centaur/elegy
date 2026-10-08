@@ -23,9 +23,8 @@ import (
 //  8. fleets (§4);
 //  9. planet automation (AI.md §7) and the queue fill.
 //
-// Not yet run: automation steps 4 and 5, and the warp re-pick's
-// minefield rule (A57). Steps the engine cannot order (load tasks) go
-// to Result.Unsupported.
+// Not yet run: automation steps 4 and 5. Steps the engine cannot order
+// (load tasks) go to Result.Unsupported.
 func PlayRobotoid(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()

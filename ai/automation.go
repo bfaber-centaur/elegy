@@ -20,8 +20,7 @@ import (
 // Cybertron, and CA cannot build terraform items), and the mines and
 // factories fill.
 //
-// Step 1 (the warp re-pick, AI.md §11 "Warp choice") runs first, without
-// its minefield rule (ASSUMPTION A57).
+// Step 1 (the warp re-pick, AI.md §11 "Warp choice") runs first.
 //
 // Not implemented: step 4 (under attack) and step 5 (blocked queues);
 // docs/AI-STATUS.md.

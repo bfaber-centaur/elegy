@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // View is everything a planner reads: one player's own objects in full
@@ -43,6 +44,9 @@ type View struct {
 	Wormholes []Wormhole
 	// PRT is the primary racial trait of other players, where known.
 	PRT map[int]engine.PRT
+	// Minefields are the minefields the player sees this year, in object
+	// order (game.Report.Objects).
+	Minefields []objects.MinefieldSighting
 	// Foreign are other players' designs the player has been shown in
 	// full, by design index (game.Report.KnownDesigns with Full set).
 	Foreign map[int]engine.Design
