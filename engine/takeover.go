@@ -395,16 +395,19 @@ func (g *Game) phaseStart() []bool {
 // whole task. It returns the drops queued, in the order they were made.
 //
 // Remote mining runs only after movement (unloadTasks); mine laying is
-// the space objects' (LayMines). Not modelled: scrap, and colonists given
-// by manual cargo transfers (which would start the queue before
-// movement). The load pass is loadPass.
+// the space objects' (LayMines). unloadPhase runs no scrap; GenerateTurn
+// passes unloadTasks the scrap step. Not modelled: colonists given by
+// manual cargo transfers (which would start the queue before movement).
+// The load pass is loadPass.
 func (g *Game) unloadPhase(owned []bool) (queue []drop, events []Event) {
-	return g.unloadTasks(owned, nil)
+	return g.unloadTasks(owned, nil, nil)
 }
 
 // unloadTasks is unloadPhase with the step 6c.2 remote-mining tasks: mine
 // runs fleet i's, in its place in fleet order, or is nil before movement.
-func (g *Game) unloadTasks(owned []bool, mine func(i int)) (queue []drop, events []Event) {
+// scrap scraps fleet i before movement (TAKEOVER.md "Other waypoint
+// tasks": scrap is before movement only) and is nil after it.
+func (g *Game) unloadTasks(owned []bool, mine func(i int), scrap func(i int) []Event) (queue []drop, events []Event) {
 	consumed := map[int]bool{}
 	for _, i := range g.fleetOrder() {
 		f := &g.Fleets[i]
@@ -422,6 +425,11 @@ func (g *Game) unloadTasks(owned []bool, mine func(i int)) (queue []drop, events
 		case TaskRemoteMine:
 			if mine != nil {
 				mine(i)
+			}
+		case TaskScrap:
+			if scrap != nil {
+				events = append(events, scrap(i)...)
+				consumed[f.ID] = true
 			}
 		}
 	}

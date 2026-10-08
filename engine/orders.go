@@ -388,7 +388,8 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 //
 // Tasks: route, patrol and transfer fleet are accepted as well as
 // colonize, merge and transport (ORDERS.md "Waypoint upkeep and the
-// remaining tasks"), and so are remote mining and lay mines, whose
+// remaining tasks"), and so are scrap (TAKEOVER.md "Other waypoint
+// tasks"), remote mining and lay mines, whose
 // refusals (no mining modules, an inhabited planet, deep space, no
 // dispensers) happen when the task runs (KERNEL.md "Remote mining",
 // OBJECTS.md "Laying"). A transfer-fleet task is accepted whoever it names:
@@ -456,7 +457,7 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 func validTask(t Task) error {
 	switch t.Kind {
 	case TaskNone, TaskColonize, TaskMerge, TaskRoute, TaskTransferFleet:
-	case TaskRemoteMine:
+	case TaskRemoteMine, TaskScrap:
 	case TaskLayMines:
 		if t.Years < 1 && t.Years != YearsIndefinitely {
 			return fmt.Errorf("lay mines for %d years: %w", t.Years, ErrOutOfRange)

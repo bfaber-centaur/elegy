@@ -196,8 +196,8 @@ Choices where OBJECTS.md is silent:
 
 Not modelled yet: following fleets (step 1a.3; Elegy does not keep
 waypoint 0's target), the stargate choice of the route task, waypoint
-tasks other than unloads, colonize, merge, route, transfer, patrol and
-lay mines (load, scrap and loading from or unloading into salvage;
+tasks other than unloads, colonize, merge, route, transfer, patrol, lay
+mines, remote mining and scrap (load, and loading from or unloading into salvage;
 ORDERS-STATUS.md), the Trader's planet trades with computer players
 (their levels are a PLACEHOLDER), terraforming production items (the
 orders lane adds them through `Game.Terraform`), the messages for
@@ -403,7 +403,7 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
 - `battle` and `battle_actions` expectations (18, CS-003-C): battle
   records are compared only through their effects.
 - Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
-  scrap (14), load actions and other transport actions, `design` and
+  load actions and other transport actions, `design` and
   `design_delete` orders, `waypoint_change` with loads.
 - Production queues with unmapped planetary items (14 and more): the
   packet items 6 and 14–17 (vectors carry no packet destination) and the
