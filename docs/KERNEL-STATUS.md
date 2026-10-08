@@ -58,7 +58,8 @@ KERNEL.md gives every rule a status. Test names follow it:
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
 file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); the
-waypoint check (step 1a.3); the before-movement waypoint tasks (unloads,
+waypoint check (step 1a.3), which first retargets waypoints aimed at a
+fleet merged away during the replay (ORDERS-STATUS.md); the before-movement waypoint tasks (unloads,
 colonize, route, drops, the research level-up check, loads and merges);
 fleet movement (ordinary fleets in fleet order, owner then fleet number,
 then fleet chasers in rounds, then waypoint settlement, where reached
@@ -191,11 +192,9 @@ Choices where OBJECTS.md is silent:
 - **O14 (ASSUMPTION).** In a game with no space objects (nil
   `Game.Objects`), a new salvage object takes its owner's lowest unused
   salvage number, with no object limit, and salvage does not decay.
-- **O15 (ASSUMPTION).** The year's mine layers are taken after the
-  unload pass after movement, which removes fleets that colonized. In
-  step 6c.2 each fleet runs one task, so a fleet consumed there lays
-  nothing, including a Space Demolition fleet whose next waypoint is "lay
-  mines".
+- **O15 (ASSUMPTION).** In step 6c.2 each fleet runs one task, so a
+  fleet that colonizes there lays nothing, including a Space Demolition
+  fleet whose next waypoint is "lay mines".
 - **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
   uses the gate's range as P; an unlimited gate shows every starbase.
 
@@ -323,6 +322,23 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
 - **W4 (ASSUMPTION).** The route task runs only for a fleet with no
   further waypoint, so a fleet already routed is not routed again before
   it leaves.
+- **W7 (ASSUMPTION).** When a merge order removes a fleet that waypoints
+  name, they are retargeted to the fleet it joined. ORDERS.md "Targets
+  that moved, died or were captured" prefers the replaying player's own
+  fleets at that spot and does not pin which one.
+- **W8 (ASSUMPTION).** When a chase order names a fleet merged away
+  earlier in the replay, the waypoint check after the orders picks among
+  the owner's fleets at the order's coordinates uniformly. Each candidate
+  draws as ORDERS.md says, but its battle-plan preference and weight are
+  not modelled, because ORDERS.md defines neither. The research lane may
+  pin them.
+- **Known issue: a stale chase id can be reused.** `Fleet.ID` is Elegy's
+  internal key, and a new fleet takes the highest id plus one
+  (`Game.newFleetID`). If the merged-away fleet held the highest id, a
+  fleet split later in the same replay takes that id. A chase order naming
+  the merged fleet then resolves to the split fleet and skips W8's pick.
+  The fleet number, which the specs count, still follows
+  PRODUCTION-LAUNCH.md "The new fleet" (lowest unused, CONFIRMED SL-02).
 
 ## Year invariants
 
