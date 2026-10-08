@@ -89,6 +89,9 @@ type Game struct {
 	// A checker that keeps state of its own implements RaceCloner, so
 	// GenerateTurn leaves the input game's checker unchanged.
 	Races RaceChecker
+	// Terraform is the remote-mining and Orbital Adjuster rules
+	// (terraformer.go), or nil to skip them.
+	Terraform Terraformer
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -299,8 +302,6 @@ func GenerateTurn(
 		g.dropShiplessFleets()
 	}
 
-	type growth struct{ pop, carry int }
-	grown := make([]growth, len(g.Planets))
 	research := make([]int, len(g.Players))
 
 	order := make([]int, len(g.Planets))
@@ -331,21 +332,22 @@ func GenerateTurn(
 		}
 	}
 
+	// Growth and deaths only act on owned planets with population
+	// (KERNEL.md "Population", BINARY-ONLY).
+	grows := make([]bool, len(g.Planets))
 	for _, i := range order {
 		p := &g.Planets[i]
-		grown[i] = growth{p.Population, p.GrowthCarry}
-		// Growth and deaths only act on owned planets with population
-		// (KERNEL.md "Population", BINARY-ONLY).
 		if p.Owner == NoOwner || p.Population <= 0 {
 			continue
 		}
+		grows[i] = true
 		player := &g.Players[p.Owner]
 		col := NewColony(p, player)
 
-		// Growth is applied after every planet's production, but the
-		// production caps read the grown population.
-		gp, gc := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
-		grown[i] = growth{gp, gc}
+		// The production caps read the grown population (ASSUMPTION K7:
+		// estimated from the environment before this year's production
+		// terraforming).
+		gp, _ := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
 
 		res := col.Resources(p.Population, p.Factories)
 		r, ev := g.PlanetProduction(i, ProductionInput{
@@ -359,12 +361,18 @@ func GenerateTurn(
 		events = append(events, ev...)
 	}
 
+	// Growth (step 4a) comes after every planet's production, with the
+	// environment production terraformed (KERNEL.md "Turn order";
+	// MEASURED KX-002 T1, T2).
 	for i := range g.Planets {
+		if !grows[i] {
+			continue
+		}
 		p := &g.Planets[i]
-		starved := p.Owner != NoOwner && p.Population > 0 && grown[i].pop <= 0
-		p.Population = grown[i].pop
-		p.GrowthCarry = grown[i].carry
-		if starved {
+		player := &g.Players[p.Owner]
+		col := NewColony(p, player)
+		p.Population, p.GrowthCarry = GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
+		if p.Population <= 0 {
 			// A planet whose population dies out is emptied
 			// (TAKEOVER.md "Capture").
 			events = append(events, g.emptyPlanet(i))
@@ -413,15 +421,25 @@ func GenerateTurn(
 				}
 			}
 		}
-		moved := map[int]bool{}
-		for _, f := range g.Fleets {
-			if p, ok := start[f.ID]; !ok || p != f.Pos {
-				moved[f.ID] = true
-			}
+	}
+	moved := map[int]bool{}
+	for _, f := range g.Fleets {
+		// A fleet built this year counts as moved (PRODUCTION-LAUNCH.md,
+		// CONFIRMED SL-03).
+		if p, ok := start[f.ID]; !ok || p != f.Pos {
+			moved[f.ID] = true
 		}
+	}
+	if g.Objects != nil {
 		layers = g.layers(moved)
 	}
-	queue, ev = g.unloadPhase(owned)
+	// Remote mining by a fleet that did not move this year, in its place
+	// in fleet order (KERNEL.md "Remote mining", CONFIRMED T-35, KB-1B).
+	queue, ev = g.unloadTasks(owned, func(i int) {
+		if g.Terraform != nil && !moved[g.Fleets[i].ID] {
+			g.Terraform.RemoteMine(&g, i, rng)
+		}
+	})
 	events = append(events, ev...)
 	if len(layers) > 0 {
 		events = append(events, g.Objects.LayMines(&g, layers)...)
@@ -437,7 +455,7 @@ func GenerateTurn(
 	if g.Objects != nil {
 		events = append(events, g.Objects.SweepMines(&g)...)
 	}
-	moved := map[int]bool{}
+	moved = map[int]bool{}
 	for _, f := range g.Fleets {
 		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
 		// SL-03).
@@ -454,6 +472,11 @@ func GenerateTurn(
 	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
 	// order" step 7.3), with the levels reached this year.
 	events = append(events, g.claimAdjusterYearEnd(rng)...)
+	// Remote terraforming by Orbital Adjusters (step 7.4), after the Claim
+	// Adjuster step (CONFIRMED OT-4).
+	if g.Terraform != nil {
+		events = append(events, g.Terraform.Adjust(&g)...)
+	}
 	// The end-of-year waypoint check (step 7a.2).
 	g.waypointCheck()
 
@@ -469,6 +492,14 @@ func GenerateTurn(
 	var sights []ObjectSight
 	if g.Objects != nil {
 		sights = g.Objects.SeeObjects(&g, g.ObjectScanners(), func(fi int) int { return g.fleetCloak(&g.Fleets[fi]) }, rng)
+	}
+	for _, e := range events {
+		if e.Kind == EventPacketDesignSeen && e.Player >= 0 && e.Player < len(g.Players) {
+			if len(sights) < len(g.Players) {
+				sights = append(sights, make([]ObjectSight, len(g.Players)-len(sights))...)
+			}
+			sights[e.Player].Designs = append(sights[e.Player].Designs, e.Count)
+		}
 	}
 	views := viewsWith(g, PopulationEstimates(g, rng), fights.seen, bombs, sights)
 	for v := range views {
