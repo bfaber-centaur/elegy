@@ -12,3 +12,9 @@ func SetParityRaces(f func(g *Game, settings []PVRaceSettings) RaceChecker) { pv
 // SetParityTerraform installs the parity harness's remote mining and
 // Orbital Adjusters (terraform_parity_test.go).
 func SetParityTerraform(t Terraformer) { pvTerraform = t }
+
+// withRules is g under the Elegy ruleset.
+func withRules(g Game) Game {
+	g.Rules = ElegyRules()
+	return g
+}

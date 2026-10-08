@@ -70,6 +70,9 @@ func generate(t *testing.T, s Settings, seed uint64) Result {
 		}
 	}
 	s.Players = players
+	if s.Rules == (engine.Ruleset{}) {
+		s.Rules = engine.ElegyRules()
+	}
 	res, err := Generate(s, NewRand(seed))
 	if err != nil {
 		t.Fatalf("seed %d: %v", seed, err)
@@ -1068,11 +1071,16 @@ func TestElegyDecisionDeterministic(t *testing.T) {
 	if _, err := Generate(s, nil); !errors.Is(err, ErrNilRand) {
 		t.Fatalf("nil rand: %v", err)
 	}
+	elegy := engine.ElegyRules()
+	mislabelled := elegy
+	mislabelled.Legacy.MergeOverflow = true
 	for _, bad := range []Settings{
-		{Size: 5, Players: twoPlayers()},
-		{Density: -1, Players: twoPlayers()},
-		{},
-		{Players: []PlayerSetup{{Race: races.Design{Race: testRace(engine.PRTOther)}, Computer: true}}},
+		{Rules: elegy, Size: 5, Players: twoPlayers()},
+		{Rules: elegy, Density: -1, Players: twoPlayers()},
+		{Rules: elegy},
+		{Rules: elegy, Players: []PlayerSetup{{Race: races.Design{Race: testRace(engine.PRTOther)}, Computer: true}}},
+		{Players: twoPlayers()},
+		{Rules: mislabelled, Players: twoPlayers()},
 	} {
 		if _, err := Generate(bad, NewRand(1)); !errors.Is(err, ErrSettings) {
 			t.Errorf("settings %+v: %v", bad, err)
@@ -1138,7 +1146,7 @@ func TestElegyDecisionGameRuns(t *testing.T) {
 	}
 	rng := NewRand(99)
 	for range 5 {
-		out, err := engine.GenerateTurn(g, nil, engine.Jrc3(), rng)
+		out, err := engine.GenerateTurn(g, nil, rng)
 		if err != nil {
 			t.Fatalf("year %d: %v", g.Year, err)
 		}
@@ -1260,7 +1268,7 @@ func TestConfirmedRacesAtCreation(t *testing.T) {
 	random := PlayerSetup{Race: races.RandomTemplate("Random")}
 	zorgon := PlayerSetup{Race: races.RandomTemplate("Zorgon")}
 	cpu := computer(engine.PRTInterstellarTraveler, Easy)
-	s := Settings{Size: Small, Density: Normal, Players: []PlayerSetup{illegal, random, zorgon, cpu}}
+	s := Settings{Rules: engine.ElegyRules(), Size: Small, Density: Normal, Players: []PlayerSetup{illegal, random, zorgon, cpu}}
 	res, err := Generate(s, NewRand(5))
 	if err != nil {
 		t.Fatal(err)
@@ -1342,5 +1350,18 @@ func TestConfirmedStartingDesignSlots(t *testing.T) {
 		return
 	}(); len(g.DesignSlots) != want {
 		t.Errorf("%d design slots, want %d", len(g.DesignSlots), want)
+	}
+}
+
+// The Elegy ruleset's newgame switches equal the variables the package
+// still reads, and a new game carries its settings' ruleset.
+func TestElegyRulesMatchNewgameSwitches(t *testing.T) {
+	l := engine.ElegyRules().Legacy
+	if l.SharedHomeworldMinerals != legacySharedHomeworldMinerals || l.SecondPlanetFallback != legacySecondPlanetFallback {
+		t.Errorf("ElegyRules %+v, newgame switches %v %v", l, legacySharedHomeworldMinerals, legacySecondPlanetFallback)
+	}
+	res := generate(t, Settings{Rules: engine.FaithfulRules(), Size: Tiny, Density: Normal, Players: twoPlayers()}, 1)
+	if res.Game.Rules != engine.FaithfulRules() {
+		t.Errorf("game rules %+v", res.Game.Rules)
 	}
 }

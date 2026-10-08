@@ -520,7 +520,7 @@ func TestConfirmedTechFromBattleSameTurn(t *testing.T) {
 			}
 		}
 		game.Players[0].Research.Levels[Weapons] = 3
-		res, err := GenerateTurn(game, nil, Jrc3(), rand.New(rand.NewSource(seed)))
+		res, err := GenerateTurn(withRules(game), nil, rand.New(rand.NewSource(seed)))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -611,7 +611,7 @@ func TestPredictionBattleTurn(t *testing.T) {
 	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
 	prey.Hull.Cost.Minerals = Minerals{30, 0, 9}
 	run := func() TurnResult {
-		res, err := GenerateTurn(combatLabGame(prey, 6, 3), nil, Jrc3(), rand.New(rand.NewSource(7)))
+		res, err := GenerateTurn(withRules(combatLabGame(prey, 6, 3)), nil, rand.New(rand.NewSource(7)))
 		if err != nil {
 			t.Fatal(err)
 		}

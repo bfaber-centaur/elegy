@@ -117,7 +117,7 @@ func kxAR(starbase bool) Game {
 
 func TestConfirmedAlternateRealityKX001(t *testing.T) {
 	t.Run("Z2 starbase kept", func(t *testing.T) {
-		r, err := GenerateTurn(kxAR(true), nil, Jrc3(), &seqRand{})
+		r, err := GenerateTurn(withRules(kxAR(true)), nil, &seqRand{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -142,7 +142,7 @@ func TestConfirmedAlternateRealityKX001(t *testing.T) {
 			t.Fatalf("hab %d, want -15", h)
 		}
 		// The player shuffle's draw, then mining.
-		r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 0, 99}})
+		r, err := GenerateTurn(withRules(g), nil, &seqRand{draws: []int{0, 0, 0, 99}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -165,7 +165,7 @@ func TestConfirmedAlternateRealityKX001(t *testing.T) {
 func TestElegyDecisionZeroMaxPopulation(t *testing.T) {
 	g := kxAR(false)
 	before := g.clone()
-	_, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	_, err := GenerateTurn(withRules(g), nil, highRand{})
 	var z *ZeroMaxPopulationError
 	if !errors.As(err, &z) || z.Planet != 7 {
 		t.Fatalf("err = %v, want *ZeroMaxPopulationError for planet 7", err)
