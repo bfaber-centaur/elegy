@@ -25,7 +25,7 @@ import (
 // See docs/GAME-LOOP.md.
 const (
 	SaveFormat  = "elegy-save"
-	SaveVersion = 6
+	SaveVersion = 7
 )
 
 // saveFile is the saved document. Field order is the encoding order.
@@ -43,9 +43,7 @@ type saveFile struct {
 	Objects   *objects.Space   `json:"objects"`
 	Races     *races.GameRaces `json:"races"`
 	Terraform bool             `json:"terraform"`
-	// Levels is each player's computer-player level (Game.ComputerLevel).
-	Levels []newgame.Level `json:"levels"`
-	Last   savedYear       `json:"last"`
+	Last      savedYear        `json:"last"`
 }
 
 // savedYear is what the last year told the players.
@@ -82,7 +80,6 @@ func (g *Game) document() (saveFile, error) {
 		NameIndex: g.nameIndex,
 		RNG:       g.rng.State(),
 		Terraform: st.Terraform != nil,
-		Levels:    g.levels,
 		Last:      savedYear{Views: g.views, Events: g.events},
 	}
 	if st.Objects != nil {
@@ -186,19 +183,17 @@ func Load(r io.Reader) (*Game, error) {
 	if len(f.Last.Views) != len(st.Players) {
 		return nil, fmt.Errorf("%w: %d views for %d players", ErrSave, len(f.Last.Views), len(st.Players))
 	}
-	if len(f.Levels) != len(st.Players) {
-		return nil, fmt.Errorf("%w: %d levels for %d players", ErrSave, len(f.Levels), len(st.Players))
-	}
-	for p, l := range f.Levels {
-		if l < newgame.Easy || l > newgame.Expert {
-			return nil, fmt.Errorf("%w: player %d level %d", ErrSave, p, l)
+	// A computer player's level is one of newgame's four; a human
+	// player's is 0, as newgame leaves it (Game.ComputerLevel).
+	for p, pl := range st.Players {
+		if l := newgame.Level(pl.Level); (pl.Computer && (l < newgame.Easy || l > newgame.Expert)) || (!pl.Computer && l != 0) {
+			return nil, fmt.Errorf("%w: player %d level %d", ErrSave, p, pl.Level)
 		}
 	}
 	g := &Game{
 		State:     st,
 		Seed:      f.Seed,
 		nameIndex: f.NameIndex,
-		levels:    f.Levels,
 		rng:       newgame.NewRand(f.RNG),
 		views:     f.Last.Views,
 		events:    f.Last.Events,

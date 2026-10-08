@@ -44,9 +44,6 @@ type Game struct {
 	// nameIndex is each planet's name index, by planet index
 	// (newgame.Result.NameIndex).
 	nameIndex []int
-	// levels is each player's computer-player level (newgame.PlayerSetup
-	// Level), by player index; it means nothing for a human player.
-	levels []newgame.Level
 }
 
 // New creates a game from a ruleset, new-game settings and a seed.
@@ -88,9 +85,6 @@ func New(rules engine.Ruleset, s newgame.Settings, seed uint64) (*Game, error) {
 		st.Objects = &objects.Space{}
 	}
 	g := &Game{State: st, Seed: seed, rng: rng, nameIndex: res.NameIndex}
-	for _, p := range s.Players {
-		g.levels = append(g.levels, p.Level)
-	}
 	g.views = engine.Views(st, engine.PopulationEstimates(st, rng))
 	g.history = history(nil).record(st.Year, g.views)
 	g.wormholes = wormholeHistory(nil).record(st.Year, g.views, space(st))
@@ -119,14 +113,14 @@ func gameID(s newgame.Settings, seed uint64) uint64 {
 
 // ComputerLevel is a computer player's level, and false for a player who
 // is not a computer player. The engine marks computer players
-// (engine.Player.Computer); the level is the new-game setting
-// (newgame.PlayerSetup.Level), which the game keeps so a loaded game can
-// run its computer players again.
+// (engine.Player.Computer) and keep their level (engine.Player.Level,
+// set from newgame.PlayerSetup.Level), so the state is the one record of
+// it and a loaded game runs its computer players at the same level.
 func (g *Game) ComputerLevel(player int) (newgame.Level, bool) {
 	if player < 0 || player >= len(g.State.Players) || !g.State.Players[player].Computer {
 		return 0, false
 	}
-	return g.levels[player], true
+	return newgame.Level(g.State.Players[player].Level), true
 }
 
 // Report is player's report for the current year, with its planet

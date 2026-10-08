@@ -242,6 +242,12 @@ func (g *generator) setUpPlayers(hws []int) error {
 			// fleet is refused) read this flag.
 			Computer: ps.Computer,
 		}
+		// The engine's Mystery Trader planet trades read the level
+		// (engine.Player.Level, OBJECTS.md "Computer players' planets",
+		// CONFIRMED O-53); a human player's stays 0.
+		if ps.Computer {
+			pl.Level = int(ps.Level)
+		}
 		// Relations (MEASURED): with exactly one human player every
 		// player starts as an enemy of every other; with two or more,
 		// every player is neutral (the engine's default). PLACEHOLDER:

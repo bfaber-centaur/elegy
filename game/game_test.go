@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -500,8 +501,10 @@ func TestLoadRejectsInvalidRuleset(t *testing.T) {
 	}
 }
 
-// A computer player's level is part of the game and survives a save and
-// load; a human player has none.
+// A computer player's level is part of the engine state
+// (engine.Player.Level, which the Mystery Trader's planet trades read)
+// and survives a save and load; a human player has none. A save with a
+// computer level outside Easy..Expert is refused.
 func TestComputerLevelSaved(t *testing.T) {
 	ca, err := newgame.ComputerPlayer(4, newgame.Harder)
 	if err != nil {
@@ -528,5 +531,19 @@ func TestComputerLevelSaved(t *testing.T) {
 		if lvl, ok := x.ComputerLevel(1); !ok || lvl != newgame.Harder || !x.State.Players[1].Computer {
 			t.Errorf("player 1: level %v, computer %v", lvl, ok)
 		}
+		if l0, l1 := x.State.Players[0].Level, x.State.Players[1].Level; l0 != 0 || l1 != int(newgame.Harder) {
+			t.Errorf("engine levels %d, %d, want 0, %d", l0, l1, newgame.Harder)
+		}
+	}
+	b, err := g.Encode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	bad := regexp.MustCompile(`("Computer": true,\s*"Level": )2`).ReplaceAllString(string(b), "${1}4")
+	if bad == string(b) {
+		t.Fatal("no computer level to corrupt")
+	}
+	if _, err := Load(strings.NewReader(bad)); !errors.Is(err, ErrSave) {
+		t.Errorf("computer level 4: err = %v, want ErrSave", err)
 	}
 }

@@ -314,6 +314,5 @@ Not wired yet:
   for the engine's load and unload-into-salvage tasks, which are not
   modelled.
 - **Computer players' planet trades:** the adapter passes
-  `engine.Player.Level` to `Space.Meet`, but nothing sets the level yet,
-  so every computer player counts as Easy and no planet trades. A new
-  game will set it from its computer players' levels.
+  `engine.Player.Level` to `Space.Meet`; `newgame` sets it from each
+  computer player's level, and the save (version 7) keeps it.

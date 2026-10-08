@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -377,7 +378,8 @@ func TestLoadRejects(t *testing.T) {
 		"format":        strings.Replace(string(b), `"elegy-save"`, `"other"`, 1),
 		"version":       strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 99`, 1),
 		"older version": strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), fmt.Sprintf(`"version": %d`, SaveVersion-1), 1),
-		"levels":        strings.Replace(string(b), `"levels": [`, `"levels": [0, `, 1),
+		"version 6":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 6`, 1),
+		"human level":   regexp.MustCompile(`("Computer": false,\s*"Level": )0`).ReplaceAllString(string(b), "${1}2"),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
 		if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {
