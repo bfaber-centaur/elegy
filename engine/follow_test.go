@@ -324,7 +324,7 @@ func TestFollowLeaderElsewhere(t *testing.T) {
 	// merge task aimed at an idle leader 195 ly away is re-aimed at itself,
 	// the only fleet of the leader's owner at its position. It does not
 	// move or merge, gets no 0x138 or 0x137, and its merge with itself
-	// completes, clearing the task.
+	// completes, clearing the task, with 0x04e (Elegy's EventFleetArrived).
 	l := followLab(t, 2)
 	l.g.Fleets[0].Pos = Point{1395, 1200}
 	r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}})
@@ -335,10 +335,14 @@ func TestFollowLeaderElsewhere(t *testing.T) {
 	if lead.Pos != (Point{1395, 1200}) || lead.Stacks[0].Count != 1 {
 		t.Errorf("leader %+v, want unmoved and unmerged", lead)
 	}
+	var got []Event
 	for _, e := range r.Events {
-		if e.Fleet == 2 && e.Kind != EventFleetArrived {
-			t.Errorf("follower message %v, want none (0x04e is not sent by Elegy)", e)
+		if e.Fleet == 2 {
+			got = append(got, e)
 		}
+	}
+	if want := []Event{{Kind: EventFleetArrived, Player: 0, Planet: -1, Fleet: 2}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("follower messages %v, want only 0x04e %v", got, want)
 	}
 	// A leader elsewhere that has orders is not followed either.
 	l = followLab(t, 2)
@@ -381,8 +385,18 @@ func TestFollowLeaderReChosen(t *testing.T) {
 	if got := g.Fleets[3].Task; got != (Task{Kind: TaskMerge, Fleet: 2}) {
 		t.Errorf("task %+v, want merge with fleet 2", got)
 	}
+	// A merge task aimed at a fleet other than the old leader keeps its
+	// target.
+	g = withRules(l.g)
+	a = ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 4, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 3}}}}}, []int{0})
+	g.follow(a.follows)
+	if got := g.Fleets[3].Task; got != (Task{Kind: TaskMerge, Fleet: 3}) {
+		t.Errorf("task %+v, want merge with fleet 3", got)
+	}
 	// A distant leader of another player with no fleet at the follower's
-	// position: treated as gone, 0x138 (ASSUMPTION F6).
+	// position: the follower follows nothing, no 0x138 or 0x137, and its
+	// task is left aimed at the leader (ASSUMPTION F6; MESSAGES.md 0x138:
+	// a follower whose leader is elsewhere does not get it).
 	l = followLab(t, 2)
 	l.g.Fleets[0].Owner = 1
 	l.g.Fleets[0].Pos = Point{1395, 1200}
@@ -390,8 +404,8 @@ func TestFollowLeaderReChosen(t *testing.T) {
 	g = withRules(l.g)
 	a = ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}}}}}, []int{0})
 	done, ev = g.follow(a.follows)
-	if want := []Event{{Kind: EventFollowNoLeader, Player: 0, Planet: -1, Fleet: 2}}; !reflect.DeepEqual(ev, want) || done != nil || g.Fleets[1].Task.Fleet != 1 {
-		t.Errorf("events %v done %v task %+v, want %v, none, merge with fleet 1", ev, done, g.Fleets[1].Task, want)
+	if ev != nil || done != nil || g.Fleets[1].Waypoints != nil || g.Fleets[1].Task != (Task{Kind: TaskMerge, Fleet: 1}) {
+		t.Errorf("events %v done %v waypoints %v task %+v, want none, none, none, merge with fleet 1", ev, done, g.Fleets[1].Waypoints, g.Fleets[1].Task)
 	}
 }
 

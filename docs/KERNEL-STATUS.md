@@ -355,10 +355,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   the leader's owner and KERNEL.md says only "the same owner"; Elegy
   follows MESSAGES.md. A merge task aimed at the old leader is re-aimed
   with it, so a follower left following itself completes a merge with
-  itself, merging nothing (MESSAGES.md 0x04e (a); Elegy sends no 0x04e
-  for a task that ends). The outcome for a follower aimed at an idle
-  leader 195 ly away, no move, no merge, no 0x138, no 0x137 and its task
-  cleared, is CONFIRMED (FO-03-F, `TestFollowLeaderElsewhere`). Then up to
+  itself, merging nothing, and gets 0x04e (MESSAGES.md 0x04e (a),
+  CONFIRMED). Elegy's 0x04e is `EventFleetArrived`; a merge with itself
+  from any order completes the same way (`TestConfirmedMergeWithItself`),
+  and its 0x04e replaces an earlier one for the fleet that year. The
+  outcome for a follower aimed at an idle leader 195 ly away, no move, no
+  merge, no 0x138, no 0x137, 0x04e and its task cleared, is CONFIRMED
+  (FO-03-F, `TestFollowLeaderElsewhere`). Then up to
   8 passes in fleet order give each follower a copy of its leader's next
   waypoint carrying the follower's own task (BINARY-ONLY); a follower
   whose leader is gone, or has no orders and is not following, gets 0x138
@@ -389,7 +392,9 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
 - **F5 (ASSUMPTION).** When several fleets of the leader's owner are at
   the follower's position, the first in fleet order becomes the leader.
 - **F6 (ASSUMPTION).** When none is (a leader of another player,
-  elsewhere), the leader is treated as gone: 0x138.
+  elsewhere), the follower follows nothing, as when left following
+  itself: no move, no 0x138, no 0x137 (MESSAGES.md 0x138: a follower
+  whose leader is elsewhere does not get it). Its task is left as it is.
 - **Known issue: a stale chase id can be reused.** `Fleet.ID` is Elegy's
   internal key, and a new fleet takes the highest id plus one
   (`Game.newFleetID`). If the merged-away fleet held the highest id, a

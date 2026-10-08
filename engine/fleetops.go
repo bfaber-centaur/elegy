@@ -223,10 +223,11 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		case f.Task.Kind == TaskTransport:
 			events = append(events, g.load(f, afterMovement)...)
 		case f.Task.Kind == TaskMerge && f.Task.Fleet == f.ID:
-			// A merge with itself completes, merging nothing
-			// (MESSAGES.md 0x04e (a); FO-03-F). Elegy does not send
-			// 0x04e for a task that ends.
+			// A merge with itself completes, merging nothing, and the
+			// owner is told the fleet has finished its orders
+			// (MESSAGES.md 0x04e (a), CONFIRMED; FO-03-F).
 			f.Task = Task{}
+			events = append(events, g.fleetEvent(f, EventFleetArrived, 0))
 		case f.Task.Kind == TaskMerge:
 			if ev, ok := g.mergeTask(f, gone); ok {
 				gone[id] = true
@@ -239,6 +240,29 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 	}
 	g.removeFleets(gone)
 	return events
+}
+
+// withFinished appends more to events, first removing an earlier "fleet
+// has finished its orders" message (EventFleetArrived) for each fleet that
+// gets one in more (MESSAGES.md 0x04e (a): "an earlier copy for the same
+// fleet is removed first").
+func withFinished(events, more []Event) []Event {
+	again := map[int]bool{}
+	for _, e := range more {
+		if e.Kind == EventFleetArrived {
+			again[e.Fleet] = true
+		}
+	}
+	if len(again) > 0 {
+		kept := events[:0:0]
+		for _, e := range events {
+			if e.Kind != EventFleetArrived || !again[e.Fleet] {
+				kept = append(kept, e)
+			}
+		}
+		events = kept
+	}
+	return append(events, more...)
 }
 
 // mergeTask runs a Merge with Fleet task (ORDERS.md "Merge", CONFIRMED

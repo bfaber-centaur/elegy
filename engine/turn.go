@@ -287,7 +287,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
-	events = append(events, g.loadPass(false)...)
+	events = withFinished(events, g.loadPass(false))
 
 	// The race check (KERNEL.md "Turn order" step 2a).
 	if g.Races != nil {
@@ -482,7 +482,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
-	events = append(events, g.loadPass(true)...)
+	events = withFinished(events, g.loadPass(true))
 	// Mine sweeping (step 7.1).
 	if g.Objects != nil {
 		events = append(events, g.Objects.SweepMines(&g)...)

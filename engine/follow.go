@@ -144,7 +144,7 @@ func (g *Game) follow(follows map[int]int) (done []Event, events []Event) {
 // CONFIRMED FO-03-F). A leader at f's position, or one that no longer
 // exists, stays. Any other is replaced by a fleet of the leader's owner
 // at f's position, which can be f itself; f then follows itself and is
-// never resolved (F3). MESSAGES.md names the leader's owner, KERNEL.md
+// never resolved (F3): no move, no 0x138, no 0x137. MESSAGES.md names the leader's owner, KERNEL.md
 // "the same owner"; Elegy follows MESSAGES.md. A Merge with Fleet task
 // aimed at the old leader is aimed at the new one with it, so a follower
 // left following itself completes its merge with itself, merging nothing
@@ -154,25 +154,25 @@ func (g *Game) follow(follows map[int]int) (done []Event, events []Event) {
 // chosen.
 //
 // ASSUMPTION F6: when none does (a leader of another player, elsewhere,
-// with no fleet at f's position), f's leader is treated as one that no
-// longer exists, and f gets 0x138.
+// with no fleet at f's position), f follows nothing, as when left
+// following itself: no move, no 0x138, no 0x137 (MESSAGES.md 0x138: "A
+// follower whose leader is elsewhere does not get it"). Its task is left
+// as it is.
 func (g *Game) followLeader(f *Fleet, leader int) int {
 	l := g.fleetIndex(leader)
 	if l < 0 || g.Fleets[l].Pos == f.Pos {
 		return leader
 	}
 	owner := g.Fleets[l].Owner
-	chosen := -1
 	for _, i := range g.fleetOrder() {
 		if c := &g.Fleets[i]; c.Owner == owner && c.Pos == f.Pos {
-			chosen = c.ID
-			break
+			if f.Task.Kind == TaskMerge && f.Task.Fleet == leader {
+				f.Task.Fleet = c.ID
+			}
+			return c.ID
 		}
 	}
-	if chosen >= 0 && f.Task.Kind == TaskMerge && f.Task.Fleet == leader {
-		f.Task.Fleet = chosen
-	}
-	return chosen
+	return f.ID
 }
 
 // endFollow ends the year's follows at the end of movement (MESSAGES.md
