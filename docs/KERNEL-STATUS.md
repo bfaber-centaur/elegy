@@ -223,11 +223,14 @@ listed; its comparison is in the test output.
   0 still holds the route task; Elegy drops a fleet's task when it
   leaves. Asked upstream whether every task stays with waypoint 0 in
   transit.
-- **SL-starbases** (CONFIRMED). Fleets built during the run carry other
-  fleet numbers than the original's: the expected fleets at planets 18,
-  19 and 15 are Elegy's fleets at 15, 18 and 19. The surface minerals
-  differ too. Both were failing before; the fleet check did not run
-  until the harness compared the orbit field. Production lane.
+- **SL-starbases** (CONFIRMED). Not modelled: the turn-time race check
+  (RACES.md "In a running game"). In the original the check degraded the
+  race, so planet 15's replacement starbase reached only 88% in year 1
+  and its ships came in year 2. Elegy finishes the starbase in year 1 and
+  numbers planet 15's fleet ahead of 18 and 19, and the surface minerals
+  follow. With the degraded race values loaded, Elegy matches the vector
+  exactly. The fleet check did not run until the harness compared the
+  orbit field.
 - **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). Not
   diagnostic, for the same reason as CB-039: its untagged fleet results
   are the two streams' common outcome. Which fleets survive changes with
