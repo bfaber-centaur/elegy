@@ -1,7 +1,7 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `fbf17ba`) and its Mystery Trader appearance
+(as of stars-elegy `main` at `2a4e48e`) and its Mystery Trader appearance
 in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
@@ -10,7 +10,7 @@ The package reads the engine's exported state and exposes step and query
 functions. It does not change `engine/`, and `engine.GenerateTurn` does
 not call it yet: the turn engine owns the year's order (OBJECTS.md "Turn
 placement") and wires each step in. Object families land one at a time:
-minefields, wormholes, then the Mystery Trader.
+minefields, wormholes, the Mystery Trader, then mass-driver packets.
 
 ## Minefields
 
@@ -142,16 +142,10 @@ Traders sit in `Space.Traders` and count toward the object limit and the
 wormhole placement objects. `Space.GiftDesigns` marks the designs a gift
 created.
 
-### Assumptions (spec gaps)
-
-OBJECTS.md now answers T1–T5, T7 and T8 of the first draft. Still open:
-
-1. **T6** The gift designs fill the hull's slots in the order the spec
-   lists the parts, "in two slots" filling consecutive slots.
-2. **T9** On arrival, "another Trader present" counts the Traders still in
-   the galaxy at that point; one removed earlier this year does not count.
-3. **T10** The traded fleet still holds its fleet number when the gift
-   fleet is numbered.
+OBJECTS.md now answers every Trader gap of the first drafts (T1–T10):
+the gift loadouts' slot layout is MEASURED (WT-004), the rest
+BINARY-ONLY. A gift fleet that lands later in fleet order is offered to
+the Trader like any fleet and refused (no minerals).
 
 ### What the turn engine needs to call (Mystery Trader)
 
@@ -162,7 +156,55 @@ OBJECTS.md now answers T1–T5, T7 and T8 of the first draft. Still open:
   them into plain positions, and the owner is told.
 - After battles: `Space.Meet`, which runs each Trader's fleets and then
   its planets; messages come from the returned records.
+- A gift fleet (`Reward.NewFleet`): mark it as not moved this year (it
+  gets no refusal message), set its waypoint 0 at the trade point, and
+  have it orbit the planet the traded fleet orbited, if any.
 - Designs: pass `TraderParts.Items(player)` to `ReadDesign`; drop a
   deleted design's index from `Space.GiftDesigns`.
 - Scanning shows Traders as objects; the engine has no Trader visibility
   yet.
+
+## Mass-driver packets
+
+| Rule | Function | Status |
+|---|---|---|
+| Driver warp `Dw` and the two-driver bonus `t` | `DriverWarp` | CONFIRMED (OB-028-C, D) |
+| Packet warp from the speed setting | `PacketWarp` | CONFIRMED (OB-028-B, C, D) |
+| Decay class, +1 for an IT launcher, at most 3 | `DecayClass` | CONFIRMED (OB-028-A, H, I) |
+| Launch and spend per item, mixed items | `PacketItem` | MEASURED (OB-028, OB-029) |
+| No driver or destination: nothing built | `Space.Launch` | CONFIRMED (OB-028-F) |
+| Merging, the 32,760 kT cap, the 16,300 kT merge limit | `Space.Launch` | CONFIRMED (OB-028-B, E); cap and limit BINARY-ONLY |
+| Flight: ⌊W²/2⌋ on the launch year, then W² | `Space.FlyLaunched`, `Space.MovePackets` | CONFIRMED (OB-003 J, K, OB-028 A–I) |
+| Decay by class, PP rates, minimum loss, partial years | `Decay`, `Space.DecayPackets` | CONFIRMED (OB-003, OB-023, OB-028) |
+| Catch share, minerals added | `CatcherWarp`, impact | CONFIRMED (OB-003, OB-009, OB-022) |
+| Damage, kill, defenses lost; AR immune; own packets | impact | CONFIRMED (OB-009, OB-022, OB-030-A, OB-009-E) |
+| PP terraforming and starbase design disclosure | none yet | not modelled; `Impact.Unhandled` marks a PP launcher's uncaught impact |
+
+Packets sit in `Space.Packets` in object order (owner, then number) and
+count toward the object limit.
+
+### Assumptions (spec gaps)
+
+1. **P1** An Interstellar Traveler's mixed item spends 48 kT of each
+   mineral (120% of 40, as for a single mineral).
+2. **P2** The 16,300 kT merge limit is tested on the earlier packet's
+   total before the new cargo is added.
+3. **P3** A new packet takes its owner's lowest unused packet number,
+   from 0.
+4. **P4** A decay loss is ⌊m · rate · share / 100⌋ in floating point,
+   with share = distance flown / the year's move (halved on the launch
+   year).
+
+### What the turn engine needs to call (packets)
+
+- Production (orders layer): a packet item calls `Space.Launch` with the
+  planet's packet destination and speed (the engine's `Planet` has
+  neither yet), spends `Launch.Spend` from the surface, and sends the
+  no-driver message for `Launch.NoDriver`.
+- Movement step 2 (objects move): `Space.MovePackets` with an
+  `ImpactContext` whose `DefenseShare` is the planet's normal-bomb
+  defense share (TAKEOVER.md); then the waypoint check.
+- Step 3a: `Space.DecayPackets` with salvage decay.
+- Step 5: `Space.FlyLaunched`, before battles and bombing.
+- For every `Impact` with `Emptied`, empty the planet as after bombing.
+- Packet visibility belongs to scanning.

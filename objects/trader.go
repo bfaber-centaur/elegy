@@ -237,8 +237,8 @@ type TraderMove struct {
 // edge with warp max(6, warp − 2) + 1 and a new destination, and it does
 // not move further that year.
 //
-// ASSUMPTION T9: "another Trader present" counts the Traders still in the
-// galaxy at that point, so one removed earlier this year does not count.
+// "Another Trader" is one still in the galaxy at that moment, moved or
+// not; one removed earlier this year does not count (BINARY-ONLY).
 func (s *Space) MoveTraders(size int, rng engine.Rand) []TraderMove {
 	var out []TraderMove
 	var kept []Trader
@@ -438,12 +438,16 @@ func (s *Space) Meet(g *engine.Game, ctx TraderContext, rng engine.Rand) ([]Enco
 // in fleet order. Cargo (minerals only) below 5,000 kT: refused. Owner
 // already served by this Trader: refused, fleet kept. Otherwise the owner
 // is marked served, the fleet is consumed (ships and cargo) and the
-// reward follows. A consumed fleet is not offered to another Trader.
+// reward follows. A consumed fleet is not offered to another Trader. A
+// gift fleet created here is offered if it lands later in fleet order
+// (BINARY-ONLY); it never trades, and having not moved gets no message
+// (the caller sends refusal messages only for fleets that moved).
 func (s *Space) fleetMeetings(g *engine.Game, ctx TraderContext, ti int, consumed map[int]bool, rng engine.Rand) []Encounter {
 	var out []Encounter
 	t := &s.Traders[ti]
-	for _, fi := range fleetOrder(g) {
-		f := &g.Fleets[fi]
+	order := fleetOrder(g)
+	for k := 0; k < len(order); k++ {
+		f := &g.Fleets[order[k]]
 		if consumed[f.ID] || f.Pos != t.Pos {
 			continue
 		}
@@ -457,7 +461,18 @@ func (s *Space) fleetMeetings(g *engine.Game, ctx TraderContext, ti int, consume
 		default:
 			t.Served = mark(t.Served, f.Owner)
 			consumed[f.ID] = true
+			id, n := f.ID, len(g.Fleets)
 			e.Reward = s.reward(g, ctx, t, f.Owner, f.Pos, cargo, rng)
+			if len(g.Fleets) != n {
+				// A gift fleet that lands later in fleet order is
+				// offered like any fleet; it has no minerals.
+				order = fleetOrder(g)
+				for j, fi := range order {
+					if g.Fleets[fi].ID == id {
+						k = j
+					}
+				}
+			}
 		}
 		out = append(out, e)
 	}
@@ -499,8 +514,9 @@ func (s *Space) reward(g *engine.Game, ctx TraderContext, t *Trader, owner int, 
 // giftDesign is one of the Trader's ship designs (OBJECTS.md
 // "Encounters", ship, CONFIRMED WT-003 B, WT-004 B, C, OB-026).
 //
-// ASSUMPTION T6: the parts go into the hull's slots in the order the
-// spec lists them, "in two slots" filling consecutive slots.
+// The loadouts are in the hull's slot order, "in two slots" meaning
+// consecutive slots, each filled to its maximum (OBJECTS.md "Encounters",
+// slot layout, MEASURED WT-004).
 func giftDesign(kind int) (string, string, []engine.SlotFill) {
 	f := func(slot int, part string, n int) engine.SlotFill {
 		return engine.SlotFill{Slot: slot, Part: part, Count: n}
@@ -550,9 +566,8 @@ const (
 // SL-02), battle plan 0, full fuel and no further waypoints, at the trade
 // point.
 //
-// ASSUMPTION T10: the traded fleet still holds its fleet number when the
-// gift fleet is numbered (consumed fleets are removed after the
-// meetings).
+// Consumed fleets, the traded one included, still hold their numbers
+// then: they leave the fleet list after all the meetings (BINARY-ONLY).
 func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engine.Point, rng engine.Rand) Reward {
 	r := Reward{Kind: ItemShip, Design: -1, NewFleet: -1}
 	if ctx.Computer != nil && ctx.Computer(owner) {

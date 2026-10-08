@@ -273,8 +273,13 @@ func TestConfirmedTraderShipGift(t *testing.T) {
 	if got.Kind != ItemShip || got.Ships != 1 || got.Design != designs || l.g.Designs[got.Design].Hull.Name != "Nubian" {
 		t.Fatalf("human gift %+v", got)
 	}
-	if enc[1].Reward.Ships != 0 || len(l.g.Fleets) != 1 {
-		t.Errorf("computer gift %+v, %d fleets", enc[1].Reward, len(l.g.Fleets))
+	// The gift fleet (number 1) comes after the traded fleet in fleet
+	// order, so it is offered and refused (no minerals; BINARY-ONLY).
+	if len(enc) != 3 || !enc[1].Refused || enc[1].Fleet != got.NewFleet {
+		t.Errorf("gift fleet not offered: %+v", enc)
+	}
+	if len(enc) == 3 && (enc[2].Owner != 1 || enc[2].Reward.Ships != 0 || len(l.g.Fleets) != 1) {
+		t.Errorf("computer gift %+v, %d fleets", enc[2].Reward, len(l.g.Fleets))
 	}
 	f := l.g.Fleets[0]
 	// Fleet numbers count from 1 (as a launch, SL-02).
