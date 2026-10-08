@@ -42,6 +42,7 @@ var orderKinds = map[string]engine.Order{
 	"DeleteDesign":   engine.DeleteDesignOrder{},
 	"Split":          engine.SplitOrder{},
 	"MoveShips":      engine.MoveShipsOrder{},
+	"Follow":         engine.FollowOrder{},
 }
 
 // kindOf is the file name of an order's kind.
