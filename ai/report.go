@@ -38,7 +38,7 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 		v.Seen[rep.Planet] = true
 	}
 	for _, d := range r.Designs {
-		od := Design{Slot: d.Slot.Slot, Index: d.Index, Design: d.Design, Created: d.Slot.Created, Picture: d.Slot.Picture}
+		od := Design{Slot: d.Slot.Slot, Index: d.Index, Design: d.Design, Created: d.Slot.Created, Picture: d.Slot.Picture, Built: d.Slot.Built}
 		if d.Slot.Starbase {
 			v.Starbases = append(v.Starbases, od)
 		} else {

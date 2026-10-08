@@ -111,7 +111,7 @@ them it stayed on its homeworld.
 | A34 | Robotoid's colonizer step checks y > 4 first, and with no hubs the `Random(8 × hubs)` draw is not made. |
 | A35 | "Population × max growth %" uses the population in hundreds; "the planet's resources" are this year's. |
 | A36 | The universe size (colonizer test) is read from the map's extent. |
-| A37 | The colonizer test's rule on ships ever built of the colony designs (b) is skipped: Elegy does not track that count. |
+| A37 | Retired: the colonizer test's rule on b reads the ships ever built of the colony designs from the design slots (`engine.DesignSlot.Built`, save v7). |
 | A38 | With no own fleet here that is not too weak, Robotoid's armada production step does nothing. |
 | A39 | The D67 draw is made only when D67 holds a design. |
 | A40 | Hub balancing takes the giving hub's last assigned fleet. |
