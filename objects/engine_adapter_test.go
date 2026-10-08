@@ -343,3 +343,27 @@ func TestConfirmedPacketInTurn(t *testing.T) {
 		t.Errorf("surface %d, want 111 (uncaught, a ninth)", s)
 	}
 }
+
+// The production queue's launch through the engine interface (OBJECTS.md
+// "Launch", CONFIRMED OB-028, OB-028-F).
+func TestConfirmedLaunchPacketInterface(t *testing.T) {
+	l := newLab(t)
+	sb := station(t, l, "Mass Driver 7", "")
+	l.g.Planets = []engine.Planet{{ID: 3, Pos: origin, Owner: 0}, {ID: 7, Pos: at(50, 0), Owner: engine.NoOwner}}
+	var o engine.SpaceObjects = &Space{}
+	built, _, ev := o.LaunchPacket(l.g, 0, 7, 0, engine.Ironium, 1)
+	if built || len(ev) != 1 || ev[0].Kind != engine.EventPacketNoDriver || ev[0].Planet != 3 {
+		t.Errorf("no starbase: built %v, events %v", built, ev)
+	}
+	l.g.Planets[0].HasStarbase, l.g.Planets[0].StarbaseDesign = true, sb
+	built, spend, ev := o.LaunchPacket(l.g, 0, 7, 0, engine.Ironium, 1)
+	if !built || len(ev) != 0 || spend != (engine.Minerals{110, 0, 0}) {
+		t.Errorf("mass driver: built %v, spend %v, events %v", built, spend, ev)
+	}
+	if p := o.(*Space).Packets; len(p) != 1 || p[0].Cargo != (engine.Minerals{100, 0, 0}) || p[0].Warp != 7 {
+		t.Errorf("packets %+v", p)
+	}
+	if _, spend, _ := o.LaunchPacket(l.g, 0, 7, 0, engine.PacketMixed, 1); spend != (engine.Minerals{44, 44, 44}) {
+		t.Errorf("mixed spend %v", spend)
+	}
+}

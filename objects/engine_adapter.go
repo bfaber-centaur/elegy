@@ -149,6 +149,18 @@ func shipsLost(f *engine.Fleet, hits []DesignHit) []engine.Event {
 	return []engine.Event{{Kind: engine.EventMineShipsLost, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: n}}
 }
 
+// LaunchPacket runs Launch for the engine's production queue.
+func (s *Space) LaunchPacket(g *engine.Game, pi, dest, speed, mineral, count int) (bool, engine.Minerals, []engine.Event) {
+	if mineral == engine.PacketMixed {
+		mineral = Mixed
+	}
+	l := s.Launch(g, pi, PacketOrder{Dest: dest, Speed: speed}, mineral, count)
+	if l.NoDriver {
+		return false, engine.Minerals{}, []engine.Event{{Kind: engine.EventPacketNoDriver, Player: g.Planets[pi].Owner, Planet: g.Planets[pi].ID, Fleet: -1}}
+	}
+	return true, l.Spend, nil
+}
+
 // TransitWormhole takes fleet fi through wormhole end `end`.
 func (s *Space) TransitWormhole(g *engine.Game, fi int, end int) []engine.Event {
 	if end < 0 || end/2 >= len(s.Wormholes) {
