@@ -87,16 +87,21 @@ func (g *Game) starbaseDock(pi int) bool {
 // routeWarp is the warp of a new fleet's route waypoint from planet index
 // src to planet index dst (PRODUCTION-LAUNCH.md "Route warp", CONFIRMED
 // SL-04..SL-07): the ideal warp; then, to the owner's own destination
-// with starbases at both ends and a dock at the destination, the highest
+// with starbases at both ends, the gate setting (warp 11) when gateSafe
+// allows the jump, or else, with a dock at the destination, the highest
 // warp 9..1 whose fuel range covers d when the ideal warp is below 9;
 // then the step-down rule, then down while the leg costs more than the
-// fuel aboard.
-//
-// Stargates are not modelled: the gate branch is skipped.
+// fuel aboard. The gate choice is CONFIRMED by the SL rows with gates at
+// both ends (11 within range, 6 beyond it) and MEASURED for the route
+// task (ORDERS.md "Route task", wuRSG2).
 func (g *Game) routeWarp(f *Fleet, src, dst int) int {
 	d := int(distance(g.Planets[src].Pos, g.Planets[dst].Pos))
 	w := g.idealWarp(f)
-	if g.Planets[dst].Owner == f.Owner && g.hasStarbase(src) && g.hasStarbase(dst) && w < 9 && g.starbaseDock(dst) {
+	own := g.Planets[dst].Owner == f.Owner && g.hasStarbase(src) && g.hasStarbase(dst)
+	if own && g.gateSafe(f, src, dst, d) {
+		return StargateWarp
+	}
+	if own && w < 9 && g.starbaseDock(dst) {
 		w = 0
 		for v := 9; v >= 1; v-- {
 			if r, unlimited := g.fuelRange(f, v); unlimited || r >= d {
@@ -115,6 +120,72 @@ func (g *Game) routeWarp(f *Fleet, src, dst int) int {
 		}
 	}
 	return w
+}
+
+// anyGateRange is what an "any" gate range counts as (OBJECTS.md
+// "Stargates").
+const anyGateRange = 8000
+
+// planetGate is the stargate on planet pi's starbase design: its mass
+// limit (0 for any) and range (OBJECTS.md "What makes a gate"; limits
+// from the component table's safe_mass and safe_range, null meaning any).
+func (g *Game) planetGate(pi int) (mass, rng int, ok bool) {
+	p := &g.Planets[pi]
+	if !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) {
+		return 0, 0, false
+	}
+	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+		if sl.Count <= 0 || sl.Part.Kind != PartStargate {
+			continue
+		}
+		c, found := Components().Lookup(sl.Part.Name)
+		if !found {
+			continue
+		}
+		rng = anyGateRange
+		if v, isNum := c.Stats["safe_mass"].(float64); isNum {
+			mass = int(v)
+		}
+		if v, isNum := c.Stats["safe_range"].(float64); isNum {
+			rng = int(v)
+		}
+		return mass, rng, true
+	}
+	return 0, 0, false
+}
+
+// gateSafe is the gate condition of the route warp (PRODUCTION-LAUNCH.md
+// "Route warp"; ORDERS.md "Route task"): both planets' starbases have
+// stargates, the fleet carries no minerals or colonists, and a jump of
+// its heaviest design over d is allowed with no damage: d within the
+// source gate's range and no design heavier than either gate's mass limit
+// (OBJECTS.md "Stargates", "Limits", "Danger"). routeWarp asks only when
+// both planets are the fleet owner's.
+//
+// ASSUMPTION W6: without space objects (Game.Objects) a gate jump does
+// nothing, so routing never chooses one.
+func (g *Game) gateSafe(f *Fleet, src, dst, d int) bool {
+	if g.Objects == nil || f.Cargo.Minerals != (Minerals{}) || f.Cargo.Colonists != 0 {
+		return false
+	}
+	ms, r, ok := g.planetGate(src)
+	if !ok {
+		return false
+	}
+	md, _, ok := g.planetGate(dst)
+	if !ok || d > r {
+		return false
+	}
+	for _, st := range f.Stacks {
+		if st.Count <= 0 {
+			continue
+		}
+		m := g.Designs[st.Design].Mass
+		if (ms > 0 && m > ms) || (md > 0 && m > md) {
+			return false
+		}
+	}
+	return true
 }
 
 // lowestFreeFleetNumber is the number of a player's next new fleet

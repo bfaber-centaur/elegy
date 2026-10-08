@@ -51,7 +51,7 @@ func slScouts(t *testing.T) (Design, Design) {
 func TestConfirmedRouteWarp(t *testing.T) {
 	// PRODUCTION-LAUNCH.md "Route warp" vectors (CONFIRMED SL-04..SL-07,
 	// both streams). The source planet has a Space Station. Rows with
-	// gates at both ends are left out: Elegy has no stargates.
+	// gates at both ends are TestConfirmedRouteWarpGates.
 	scout, qj5 := slScouts(t)
 	c := Components()
 	station, err := c.NewDesign("Station", "Space Station", nil)
@@ -328,5 +328,96 @@ func TestPredictionJoinTakesSlotPlace(t *testing.T) {
 	g.insertStack(&f, Stack{Design: 1, Count: 4})
 	if want := []Stack{{Design: 0, Count: 1}, {Design: 1, Count: 4}, {Design: 2, Count: 1}}; !reflect.DeepEqual(f.Stacks, want) {
 		t.Errorf("stacks %+v, want %+v", f.Stacks, want)
+	}
+}
+
+// gateObjects stands in for space objects: routing only asks whether the
+// game has them.
+type gateObjects struct{ SpaceObjects }
+
+func TestConfirmedRouteWarpGates(t *testing.T) {
+	// PRODUCTION-LAUNCH.md "Route warp" rows with Stargate 100/250 at both
+	// ends (CONFIRMED SL-04..SL-07): 49 ly gives the gate setting, 11; at
+	// 309 ly, beyond the 250 ly range, the dock rule gives 6. A gate at
+	// the destination only (94 ly) keeps the dock rule's 7.
+	scout, qj5 := slScouts(t)
+	c := Components()
+	gated, err := c.NewDesign("Gate", "Space Station", []SlotFill{{Slot: 0, Part: "Stargate 100/250", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	station, err := c.NewDesign("Station", "Space Station", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range []struct {
+		srcGate       bool
+		d             int
+		scout, qj5Got int
+	}{
+		{true, 49, 11, 11}, {true, 309, 6, 6}, {false, 94, 7, 7},
+	} {
+		for k, want := range []int{tt.scout, tt.qj5Got} {
+			src := 2
+			if tt.srcGate {
+				src = 3
+			}
+			g := &Game{
+				Players: make([]Player, 2),
+				Designs: []Design{scout, qj5, station, gated},
+				Planets: []Planet{
+					{ID: 1, Owner: 0, Pos: Point{1000, 1000}, HasStarbase: true, StarbaseDesign: src, StarbaseHull: 3},
+					{ID: 2, Owner: 0, Pos: Point{1000 + tt.d, 1000}, HasStarbase: true, StarbaseDesign: 3, StarbaseHull: 3},
+				},
+				Objects: gateObjects{},
+			}
+			f := Fleet{Owner: 0, Pos: g.Planets[0].Pos, Stacks: []Stack{{Design: k, Count: 1}}, Fuel: 50}
+			if got := g.routeWarp(&f, 0, 1); got != want {
+				t.Errorf("%s, source gate %v at %d ly: warp %d, want %d", g.Designs[k].Name, tt.srcGate, tt.d, got, want)
+			}
+		}
+	}
+}
+
+func TestRouteWarpGateConditions(t *testing.T) {
+	// PRODUCTION-LAUNCH.md "Route warp", "Gates": no gate with cargo
+	// aboard, with a design over a gate's mass limit, to another player's
+	// planet, or (ASSUMPTION W6) without space objects.
+	c := Components()
+	gated, err := c.NewDesign("Gate", "Space Station", []SlotFill{{Slot: 0, Part: "Stargate 100/250", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	scout, _ := slScouts(t)
+	heavy := scout
+	heavy.Mass = 101
+	setup := func() (*Game, Fleet) {
+		g := &Game{
+			Players: make([]Player, 2),
+			Designs: []Design{scout, heavy, gated},
+			Planets: []Planet{
+				{ID: 1, Owner: 0, Pos: Point{1000, 1000}, HasStarbase: true, StarbaseDesign: 2, StarbaseHull: 3},
+				{ID: 2, Owner: 0, Pos: Point{1049, 1000}, HasStarbase: true, StarbaseDesign: 2, StarbaseHull: 3},
+			},
+			Objects: gateObjects{},
+		}
+		return g, Fleet{Owner: 0, Pos: g.Planets[0].Pos, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: 50}
+	}
+	g, f := setup()
+	if w := g.routeWarp(&f, 0, 1); w != StargateWarp {
+		t.Fatalf("baseline warp %d", w)
+	}
+	for name, change := range map[string]func(g *Game, f *Fleet){
+		"minerals":  func(g *Game, f *Fleet) { f.Cargo.Minerals[Boranium] = 1 },
+		"colonists": func(g *Game, f *Fleet) { f.Cargo.Colonists = 1 },
+		"heavy":     func(g *Game, f *Fleet) { f.Stacks = append(f.Stacks, Stack{Design: 1, Count: 1}) },
+		"other":     func(g *Game, f *Fleet) { g.Planets[1].Owner = 1 },
+		"objects":   func(g *Game, f *Fleet) { g.Objects = nil },
+	} {
+		g, f := setup()
+		change(g, &f)
+		if w := g.routeWarp(&f, 0, 1); w == StargateWarp {
+			t.Errorf("%s: gate chosen", name)
+		}
 	}
 }
