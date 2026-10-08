@@ -584,11 +584,15 @@ func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error)
 }
 
 // newDesign is NewDesign; with kinds false a part of a kind its slot does
-// not take is kept. The original keeps and uses a stored design whatever
-// wrote it (TAKEOVER.md "Design legality": "parity is keep and use"), and
-// some oracle states were written directly with such designs (CB-009,
-// CB-010: a Beam Deflector in a shield-or-armor slot); the parity harness
-// loads those.
+// not take is kept. Some oracle states were written directly with such
+// designs (CB-009, CB-010: a Beam Deflector in a shield-or-armor slot);
+// the parity harness loads those.
+//
+// ASSUMPTION K10: the original keeps and uses such a part. TAKEOVER.md
+// "Design parts dropped when the year is generated" says parity is "keep
+// and use" for parts beyond the owner's tech or race; extending it to a
+// part in a slot of the wrong kind is inferred, supported by CB-010
+// passing with the part kept.
 func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {

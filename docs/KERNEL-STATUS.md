@@ -379,8 +379,11 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 
 - CB-009 and CB-010 load designs written straight into the oracle's
   state with a Beam Deflector in a shield-or-armor slot; the harness keeps
-  such a part, as the original keeps and uses a stored design (TAKEOVER.md
-  "Design parts dropped when the year is generated"). CB-010 passes.
+  such a part. ASSUMPTION K10: TAKEOVER.md "Design parts dropped when the
+  year is generated" says parity is "keep and use" for parts beyond the
+  owner's tech or race, and extending it to a part in a slot of the wrong
+  kind is inferred; CB-010 passing with the part kept supports it.
+  CB-010 passes.
   CB-009 is `random 1`: its `salvage_at` amounts follow which ships the
   battle's draws killed (its `fleet_gone` expectations are samples), but
   the salvage expectations are not marked `sample`; inferred from 1 of 8

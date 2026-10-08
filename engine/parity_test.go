@@ -548,8 +548,8 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		ds, err := cat.NewDesign(name, d.Hull, fills)
 		if err != nil && strings.Contains(err.Error(), "does not take") {
 			// A design written directly into the oracle's state, with a
-			// part in a slot the client would not allow: the original keeps
-			// and uses it (TAKEOVER.md "Design legality").
+			// part in a slot the client would not allow, is kept (ASSUMPTION
+			// K10, Catalog.newDesign).
 			ds, err = cat.newDesign(name, d.Hull, fills, false)
 		}
 		if err != nil && !starbase {
