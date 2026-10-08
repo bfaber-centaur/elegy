@@ -867,8 +867,7 @@ func (t *robotoidTurn) troops(f *engine.Fleet) int { return t.count(f, 9, 10) }
 //
 // ASSUMPTION A31: "the nearest object of interest" is the nearest planet.
 // ASSUMPTION A32: a launch by chance loads colonists as a normal launch
-// does. The invasion step is reported: Elegy's planner does not estimate
-// the defense percentage yet.
+// does. The invasion at another player's planet is armadaDrop (A59).
 func (t *robotoidTurn) armada(f *engine.Fleet) {
 	v := t.v
 	P, A := t.potency, t.size
@@ -967,10 +966,34 @@ func (t *robotoidTurn) armada(f *engine.Fleet) {
 		}
 		t.launch(f, here)
 	default:
-		if f.Cargo.Colonists > 0 {
-			t.res.unsupported("fleet %d: armada invasion test at planet %d", f.ID, here)
+		if n := armadaDrop(v.Known[here], f.Cargo.Colonists); n > 0 {
+			task := engine.Task{Kind: engine.TaskTransport}
+			task.Transport[engine.CargoColonists] = engine.Transport{Action: engine.UnloadExactly, Amount: n}
+			t.emit(f, taskHere(f, task))
 		}
 	}
+}
+
+// armadaDrop is §11's invasion test at another player's planet, from the
+// planet report the player holds: with g its population estimate in units
+// of 400 colonists and e its defense coverage estimate (0..15), defense %
+// = ⌊(e+1)·18/4⌋ and need = ⌊g·400 / (100 − defense %)⌋ colonists. With c
+// the armada's colonist cargo in kT, it invades when need < ⌊c/5⌋, or
+// need < 200 and c > 350, or need < 10 and c > 150, dropping
+// min(max(⌊c/2⌋, ⌊5·need/4⌋), c, 30000) kT. It returns 0 for no invasion
+// (no move that turn either).
+//
+// ASSUMPTION A59: need (colonists) and c (kT) are compared and mixed as
+// plain numbers, with no conversion, as §11 reads; whether the game does
+// so is UNRESOLVED there (a probable unit slip).
+func armadaDrop(rep engine.PlanetReport, c int) int {
+	g := rep.PopEstimate / 400
+	def := (rep.DefenseEstimate + 1) * 18 / 4
+	need := g * 400 / (100 - def)
+	if !(need < c/5 || need < 200 && c > 350 || need < 10 && c > 150) {
+		return 0
+	}
+	return min(max(c/2, 5*need/4), c, 30000)
 }
 
 // launch is AI.md §11's launch target: the best-scoring threat-marked
