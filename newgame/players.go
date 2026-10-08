@@ -105,12 +105,19 @@ func (g *generator) resolvePlayers() {
 // 100 colonists, before a second planet takes its share (UNIVERSE.md
 // "Homeworld", "BBS option", "Computer players", CONFIRMED).
 //
-// ELEGY CHOICE: the order of BBS and the expert bonus is not specified;
-// BBS applies first, then the expert +10%, each truncating.
+// The expert +10% applies before the BBS factor, each truncating: the
+// UG vectors' two expert players in BBS games (UG03 player 2, PP with LSP
+// and growth 19: 175 → 192 → 921, homeworld 736 after the second planet;
+// UG21 player 9, CA with LSP and growth 15: 175 → 192 → 768) match this
+// order and not the reverse (739, 770). MEASURED from the vectors; the
+// spec does not state the order yet.
 func homeworldPopulation(p player, bbs bool) int {
 	pop := 250
 	if p.Race.LRT.LowStartingPopulation {
 		pop = 175
+	}
+	if p.Computer && p.Level == Expert {
+		pop += pop / 10
 	}
 	if bbs {
 		k := 1
@@ -118,9 +125,6 @@ func homeworldPopulation(p player, bbs bool) int {
 			k = 2
 		}
 		pop = pop * (p.Race.GrowthRate*k + 5) / 5
-	}
-	if p.Computer && p.Level == Expert {
-		pop += pop / 10
 	}
 	return pop
 }
