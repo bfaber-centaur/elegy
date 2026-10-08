@@ -482,6 +482,7 @@ func (g *Game) load(f *Fleet) {
 		return
 	}
 	if g.Planets[pi].Owner != f.Owner {
+		g.settleSets(f)
 		return
 	}
 	p := &g.Planets[pi]
@@ -556,7 +557,9 @@ func (t *Transport) percentTarget(capacity int) int {
 // actions when they load, so they persist until satisfied (held ≥ v, or
 // avail ≤ v), like "load exactly" ("load actions persist until
 // satisfied"); TAKEOVER.md does not say. Their unload direction is
-// unload's and clears there, as does an action with nothing to move.
+// unload's and clears there. Otherwise the load pass settles them,
+// wherever the fleet is (settleSets), so the target's holding is read
+// after every unload and drop of the phase, whatever the fleet order.
 func (t *Transport) loaded(amount, capacity, held, avail int) {
 	switch t.Action {
 	case LoadExactly:
@@ -618,10 +621,9 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		case UnloadExactly:
 			amount = min(t.Amount, have)
 		case SetAmount, SetWaypoint:
-			// A load is the load pass's; with nothing to move the
-			// action is satisfied and clears here, wherever the fleet
-			// is (ASSUMPTION T11).
-			if amount = t.unloadWant(have, g.targetHolds(f, c)); amount < 0 {
+			// A load, or nothing to move: the load pass settles it
+			// (ASSUMPTION T11).
+			if amount = t.unloadWant(have, g.targetHolds(f, c)); amount <= 0 {
 				continue
 			}
 		default:
@@ -724,6 +726,7 @@ func (g *Game) salvageAt(pos Point) int {
 func (g *Game) loadSalvage(f *Fleet) {
 	si := g.salvageAt(f.Pos)
 	if si < 0 {
+		g.settleSets(f)
 		return
 	}
 	sv := &g.Salvage[si]
@@ -740,6 +743,21 @@ func (g *Game) loadSalvage(f *Fleet) {
 		f.Cargo.Minerals[c] += amount
 		free -= amount
 		t.loaded(amount, capacity, f.Cargo.Minerals[c], sv.Minerals[c])
+	}
+	g.settleSets(f)
+}
+
+// settleSets settles the "set amount to" and "set waypoint to" actions
+// where the load pass loads nothing of their type: a planet the fleet's
+// owner does not own, deep space, or colonists at salvage. One already
+// satisfied clears; one that would load keeps waiting (ASSUMPTION T10,
+// T11). A task left with no action is no task.
+func (g *Game) settleSets(f *Fleet) {
+	capacity := g.cargoCapacity(f)
+	for c := range NumCargo {
+		if t := &f.Task.Transport[c]; t.Action == SetAmount || t.Action == SetWaypoint {
+			t.loaded(0, capacity, *held(f, c), g.targetHolds(f, c))
+		}
 	}
 	if f.Task.Transport == ([NumCargo]Transport{}) {
 		f.Task = Task{}

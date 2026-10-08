@@ -183,3 +183,59 @@ func TestSetActionNothingToMove(t *testing.T) {
 		}
 	}
 }
+
+// The load pass settles a set action after every unload of the phase, so
+// the result does not depend on fleet order (ASSUMPTION T11): at its own
+// planet holding 100 Fe, fleet A sets the waypoint to 100 with an empty
+// hold and fleet B unloads all its 50 Fe. Either way round, B's 50 lands
+// and A loads it back, leaving the planet at 100.
+func TestSetWaypointAfterOtherUnloads(t *testing.T) {
+	for _, aFirst := range []bool{true, false} {
+		l := newTKLab(t, 3)
+		medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
+		pi := l.planet(0, 0, 100)
+		l.g.Planets[pi].Surface[Ironium] = 100
+		ai := l.fleet(0, pi, 0, Stack{Design: medium, Count: 1})
+		bi := l.fleet(0, pi, 0, Stack{Design: medium, Count: 1})
+		l.g.Fleets[ai].Number, l.g.Fleets[bi].Number = 1, 2
+		if !aFirst {
+			l.g.Fleets[ai].Number, l.g.Fleets[bi].Number = 2, 1
+		}
+		a, b := &l.g.Fleets[ai], &l.g.Fleets[bi]
+		a.Task = Task{Kind: TaskTransport}
+		a.Task.Transport[Ironium] = Transport{SetWaypoint, 100}
+		b.Cargo.Minerals[Ironium] = 50
+		b.Task = Task{Kind: TaskTransport}
+		b.Task.Transport[Ironium] = Transport{Action: UnloadAll}
+		l.g.unloadPhase(l.g.phaseStart())
+		l.g.loadPass(false)
+		a, b = &l.g.Fleets[ai], &l.g.Fleets[bi]
+		if a.Cargo.Minerals[Ironium] != 50 || b.Cargo.Minerals[Ironium] != 0 || l.g.Planets[pi].Surface[Ironium] != 100 {
+			t.Errorf("A first %v: A holds %d, B %d, planet %d; want 50, 0 and 100", aFirst, a.Cargo.Minerals[Ironium], b.Cargo.Minerals[Ironium], l.g.Planets[pi].Surface[Ironium])
+		}
+		if a.Task.Kind != TaskNone || b.Task.Kind != TaskNone {
+			t.Errorf("A first %v: tasks %+v and %+v, want none", aFirst, a.Task, b.Task)
+		}
+	}
+}
+
+// Colonists at salvage: a set amount already met clears in the load
+// pass, though nothing loads colonists there; one that would load waits
+// (ASSUMPTION T6, T10, T11).
+func TestSetColonistsAtSalvage(t *testing.T) {
+	for _, tt := range []struct {
+		v, held int
+		left    bool
+	}{{10, 10, false}, {20, 10, true}} {
+		task := Task{Kind: TaskTransport}
+		task.Transport[CargoColonists] = Transport{SetAmount, tt.v}
+		l := salvageLab(t, Salvage{Minerals: Minerals{50, 0, 0}, Steps: 10}, task)
+		l.g.Fleets[0].Cargo.Colonists = tt.held
+		l.g.unloadPhase([]bool{})
+		l.g.loadPass(false)
+		f := l.g.Fleets[0]
+		if left := f.Task.Kind == TaskTransport; left != tt.left || f.Cargo.Colonists != tt.held {
+			t.Errorf("set amount %d with %d: task %+v, colonists %d; want left %v, %d", tt.v, tt.held, f.Task, f.Cargo.Colonists, tt.left, tt.held)
+		}
+	}
+}
