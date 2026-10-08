@@ -64,14 +64,15 @@ type wormholeRecord struct {
 	Year      int          `json:"year"`
 	Pos       engine.Point `json:"pos"`
 	Stability int          `json:"stability"`
+	Years     int          `json:"years"`
 }
 
 // wormholeHistory is every player's wormhole sightings, by player and
 // end id.
 type wormholeHistory []map[int]wormholeRecord
 
-// record adds the ends each view saw this year, with their position and
-// stability now. year is the year the views describe.
+// record adds the ends each view saw this year, with their position,
+// stability and years since the last jump now. year is the year the views describe.
 func (h wormholeHistory) record(year int, views []engine.PlayerView, sp *objects.Space) wormholeHistory {
 	for len(h) < len(views) {
 		h = append(h, map[int]wormholeRecord{})
@@ -86,7 +87,7 @@ func (h wormholeHistory) record(year int, views []engine.PlayerView, sp *objects
 				continue
 			}
 			e := sp.Wormholes[wi].Ends[ei]
-			h[v][id] = wormholeRecord{End: id, Year: year, Pos: e.Pos, Stability: objects.JumpChance(e)}
+			h[v][id] = wormholeRecord{End: id, Year: year, Pos: e.Pos, Stability: objects.JumpChance(e), Years: e.Years}
 		}
 	}
 	return h

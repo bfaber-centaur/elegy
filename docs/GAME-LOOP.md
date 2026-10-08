@@ -70,7 +70,7 @@ Computer opponents, scripted players and front ends all implement
 | `Events`, `Orders` | the previous year's messages to the player, and the outcome of each of its orders | engine `TurnResult` |
 | `History` | for every planet ever reported to the player, the latest report and the year it describes; lost colonies stay recorded as the player's own | AI.md §1 "What it sees" (CONFIRMED AI-12); ASSUMPTION G1 below |
 | `Universe` | every planet's id, position and name index, seen or not | AI.md §1 (CONFIRMED AI-12: colonizers flown to never-scanned planets); ai/rototill.md §3 (MEASURED AI-17: scouts to the nearest never-seen planet) |
-| `Wormholes` | each wormhole end the player still knows, as last seen: the year, position and the stability its report named then; its destination when the player knows it and sees the other end this year | OBJECTS.md "Jiggle", "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); SCANNING.md (a known end beyond normal range is not seen); ASSUMPTION G2 below |
+| `Wormholes` | for a computer player, each wormhole end it saw this year; for a human player, also each end it still knows but did not see, as last seen. Each shows the year seen, position, the stability its report named and the years since its last jump, plus its destination when the player knows it and sees the other end this year | SCANNING.md "Space objects" (MEASURED SC-038: what a sighting shows; nothing carries over in computer players' history); OBJECTS.md "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); ASSUMPTION G2 below |
 | `KnownDesigns` | other players' designs the player knows: hull and mass for every design seen; the whole design, parts included, once shown in full (a War Monger viewer, or a battle the player took part in); the last year seen | SCANNING.md "Designs" (CONFIRMED SC-001..SC-023, SC-015, SC-031, SC-036; MEASURED SC-037, computer players' files, for what later years keep); ASSUMPTION G3 below |
 | `Objects` | the minefields, packets, Mystery Traders and salvage the player saw this year: owner, number and position; a minefield's mine count and kind; the detonate setting of its own fields and the warp, destination and cargo of its own packets only | SCANNING.md "Space objects" (CONFIRMED, who sees what); ASSUMPTION V4 in OBJECTS-STATUS.md (what a sighting shows; `objects.Space.Report`) |
 | `Rand` | the game's stream, during `Advance` only | AI.md §1 "Random numbers" |
@@ -87,10 +87,15 @@ Not in the report:
 record, whatever its level. stars-elegy does not say how the original
 merges a lower-level report into its history.
 
-**ASSUMPTION G2:** a known wormhole end the player did not see this
-year is reported with its last-seen position and stability, until a jump
-makes the player forget it. stars-elegy gives no rule for how the
-original displays such an end.
+A computer player's report lists only the wormhole ends it saw this
+year. In computer players' history files, nothing about an object
+carries over after it leaves view (SCANNING.md "Space objects", MEASURED
+SC-038).
+
+**ASSUMPTION G2:** a human player's report also lists a known wormhole
+end the player did not see this year, with its last-seen values, until a
+jump makes the player forget it. The original's client writes a human
+player's history, and what it keeps is UNRESOLVED (SC-038).
 
 A known design is reported as it was shown. An owner can put a new
 design in an unused slot under the same index (`engine.DesignOrder`),
@@ -125,7 +130,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 5, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 6, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:

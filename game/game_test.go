@@ -60,9 +60,11 @@ func TestReportUniverse(t *testing.T) {
 	}
 }
 
-// TestReportWormholesLastSeen: a known end the player does not see this
-// year keeps the position and stability it had when last seen (ASSUMPTION
-// G2), even after it moved and aged; a forgotten end leaves the report;
+// TestReportWormholesLastSeen: a sighting shows the end's position,
+// stability and years since its last jump (MEASURED SC-038). A human
+// player's known end not seen this year keeps the values it had when last
+// seen (ASSUMPTION G2), even after it moved and aged; a computer player's
+// report drops it (MEASURED SC-038). A forgotten end leaves the report;
 // another player sees nothing.
 func TestReportWormholesLastSeen(t *testing.T) {
 	g := newSmoke(t, smokeSeed)
@@ -75,9 +77,10 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	// 2400: player 0 sees end 0 and its partner, and knows where it leads.
 	e.MarkKnown(0)
 	e.DestKnown = []bool{true}
+	e.Years = 5
 	g.views[0].Objects.Wormholes = []int{objects.WormholeEndID(0, 0), objects.WormholeEndID(0, 1)}
 	g.wormholes = wormholeHistory(nil).record(2400, g.views, sp)
-	seenPos, seenStab := e.Pos, objects.JumpChance(*e)
+	seenPos, seenStab, seenYears := e.Pos, objects.JumpChance(*e), e.Years
 
 	end0 := func(r Report) *KnownWormholeEnd {
 		for i := range r.Wormholes {
@@ -89,7 +92,7 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	}
 	r, _ := g.Report(0)
 	k := end0(r)
-	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Destination == nil || *k.Destination != partner {
+	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Years != seenYears || k.Destination == nil || *k.Destination != partner {
 		t.Fatalf("seen end: %+v", k)
 	}
 
@@ -104,9 +107,16 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	}
 	r, _ = g.Report(0)
 	k = end0(r)
-	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Destination != nil {
-		t.Fatalf("unseen end: %+v; want the 2400 sighting at %v, stability %d, no destination", k, seenPos, seenStab)
+	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Years != seenYears || k.Destination != nil {
+		t.Fatalf("unseen end: %+v; want the 2400 sighting at %v, stability %d, %d years, no destination", k, seenPos, seenStab, seenYears)
 	}
+	// The same player as a computer player is not told about the end it
+	// does not see this year.
+	g.State.Players[0].Computer = true
+	if r, _ = g.Report(0); end0(r) != nil {
+		t.Errorf("computer player's report keeps an end out of sight: %+v", end0(r))
+	}
+	g.State.Players[0].Computer = false
 	if r1, _ := g.Report(1); end0(r1) != nil {
 		t.Error("player 1 sees an end only player 0 knows")
 	}
