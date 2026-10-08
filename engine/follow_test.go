@@ -235,3 +235,53 @@ func TestFollowNewFleetName(t *testing.T) {
 		t.Errorf("follow messages %v, want 0x137 for two fleets", got)
 	}
 }
+
+func TestFollowOrderReplacesOrders(t *testing.T) {
+	// ORDERS.md "Waypoint 0 aimed at a fleet": the order is a waypoint-0
+	// change "which leaves the fleet with that one waypoint", so the
+	// fleet's earlier waypoints go and waypoint 0's task is the order's.
+	// With an idle leader the follower therefore stays put (0x138).
+	l := followLab(t, 2)
+	l.g.Fleets[1].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+	l.g.Fleets[1].Task = Task{Kind: TaskPatrol, Range: 50}
+	order := Task{Kind: TaskTransport}
+	order.Transport[Ironium] = Transport{LoadExactly, 10}
+	g := withRules(l.g)
+	a := ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: 1, Task: order}}}}, []int{0})
+	if a.Results[0].Err != nil {
+		t.Fatal(a.Results[0].Err)
+	}
+	if f := g.Fleets[1]; f.Waypoints != nil || !reflect.DeepEqual(f.Task, order) {
+		t.Errorf("waypoints %v task %+v, want none and %+v", f.Waypoints, f.Task, order)
+	}
+	r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1})
+	if f := followed(t, r.Game, 2); f.Pos != (Point{1200, 1200}) {
+		t.Errorf("follower of an idle leader moved to %v", f.Pos)
+	}
+	// An invalid task rejects the order, as in a waypoint order.
+	bad := Task{Kind: TaskTransport}
+	bad.Transport[Ironium] = Transport{LoadExactly, -1}
+	g = withRules(followLab(t, 2).g)
+	a = ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: 1, Task: bad}}}}, []int{0})
+	if !errors.Is(a.Results[0].Err, ErrOutOfRange) || a.follows[2] != 0 {
+		t.Errorf("negative transport amount: %v, follows %v; want rejected", a.Results[0].Err, a.follows)
+	}
+}
+
+func TestFollowAnotherPlayersFleet(t *testing.T) {
+	// KERNEL.md step 1a.3 names "another fleet", whoever owns it: player
+	// 0's fleet follows player 1's and copies its next waypoint.
+	l := followLab(t, 2)
+	l.g.Fleets[0].Owner = 1
+	leg := Waypoint{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}
+	l.g.Fleets[0].Waypoints = []Waypoint{leg}
+	g := withRules(l.g)
+	a := ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: 1}}}}, []int{0})
+	if a.Results[0].Err != nil {
+		t.Fatal(a.Results[0].Err)
+	}
+	following, _ := g.follow(a.follows)
+	if !following[2] || !reflect.DeepEqual(g.Fleets[1].Waypoints, []Waypoint{leg}) {
+		t.Errorf("following %v waypoints %v, want fleet 2 with %v", following, g.Fleets[1].Waypoints, leg)
+	}
+}
