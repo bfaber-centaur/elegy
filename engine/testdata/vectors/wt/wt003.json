@@ -1897,14 +1897,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Multi Cargo Pod: bit 0x0001 added; tech unchanged; message 0x10b"
@@ -1921,14 +1923,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Multi Function Pod: bit 0x0002 added; tech unchanged; message 0x10b"
@@ -1945,14 +1949,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 2,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Langston Shell: bit 0x0004 added; tech unchanged; message 0x10b"
@@ -1969,14 +1975,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 3,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Mega Poly Shell: bit 0x0008 added; tech unchanged; message 0x10b"
@@ -1993,14 +2001,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 4,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Alien Miner: bit 0x0010 added; tech unchanged; message 0x10b"
@@ -2017,14 +2027,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 5,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Hush-a-Boom: bit 0x0020 added; tech unchanged; message 0x10b"
@@ -2041,14 +2053,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 6,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Anti Matter Torpedo: bit 0x0040 added; tech unchanged; message 0x10b"
@@ -2065,14 +2079,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 7,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Multi Contained Munition: bit 0x0080 added; tech unchanged; message 0x10b"
@@ -2089,14 +2105,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 8,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 268,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Mini Morph: bit 0x0100 added; tech unchanged; message 0x10c"
@@ -2113,14 +2131,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 9,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Enigma Pulsar: bit 0x0200 added; tech unchanged; message 0x10b"
@@ -2137,14 +2157,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 10,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 271,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Genesis Device: bit 0x0400 added; tech unchanged; message 0x10f"
@@ -2161,14 +2183,16 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 11,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 0,
      "message_id": 267,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "part Jump Gate: bit 0x0800 added; tech unchanged; message 0x10b",
@@ -2206,7 +2230,8 @@
        "Jump Gate"
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -2221,7 +2246,8 @@
        "biotechnology": 26
       }
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "player 0 mt 0x0fff, tech 26 everywhere",
@@ -2244,13 +2270,15 @@
      "kind": "fleet_gone",
      "owner": 1,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "no_new_fleets",
      "owner": 1,
      "observed_new": [],
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -2258,7 +2286,8 @@
      "equals": {
       "ship_design_count": 16
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -2266,14 +2295,16 @@
      "equals": {
       "mystery_trader_items": []
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 1,
      "message_id": 336,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "fleet consumed; no new fleet or design; mt unchanged; message 0x150",

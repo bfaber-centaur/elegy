@@ -1571,7 +1571,8 @@
       "x": 1380,
       "y": 1300
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "sample",
