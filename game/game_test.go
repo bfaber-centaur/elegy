@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -114,6 +115,82 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	e.Known = nil
 	if r, _ = g.Report(0); end0(r) != nil {
 		t.Error("a forgotten end is still reported")
+	}
+}
+
+// Another player's design is reported with hull and mass when seen
+// partially, with all its parts once seen in full, and stays known in
+// later years out of sight (ASSUMPTION G3), through a save and load.
+func TestReportKnownDesigns(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	theirs := -1
+	for _, s := range g.State.DesignSlots {
+		if s.Owner == 1 && s.Starbase {
+			theirs = s.Design
+			break
+		}
+	}
+	other := -1
+	for _, s := range g.State.DesignSlots {
+		if s.Owner == 2 && !s.Starbase {
+			other = s.Design
+			break
+		}
+	}
+	if theirs < 0 || other < 0 {
+		t.Fatal("no designs of players 1 and 2")
+	}
+	known := func(r Report, d int) *KnownDesign {
+		for i := range r.KnownDesigns {
+			if r.KnownDesigns[i].Index == d {
+				return &r.KnownDesigns[i]
+			}
+		}
+		return nil
+	}
+	want := g.State.Designs[theirs]
+
+	// 2400: player 0 sees player 1's starbase partially.
+	g.views[0].Designs = []engine.DesignSighting{{Design: theirs, Hull: want.Hull.Name, Mass: want.Mass}}
+	g.designs = designHistory(nil).record(2400, g.views)
+	r, _ := g.Report(0)
+	k := known(r, theirs)
+	if k == nil || k.Full || k.Design != nil || k.Hull != want.Hull.Name || k.Mass != want.Mass || k.Year != 2400 {
+		t.Fatalf("partial sighting: %+v", k)
+	}
+
+	// 2401: a battle shows it in full, and player 2's design partially.
+	g.State.Year = 2401
+	g.views[0].Designs = []engine.DesignSighting{{Design: theirs, Full: true}, {Design: other}}
+	g.designs = g.designs.clone().record(2401, g.views)
+	// 2402: out of sight.
+	g.State.Year = 2402
+	g.views[0].Designs = nil
+	g.designs = g.designs.clone().record(2402, g.views)
+
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range []*Game{g, loaded} {
+		r, _ = x.Report(0)
+		k = known(r, theirs)
+		if k == nil || !k.Full || k.Year != 2401 || k.Design == nil || !reflect.DeepEqual(*k.Design, want) {
+			t.Fatalf("full design out of sight: %+v", k)
+		}
+		if o := known(r, other); o == nil || o.Full || o.Design != nil {
+			t.Fatalf("partial design: %+v", o)
+		}
+		if len(r.KnownDesigns) != 2 {
+			t.Fatalf("%d known designs, want 2", len(r.KnownDesigns))
+		}
+		if r1, _ := x.Report(1); len(r1.KnownDesigns) != 0 {
+			t.Fatalf("player 1 knows %+v, which only player 0 saw", r1.KnownDesigns)
+		}
 	}
 }
 

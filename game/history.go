@@ -119,3 +119,58 @@ func (h wormholeHistory) clone() wormholeHistory {
 	}
 	return out
 }
+
+// designRecord is what a player knows of another player's design: the
+// last year a view showed it, and whether any view showed it in full.
+type designRecord struct {
+	Design int  `json:"design"`
+	Year   int  `json:"year"`
+	Full   bool `json:"full,omitempty"`
+}
+
+// designHistory is every player's knowledge of other players' designs,
+// by player and design index.
+type designHistory []map[int]designRecord
+
+// record adds the designs each view showed this year. A design once seen
+// in full stays known in full (ASSUMPTION G3). year is the year the views
+// describe.
+func (h designHistory) record(year int, views []engine.PlayerView) designHistory {
+	for len(h) < len(views) {
+		h = append(h, map[int]designRecord{})
+	}
+	for v, view := range views {
+		for _, d := range view.Designs {
+			h[v][d.Design] = designRecord{Design: d.Design, Year: year, Full: d.Full || h[v][d.Design].Full}
+		}
+	}
+	return h
+}
+
+// list is player's known designs in design index order.
+func (h designHistory) list(player int) []designRecord {
+	if player >= len(h) {
+		return nil
+	}
+	ids := make([]int, 0, len(h[player]))
+	for id := range h[player] {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+	out := make([]designRecord, len(ids))
+	for i, id := range ids {
+		out[i] = h[player][id]
+	}
+	return out
+}
+
+func (h designHistory) clone() designHistory {
+	out := make(designHistory, len(h))
+	for p, m := range h {
+		out[p] = make(map[int]designRecord, len(m))
+		for id, r := range m {
+			out[p][id] = r
+		}
+	}
+	return out
+}

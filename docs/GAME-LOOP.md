@@ -71,6 +71,7 @@ Computer opponents, scripted players and front ends all implement
 | `History` | for every planet ever reported to the player, the latest report and the year it describes; lost colonies stay recorded as the player's own | AI.md §1 "What it sees" (CONFIRMED AI-12); ASSUMPTION G1 below |
 | `Universe` | every planet's id, position and name index, seen or not | AI.md §1 (CONFIRMED AI-12: colonizers flown to never-scanned planets); ai/rototill.md §3 (MEASURED AI-17: scouts to the nearest never-seen planet) |
 | `Wormholes` | each wormhole end the player still knows, as last seen: the year, position and the stability its report named then; its destination when the player knows it and sees the other end this year | OBJECTS.md "Jiggle", "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); SCANNING.md (a known end beyond normal range is not seen); ASSUMPTION G2 below |
+| `KnownDesigns` | other players' designs the player knows: hull and mass for every design seen; the whole design, parts included, once shown in full (a War Monger viewer, or a battle the player took part in); the last year seen | SCANNING.md "Designs" (CONFIRMED SC-001..SC-023, SC-015, SC-031, SC-036); ASSUMPTION G3 below |
 | `Rand` | the game's stream, during `Advance` only | AI.md §1 "Random numbers" |
 
 Not in the report:
@@ -90,6 +91,11 @@ year is reported with its last-seen position and stability, until a jump
 makes the player forget it. stars-elegy gives no rule for how the
 original displays such an end.
 
+**ASSUMPTION G3:** a known design stays in the report in later years
+when no view shows it, and a design once shown in full stays known in
+full. stars-elegy says what a player's file holds the year a design is
+revealed, not whether later files keep it.
+
 **ELEGY CHOICE:** a driver's own state between years belongs to the
 driver, not the game. A saved game holds the game, its stream and the
 players' histories. A driver that must survive a save and load rebuilds
@@ -100,7 +106,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 3, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 4, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:
@@ -113,7 +119,7 @@ file formats. It holds:
 - each computer player's level (`Game.ComputerLevel`), so a loaded game
   can run its computer players again;
 - what the last year told each player (views, events, order outcomes,
-  planet histories, wormhole sightings).
+  planet histories, wormhole sightings, known designs).
 
 An order outcome keeps its message and which engine error it wraps, so
 `errors.Is` gives the same answer after a load.
