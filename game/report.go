@@ -131,8 +131,14 @@ type KnownWormholeEnd struct {
 // engine.DesignSighting.Full). Nothing else about a design seen only
 // partially is reported.
 //
+// The record is what the player was shown: an owner may later put a new
+// design in the same unused slot, under the same index
+// (engine.DesignOrder), and the report keeps the old one until a view
+// shows the new one.
+//
 // ASSUMPTION G3: a design stays known, and stays known in full once shown
-// in full, in later years when no view shows it. stars-elegy says what a
+// in full, in later years when no view shows it, and while later
+// sightings show the same design. stars-elegy says what a
 // player's file holds the year a design is revealed, not whether later
 // files keep it.
 type KnownDesign struct {

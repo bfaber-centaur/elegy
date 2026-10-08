@@ -91,9 +91,13 @@ year is reported with its last-seen position and stability, until a jump
 makes the player forget it. stars-elegy gives no rule for how the
 original displays such an end.
 
+A known design is reported as it was shown. An owner can put a new
+design in an unused slot under the same index (`engine.DesignOrder`),
+and the report keeps the old design until a view shows the new one.
+
 **ASSUMPTION G3:** a known design stays in the report in later years
 when no view shows it, and a design once shown in full stays known in
-full. stars-elegy says what a player's file holds the year a design is
+full while later sightings show the same design. stars-elegy says what a player's file holds the year a design is
 revealed, not whether later files keep it.
 
 **ELEGY CHOICE:** a driver's own state between years belongs to the

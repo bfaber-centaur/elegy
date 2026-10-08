@@ -1,6 +1,7 @@
 package game
 
 import (
+	"reflect"
 	"sort"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -120,28 +121,44 @@ func (h wormholeHistory) clone() wormholeHistory {
 	return out
 }
 
-// designRecord is what a player knows of another player's design: the
-// last year a view showed it, and whether any view showed it in full.
+// designRecord is what a player knows of another player's design, as
+// last shown: the year, the hull and mass, and the whole design when the
+// player was shown it in full. It is a snapshot: the owner may later put
+// a new design in the same unused slot, under the same index
+// (engine.DesignOrder), which the player has not seen.
 type designRecord struct {
-	Design int  `json:"design"`
-	Year   int  `json:"year"`
-	Full   bool `json:"full,omitempty"`
+	Design int            `json:"design"`
+	Year   int            `json:"year"`
+	Hull   string         `json:"hull"`
+	Mass   int            `json:"mass"`
+	Full   *engine.Design `json:"full,omitempty"`
 }
 
 // designHistory is every player's knowledge of other players' designs,
 // by player and design index.
 type designHistory []map[int]designRecord
 
-// record adds the designs each view showed this year. A design once seen
-// in full stays known in full (ASSUMPTION G3). year is the year the views
-// describe.
-func (h designHistory) record(year int, views []engine.PlayerView) designHistory {
+// record adds the designs each view showed this year. designs is the
+// game's design list as the views show it. A design once seen in full
+// stays known in full while later sightings show the same design
+// (ASSUMPTION G3); a sighting of a different design under that index
+// replaces the record. year is the year the views describe.
+func (h designHistory) record(year int, views []engine.PlayerView, designs []engine.Design) designHistory {
 	for len(h) < len(views) {
 		h = append(h, map[int]designRecord{})
 	}
 	for v, view := range views {
 		for _, d := range view.Designs {
-			h[v][d.Design] = designRecord{Design: d.Design, Year: year, Full: d.Full || h[v][d.Design].Full}
+			if d.Design < 0 || d.Design >= len(designs) {
+				continue
+			}
+			r := designRecord{Design: d.Design, Year: year, Hull: d.Hull, Mass: d.Mass}
+			cur := designs[d.Design]
+			if old := h[v][d.Design].Full; d.Full || (old != nil && reflect.DeepEqual(*old, cur)) {
+				full := deepCopy(cur)
+				r.Full = &full
+			}
+			h[v][d.Design] = r
 		}
 	}
 	return h
