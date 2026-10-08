@@ -112,7 +112,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 4, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 5, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:
@@ -120,6 +120,9 @@ file formats. It holds:
   `Load` validates;
 - the space objects and race designs (the engine's `Objects` and `Races`)
   and whether terraforming is on;
+- every design slot's creation year and picture
+  (`engine.DesignSlot.Created`, `Picture`; ASSUMPTION B2 for the starting
+  designs: the first year, picture 0);
 - the generator state;
 - the planet name indexes;
 - each computer player's level (`Game.ComputerLevel`), so a loaded game
@@ -238,5 +241,6 @@ must give the same hashes.
 
 ## Not done yet
 
-- Computer players' design creation years and pictures in the save (see
-  above).
+- `ai.Driver` reading its designs' creation years and pictures from
+  `OwnDesign.Slot`, which the save now keeps (save version 5), instead of
+  its own memory (see above).

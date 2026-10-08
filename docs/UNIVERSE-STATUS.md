@@ -169,6 +169,9 @@ Spec gaps to send to stars-elegy (Elegy follows the vectors):
    UG01-E..UG30-E): not in UNIVERSE.md or KERNEL.md.
 5. **ASSUMPTION B1**: built-in race leftover spend (here and
    RACES-STATUS.md).
+   **ASSUMPTION B2**: the starting designs' creation year is the game's
+   first year and their picture 0 (`designs.go`); not in UNIVERSE.md or
+   AI.md.
 6. **PLACEHOLDER** relations with no human player, planet names and
    computer-player names (above).
 
