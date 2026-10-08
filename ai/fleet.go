@@ -5,46 +5,27 @@ import (
 	"github.com/bfaber-centaur/elegy/terraform"
 )
 
-// idealWarp is a fleet's ideal warp (stars-elegy PRODUCTION-LAUNCH.md
-// "Ideal warp of the fleet", CONFIRMED for Long Hump 6 and Quick Jump 5,
-// BINARY-ONLY for other engines; ESTIMATES.md "Fleets" uses the same
-// value): from warp 10, each design in fleet order lowers it.
-//
-// The engine has the same rule unexported; this copy is the planner's
-// until the engine exports one.
-func (v *View) idealWarp(f *engine.Fleet) int {
-	w := 10
-	for _, s := range f.Stacks {
-		d, ok := v.design(s.Design)
-		if !ok || d.Engines == 0 {
-			w = 0
-			continue
-		}
-		fuel := d.Engine.Fuel
-		for w > 0 && fuel[w] >= 121 {
-			w--
-		}
-		name := d.Engine.Name
-		if fuel[w] > 0 && name != "Trans-Galactic Mizer Scoop" && name != "Galaxy Scoop" {
-			switch {
-			case w >= 5 && fuel[w-1] == 0:
-				w--
-			case w >= 6 && fuel[w-2] == 0:
-				w -= 2
-			case w >= 7 && fuel[w-3] == 0:
-				w -= 3
-			}
-		}
-		switch name {
-		case "Interspace-10", "Enigma Pulsar", "Trans-Star 10", "Trans-Galactic Mizer Scoop", "Galaxy Scoop":
-		default:
-			if w == 10 {
-				w = 9
-			}
-		}
+// ships is the fleet as the engine's movement estimates read it
+// (engine.FleetShips): its stacks with the player's own designs, its cargo
+// mass and the player's Improved Fuel Efficiency, under the game's
+// ruleset. A stack whose design the view lacks counts as a design with no
+// engines. The view's ruleset must be valid (Driver.Orders checks it).
+func (v *View) ships(f *engine.Fleet) engine.FleetShips {
+	var stacks []engine.ShipStack
+	for _, st := range f.Stacks {
+		d, _ := v.design(st.Design)
+		stacks = append(stacks, engine.ShipStack{Index: st.Design, Design: d, Count: st.Count})
 	}
-	return w
+	s, err := engine.NewFleetShips(v.Rules, stacks, cargoMass(f.Cargo), v.Self.Race.LRT.ImprovedFuelEfficiency)
+	if err != nil {
+		panic(err)
+	}
+	return s
 }
+
+// idealWarp is a fleet's ideal warp (stars-elegy PRODUCTION-LAUNCH.md
+// "Ideal warp of the fleet"; engine.FleetShips.IdealWarp).
+func (v *View) idealWarp(f *engine.Fleet) int { return v.ships(f).IdealWarp() }
 
 // cargoCapacity is the fleet's cargo hold in kT.
 func (v *View) cargoCapacity(f *engine.Fleet) int {

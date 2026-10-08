@@ -2,6 +2,7 @@ package ai
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -105,6 +106,15 @@ func TestDriversInGameLoop(t *testing.T) {
 func TestDriverNeedsRand(t *testing.T) {
 	if _, err := NewDriver(Rototill, Expert).Orders(game.Report{}); err != ErrNoRand {
 		t.Errorf("error %v, want ErrNoRand", err)
+	}
+}
+
+// A report without a valid ruleset is refused before any planning: the
+// fleet estimates read the game's rules (engine.NewFleetShips).
+func TestDriverNeedsRules(t *testing.T) {
+	r := game.Report{Rand: &script{t: t}}
+	if _, err := NewDriver(Rototill, Expert).Orders(r); !errors.Is(err, engine.ErrNoRuleset) {
+		t.Errorf("error %v, want ErrNoRuleset", err)
 	}
 }
 

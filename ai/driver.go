@@ -41,6 +41,9 @@ func (d *Driver) Orders(r game.Report) ([]engine.Order, error) {
 	if r.Rand == nil {
 		return nil, ErrNoRand
 	}
+	if err := r.Rules.Validate(); err != nil {
+		return nil, fmt.Errorf("ai: %w", err)
+	}
 	v := ViewOf(r, d.Level)
 	var res Result
 	switch d.Personality {
