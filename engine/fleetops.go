@@ -222,6 +222,11 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		switch {
 		case f.Task.Kind == TaskTransport:
 			events = append(events, g.load(f, afterMovement)...)
+		case f.Task.Kind == TaskMerge && f.Task.Fleet == f.ID:
+			// A merge with itself completes, merging nothing
+			// (MESSAGES.md 0x04e (a); FO-03-F). Elegy does not send
+			// 0x04e for a task that ends.
+			f.Task = Task{}
 		case f.Task.Kind == TaskMerge:
 			if ev, ok := g.mergeTask(f, gone); ok {
 				gone[id] = true
@@ -240,11 +245,12 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 // FO-01..07): f joins the target, which keeps its id, if the target is at
 // f's position; otherwise the task is refused and cleared, both fleets
 // unchanged. A target that is gone, has already merged away, or is another
-// player's fleet is refused the same way (BINARY-ONLY). It reports whether
-// f merged.
+// player's fleet is refused the same way (BINARY-ONLY). A merge with
+// itself is not refused: loadPass completes it. It reports whether f
+// merged.
 func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 	t := g.fleetIndex(f.Task.Fleet)
-	if t < 0 || gone[f.Task.Fleet] || f.Task.Fleet == f.ID || g.Fleets[t].Owner != f.Owner || g.Fleets[t].Pos != f.Pos {
+	if t < 0 || gone[f.Task.Fleet] || g.Fleets[t].Owner != f.Owner || g.Fleets[t].Pos != f.Pos {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}

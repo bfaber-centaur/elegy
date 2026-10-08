@@ -47,6 +47,11 @@ func followEvents(events []Event) map[int][]EventKind {
 	return got
 }
 
+// doneFor is player's 0x137 for fleet id.
+func doneFor(player, id int) Event {
+	return Event{Kind: EventFollowDone, Player: player, Planet: -1, Fleet: id}
+}
+
 // followed is fleet id in g.
 func followed(t *testing.T, g Game, id int) Fleet {
 	t.Helper()
@@ -68,11 +73,11 @@ func TestFollowCopiesLeaderWaypoint(t *testing.T) {
 	if a.Results[0].Err != nil {
 		t.Fatal(a.Results[0].Err)
 	}
-	following, ev := g.follow(a.follows)
+	done, ev := g.follow(a.follows)
 	want := leg
 	want.Task = Task{Kind: TaskNone}
-	if got := g.Fleets[1].Waypoints; !reflect.DeepEqual(got, []Waypoint{want}) || len(ev) != 0 || !following[2] {
-		t.Errorf("waypoints %v events %v following %v, want %v, none, fleet 2", got, ev, following, want)
+	if got := g.Fleets[1].Waypoints; !reflect.DeepEqual(got, []Waypoint{want}) || len(ev) != 0 || !reflect.DeepEqual(done, []Event{doneFor(0, 2)}) {
+		t.Errorf("waypoints %v events %v done %v, want %v, none, fleet 2", got, ev, done, want)
 	}
 }
 
@@ -146,7 +151,7 @@ func TestFollowChains(t *testing.T) {
 	// each follow the next and fleet 10 follows fleet 11, which has a
 	// waypoint: in fleet order each pass resolves one more link, so the 8
 	// passes reach fleets 10 down to 3, and fleets 1 and 2 are left
-	// unresolved, unmoved, with no 0x138 and with 0x137 (ASSUMPTION F3).
+	// unresolved, unmoved, with no 0x138 and no 0x137 (ASSUMPTION F3).
 	l := followLab(t, 11)
 	l.g.Fleets[10].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
 	var orders []Order
@@ -157,14 +162,16 @@ func TestFollowChains(t *testing.T) {
 	lead := followed(t, r.Game, 11)
 	done := map[int][]EventKind{}
 	for id := 1; id <= 10; id++ {
-		done[id] = []EventKind{EventFollowDone}
+		if id >= 3 {
+			done[id] = []EventKind{EventFollowDone}
+		}
 		f := followed(t, r.Game, id)
 		if moved := f.Pos == lead.Pos; moved != (id >= 3) || f.Waypoints != nil {
 			t.Errorf("fleet %d at %v with %v; leader at %v; want moved %v", id, f.Pos, f.Waypoints, lead.Pos, id >= 3)
 		}
 	}
 	if got := followEvents(r.Events); !reflect.DeepEqual(got, done) {
-		t.Errorf("follow messages %v, want 0x137 for fleets 1..10", got)
+		t.Errorf("follow messages %v, want 0x137 for fleets 3..10", got)
 	}
 	// The other way round, fleet k following fleet k−1 and fleet 1 the
 	// leader, one pass resolves the whole chain (ASSUMPTION F2).
@@ -185,8 +192,8 @@ func TestFollowChains(t *testing.T) {
 
 func TestFollowCycle(t *testing.T) {
 	// MESSAGES.md 0x138: circular chains get no message. Fleets 1 and 2
-	// following each other never resolve: no waypoint, no move, no 0x138,
-	// and 0x137 at the end of movement (ASSUMPTION F3).
+	// following each other never resolve: no waypoint, no move, no 0x138
+	// and no 0x137 (ASSUMPTION F3 for two or more fleets).
 	l := followLab(t, 2)
 	r := followTurn(t, l, FollowOrder{Fleet: 1, Leader: 2}, FollowOrder{Fleet: 2, Leader: 1})
 	for id := 1; id <= 2; id++ {
@@ -194,9 +201,8 @@ func TestFollowCycle(t *testing.T) {
 			t.Errorf("fleet %d at %v with %v, want unmoved with none", id, f.Pos, f.Waypoints)
 		}
 	}
-	want := map[int][]EventKind{1: {EventFollowDone}, 2: {EventFollowDone}}
-	if got := followEvents(r.Events); !reflect.DeepEqual(got, want) {
-		t.Errorf("follow messages %v, want %v", got, want)
+	if got := followEvents(r.Events); len(got) != 0 {
+		t.Errorf("follow messages %v, want none", got)
 	}
 }
 
@@ -280,8 +286,126 @@ func TestFollowAnotherPlayersFleet(t *testing.T) {
 	if a.Results[0].Err != nil {
 		t.Fatal(a.Results[0].Err)
 	}
-	following, _ := g.follow(a.follows)
-	if !following[2] || !reflect.DeepEqual(g.Fleets[1].Waypoints, []Waypoint{leg}) {
-		t.Errorf("following %v waypoints %v, want fleet 2 with %v", following, g.Fleets[1].Waypoints, leg)
+	done, _ := g.follow(a.follows)
+	if !reflect.DeepEqual(done, []Event{doneFor(0, 2)}) || !reflect.DeepEqual(g.Fleets[1].Waypoints, []Waypoint{leg}) {
+		t.Errorf("done %v waypoints %v, want fleet 2 with %v", done, g.Fleets[1].Waypoints, leg)
+	}
+}
+
+func TestFollowMergedAway(t *testing.T) {
+	// MESSAGES.md 0x137 (CONFIRMED fo/fo03 G): a follower whose merge task
+	// targets its moving leader merges into it before movement and no
+	// longer exists, and still gets 0x137 for its own id. The leader
+	// moves with the follower's ships.
+	l := followLab(t, 2)
+	leg := Waypoint{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}
+	l.g.Fleets[0].Waypoints = []Waypoint{leg}
+	r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}})
+	if i := r.Game.fleetIndex(2); i >= 0 {
+		t.Fatalf("follower still there: %+v", r.Game.Fleets[i])
+	}
+	if lead := followed(t, r.Game, 1); lead.Pos == (Point{1200, 1200}) || lead.Stacks[0].Count != 2 {
+		t.Errorf("leader at %v with %v, want moved with both ships", lead.Pos, lead.Stacks)
+	}
+	var done []Event
+	for _, e := range r.Events {
+		if e.Kind == EventFollowDone || e.Kind == EventFollowNoLeader {
+			done = append(done, e)
+		}
+	}
+	if !reflect.DeepEqual(done, []Event{doneFor(0, 2)}) {
+		t.Errorf("follow messages %v, want 0x137 for fleet 2", done)
+	}
+}
+
+func TestFollowLeaderElsewhere(t *testing.T) {
+	// FO-03-F (MESSAGES.md 0x138, ORDERS.md "Waypoint 0 aimed at a
+	// fleet"; outcome CONFIRMED, re-choice BINARY-ONLY): a follower with a
+	// merge task aimed at an idle leader 195 ly away is re-aimed at itself,
+	// the only fleet of the leader's owner at its position. It does not
+	// move or merge, gets no 0x138 or 0x137, and its merge with itself
+	// completes, clearing the task.
+	l := followLab(t, 2)
+	l.g.Fleets[0].Pos = Point{1395, 1200}
+	r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}})
+	f, lead := followed(t, r.Game, 2), followed(t, r.Game, 1)
+	if f.Pos != (Point{1200, 1200}) || f.Waypoints != nil || f.Task != (Task{}) || f.Stacks[0].Count != 1 {
+		t.Errorf("follower %+v, want unmoved, unmerged, no waypoints or task", f)
+	}
+	if lead.Pos != (Point{1395, 1200}) || lead.Stacks[0].Count != 1 {
+		t.Errorf("leader %+v, want unmoved and unmerged", lead)
+	}
+	for _, e := range r.Events {
+		if e.Fleet == 2 && e.Kind != EventFleetArrived {
+			t.Errorf("follower message %v, want none (0x04e is not sent by Elegy)", e)
+		}
+	}
+	// A leader elsewhere that has orders is not followed either.
+	l = followLab(t, 2)
+	l.g.Fleets[0].Pos = Point{1395, 1200}
+	l.g.Fleets[0].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+	r = followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1})
+	if f := followed(t, r.Game, 2); f.Pos != (Point{1200, 1200}) {
+		t.Errorf("follower of a distant moving leader moved to %v", f.Pos)
+	}
+	if got := followEvents(r.Events); len(got) != 0 {
+		t.Errorf("follow messages %v, want none", got)
+	}
+}
+
+func TestFollowLeaderReChosen(t *testing.T) {
+	// KERNEL.md step 1a.3 (BINARY-ONLY): a leader elsewhere is replaced by
+	// a fleet of the leader's owner at the follower's position, the first
+	// in fleet order (ASSUMPTION F5). Fleet 4 is aimed at fleet 1, which is
+	// elsewhere; fleets 2 and 3 are at fleet 4's position, and fleet 2,
+	// first, has a waypoint, so fleet 4 copies it.
+	l := followLab(t, 4)
+	l.g.Fleets[0].Pos = Point{1395, 1200}
+	l.g.Fleets[0].Waypoints = []Waypoint{{Pos: Point{1500, 1200}, Warp: 5, Target: TargetSpace}}
+	mine := Waypoint{Pos: Point{1200, 1300}, Warp: 5, Target: TargetSpace}
+	l.g.Fleets[1].Waypoints = []Waypoint{mine}
+	l.g.Fleets[2].Waypoints = []Waypoint{{Pos: Point{1100, 1200}, Warp: 5, Target: TargetSpace}}
+	g := withRules(l.g)
+	a := ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 4, Leader: 1}}}}, []int{0})
+	if a.Results[0].Err != nil {
+		t.Fatal(a.Results[0].Err)
+	}
+	done, ev := g.follow(a.follows)
+	if !reflect.DeepEqual(g.Fleets[3].Waypoints, []Waypoint{mine}) || len(ev) != 0 || !reflect.DeepEqual(done, []Event{doneFor(0, 4)}) {
+		t.Errorf("waypoints %v events %v done %v, want %v, none, fleet 4", g.Fleets[3].Waypoints, ev, done, mine)
+	}
+	// A merge task aimed at the old leader is re-aimed with it.
+	g = withRules(l.g)
+	a = ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 4, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}}}}}, []int{0})
+	g.follow(a.follows)
+	if got := g.Fleets[3].Task; got != (Task{Kind: TaskMerge, Fleet: 2}) {
+		t.Errorf("task %+v, want merge with fleet 2", got)
+	}
+	// A distant leader of another player with no fleet at the follower's
+	// position: treated as gone, 0x138 (ASSUMPTION F6).
+	l = followLab(t, 2)
+	l.g.Fleets[0].Owner = 1
+	l.g.Fleets[0].Pos = Point{1395, 1200}
+	l.g.Fleets[0].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+	g = withRules(l.g)
+	a = ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: 1, Task: Task{Kind: TaskMerge, Fleet: 1}}}}}, []int{0})
+	done, ev = g.follow(a.follows)
+	if want := []Event{{Kind: EventFollowNoLeader, Player: 0, Planet: -1, Fleet: 2}}; !reflect.DeepEqual(ev, want) || done != nil || g.Fleets[1].Task.Fleet != 1 {
+		t.Errorf("events %v done %v task %+v, want %v, none, merge with fleet 1", ev, done, g.Fleets[1].Task, want)
+	}
+}
+
+func TestFollowDoneInFleetOrder(t *testing.T) {
+	// MESSAGES.md "Order within movement": fleets in number order, then
+	// 0x137 once every fleet has moved. Fleets 3 and 2 sit in that order
+	// in the fleet list; their 0x137 still come in fleet order.
+	l := followLab(t, 3)
+	l.g.Fleets[0].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+	l.g.Fleets[1], l.g.Fleets[2] = l.g.Fleets[2], l.g.Fleets[1]
+	g := withRules(l.g)
+	a := ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 3, Leader: 1}, FollowOrder{Fleet: 2, Leader: 1}}}}, []int{0})
+	done, _ := g.follow(a.follows)
+	if want := []Event{doneFor(0, 2), doneFor(0, 3)}; !reflect.DeepEqual(done, want) {
+		t.Errorf("0x137 %v, want %v", done, want)
 	}
 }
