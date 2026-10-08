@@ -145,11 +145,55 @@ this year as stationary), and the route task on arrival. Packet items
 need `Game.Objects` and terraform items `Game.Terraform`; without them,
 and in `RunProduction`, they stop the queue.
 
-## Not modelled
+## Open items for the next owner
 
-- cargo to deep space (jettison: refused, ORDERS.md "Deep-space jettison");
-- the binary's separate queued cross-player credit routine, which no
-  legal order is known to reach (ORDERS.md, stars-elegy #87:
-  UNRESOLVED);
-- Mystery Trader items (the player owns none), and the minefield detonate
-  order;
+A durable list as of the orders lane's last PR. Each item names what a
+successor needs before it can change.
+
+### Orders Elegy does not implement
+
+- **Lay-mines and remote-mining waypoint tasks.** The kernel models both
+  (`TaskLayMines`, `TaskRemoteMine`), but `validTask` still refuses a
+  waypoint order carrying either with `ErrNotModelled` (L6). Accepting
+  them needs whatever order-time checks OBJECTS.md "Laying" and KERNEL.md
+  "Remote mining" give (or a labelled choice where they give none), plus
+  the duration in `Task.Years`.
+- **Minefield detonate** (`DetonateOrder`): always `ErrNotModelled`.
+  ORDERS.md's rule (own minefield of a kind that can detonate) can be
+  applied once a minefield is reachable through `Game.Objects`.
+- **Mystery Trader items**: no order reaches them (the player owns none).
+- **The queued cross-player credit routine**: no legal order is known to
+  reach it (ORDERS.md, stars-elegy #87, UNRESOLVED HYPOTHESIS).
+- **Production side, not orders**: the Alternate Reality remote-mining
+  task on a new fleet, the "did not move" mark (GenerateTurn must not
+  mark a fleet built this year as stationary), and the route task on
+  arrival. Packet items need `Game.Objects` and terraform items
+  `Game.Terraform`; without them, and in `RunProduction`, they stop the
+  queue.
+
+### Orders Elegy refuses on purpose
+
+- **Cargo to deep space (jettison)**: refused under ORDERS.md "Deep-space
+  jettison" (Elegy's chosen rule; settled, no open question).
+
+### Labelled choices
+
+Every Elegy choice is in the tables above: L2, L4, L6, L7, L11, L14–L16,
+L18–L23 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
+`ASSUMPTION` in the code. L1, L3, L5, L8–L10, L12 and L17 are
+settled by the specs (L13 was never used).
+
+### Open questions for stars-elegy
+
+- L22: which ships of a damaged stack a split or ship move takes, and
+  how the damage divides.
+- L23: the order of the two directions in one ship move, and whether an
+  emptied fleet is removed at once.
+- L20 / L21: the new fleet's number, the 512-fleet case, its repeat flag
+  and name on a split.
+- L19: whether a packet speed outside 4..19 can be stored.
+- P6: a packet destination that names no planet.
+- P7: the Auto Alchemy prefix before a removed packet item.
+- The two stack caps: the merge order keeps 32766 per design (ORDERS.md
+  "Merge order", BINARY-ONLY) while a ship move keeps 32765 (MEASURED CO-06); a case
+  checking the split path at the cap would confirm both stand.
