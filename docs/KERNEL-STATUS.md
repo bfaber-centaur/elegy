@@ -410,9 +410,9 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
   "Est. fuel usage", and `sample` mismatches (155): those client
   estimates are not modelled, and one stream's random outcome is never a
   failure (above). The two fleet estimates are compared
-  (`Game.EstRange`, `Game.EstFuelUsage`; ESTIMATES.md, CONFIRMED ES-001):
-  ES-001's 23 ranges and 21 fuel readings and ES-002's 18 fuel readings
-  all pass.
+  (`Game.EstRange`, `Game.EstFuelUsage`; ESTIMATES.md): ES-001's 23
+  ranges and 21 fuel readings and ES-002's 18 fuel readings all pass,
+  61 of them CONFIRMED and ES-002-F07-w1 MEASURED.
 - `view` of `other_players` (96), `player` (56) and `design` (4), and
   the view fields `population_estimate`, `defense_estimate`, `heading`,
   `mass_shown` and `environment_visible`: not compared yet.
