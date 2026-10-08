@@ -43,6 +43,9 @@ type View struct {
 	Wormholes []Wormhole
 	// PRT is the primary racial trait of other players, where known.
 	PRT map[int]engine.PRT
+	// Foreign are other players' designs the player has been shown in
+	// full, by design index (game.Report.KnownDesigns with Full set).
+	Foreign map[int]engine.Design
 }
 
 // Design is one of the player's designs.
