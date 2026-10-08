@@ -580,6 +580,20 @@ type SlotFill struct {
 // (COMPONENTS.md "Hull"). Mass is the hull's plus every part's; fuel and
 // cargo capacity are the hull's plus those of its parts.
 func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error) {
+	return c.newDesign(name, hull, fills, true)
+}
+
+// newDesign is NewDesign; with kinds false a part of a kind its slot does
+// not take is kept. Some oracle states were written directly with such
+// designs (CB-009, CB-010: a Beam Deflector in a shield-or-armor slot);
+// the parity harness loads those.
+//
+// ASSUMPTION K10: the original keeps and uses such a part. TAKEOVER.md
+// "Design parts dropped when the year is generated" says parity is "keep
+// and use" for parts beyond the owner's tech or race; extending it to a
+// part in a slot of the wrong kind is inferred, supported by CB-010
+// passing with the part kept.
+func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {
 		return Design{}, fmt.Errorf("design %q: no hull %q", name, hull)
@@ -607,7 +621,7 @@ func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error)
 			return Design{}, fmt.Errorf("design %q: %w", name, err)
 		}
 		hs := h.Slots[f.Slot]
-		if !kindIn(p.Kind, hs.Kinds) {
+		if kinds && !kindIn(p.Kind, hs.Kinds) {
 			return Design{}, fmt.Errorf("design %q: slot %d does not take %s", name, f.Slot, f.Part)
 		}
 		if f.Count < 1 || f.Count > hs.Max {
