@@ -199,9 +199,8 @@ waypoint 0's target), the stargate choice of the route task, waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol and
 lay mines (load, scrap and loading from or unloading into salvage;
 ORDERS-STATUS.md), the Trader's planet trades with computer players
-(their levels are a PLACEHOLDER), packet items in the production queue
-(the orders lane adds them; the harness skips packets of a player whose
-queue it did not load), terraforming production items, the messages for
+(their levels are a PLACEHOLDER), terraforming production items (the
+orders lane adds them through `Game.Terraform`), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
 0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
 ships/starbases in the queue, and the
@@ -350,6 +349,59 @@ starbase visibility, a fleet's level (3 seen, 4 with its cargo) and
 `known`, and whether a minefield, packet, wormhole end or Trader was
 seen that year. Other view fields are skipped. SC028-T75-out is
 skipped as a setup artifact (PARITY.md).
+
+## Integration handoff list
+
+The durable list for the next integration owner, as of the merge of
+elegy #40. `TestParityVectors -v` prints each case's status and reason.
+
+**Parity failures** (not in the baseline):
+
+- OB-030-A: random mining remainder, with no tolerance (above). stars-elegy
+  #111 adds the tolerance; re-baseline after its vector sync.
+- FO-03-E, FO-06-G: "differs" only because `legacyMergeOverflow` is off
+  by default; they pass with the LEGACY BUG switch on.
+
+**Whole corpora or case groups skipped, and why:**
+
+- rp (race penalty): skipped wholesale (`l.global` in
+  `parity_test.go`) from before the race check was wired. With the skip
+  lifted as a trial, RD-P7 skips (out-of-range PRT 10), RD-P8, RD-P11,
+  RD-P12, RD-P17, RD-P20 and RD-P21 fail (populations, factories,
+  surface minerals, fleet positions and fuel; not diagnosed), and the
+  other RD-P cases pass. Next move: lift the skip, baseline the passes
+  and diagnose the failures.
+- UG01-A..UG30-A: "player not in the state" (the expectation names a
+  player the initial state lacks).
+- `client_estimate` (159) and `sample` mismatches (155): client-side
+  estimates are not modelled, and one stream's random outcome is never a
+  failure (above).
+- `view` of `other_players` (96), `player` (56) and `design` (4), and
+  the view fields `population_estimate`, `defense_estimate`, `heading`,
+  `mass_shown` and `environment_visible`: not compared yet.
+- `battle` and `battle_actions` expectations (18, CS-003-C): battle
+  records are compared only through their effects.
+- Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
+  scrap (14), load actions and other transport actions, `design` and
+  `design_delete` orders, `waypoint_change` with loads.
+- Production queues with unmapped planetary items (14 and more): the
+  packet items 6 and 14–17 (vectors carry no packet destination) and the
+  terraform items 4, 5 and 12 until the orders lane's items land. Packets
+  launched from such a queue are skipped too ("a packet from a
+  production queue").
+- Stream cycles beyond the harness's seeds, "original environment null",
+  "design read needs the order layer's design source", and KX-002-R3/R4
+  (the next research field choice is not in the vector).
+- SC028-T75-out: a setup artifact.
+
+**Sample-only and random cases:** a case listed as `random k` in the
+baseline passes with k of 8 seeds; it is evidence of the rule, never of
+exact parity. A `sample: true` expectation counts only when it matches.
+
+**Unmodelled steps:** see "Not modelled yet" above.
+
+**Open questions:** K2 and K7 below; ASSUMPTIONs O9–O14, W1–W5, P1 and
+S5 above.
 
 ## Open spec questions
 

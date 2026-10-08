@@ -42,6 +42,10 @@ type pvOrder struct {
 	Amounts   map[string]int    `json:"amounts"`
 	Index     int               `json:"index"`
 	Waypoint  pvWaypoint        `json:"waypoint"`
+	Ships     []struct {
+		Design int `json:"design"`
+		Count  int `json:"count"`
+	} `json:"ships"`
 }
 
 // pvPlan converts a battle plan's fields as the state's battle_plans give
@@ -87,6 +91,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 			continue
 		}
 		file := PlayerOrders{Player: b.Player, GameID: g.ID, Year: g.Year}
+		split := -1 // a split's source fleet, waiting for the move that fills it
 		for _, raw := range b.Orders {
 			var o pvOrder
 			if err := json.Unmarshal(raw, &o); err != nil {
@@ -94,6 +99,9 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 			}
 			fleet := l.fleetID[pvFleetKey(b.Player, o.Fleet)]
 			var order Order
+			if split >= 0 && o.Kind != "move_ships" {
+				return nil, "order split without a move_ships"
+			}
 			switch o.Kind {
 			case "research":
 				next, err := pvNextField(o.NextField)
@@ -176,13 +184,50 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 					}
 				}
 				order = w
+			case "split":
+				// FORMAT.md: a new empty fleet beside it, which the next
+				// move_ships fills; Elegy's SplitOrder does both.
+				split = o.Fleet
+				continue
+			case "move_ships":
+				owner := b.Player
+				if o.With.Owner != nil {
+					owner = *o.With.Owner
+				}
+				if o.With.Kind != "fleet" || owner != b.Player {
+					return nil, "order move_ships with another player's object"
+				}
+				var ships []Stack
+				for _, sh := range o.Ships {
+					d, ok := l.design[[2]int{b.Player, sh.Design}]
+					if !ok {
+						return nil, fmt.Sprintf("order move_ships design %d", sh.Design)
+					}
+					ships = append(ships, Stack{Design: d, Count: sh.Count})
+				}
+				if split >= 0 {
+					if o.Fleet != split {
+						return nil, "order split filled from another fleet"
+					}
+					for k := range ships {
+						if ships[k].Count >= 0 {
+							return nil, "order split into the source"
+						}
+						ships[k].Count = -ships[k].Count
+					}
+					order, split = SplitOrder{Fleet: fleet, Ships: ships}, -1
+					break
+				}
+				order = MoveShipsOrder{Fleet: fleet, With: l.fleetID[pvFleetKey(owner, o.With.ID)], Ships: ships}
 			default:
 				// design and design_delete need the players' design slots,
-				// which the harness does not load; split and move_ships are
-				// not modelled.
+				// which the harness does not load.
 				return nil, "order " + o.Kind
 			}
 			file.Orders = append(file.Orders, order)
+		}
+		if split >= 0 {
+			return nil, "order split without a move_ships"
 		}
 		files = append(files, file)
 	}
