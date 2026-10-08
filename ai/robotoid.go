@@ -23,8 +23,8 @@ import (
 //  8. fleets (§4);
 //  9. planet automation (AI.md §7) and the queue fill.
 //
-// Not yet run: automation steps 4 and 5. Steps the engine cannot order
-// (load tasks) go to Result.Unsupported.
+// Not yet run: automation steps 4 and 5. Steps it cannot order yet go
+// to Result.Unsupported.
 func PlayRobotoid(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -660,8 +660,7 @@ func (t *robotoidTurn) assignHubs() map[int]int {
 // empty each year), Robotoid's small foreign colonies (their fixed values
 // are not published), salvage (not in the view), and the colonist
 // rules (ASSUMPTION A41: robotoid.md gives no amounts beyond ranges).
-// Elegy's transport task can unload but not load, so a load at the target
-// is reported as unsupported and the fleet moves with no task.
+// A load at an own target is ordered by hubLoad (A56).
 func (t *robotoidTurn) hubFreighter(f *engine.Fleet, src int) {
 	v := t.v
 	sp := v.ownPlanet(src)
@@ -751,9 +750,31 @@ func (t *robotoidTurn) hubFreighter(f *engine.Fleet, src int) {
 			task.Transport[c] = engine.Transport{Action: engine.UnloadAll}
 		}
 	} else {
-		t.res.unsupported("fleet %d: load task at planet %d (AI.md §11 hub freighters)", f.ID, best)
+		task = hubLoad(mode, scarce, capacity-held)
 	}
 	t.emit(f, moveOrder(f, toPlanet(best, pos, 4, task)))
+}
+
+// hubLoad is AI.md §11's hub-freighter load task at an own planet: load
+// all three minerals in mode 0; in mode 1 or 2 fill 66 % of the room with
+// the scarce mineral and 33 % with the others.
+//
+// ASSUMPTION A56: the percentages are of the room left in the hold (kT),
+// rounded down, and the others' 33 % is split evenly between the two,
+// each loaded exactly.
+func hubLoad(mode, scarce, room int) engine.Task {
+	task := engine.Task{Kind: engine.TaskTransport}
+	for _, m := range []int{engine.Ironium, engine.Boranium, engine.Germanium} {
+		switch {
+		case mode == 0:
+			task.Transport[m] = engine.Transport{Action: engine.LoadAll}
+		case m == scarce:
+			task.Transport[m] = engine.Transport{Action: engine.LoadExactly, Amount: room * 66 / 100}
+		default:
+			task.Transport[m] = engine.Transport{Action: engine.LoadExactly, Amount: room * 33 / 100 / 2}
+		}
+	}
+	return task
 }
 
 func isqrt(x int) int {
