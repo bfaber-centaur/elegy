@@ -53,9 +53,10 @@ Elegy would otherwise do differently. The spec column is the rule's place
 in the stars-elegy behavioural record and its evidence; the code comment
 at the use site has the detail.
 
-Every switch is read from the game's own ruleset (`g.Rules.Legacy`, or
-the new-game settings' `Rules` during generation); no package-level
-compatibility constant or variable remains. A function that has no game
+Every switch that has a use is read from the game's own ruleset
+(`g.Rules.Legacy`, or the new-game settings' `Rules` during generation);
+no package-level compatibility constant or variable remains. The two
+Cybertron switches have no use yet. A function that has no game
 takes the switch as a parameter from a caller that does.
 
 | Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
@@ -79,8 +80,8 @@ takes the switch as a parameter from a caller that does.
 | `trader_last_redraw` | `TraderLastRedraw` | on | on | `objects/trader.go` `Space.reward` | OBJECTS.md "Encounters", LEGACY BUG, BINARY-ONLY |
 | `shared_homeworld_minerals` | `SharedHomeworldMinerals` | on | on | `newgame/players.go` `setUpHomeworld` | UNIVERSE.md "Shared starting minerals", LEGACY BUG, CONFIRMED UG16–UG21 |
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
-| `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | computer players, from their report (`ai/`) | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
-| `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | computer players, from their report (`ai/`) | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
+| `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | not read yet: Cybertron's packet step (`ai/`) is unimplemented; the computer opponents will read it from `Report.Rules` when they build §6 | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
+| `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | not read yet: Cybertron's packet step (`ai/`) is unimplemented; the computer opponents will read it from `Report.Rules` when they build §6 | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
 
 Not every off setting has been exercised. One known gap: with
 `colocation` off, a fleet with no scanner still sees a cloaked fleet at its
