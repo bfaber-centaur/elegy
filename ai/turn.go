@@ -449,3 +449,12 @@ func (t *turn) randomNearby(from engine.Point, r int, avoid bool) (int, bool) {
 	}
 	return id, id >= 0
 }
+
+// headsTo is the planet a fleet heads to, or orbits when idle.
+func (t *turn) headsTo(f *engine.Fleet) (int, bool) {
+	if len(f.Waypoints) > 0 {
+		w := f.Waypoints[0]
+		return w.ID, w.Target == engine.TargetPlanet
+	}
+	return t.v.planetAt(f.Pos)
+}
