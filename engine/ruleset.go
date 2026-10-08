@@ -129,6 +129,22 @@ type Legacy struct {
 	// redraws were used takes the homeworld's environment (UNIVERSE.md
 	// "Second planet", CONFIRMED UG29, UG30). newgame/players.go.
 	SecondPlanetFallback bool `json:"second_planet_fallback"`
+
+	// ai
+
+	// CybertronPacketMarkNextID: Cybertron's scanner shot tests and sets
+	// the packet mark of the planet whose id is one higher than the
+	// shot's destination, not the destination's own (stars-elegy
+	// ai/cybertron.md §6 "Packet marks", LEGACY BUG, MEASURED AI-24). Not
+	// read yet: Cybertron's packet step is not implemented. The computer
+	// opponents will read it from Report.Rules when they build §6.
+	CybertronPacketMarkNextID bool `json:"cybertron_packet_mark_next_id"`
+	// CybertronScannerShotOverflow: for a warp w of 14 or more, the
+	// scanner shot's minimum-distance test (d² < w⁴) overflows and
+	// passes every planet (stars-elegy ai/cybertron.md §6 "Scanner
+	// shot" step 5, LEGACY BUG, BINARY-ONLY). Not read yet, like
+	// CybertronPacketMarkNextID.
+	CybertronScannerShotOverflow bool `json:"cybertron_scanner_shot_overflow"`
 }
 
 // Built-in ruleset identities.
@@ -182,12 +198,25 @@ func elegyRulesV1() Ruleset {
 	}}
 }
 
-// FaithfulRules is the faithful J-RC3 ruleset, version 1: every legacy
-// switch on. It differs from ElegyRules only in FieldLimit511,
-// MergeOverflow, KeepUnentitledParts and ZeroMaxPopulationStop. It is only
-// as faithful as the switches go: behaviour Elegy has not modelled, or
+// FaithfulRules is the faithful J-RC3 ruleset, its latest version:
+// version 2, every legacy switch on. It differs from ElegyRules only in
+// FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
+// and the two Cybertron switches. It is only as faithful as the switches go: behaviour Elegy has not modelled, or
 // models differently without a switch, is the same in both.
+//
+// Version 2 adds CybertronPacketMarkNextID and CybertronScannerShotOverflow,
+// both on; version 1 predates them.
 func FaithfulRules() Ruleset {
+	r := faithfulRulesV1()
+	r.Version = 2
+	r.Legacy.CybertronPacketMarkNextID = true
+	r.Legacy.CybertronScannerShotOverflow = true
+	return r
+}
+
+// faithfulRulesV1 is the faithful ruleset, version 1: every switch that
+// existed before the Cybertron switches on.
+func faithfulRulesV1() Ruleset {
 	r := elegyRulesV1()
 	r.ID, r.Version = FaithfulRulesID, 1
 	r.Legacy.MergeOverflow = true
@@ -201,7 +230,7 @@ func FaithfulRules() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), ElegyRules(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), ElegyRules(), faithfulRulesV1(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).
