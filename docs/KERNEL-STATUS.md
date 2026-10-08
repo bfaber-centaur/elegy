@@ -58,7 +58,8 @@ KERNEL.md gives every rule a status. Test names follow it:
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
 file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); the
-waypoint check (step 1a.3); the before-movement waypoint tasks (unloads,
+waypoint check (step 1a.3), which first retargets waypoints aimed at a
+fleet merged away during the replay (ORDERS-STATUS.md); the before-movement waypoint tasks (unloads,
 colonize, route, drops, the research level-up check, loads and merges);
 fleet movement (ordinary fleets in fleet order, owner then fleet number,
 then fleet chasers in rounds, then waypoint settlement, where reached

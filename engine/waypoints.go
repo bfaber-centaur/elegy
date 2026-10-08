@@ -54,6 +54,59 @@ func (g *Game) waypointCheck() {
 	}
 }
 
+// chaseMerged is the waypoint check's retarget of a waypoint that names
+// a fleet a merge order removed earlier in the replay (merged: fleet id to
+// owner), when the waypoint's own order came later (ORDERS.md "Targets
+// that moved, died or were captured", "A fleet target merged away during
+// order replay", BINARY-ONLY). The waypoint takes a fleet of the merged
+// fleet's owner that stands exactly at its coordinates; with none it keeps
+// the stale id, and waypointCheck makes it a plain go-to there. Each
+// candidate costs a draw: rand(k) for the k-th, plus a rand(2) for a
+// candidate some waypoint already picked this year.
+//
+// ASSUMPTION W8: ORDERS.md prefers a candidate that the chasing fleet's
+// battle plan's primary target matches, by a weight it does not define.
+// Elegy does not model that preference: the k-th candidate in fleet order
+// is taken when its rand(k) is 0, a uniform choice, and the extra rand(2)
+// is drawn without changing the choice. Waypoints are visited in fleet
+// order, and a fleet is never its own candidate. Elegy's fleet ids can be
+// reused (Game.newFleetID): a fleet made later in the replay with the
+// merged fleet's id is chased as itself.
+func (g *Game) chaseMerged(merged map[int]int, rng Rand) {
+	if len(merged) == 0 {
+		return
+	}
+	order := g.fleetOrder()
+	picked := map[int]bool{}
+	for _, i := range order {
+		for j := range g.Fleets[i].Waypoints {
+			wp := &g.Fleets[i].Waypoints[j]
+			owner, ok := merged[wp.ID]
+			if wp.Target != TargetFleet || !ok || g.fleetIndex(wp.ID) >= 0 {
+				continue
+			}
+			choice, k := -1, 0
+			for _, c := range order {
+				cf := &g.Fleets[c]
+				if c == i || cf.Owner != owner || cf.Pos != wp.Pos {
+					continue
+				}
+				k++
+				if rng.Intn(k) == 0 {
+					choice = c
+				}
+				if picked[cf.ID] {
+					rng.Intn(2)
+				}
+			}
+			if choice >= 0 {
+				wp.ID = g.Fleets[choice].ID
+				picked[wp.ID] = true
+			}
+		}
+	}
+}
+
 // Route and transfer-fleet messages. Elegy's wording.
 const (
 	EventFleetGiven       EventKind = iota + EventOriginalDrift + 1 // Player = giver, Fleet = the new fleet, Count = recipient

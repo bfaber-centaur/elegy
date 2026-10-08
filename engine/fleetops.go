@@ -183,6 +183,21 @@ func (g *Game) MergeFleets(owner, into int, from []int) error {
 		g.absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, mergeOrderDamaged)
 	}
 	g.removeFleets(ids)
+	// Removing a fleet retargets every waypoint that names it, any
+	// player's, to what stands at its position, keeping the coordinates;
+	// no draws (ORDERS.md "Targets that moved, died or were captured", "A
+	// fleet target merged away during order replay", BINARY-ONLY).
+	// ASSUMPTION W7: the spec prefers the replaying player's own fleets
+	// there and does not pin which; Elegy takes the fleet they joined.
+	// Only the merge order retargets this way; fleets removed elsewhere
+	// keep the "target gone" rule of the waypoint check.
+	for i := range g.Fleets {
+		for k := range g.Fleets[i].Waypoints {
+			if wp := &g.Fleets[i].Waypoints[k]; wp.Target == TargetFleet && ids[wp.ID] {
+				wp.ID = into
+			}
+		}
+	}
 	return nil
 }
 

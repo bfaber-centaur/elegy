@@ -71,6 +71,12 @@ type Applied struct {
 	// newFleets maps the current file's new-fleet names to the fleets
 	// their splits made (SplitOrder.NewFleet).
 	newFleets map[int]int
+	// merged maps each fleet a merge order removed during the replay to
+	// its owner. A later file's waypoint may still name it, and the
+	// waypoint check after the orders retargets it (Game.chaseMerged).
+	// ELEGY CHOICE: Elegy's fleet ids do not carry the owner, so the
+	// replay records it.
+	merged map[int]int
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
@@ -371,8 +377,17 @@ type MergeOrder struct {
 	From []int
 }
 
-func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
-	return g.MergeFleets(player, o.Into, o.From)
+func (o MergeOrder) apply(g *Game, player int, a *Applied) error {
+	if err := g.MergeFleets(player, o.Into, o.From); err != nil {
+		return err
+	}
+	if a.merged == nil {
+		a.merged = map[int]int{}
+	}
+	for _, id := range o.From {
+		a.merged[id] = player
+	}
+	return nil
 }
 
 // WaypointOrder replaces a fleet's orders: the task at its current
@@ -425,7 +440,7 @@ type WaypointOrder struct {
 	Waypoints []Waypoint
 }
 
-func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
+func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 	i, err := g.ownFleet(player, o.Fleet)
 	if err != nil {
 		return err
@@ -450,6 +465,16 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 			wp.Pos = pos
 		case TargetFleet:
 			t := g.fleetIndex(wp.ID)
+			if _, gone := a.merged[wp.ID]; t < 0 && gone {
+				// A fleet merged away earlier in this replay: the waypoint
+				// keeps its id and the coordinates the order carried, and
+				// the waypoint check after the orders retargets it
+				// (ORDERS.md "Targets that moved, died or were captured",
+				// "A fleet target merged away during order replay",
+				// BINARY-ONLY; Game.chaseMerged).
+				wp.Pos = g.clampToGalaxy(wp.Pos)
+				break
+			}
 			if t < 0 {
 				return fmt.Errorf("waypoint %d fleet %d: %w", k, wp.ID, ErrNoSuchObject)
 			}

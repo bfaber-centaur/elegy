@@ -255,7 +255,9 @@ func GenerateTurn(
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
-	// The waypoint check after the orders (step 1a.3).
+	// The waypoint check after the orders (step 1a.3), first retargeting
+	// waypoints that name a fleet merged away in the replay.
+	g.chaseMerged(applied.merged, rng)
 	g.waypointCheck()
 
 	// Waypoint tasks before movement (TAKEOVER.md "Where each task
