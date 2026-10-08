@@ -1112,7 +1112,8 @@
      "kind": "fleet_gone",
      "owner": 1,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -1122,14 +1123,16 @@
        "Anti Matter Torpedo"
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
      "player": 1,
      "message_id": 265,
      "present": true,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "sample",

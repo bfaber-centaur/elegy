@@ -1589,9 +1589,6 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
-	// PARITY.md: the original put the fleet at y 1000, not the vector's
-	// y 920, inside the cloak bound; SC-033 repeats the case.
-	"SC028-T75-out": "setup artifact (PARITY.md \"SC-028-T75-out\")",
 }
 
 func pvUnique(xs []string) []string {

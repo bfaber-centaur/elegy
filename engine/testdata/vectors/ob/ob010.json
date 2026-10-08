@@ -1687,6 +1687,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1701,6 +1702,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1718,6 +1720,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1732,6 +1735,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1749,6 +1753,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1763,6 +1768,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1784,6 +1790,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1798,6 +1805,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1819,6 +1827,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1833,6 +1842,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1854,6 +1864,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     },
     {
@@ -1868,6 +1879,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     }
    ],

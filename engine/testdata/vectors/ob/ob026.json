@@ -1254,7 +1254,8 @@
      "kind": "fleet_gone",
      "owner": 1,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "sample",

@@ -1477,6 +1477,7 @@
      "owner": 0,
      "id": 0,
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1491,6 +1492,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1508,6 +1510,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1522,6 +1525,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1539,6 +1543,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1553,6 +1558,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1570,6 +1576,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1584,6 +1591,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1601,6 +1609,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1615,6 +1624,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1622,6 +1632,7 @@
      "owner": 0,
      "id": 0,
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     },
     {
@@ -1636,6 +1647,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     }
    ],
@@ -1653,7 +1665,8 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -1666,7 +1679,8 @@
       "type": "heavy",
       "detonating": false
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "hit (99.8%): all destroyed (500 each); field 6000-60 = 5940, decay 10% -> 5346; salvage 0-9 kT each"
@@ -1694,6 +1708,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1708,6 +1723,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 15000"
     },
     {
@@ -1725,6 +1741,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1739,6 +1756,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 20000"
     },
     {
@@ -1756,6 +1774,7 @@
       ]
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1770,6 +1789,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 25000"
     },
     {
@@ -1777,6 +1797,7 @@
      "owner": 0,
      "id": 2,
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1791,6 +1812,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 30000"
     },
     {
@@ -1798,6 +1820,7 @@
      "owner": 0,
      "id": 2,
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1812,6 +1835,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 40000"
     },
     {
@@ -1819,6 +1843,7 @@
      "owner": 0,
      "id": 2,
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     },
     {
@@ -1833,6 +1858,7 @@
       "detonating": false
      },
      "year": 1,
+     "sample": true,
      "stream": "cycles 60000"
     }
    ],
