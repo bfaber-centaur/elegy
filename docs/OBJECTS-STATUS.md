@@ -313,5 +313,7 @@ Not wired yet:
 - **Salvage loads and unloads:** `SalvageLoad` and `SalvageRoom` wait
   for the engine's load and unload-into-salvage tasks, which are not
   modelled.
-- **Computer players' planet trades:** `Space.Meet` needs each computer
-  player's level, which the adapter does not have; it uses a PLACEHOLDER.
+- **Computer players' planet trades:** the adapter passes
+  `engine.Player.Level` to `Space.Meet`, but nothing sets the level yet,
+  so every computer player counts as Easy and no planet trades. A new
+  game will set it from its computer players' levels.

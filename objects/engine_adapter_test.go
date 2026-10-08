@@ -465,3 +465,25 @@ func TestLayMinesAfterColonizerRemoved(t *testing.T) {
 		t.Errorf("layer's task %+v, want lay mines with 1 year left", tk)
 	}
 }
+
+// MeetTraders reads a computer player's level from engine.Player.Level
+// (OBJECTS.md "Computer players' planets", CONFIRMED O-53): a Harder
+// planet with 3,600 kT trades and pays 3,500 kT; a Standard one does not.
+func TestMeetTradersComputerLevel(t *testing.T) {
+	for _, c := range []struct {
+		level int
+		trade bool
+	}{{0, false}, {1, false}, {2, true}} {
+		l, s := traderLab(t, TraderItem{Kind: ItemResearch})
+		l.g.Players[1].Computer, l.g.Players[1].Level = true, c.level
+		l.g.Planets = []engine.Planet{{ID: 7, Pos: at(50, 0), Owner: 1, HasStarbase: true, Surface: engine.Minerals{0, 0, 3600}}}
+		ev := s.MeetTraders(l.g, &script{})
+		traded := len(ev) == 1 && ev[0].Kind == engine.EventTraderPlanetTrade && ev[0].Player == 1 && ev[0].Planet == 7
+		if traded != c.trade || (c.trade && l.g.Planets[0].Surface != (engine.Minerals{0, 0, 100})) {
+			t.Errorf("level %d: events %+v surface %v, want trade %v", c.level, ev, l.g.Planets[0].Surface, c.trade)
+		}
+		if !c.trade && len(ev) != 0 {
+			t.Errorf("level %d: events %+v, want none", c.level, ev)
+		}
+	}
+}

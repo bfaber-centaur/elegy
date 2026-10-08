@@ -295,8 +295,8 @@ func newDestination(size int, rng engine.Rand) engine.Point {
 
 // --- Encounters ---
 
-// TraderContext is what the encounters need to know about the game that
-// the engine does not hold yet.
+// TraderContext is what the encounters need to know about the players
+// (MeetTraders fills it from engine.Player).
 type TraderContext struct {
 	YearIndex int
 	// Computer reports a computer player; Level its level, 0 easy .. 3

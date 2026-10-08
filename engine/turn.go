@@ -133,6 +133,12 @@ type Player struct {
 	// rules that name computer players (a gifted fleet is refused;
 	// Mystery Trader trades).
 	Computer bool
+	// Level is a computer player's level: 0 Easy, 1 Standard, 2 Harder,
+	// 3 Expert. The engine reads it only for computer players, and only
+	// for Mystery Trader planet trades (OBJECTS.md "Computer players'
+	// planets": Harder and Expert trade, CONFIRMED O-53). Nothing sets it
+	// yet, so every computer player counts as Easy.
+	Level int
 }
 
 type Planet struct {
