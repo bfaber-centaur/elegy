@@ -3,11 +3,13 @@ package regress
 import (
 	"flag"
 	"fmt"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/game"
 	"github.com/bfaber-centaur/elegy/newgame"
 )
 
@@ -136,19 +138,28 @@ func TestHarnessReportsFailures(t *testing.T) {
 }
 
 // A case stopped early keeps the observations of the years it played.
+// The opponent is replaced by a driver that orders nothing and reports
+// one unsupported step a year, so the test does not depend on what the
+// computer players cannot order yet.
 func TestStoppedCaseKeepsObservations(t *testing.T) {
-	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"robotoid"}, Size: newgame.Tiny, Years: 6,
+	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny, Years: 6,
 		Checks: []Check{{Name: "fails from 2403", Check: func(g engine.Game) []string {
 			if g.Year >= 2403 {
 				return []string{"planted problem"}
 			}
 			return nil
 		}}}}
-	r := Run(c)
-	if len(r.Findings) != 2 || r.Findings[0].Category != CheckFails || r.Findings[1].Category != Unsupported || r.Findings[1].Count == 0 {
-		t.Fatalf("findings %+v: want the year-check failure, then the unsupported steps of the years played", r.Findings)
+	r := run(c, func() []game.Driver { return []game.Driver{nil, oneUnsupported{}} })
+	if len(r.Findings) != 2 || r.Findings[0].Category != CheckFails || !reflect.DeepEqual(r.Findings[1], Finding{Category: Unsupported, Count: 3}) {
+		t.Fatalf("findings %+v: want the year-check failure, then 3 unsupported steps for the 3 years played", r.Findings)
 	}
 }
+
+// oneUnsupported orders nothing and reports one unsupported step.
+type oneUnsupported struct{}
+
+func (oneUnsupported) Orders(game.Report) ([]engine.Order, error) { return nil, nil }
+func (oneUnsupported) unsupportedSteps() int                      { return 1 }
 
 // differs names the first differing paths of two games, and nothing for
 // equal ones.

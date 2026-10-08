@@ -201,8 +201,22 @@ func (c Case) drivers() []game.Driver {
 	return ds
 }
 
+// unsupportedSteps is how many steps d could not order this year.
+func unsupportedSteps(d game.Driver) int {
+	switch d := d.(type) {
+	case *ai.Driver:
+		return len(d.Unsupported)
+	case interface{ unsupportedSteps() int }:
+		return d.unsupportedSteps()
+	}
+	return 0
+}
+
 // Run plays the case.
-func Run(c Case) Result {
+func Run(c Case) Result { return run(c, c.drivers) }
+
+// run plays the case with the drivers newDrivers makes, one set per copy.
+func run(c Case, newDrivers func() []game.Driver) Result {
 	res := Result{Case: c}
 	fail := func(cat Category, year int, format string, args ...any) {
 		res.Findings = append(res.Findings, Finding{Category: cat, Year: year, Detail: fmt.Sprintf(format, args...)})
@@ -217,8 +231,8 @@ func Run(c Case) Result {
 		fail(SetupFailed, 0, "%v", err)
 		return res
 	}
-	a := &copyGame{primary, c.drivers()}
-	b := &copyGame{replay, c.drivers()}
+	a := &copyGame{primary, newDrivers()}
+	b := &copyGame{replay, newDrivers()}
 	var r *copyGame // the reloaded copy, from SaveAt
 	unsupported, rejected := 0, -1
 	// observed adds the observations made so far: a case that stops early
@@ -238,7 +252,7 @@ func Run(c Case) Result {
 			} else if g, err := game.Load(&buf); err != nil {
 				fail(ReloadFailed, a.g.State.Year, "load: %v", err)
 			} else {
-				r = &copyGame{g, c.drivers()}
+				r = &copyGame{g, newDrivers()}
 				if d := differs(a.g, r.g); d != "" {
 					fail(ReloadDiffers, a.g.State.Year, "right after the load: %s", d)
 					r = nil
@@ -263,9 +277,7 @@ func Run(c Case) Result {
 			res.Findings[rejected].Count++
 		}
 		for _, d := range a.drivers {
-			if ad, ok := d.(*ai.Driver); ok {
-				unsupported += len(ad.Unsupported)
-			}
+			unsupported += unsupportedSteps(d)
 		}
 		for _, ch := range c.Checks {
 			if probs := ch.Check(a.g.State); len(probs) > 0 {
