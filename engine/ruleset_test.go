@@ -174,3 +174,35 @@ func TestRulesetsCoexist(t *testing.T) {
 		}
 	}
 }
+
+// A ruleset saved before a switch existed decodes it as off. Each
+// built-in version that predates a switch has it off, so its old saves
+// still validate: here jrc3-faithful v1 and elegy v2 without
+// cybertron_packet_mark_next_id.
+func TestRulesetSavedBeforeSwitch(t *testing.T) {
+	for _, r := range []Ruleset{faithfulRulesV1(), ElegyRules()} {
+		b, err := json.Marshal(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(b, &m); err != nil {
+			t.Fatal(err)
+		}
+		delete(m["legacy"].(map[string]any), "cybertron_packet_mark_next_id")
+		old, _ := json.Marshal(m)
+		var back Ruleset
+		if err := json.Unmarshal(old, &back); err != nil {
+			t.Fatal(err)
+		}
+		if back != r || back.Validate() != nil {
+			t.Errorf("%s v%d saved without the switch: %+v, %v", r.ID, r.Version, back, back.Validate())
+		}
+	}
+	v2 := FaithfulRules()
+	v2.Version = 1
+	v2.Legacy.CybertronPacketMarkNextID = false
+	if v2 != faithfulRulesV1() {
+		t.Errorf("jrc3-faithful v2 differs from v1 beyond CybertronPacketMarkNextID")
+	}
+}

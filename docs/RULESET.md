@@ -27,7 +27,8 @@ included, not just the ID.
 |---|---|---|
 | `elegy` | 2 | `engine.ElegyRules()`, the default: version 1 with `zero_max_population_stop` off, so an Alternate Reality planet with population and no starbase no longer stops the year (Bobby's "Keep going", 2026-10-08). |
 | `elegy` | 1 | The behaviour Elegy had before rulesets existed. Every switch on except `merge_overflow`, `keep_unentitled_parts` and `field_limit_511`, where Elegy has chosen its own rule. Kept for games saved under it. |
-| `jrc3-faithful` | 1 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. |
+| `jrc3-faithful` | 2 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. Adds `cybertron_packet_mark_next_id` (on) to version 1. |
+| `jrc3-faithful` | 1 | Every switch that existed before `cybertron_packet_mark_next_id` on. Kept for games saved under it. |
 
 A built-in ruleset's settings never change once released. A change is a
 new version, and the old version stays in `engine.Rulesets()` so a game
@@ -39,8 +40,11 @@ The zero `Ruleset` is no ruleset: `GenerateTurn` and `newgame.Generate`
 refuse it (`engine.ErrNoRuleset`).
 
 Adding a switch adds a `Legacy` field. A save written before the field
-existed decodes it as `false`, so the save format's loader has to know
-which ruleset fields its version had.
+existed decodes it as `false`. So a built-in version released before a
+switch has it off: a new switch that is on in a built-in ruleset makes
+a new version of that ruleset, and one that is off leaves the version
+alone (`cybertron_packet_mark_next_id` made `jrc3-faithful` v2 and left
+`elegy` at v2).
 
 ## Switch inventory
 
@@ -54,7 +58,7 @@ the new-game settings' `Rules` during generation); no package-level
 compatibility constant or variable remains. A function that has no game
 takes the switch as a parameter from a caller that does.
 
-| Saved name | Field | `elegy` v2 | `jrc3-faithful` v1 | Read in | Spec and evidence |
+| Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `Game.fuelTerm` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
 | `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014 |
@@ -75,6 +79,7 @@ takes the switch as a parameter from a caller that does.
 | `trader_last_redraw` | `TraderLastRedraw` | on | on | `objects/trader.go` `Space.reward` | OBJECTS.md "Encounters", LEGACY BUG, BINARY-ONLY |
 | `shared_homeworld_minerals` | `SharedHomeworldMinerals` | on | on | `newgame/players.go` `setUpHomeworld` | UNIVERSE.md "Shared starting minerals", LEGACY BUG, CONFIRMED UG16–UG21 |
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
+| `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | computer players, from their report (`ai/`) | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
 
 Not every off setting has been exercised. One known gap: with
 `colocation` off, a fleet with no scanner still sees a cloaked fleet at its
