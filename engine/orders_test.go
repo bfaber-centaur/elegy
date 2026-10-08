@@ -406,9 +406,10 @@ func TestConfirmedManualTransfersToOthers(t *testing.T) {
 	}
 }
 
-func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
-	// TAKEOVER.md: replay is two passes, debits then credits. Player 1
-	// replays first and cannot use what player 0 gives it this year.
+func TestGiftCreditedInPlace(t *testing.T) {
+	// ORDERS.md "Cross-owner cargo": the gift is credited in place as its
+	// order applies. ASSUMPTION L17: a later replay sees it, so player 1,
+	// replaying after player 0, can unload what it was just given.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	files := []PlayerOrders{
@@ -416,8 +417,8 @@ func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 3, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-30}}}},
 	}
 	ApplyOrders(g, files, []int{0, 1})
-	if g.Planets[1].Surface[Ironium] != 0 || g.Fleets[2].Cargo.Minerals[Ironium] != 30 {
-		t.Errorf("planet %d Fe, fleet %d Fe; want 0 and 30", g.Planets[1].Surface[Ironium], g.Fleets[2].Cargo.Minerals[Ironium])
+	if g.Planets[1].Surface[Ironium] != 30 || g.Fleets[2].Cargo.Minerals[Ironium] != 0 {
+		t.Errorf("planet %d Fe, fleet %d Fe; want 30 and 0", g.Planets[1].Surface[Ironium], g.Fleets[2].Cargo.Minerals[Ironium])
 	}
 }
 
@@ -464,9 +465,10 @@ func TestGiftReceiverRemovedEarlier(t *testing.T) {
 }
 
 func TestGiftToFleetMergedAway(t *testing.T) {
-	// ASSUMPTION L9: the receiver merged away after the debit is treated
-	// like a missing endpoint (ORDERS.md "Missing endpoint"), and the cargo
-	// goes back to the giver's fleet.
+	// ORDERS.md "Receiver removed after the credit, same turn"
+	// (BINARY-ONLY): the credited gift is the receiver's own cargo, so a
+	// later merge pools it into the surviving fleet; nothing goes back to
+	// the giver.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
@@ -475,8 +477,31 @@ func TestGiftToFleetMergedAway(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
 	}
 	a := ApplyOrders(g, files, []int{0, 1})
-	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Events) != 0 {
-		t.Errorf("giver Fe %d, events %+v; want 30 and none", g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
+	if g.fleetIndex(3) >= 0 {
+		t.Fatal("receiver not merged away")
+	}
+	if giver, into := g.Fleets[0].Cargo.Minerals[Ironium], g.Fleets[g.fleetIndex(5)].Cargo.Minerals[Ironium]; giver != 0 || into != 30 || len(a.Events) != 0 {
+		t.Errorf("giver Fe %d, surviving fleet Fe %d, events %+v; want 0, 30, none", giver, into, a.Events)
+	}
+}
+
+func TestMeasuredGiftLostWithDeletedDesign(t *testing.T) {
+	// ORDERS.md "Receiver removed after the credit, same turn": a later
+	// design delete shares the gifted cargo out as any cargo (MEASURED
+	// CO-07c), so a receiver whose only ships are deleted loses it all.
+	g := ordersGame()
+	g.Fleets[0].Pos = g.Fleets[2].Pos
+	g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: 1, Slot: 0, Design: 1})
+	files := []PlayerOrders{
+		{Player: 0, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}}},
+		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{DeleteDesignOrder{Slot: 0}}},
+	}
+	a := ApplyOrders(g, files, []int{0, 1})
+	if a.Results[len(a.Results)-1].Err != nil {
+		t.Fatal(a.Results)
+	}
+	if g.fleetIndex(3) >= 0 || g.Fleets[0].Cargo.Minerals[Ironium] != 0 || len(a.Events) != 0 {
+		t.Errorf("receiver index %d, giver Fe %d, events %+v; want gone, 0, none", g.fleetIndex(3), g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
 	}
 }
 

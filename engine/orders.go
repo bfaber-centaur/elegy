@@ -60,8 +60,8 @@ type OrderResult struct {
 type Applied struct {
 	Results []OrderResult
 	Events  []Event
-	// Gifts is cargo given to another owner's planet or fleet, taken from
-	// the giver in the first pass and credited in the second.
+	// Gifts is cargo given to another owner's planet or fleet, each taken
+	// from the giver and credited in place as its order applied.
 	Gifts []CargoGift
 	// drops is colonists put onto another player's planet, in the order
 	// given. They join the before-movement drop resolution (TAKEOVER.md
@@ -96,10 +96,9 @@ func (g *Game) acceptFile(o PlayerOrders) error {
 
 // ApplyOrders applies a year's order files, KERNEL.md "Turn order" step 1:
 // one player at a time, in the replay order given (player indices). Cargo
-// given to another owner is taken from the giver as each order applies,
-// and credited only after every file has been replayed (TAKEOVER.md
-// "Manual cargo transfers to other players": replay is
-// two passes, debits then credits; creditGifts). Each
+// given to another owner is taken from the giver and credited to the
+// receiver in place as each order applies (ORDERS.md "Cross-owner cargo";
+// creditGift). Each
 // order is validated on its own; a rejected order is dropped and the rest
 // of the file still applies (ORDERS.md "Per-order validation"). When two
 // players' orders act on one object, the later one in the replay order
@@ -138,7 +137,6 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 			a.Results = append(a.Results, OrderResult{Player: p, Index: k, Err: err})
 		}
 	}
-	a.Events = append(a.Events, g.creditGifts(a.Gifts)...)
 	return a
 }
 
