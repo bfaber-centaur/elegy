@@ -53,11 +53,11 @@ Elegy would otherwise do differently. The spec column is the rule's place
 in the stars-elegy behavioural record and its evidence; the code comment
 at the use site has the detail.
 
-Every switch that has a use is read from the game's own ruleset
-(`g.Rules.Legacy`, or the new-game settings' `Rules` during generation);
-no package-level compatibility constant or variable remains. The two
-Cybertron switches have no use yet. A function that has no game
-takes the switch as a parameter from a caller that does.
+Every switch is read from the game's own ruleset (`g.Rules.Legacy`, the
+new-game settings' `Rules` during generation, or, for the computer
+opponents, the player report's `Rules`); no package-level compatibility
+constant or variable remains. A function that has no game takes the
+switch as a parameter from a caller that does.
 
 | Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
