@@ -363,17 +363,35 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 
 **Whole corpora or case groups skipped, and why:**
 
-- rp (race penalty): skipped wholesale (`l.global` in
-  `parity_test.go`) from before the race check was wired. With the skip
-  lifted as a trial, RD-P7 skips (out-of-range PRT 10), RD-P8, RD-P11,
-  RD-P12, RD-P17, RD-P20 and RD-P21 fail (populations, factories,
-  surface minerals, fleet positions and fuel; not diagnosed), and the
-  other RD-P cases pass. Next move: lift the skip, baseline the passes
-  and diagnose the failures.
+- rp (race penalty): no longer skipped; RD-P1..RD-P21 pass and are in
+  the baseline. Race expectations compare the whole race and the wizard
+  settings (leftover spend, stat 15, techs start high) after the year's
+  race check. The harness reads stored habitat values as signed bytes
+  (RACES.md "Repairs": 251 is −5, a low of 255 the immune marker) and an
+  out-of-range PRT as an invalid one, which the check clamps (RD-P7).
+- Computer players without orders in the vector: their fleets, planets
+  and production queues are not compared ("a computer player's planned
+  orders"), since the host plans them each year and the harness runs no
+  planner. 19 expectations, each skipped alone inside a case that is
+  otherwise checked: RD-P11 (2), RD-P12 (2), RD-P20 (9), RD-P21 (6).
+  Their race expectations are compared.
+
+**Expectations skipped inside checked cases** (reference seed, as of this
+list; `TestParityVectors -v` prints the current counts as "expectations
+skipped in checked cases"): other oracle random streams 4222, `message`
+754 (Elegy's events are its own), `score_record` 319, samples that did
+not match 318, player default queue settings 103, `battle` 54 and
+`battle_actions` 42, planet `starbase` 22, transport `load_all` 21 and
+`set_amount_to` 5, computer players' planned orders 19, Super Stealth
+research stealing 13, `battle_plan` 13, wormhole objects 10,
+`no_battle` 9, player `research_field` 6, original environment null 5,
+`mystery_trader_items` 5, and 1 to 4 each for planet `concentrations`,
+`planetary_scanner` and `starbase_design`, player `counts` and
+`ship_design_count`, `no_new_fleets`, `sample` and the design read.
 - UG01-A..UG30-A: "player not in the state" (the expectation names a
   player the initial state lacks).
 - RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
-  files, which `newgame/vectors_test.go` checks; this harness has no
+  files, which `newgame/vectors_test.go` checks (elegy #42); this harness has no
   players for them and skips them ("player not in the state", samples).
 - `client_estimate` (159) and `sample` mismatches (155): client-side
   estimates are not modelled, and one stream's random outcome is never a
@@ -398,6 +416,10 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 **Sample-only and random cases:** a case listed as `random k` in the
 baseline passes with k of 8 seeds; it is evidence of the rule, never of
 exact parity. A `sample: true` expectation counts only when it matches.
+A case whose compared expectations are all samples is reported as
+`sample-only`, not as a pass, and listed so in the baseline (`sample-only
+k` when every sample missed on the other seeds): 25 cases (CB 3, OB 4,
+WT 18) as of this list.
 
 **Unmodelled steps:** see "Not modelled yet" above.
 
