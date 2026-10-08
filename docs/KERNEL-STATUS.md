@@ -215,13 +215,14 @@ Not modelled yet: following fleets (step 1a.3; Elegy does not keep
 waypoint 0's target), waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
-by task, ASSUMPTION T5; ORDERS-STATUS.md), terraforming production items (the
-orders lane adds them through `Game.Terraform`), the messages for
+by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
 0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
 and the
-BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses,
-Radiating Hydro-Ram colonist deaths and transport tasks.
+BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses and
+Radiating Hydro-Ram colonist deaths. Terraforming production items are
+built (#41, `production_terraform.go`; TERRAFORM-STATUS.md), and a fleet
+whose transport task is still current does not move (#123, above).
 
 ## Corrected upstream
 
