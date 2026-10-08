@@ -16,6 +16,8 @@ type View struct {
 	Year   int // calendar year the orders are for
 	Player int
 	Level  Level
+	// Rules is the game's ruleset (game.Report.Rules).
+	Rules engine.Ruleset
 
 	Self engine.Player
 	// Planets are the player's own planets.

@@ -74,8 +74,8 @@ func TestCybertronArmada(t *testing.T) {
 	v := caView(t, 2460)
 	home := v.Universe[0].Pos
 	v.Ships = append(v.Ships, Design{Slot: 6, Index: 36, Design: v.Ships[0].Design, Created: 2450})
-	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: 1, PopEstimate: 1000} // 60 ly: 5 + 5
-	v.Known[5] = engine.PlanetReport{Planet: 5, Level: engine.ReportNormal, Owner: 1, Starbase: true}    // 120 ly: 2 + 4
+	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: 1, PopEstimate: 400000} // 60 ly: 5 + 5
+	v.Known[5] = engine.PlanetReport{Planet: 5, Level: engine.ReportNormal, Owner: 1, Starbase: true}      // 120 ly: 2 + 4
 	v.Fleets = []engine.Fleet{fleet(100, 1, home, 36, 2)}
 	ct := cyberTest(t, v, &script{t: t})
 	ct.notes()
@@ -132,5 +132,35 @@ func TestCybertronColonyShipProduction(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("queue %+v, want a colony ship", q)
+	}
+}
+
+// §5 pass A with no group aged out: an armed fleet orbiting a planet or
+// bound for one is a group fleet and marks another player's planet as
+// targeted; one idle in deep space or bound for space is a Destroyer
+// fleet.
+func TestCybertronPassAClasses(t *testing.T) {
+	v := caView(t, 2460)
+	v.Ships = append(v.Ships, Design{Slot: 6, Index: 36, Design: v.Ships[0].Design, Created: 2450})
+	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: 1}
+	p3 := v.Universe[2].Pos
+	deep := engine.Point{X: 1500, Y: 1500}
+	orbit := fleet(100, 1, p3, 36, 1)
+	bound := fleet(101, 2, deep, 36, 1)
+	bound.Waypoints = []engine.Waypoint{{Pos: p3, Target: engine.TargetPlanet, ID: 3, Warp: 6}}
+	idle := fleet(102, 3, deep, 36, 1)
+	space := fleet(103, 4, engine.Point{X: 1600, Y: 1600}, 36, 1)
+	space.Waypoints = []engine.Waypoint{{Pos: deep, Target: engine.TargetSpace, Warp: 6}}
+	v.Fleets = []engine.Fleet{orbit, bound, idle, space}
+	ct := cyberTest(t, v, top{})
+	ct.passA()
+	if ct.grFleets != 2 || ct.ddFleets != 2 || !ct.targeted[3] || len(ct.targeted) != 1 {
+		t.Errorf("group %d, Destroyer %d, targeted %v; want 2, 2 and planet 3", ct.grFleets, ct.ddFleets, ct.targeted)
+	}
+	ct = cyberTest(t, v, top{})
+	ct.aged6 = true
+	ct.passA()
+	if ct.grFleets != 0 || ct.ddFleets != 4 {
+		t.Errorf("group 6–9 aged out: group %d, Destroyer %d; want 0 and 4", ct.grFleets, ct.ddFleets)
 	}
 }

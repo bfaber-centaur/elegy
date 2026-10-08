@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/newgame"
 	"github.com/bfaber-centaur/elegy/objects"
+	"github.com/bfaber-centaur/elegy/races"
 )
 
 func TestHistoryKeepsLatestAndLostColonies(t *testing.T) {
@@ -231,5 +233,36 @@ func TestLoadRejectsInvalidRuleset(t *testing.T) {
 	}
 	if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {
 		t.Fatalf("err = %v, want ErrSave", err)
+	}
+}
+
+// A computer player's level is part of the game and survives a save and
+// load; a human player has none.
+func TestComputerLevelSaved(t *testing.T) {
+	ca, err := newgame.ComputerPlayer(4, newgame.Harder)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := newgame.Settings{Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate,
+		Players: []newgame.PlayerSetup{{Race: races.Default()}, ca}}
+	g, err := New(engine.ElegyRules(), s, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	g2, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range []*Game{g, g2} {
+		if _, ok := x.ComputerLevel(0); ok {
+			t.Error("player 0 is human but has a computer level")
+		}
+		if lvl, ok := x.ComputerLevel(1); !ok || lvl != newgame.Harder || !x.State.Players[1].Computer {
+			t.Errorf("player 1: level %v, computer %v", lvl, ok)
+		}
 	}
 }

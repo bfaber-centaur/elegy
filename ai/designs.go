@@ -227,10 +227,7 @@ func (s *shipDesigns) syncView(v *View) {
 		if !sl.present || sl.fills == nil {
 			continue
 		}
-		// The builder takes only hulls and parts the race can build now,
-		// so the ruleset's KeepUnentitledParts switch changes nothing
-		// here; the zero ruleset is passed.
-		d, err := engine.Components().ReadDesign(sl.name, sl.hull, sl.fills, s.race, s.lvls, nil, engine.Ruleset{})
+		d, err := engine.Components().ReadDesign(sl.name, sl.hull, sl.fills, s.race, s.lvls, nil, v.Rules)
 		if err != nil {
 			continue
 		}
