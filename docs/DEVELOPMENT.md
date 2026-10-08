@@ -81,7 +81,7 @@ What the tests show today:
 
 Known gaps that a long game can reach:
 
-- Waypoint tasks that load cargo or scrap ships are not modelled, and a minefield detonate order is refused (`engine/orders.go` `validTask`, `DetonateOrder`).
+- Following fleets are not modelled yet (elegy #130), and transport tasks cannot target fleets (KERNEL-STATUS.md "Not modelled yet", TAKEOVER-STATUS.md "Not modelled").
 - An Alternate Reality colony whose owner has no starbase design gets none (TAKEOVER-STATUS.md, UNRESOLVED).
 
 ### After that: games against the computer opponents
