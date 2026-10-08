@@ -22,8 +22,11 @@ import (
 //
 // Step 1 (the warp re-pick, AI.md §11 "Warp choice") runs first.
 //
-// Not implemented: step 4 (under attack) and step 5 (blocked queues);
-// docs/AI-STATUS.md.
+// Step 4 (under attack) runs from year index (universe size + 2)·10
+// (universeSize, ASSUMPTION A36; Elegy has no tutorial games), over the
+// turn's planet order.
+//
+// Not implemented: step 5 (blocked queues); docs/AI-STATUS.md.
 type automation struct {
 	v      *View
 	res    *Result
@@ -45,6 +48,11 @@ func (a *automation) run() {
 	}
 	for _, id := range a.order {
 		a.perPlanet(a.v.ownPlanet(id))
+	}
+	if a.v.Year-FirstYear >= (universeSize(a.v)+2)*10 {
+		for _, id := range a.order {
+			a.underAttack(a.v.ownPlanet(id))
+		}
 	}
 	for _, id := range a.order {
 		a.minesAndFactories(a.v.ownPlanet(id))
@@ -242,6 +250,76 @@ func (a *automation) defenses(p *engine.Planet) bool {
 		return false
 	}
 	return a.q.add(p, engine.QueueItem{Kind: engine.ItemDefenses, Count: min(room, 4)}, false)
+}
+
+// underAttack is step 4, "Under attack": a planet is threatened when a
+// foreign fleet with a bomber orbits it. Quick defenses, if none are
+// queued and the resources after research r ≥ 50: n = r/25, less n/6
+// when n > 5; r −= r/10; n at most the defense room; m = min(100,
+// smallest mineral/5). If n > m: extra = max(0, (r − m·k)/150), k = 25
+// for a Mineral Alchemy race and 100 otherwise; m + extra defenses go to
+// the front, then 5·extra alchemy in front of them.
+//
+// ASSUMPTION A60: a ship is a bomber when its design, known in full
+// (View.Foreign), carries a bomb part; a design known only by hull and
+// mass is not counted. "Orbits" is the sighting at the planet's position.
+// ASSUMPTION A61: when n ≤ m (§7 names only n > m), the n defenses go to
+// the front. "Resources" and "minerals" are the planet's available ones
+// (AI.md §7 "available", as in step 3), and room is A14's.
+func (a *automation) underAttack(p *engine.Planet) {
+	v := a.v
+	if !v.bombed(p.Pos) || a.q.has(p, engine.ItemDefenses) {
+		return
+	}
+	avail := v.available(p, a.budget)
+	r := avail.Resources
+	if r < 50 {
+		return
+	}
+	n := r / 25
+	if n > 5 {
+		n -= n / 6
+	}
+	r -= r / 10
+	col := engine.NewColony(p, &v.Self)
+	n = min(n, col.OperableDefenses(p.Population)-p.Defenses-a.q.count(p, engine.ItemDefenses))
+	m := 100
+	for _, x := range avail.Minerals {
+		m = min(m, x/5)
+	}
+	if n <= m {
+		a.q.add(p, engine.QueueItem{Kind: engine.ItemDefenses, Count: n}, true)
+		return
+	}
+	k := 100
+	if v.Self.Race.LRT.MineralAlchemy {
+		k = 25
+	}
+	extra := max(0, (r-m*k)/150)
+	a.q.add(p, engine.QueueItem{Kind: engine.ItemDefenses, Count: m + extra}, true)
+	a.q.add(p, engine.QueueItem{Kind: engine.ItemMineralAlchemy, Count: 5 * extra}, true)
+}
+
+// bombed reports whether another player's fleet holding a bomber (A60)
+// is at pos.
+func (v *View) bombed(pos engine.Point) bool {
+	for _, o := range v.Others {
+		if o.Owner == v.Player || o.Pos != pos {
+			continue
+		}
+		for _, st := range o.Stacks {
+			d, ok := v.Foreign[st.Design]
+			if !ok || st.Count < 1 {
+				continue
+			}
+			for _, sl := range d.Slots {
+				if sl.Count > 0 && sl.Part.Kind == engine.PartBomb {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 // minesAndFactories is the queue fill after the steps (AI.md §7 "Mines and
