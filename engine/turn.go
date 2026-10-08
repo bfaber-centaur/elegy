@@ -89,8 +89,11 @@ type Game struct {
 	// A checker that keeps state of its own implements RaceCloner, so
 	// GenerateTurn leaves the input game's checker unchanged.
 	Races RaceChecker
-	// Terraform is the remote-mining and Orbital Adjuster rules
-	// (terraformer.go), or nil to skip them.
+	// Terraform is the terraforming and remote-mining rules
+	// (terraformer.go): production's terraform items
+	// (production_terraform.go), remote mining and the Orbital Adjusters.
+	// Nil skips remote mining and the adjusters, and terraform items then
+	// stop the queue.
 	Terraform Terraformer
 }
 

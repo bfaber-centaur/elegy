@@ -20,9 +20,9 @@ const (
 	EventPacketDesignSeen
 )
 
-// Terraformer is the remote-mining and Orbital Adjuster rules, which the
-// terraform package implements (it imports this package, so GenerateTurn
-// reaches it through this interface).
+// Terraformer is the terraforming, remote-mining and Orbital Adjuster
+// rules, which the terraform package implements (it imports this package,
+// so the engine reaches it through this interface).
 type Terraformer interface {
 	// MiningRate is fleet f's remote-mining rate (KERNEL.md "Remote
 	// mining").
@@ -33,6 +33,22 @@ type Terraformer interface {
 	// Adjust runs the Orbital Adjusters (step 7.4) and returns their
 	// messages.
 	Adjust(g *Game) []Event
+
+	// Production's terraform items (KERNEL.md "Terraforming";
+	// production_terraform.go), each the terraform function of the same
+	// name (docs/TERRAFORM-STATUS.md).
+
+	// Reach is how far race at these tech levels terraforms each axis.
+	Reach(race Race, levels [NumFields]int) [3]int
+	// Capacity is the improving clicks still available on p.
+	Capacity(p Planet, race Race, reach [3]int) int
+	// Improve makes one improving click on p and returns the axis moved,
+	// or -1.
+	Improve(p *Planet, race Race, reach [3]int) int
+	// UnitCost is a Terraform Environment unit's resource cost.
+	UnitCost(race Race) int
+	// AutoUnits is how many units an auto item builds this year.
+	AutoUnits(count, capacity int, minOnly bool, popChange, hab int) int
 }
 
 // defaultTask is a new fleet's task at its build planet (PRODUCTION-LAUNCH.md
