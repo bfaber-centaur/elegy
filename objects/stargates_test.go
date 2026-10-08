@@ -158,3 +158,49 @@ func TestConfirmedGateMixedFleet(t *testing.T) {
 		}
 	}
 }
+
+// Damage with old damage, fuel and cargo after losses, and skipped
+// designs (OBJECTS.md "Stargates", BINARY-ONLY; fits OB-021, GT-001).
+func TestPredictionGateLosses(t *testing.T) {
+	// 4 Laser DDs (armor 200) at 50% / u 100: D = 2, Dm = 40. 13%: the
+	// first ship is destroyed (3 < 4) and rand(500) = 50 < 100 lowers D to
+	// 1; avg = ⌊(26·3 + 40·1)/3⌋ = 39, u = 97.
+	l := gateLab(t, "Stargate 100/250", 380)
+	fi := l.fleet(0, origin, "Laser DD", 4)
+	l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 50, Units: 100}
+	Jump(l.g, fi, at(380, 0), &script{3, 50, 50, 50, 50})
+	if st := l.g.Fleets[fi].Stacks[0]; st.Count != 3 || st.Damage != (engine.Damage{Pct: 100, Units: 97}) {
+		t.Errorf("damaged design: %+v", st)
+	}
+	// Nw + Dm ≥ A: D more ships go. u 450: Dm 180, 26 + 180 ≥ 200, so 2
+	// of 4 are destroyed; avg = ⌊(26·2 + 180·2)/2⌋ = 206.
+	l = gateLab(t, "Stargate 100/250", 380)
+	fi = l.fleet(0, origin, "Laser DD", 4)
+	l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 50, Units: 450}
+	j := Jump(l.g, fi, at(380, 0), &script{50, 50, 50, 50})
+	if st := l.g.Fleets[fi].Stacks[0]; st.Count != 2 || j.Designs[0].Destroyed != 2 || st.Damage.Units != 515 {
+		t.Errorf("extra destruction: %+v %+v", j, st)
+	}
+	// Two of three lost from 100 fuel keeps 34.
+	l = gateLab(t, "Stargate 100/250", 380)
+	fi = l.fleet(0, origin, "Laser DD", 3)
+	l.g.Fleets[fi].Fuel = 100
+	Jump(l.g, fi, at(380, 0), &script{0, 0, 50})
+	if f := l.g.Fleets[fi]; f.Stacks[0].Count != 1 || f.Fuel != 34 {
+		t.Errorf("two lost: %+v", f)
+	}
+	// A design at 0% makes no draws and takes no damage.
+	l = gateLab(t, "Stargate 100/250", 200)
+	fi = l.fleet(0, origin, "Laser DD", 3)
+	c := &count{}
+	if j := Jump(l.g, fi, at(200, 0), c); c.n != 0 || j.Designs[0].Pct != 0 || l.g.Fleets[fi].Stacks[0].Damage != (engine.Damage{}) {
+		t.Errorf("0%%: %+v, %d draws", j, c.n)
+	}
+	// Cargo lost by capacity: half of 20 kT, ⌊c·10/20⌋ each, then 1 kT
+	// from ironium.
+	cg := engine.Cargo{Minerals: engine.Minerals{10, 7, 3}}
+	loseShare(&cg, 1, 2)
+	if cg != (engine.Cargo{Minerals: engine.Minerals{4, 4, 2}}) {
+		t.Errorf("cargo share: %+v", cg)
+	}
+}

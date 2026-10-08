@@ -2,6 +2,7 @@ package objects
 
 import (
 	"math"
+	"sort"
 
 	"github.com/bfaber-centaur/elegy/engine"
 )
@@ -181,12 +182,22 @@ func planetAt(g *engine.Game, p engine.Point) int {
 // messages, waypoints, the moved mark, no repair this year, chasers and
 // deleting a lost fleet.
 //
-// ASSUMPTION G1: designs are checked and rolled in order of first
-// appearance in the fleet's stacks, ship by ship. ASSUMPTION G2: the new
-// damage is averaged as (old damage of every ship of the design,
-// destroyed ones included, + survivors × new) / survivors, stored as
-// pct 100. ASSUMPTION G3: the fleet's fuel scales with its fuel capacity
-// (rounded half up; OB-021: 100 → 67), and cargo kept aboard stays whole.
+// Designs go in design-number order, every pct first; a design at 0%
+// is skipped, one at 100% removed, both without draws. Otherwise, unless
+// the owner is IT, each ship draws rand(100) < ⌊pct/3⌋ to be destroyed,
+// and each destroyed ship draws rand(500) < u while D > 0, lowering D.
+// Damage: D = max(1, ⌊p₀·n/100⌋) damaged ships with Dm = max(1,
+// ⌊u·A/500⌋) each (0 and 0 when undamaged), Nw = max(1, ⌊pct·A/100⌋); if
+// D > 0 and Nw + Dm ≥ A, D more ships are destroyed; the s left take avg
+// = ⌊(Nw·s + Dm·D)/s⌋, stored as p = 100, u = max(1, ⌊avg·500/A⌋). When
+// ships are lost, they take ⌊fuel·L/T⌋ of the fuel by fuel capacity, and
+// cargo still aboard is lost the same way by cargo capacity (OBJECTS.md
+// "Stargates", BINARY-ONLY; fits OB-021, GT-001).
+//
+// ASSUMPTION G4: when the extra destruction would take more ships than
+// are left (D > s, which corrupts the original's record), every ship of
+// the design is destroyed. A design's ships are taken as one stack, with
+// its first stack's damage.
 func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 	f := &g.Fleets[fi]
 	out := GateJump{Source: -1, Dest: -1}
@@ -249,7 +260,9 @@ func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 		out.Refused = TooFar
 		return out
 	}
-	type group struct{ design, ships int }
+	// Designs in design-number order (the owner's ship slots); every
+	// pct first, so a mass refusal comes before any draw.
+	type group struct{ design, ships, slot, pct int }
 	var groups []group
 	idx := map[int]int{}
 	for _, st := range f.Stacks {
@@ -261,39 +274,63 @@ func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 			continue
 		}
 		idx[st.Design] = len(groups)
-		groups = append(groups, group{st.Design, st.Count})
+		groups = append(groups, group{design: st.Design, ships: st.Count, slot: designNumber(g, f.Owner, st.Design)})
 	}
-	for _, gr := range groups {
+	sort.SliceStable(groups, func(i, j int) bool { return groups[i].slot < groups[j].slot })
+	for i := range groups {
+		gr := &groups[i]
 		m := g.Designs[gr.design].Mass
 		if (sg.Mass > 0 && m > 5*sg.Mass) || (dg.Mass > 0 && m > 5*dg.Mass) {
 			out.Refused = TooHeavy
 			return out
 		}
+		gr.pct = GateDanger(d, sg.Range, m, sg.Mass, dg.Mass)
 	}
-	fuelCapBefore := fleetFuelCap(g, f)
+	fuelCapBefore, cargoCapBefore := fleetFuelCap(g, f), fleetCargoCap(g, f)
 	count := len(groups)
+	lostAny := false
 	for _, gr := range groups {
 		dsg := g.Designs[gr.design]
-		gd := GateDesign{Design: gr.design, Ships: gr.ships, Pct: GateDanger(d, sg.Range, dsg.Mass, sg.Mass, dg.Mass)}
+		gd := GateDesign{Design: gr.design, Ships: gr.ships, Pct: gr.pct}
 		switch {
+		case gd.Pct <= 0:
 		case gd.Pct >= 100:
-			gd.Lost = true
+			gd.Lost, lostAny = true, true
 			count -= 2
-		case gd.Pct > 0:
+		default:
 			armor := designArmor(dsg)
-			if !it {
+			old := firstDamage(f, gr.design)
+			D, Dm := 0, 0
+			if old.Pct > 0 && old.Units > 0 {
+				D = max(1, old.Pct*gr.ships/100)
+				Dm = max(1, old.Units*armor/500)
+			}
+			if k := gd.Pct / 3; k > 0 && !it {
 				for range gr.ships {
-					if rng.Intn(100) < gd.Pct/3 {
+					if rng.Intn(100) < k {
 						gd.Destroyed++
+						if D > 0 && rng.Intn(500) < old.Units {
+							D--
+						}
 					}
 				}
 			}
-			gd.Damage = max(1, gd.Pct*armor/100)
-			if gd.Destroyed == gr.ships {
+			nw := max(1, gd.Pct*armor/100)
+			gd.Damage = nw
+			left := gr.ships - gd.Destroyed
+			if left > 0 && D > 0 && nw+Dm >= armor {
+				gd.Destroyed += min(D, left)
+				left = max(0, left-D)
+			}
+			if gd.Destroyed > 0 {
+				lostAny = true
+			}
+			if left <= 0 {
 				gd.Lost = true
 				count--
 			} else {
-				gateDamage(f, gr.design, gr.ships, gr.ships-gd.Destroyed, gd.Damage, armor)
+				avg := (nw*left + Dm*D) / left
+				setDesign(f, gr.design, left, engine.Damage{Pct: 100, Units: max(1, avg*500/armor)})
 			}
 		}
 		out.Designs = append(out.Designs, gd)
@@ -315,39 +352,92 @@ func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 		out.FleetLost = true
 		return out
 	}
-	if after := fleetFuelCap(g, f); after < fuelCapBefore && fuelCapBefore > 0 {
-		f.Fuel = (2*f.Fuel*after + fuelCapBefore) / (2 * fuelCapBefore)
+	if lostAny {
+		if fuelCapBefore > 0 {
+			f.Fuel -= f.Fuel * (fuelCapBefore - fleetFuelCap(g, f)) / fuelCapBefore
+		}
+		if cargoCapBefore > 0 {
+			loseShare(&f.Cargo, cargoCapBefore-fleetCargoCap(g, f), cargoCapBefore)
+		}
 	}
 	f.Pos = dest
 	return out
 }
 
-// gateDamage puts a design's survivors into its first stack with the
-// averaged damage (ASSUMPTION G2) and empties its other stacks.
-func gateDamage(f *engine.Fleet, design, ships, survivors, dmg, armor int) {
-	existing := 0
-	first := -1
+// designNumber is a design's number in its owner's ship slots, for
+// ordering; a design in no slot sorts after them, by index.
+func designNumber(g *engine.Game, owner, design int) int {
+	for _, ds := range g.DesignSlots {
+		if ds.Owner == owner && !ds.Starbase && ds.Design == design {
+			return ds.Slot
+		}
+	}
+	return maxShipDesigns + design
+}
+
+// firstDamage is the damage of a design's first stack in the fleet.
+func firstDamage(f *engine.Fleet, design int) engine.Damage {
+	for _, st := range f.Stacks {
+		if st.Design == design && st.Count > 0 {
+			return st.Damage
+		}
+	}
+	return engine.Damage{}
+}
+
+// setDesign leaves a design's n survivors in its first stack with dmg
+// and empties its other stacks.
+func setDesign(f *engine.Fleet, design, n int, dmg engine.Damage) {
+	first := true
 	for si := range f.Stacks {
 		st := &f.Stacks[si]
 		if st.Design != design || st.Count <= 0 {
 			continue
 		}
-		if st.Damage.Units > 0 && st.Damage.Pct > 0 {
-			damaged := (st.Damage.Pct*st.Count + 99) / 100
-			existing += st.Damage.Units * armor / 500 * damaged
-		}
-		if first < 0 {
-			first = si
+		if first {
+			st.Count, st.Damage, first = n, dmg, false
 		} else {
 			st.Count = 0
 		}
 	}
-	avg := (existing + survivors*dmg) / survivors
-	f.Stacks[first].Count = survivors
-	f.Stacks[first].Damage = engine.Damage{Pct: 100, Units: avg * 500 / armor}
-	if f.Stacks[first].Damage.Units == 0 {
-		f.Stacks[first].Damage = engine.Damage{}
+}
+
+// loseShare takes ⌊C·lost/total⌋ of the cargo C, split as ⌊c·x/C⌋ per
+// item, then the remainder 1 kT at a time over ironium, boranium,
+// germanium and colonists in one pass over the items still holding cargo.
+func loseShare(c *engine.Cargo, lost, total int) {
+	items := []*int{&c.Minerals[engine.Ironium], &c.Minerals[engine.Boranium], &c.Minerals[engine.Germanium], &c.Colonists}
+	C := 0
+	for _, v := range items {
+		C += *v
 	}
+	if C == 0 || lost <= 0 {
+		return
+	}
+	x := C * lost / total
+	taken := 0
+	for _, v := range items {
+		t := *v * x / C
+		*v -= t
+		taken += t
+	}
+	for _, v := range items {
+		if taken >= x {
+			break
+		}
+		if *v > 0 {
+			*v--
+			taken++
+		}
+	}
+}
+
+func fleetCargoCap(g *engine.Game, f *engine.Fleet) int {
+	c := 0
+	for _, st := range f.Stacks {
+		c += st.Count * g.Designs[st.Design].CargoCapacity
+	}
+	return c
 }
 
 func fleetFuelCap(g *engine.Game, f *engine.Fleet) int {
