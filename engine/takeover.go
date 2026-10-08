@@ -468,9 +468,16 @@ func (g *Game) removeFleets(ids map[int]bool) {
 // then satisfied and clears; "load exactly" keeps what it could not load
 // and clears when that reaches 0 ("load actions persist until
 // satisfied"). A task left with no action is no task, as after unloads.
+//
+// Away from a planet the loads come from salvage (ASSUMPTION T5, see
+// loadSalvage).
 func (g *Game) load(f *Fleet) {
 	pi := g.planetAt(f.Pos)
-	if pi < 0 || g.Planets[pi].Owner != f.Owner {
+	if pi < 0 {
+		g.loadSalvage(f)
+		return
+	}
+	if g.Planets[pi].Owner != f.Owner {
 		return
 	}
 	p := &g.Planets[pi]
@@ -517,11 +524,13 @@ func (g *Game) load(f *Fleet) {
 // In deep space minerals are destroyed, with no salvage, and colonists
 // are refused (BINARY-ONLY).
 //
+// Away from a planet, minerals unload into the salvage object at the
+// fleet's position (ASSUMPTION T5, unloadSalvage).
+//
 // ASSUMPTION T1: Elegy's task does not record what a waypoint pointed
-// at, so a fleet away from any planet but sharing its position with
-// another fleet or a salvage object keeps its cargo: unloads to fleets
-// and salvage are not modelled. Anywhere else away from a planet is deep
-// space.
+// at, so a fleet away from any planet and any salvage but sharing its
+// position with another fleet keeps its cargo: unloads to fleets are not
+// modelled. Anywhere else away from a planet is deep space.
 func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 	var events []Event
 	pi := g.planetAt(f.Pos)
@@ -545,7 +554,13 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 			continue
 		}
 		if pi < 0 {
-			switch {
+			switch si := g.salvageAt(f.Pos); {
+			case si >= 0 && c < NumMinerals:
+				g.unloadSalvage(f, si, c, amount)
+			case si >= 0:
+				// ASSUMPTION T7: colonists unloaded into salvage are
+				// refused, as in deep space.
+				events = append(events, Event{Kind: EventDropRefused, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: amount})
 			case !g.deepSpace(f):
 			case c < NumMinerals:
 				f.Cargo.Minerals[c] -= amount
@@ -570,6 +585,76 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		f.Task = Task{}
 	}
 	return events
+}
+
+// salvageAt is the index of the first salvage object at pos, in object
+// order, or -1. ASSUMPTION T5: Elegy's task does not record what its
+// waypoint pointed at, so a transport task away from a planet acts on the
+// first salvage object at the fleet's position (OBJECTS.md "Salvage",
+// "Loading": "a fleet at the salvage's position"); with no space objects
+// there is none.
+func (g *Game) salvageAt(pos Point) int {
+	if g.Objects == nil {
+		return -1
+	}
+	for i, s := range g.Salvage {
+		if s.Pos == pos {
+			return i
+		}
+	}
+	return -1
+}
+
+// loadSalvage runs a transport task's mineral loads from the salvage
+// object at the fleet's position (OBJECTS.md "Salvage", "Loading",
+// BINARY-ONLY): the usual load amount, capped by what the salvage holds
+// (SpaceObjects.SalvageLoad), whoever owns the salvage and the fleet.
+// Minerals load in order, each from the space the earlier ones left, and
+// the actions clear as for a planet. Colonists cannot be loaded from
+// salvage; ASSUMPTION T6: a colonist load action waits, as a load away
+// from the owner's planet does (T4). An emptied object stays until the
+// next decay.
+func (g *Game) loadSalvage(f *Fleet) {
+	si := g.salvageAt(f.Pos)
+	if si < 0 {
+		return
+	}
+	sv := &g.Salvage[si]
+	free := g.cargoCapacity(f) - f.Cargo.mass()
+	for c := range NumMinerals {
+		t := &f.Task.Transport[c]
+		if t.Action != LoadAll && t.Action != LoadExactly {
+			continue
+		}
+		want := max(0, free)
+		if t.Action == LoadExactly {
+			want = min(want, t.Amount)
+		}
+		amount := g.Objects.SalvageLoad(*sv, c, want)
+		if t.Action == LoadExactly {
+			t.Amount -= amount
+		}
+		sv.Minerals[c] -= amount
+		f.Cargo.Minerals[c] += amount
+		free -= amount
+		if t.Action == LoadAll || t.Amount <= 0 {
+			t.Action, t.Amount = TransportNone, 0
+		}
+	}
+	if f.Task.Transport == ([NumCargo]Transport{}) {
+		f.Task = Task{}
+	}
+}
+
+// unloadSalvage unloads amount kT of mineral c into salvage object si,
+// up to its room (OBJECTS.md "Salvage", "Loading": accepted only up to
+// the object's stored size, which an unload does not refresh). ASSUMPTION
+// T7: what does not fit stays aboard.
+func (g *Game) unloadSalvage(f *Fleet, si, c, amount int) {
+	sv := &g.Salvage[si]
+	amount = min(amount, g.Objects.SalvageRoom(*sv))
+	sv.Minerals[c] += amount
+	f.Cargo.Minerals[c] -= amount
 }
 
 // deepSpace reports a fleet away from any planet with no other fleet or

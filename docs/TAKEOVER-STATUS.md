@@ -40,6 +40,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | "At the start of this phase" ownership | `phaseStart` | BINARY-ONLY (#34) | `TestPredictionPhaseStartOwnership` |
 | Unload amounts; own-planet unloads before or after growth; minerals on any planet | `unload` | BINARY-ONLY (#34) | `TestPredictionUnloadAmounts`, `TestPredictionForeignMinerals` |
 | Deep space: minerals destroyed (no salvage), colonists refused | `unload`, `deepSpace` | BINARY-ONLY (#37) | `TestPredictionDeepSpaceUnload` |
+| Salvage: a transport task loads minerals from it, capped by what it holds, and unloads minerals into it up to its stored size (ASSUMPTION T5–T7) | `loadSalvage`, `unloadSalvage`, `SpaceObjects.SalvageLoad`, `SalvageRoom` | BINARY-ONLY (OBJECTS.md "Salvage", "Loading") | `TestLoadFromSalvage`, `TestUnloadIntoSalvage`; through the adapter `TestSalvageLoadInTurn`, `TestSalvageUnloadInTurn`, `TestSalvageFirstAtPosition` |
 | Ground combat | `resolveDrops` | CONFIRMED (T-21..T-25); WM, IS, AR BINARY-ONLY | `TestConfirmedGroundCombat`, `TestPredictionGroundStrengthTraits` |
 | Drop resolution order | `resolveQueue` | BINARY-ONLY (#34) | none yet beyond one planet at a time |
 | Several players dropping | `dropWinner` (ruleset switch `Legacy.DropScan`) | LEGACY BUG, CONFIRMED (T-32) | `TestConfirmedSeveralPlayersDrop` |
@@ -62,7 +63,10 @@ established Stars! behavior; each is marked `ASSUMPTION Tn` in the code.
 
 | Id | What Elegy does | Why |
 |---|---|---|
-| T1 | Away from a planet, a fleet that shares its position with another fleet or a salvage object keeps the cargo it would unload (the action still clears). Anywhere else is deep space. | TAKEOVER.md defines deep space by the waypoint's target, which Elegy's task does not record, and unloads to fleets and salvage are not modelled. |
+| T1 | Away from a planet and any salvage, a fleet that shares its position with another fleet keeps the cargo it would unload (the action still clears). Anywhere else is deep space. | TAKEOVER.md defines deep space by the waypoint's target, which Elegy's task does not record, and unloads to fleets are not modelled. |
+| T5 | Away from a planet, a transport task loads from and unloads into the first salvage object (object order) at the fleet's position; with no space objects there is none. | OBJECTS.md "Salvage", "Loading" names a fleet at the salvage's position; the original acts on the waypoint's target, which Elegy's task does not record. |
+| T6 | A colonist load action at salvage waits, as a load away from the owner's planet does (T4). | OBJECTS.md says colonists cannot be loaded from salvage, not what becomes of the action. |
+| T7 | Minerals unloaded into salvage beyond its room stay aboard (the action clears); colonists unloaded there are refused, as in deep space. | OBJECTS.md says an unload is accepted only up to the stored size, not where the rest goes, and says nothing of colonists. |
 
 The scan for several drops starts at the first dropping player, so a lone
 attacker of strength 0 (Alternate Reality colonists, `k = 0`) lands; the

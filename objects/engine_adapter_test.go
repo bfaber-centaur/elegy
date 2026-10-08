@@ -521,3 +521,68 @@ func TestDesignOrderTraderParts(t *testing.T) {
 		t.Errorf("jrc3-faithful: cargo %d owned, %d unowned; want both %d (the pod kept)", owned, unowned, with)
 	}
 }
+
+// salvageTurn runs one year of a fleet of player 0 (a 210 kT Medium
+// Freighter) with task and cargo at origin, away from any planet, on the
+// salvage objects svs of player 1, each marked fresh so the year's decay
+// leaves its amounts and stored size (OBJECTS.md "Salvage", "Decay").
+func salvageTurn(t *testing.T, task engine.Task, cargo engine.Minerals, svs ...engine.Salvage) engine.Game {
+	t.Helper()
+	l := newLab(t)
+	for i := range svs {
+		svs[i].Owner, svs[i].Fresh = 1, true
+	}
+	l.g.Salvage = svs
+	l.g.Objects = &Space{}
+	fi := l.fleet(0, origin, "Freighter", 1)
+	l.g.Fleets[fi].Task = task
+	l.g.Fleets[fi].Cargo.Minerals = cargo
+	return turn(t, *l.g, top{})
+}
+
+// A transport task loads from the salvage under the fleet through
+// Space.SalvageLoad: the usual amounts capped by what the object holds,
+// minerals in order from the space left (OBJECTS.md "Salvage",
+// "Loading"; ASSUMPTION T5).
+func TestSalvageLoadInTurn(t *testing.T) {
+	task := engine.Task{Kind: engine.TaskTransport}
+	task.Transport[0] = engine.Transport{Action: engine.LoadAll}
+	task.Transport[1] = engine.Transport{Action: engine.LoadExactly, Amount: 150}
+	g := salvageTurn(t, task, engine.Minerals{}, engine.Salvage{Pos: origin, Minerals: engine.Minerals{120, 500, 40}, Steps: 66})
+	// Ironium: all 120 the object holds. Boranium: 150 asked, 90 of space
+	// left.
+	if f, sv := g.Fleets[0].Cargo.Minerals, g.Salvage[0].Minerals; f != (engine.Minerals{120, 90, 0}) || sv != (engine.Minerals{0, 410, 40}) {
+		t.Errorf("fleet %v, salvage %v; want [120 90 0] and [0 410 40]", f, sv)
+	}
+}
+
+// A transport task unloads into the salvage under the fleet only up to
+// its room, Space.SalvageRoom: the object holds 37 kT in 6 steps, so 23
+// kT fit and the rest stays aboard (OBJECTS.md "Salvage", "Loading";
+// ASSUMPTION T7).
+func TestSalvageUnloadInTurn(t *testing.T) {
+	task := engine.Task{Kind: engine.TaskTransport}
+	task.Transport[0] = engine.Transport{Action: engine.UnloadAll}
+	task.Transport[2] = engine.Transport{Action: engine.UnloadExactly, Amount: 15}
+	g := salvageTurn(t, task, engine.Minerals{10, 5, 40}, engine.Salvage{Pos: origin, Minerals: engine.Minerals{30, 0, 7}, Steps: 6})
+	// Ironium 10 of 23; germanium 15 asked, 13 of room left.
+	if f, sv := g.Fleets[0].Cargo.Minerals, g.Salvage[0].Minerals; f != (engine.Minerals{0, 5, 27}) || sv != (engine.Minerals{40, 0, 20}) {
+		t.Errorf("fleet %v, salvage %v; want [0 5 27] and [40 0 20]", f, sv)
+	}
+}
+
+// With several salvage objects, a transport task acts on the first one
+// at the fleet's position, in object order (ASSUMPTION T5): not one
+// elsewhere listed before it, nor a later one at the same position.
+func TestSalvageFirstAtPosition(t *testing.T) {
+	task := engine.Task{Kind: engine.TaskTransport}
+	task.Transport[0] = engine.Transport{Action: engine.LoadAll}
+	g := salvageTurn(t, task, engine.Minerals{},
+		engine.Salvage{Pos: at(50, 0), Minerals: engine.Minerals{100, 0, 0}, Steps: 10},
+		engine.Salvage{Pos: origin, Minerals: engine.Minerals{50, 0, 0}, Steps: 5},
+		engine.Salvage{Pos: origin, Minerals: engine.Minerals{70, 0, 0}, Steps: 7})
+	got := []int{g.Salvage[0].Minerals[0], g.Salvage[1].Minerals[0], g.Salvage[2].Minerals[0]}
+	if g.Fleets[0].Cargo.Minerals[0] != 50 || got[0] != 100 || got[1] != 0 || got[2] != 70 {
+		t.Errorf("fleet ironium %d, salvage ironium %v; want 50 and [100 0 70]", g.Fleets[0].Cargo.Minerals[0], got)
+	}
+}

@@ -310,9 +310,10 @@ the rules each call uses.
 
 Not wired yet:
 
-- **Salvage loads and unloads:** `SalvageLoad` and `SalvageRoom` wait
-  for the engine's load and unload-into-salvage tasks, which are not
-  modelled.
+- **Salvage manual loads:** the engine's transport tasks load from and
+  unload into salvage through `SalvageLoad` and `SalvageRoom` (the
+  adapter's `Space.SalvageLoad`, `Space.SalvageRoom`); a manual cargo
+  order with salvage, and its messages 0x0db and 0x0dc, are not modelled.
 - **Computer players' planet trades:** the adapter passes
   `engine.Player.Level` to `Space.Meet`; `newgame` sets it from each
   computer player's level, and the save (version 7) keeps it.

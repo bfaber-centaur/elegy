@@ -14,9 +14,9 @@ The milestone is `GenerateTurn` running the players' orders, waypoint
 tasks, production and the space objects in KERNEL.md's turn order, with
 the GT, MF, OB, WT and WU vectors running through it in
 `TestParityVectors`, and every failure listed below under "Known parity
-failures" with its real reason. As of this change, in the baseline: GT
-4 pass; MF 23 pass, 2 random; OB 119 pass, 6 random; WT 23 pass, 5
-random; WU 28 pass. Packet items build and launch through
+failures" with its real reason. In the baseline at main e5e613c: GT 4
+pass; MF 23 pass, 2 random; OB 145 pass, 1 random, 4 sample-only; WT 10
+pass, 18 sample-only; WU 31 pass. Packet items build and launch through
 `SpaceObjects.LaunchPacket`; the harness maps them (items 6, 14–17)
 since the vectors carry each planet's packet destination and warp
 (stars-elegy 4247afc).
@@ -202,8 +202,8 @@ Choices where OBJECTS.md is silent:
 Not modelled yet: following fleets (step 1a.3; Elegy does not keep
 waypoint 0's target), the stargate choice of the route task, waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol, lay
-mines, remote mining and scrap (load, and loading from or unloading into salvage;
-ORDERS-STATUS.md), terraforming production items (the
+mines, remote mining and scrap (load from and unload into salvage only
+by task, ASSUMPTION T5; ORDERS-STATUS.md), terraforming production items (the
 orders lane adds them through `Game.Terraform`), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
 0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
