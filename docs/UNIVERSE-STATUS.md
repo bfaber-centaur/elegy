@@ -186,10 +186,12 @@ Unimplemented behaviour:
 11. Salvage as a space object: it stays in `engine.Game.Salvage`.
     Salvage numbering, decay and loading exist in `objects/`; the spec
     gaps on owner, merging and pickup are with the objects research lane.
-12. Not wired by the kernel yet: the terraforming production items, the
-    remote-mining task, Orbital Adjusters and `Impact.DiscloseDesign`
-    (TERRAFORM-STATUS.md "Turn wiring"); the yearly race check
-    (RACES-STATUS.md "Not wired yet").
+12. Wired by the kernel on main (2026-10-08): the terraforming
+    production items (`engine/production_terraform.go`), the
+    remote-mining task, Orbital Adjusters (`Game.Terraform`),
+    `Impact.DiscloseDesign` (`objects/engine_adapter.go`) and the yearly
+    race check (`Game.Races`). A new game leaves `Races` and `Terraform`
+    nil; `game.New` sets both (docs/GAME-LOOP.md).
 13. Generation itself, under "Not modelled" below.
 
 ## Not modelled
