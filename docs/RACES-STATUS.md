@@ -34,12 +34,12 @@ germanium bit (31); it gives exactly the corpus's −3667 and 1457 points.
   their rules with the PG001 race (growth 0 is repaired and punished) and
   leaves the messages to the engine wiring below.
 
-## Not wired yet
+## Wiring and gaps
 
-- The yearly check (`races.YearlyCheck`) is not called by
-  `engine.GenerateTurn`: the engine's `Player` has no race design, name or
-  tampered flag yet. Wiring it needs that shared-type change and belongs
-  with the turn engine.
+- The yearly check runs in `engine.GenerateTurn` step 2a through
+  `Game.Races` (`races.GameRaces`, which holds each player's wizard
+  settings and tampered flag). The parity harness's rp corpus checks it
+  end to end: RD-P1..RD-P21 pass (`engine/parity_test.go`).
 - Race files, their checksums and the corrupt-file refusal: Elegy has no
   race files.
 - The wizard's own limits (20-wide ranges, AR resets, no saving below 0)
