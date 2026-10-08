@@ -108,16 +108,60 @@ func TestConfirmedTransit(t *testing.T) {
 }
 
 // Badness rejects a try outside the galaxy or on an object (OBJECTS.md
-// "Placement badness"); the creation flags are tested in newgame.
+// "Placement badness"; the 1000 + W line is inside, BINARY-ONLY); the
+// creation flags are tested in newgame.
 func TestPredictionBadnessRejects(t *testing.T) {
 	sr := Surroundings{Width: 400, Objects: []engine.Point{at(200, 200)}}
-	for _, p := range []engine.Point{at(-1, 50), at(50, 400), at(200, 200)} {
+	if got := sr.Badness(at(50, 400)); got != 4 {
+		t.Errorf("on the 1000 + W line: badness %d, want 4 (edge)", got)
+	}
+	for _, p := range []engine.Point{at(-1, 50), at(50, 401), at(200, 200)} {
 		if got := sr.Badness(p); got != Rejected {
 			t.Errorf("%v: badness %d, want rejected", p, got)
 		}
 	}
 	if got := sr.Badness(at(100, 100)); got != 0 {
 		t.Errorf("open space: %d", got)
+	}
+}
+
+// Movement tries (OBJECTS.md "During movement", BINARY-ONLY): a try on
+// the old position is skipped but uses up a try; when every scored try is
+// rejected the end moves to the first of them; with every try skipped
+// there is no position.
+func TestPredictionPlaceSkip(t *testing.T) {
+	sr := Surroundings{Width: 400}
+	old, out1, out2 := at(0, 0), at(-1, 0), at(-2, 0)
+	tries := []engine.Point{old, out1, out2}
+	n := 0
+	next := func() engine.Point {
+		p := tries[min(n, len(tries)-1)]
+		n++
+		return p
+	}
+	if p, ok := sr.Place(next, func(p engine.Point) bool { return p == old }); !ok || p != out1 || n != PlacementTries {
+		t.Errorf("all rejected: %v %v after %d tries, want %v", p, ok, n, out1)
+	}
+	n = 0
+	if _, ok := sr.Place(func() engine.Point { n++; return old }, func(p engine.Point) bool { return p == old }); ok || n != PlacementTries {
+		t.Errorf("all skipped: ok %v after %d tries", ok, n)
+	}
+	// A skipped try uses up one of the 100: the 100th try is never drawn
+	// when the first is skipped and the rest rejected.
+	n = 0
+	good := at(100, 100)
+	seq := func() engine.Point {
+		n++
+		switch {
+		case n == 1:
+			return old
+		case n <= PlacementTries:
+			return out1
+		}
+		return good
+	}
+	if p, _ := sr.Place(seq, func(p engine.Point) bool { return p == old }); p != out1 {
+		t.Errorf("skipped try not counted: %v", p)
 	}
 }
 

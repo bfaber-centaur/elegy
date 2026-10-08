@@ -95,10 +95,10 @@ type Surroundings struct {
 // 225, 900) and planets' (< 25, 100, 400, 784) set 8, 4, 2, 1 from the
 // closest band.
 //
-// ASSUMPTION W1: outside the galaxy is a coordinate below 1000 or at or
-// above 1000 + W (positions are drawn as 1000 + rand(W)).
+// Outside the galaxy is a coordinate below 1000 or above 1000 + W; one
+// equal to 1000 + W is inside (BINARY-ONLY).
 func (sr Surroundings) Badness(p engine.Point) int {
-	if p.X < Origin || p.Y < Origin || p.X >= Origin+sr.Width || p.Y >= Origin+sr.Width {
+	if p.X < Origin || p.Y < Origin || p.X > Origin+sr.Width || p.Y > Origin+sr.Width {
 		return Rejected
 	}
 	for _, list := range [][]engine.Point{sr.Planets, sr.Objects, sr.Ends} {
@@ -129,25 +129,26 @@ func (sr Surroundings) Badness(p engine.Point) int {
 }
 
 // Place makes up to PlacementTries tries and keeps the first with the
-// lowest badness, stopping at a try with none. reject, if set, rejects a
-// try outright.
-func (sr Surroundings) Place(try func() engine.Point, reject func(engine.Point) bool) engine.Point {
-	var best engine.Point
+// lowest badness, stopping at a try with none; a rejected try (15) beats
+// no try at all. skip, if set, passes over a try without scoring it, the
+// try still using up one of the PlacementTries (OBJECTS.md "During
+// movement", BINARY-ONLY). ok is false only when every try was skipped.
+func (sr Surroundings) Place(try func() engine.Point, skip func(engine.Point) bool) (p engine.Point, ok bool) {
 	bestBad := Rejected + 1
 	for range PlacementTries {
-		p := try()
-		bad := sr.Badness(p)
-		if reject != nil && reject(p) {
-			bad = Rejected
+		q := try()
+		if skip != nil && skip(q) {
+			continue
 		}
+		bad := sr.Badness(q)
 		if bad < bestBad {
-			best, bestBad = p, bad
+			p, bestBad, ok = q, bad, true
 		}
 		if bad == 0 {
 			break
 		}
 	}
-	return best
+	return p, ok
 }
 
 // UniformTry is a uniform try over the galaxy, 1000 + rand(W) per axis.
@@ -203,6 +204,9 @@ func (s *Space) surroundings(g *engine.Game, width, wi, ei int) Surroundings {
 	for _, m := range s.Minefields {
 		sr.Objects = append(sr.Objects, m.Pos)
 	}
+	for _, t := range s.Traders {
+		sr.Objects = append(sr.Objects, t.Pos)
+	}
 	return sr
 }
 
@@ -212,14 +216,14 @@ func (s *Space) surroundings(g *engine.Game, width, wi, ei int) Surroundings {
 // A jump resets the years, clears who knows the end and places it from
 // up to 100 uniform tries over the galaxy. Otherwise the end jiggles:
 // years + 1, up to 100 tries of (x + rand(25) − 12, y + rand(25) − 12),
-// a try equal to the old position rejected. The class never changes;
+// a try equal to the old position skipped. The class never changes;
 // destination knowledge is kept.
 //
-// ASSUMPTION W2: jump and jiggle tries are judged by the creation
-// badness (partner, other ends as they stand, planets; fleets and
-// minefield centres as objects), keeping the first try with the lowest
-// badness; a jiggle whose tries are all rejected keeps the first. Each try
-// draws x before y.
+// Both moves judge their tries with the creation badness (partner, the
+// other ends as they stand, planets; fleets, minefield centres and
+// Traders as objects), each try drawing x before y; if every scored try
+// is rejected the end moves to the first of them (OBJECTS.md "During
+// movement", BINARY-ONLY).
 func (s *Space) MoveWormholes(g *engine.Game, width int, rng engine.Rand) []WormholeMove {
 	var out []WormholeMove
 	for wi := range s.Wormholes {
@@ -231,7 +235,7 @@ func (s *Space) MoveWormholes(g *engine.Game, width int, rng engine.Rand) []Worm
 			if rng.Intn(100) < JumpChance(*e) {
 				e.Years = 0
 				e.Known = nil
-				e.Pos = sr.Place(UniformTry(width, rng), nil)
+				e.Pos, _ = sr.Place(UniformTry(width, rng), nil)
 				mv.Jumped = true
 			} else {
 				e.Years++
@@ -240,7 +244,9 @@ func (s *Space) MoveWormholes(g *engine.Game, width int, rng engine.Rand) []Worm
 					y := from.Y + rng.Intn(25) - 12
 					return engine.Point{X: x, Y: y}
 				}
-				e.Pos = sr.Place(try, func(p engine.Point) bool { return p == from })
+				if p, ok := sr.Place(try, func(p engine.Point) bool { return p == from }); ok {
+					e.Pos = p
+				}
 			}
 			mv.To = e.Pos
 			out = append(out, mv)

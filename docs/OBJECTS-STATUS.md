@@ -1,7 +1,8 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `5469029`), with the part statistics of
+(as of stars-elegy `main` at `fbf17ba`) and its Mystery Trader appearance
+in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
 
@@ -9,7 +10,7 @@ The package reads the engine's exported state and exposes step and query
 functions. It does not change `engine/`, and `engine.GenerateTurn` does
 not call it yet: the turn engine owns the year's order (OBJECTS.md "Turn
 placement") and wires each step in. Object families land one at a time:
-minefields, then wormholes.
+minefields, wormholes, then the Mystery Trader.
 
 ## Minefields
 
@@ -94,14 +95,16 @@ visibility yet; those belong to the turn engine and scanning code.
 `newgame` now places wormholes through `objects`; its tests and the
 creation results are unchanged.
 
-### Assumptions (spec gaps)
+OBJECTS.md now answers the two wormhole gaps (W1, W2), so they are no
+longer assumptions; both answers are BINARY-ONLY:
 
-1. **W1** Outside the galaxy is a coordinate below 1000 or at or above
-   1000 + W.
-2. **W2** Jump and jiggle tries are judged by the creation badness
-   (partner, the other ends as they stand, planets; fleets and minefield
-   centres as objects); a jiggle whose tries are all rejected keeps the
-   first; each try draws x before y.
+- Outside the galaxy is a coordinate below 1000 or above 1000 + W; a
+  coordinate equal to 1000 + W is inside (`Surroundings.Badness`).
+- Jump and jiggle tries use the creation badness, with fleets, minefield
+  centres and Traders as objects; each try draws x before y. A jiggle try
+  on the old position is skipped without a score but uses up one of the
+  100 tries. If every scored try is rejected, the end moves to the first
+  of them; it does not stay put (`Surroundings.Place`).
 
 ### What the turn engine needs to call (wormholes)
 
@@ -116,3 +119,50 @@ creation results are unchanged.
   `Space.MoveWormholes`.
 - Scanning marks sightings with `WormholeEnd.MarkKnown` and shows
   destinations with `Space.Destination`.
+
+## Mystery Trader
+
+| Rule | Function | Status |
+|---|---|---|
+| Appearance: chance, warp, start, destination, item, in draw order | `Space.Appear` | CONFIRMED (KERNEL.md, KX-004 S6–S10) |
+| Part reroll (bits 6, 7, 10, 11) and conversion of the second draw (7 before 120, 10 before 150, 11 before 180) | `Space.Appear` | BINARY-ONLY |
+| Movement: warp rise, then the 1/3 new destination; arrival, leaving | `Space.MoveTraders` | CONFIRMED in part (OB-023, OB-026, OB-031); draws BINARY-ONLY |
+| New destination on any of the four edges | `newDestination` | CONFIRMED in part (OB-023); draw order BINARY-ONLY |
+| Each year's step, shared with packets | `StepToward` | BINARY-ONLY in detail; agrees with OB-003, OB-023, OB-028 |
+| Trade threshold, one trade per player per Trader, fleet consumed | `Space.Meet` | CONFIRMED (OB-004, OB-023, OB-030-T, WT-002..WT-004) |
+| Part reward; parts owned per player | `TraderParts`, `TraderParts.Items` | CONFIRMED (WT-003 A) |
+| Research reward: L from cargo and tech sum, field choice | `researchReward` | CONFIRMED (WT-002 A, B); field odds MEASURED; draws BINARY-ONLY |
+| Every field at 26: nothing with 1/5, else a part or a ship | `Space.Meet` | CONFIRMED (WT-004 C) |
+| 25th redraw finds an unowned part but gives a ship | `LegacyTraderLastRedraw` (on) | LEGACY BUG, BINARY-ONLY |
+| Ship gifts: designs, first empty design slot | `shipGift`, `giftDesign` | CONFIRMED (WT-003 B, WT-004, OB-026) |
+| Gift draw order, matching (earlier gifts only, name not compared), counts, new fleet | `shipGift`, `giftSlot` | BINARY-ONLY; fleet number from 1 as a launch (SL-02) |
+| Computer players' planets: after each Trader's fleets, planet-number order, scan stop, d² ≤ 10,000, ship item as bit 12 | `Space.Meet` | CONFIRMED in part (TP-001, TP-002); Harder 3,500 kT CONFIRMED (O-53); order, range and ship items BINARY-ONLY |
+
+Traders sit in `Space.Traders` and count toward the object limit and the
+wormhole placement objects. `Space.GiftDesigns` marks the designs a gift
+created.
+
+### Assumptions (spec gaps)
+
+OBJECTS.md now answers T1–T5, T7 and T8 of the first draft. Still open:
+
+1. **T6** The gift designs fill the hull's slots in the order the spec
+   lists the parts, "in two slots" filling consecutive slots.
+2. **T9** On arrival, "another Trader present" counts the Traders still in
+   the galaxy at that point; one removed earlier this year does not count.
+3. **T10** The traded fleet still holds its fleet number when the gift
+   fleet is numbered.
+
+### What the turn engine needs to call (Mystery Trader)
+
+- End of production, after new minerals: `Space.Appear`, then the
+  appearance message to every player.
+- Before fleets move: `Space.MoveTraders`, then the waypoint refresh, so
+  waypoints on a Trader follow its new position. A Trader that left turns
+  them into plain positions, and the owner is told.
+- After battles: `Space.Meet`, which runs each Trader's fleets and then
+  its planets; messages come from the returned records.
+- Designs: pass `TraderParts.Items(player)` to `ReadDesign`; drop a
+  deleted design's index from `Space.GiftDesigns`.
+- Scanning shows Traders as objects; the engine has no Trader visibility
+  yet.
