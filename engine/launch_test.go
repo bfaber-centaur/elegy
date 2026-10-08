@@ -425,3 +425,68 @@ func TestRouteWarpGateConditions(t *testing.T) {
 		}
 	}
 }
+
+// RawWarp leaves out only the free-warp step-down (AI.md §11 `raw`;
+// PRODUCTION-LAUNCH.md "Ideal warp of the fleet" step 3): for one design
+// it is never below IdealWarp, its fuel figure is below 121 mg, and the
+// two engines exempt from the step-down give the same value; four engines
+// give exact values where the two differ.
+func TestRawWarpWithoutStepDown(t *testing.T) {
+	c := Components()
+	for _, engine := range []string{"Settler's Delight", "Quick Jump 5", "Fuel Mizer", "Long Hump 6",
+		"Daddy Long Legs 7", "Alpha Drive 8", "Trans-Galactic Drive", "Interspace-10", "Enigma Pulsar",
+		"Trans-Star 10", "Radiating Hydro-Ram Scoop", "Sub-Galactic Fuel Scoop", "Trans-Galactic Fuel Scoop",
+		"Trans-Galactic Super Scoop", "Trans-Galactic Mizer Scoop", "Galaxy Scoop"} {
+		d, err := c.NewDesign(engine, "Scout", []SlotFill{{Slot: 0, Part: engine, Count: 1}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		s, err := NewFleetShips(ElegyRules(), []ShipStack{{Design: d, Count: 1}}, 0, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, ideal := s.RawWarp(), s.IdealWarp()
+		if raw < ideal || d.Engine.Fuel[raw] >= 121 {
+			t.Errorf("%s: raw %d (fuel %d), ideal %d", engine, raw, d.Engine.Fuel[raw], ideal)
+		}
+		if noFuelWarpEngines[engine] && raw != ideal {
+			t.Errorf("%s: raw %d, ideal %d", engine, raw, ideal)
+		}
+	}
+	none, _ := NewFleetShips(ElegyRules(), nil, 0, false)
+	if none.RawWarp() != none.IdealWarp() {
+		t.Error("no ships")
+	}
+
+	// Engines where the step-down acts, worked from PRODUCTION-LAUNCH.md
+	// "Ideal warp of the fleet" and the stars-elegy fuel tables
+	// (data/components.json `fuel_table`, COMPONENTS.md "Fuel tables",
+	// CONFIRMED CS-002). Step 2 stops at the first warp below 121 mg; raw
+	// keeps it (step 4 lowers warp 10 to 9), ideal takes step 3:
+	//   - Fuel Mizer 0,0,0,0,0,35,120,175,...: step 2 stops at 6 (120);
+	//     f(5) = 35, f(4) = 0, so ideal 4.
+	//   - Sub-Galactic Fuel Scoop ...,0,85,105,210,...: 7 (105); f(6) = 85,
+	//     f(5) = 0, so ideal 5.
+	//   - Trans-Galactic Fuel Scoop ...,0,88,100,145,...: 8 (100); f(7) = 88,
+	//     f(6) = 0, so ideal 6.
+	//   - Trans-Galactic Super Scoop ...,0,65,90,108: 10 (108), raw 9 by
+	//     step 4; f(9) = 90, f(8) = 65, f(7) = 0, so ideal 7.
+	for engine, want := range map[string][2]int{
+		"Fuel Mizer":                 {6, 4},
+		"Sub-Galactic Fuel Scoop":    {7, 5},
+		"Trans-Galactic Fuel Scoop":  {8, 6},
+		"Trans-Galactic Super Scoop": {9, 7},
+	} {
+		d, err := c.NewDesign(engine, "Scout", []SlotFill{{Slot: 0, Part: engine, Count: 1}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		s, err := NewFleetShips(ElegyRules(), []ShipStack{{Design: d, Count: 1}}, 0, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := [2]int{s.RawWarp(), s.IdealWarp()}; got != want {
+			t.Errorf("%s: raw, ideal %v, want %v", engine, got, want)
+		}
+	}
+}
