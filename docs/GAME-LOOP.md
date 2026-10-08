@@ -144,7 +144,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 6, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 7, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:
@@ -152,13 +152,15 @@ file formats. It holds:
   `Load` validates;
 - the space objects and race designs (the engine's `Objects` and `Races`)
   and whether terraforming is on;
-- every design slot's creation year and picture
-  (`engine.DesignSlot.Created`, `Picture`; ASSUMPTION B2 for the starting
-  designs: the first year, picture 0);
+- every design slot's creation year, picture and ships built
+  (`engine.DesignSlot.Created`, `Picture`, `Built`; ASSUMPTION B2 for the
+  starting designs: the first year, picture 0);
 - the generator state;
 - the planet name indexes;
-- each computer player's level (`Game.ComputerLevel`), so a loaded game
-  can run its computer players again;
+- each computer player's level, in the engine state
+  (`engine.Player.Level`, which `Game.ComputerLevel` reads), so a loaded
+  game runs its computer players and the Mystery Trader's planet trades
+  at the same level;
 - what the last year told each player (views, events, order outcomes,
   planet histories, wormhole sightings, known designs).
 
@@ -168,7 +170,11 @@ An order outcome keeps its message and which engine error it wraps, so
 The encoding is canonical: a game encodes to the same bytes every time,
 and a loaded game saves back byte for byte. `Hash` is the SHA-256 of
 those bytes. `Load` refuses an unknown format, another version, unknown
-fields and a state that fails `Check`.
+fields, a state that fails `Check` and a level out of range (0..3 for a
+computer player, 0 for a human). Version 7 put the level in the engine
+state; a version 6 save is refused because it would load every computer
+player as Easy, and because its design slots' `Built` counts may predate
+the field.
 
 ## The smoke test
 
