@@ -694,6 +694,19 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 			l.global = "space objects: " + err.Error()
 		}
 		g.Objects = obj
+		// Each player's Trader parts, the vector's player
+		// mystery_trader_items (stars-elegy tools/vectors/build.py, the
+		// part word by bit since #127), which a tech attempt never gives
+		// again (COMBAT.md "Tech from battle", step 3).
+		if obj != nil {
+			for _, p := range s.Players {
+				for _, it := range p.MysteryTraderItems {
+					if b := obj.TraderBit(it); b >= 0 && p.ID >= 0 && p.ID < len(g.Players) {
+						obj.GiveTraderBit(p.ID, b)
+					}
+				}
+			}
+		}
 	case len(s.Objects) > 0:
 		var o struct {
 			Kind string `json:"kind"`

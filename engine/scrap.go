@@ -40,6 +40,14 @@ type scrapYear map[int]int
 // TK-203), drawing as the scrap runs (KERNEL.md "Random draw order",
 // CONFIRMED KB-3A). The fleet's owner gains nothing.
 //
+// The attempt's Mystery Trader chances are the scrapped ships' Trader
+// part counts (TAKEOVER.md "Other waypoint tasks": "the part's chance is
+// the number seen", MEASURED TK-305: 12 one-ship designs with 2
+// Hush-a-Boom each gave 24). ASSUMPTION K11: a stack counts its part
+// counts once per ship, and the chance is capped at 25 as in battle
+// (COMBAT.md "Mystery Trader chances"); TK-305 had one ship per design
+// and stayed below the cap.
+//
 // Each mineral is floor(k·C/d) of the whole fleet's cost (T-34: 9C/20 of
 // 210 kT gave 94).
 //
@@ -54,6 +62,7 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 	owner := g.Players[f.Owner]
 	var cost Cost
 	var seen [NumFields]int
+	var chance traderChances
 	for _, s := range f.Stacks {
 		if s.Count <= 0 {
 			continue
@@ -68,6 +77,7 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		for k := range NumFields {
 			seen[k] = max(seen[k], req[k])
 		}
+		chance.addParts(g, d, s.Count)
 	}
 	pi := g.planetAt(f.Pos)
 	events := []Event{{Kind: EventFleetScrapped, Player: f.Owner, Planet: -1, Fleet: f.ID}}
@@ -106,7 +116,7 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		p.Population += f.Cargo.Colonists
 	}
 	if p.HasStarbase && p.Owner != NoOwner {
-		events = append(events, techAttempt(g, rng, p.Owner, seen, gained)...)
+		events = append(events, techAttempt(g, rng, p.Owner, seen, chance, gained)...)
 	}
 	return events
 }

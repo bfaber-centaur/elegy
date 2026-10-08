@@ -836,7 +836,7 @@ func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool)
 	repelled(w)
 	events = append(events, g.newColony(pi, w, land))
 	if captured {
-		events = append(events, techAttempt(g, rng, w, oldLevels, gained)...)
+		events = append(events, techAttempt(g, rng, w, oldLevels, traderChances{}, gained)...)
 	}
 	return events
 }

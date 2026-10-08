@@ -11,6 +11,38 @@ const (
 	EventBattleTech                                                  // Count = field gaining research
 )
 
+// EventTraderPartFound: Player gained Mystery Trader part bit Count from
+// a tech attempt (COMBAT.md "Tech from battle", step 3; MESSAGES.md
+// 0x13a, 0x13b in battle, 0x13c from a scrap).
+const EventTraderPartFound EventKind = EventScrapRecycled + 1
+
+// traderTries is the number of Mystery Trader item tries in a tech
+// attempt, and the number of item indices k (COMBAT.md "Tech from
+// battle", step 3).
+const traderTries = 13
+
+// maxTraderChance caps an item's chance in a battle (COMBAT.md "Mystery
+// Trader chances", CONFIRMED CB-048).
+const maxTraderChance = 25
+
+// traderChances is each Mystery Trader item's chance in a tech attempt,
+// in percent, by Trader part bit.
+type traderChances [traderTries]int
+
+// addParts adds n times the part counts of design d's Mystery Trader parts
+// to their chances, each at most maxTraderChance. The hull never counts.
+// With no space objects no part is a Trader part.
+func (c *traderChances) addParts(g *Game, d Design, n int) {
+	if g.Objects == nil {
+		return
+	}
+	for _, s := range d.Slots {
+		if b := g.Objects.TraderBit(s.Part.Name); b >= 0 && b < traderTries {
+			c[b] = min(maxTraderChance, c[b]+n*s.Count)
+		}
+	}
+}
+
 // battleResult is what later steps of the turn need from the battles.
 type battleResult struct {
 	events []Event
@@ -195,7 +227,7 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 			attempt = mask&observers != 0 && present[p]
 		}
 		if attempt {
-			events = append(events, techAttempt(g, b.rng, p, b.seen, gained)...)
+			events = append(events, techAttempt(g, b.rng, p, b.seen, b.traderChance, gained)...)
 		}
 	}
 	return events
@@ -203,17 +235,32 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 
 // techAttempt is one player's tech attempt against the seen levels
 // (COMBAT.md "Tech from battle" steps 1–5; also a capture's attempt,
-// TAKEOVER.md "Capture"). Mystery Trader items are not modelled, so the
-// 13 item tries draw but never give an item.
-func techAttempt(g *Game, rng Rand, p int, seen [NumFields]int, gained map[int]bool) []Event {
+// TAKEOVER.md "Capture", with no chances, and a scrap's, TAKEOVER.md
+// "Other waypoint tasks"). Step 3: each of 13 tries draws rand(13) for
+// an item k; an item with a chance the player does not own draws
+// rand(100) and is given below its chance, which ends the attempt. A
+// success at k gives Trader part bit k (OBJECTS.md "Encounters" order,
+// CONFIRMED CB-048; COMBAT.md's index table as corrected by stars-elegy
+// #127). Of the indices only k 8 is a hull; k 10, the Genesis Device, is
+// on no ship, and k 12 is the ship-gift bit with no item, so neither ever
+// has a chance.
+func techAttempt(g *Game, rng Rand, p int, seen [NumFields]int, chance traderChances, gained map[int]bool) []Event {
 	if gained[p] {
 		return nil
 	}
 	if rng.Intn(100) < 50 {
 		return nil
 	}
-	for range 13 {
-		rng.Intn(13)
+	for range traderTries {
+		k := rng.Intn(traderTries)
+		if chance[k] <= 0 || g.Objects.OwnsTraderBit(p, k) {
+			continue
+		}
+		if rng.Intn(100) < chance[k] {
+			g.Objects.GiveTraderBit(p, k)
+			gained[p] = true
+			return []Event{{Kind: EventTraderPartFound, Player: p, Planet: -1, Fleet: -1, Count: k}}
+		}
 	}
 	pl := &g.Players[p]
 	for range 6 {

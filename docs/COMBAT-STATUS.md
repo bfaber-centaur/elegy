@@ -112,9 +112,17 @@ spec now determines them:
 - **Capacitors.** The product runs over every item, capped at 2550;
   132% is CONFIRMED for one Flux and one Energy Capacitor (CB-002 C4)
   ("Token values").
-- **Mystery Trader draws.** Each tech attempt makes its 13 `rand(13)`
-  tries. Elegy has no trader items, so none is ever given ("Tech from
-  battle").
+- **Mystery Trader items.** Each kill event adds each Trader part slot's
+  count to that part's chance, at most 25; the hull never counts. Each of
+  a tech attempt's 13 `rand(13)` tries for k draws `rand(100)` only for
+  an item with a chance the player lacks, and below the chance gives
+  Trader part bit k (OBJECTS.md "Encounters" order; CONFIRMED CB-048;
+  `traderChances`, `techAttempt`, `TestConfirmedTraderChances`,
+  `TestConfirmedTechAttemptTraderItem`). Without space objects no part
+  has a chance ("Tech from battle", "Mystery Trader chances"). Of the 13
+  indices only k 8 (Mini Morph) is a hull; k 10 (Genesis Device) is on no
+  ship and k 12 is the ship-gift bit, so neither ever has a chance
+  (COMBAT.md's index table as corrected by stars-elegy #127).
 - **Salvage order.** Deep-space salvage additions are made after the
   battle's tech attempts ("Random draws in a battle", step 5).
 
@@ -124,5 +132,4 @@ spec now determines them:
   (`engine/catalog.go`, `docs/COMPONENTS-STATUS.md`): `NewDesign` builds a
   `Design` from catalogue names. Designs built by hand still work.
 - **Mystery Trader items** and **queued ships and packets** lost with a
-  starbase: Elegy has no trader items, and its production queue has no
-  ship items yet.
+  starbase: the production queue has no Trader items or ship items yet.
