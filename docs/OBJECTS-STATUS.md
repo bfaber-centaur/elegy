@@ -208,3 +208,41 @@ count toward the object limit.
 - Step 5: `Space.FlyLaunched`, before battles and bombing.
 - For every `Impact` with `Emptied`, empty the planet as after bombing.
 - Packet visibility belongs to scanning.
+
+## Stargates
+
+| Rule | Function | Status |
+|---|---|---|
+| What makes a gate; limits from the component table | `StarbaseGate`, `PlanetGate` | CONFIRMED (GT-004) |
+| Source and destination gates, one-sided friendship, Jump Gates | `Jump` | CONFIRMED (GT-001 A–E, M) |
+| Refusal order | `Jump`, `GateRefusal` | CONFIRMED (GT-001 F3, GT-003 R1–R6); the destination planet check BINARY-ONLY in its place |
+| Cargo unloaded before the checks; foreign colonists | `Jump` | LEGACY BUG MEASURED (OB-021); CONFIRMED (GT-001 F, F2) |
+| Range and mass refusals at 5× | `Jump` | CONFIRMED (GT-001) |
+| Danger | `GateDanger` | CONFIRMED (GT-001 N1–N6) |
+| Losses, damage; IT destroys no ships | `Jump` | CONFIRMED (OB-021, OB-022) |
+| Mixed-fleet count | `LegacyGateMixedFleetLoss` (on) | LEGACY BUG, MEASURED (GT-001 H2, GT-002), CONFIRMED (GT-003 W0–W5) |
+
+### Assumptions (spec gaps)
+
+1. **G1** Designs are checked and rolled in order of first appearance in
+   the fleet's stacks, ship by ship.
+2. **G2** Survivors' new damage is averaged as (old damage of every ship
+   of the design, destroyed ones included, + survivors × new) /
+   survivors, stored as pct 100.
+3. **G3** Fuel scales with the fleet's fuel capacity, rounded half up
+   (OB-021: 100 → 67); cargo kept aboard (IT, Jump Gates) stays whole.
+
+### What the turn engine needs to call (stargates)
+
+- Fleet movement: a fleet whose next waypoint has warp `GateWarp` (11)
+  calls `Jump` instead of moving. On `GateOK` the fleet is at the
+  destination: consume the waypoint, mark it moved, give it no heading
+  or warp for others' scans, skip its repair this year, never apply
+  Cheap Engines failure, and make other players' chasers stop at its
+  departure point (the owner's own follow it).
+- `FleetLost`: delete the fleet with the "fleet lost" message.
+- A refusal: one message to the owner for `Refused`; the fleet keeps its
+  waypoints and counts as stationary. An unload (`Unloaded`) also
+  messages the source planet's owner.
+- Orders: accept waypoint warp 11 (now refused as not modelled), and let
+  routing pick it when both ends are gated and the jump is safe.
