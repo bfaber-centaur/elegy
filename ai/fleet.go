@@ -105,7 +105,20 @@ func toWormhole(w Wormhole, warp int) engine.Waypoint {
 // and the route stays; the fleet is scrapped where it is, before it moves
 // (TAKEOVER.md "Scrap", CONFIRMED T-34).
 func scrapOrder(f *engine.Fleet) engine.WaypointOrder {
-	f.Task = engine.Task{Kind: engine.TaskScrap}
+	return taskHere(f, engine.Task{Kind: engine.TaskScrap})
+}
+
+// layMines is the lay-mines task the planners give (robotoid.md §4
+// scouts, cybertron.md §5 slot-0 fleets).
+//
+// ASSUMPTION A53: it lays indefinitely. robotoid.md gives Robotoid's task
+// the parameters 5 and 5 without reading them, and cybertron.md names no
+// duration.
+var layMines = engine.Task{Kind: engine.TaskLayMines, Years: engine.YearsIndefinitely}
+
+// taskHere sets waypoint 0's task and keeps the route.
+func taskHere(f *engine.Fleet, task engine.Task) engine.WaypointOrder {
+	f.Task = task
 	return engine.WaypointOrder{Fleet: f.ID, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
 }
 

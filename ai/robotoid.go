@@ -24,8 +24,8 @@ import (
 //  9. planet automation (AI.md §7) and the queue fill.
 //
 // Not yet run: the warp re-pick (AI.md §11 "Warp choice") and automation
-// steps 4 and 5. Steps the engine cannot order (lay mines, load tasks)
-// go to Result.Unsupported.
+// steps 4 and 5. Steps the engine cannot order (load tasks) go to
+// Result.Unsupported.
 func PlayRobotoid(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -417,9 +417,12 @@ func hasPower(d engine.Design) bool {
 // passA is §4 pass A.
 //
 // ASSUMPTION A43: player positions are not "close" (the view does not
-// carry the setting). Waypoint-0 marker tasks are never set in Elegy
-// (the lay-mines task they stand for is not modelled), so clearing them
-// does nothing.
+// carry the setting).
+//
+// ASSUMPTION A54: an attack fleet's waypoint-0 marker task is not
+// cleared. robotoid.md refers to it ("below") without defining it; the
+// only task Elegy's Robotoid sets that could be one is the scouts'
+// lay-mines task, and scouts are never attack fleets.
 func (t *robotoidTurn) passA() {
 	v := t.v
 	for i := len(v.Others) - 1; i >= 0; i-- {
@@ -559,7 +562,7 @@ func (t *robotoidTurn) scout(f *engine.Fleet) {
 		}
 	}
 	if !moved && f.Task.Kind == engine.TaskNone {
-		t.res.unsupported("fleet %d: lay mines (robotoid.md §4 scouts)", f.ID)
+		t.emit(f, taskHere(f, layMines))
 		return
 	}
 	if len(f.Waypoints) == 0 && v.holds(f, 1) && t.y > 4 {

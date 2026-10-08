@@ -164,3 +164,21 @@ func TestCybertronPassAClasses(t *testing.T) {
 		t.Errorf("group 6–9 aged out: group %d, Destroyer %d; want 0 and 4", ct.grFleets, ct.ddFleets)
 	}
 }
+
+// cybertron.md §5 slot-0 fleets: a lone scout with no buddy rule and no
+// move lays mines where it is, unless waypoint 0 already has that task.
+func TestCybertronMinelayer(t *testing.T) {
+	v := caView(t, 2450)
+	v.Fleets = []engine.Fleet{fleet(100, 1, v.Universe[0].Pos, 10, 1)}
+	ct := cyberTest(t, v, top{})
+	ct.minelayer(0)
+	got := ordersOf[engine.WaypointOrder](ct.res.Orders)
+	if len(got) != 1 || got[0].Task != layMines || len(ct.res.Unsupported) != 0 {
+		t.Fatalf("orders %+v, unsupported %v; want one lay-mines task here", got, ct.res.Unsupported)
+	}
+	ct = cyberTest(t, v, top{})
+	ct.minelayer(0)
+	if len(ct.res.Orders) != 0 {
+		t.Errorf("orders %+v for a fleet already laying mines, want none", ct.res.Orders)
+	}
+}
