@@ -191,6 +191,11 @@ Choices where OBJECTS.md is silent:
 - **O14 (ASSUMPTION).** In a game with no space objects (nil
   `Game.Objects`), a new salvage object takes its owner's lowest unused
   salvage number, with no object limit, and salvage does not decay.
+- **O15 (ASSUMPTION).** The year's mine layers are taken after the
+  unload pass after movement, which removes fleets that colonized. In
+  step 6c.2 each fleet runs one task, so a fleet consumed there lays
+  nothing, including a Space Demolition fleet whose next waypoint is "lay
+  mines".
 - **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
   uses the gate's range as P; an unlimited gate shows every starbase.
 
