@@ -307,8 +307,10 @@ func TestPredictionWaypointClamp(t *testing.T) {
 		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Pos: Point{1200, 1200}, Warp: 11}}},
 	)
 	// ORDERS.md Q13 (chosen rule): warp outside 0..11 and a missing
-	// target are rejected; warp 11, the stargate hop, is not modelled.
-	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrNoSuchObject) || !errors.Is(errs[3], ErrNotModelled) {
+	// target are rejected; warp 11, the stargate hop (CONFIRMED GT-004),
+	// is accepted, the gate conditions checked at the jump (OBJECTS.md
+	// "Stargates").
+	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrNoSuchObject) || errs[3] != nil {
 		t.Fatalf("errors %v", errs)
 	}
 	want := []Waypoint{{Pos: Point{1400, 1000}, Warp: 6}, {Pos: Point{1200, 1200}, Warp: 5, Target: TargetPlanet, ID: 2}}

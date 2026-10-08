@@ -79,13 +79,12 @@ const (
 // The warp is the route warp new fleets use (PRODUCTION-LAUNCH.md, via
 // routeWarp). Anywhere else the fleet stays idle. Who owns the
 // destination does not matter (WU-ROUTE routed to another player's
-// planet).
+// planet). The gate choice (warp 11) is the route warp's (MEASURED,
+// ORDERS.md "Route task", wuRSG2).
 //
 // ASSUMPTION W4: the task runs only for a fleet with no further waypoint
 // (one that has reached the end of its orders), so a fleet already routed
 // is not routed again before it leaves.
-//
-// Not modelled: the stargate choice (warp 11), as Elegy has no stargates.
 func (g *Game) routeTask(f *Fleet) []Event {
 	pi := g.planetAt(f.Pos)
 	if pi < 0 || len(f.Waypoints) > 0 {

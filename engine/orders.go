@@ -417,9 +417,6 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 		if wp.Warp < 0 || wp.Warp > 11 {
 			return fmt.Errorf("waypoint %d warp %d: %w", k, wp.Warp, ErrOutOfRange)
 		}
-		if wp.Warp == 11 {
-			return fmt.Errorf("waypoint %d stargate hop: %w", k, ErrNotModelled)
-		}
 		if err := validTask(wp.Task); err != nil {
 			return err
 		}

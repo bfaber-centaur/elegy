@@ -44,7 +44,7 @@ at the end of the replay, before any waypoint task.
 | `CargoOrder`, preconditions | fleet at the target or refused; no jettison; planet fuel dropped, the rest moves; any fleet with free hold carries colonists | ORDERS.md "Elegy implementation Q3", "Q4" | chosen rules | `TestCargoChecks` |
 | `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited in place as the order applies, no message; relations do not matter | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestGiftCreditedInPlace` |
 | `CargoOrder`, another player's fleet | giving only; colonists rejected (no legal client writes them, TK-408, TK-414); credited in place as the order applies; what does not fit is lost and the giver told; no relation check; a later merge or design delete disposes of the gift as of the fleet's own cargo | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | MEASURED (TK-406, TK-407, TK-409); over-full gift CONFIRMED; colonists chosen rule | `TestPredictionCargoToForeignFleet`, `TestGiftReceiverRemovedEarlier`, `TestGiftToFleetMergedAway`, `TestMeasuredGiftLostWithDeletedDesign` |
-| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position; a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (stargate) not modelled; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13), "Waypoint upkeep and the remaining tasks", "Transfer fleet"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks` |
+| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position; a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (the stargate hop, GT-004) accepted, the gate checked at the jump; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13); OBJECTS.md "Stargates", "Waypoint upkeep and the remaining tasks", "Transfer fleet"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks` |
 | `RepeatOrder` | own fleet; sets or clears the repeat-orders flag (the host checks no owner, LEGACY BUG) | ORDERS.md "Reaching a waypoint", "Ownership"; LIMITS.md "No owner check" | chosen rule | `TestRepeatOrder` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
@@ -97,6 +97,7 @@ item.
 |---|---|---|---|
 | Ideal warp per engine | `idealWarp` | CONFIRMED for Long Hump 6 and Quick Jump 5 (SL-04..07), BINARY-ONLY otherwise | `TestIdealWarpPerEngine` |
 | Route warp: dock rule, step down, fuel | `routeWarp` | CONFIRMED (SL-04..07, every non-gate row) | `TestConfirmedRouteWarp`, `TestConfirmedRouteWarpTankScout` |
+| Route warp: the gate (warp 11) when both own planets are gated, the fleet carries no cargo and the jump is within the source range and both mass limits; new ships and the route task | `routeWarp`, `gateSafe` | CONFIRMED (SL gate rows); route task MEASURED (ORDERS.md wuRSG2) | `TestConfirmedRouteWarpGates`, `TestRouteWarpGateConditions` |
 | One fleet per build event, the owner's lowest free `Number`, full tanks, plan 0, no task, no name | `Launch` | CONFIRMED (SL-01, SL-02) | `TestConfirmedLaunchNewFleets` |
 | Route destination: a second waypoint with the route task | `Launch` | CONFIRMED (SL-04..07) | `TestConfirmedLaunchRouted` |
 | No starbase, or no tech: nothing built | `Launch` | BINARY-ONLY | `TestPredictionLaunchNeedsStarbaseAndTech` |
@@ -127,9 +128,10 @@ Production assumptions:
 | P3 | A queue order with a design item naming an empty or out-of-range slot is refused. | The host checks no item ids (LIMITS.md "Production-queue replace"). |
 | P4 | A queue that a design delete leaves empty is removed. | KERNEL.md says a zero-item queue does not arise in play. |
 | P6 | A packet destination naming no planet counts as no destination. | OBJECTS.md "The settings": the original reads past its planet table; Elegy needs a chosen rule. |
+| W6 | Without space objects (`Game.Objects`) routing never chooses a gate. | A gate jump does nothing without them. |
 | P7 | An Auto Alchemy prefix before a packet item removed for want of a driver or destination stays and stands before the next item. | KERNEL.md does not say what happens to the prefix. |
 
-Not modelled there: stargate routing, the Alternate Reality remote-mining
+Not modelled there: the Alternate Reality remote-mining
 task, the "did not move" mark (GenerateTurn must not mark a fleet built
 this year as stationary), and the route task on arrival. Packet items
 need `Game.Objects`; without it, and in `RunProduction`, they stop the
@@ -141,5 +143,5 @@ queue.
 - the binary's separate queued cross-player credit routine, which no
   legal order is known to reach (ORDERS.md, stars-elegy #87:
   UNRESOLVED);
-- Mystery Trader items (the player owns none), minefields, stargates;
-- stargate hops (waypoint warp 11).
+- Mystery Trader items (the player owns none), and the minefield detonate
+  order;
