@@ -153,6 +153,13 @@ func TestReportSurvivesSaveLoad(t *testing.T) {
 	}
 }
 
+func TestGameID(t *testing.T) {
+	a, b, c := newSmoke(t, 1), newSmoke(t, 1), newSmoke(t, 2)
+	if a.State.ID == 0 || a.State.ID != b.State.ID || a.State.ID == c.State.ID {
+		t.Fatalf("game ids %d, %d (same seed), %d (another seed)", a.State.ID, b.State.ID, c.State.ID)
+	}
+}
+
 // TestRulesetsCoexist: games with the Elegy and the faithful rulesets
 // run side by side in one process, each keeps its own ruleset through
 // every year and a save and load, and the two save differently.
@@ -193,6 +200,9 @@ func TestRulesetsCoexist(t *testing.T) {
 		}
 		h0, _ := g.Hash()
 		h1, _ := loaded.Hash()
+		if r, _ := loaded.Report(0); r.Rules != want {
+			t.Fatalf("%s: the report carries ruleset %q", want.ID, r.Rules.ID)
+		}
 		if loaded.State.Rules != want || h0 != h1 {
 			t.Fatalf("%s: reload gives ruleset %+v, hash equal %v", want.ID, loaded.State.Rules, h0 == h1)
 		}

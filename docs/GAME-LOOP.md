@@ -64,6 +64,7 @@ Computer opponents, scripted players and front ends all implement
 
 | Report field | What it holds | Source |
 |---|---|---|
+| `Rules` | the game's ruleset | a game's rules are known to every player |
 | `Self`, `Planets`, `Fleets`, `Designs` | the player's own record, planets, fleets and designs, in full | SCANNING.md: a player knows everything about its own objects |
 | `View` | the engine's `PlayerView` from the year just generated | SCANNING.md |
 | `Events`, `Orders` | the previous year's messages to the player, and the outcome of each of its orders | engine `TurnResult` |
@@ -144,7 +145,47 @@ diverged.
 This is not a parity test. Elegy's stream and draw order are its own, so
 nothing here is compared with the original.
 
+## Order files
+
+**ELEGY CHOICE:** an order file is Elegy's own versioned JSON document.
+ORDERS.md "Scope and vocabulary" says Elegy defines its own order format.
+Each order names its kind (the engine order type without `Order`) and
+holds that type's fields:
+
+```json
+{"format": "elegy-orders", "version": 1, "game": 970338138316348672, "year": 2400, "player": 0,
+ "orders": [{"kind": "Research", "order": {"Budget": 15, "Field": 0, "Next": -2}}]}
+```
+
+`game.EncodeOrders` and `game.DecodeOrders` read and write the files.
+An unknown kind or field refuses the whole file. A test parses the
+engine's source, so every engine order kind has a name in the format.
+
+**ELEGY CHOICE:** the game id order files carry (ORDERS.md "Wrong game
+or wrong year") is the first eight bytes of the SHA-256 of the new-game
+settings and seed, and never 0. The spec does not say how the original
+picks one.
+
+## Command line
+
+`cmd/elegy` plays games from save files and order files:
+
+```sh
+go run ./cmd/elegy new -seed 1 -players 3 -size small -rules elegy -o game.json   # or -rules jrc3-faithful
+go run ./cmd/elegy orders -game game.json -player 0 > orders0.json   # an empty file to fill
+go run ./cmd/elegy turn -game game.json orders0.json                # players without a file keep standing orders
+go run ./cmd/elegy report -game game.json -player 0                 # the player's Report as JSON
+go run ./cmd/elegy hash -game game.json
+go run ./cmd/elegy play -seed 1 -players 3 -years 40                # idle players; one hash per year
+```
+
+`turn` refuses an order file for another game, another year or a
+missing player before anything runs. It prints each rejected order and
+writes the next year back to the save file, through a temporary file.
+Players are created with `races.Default()`. Choosing races and computer
+players from the command line is still to do.
+
 ## Not done yet
 
-- A CLI and an order file format.
+- Races and computer players chosen on the command line.
 - Computer opponents (lane C implements them as drivers).
