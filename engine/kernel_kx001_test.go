@@ -160,17 +160,52 @@ func TestConfirmedAlternateRealityKX001(t *testing.T) {
 	})
 }
 
-// Z1: the original cannot generate the year (divide by zero). Elegy
-// decision: GenerateTurn refuses it with a typed error and changes nothing.
-func TestElegyDecisionZeroMaxPopulation(t *testing.T) {
-	g := kxAR(false)
-	before := g.clone()
-	_, err := GenerateTurn(withRules(g), nil, highRand{})
-	var z *ZeroMaxPopulationError
-	if !errors.As(err, &z) || z.Planet != 7 {
-		t.Fatalf("err = %v, want *ZeroMaxPopulationError for planet 7", err)
+// Z1: the original cannot generate the year (divide by zero). Under a
+// ruleset with ZeroMaxPopulationStop (faithful, Elegy version 1)
+// GenerateTurn refuses it with a typed error and changes nothing.
+func TestElegyDecisionZeroMaxPopulationStop(t *testing.T) {
+	for _, rules := range []Ruleset{FaithfulRules(), elegyRulesV1()} {
+		g := kxAR(false)
+		g.Rules = rules
+		before := g.clone()
+		_, err := GenerateTurn(g, nil, highRand{})
+		var z *ZeroMaxPopulationError
+		if !errors.As(err, &z) || z.Planet != 7 {
+			t.Fatalf("%s v%d: err = %v, want *ZeroMaxPopulationError for planet 7", rules.ID, rules.Version, err)
+		}
+		if !reflect.DeepEqual(g, before) {
+			t.Errorf("%s v%d: input game changed", rules.ID, rules.Version)
+		}
 	}
-	if !reflect.DeepEqual(g, before) {
-		t.Error("input game changed")
+}
+
+// Z1 under the Elegy ruleset (INTENTIONALLY DIFFERENT, "Keep going"): the
+// year is generated and the planet is maximally overcrowded. 486 units,
+// carry 80: g = 4·(−300) = −1200, t = trunc(−1200·486/100) = −5832,
+// q = −58, r = −32, so 428 units, carry 48. Ten units or fewer stay.
+func TestElegyDecisionZeroMaxPopulationKeepGoing(t *testing.T) {
+	g := kxAR(false)
+	g.Rules = ElegyRules()
+	if p := g.Planets[0]; p.Population != 486 || p.GrowthCarry != 80 || p.HasStarbase || p.StarbaseHull != 0 {
+		t.Fatalf("start %+v", p)
+	}
+	r, err := GenerateTurn(g, nil, highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p := r.Game.Planets[0]; p.Population != 428 || p.GrowthCarry != 48 || p.Owner != 0 {
+		t.Errorf("population (%d,%d) owner %d, want (428,48) owner 0", p.Population, p.GrowthCarry, p.Owner)
+	}
+	for _, pop := range []int{1, 10} {
+		g := kxAR(false)
+		g.Rules = ElegyRules()
+		g.Planets[0].Population = pop
+		r, err := GenerateTurn(g, nil, highRand{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if p := r.Game.Planets[0]; p.Population != pop || p.GrowthCarry != 80 {
+			t.Errorf("%d units: (%d,%d), want (%d,80)", pop, p.Population, p.GrowthCarry, pop)
+		}
 	}
 }
