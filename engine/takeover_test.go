@@ -832,8 +832,8 @@ func TestConfirmedAlternateRealityColonyStarbase(t *testing.T) {
 	// TAKEOVER.md "Colonization" (CONFIRMED T-26, T-33): an Alternate
 	// Reality colony gets a starbase of the owner's first starbase design,
 	// here the Space Station in slot 1 rather than the Orbital Fort in
-	// slot 3. With no starbase design, none (UNRESOLVED: TAKEOVER.md does
-	// not say).
+	// slot 3 (lowest occupied slot, ASSUMPTION T3). With no starbase
+	// design, none (UNRESOLVED: TAKEOVER.md does not say).
 	l := newTKLab(t, 3)
 	l.g.Players[0].Race.PRT = PRTAlternateReality
 	fort := l.design("Orbital Fort")

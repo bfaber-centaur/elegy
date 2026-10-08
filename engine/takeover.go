@@ -323,7 +323,11 @@ func (g *Game) emptyPlanet(pi int) Event {
 // three items for Alternate Reality and the fifth and sixth for Claim
 // Adjuster, and the owner's default leftover setting (BINARY-ONLY). An
 // Alternate Reality colony gets a starbase of the owner's first starbase
-// design (CONFIRMED T-26, T-33), the one in the lowest starbase slot.
+// design (CONFIRMED T-26, T-33; PARITY.md: starbase design 0).
+//
+// ASSUMPTION T3: "first" is the design in the owner's lowest occupied
+// starbase slot, so with slot 0 empty the next slot's design is used;
+// TAKEOVER.md does not define it.
 //
 // UNRESOLVED: TAKEOVER.md does not say what a colony gets when its
 // Alternate Reality owner has no starbase design; Elegy gives none, as
@@ -359,7 +363,7 @@ func (g *Game) newColony(pi, player, pop int) Event {
 }
 
 // firstStarbaseDesign is player's starbase design in the lowest starbase
-// slot (Game.DesignSlots).
+// slot (Game.DesignSlots; ASSUMPTION T3).
 func (g *Game) firstStarbaseDesign(player int) (int, bool) {
 	best, design := -1, 0
 	for _, ds := range g.DesignSlots {
