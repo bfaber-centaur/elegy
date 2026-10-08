@@ -419,6 +419,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 			key[1] = -1 - d.Slot
 		}
 		l.design[key] = len(g.Designs)
+		g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: d.Owner, Starbase: starbase, Slot: d.Slot, Design: len(g.Designs)})
 		g.Designs = append(g.Designs, ds)
 		return nil
 	}
@@ -530,7 +531,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	}
 	for _, f := range s.Fleets {
 		key := pvFleetKey(f.Owner, f.ID)
-		ef := Fleet{ID: l.fleetID[key], Number: f.ID, Owner: f.Owner, Pos: Point{f.X, f.Y}, Fuel: f.Fuel, Plan: f.BattlePlan}
+		ef := Fleet{ID: l.fleetID[key], Number: f.ID + 1, Owner: f.Owner, Pos: Point{f.X, f.Y}, Fuel: f.Fuel, Plan: f.BattlePlan}
 		for _, sh := range f.Ships {
 			st := Stack{Design: l.design[[2]int{f.Owner, sh.Design}], Count: sh.Count}
 			if sh.Damage != nil {
@@ -618,8 +619,23 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 		if err := json.Unmarshal(r, &it); err != nil {
 			return nil, "production queue item " + string(r)
 		}
+		if it.Kind == 2 {
+			// A design item: id 0–15 is a ship design slot, 16–25 starbase
+			// slot id − 16 (FORMAT.md "Queue items", CONFIRMED).
+			k, slot := ItemShip, it.ID
+			if it.ID >= 16 {
+				k, slot = ItemStarbase, it.ID-16
+			}
+			items = append(items, QueueItem{Kind: k, Count: it.Count, Percent: it.Percent, Slot: slot})
+			continue
+		}
+		if it.Kind == 0 {
+			// FORMAT.md lists production_queue expectation items as
+			// {id, count, percent}: without a kind the id is ambiguous.
+			return nil, "production queue item without a kind"
+		}
 		if it.Kind != 1 {
-			return nil, "production queue: a design"
+			return nil, "production queue: item kind " + strconv.Itoa(it.Kind)
 		}
 		k, ok := pvItemKinds[it.ID]
 		if !ok {
@@ -736,10 +752,17 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		return "skip: " + e.Kind + " list"
 	}
 	fleet := func(owner, id int) *Fleet {
-		fid := l.fleetID[pvFleetKey(owner, id)]
+		fid, ok := l.fleetID[pvFleetKey(owner, id)]
 		for i := range g.Fleets {
-			if g.Fleets[i].ID == fid && fid != 0 {
-				return &g.Fleets[i]
+			f := &g.Fleets[i]
+			if ok && f.ID == fid && fid != 0 {
+				return f
+			}
+			// A fleet built during the run is known by its fleet number:
+			// the vector stores it from 0, the client shows it from 1
+			// (PRODUCTION-LAUNCH.md "The new fleet").
+			if !ok && f.Owner == owner && f.Number == id+1 {
+				return f
 			}
 		}
 		return nil
@@ -1113,7 +1136,10 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "skip", why)
 			continue
 		}
-		if c.VariesByStream {
+		// A case that varies by stream is skipped whole. In the sl corpus
+		// the varying expectations are tagged: those are skipped below
+		// and the rest are checked.
+		if c.VariesByStream && !(v.corpus == "sl" && pvStreamTagged(c)) {
 			res(c, "skip", "random outcome")
 			continue
 		}
@@ -1167,6 +1193,15 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
+}
+
+func pvStreamTagged(c pvCase) bool {
+	for _, e := range c.Expect {
+		if e.Stream != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func pvUnique(xs []string) []string {

@@ -1,7 +1,7 @@
 package engine
 
-// ItemKind is a production-queue item type. Ships, starbases, terraforming,
-// packets and scanners are not modelled yet.
+// ItemKind is a production-queue item type. Terraforming, packets and
+// scanners are not modelled yet.
 type ItemKind int
 
 const (
@@ -13,9 +13,17 @@ const (
 	ItemAutoFactories
 	ItemAutoDefenses
 	ItemAutoAlchemy
+	// ItemShip and ItemStarbase build the design in the owner's ship or
+	// starbase design slot QueueItem.Slot (vectors FORMAT.md "Queue
+	// items": a design item names its slot, CONFIRMED).
+	ItemShip
+	ItemStarbase
 )
 
-func (k ItemKind) auto() bool { return k >= ItemAutoMines }
+func (k ItemKind) auto() bool { return k >= ItemAutoMines && k <= ItemAutoAlchemy }
+
+// design reports whether k builds a design.
+func (k ItemKind) design() bool { return k == ItemShip || k == ItemStarbase }
 
 // real is the item an auto item builds.
 func (k ItemKind) real() ItemKind {
@@ -39,6 +47,7 @@ type QueueItem struct {
 	Kind    ItemKind
 	Count   int
 	Percent int
+	Slot    int // the design slot, for ItemShip and ItemStarbase
 }
 
 // ItemCost is the per-unit cost of an item for a race (KERNEL.md "Item
@@ -108,6 +117,8 @@ type ProductionInput struct {
 // production is the mutable state of one planet's production run.
 type production struct {
 	in       ProductionInput
+	g        *Game // nil when run without a game: design items then stop the queue
+	pi       int   // the planet's index in g.Planets
 	planet   *Planet
 	r        int // resources left
 	events   []Event
@@ -123,6 +134,33 @@ type production struct {
 // KERNEL.md "Production" and PARITY.md "PQ-001": CONFIRMED in all 15 PQ-001
 // cases. The empty-queue and zero-resource rules are BINARY-ONLY.
 func RunProduction(p *Planet, in ProductionInput) (research int, events []Event) {
+	return runProduction(nil, -1, p, in)
+}
+
+// PlanetProduction is RunProduction for planet index pi of the game, with
+// ship and starbase items built (PRODUCTION-LAUNCH.md; KERNEL.md "Turn
+// order", step 4: production in planet order, with the tech levels from
+// before this year's research). A design item is spent on like any
+// non-auto item (KERNEL.md "Production": the PQ-001 model), at the
+// design's cost for its owner: a ship at its owner cost (COMPONENTS.md
+// "Cost for an owner"), a starbase at StarbaseBuildCost, or at
+// StarbaseReplacementCost where a starbase stands. The units an item
+// completes in a year are one build event (Launch); each starbase unit is
+// built as it completes (BuildStarbase), and later units are charged as
+// replacements of it.
+//
+// ASSUMPTION P1: a design item whose slot holds no design is removed with
+// nothing spent. Deleting a design removes its items (DeleteDesignOrder),
+// so only a state built without design orders reaches it.
+//
+// ASSUMPTION P2: a starbase item replacing a starbase of the same hull
+// whose designs do not record slot positions (Design.SlotPos) is charged
+// the fresh starbase cost.
+func (g *Game) PlanetProduction(pi int, in ProductionInput) (research int, events []Event) {
+	return runProduction(g, pi, &g.Planets[pi], in)
+}
+
+func runProduction(g *Game, pi int, p *Planet, in ProductionInput) (research int, events []Event) {
 	if !p.HasQueue {
 		return in.Resources, nil
 	}
@@ -132,7 +170,7 @@ func RunProduction(p *Planet, in ProductionInput) (research int, events []Event)
 	if in.Resources <= 0 {
 		return 0, nil // BINARY-ONLY: builds nothing, sends no messages
 	}
-	pr := &production{in: in, planet: p, r: in.Resources}
+	pr := &production{in: in, g: g, pi: pi, planet: p, r: in.Resources}
 	if !in.LeftoverOnly {
 		tax := pr.r * in.ResearchBudget / 100
 		pr.r -= tax
@@ -312,7 +350,19 @@ func (pr *production) plain(i int, alch bool) bool {
 		}
 	}
 	c := pr.cost(it.Kind)
+	if it.Kind.design() {
+		var ok bool
+		if c, ok = pr.designCost(*it); !ok {
+			if pr.g == nil {
+				pr.stopped = true
+				return false
+			}
+			it.Count = 0 // ASSUMPTION P1
+			return true
+		}
+	}
 	built := 0
+	earlier := false
 	for it.Count > 0 {
 		if !pr.affordable(c, it.Percent) {
 			l := pr.limiting(c, it.Percent)
@@ -330,9 +380,99 @@ func (pr *production) plain(i int, alch bool) bool {
 		it.Percent = 0
 		it.Count--
 		built++
+		if it.Kind == ItemStarbase {
+			earlier = pr.buildStarbase(it.Slot) || earlier
+			built = 0
+			var ok bool
+			if c, ok = pr.designCost(*it); !ok {
+				break
+			}
+		}
 	}
-	pr.complete(it.Kind, built)
-	return it.Count == 0
+	if it.Kind == ItemShip {
+		pr.launch(it.Slot, built)
+	} else {
+		pr.complete(it.Kind, built)
+	}
+	done := it.Count == 0
+	if earlier {
+		pr.afterEarlierHull(i)
+	}
+	return done
+}
+
+// designOf is the design in the owner's slot for a design item.
+func (pr *production) designOf(it QueueItem) (int, bool) {
+	if pr.g == nil {
+		return 0, false
+	}
+	return pr.g.PlayerDesign(pr.planet.Owner, it.Kind == ItemStarbase, it.Slot)
+}
+
+// designCost is a design item's per-unit cost for the planet's owner
+// (PlanetProduction).
+func (pr *production) designCost(it QueueItem) (Cost, bool) {
+	d, ok := pr.designOf(it)
+	if !ok {
+		return Cost{}, false
+	}
+	g, p := pr.g, pr.planet
+	race, levels := pr.in.Colony.Race, g.Players[p.Owner].Research.Levels
+	nd := g.Designs[d]
+	if it.Kind == ItemShip {
+		return designCost(nd, race, levels), true
+	}
+	if p.HasStarbase && p.StarbaseDesign >= 0 && p.StarbaseDesign < len(g.Designs) {
+		if c, ok := StarbaseReplacementCost(nd, g.Designs[p.StarbaseDesign], race, levels); ok {
+			return c, true
+		}
+	}
+	return StarbaseBuildCost(nd, race, levels), true // fresh, or ASSUMPTION P2
+}
+
+// launch is a ship item's build event for the n ships it completed this
+// year (PRODUCTION-LAUNCH.md "When it happens": one event per item).
+func (pr *production) launch(slot, n int) {
+	if n == 0 {
+		return
+	}
+	d, _ := pr.designOf(QueueItem{Kind: ItemShip, Slot: slot})
+	ev, _ := pr.g.Launch(pr.pi, d, n)
+	pr.events = append(pr.events, ev...)
+}
+
+// buildStarbase completes one starbase unit and reports whether its hull
+// comes earlier in the hull list than the starbase it replaced.
+func (pr *production) buildStarbase(slot int) bool {
+	g, p := pr.g, pr.planet
+	d, _ := pr.designOf(QueueItem{Kind: ItemStarbase, Slot: slot})
+	had, old := p.HasStarbase, p.StarbaseHull
+	pr.events = append(pr.events, g.BuildStarbase(pr.pi, d)...)
+	return had && p.StarbaseDesign == d && p.StarbaseHull < old
+}
+
+// afterEarlierHull is the queue change when a new starbase's hull comes
+// earlier in the hull list than the old one's (PRODUCTION-LAUNCH.md
+// "Starbases", "Queued ships", CONFIRMED SL-12): every ship item is
+// removed and every starbase item left loses its progress. Items before
+// index i were built already this year (MEASURED once); only an Auto
+// Alchemy prefix or auto items can stand there.
+func (pr *production) afterEarlierHull(i int) {
+	q := pr.planet.Queue
+	out := append([]QueueItem(nil), q[:i+1]...)
+	for _, it := range q[i+1:] {
+		switch it.Kind {
+		case ItemShip:
+			continue
+		case ItemStarbase:
+			it.Percent = 0
+		}
+		out = append(out, it)
+	}
+	if out[i].Kind == ItemStarbase {
+		out[i].Percent = 0
+	}
+	pr.planet.Queue = out
 }
 
 // autoInstall processes Auto Mines/Factories/Defenses at index i and returns

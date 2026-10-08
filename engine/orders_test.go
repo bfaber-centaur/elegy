@@ -222,7 +222,7 @@ func TestConfirmedQueueReplace(t *testing.T) {
 	// only against an unused old item of the same kind with exactly that
 	// percentage. The base queue is Factory ×5 at 49%, Mine ×5 at 30%,
 	// Defenses ×5, Factory ×5 at 20%.
-	base := []QueueItem{{ItemFactory, 5, 49}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}
+	base := []QueueItem{{ItemFactory, 5, 49, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}}
 	for _, tt := range []struct {
 		name      string
 		sent      []QueueItem
@@ -230,12 +230,12 @@ func TestConfirmedQueueReplace(t *testing.T) {
 		wantQueue bool
 	}{
 		// Moved and recounted items keep progress (LQ-1: Mine ×5 → ×3).
-		{"moved", []QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}},
-			[]QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}}, true},
+		{"moved", []QueueItem{{ItemFactory, 5, 20, 0}, {ItemMine, 3, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 49, 0}},
+			[]QueueItem{{ItemFactory, 5, 20, 0}, {ItemMine, 3, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 49, 0}}, true},
 		// LQ-2: the 49% Factory removed, a new Factory at the top sent at
 		// 0; the other Factory keeps its 20.
-		{"LQ-2", []QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}},
-			[]QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}, true},
+		{"LQ-2", []QueueItem{{ItemFactory, 5, 0, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}},
+			[]QueueItem{{ItemFactory, 5, 0, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}}, true},
 		// LQ-4: an empty list removes the queue.
 		{"LQ-4", nil, nil, false},
 	} {
@@ -258,16 +258,16 @@ func TestPredictionQueueNoNewProgress(t *testing.T) {
 	// are refused (L14).
 	g := ordersGame()
 	p := &g.Planets[0]
-	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}
+	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0, 0}, {ItemMine, 5, 0, 0}, {ItemFactory, 9, 20, 0}}
 	errs, _ := apply(g, 0,
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemFactory, 9, 49}, {ItemMine, 5, 30}, {ItemFactory, 9, 20}}},
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 0, 0}}},
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 1024, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemFactory, 9, 49, 0}, {ItemMine, 5, 30, 0}, {ItemFactory, 9, 20, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 0, 0, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 1024, 0, 0}}},
 	)
 	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrOutOfRange) {
 		t.Fatal(errs)
 	}
-	if want := []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}; !reflect.DeepEqual(p.Queue, want) {
+	if want := []QueueItem{{ItemFactory, 9, 0, 0}, {ItemMine, 5, 0, 0}, {ItemFactory, 9, 20, 0}}; !reflect.DeepEqual(p.Queue, want) {
 		t.Errorf("queue %+v, want %+v", p.Queue, want)
 	}
 }

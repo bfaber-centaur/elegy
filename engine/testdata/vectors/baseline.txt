@@ -21,6 +21,7 @@ CB-022-nolone random 7
 CB-022 random 7
 CB-023-control random 7
 CB-024
+CB-047-ctl random 7
 SC-035
 CO-04a
 CO-04b
@@ -156,8 +157,14 @@ PQ-001-C12
 PQ-001-C13
 PQ-001-C14
 PQ-001-P0
+SL-limit-a-ctl
+SL-limit-a
 SL-limit-b-ctl
+SL-limit-b
 SL-limit-b300-ctl
+SL-limit-b300
+SL-routes
+SL-starbases-ctl
 TK-101-A
 TK-102-A
 TK-103-A
@@ -227,6 +234,8 @@ WU-TWOEQ
 WU-TWOEQ2
 WU-WARP40
 WU-WARP90
+PQ-1-explore
+PQ-1
 WP-1-explore
 XF-1-explore
 XF-1

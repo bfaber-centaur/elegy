@@ -76,8 +76,16 @@ and has been sent to stars-elegy as a question.
 
 ## Ships leaving production
 
-`engine/launch.go` follows stars-elegy `docs/PRODUCTION-LAUNCH.md` on main. Production has no ship or starbase items yet, so
-`Launch` and `BuildStarbase` are the build steps such an item will call.
+`engine/launch.go` follows stars-elegy `docs/PRODUCTION-LAUNCH.md` on main.
+Production builds ship and starbase items through `Game.PlanetProduction`
+(`engine/production.go`): a design item names one of the owner's design
+slots, is spent on like any non-auto item (`KERNEL.md` "Production", the
+PQ-001 model), at the design's owner cost (ships), `StarbaseBuildCost`, or
+`StarbaseReplacementCost` where a starbase stands. The units an item
+completes in a year are one `Launch`; each starbase unit is built as it
+completes. `GenerateTurn` calls `PlanetProduction` for each planet;
+`RunProduction`, which has no game, still stops the queue at a design
+item.
 
 | Rule | Code | Status | Test |
 |---|---|---|---|
@@ -91,13 +99,27 @@ and has been sent to stars-elegy as a question.
 | Dock check at order validation | `DockAllows` | chosen rule (host has none, SL-12) | `TestDockAllows` |
 | New starbase keeps damage units; the owner is told no ships / up to N kT / any size | `BuildStarbase` | CONFIRMED (SL-12); message BINARY-ONLY | `TestConfirmedStarbaseKeepsDamage` |
 | At the limit, ships of a design the fleet lacks take their design slot's place | `insertStack` | BINARY-ONLY | `TestPredictionJoinTakesSlotPlace` |
-| Replacement cost, different hull | `StarbaseReplacementCost` | MEASURED (SL-12) | `TestMeasuredStarbaseReplacementCost` |
+| Replacement cost, different hull | `StarbaseReplacementCost` | MEASURED (SL-12) | `TestMeasuredStarbaseReplacementCost`, `TestMeasuredProductionChargesReplacement` |
+| Replacement cost, same hull: slot by slot | `StarbaseReplacementCost` | BINARY-ONLY | `TestSameHullReplacementSameParts` |
+| One build event per item per year; a ship item spent on like any item | `PlanetProduction` | CONFIRMED (SL-01); spending KERNEL.md PQ-001 model | `TestConfirmedProductionOneFleetPerItem`, `TestProductionShipPartial` |
+| Without a starbase: resources spent, nothing built, item removed | `PlanetProduction`, `Launch` | BINARY-ONLY | `TestPredictionShipWithoutStarbase` |
+| An earlier hull removes queued ships and resets starbase items | `afterEarlierHull` | CONFIRMED (SL-12); earlier items built MEASURED once | `TestConfirmedEarlierHullClearsShips` |
+| Design delete drops the slot's queue entries | `DeleteDesignOrder` | MEASURED (CO-07) | `TestMeasuredDesignDeleteDropsQueue` |
+| Design edit: a queue entry builds the edited design | queue items name the slot | MEASURED (CO-08) | `TestMeasuredDesignEditQueueBuildsEdited` |
+| Ship item dock check at order validation | `QueueOrder`, `DockAllows` | chosen rule | `TestQueueOrderDesignItems` |
+
+Production assumptions:
+
+| Id | What Elegy does | Why |
+|---|---|---|
+| P1 | A design item whose slot holds no design is removed with nothing spent. | Deleting a design removes its items, so only a state built without design orders reaches it. |
+| P2 | A same-hull starbase replacement whose designs do not record slot positions is charged the fresh cost. | Designs from `NewDesign` record them (`Design.SlotPos`). |
+| P3 | A queue order with a design item naming an empty or out-of-range slot is refused. | The host checks no item ids (LIMITS.md "Production-queue replace"). |
+| P4 | A queue that a design delete leaves empty is removed. | KERNEL.md says a zero-item queue does not arise in play. |
 
 Not modelled there: stargate routing, the Alternate Reality remote-mining
 task, the "did not move" mark (GenerateTurn must not mark a fleet built
-this year as stationary), the queue changes when a starbase is replaced
-by an earlier hull, the same-hull replacement cost (Elegy's designs do not
-record slot positions), mass drivers, and the route task on arrival.
+this year as stationary), mass drivers, and the route task on arrival.
 
 ## Not modelled
 
@@ -106,8 +128,5 @@ record slot positions), mass drivers, and the route task on arrival.
   legal order is known to reach (ORDERS.md, stars-elegy #87:
   UNRESOLVED);
 - Mystery Trader items (the player owns none), minefields, stargates;
-- mass drivers and packets in planet settings, and ship and starbase
-  items in the queue: so a queue entry is not dropped when its design is
-  deleted (CO-07), and the queue-only design edit (CO-08) is reached only
-  as a slot with nothing in play;
+- mass drivers and packets in planet settings;
 - stargate hops (waypoint warp 11).
