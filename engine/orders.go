@@ -388,12 +388,19 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 //
 // Tasks: route, patrol and transfer fleet are accepted as well as
 // colonize, merge and transport (ORDERS.md "Waypoint upkeep and the
-// remaining tasks"). A transfer-fleet task is accepted whoever it names:
+// remaining tasks"), and so are remote mining and lay mines, whose
+// refusals (no mining modules, an inhabited planet, deep space, no
+// dispensers) happen when the task runs (KERNEL.md "Remote mining",
+// OBJECTS.md "Laying"). A transfer-fleet task is accepted whoever it names:
 // the host refuses an absent, eliminated, hostile or colonist-carrying
 // transfer when the task runs (ORDERS.md "Transfer fleet"), and so does
 // Game.transferFleet.
 //
 // ASSUMPTION L6: a task Elegy does not model rejects the order.
+//
+// ASSUMPTION L24: a lay-mines duration other than YearsIndefinitely or at
+// least one year rejects the order; OBJECTS.md "Duration" names this
+// year only, k years and indefinitely, and no order-time check.
 //
 // ASSUMPTION L18: a patrol task with a negative range rejects the order,
 // as a negative transport amount does (ORDERS.md "Waypoint warp, target
@@ -449,6 +456,11 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 func validTask(t Task) error {
 	switch t.Kind {
 	case TaskNone, TaskColonize, TaskMerge, TaskRoute, TaskTransferFleet:
+	case TaskRemoteMine:
+	case TaskLayMines:
+		if t.Years < 1 && t.Years != YearsIndefinitely {
+			return fmt.Errorf("lay mines for %d years: %w", t.Years, ErrOutOfRange)
+		}
 	case TaskPatrol:
 		if t.Range < 0 {
 			return fmt.Errorf("patrol range %d: %w", t.Range, ErrOutOfRange)

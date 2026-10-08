@@ -5,7 +5,7 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
 OT runs and the turn order and random draw order). The parity vectors
-are copied from stars-elegy `main` at `6fba6a3` (stars-elegy #111, #113).
+are copied from stars-elegy `main` at `58a9b58` (stars-elegy #111, #113, #116).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
@@ -347,8 +347,8 @@ year's `PlayerView`s: a planet's report level (0 none, 1 position, 3
 normal, 4 detailed, PARITY.md "Co-location and orbit reports") and
 starbase visibility, a fleet's level (3 seen, 4 with its cargo) and
 `known`, and whether a minefield, packet, wormhole end or Trader was
-seen that year. Other view fields are skipped. SC028-T75-out is
-skipped as a setup artifact (PARITY.md).
+seen that year. Other view fields are skipped. SC028-T75-out, a setup
+artifact (PARITY.md), is no longer in the vectors (stars-elegy #116).
 
 ## Integration handoff list
 
@@ -394,7 +394,6 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 - Stream cycles beyond the harness's seeds, "original environment null",
   "design read needs the order layer's design source", and KX-002-R3/R4
   (the next research field choice is not in the vector).
-- SC028-T75-out: a setup artifact.
 
 **Sample-only and random cases:** a case listed as `random k` in the
 baseline passes with k of 8 seeds; it is evidence of the rule, never of

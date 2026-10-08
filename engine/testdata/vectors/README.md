@@ -358,7 +358,17 @@ is paid by a field (MF-4). In `gt`, the fleets whose survivors a gate's
 loss roll decided (a predicted ship range, the O-65 fleets of which only
 some arrive, the GT-003 W cases) carry `sample: true`, and so do message
 ids that only some of those fleets got. In `ob`, a PP terraforming step's
-size is a draw, so OB-029's `environment` expectations are samples. In
+size is a draw, so OB-029's `environment` expectations are samples.
+In `ob` and `wt`, these are samples too, because the original draws them
+(OBJECTS.md):
+- whether a player sees a wormhole, where the drawn jiggle (at most 17 ly
+  for these wormholes, none of which can jump) can carry it across the
+  scanner bound: only OB-018-SCAN wormhole 2;
+- the fleet and field of a mine-hit case, since each hit is drawn;
+- a Trader's end position, since an arriving lone Trader leaves on a draw;
+- the outcome of a Trader encounter (the meeting fleet, the Trader, the
+  player's parts), since the Trader's 1/25 warp rise can carry it past the
+  meeting point. In
 the single-stream `kx005` runs (T1, T2) the Claim Adjuster planets'
 environments and the drift message 0x15c are samples: each planet's drift
 is drawn.
@@ -431,5 +441,54 @@ go test ./internal/vectors
 - RD-P19 years 2 and 3 (`rp19-y2`, `rp19-y3`): their start files are the
   previous year's output, not a separate edit; the year-1 vector covers the
   edit and PARITY "Race design" Round 3 records the later years.
-- Universe generation (`ug`), objects (`ob`), `pg`, `pq` and `cs`:
-  being converted by their own lane.
+- SC-028-T75-out: left out of `sc028` by the builder (`EXCLUDE` in
+  `build_sc.py`). The original put the fleet at y 1000, not the start
+  file's y 920, so the case tests the setup, not a rule (PARITY
+  "SC-028-T75-out"); SC-033-T75-out repeats it from the centre.
+
+## Open gaps (state at the end of the vectors lane, 2026-10-08)
+
+What a parity pass does not prove, so it is not mistaken for coverage.
+
+**Sample-only cases.** In these cases every expectation is a random
+outcome (`sample: true` or `kind: "sample"`). A pass shows the outcome is
+one the rule allows under that seed; a miss on some seeds is expected.
+Neither proves exact parity. Rerun the list with the script in the
+comment below after a rebuild.
+
+- New games: UG01..UG30, RD-1..RD-7 and RW08 cases B..E (planet counts,
+  starting planets, wormholes, stored victory conditions), plus RD-5-R and
+  RD-6-R (Random races).
+- Objects: OB-004-D, OB-005-A/B, OB-007-D, OB-010-S, OB-023-T, OB-024-A..C, OB-025 (all nine),
+  OB-026-A..D, OB-027-A/B, OB-029-D2, OB-030-T.
+- Mystery Trader: WT-001-E, WT-001-F2, WT-002-B, WT-003-A00..A11, A and B,
+  WT-004-A..C, WT-005-A.
+- Others: CS-003-W-E00..E06 and E10..E13, FM-101-F/G,
+  FM-102-A/C, PQ-001-C09/C14/P0 mining, TK-115-T.
+
+<!-- python3 -c "import json,glob;print([c['id'] for f in sorted(glob.glob('vectors/*/*.json')) for c in json.load(open(f)).get('cases',[]) if c.get('expect') and all(e.get('sample') or e.get('kind')=='sample' for e in c['expect'])])" -->
+
+Many other cases mix exact and sample expectations (every GT and MF
+moving fleet, the KX-005 drift, battles); their exact parts still count.
+
+**Vectors still missing.** Everything under "Not converted yet" above.
+The ones an implementer is most likely to want are FM-000..004 and
+TK-001..007 (round 1 prose and tables, which need a checker-output rerun
+or a hand conversion), KX-004 E0/E1, and BP-2.
+
+**Oracle runs not run.** Each PARITY section's "Not tested" list is the
+current record; the main ones are:
+
+- Fleet Operations: split, direct transfers and merges, direct cargo
+  placement, steal mode (need host-accepted order files, serial-gated).
+- Combat: salvage at more than one point (E-8), Mystery Trader items from
+  battle (never observed).
+- Scanning: SD detection of cloaked fleets (S-21), AR planet scanners
+  (S-11), chase retargeting (S-24), more than two players, planet reports
+  after bombing, minefield hits or a lost planet.
+- Universe objects: packet limits (32,760 and 16,300 kT), the 4,050-object
+  limit (LIMITS.md), wormhole jump odds as a rate (O-28), the Trader's 1/2
+  leaving rate and ship counts after year index 100.
+- Battle plans: the 16-plan limit and delete-and-renumber, the stale
+  "Default" attack-who.
+- AI: §7 planet automation (AI-7).

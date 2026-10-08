@@ -18,8 +18,8 @@ and the design read are engine functions an order layer will call:
 | Damage on a merge (`ceil(100·ΣD/n)`; one damaged stack keeps its units; two divide by all ships) | `mergeDamage` (switch `legacyMergeDilution`, on) | LEGACY BUG, CONFIRMED (FO, seven cases) | `TestConfirmedMergeDamageDilution` (both settings) |
 | No ship-count cap on the task; 32768 or more leaves no ships | `absorb` (switch `legacyMergeOverflow`, off) | LEGACY BUG, CONFIRMED (FO) | `TestConfirmedMergeTaskOverflow` (both settings) |
 | Elegy's chosen rule: the task takes the merge order's cap | `absorb` | Elegy decision, below | `TestConfirmedMergeTaskOverflow` |
-| Merge order: co-located fleets of the owner; a stack passing 32767 becomes 32766, the rest lost, the order not refused | `MergeFleets`, `absorb` | BINARY-ONLY | `TestPredictionMergeOrder` |
-| Merge order damage: percentage over all ships, units over the damaged ships only (no dilution) | `MergeFleets`, `mergeDamage` | BINARY-ONLY | `TestPredictionMergeOrderDamage` |
+| Merge order: co-located fleets of the owner; a stack passing 32767 becomes 32766, the rest lost, the order not refused | `MergeFleets`, `absorb` | Elegy's chosen rule, unconfirmed (ORDERS.md "Merge order": never reached by a legal order; the exchange path's 32765 is MEASURED CO-06) | `TestPredictionMergeOrder` |
+| Merge order damage: percentage over all ships, units over the damaged ships only, rounded down (no dilution) | `MergeFleets`, `mergeDamage` (`mergeOrderDamaged`) | CONFIRMED (CO-05, CO-05b, CO-05c) | `TestConfirmedMergeOrderDamage` |
 | Task target gone, merged away or another player's: refused | `mergeTask` | BINARY-ONLY | `TestPredictionMergeTaskForeignTarget` |
 | Ownership checked on every order (chosen rule) | `MergeFleets` | chosen rule (ORDERS.md "Ownership") | `TestPredictionMergeOrder` |
 | Design read: parts above research tech dropped; mass and capacities from the parts kept | `ReadDesign` | BINARY-ONLY | `TestPredictionDesignTechStrip` |
