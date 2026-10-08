@@ -214,10 +214,12 @@ func unsupportedSteps(d game.Driver) int {
 }
 
 // Run plays the case.
-func Run(c Case) Result { return run(c, c.drivers) }
+func Run(c Case) Result { return run(c, c.drivers, nil) }
 
 // run plays the case with the drivers newDrivers makes, one set per copy.
-func run(c Case, newDrivers func() []game.Driver) Result {
+// A non-nil prepare changes each new game (primary and replay) before
+// the first year; tests use it to plant a broken state.
+func run(c Case, newDrivers func() []game.Driver, prepare func(*game.Game)) Result {
 	res := Result{Case: c}
 	fail := func(cat Category, year int, format string, args ...any) {
 		res.Findings = append(res.Findings, Finding{Category: cat, Year: year, Detail: fmt.Sprintf(format, args...)})
@@ -231,6 +233,10 @@ func run(c Case, newDrivers func() []game.Driver) Result {
 	if err != nil {
 		fail(SetupFailed, 0, "%v", err)
 		return res
+	}
+	if prepare != nil {
+		prepare(primary)
+		prepare(replay)
 	}
 	a := &copyGame{primary, newDrivers()}
 	b := &copyGame{replay, newDrivers()}

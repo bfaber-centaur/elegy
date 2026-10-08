@@ -75,11 +75,17 @@ func matrix(t *testing.T) []Case {
 	for _, seed := range seeds {
 		for _, r := range rules {
 			for _, o := range opps {
-				cases = append(cases, Case{Seed: seed, Rules: r, Opponents: o, Size: size, Years: years, SaveAt: saveAt, Checks: yearChecks()})
+				cases = append(cases, matrixCase(seed, r, o, size, years, saveAt))
 			}
 		}
 	}
 	return cases
+}
+
+// matrixCase is one case of a TestLongGames matrix (the PR subset, the
+// nightly run or a reproduction), with the year checks.
+func matrixCase(seed uint64, rules string, opponents []string, size newgame.Size, years, saveAt int) Case {
+	return Case{Seed: seed, Rules: rules, Opponents: opponents, Size: size, Years: years, SaveAt: saveAt, Checks: yearChecks()}
 }
 
 // TestLongGames plays the matrix and reports findings by category. Any
@@ -149,7 +155,7 @@ func TestStoppedCaseKeepsObservations(t *testing.T) {
 			}
 			return nil
 		}}}}
-	r := run(c, func() []game.Driver { return []game.Driver{nil, oneUnsupported{}} })
+	r := run(c, func() []game.Driver { return []game.Driver{nil, oneUnsupported{}} }, nil)
 	if len(r.Findings) != 2 || r.Findings[0].Category != CheckFails || !reflect.DeepEqual(r.Findings[1], Finding{Category: Unsupported, Count: 3}) {
 		t.Fatalf("findings %+v: want the year-check failure, then 3 unsupported steps for the 3 years played", r.Findings)
 	}
@@ -174,6 +180,35 @@ func TestYearChecksRunCheckYear(t *testing.T) {
 	}
 	if len(probs) == 0 || !strings.Contains(strings.Join(probs, "; "), "year") {
 		t.Fatalf("problems %q: want CheckYear's year problem", probs)
+	}
+}
+
+// A matrix case runs engine.CheckYear: a starting fleet numbered 0,
+// which game.Check accepts and the engine carries over, stops the case
+// in its first year with a year-check failure naming CheckYear.
+func TestMatrixCaseStopsOnCheckYear(t *testing.T) {
+	c := matrixCase(5, "elegy", []string{"rototill"}, newgame.Tiny, 4, 2)
+	r := run(c, c.drivers, func(g *game.Game) {
+		for i := range g.State.Fleets {
+			if g.State.Fleets[i].Owner == 1 {
+				g.State.Fleets[i].Number = 0
+				return
+			}
+		}
+		t.Fatal("test setup: player 1 has no fleet")
+	})
+	var failures []Finding
+	for _, f := range r.Findings {
+		if f.Category.IsFailure() {
+			failures = append(failures, f)
+		}
+	}
+	if len(failures) != 1 || failures[0].Category != CheckFails || failures[0].Year != 2400 ||
+		!strings.Contains(failures[0].Detail, "engine.CheckYear") || !strings.Contains(failures[0].Detail, "number 0") {
+		t.Fatalf("failures %+v: want one CheckYear failure in the year played from 2400", failures)
+	}
+	if r.Years != 1 {
+		t.Errorf("played %d years: want the case stopped after the first", r.Years)
 	}
 }
 
