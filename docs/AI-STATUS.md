@@ -119,15 +119,14 @@ them it stayed on its homeworld.
 | A46 | A wormhole order targets the point in space where the end was last seen: the engine's waypoints cannot target a wormhole end yet. |
 | A47 | Each attack-fleet item Cybertron's production queues adds one to its kind's fleet count only when its slot holds a design and the item is queued. |
 | A48 | Packet supply: minerals tried in order ironium, boranium, germanium, the first with a target wins; "over 700 kT" and "at least 70 resources" are amounts left after the queue; the low notes read the target's surface minerals; a planet is not its own target; "up to 7" is as many as the amount left pays for, at most 7; the speed is w. |
-| A49 | Attack packets: M sums the three minerals left; "the budget can kill" is a kill mass of at most M; the kill mass is divided by q^(distance/w²) (what a packet keeps over its flight, so a farther target needs more), in floating point with the distance in ly; the count is ⌈kill mass / 70⌉; ranges are inclusive. |
+| A49 | Attack packets (cybertron.md §6: the budget test BINARY-ONLY, the mass sent MEASURED AI-24): M sums the three minerals left after the queue and R is the available resources before it (§6 names the queue only for M); f is computed in floating point; the range test is inclusive. |
 | A50 | The report does not carry the parts of another player's starbase design, so its catch warp cannot be read: only planets with no starbase in view are attack-packet targets. |
 | A51 | Retired: the scanner shot's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset switches `CybertronPacketMarkNextID` and `CybertronScannerShotOverflow` (off in elegy, on in jrc3-faithful); with them off, the mark is on the destination. |
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 
 ## Spec questions
 
-- cybertron.md §6 attack: whether the kill mass is multiplied or divided
-  by `q^(distance/w²)` (A49).
+None open.
 
 ## Decisions pending
 
