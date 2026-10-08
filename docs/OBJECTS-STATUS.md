@@ -245,6 +245,7 @@ kernel owns (elegy #27). `newgame.Generate` sets `Game.Objects` to an
 | 3.3 warp-11 waypoint | `Stargate` | `Jump` |
 | 3.3 reached wormhole end | `TransitWormhole` | `Space.Transit` |
 | 3a | `DecayObjects` | `Space.DecayPackets`, `Space.Detonate`, `Space.Decay` |
+| 4 production, a packet item | `LaunchPacket` | `Space.Launch` |
 | 4c | `TraderAppears` | `Space.Appear` |
 | 5.1 | `MoveObjectsAgain` | `Space.FlyLaunched`, `Space.MoveWormholes` |
 | 6b | `MeetTraders` | `Space.Meet` |
@@ -267,7 +268,5 @@ Not wired yet:
   packets see fleets and planets, OB-012) and
   `Space.DemolitionSightings` (OB-014-B) feed the engine's fleet views;
   `Sightings.Owners` its known players.
-- **Packet launch** from production (`Space.Launch`, `PacketItem`), the
-  orders layer's.
 - **Computer players' planet trades** (`Space.Meet` needs their levels;
   PLACEHOLDER in the adapter).
