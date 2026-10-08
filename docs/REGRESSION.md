@@ -63,6 +63,11 @@ of 60 years, reloaded after 23 years. 60 years reach Cybertron's first
 warship group. The cases run in parallel; the job takes about 30
 seconds.
 
+The scheduled "Long games" workflow runs nightly, and on demand from
+the Actions tab. It has 12 seeds (1–12), both rulesets and the same 4
+opponent sets: 96 games of 150 years on a medium map, reloaded after 77
+years. On demand, its seeds and years can be changed.
+
 To replay a case or run another matrix:
 
 ```sh

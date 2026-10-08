@@ -1,0 +1,42 @@
+name: Long games
+
+# The long-game regression (docs/REGRESSION.md) on a larger matrix than
+# the PR subset: 12 seeds x both rulesets x 4 opponent sets = 96 games of
+# 150 years on a medium map, each replayed and reloaded after 77 years.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: comma-separated seeds
+        default: "1,2,3,4,5,6,7,8,9,10,11,12"
+      years:
+        description: years per game
+        default: "150"
+
+permissions:
+  contents: read
+
+jobs:
+  long-games:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Play the long games
+        env:
+          SEEDS: ${{ inputs.seeds || '1,2,3,4,5,6,7,8,9,10,11,12' }}
+          YEARS: ${{ inputs.years || '150' }}
+        run: >
+          go test ./regress -run '^TestLongGames$' -count=1 -v -timeout 55m
+          -args -seeds="$SEEDS" -years="$YEARS" -save-at=77 -size=2
