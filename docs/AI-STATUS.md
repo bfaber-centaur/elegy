@@ -119,15 +119,14 @@ them it stayed on its homeworld.
 | A46 | A wormhole order targets the point in space where the end was last seen: the engine's waypoints cannot target a wormhole end yet. |
 | A47 | Each attack-fleet item Cybertron's production queues adds one to its kind's fleet count only when its slot holds a design and the item is queued. |
 | A48 | Packet supply: minerals tried in order ironium, boranium, germanium, the first with a target wins; "over 700 kT" and "at least 70 resources" are amounts left after the queue; the low notes read the target's surface minerals; a planet is not its own target; "up to 7" is as many as the amount left pays for, at most 7; the speed is w. |
-| A49 | Attack packets: M sums the three minerals left; "the budget can kill" is a kill mass of at most M; the kill mass is divided by q^(distance/w²) (what a packet keeps over its flight, so a farther target needs more), in floating point with the distance in ly; the count is ⌈kill mass / 70⌉; ranges are inclusive. |
+| A49 | Attack packets (cybertron.md §6: the budget test BINARY-ONLY, the mass sent MEASURED AI-24): M sums the three minerals left after the queue and R is the available resources before it (§6 names the queue only for M); f is computed in floating point; the range test is inclusive. |
 | A50 | The report does not carry the parts of another player's starbase design, so its catch warp cannot be read: only planets with no starbase in view are attack-packet targets. |
 | A51 | Retired: the scanner shot's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset switches `CybertronPacketMarkNextID` and `CybertronScannerShotOverflow` (off in elegy, on in jrc3-faithful); with them off, the mark is on the destination. |
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 
 ## Spec questions
 
-- cybertron.md §6 attack: whether the kill mass is multiplied or divided
-  by `q^(distance/w²)` (A49).
+None open.
 
 ## Decisions pending
 
@@ -155,6 +154,20 @@ The driver's only state is the creation year and picture of the designs
 it stored (AI.md §5, §10), which the engine's designs do not carry. It
 does not survive a save and load (`game.Driver`'s ELEGY CHOICE); after a
 load those designs count as created in the first year with picture 0.
+
+**Open issue ([#70](https://github.com/bfaber-centaur/elegy/issues/70)):
+save and reload.** The smoke tests show deterministic uninterrupted
+games only. A game with computer players that is saved mid-way and
+reloaded into fresh drivers does not continue identically. In a local
+run of the equivalence test that will land with the fix
+(`TestDriversSaveReload`: 50 years, saved after 2425), the state differed
+from 2426 on, under both `elegy` and `jrc3-faithful`, while the same
+game reloaded with the same drivers matched every year. The driver's design metadata
+is the only cause found, and the report cannot rebuild it. The
+proposed fix puts both values on the engine's stored design and in the
+save. Until #70 is closed, nothing here claims save/reload determinism
+for computer players. Owner: this lane (ai/), with the engine and save
+changes routed to their lanes.
 
 ## Inputs the planners need from outside `ai/`
 

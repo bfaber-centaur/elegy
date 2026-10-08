@@ -70,15 +70,14 @@ spec does not give the scan's start value. The code says so at
 
 ## Not modelled
 
-Elegy has none of these yet:
-
 - load actions ("load all", "fill to", "wait for", "set amount to", "set
-  waypoint to"), fleet transfers, remote mining, mine
-  laying and cargo given to other players' fleets;
-- colonists given by manual cargo transfers in the orders, which would
-  start the before-movement drop queue;
-- ancient artifacts (no random events);
-- the design check at generation that drops parts above the owner's tech
-  (Elegy's designs have no owner, so every part is kept and used; the
-  design read for an owner is `Catalog.ReadDesign`, ORDERS-STATUS.md);
+  waypoint to"). Fleet transfers, remote mining, mine laying,
+  cargo given to other players' fleets and colonists dropped by a manual
+  cargo order are implemented (KERNEL-STATUS.md, ORDERS-LAYER-STATUS.md);
+- ancient artifacts;
+- the design check at generation that drops parts above the owner's tech:
+  designs have owners through `Game.DesignSlots`, but `Catalog.ReadDesign`
+  runs only when a design order (ORDERS-STATUS.md) or a computer player
+  (`ai/designs.go`) makes a design, so a design made any other way keeps
+  every part;
 - the old owner's message beyond `EventPlanetEmptied`.

@@ -119,20 +119,22 @@ func TestScannerShotOwnPlanet(t *testing.T) {
 	}
 }
 
-// Attack packets: an expert with minerals to spare aims at the nearest
-// other player's planet in range that it can kill, queues the packets
-// and marks the target; the scanner shot is not tried.
+// Attack packets, cybertron.md §6's worked example: need 284 at
+// f = 0.75^0.807 sends 358 kT, 6 packets (multiplying by f would send 4).
+// The expert aims at the nearest other player's planet it can kill,
+// queues the packets and marks the target; the scanner shot is not tried.
 func TestAttackPacket(t *testing.T) {
-	v := shotView(t, "Mass Driver 5", engine.Point{X: 150, Y: 200})
-	v.Known[2] = engine.PlanetReport{Planet: 2, Level: engine.ReportNormal, Owner: 1, PopEstimate: 4000}
+	// Planet 2 at (51, 8) from home: D = 51.62 ly, D/w² = 0.8066 at w = 8.
+	v := shotView(t, "Mass Driver 5", engine.Point{X: 151, Y: 208})
+	// pop 800/400 = 2: 16000·min(1000, 108)/(64·95) = 284.2 → 284.
+	v.Known[2] = engine.PlanetReport{Planet: 2, Level: engine.ReportNormal, Owner: 1, PopEstimate: 800}
 	v.Planets[0].Surface = engine.Minerals{3000, 2000, 1000}
+	v.Planets[0].Population, v.Planets[0].Factories = 3000, 200
 	ct := cyberTest(t, v, &script{t: t})
 	marked := map[int]bool{}
 	if !ct.attackPacket(&v.Planets[0], 0, marked) {
 		t.Fatal("no attack")
 	}
-	// pop 10: 16000·140 / (64·95) = 368.4; 50 ly at w² = 64 with q 0.75:
-	// ÷ 0.75^0.78125 → 460.0 kT, 7 packets, all ironium (the most left).
 	q := ct.q.get(&v.Planets[0])
 	n := 0
 	for _, it := range q {
@@ -141,8 +143,21 @@ func TestAttackPacket(t *testing.T) {
 		}
 	}
 	set := ordersOf[engine.PlanetSettingsOrder](ct.res.Orders)
-	if n != 7 || len(set) != 1 || set[0].PacketDest != 2 || set[0].PacketSpeed != 8 || !marked[2] {
-		t.Errorf("queue %+v, settings %+v, marks %v; want 7 ironium packets to planet 2 at warp 8", q, set, marked)
+	if n != 6 || len(set) != 1 || set[0].PacketDest != 2 || set[0].PacketSpeed != 8 || !marked[2] {
+		t.Errorf("queue %+v, settings %+v, marks %v; want 6 ironium packets to planet 2 at warp 8", q, set, marked)
+	}
+}
+
+// The budget C = min(M, 70·((R/2 − 5)/5)) limits targets: with too few
+// resources the same planet does not qualify.
+func TestAttackPacketBudget(t *testing.T) {
+	v := shotView(t, "Mass Driver 5", engine.Point{X: 151, Y: 208})
+	v.Known[2] = engine.PlanetReport{Planet: 2, Level: engine.ReportNormal, Owner: 1, PopEstimate: 800}
+	v.Planets[0].Surface = engine.Minerals{3000, 2000, 1000}
+	v.Planets[0].Population, v.Planets[0].Factories = 100, 0
+	ct := cyberTest(t, v, &script{t: t})
+	if ct.attackPacket(&v.Planets[0], 0, map[int]bool{}) {
+		t.Errorf("attacked with %d resources", v.available(&v.Planets[0], 0).Resources)
 	}
 }
 

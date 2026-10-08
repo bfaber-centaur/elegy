@@ -143,7 +143,7 @@ the Trader like any fleet and refused (no minerals).
 | Catch share, minerals added | `CatcherWarp`, impact | CONFIRMED (OB-003, OB-009, OB-022) |
 | Damage, kill, defenses lost; AR immune; own packets | impact | CONFIRMED (OB-009, OB-022, OB-030-A, OB-009-E) |
 | PP terraforming | impact → `terraform.PacketTerraform`, `Impact.Terraform` | axes CONFIRMED (OB-029-T1..T3); draws BINARY-ONLY; see TERRAFORM-STATUS.md |
-| PP starbase design disclosure | `Impact.DiscloseDesign` | BINARY-ONLY; the turn engine records the design (not wired) |
+| PP starbase design disclosure | `Impact.DiscloseDesign` | BINARY-ONLY; the turn engine records the design (`EventPacketDesignSeen`) |
 
 Packets sit in `Space.Packets` in object order (owner, then number) and
 count toward the object limit.
@@ -283,33 +283,23 @@ kernel owns (elegy #27). `newgame.Generate` sets `Game.Objects` to an
 | 6b | `MeetTraders` | `Space.Meet` |
 | 6c.2 | `LayMines` | `Space.Lay` |
 | 7.1 | `SweepMines` | `Space.Sweep` (the sweeper's owner learns the field) |
-| before the views | `SeeObjects` | wormhole-end sight; see below |
+| before the views | `SeeObjects` | `Space.Scan` per player, `PacketScanners`, `DemolitionSightings` |
+
+Also wired: minefield knowledge (`MineHit`
+calls `LearnHit`; `SeeObjects` calls `Space.Scan` per player), fleet and
+player sight from PP packets and SD minefields, the salvage call sites
+(`AddMineSalvage`, `DecaySalvage`) and PP starbase design disclosure
+(`objects/engine_adapter.go`; KERNEL-STATUS.md "Space objects"). Tests:
+the OB-011..OB-018 parity cases pass through the whole turn;
+`TestPredictionMinefieldKnowledge`, `TestConfirmedPacketScanners`,
+`TestConfirmedDemolitionSight`, `TestPredictionSalvageDecay`,
+`TestPredictionMineSalvage` and `TestPredictionPacketDesignSeen` cover
+the rules each call uses.
 
 Not wired yet:
 
-- **Minefield knowledge.** `Minefield.Known` now exists: sweeps mark it
-  (`Space.Sweep`), and `Space.Scan` and `Space.LearnHit` mark sight and
-  hits. The adapter's `SeeObjects` still marks only wormhole ends, and
-  `MineHit` does not call `LearnHit`. For the harness's `known_to`
-  checks, `SeeObjects` can call `Space.Scan` once per player with that
-  player's scanners (checked locally: MF-13a and MF-13c then match their
-  `known_to` expectations once the harness compares them). `Scan` applies the same wormhole rule and adds the
-  minefield rule, PP packet scanners, packets, Traders and the owners
-  made known. `MineHit` can call `LearnHit` with the stop point. Known
-  is copied before it changes, so `CloneObjects` needs no change.
-- **Fleet and player sight from objects:** `Space.PacketScanners` (PP
-  packets see fleets and planets, OB-012) and
-  `Space.DemolitionSightings` (OB-014-B) feed the engine's fleet views;
-  `Sightings.Owners` its known players.
-- **Salvage** (engine call sites, the kernel's):
-  - Set `Owner`, `Number` (from `Space.SalvageNumber`), `Fresh` and `Steps`
-    where battle, overflow, takeover and scrap salvage is created.
-  - Call `DecaySalvage` at step 3a, before packet decay.
-  - `MineHit` passes `Hit.Salvage` to `Space.AddMineSalvage` in place of
-    its append, at the point `StopPoint` gives (`mineStop` places the
-    fleet with its own rounding today).
-  - Load and unload tasks use `SalvageLoad` and `SalvageRoom`.
-- **PP starbase design disclosure:** record the catcher's starbase
-  design for the launcher when `Impact.DiscloseDesign` is set.
-- **Computer players' planet trades** (`Space.Meet` needs their levels;
-  PLACEHOLDER in the adapter).
+- **Salvage loads and unloads:** `SalvageLoad` and `SalvageRoom` wait
+  for the engine's load and unload-into-salvage tasks, which are not
+  modelled.
+- **Computer players' planet trades:** `Space.Meet` needs each computer
+  player's level, which the adapter does not have; it uses a PLACEHOLDER.

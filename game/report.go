@@ -70,6 +70,9 @@ type Report struct {
 	// Wormholes are the wormhole ends the player knows (OBJECTS.md
 	// "Wormholes"), in end order.
 	Wormholes []KnownWormholeEnd
+	// KnownDesigns are the other players' designs the player knows, in
+	// design index order; see KnownDesign.
+	KnownDesigns []KnownDesign
 
 	// Rand draws from the game's random stream. The loop sets it; a
 	// driver that needs random numbers must draw them from it, and only
@@ -114,6 +117,40 @@ type KnownWormholeEnd struct {
 	Destination *engine.Point `json:",omitempty"`
 }
 
+// KnownDesign is another player's design as a player knows it. Index is
+// the design's index in the game's design list, which View.Fleets'
+// stacks and planet reports' StarbaseDesign refer to. Year is the last
+// year a view showed it (the game year whose start it shows).
+//
+// Hull and Mass are always known: a seen ship or starbase reveals its
+// design's hull and mass (stars-elegy SCANNING.md "Designs", CONFIRMED).
+// Full is set, and Design holds the whole design with its parts, once the
+// player has been shown the design in full: a War Monger viewer sees every
+// design in full, and everyone in a battle learns the other participants'
+// designs (SCANNING.md "Designs", CONFIRMED SC-015, SC-031, SC-036;
+// engine.DesignSighting.Full). Nothing else about a design seen only
+// partially is reported.
+//
+// The record is what the player was shown: an owner may later put a new
+// design in the same unused slot, under the same index
+// (engine.DesignOrder), and the report keeps the old one until a view
+// shows the new one.
+//
+// ASSUMPTION G3: a design stays known, and stays known in full once shown
+// in full, in later years when no view shows it. A partial sighting whose
+// hull and mass match keeps the full design last shown, which may be
+// stale; a partial sighting with another hull or mass replaces it.
+// stars-elegy says what a player's file holds the year a design is
+// revealed, not whether later files keep it.
+type KnownDesign struct {
+	Index  int
+	Year   int
+	Hull   string
+	Mass   int
+	Full   bool
+	Design *engine.Design `json:",omitempty"`
+}
+
 // PlanetRecord is one planet of a player's planet history: the latest
 // report the player received about it and the year that report
 // describes (the game year whose start it shows).
@@ -151,7 +188,8 @@ type OrderOutcome struct {
 // Orders). For a new game, views are the starting knowledge and events
 // and results are empty.
 //
-// NewReport leaves History, Universe, Wormholes and Rand empty; the
+// NewReport leaves History, Universe, Wormholes, KnownDesigns and Rand
+// empty; the
 // loop's Game.Report fills them.
 func NewReport(g engine.Game, player int, views []engine.PlayerView, events []engine.Event, results []engine.OrderResult) (Report, error) {
 	if player < 0 || player >= len(g.Players) {

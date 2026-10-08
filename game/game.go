@@ -38,6 +38,9 @@ type Game struct {
 	// sightings (Report.Wormholes).
 	history   history
 	wormholes wormholeHistory
+	// designs is every player's knowledge of other players' designs
+	// (Report.KnownDesigns).
+	designs designHistory
 	// nameIndex is each planet's name index, by planet index
 	// (newgame.Result.NameIndex).
 	nameIndex []int
@@ -91,6 +94,7 @@ func New(rules engine.Ruleset, s newgame.Settings, seed uint64) (*Game, error) {
 	g.views = engine.Views(st, engine.PopulationEstimates(st, rng))
 	g.history = history(nil).record(st.Year, g.views)
 	g.wormholes = wormholeHistory(nil).record(st.Year, g.views, space(st))
+	g.designs = designHistory(nil).record(st.Year, g.views, st.Designs)
 	return g, nil
 }
 
@@ -156,6 +160,14 @@ func (g *Game) Report(player int) (Report, error) {
 			}
 			r.Wormholes = append(r.Wormholes, k)
 		}
+	}
+	for _, d := range g.designs.list(player) {
+		k := KnownDesign{Index: d.Design, Year: d.Year, Hull: d.Hull, Mass: d.Mass, Full: d.Full != nil}
+		if d.Full != nil {
+			full := deepCopy(*d.Full)
+			k.Design = &full
+		}
+		r.KnownDesigns = append(r.KnownDesigns, k)
 	}
 	return r, nil
 }
@@ -266,6 +278,7 @@ func (g *Game) Advance(drivers []Driver) (Year, error) {
 	g.results = normalizeResults(res.Orders)
 	g.history = g.history.clone().record(res.Game.Year, res.Views)
 	g.wormholes = g.wormholes.clone().record(res.Game.Year, res.Views, space(res.Game))
+	g.designs = g.designs.clone().record(res.Game.Year, res.Views, res.Game.Designs)
 	return Year{Orders: files, Result: res}, nil
 }
 
