@@ -62,7 +62,7 @@ switch as a parameter from a caller that does.
 | Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `Game.fuelTerm` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
-| `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014. Off: a scanner is needed and cloaking applies at distance 0 too, so a fleet with no scanner part sees no fleet, also at its own position (Elegy choice, `TestElegyDecisionColocationOff`) |
+| `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014. Off: a scanner is needed and cloaking applies at distance 0 too, so a fleet with no scanner part sees no fleet, also at its own position (ELEGY CHOICE, `TestElegyDecisionColocationOff`) |
 | `drop_scan` | `DropScan` | on | on | `engine/takeover.go` `Game.dropWinner` | TAKEOVER.md "Several players dropping at once", LEGACY BUG, CONFIRMED T-32 |
 | `starbase_armed_class` | `StarbaseArmedClass` | on | on | `engine/combat_battle.go`, `starbaseClass` | COMBAT.md "Starbases in battle", LEGACY BUG, CONFIRMED CB-011..013 S4/S5 |
 | `observer_tech_mask` | `ObserverTechMask` | on | on | `engine/combat.go` `battle.techAttempts` | COMBAT.md "Tech from battle", LEGACY BUG, CONFIRMED CB-031-obs, CB-037 |

@@ -46,7 +46,7 @@ type Legacy struct {
 	// Colocation: every scanning test passes at distance 0 (SCANNING.md
 	// "Co-location", CONFIRMED SC-002, SC-014). Off, a scanner is needed
 	// and cloaking applies at distance 0 too: a fleet with no scanner part
-	// sees no fleet, also at its own position (Elegy choice).
+	// sees no fleet, also at its own position (ELEGY CHOICE).
 	// engine/scanning.go.
 	Colocation bool `json:"colocation"`
 	// DropScan: several players' drops pick the winner by the scan in
