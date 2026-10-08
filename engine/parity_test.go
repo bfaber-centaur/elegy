@@ -912,7 +912,8 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 			return Task{}, "fleet-to-fleet transport"
 		}
 		t := Task{Kind: TaskTransport}
-		for cargo, o := range w.Task.Orders {
+		for _, cargo := range pvKeys(w.Task.Orders) {
+			o := w.Task.Orders[cargo]
 			c, ok := pvCargo[cargo]
 			if !ok {
 				return Task{}, "transport " + cargo
@@ -1684,7 +1685,8 @@ func (l *pvLoaded) viewCheck(g *Game, e pvExpect, eq map[string]json.RawMessage,
 	default:
 		return "skip: view of a " + sub.Kind
 	}
-	for k, w := range eq {
+	for _, k := range pvKeys(eq) {
+		w := eq[k]
 		gv, ok := got[k]
 		if !ok {
 			return "skip: view field " + k
