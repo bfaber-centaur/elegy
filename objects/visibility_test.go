@@ -158,3 +158,15 @@ func TestPredictionMinefieldKnowledge(t *testing.T) {
 		t.Errorf("after hit: %+v", got)
 	}
 }
+
+// Learning a field never reaches a shallow copy's Known (CloneObjects
+// copies Space.Minefields without their Known slices).
+func TestElegyDecisionKnownCopyOnWrite(t *testing.T) {
+	l := newLab(t)
+	sp := &Space{Minefields: []Minefield{{Owner: 1, Pos: at(10, 0), Count: 100, Known: []bool{false, true}}}}
+	c := sp.CloneObjects().(*Space)
+	c.Scan(l.g, 0, []Scanner{rhino(origin)})
+	if !c.Minefields[0].KnownBy(0) || sp.Minefields[0].KnownBy(0) {
+		t.Errorf("clone %v, original %v", c.Minefields[0].Known, sp.Minefields[0].Known)
+	}
+}

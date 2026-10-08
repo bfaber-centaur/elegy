@@ -7,10 +7,10 @@ in `KERNEL.md`, with the part statistics of
 comes from the private archaeology repositories.
 
 The package reads the engine's exported state and exposes step and query
-functions. It does not change `engine/`, and `engine.GenerateTurn` does
-not call it yet: the turn engine owns the year's order (OBJECTS.md "Turn
-placement") and wires each step in. Object families land one at a time:
-minefields, wormholes, the Mystery Trader, then mass-driver packets.
+functions. The turn engine owns the year's order (OBJECTS.md "Turn
+placement") and calls them through `engine.SpaceObjects`, which
+`objects/engine_adapter.go` implements (elegy #27; see "Turn wiring"
+below and KERNEL-STATUS.md "Space objects").
 
 ## Minefields
 
@@ -62,23 +62,6 @@ Marked `ASSUMPTION On` in the code and sent to the spec owner:
 8. **O8** A fleet inside several detonating fields is hit by the first in
    object order.
 
-### What the turn engine needs to call (minefields)
-
-In OBJECTS.md "Turn placement" order:
-
-- movement: `CheckStep` for each movement step of a fleet moving at warp
-  1–10, not through a stargate and not already at its waypoint, then
-  `ApplyHit` at the stop point (the fleet stops, gets no ram-scoop fuel,
-  and has spent its whole leg's fuel);
-- after movement: `Space.Detonate`, then `Space.Decay`;
-- waypoint tasks after battles: `Space.Lay` for the fleets laying this
-  year (a "lay mines" task with its duration, and the SD half lay);
-- then `Space.Sweep`;
-- fleets left with no stacks are destroyed; salvage objects and messages
-  come from the returned records.
-
-The engine has no minefield list, "lay mines" task or minefield
-visibility yet; those belong to the turn engine and scanning code.
 
 ## Wormholes
 
@@ -106,19 +89,6 @@ longer assumptions; both answers are BINARY-ONLY:
   100 tries. If every scored try is rejected, the end moves to the first
   of them; it does not stay put (`Surroundings.Place`).
 
-### What the turn engine needs to call (wormholes)
-
-- Fleet movement: a fleet whose reached waypoint targets a wormhole end
-  (not a plain position on it, and not one it passes over) calls
-  `Space.Transit`; fleets following it lose it.
-- A waypoint aimed at an end keeps following it only while its owner knew
-  the end (`WormholeEnd.KnownBy`) at the start of the year; otherwise,
-  after the wormhole's first move, it becomes a plain position at the
-  end's old position (CONFIRMED OB-025-F, OB-027).
-- After fleets move (OBJECTS.md "Turn placement" step 7):
-  `Space.MoveWormholes`.
-- Scanning marks sightings with `WormholeEnd.MarkKnown` and shows
-  destinations with `Space.Destination`.
 
 ## Mystery Trader
 
@@ -147,22 +117,6 @@ the gift loadouts' slot layout is MEASURED (WT-004), the rest
 BINARY-ONLY. A gift fleet that lands later in fleet order is offered to
 the Trader like any fleet and refused (no minerals).
 
-### What the turn engine needs to call (Mystery Trader)
-
-- End of production, after new minerals: `Space.Appear`, then the
-  appearance message to every player.
-- Before fleets move: `Space.MoveTraders`, then the waypoint refresh, so
-  waypoints on a Trader follow its new position. A Trader that left turns
-  them into plain positions, and the owner is told.
-- After battles: `Space.Meet`, which runs each Trader's fleets and then
-  its planets; messages come from the returned records.
-- A gift fleet (`Reward.NewFleet`): mark it as not moved this year (it
-  gets no refusal message), set its waypoint 0 at the trade point, and
-  have it orbit the planet the traded fleet orbited, if any.
-- Designs: pass `TraderParts.Items(player)` to `ReadDesign`; drop a
-  deleted design's index from `Space.GiftDesigns`.
-- Scanning shows Traders as objects; the engine has no Trader visibility
-  yet.
 
 ## Mass-driver packets
 
@@ -210,19 +164,6 @@ Still open:
    planet undefined and asks Elegy for a rule: Elegy treats it as no
    destination (`Launch.NoDriver`).
 
-### What the turn engine needs to call (packets)
-
-- Production (orders layer): a packet item calls `Space.Launch` with the
-  planet's packet destination and speed (the engine's `Planet` has
-  neither yet), spends `Launch.Spend` from the surface, and sends the
-  no-driver message for `Launch.NoDriver`.
-- Movement step 2 (objects move): `Space.MovePackets` with an
-  `ImpactContext` whose `DefenseShare` is the planet's normal-bomb
-  defense share (TAKEOVER.md); then the waypoint check.
-- Step 3a: `Space.DecayPackets` with salvage decay.
-- Step 5: `Space.FlyLaunched`, before battles and bombing.
-- For every `Impact` with `Emptied`, empty the planet as after bombing.
-- Packet visibility belongs to scanning.
 
 ## Stargates
 
@@ -256,20 +197,6 @@ Still open:
    design is destroyed. A design's ships are taken as one stack with its
    first stack's damage.
 
-### What the turn engine needs to call (stargates)
-
-- Fleet movement: a fleet whose next waypoint has warp `GateWarp` (11)
-  calls `Jump` instead of moving. On `GateOK` the fleet is at the
-  destination: consume the waypoint, mark it moved, give it no heading
-  or warp for others' scans, skip its repair this year, never apply
-  Cheap Engines failure, and make other players' chasers stop at its
-  departure point (the owner's own follow it).
-- `FleetLost`: delete the fleet with the "fleet lost" message.
-- A refusal: one message to the owner for `Refused`; the fleet keeps its
-  waypoints and counts as stationary. An unload (`Unloaded`) also
-  messages the source planet's owner.
-- Orders: accept waypoint warp 11 (now refused as not modelled), and let
-  routing pick it when both ends are gated and the jump is safe.
 
 ## Visibility
 
@@ -304,14 +231,43 @@ Not covered yet: knowledge from a detonating SD field's hit, and dropping
 or keeping waypoints on objects no longer seen (SCANNING.md "Orders that
 depend on sight").
 
-### What the turn engine needs to call (visibility)
+## Turn wiring
 
-- Knowledge step, per player `v`: build the fleet and planet scanners
-  (`Scanner`, `Fleet` set for fleets), add `Space.PacketScanners(g, v)`
-  to the scanners used for fleets and planets (they see orbiting fleets,
-  with the cloak rule), and call `Space.Scan` for the objects.
-- Add `Sightings.Owners` to the players `v` knows.
-- For an SD player, add `Space.DemolitionSightings` to the fleets `v`
-  sees, passing the engine's cloak percent.
-- Movement: after a mine hit, call `Space.LearnHit` with the fleet's stop
-  point.
+`engine.GenerateTurn` reaches these rules through `engine.SpaceObjects`
+(`Game.Objects`), implemented by `objects/engine_adapter.go`, which the
+kernel owns (elegy #27). `newgame.Generate` sets `Game.Objects` to an
+`objects.Space` holding the new game's wormholes.
+
+| Turn step (KERNEL.md "Turn order") | Adapter method | Rules called |
+|---|---|---|
+| 3.2 Traders, then packets in flight | `MoveObjects` | `Space.MoveTraders`, `Space.MovePackets` |
+| 3.3 each movement step | `MineCheck`, `MineHit` | `CheckStep`, `ApplyHit` |
+| 3.3 warp-11 waypoint | `Stargate` | `Jump` |
+| 3.3 reached wormhole end | `TransitWormhole` | `Space.Transit` |
+| 3a | `DecayObjects` | `Space.DecayPackets`, `Space.Detonate`, `Space.Decay` |
+| 4c | `TraderAppears` | `Space.Appear` |
+| 5.1 | `MoveObjectsAgain` | `Space.FlyLaunched`, `Space.MoveWormholes` |
+| 6b | `MeetTraders` | `Space.Meet` |
+| 6c.2 | `LayMines` | `Space.Lay` |
+| 7.1 | `SweepMines` | `Space.Sweep` (the sweeper's owner learns the field) |
+| before the views | `SeeObjects` | wormhole-end sight; see below |
+
+Not wired yet:
+
+- **Minefield knowledge.** `Minefield.Known` now exists: sweeps mark it
+  (`Space.Sweep`), and `Space.Scan` and `Space.LearnHit` mark sight and
+  hits. The adapter's `SeeObjects` still marks only wormhole ends, and
+  `MineHit` does not call `LearnHit`. For the harness's `known_to`
+  checks, `SeeObjects` can call `Space.Scan` once per player with that
+  player's scanners. `Scan` applies the same wormhole rule and adds the
+  minefield rule, PP packet scanners, packets, Traders and the owners
+  made known. `MineHit` can call `LearnHit` with the stop point. Known
+  is copied before it changes, so `CloneObjects` needs no change.
+- **Fleet and player sight from objects:** `Space.PacketScanners` (PP
+  packets see fleets and planets, OB-012) and
+  `Space.DemolitionSightings` (OB-014-B) feed the engine's fleet views;
+  `Sightings.Owners` its known players.
+- **Packet launch** from production (`Space.Launch`, `PacketItem`), the
+  orders layer's.
+- **Computer players' planet trades** (`Space.Meet` needs their levels;
+  PLACEHOLDER in the adapter).

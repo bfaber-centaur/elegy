@@ -446,7 +446,7 @@ func (s *Space) Sweep(g *engine.Game) []Swept {
 			}
 			a = min(a, m.Count)
 			m.Count -= a
-			m.Known = mark(m.Known, owner)
+			m.learn(owner)
 			out = append(out, Swept{Sweeper: owner, Fleet: fi, Planet: pi, Field: *m, Mines: a})
 		}
 	}

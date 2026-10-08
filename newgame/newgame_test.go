@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 	"github.com/bfaber-centaur/elegy/races"
 )
 
@@ -1131,6 +1132,10 @@ func TestElegyDecisionGameRuns(t *testing.T) {
 	}
 	res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, 8)
 	g := res.Game
+	// The game carries its wormholes into the turn as its space objects.
+	if sp, ok := g.Objects.(*objects.Space); !ok || len(sp.Wormholes) != len(res.Wormholes) || len(res.Wormholes) == 0 {
+		t.Fatalf("objects %#v, %d wormholes", g.Objects, len(res.Wormholes))
+	}
 	rng := NewRand(99)
 	for range 5 {
 		out, err := engine.GenerateTurn(g, nil, engine.Jrc3(), rng)
@@ -1141,6 +1146,9 @@ func TestElegyDecisionGameRuns(t *testing.T) {
 	}
 	if g.Year != 2405 {
 		t.Fatalf("year %d", g.Year)
+	}
+	if sp, ok := g.Objects.(*objects.Space); !ok || len(sp.Wormholes) != len(res.Wormholes) {
+		t.Errorf("objects after five years: %#v", g.Objects)
 	}
 }
 

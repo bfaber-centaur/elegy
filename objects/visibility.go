@@ -83,7 +83,7 @@ func (s *Space) Scan(g *engine.Game, v int, scanners []Scanner) Sightings {
 			continue
 		}
 		out.Minefields = append(out.Minefields, i)
-		m.Known = mark(m.Known, v)
+		m.learn(v)
 		if m.Owner != v {
 			owners[m.Owner] = true
 		}
@@ -153,6 +153,16 @@ func seesWormhole(e WormholeEnd, v int, scanners []Scanner) bool {
 // KnownBy reports whether a player knows the minefield.
 func (m Minefield) KnownBy(player int) bool { return has(m.Known, player) }
 
+// learn records that a player knows the field. It copies Known before
+// changing it, so a copy of the field made with a shallow copy of
+// Space.Minefields (as Space.CloneObjects makes) never sees the change.
+func (m *Minefield) learn(player int) {
+	if player < 0 || m.KnownBy(player) {
+		return
+	}
+	m.Known = mark(append([]bool(nil), m.Known...), player)
+}
+
 // LearnHit records that fleet f's owner learned the minefields that hit
 // it: a player knows a field once it has been hit by it (SCANNING.md
 // "Space objects", BINARY-ONLY). stop is the Stop CheckStep returned and
@@ -168,7 +178,7 @@ func (s *Space) LearnHit(g *engine.Game, f *engine.Fleet, stop Stop, pos engine.
 	for i := range s.Minefields {
 		m := &s.Minefields[i]
 		if m.Kind == stop.Kind && m.Count > 0 && m.Contains(pos) && stopsFleet(g, *m, f.Owner) {
-			m.Known = mark(m.Known, f.Owner)
+			m.learn(f.Owner)
 		}
 	}
 }
