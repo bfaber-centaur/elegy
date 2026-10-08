@@ -122,7 +122,11 @@
     "player": 1,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 6,
+      "level": 3
+     }
     },
     "race": {
      "prt": "AR",
@@ -184,7 +188,11 @@
     "player": 2,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 3
+     }
     },
     "race": {
      "prt": "IS",
@@ -243,7 +251,11 @@
     "player": 3,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 2
+     }
     },
     "race": {
      "prt": "IS",
@@ -303,7 +315,11 @@
     "player": 4,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 1
+     }
     },
     "race": {
      "prt": "IS",
@@ -363,7 +379,11 @@
     "player": 5,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 4,
+      "level": 3
+     }
     },
     "race": {
      "prt": "CA",
@@ -423,7 +443,11 @@
     "player": 6,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 5,
+      "level": 1
+     }
     },
     "race": {
      "prt": "PP",
@@ -482,7 +506,11 @@
     "player": 7,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 1,
+      "level": 4
+     }
     },
     "race": {
      "prt": "HE",
@@ -922,7 +950,7 @@
      "check": "wormholes",
      "target": [],
      "observed": 6,
-     "constraint": "pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
+     "constraint": "wormhole ends (two per pair): pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
     }
    ]
   },

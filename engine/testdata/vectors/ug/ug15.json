@@ -122,7 +122,11 @@
     "player": 1,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 6,
+      "level": 3
+     }
     },
     "race": {
      "prt": "AR",
@@ -184,7 +188,11 @@
     "player": 2,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 6,
+      "level": 4
+     }
     },
     "race": {
      "prt": "AR",
@@ -246,7 +254,11 @@
     "player": 3,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 2,
+      "level": 2
+     }
     },
     "race": {
      "prt": "SS",
@@ -305,7 +317,11 @@
     "player": 4,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 5,
+      "level": 1
+     }
     },
     "race": {
      "prt": "PP",
@@ -364,7 +380,11 @@
     "player": 5,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 6,
+      "level": 2
+     }
     },
     "race": {
      "prt": "AR",
@@ -423,7 +443,11 @@
     "player": 6,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 6,
+      "level": 1
+     }
     },
     "race": {
      "prt": "AR",
@@ -483,7 +507,11 @@
     "player": 7,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 3
+     }
     },
     "race": {
      "prt": "IS",
@@ -542,7 +570,11 @@
     "player": 8,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 1,
+      "level": 3
+     }
     },
     "race": {
      "prt": "HE",
@@ -601,7 +633,11 @@
     "player": 9,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 4,
+      "level": 1
+     }
     },
     "race": {
      "prt": "CA",
@@ -662,7 +698,11 @@
     "player": 10,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 3
+     }
     },
     "race": {
      "prt": "IS",
@@ -721,7 +761,11 @@
     "player": 11,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 2,
+      "level": 2
+     }
     },
     "race": {
      "prt": "SS",
@@ -780,7 +824,11 @@
     "player": 12,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 5,
+      "level": 4
+     }
     },
     "race": {
      "prt": "PP",
@@ -841,7 +889,11 @@
     "player": 13,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 5,
+      "level": 3
+     }
     },
     "race": {
      "prt": "PP",
@@ -902,7 +954,11 @@
     "player": 14,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 3
+     }
     },
     "race": {
      "prt": "IS",
@@ -961,7 +1017,11 @@
     "player": 15,
     "computer": {
      "race": 0,
-     "level": 0
+     "level": 0,
+     "drawn": {
+      "type": 3,
+      "level": 4
+     }
     },
     "race": {
      "prt": "IS",
@@ -1739,7 +1799,7 @@
      "check": "wormholes",
      "target": [],
      "observed": 14,
-     "constraint": "pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
+     "constraint": "wormhole ends (two per pair): pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
     }
    ]
   },

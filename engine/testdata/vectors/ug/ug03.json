@@ -434,7 +434,7 @@
      "check": "wormholes",
      "target": [],
      "observed": 2,
-     "constraint": "pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
+     "constraint": "wormhole ends (two per pair): pairs by size (tiny 0-2, small 1-3, medium 1-5, large 3-6, huge 4-8) when random events are on, none when off (OBJECTS.md \"Creation\")"
     }
    ]
   },

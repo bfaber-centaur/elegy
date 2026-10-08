@@ -5,7 +5,7 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
 OT runs and the turn order and random draw order). The parity vectors
-are copied from stars-elegy `main` at `07ad518` (stars-elegy #111).
+are copied from stars-elegy `main` at `6fba6a3` (stars-elegy #111, #113).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
