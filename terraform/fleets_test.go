@@ -262,12 +262,35 @@ func TestPredictionPacketTerraform(t *testing.T) {
 	if u := Uncaught(engine.Minerals{1000, 300, 0}, 490); u != (engine.Minerals{510, 153, 0}) {
 		t.Errorf("uncaught %v", u)
 	}
-	// An immune axis moves toward the nearer extreme, by half the count
-	// (ASSUMPTION P3).
+	// An immune axis moves toward 99 from an original of 50 or more, the
+	// current value by half the count.
 	l.g.Players[1].Race.Env[Gravity] = engine.EnvRange{Immune: true}
 	pi = l.planet(engine.NoOwner, [3]int{70, 70, 70}, [3]int{70, 70, 70})
 	r = PacketTerraform(l.g, pi, 1, engine.Minerals{300, 0, 0}, &script{0, 0, 0, 9, 0, 9})
 	if p := l.g.Planets[pi]; p.Env != [3]int{71, 70, 70} || p.OrigEnv != [3]int{71, 70, 70} {
 		t.Errorf("immune: %v %v %+v", p.Env, p.OrigEnv, r)
+	}
+	// Original 50 goes toward 99; a permanent success moves the original
+	// too (OBJECTS.md "PP terraforming").
+	pi = l.planet(engine.NoOwner, [3]int{50, 70, 70}, [3]int{})
+	l.g.Planets[pi].OrigEnv = [3]int{50, 70, 70}
+	PacketTerraform(l.g, pi, 1, engine.Minerals{300, 0, 0}, &script{0, 0, 0, 9, 0, 9})
+	if p := l.g.Planets[pi]; p.Env != [3]int{51, 70, 70} || p.OrigEnv != [3]int{51, 70, 70} {
+		t.Errorf("immune at 50: %v %v", p.Env, p.OrigEnv)
+	}
+	// Below 50 goes toward 1.
+	pi = l.planet(engine.NoOwner, [3]int{40, 70, 70}, [3]int{})
+	l.g.Planets[pi].OrigEnv = [3]int{49, 70, 70}
+	PacketTerraform(l.g, pi, 1, engine.Minerals{200, 0, 0}, &script{0, 9, 0, 9})
+	if p := l.g.Planets[pi]; p.Env != [3]int{39, 70, 70} {
+		t.Errorf("immune below 50: %v", p.Env)
+	}
+	// Gated: with every other axis at its limit (the ideal), the current
+	// value does not move; the permanent move still does.
+	pi = l.planet(engine.NoOwner, [3]int{70, 50, 50}, [3]int{})
+	l.g.Planets[pi].OrigEnv = [3]int{70, 50, 50}
+	r = PacketTerraform(l.g, pi, 1, engine.Minerals{200, 0, 0}, &script{0, 0, 0, 9})
+	if p := l.g.Planets[pi]; p.Env != [3]int{70, 50, 50} || p.OrigEnv != [3]int{71, 50, 50} || r.Moved != [3]int{} {
+		t.Errorf("immune, no limit elsewhere: %v %v %+v", p.Env, p.OrigEnv, r)
 	}
 }

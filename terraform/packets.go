@@ -29,33 +29,31 @@ func Uncaught(m engine.Minerals, q int) engine.Minerals {
 
 // PacketTerraform applies a Packet Physics packet's terraforming to the
 // planet at index pi, owned or not (OBJECTS.md "Impact" step 4, "PP
-// terraforming"; CONFIRMED in part OB-029-T1..T3, the draws BINARY-ONLY).
-// pp is the packet's owner and u its uncaught share (Uncaught). The
-// caller applies it only when the launcher is a Packet Physics player and
-// the packet was not fully caught, before the impact's damage.
+// terraforming"; CONFIRMED in part OB-029-T1..T3, the draws and their
+// order BINARY-ONLY). pp is the packet's owner and u its uncaught share
+// (Uncaught). The caller applies it only when the launcher is a Packet
+// Physics player and the packet was not fully caught, before the
+// impact's damage.
 //
 // Each mineral works on one axis: ironium gravity, boranium temperature,
-// germanium radiation (OB-029-T1..T3). For each 100 kT chunk of u (the
-// last may be partial) one draw rand(200) < min(chunk, 100) is a
-// success, and each success draws rand(10) == 0 for a permanent one. The
-// permanent count moves the original value toward the PP player's ideal,
-// capped there, or toward the nearer extreme on an axis the PP player is
-// immune to. Then the current value moves by the success count toward the
-// ideal, within the PP player's reach around the (new) original value
-// (Limit); on an immune axis by half the count toward the nearer extreme.
+// germanium radiation (OB-029-T1..T3), in that order, each axis's moves
+// applied before the next axis draws; the moves make no draws. For each
+// 100 kT chunk of u (the last may be partial) one draw
+// rand(200) < min(chunk, 100) is a success, and each success draws
+// rand(10) == 0 for a permanent one.
 //
-// ASSUMPTION P1: the minerals are drawn and applied in mineral order
-// (ironium, boranium, germanium), each mineral's chunks in order.
-//
-// ASSUMPTION P2: "the PP player's terraforming tech could improve the
-// planet" is read per axis: the current value moves only when Limit for
-// that axis, with the PP player's reach and the new original value, is
-// not the current value; it then moves at most to that limit.
-//
-// ASSUMPTION P3: the extremes are 1 and 99 (the clip of KERNEL.md
-// "Terraforming"); the nearer extreme is the one nearer to the value
-// being moved, 1 on a tie (value 50); half the count is rounded down;
-// the immune-axis move is not gated by P2.
+//   - An axis the PP player is not immune to: the permanent count moves
+//     the original value toward the PP player's ideal, capped there. The
+//     limit is then the new original ± the PP player's reach, clamped to
+//     1..99, in the improving direction only and never past the ideal
+//     (Limit); the current value moves toward it by at most the success
+//     count. With no limit nothing moves.
+//   - An axis the PP player is immune to: both moves go toward 1 when the
+//     original value is below 50, else toward 99. The permanent count
+//     moves the original value; half the success count, rounded down,
+//     moves the current value, but only if some axis the PP player is not
+//     immune to still has a limit at that moment. An immune axis never has
+//     a limit of its own.
 func PacketTerraform(g *engine.Game, pi, pp int, u engine.Minerals, rng engine.Rand) PacketResult {
 	var r PacketResult
 	p := &g.Planets[pi]
@@ -77,7 +75,9 @@ func PacketTerraform(g *engine.Game, pi, pp int, u engine.Minerals, rng engine.R
 		orig, cur := p.OrigEnv[a], p.Env[a]
 		if env.Immune {
 			p.OrigEnv[a] = toward(orig, extreme(orig), r.Permanent[a])
-			p.Env[a] = toward(cur, extreme(cur), r.Successes[a]/2)
+			if anyLimit(p, race, reach) {
+				p.Env[a] = toward(cur, extreme(orig), r.Successes[a]/2)
+			}
 		} else {
 			p.OrigEnv[a] = toward(orig, env.Center, r.Permanent[a])
 			if lim := Limit(cur, p.OrigEnv[a], env.Center, reach[a]); lim != cur {
@@ -90,6 +90,17 @@ func PacketTerraform(g *engine.Game, pi, pp int, u engine.Minerals, rng engine.R
 	return r
 }
 
+// anyLimit reports whether some axis the race is not immune to still has
+// room on p with this reach.
+func anyLimit(p *engine.Planet, race engine.Race, reach [3]int) bool {
+	for a, r := range race.Env {
+		if !r.Immune && Limit(p.Env[a], p.OrigEnv[a], r.Center, reach[a]) != p.Env[a] {
+			return true
+		}
+	}
+	return false
+}
+
 // toward moves v by at most n toward target, stopping at it.
 func toward(v, target, n int) int {
 	if v < target {
@@ -98,9 +109,11 @@ func toward(v, target, n int) int {
 	return max(v-n, target)
 }
 
-func extreme(v int) int {
-	if v > 50 {
-		return 99
+// extreme is the end an immune axis moves toward: 1 for an original
+// value below 50, else 99.
+func extreme(orig int) int {
+	if orig < 50 {
+		return 1
 	}
-	return 1
+	return 99
 }

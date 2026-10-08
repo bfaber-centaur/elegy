@@ -60,14 +60,11 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
   unit.
 - **T3** Adjusting fleets act one at a time in fleet order (owner, then
   number), each on the state the previous left.
-- **P1** PP terraforming draws and applies mineral by mineral (ironium,
-  boranium, germanium), each mineral's chunks in order.
-- **P2** "The PP player's terraforming tech could improve the planet" is
-  read per axis: the current value moves only when that axis's `Limit`
-  (PP reach, new original value) differs from it, and at most to it.
-- **P3** The extremes are 1 and 99; the nearer one is nearer to the value
-  being moved, 1 at 50; half the count rounds down; the immune-axis move
-  is not gated by P2.
+- P1–P3 are answered (stars-elegy #110, OBJECTS.md "PP terraforming",
+  BINARY-ONLY): axes in mineral order, each applied before the next
+  draws; the limit is per axis (`Limit` with the new original value);
+  an immune axis moves toward 1 below an original of 50, else toward 99,
+  and its current-value move needs some non-immune axis with a limit.
 - **R1** Another player's miners at an Alternate Reality planet
   (BINARY-ONLY) mine nothing.
 
