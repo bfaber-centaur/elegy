@@ -247,6 +247,7 @@ keeps the fleet and planet sightings; these functions cover the objects.
 | Owners made known by minefields and packets | `Sightings.Owners` | CONFIRMED (OB-011, OB-017, OB-018) |
 | PP packet scanners, `R = P = warp²` | `Space.PacketScanners` | CONFIRMED (OB-012) |
 | SD minefields see fleets inside, not orbiting | `Space.DemolitionSightings` | CONFIRMED (OB-014-B); the cloak draw BINARY-ONLY |
+| What a sighting shows: minefields, packets, Traders, salvage | `Space.Report`, `ObjectReport` | ASSUMPTION V4 (stars-elegy does not say yet); not in `game.Report` yet |
 
 ### Assumptions (spec gaps)
 
@@ -259,6 +260,11 @@ keeps the fleet and planet sightings; these functions cover the objects.
    elsewhere in SCANNING.md. A fleet at a planet's position is in orbit.
    Fleets are taken in fleet order, and each makes at most one cloak draw
    however many fields it is inside.
+4. **V4** A sighting shows an object's owner, number and position; a
+   minefield also its mine count and kind. Only the owner sees its
+   fields' detonate setting and its packets' warp, destination and cargo.
+   Nothing else is shown: not another player's packet's details, not
+   salvage contents, not a Trader's warp, destination or item.
 
 Not covered yet: knowledge from a detonating SD field's hit, and dropping
 or keeping waypoints on objects no longer seen (SCANNING.md "Orders that
