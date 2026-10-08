@@ -41,6 +41,10 @@ type Design struct {
 	// Engines give their fuel table and number for movement.
 	Hull  Hull
 	Slots []Slot
+	// SlotPos is the hull slot each entry of Slots fills, when the design
+	// came from NewDesign; the same-hull starbase replacement cost compares
+	// slots by it (launch.go).
+	SlotPos []int
 }
 
 // Stack is a number of ships of one design (an index into Game.Designs).

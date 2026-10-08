@@ -423,6 +423,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 			key[1] = -1 - d.Slot
 		}
 		l.design[key] = len(g.Designs)
+		g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: d.Owner, Starbase: starbase, Slot: d.Slot, Design: len(g.Designs)})
 		g.Designs = append(g.Designs, ds)
 		return nil
 	}
@@ -625,8 +626,23 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 		if err := json.Unmarshal(r, &it); err != nil {
 			return nil, "production queue item " + string(r)
 		}
+		if it.Kind == 2 {
+			// A design item: id 0–15 is a ship design slot, 16–25 starbase
+			// slot id − 16 (FORMAT.md "Queue items", CONFIRMED).
+			k, slot := ItemShip, it.ID
+			if it.ID >= 16 {
+				k, slot = ItemStarbase, it.ID-16
+			}
+			items = append(items, QueueItem{Kind: k, Count: it.Count, Percent: it.Percent, Slot: slot})
+			continue
+		}
+		if it.Kind == 0 {
+			// FORMAT.md lists production_queue expectation items as
+			// {id, count, percent}: without a kind the id is ambiguous.
+			return nil, "production queue item without a kind"
+		}
 		if it.Kind != 1 {
-			return nil, "production queue: a design"
+			return nil, "production queue: item kind " + strconv.Itoa(it.Kind)
 		}
 		k, ok := pvItemKinds[it.ID]
 		if !ok {
@@ -757,7 +773,13 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		}
 		for i := range g.Fleets {
 			f := &g.Fleets[i]
-			if ok && f.ID == fid || !ok && !started[f.ID] && f.Owner == owner && f.Number == id+1 {
+			if ok && f.ID == fid {
+				return f
+			}
+			// A fleet made during the run (built or given) is known by its
+			// fleet number: the vector stores it from 0, the client shows
+			// it from 1 (PRODUCTION-LAUNCH.md "The new fleet").
+			if !ok && !started[f.ID] && f.Owner == owner && f.Number == id+1 {
 				return f
 			}
 		}

@@ -218,9 +218,11 @@ listed; its comparison is in the test output.
   0 still holds the route task; Elegy drops a fleet's task when it
   leaves. Asked upstream whether every task stays with waypoint 0 in
   transit.
-- **WU-B2, FO-04-E** (MEASURED, CONFIRMED). The gifted fleet's design is
-  expected in the recipient's slot 6; the harness does not load the
-  players' design slots yet, so the copy takes slot 0.
+- **SL-starbases** (CONFIRMED). Fleets built during the run carry other
+  fleet numbers than the original's: the expected fleets at planets 18,
+  19 and 15 are Elegy's fleets at 15, 18 and 19. The surface minerals
+  differ too. Both were failing before; the fleet check did not run
+  until the harness compared the orbit field. Production lane.
 - **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). In every
   seed three fleets the original destroyed survive and one it kept is
   gone. Cause not yet investigated.

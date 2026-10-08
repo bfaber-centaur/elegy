@@ -222,7 +222,7 @@ func TestConfirmedQueueReplace(t *testing.T) {
 	// only against an unused old item of the same kind with exactly that
 	// percentage. The base queue is Factory ×5 at 49%, Mine ×5 at 30%,
 	// Defenses ×5, Factory ×5 at 20%.
-	base := []QueueItem{{ItemFactory, 5, 49}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}
+	base := []QueueItem{{ItemFactory, 5, 49, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}}
 	for _, tt := range []struct {
 		name      string
 		sent      []QueueItem
@@ -230,12 +230,12 @@ func TestConfirmedQueueReplace(t *testing.T) {
 		wantQueue bool
 	}{
 		// Moved and recounted items keep progress (LQ-1: Mine ×5 → ×3).
-		{"moved", []QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}},
-			[]QueueItem{{ItemFactory, 5, 20}, {ItemMine, 3, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 49}}, true},
+		{"moved", []QueueItem{{ItemFactory, 5, 20, 0}, {ItemMine, 3, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 49, 0}},
+			[]QueueItem{{ItemFactory, 5, 20, 0}, {ItemMine, 3, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 49, 0}}, true},
 		// LQ-2: the 49% Factory removed, a new Factory at the top sent at
 		// 0; the other Factory keeps its 20.
-		{"LQ-2", []QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}},
-			[]QueueItem{{ItemFactory, 5, 0}, {ItemMine, 5, 30}, {ItemDefenses, 5, 0}, {ItemFactory, 5, 20}}, true},
+		{"LQ-2", []QueueItem{{ItemFactory, 5, 0, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}},
+			[]QueueItem{{ItemFactory, 5, 0, 0}, {ItemMine, 5, 30, 0}, {ItemDefenses, 5, 0, 0}, {ItemFactory, 5, 20, 0}}, true},
 		// LQ-4: an empty list removes the queue.
 		{"LQ-4", nil, nil, false},
 	} {
@@ -258,16 +258,16 @@ func TestPredictionQueueNoNewProgress(t *testing.T) {
 	// are refused (L14).
 	g := ordersGame()
 	p := &g.Planets[0]
-	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}
+	p.HasQueue, p.Queue = true, []QueueItem{{ItemFactory, 9, 0, 0}, {ItemMine, 5, 0, 0}, {ItemFactory, 9, 20, 0}}
 	errs, _ := apply(g, 0,
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemFactory, 9, 49}, {ItemMine, 5, 30}, {ItemFactory, 9, 20}}},
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 0, 0}}},
-		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 1024, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemFactory, 9, 49, 0}, {ItemMine, 5, 30, 0}, {ItemFactory, 9, 20, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 0, 0, 0}}},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{ItemMine, 1024, 0, 0}}},
 	)
 	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrOutOfRange) {
 		t.Fatal(errs)
 	}
-	if want := []QueueItem{{ItemFactory, 9, 0}, {ItemMine, 5, 0}, {ItemFactory, 9, 20}}; !reflect.DeepEqual(p.Queue, want) {
+	if want := []QueueItem{{ItemFactory, 9, 0, 0}, {ItemMine, 5, 0, 0}, {ItemFactory, 9, 20, 0}}; !reflect.DeepEqual(p.Queue, want) {
 		t.Errorf("queue %+v, want %+v", p.Queue, want)
 	}
 }
@@ -406,9 +406,10 @@ func TestConfirmedManualTransfersToOthers(t *testing.T) {
 	}
 }
 
-func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
-	// TAKEOVER.md: replay is two passes, debits then credits. Player 1
-	// replays first and cannot use what player 0 gives it this year.
+func TestGiftCreditedInPlace(t *testing.T) {
+	// ORDERS.md "Cross-owner cargo": the gift is credited in place as its
+	// order applies. ASSUMPTION L17: a later replay sees it, so player 1,
+	// replaying after player 0, can unload what it was just given.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	files := []PlayerOrders{
@@ -416,8 +417,8 @@ func TestPredictionGiftsCreditedAfterReplay(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 3, Target: TargetPlanet, ID: 2, Amounts: [NumCargo + 1]int{-30}}}},
 	}
 	ApplyOrders(g, files, []int{0, 1})
-	if g.Planets[1].Surface[Ironium] != 0 || g.Fleets[2].Cargo.Minerals[Ironium] != 30 {
-		t.Errorf("planet %d Fe, fleet %d Fe; want 0 and 30", g.Planets[1].Surface[Ironium], g.Fleets[2].Cargo.Minerals[Ironium])
+	if g.Planets[1].Surface[Ironium] != 30 || g.Fleets[2].Cargo.Minerals[Ironium] != 0 {
+		t.Errorf("planet %d Fe, fleet %d Fe; want 30 and 0", g.Planets[1].Surface[Ironium], g.Fleets[2].Cargo.Minerals[Ironium])
 	}
 }
 
@@ -464,9 +465,10 @@ func TestGiftReceiverRemovedEarlier(t *testing.T) {
 }
 
 func TestGiftToFleetMergedAway(t *testing.T) {
-	// ASSUMPTION L9: the receiver merged away after the debit is treated
-	// like a missing endpoint (ORDERS.md "Missing endpoint"), and the cargo
-	// goes back to the giver's fleet.
+	// ORDERS.md "Receiver removed after the credit, same turn"
+	// (BINARY-ONLY): the credited gift is the receiver's own cargo, so a
+	// later merge pools it into the surviving fleet; nothing goes back to
+	// the giver.
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	g.Fleets = append(g.Fleets, Fleet{ID: 5, Owner: 1, Pos: g.Fleets[2].Pos, Stacks: []Stack{{Design: 1, Count: 1}}})
@@ -475,8 +477,31 @@ func TestGiftToFleetMergedAway(t *testing.T) {
 		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{MergeOrder{Into: 5, From: []int{3}}}},
 	}
 	a := ApplyOrders(g, files, []int{0, 1})
-	if g.Fleets[0].Cargo.Minerals[Ironium] != 30 || len(a.Events) != 0 {
-		t.Errorf("giver Fe %d, events %+v; want 30 and none", g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
+	if g.fleetIndex(3) >= 0 {
+		t.Fatal("receiver not merged away")
+	}
+	if giver, into := g.Fleets[0].Cargo.Minerals[Ironium], g.Fleets[g.fleetIndex(5)].Cargo.Minerals[Ironium]; giver != 0 || into != 30 || len(a.Events) != 0 {
+		t.Errorf("giver Fe %d, surviving fleet Fe %d, events %+v; want 0, 30, none", giver, into, a.Events)
+	}
+}
+
+func TestMeasuredGiftLostWithDeletedDesign(t *testing.T) {
+	// ORDERS.md "Receiver removed after the credit, same turn": a later
+	// design delete shares the gifted cargo out as any cargo (MEASURED
+	// CO-07c), so a receiver whose only ships are deleted loses it all.
+	g := ordersGame()
+	g.Fleets[0].Pos = g.Fleets[2].Pos
+	g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: 1, Slot: 0, Design: 1})
+	files := []PlayerOrders{
+		{Player: 0, GameID: 77, Year: 2410, Orders: []Order{CargoOrder{Fleet: 1, Target: TargetFleet, ID: 3, Amounts: [NumCargo + 1]int{-30}}}},
+		{Player: 1, GameID: 77, Year: 2410, Orders: []Order{DeleteDesignOrder{Slot: 0}}},
+	}
+	a := ApplyOrders(g, files, []int{0, 1})
+	if a.Results[len(a.Results)-1].Err != nil {
+		t.Fatal(a.Results)
+	}
+	if g.fleetIndex(3) >= 0 || g.Fleets[0].Cargo.Minerals[Ironium] != 0 || len(a.Events) != 0 {
+		t.Errorf("receiver index %d, giver Fe %d, events %+v; want gone, 0, none", g.fleetIndex(3), g.Fleets[0].Cargo.Minerals[Ironium], a.Events)
 	}
 }
 

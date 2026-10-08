@@ -40,10 +40,10 @@ const (
 //     drop, resolved with the before-movement unloads;
 //   - colonists onto an unowned planet, or a planet with a starbase, are
 //     lost and the giver is told;
-//   - minerals (and fuel, to a fleet) are credited in place in the
-//     orders step's credit pass, after every debit and before movement
-//     (creditGifts; ORDERS.md "Two passes, in place"; MEASURED for
-//     planets, TK-405, TK-412, and for fleets, TK-406, TK-407, TK-409).
+//   - minerals (and fuel, to a fleet) are credited in place as the order
+//     applies, before movement (creditGift; ORDERS.md "Cross-owner
+//     cargo"; MEASURED for planets, TK-405, TK-412, and for fleets,
+//     TK-406, TK-407, TK-409).
 //
 // Colonists given to another player's fleet are rejected: a legal client
 // never writes such an order (TAKEOVER.md, TK-408,
@@ -166,6 +166,7 @@ func (o CargoOrder) apply(g *Game, player int, a *Applied) error {
 				gift.Amounts[c] = n
 			}
 			a.Gifts = append(a.Gifts, gift)
+			a.Events = append(a.Events, g.creditGift(gift)...)
 			return nil
 		}
 		for c, v := range o.Amounts {
@@ -227,67 +228,51 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 	}
 	if any {
 		a.Gifts = append(a.Gifts, gift)
+		a.Events = append(a.Events, g.creditGift(gift)...)
 	}
 }
 
-// creditGifts is the second pass of the replay (ORDERS.md "Cross-owner
-// cargo", "Two passes, in place"; TAKEOVER.md "Manual cargo transfers to
-// other players"): every debit was taken as its order applied, and each
-// gift, in the order given, is now credited in place, still within the
-// orders step and before movement. There is no relation check. A planet
-// takes all its minerals with no message (MEASURED, TK-405, TK-412). A
-// fleet takes what fits its free hold and tank (MEASURED, TK-406, TK-407,
-// TK-409); the remainder is lost, not returned, and the giver is told
-// (ORDERS.md "Receiver short of room", CONFIRMED).
+// creditGift credits a gift to its receiver in place, as the order that
+// debited the giver applies, still within the orders step and before
+// movement (ORDERS.md "Cross-owner cargo", "Credited in place at step 1";
+// TAKEOVER.md "When a gift is credited"). There is no relation check. A
+// planet takes all its minerals with no message (MEASURED, TK-405,
+// TK-412). A fleet takes what fits its free hold and tank (MEASURED,
+// TK-406, TK-407, TK-409); the remainder is lost, not returned, and the
+// giver is told (ORDERS.md "Receiver short of room", CONFIRMED).
 //
-// A gift naming a receiver that is missing when its order is replayed,
-// including one removed by an earlier order the same turn (merged,
-// scrapped, or removed in a player's replay that ran first), is rejected
-// there: the record is skipped whole and the giver keeps the cargo, as
-// nothing is debited (ORDERS.md "Cross-owner cargo", "Missing endpoint",
-// stars-elegy #87; BINARY-ONLY for the same-turn removal).
+// The credited cargo carries no record that it was a gift: a later order
+// that merges the receiver away or deletes its design disposes of it as
+// of the fleet's own cargo (ORDERS.md "Receiver removed after the credit,
+// same turn"; BINARY-ONLY). A gift naming a receiver already missing when
+// its order is replayed is rejected by the order, and nothing is debited
+// (ORDERS.md "Missing endpoint", BINARY-ONLY for a same-turn removal).
 //
-// ASSUMPTION L9: a receiving fleet removed by a later order, after the
-// debit and before the credit pass, is treated the same way: the record
-// is skipped and what was taken goes back to the giver's fleet, as much
-// as fits it now; anything that cannot go back (the giver's fleet is gone
-// too, or has filled up since) is lost and the giver told. ORDERS.md does
-// not cover a removal between the passes.
+// ASSUMPTION L17: each gift is credited as its own order applies, so a
+// later order in the replay, the receiver's owner's included, sees it.
+// ORDERS.md does not establish whether the host orders all debits before
+// all credits across transfer records.
 //
 // Not modelled: the binary's separate queued cross-player credit routine,
 // which no legal order is known to reach (ORDERS.md "A separate queued
 // credit routine exists in the binary", UNRESOLVED).
-func (g *Game) creditGifts(gifts []CargoGift) []Event {
-	var events []Event
-	for _, gift := range gifts {
-		if gift.Target == TargetPlanet {
-			p := &g.Planets[g.planetIndex(gift.ID)]
-			for m := range NumMinerals {
-				p.Surface[m] += gift.Amounts[m]
-			}
-			continue
+func (g *Game) creditGift(gift CargoGift) []Event {
+	if gift.Target == TargetPlanet {
+		p := &g.Planets[g.planetIndex(gift.ID)]
+		for m := range NumMinerals {
+			p.Surface[m] += gift.Amounts[m]
 		}
-		lost := 0
-		ti := g.fleetIndex(gift.ID)
-		if ti < 0 {
-			ti = g.fleetIndex(gift.FromFleet)
-		}
-		if ti < 0 {
-			for _, v := range gift.Amounts {
-				lost += v
-			}
-			events = append(events, Event{Kind: EventCargoGiftLost, Player: gift.From, Planet: -1, Fleet: gift.FromFleet, Count: lost})
-			continue
-		}
-		t := &g.Fleets[ti]
-		for c, v := range gift.Amounts {
-			n := min(v, g.free(t, c))
-			*held(t, c) += n
-			lost += v - n
-		}
-		if lost > 0 {
-			events = append(events, Event{Kind: EventCargoGiftLost, Player: gift.From, Planet: -1, Fleet: gift.FromFleet, Count: lost})
-		}
+		return nil
 	}
-	return events
+	t := &g.Fleets[g.fleetIndex(gift.ID)]
+	lost := 0
+	for c, v := range gift.Amounts {
+		n := min(v, g.free(t, c))
+		*held(t, c) += n
+		lost += v - n
+	}
+	if lost > 0 {
+		return []Event{{Kind: EventCargoGiftLost, Player: gift.From, Planet: -1, Fleet: gift.FromFleet, Count: lost}}
+	}
+	return nil
 }

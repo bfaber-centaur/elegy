@@ -70,12 +70,18 @@ var LegacyEmptyFleetSalvage = true
 // (OBJECTS.md "Conventions": by kind, then owner, then number).
 type Space struct {
 	Minefields []Minefield
-	// OtherObjects counts the space objects of other kinds (packets,
-	// salvage, wormholes, the Mystery Trader), which sort after every
-	// minefield. It counts toward MaxObjects and, with
-	// LegacyFieldLimit511, holds every player to 511 fields.
+	Wormholes  []Wormhole
+	// OtherObjects counts the space objects of kinds this package does
+	// not hold yet (packets, salvage, the Mystery Trader). Like
+	// wormhole ends, they sort after every minefield, count toward
+	// MaxObjects and, with LegacyFieldLimit511, hold every player to 511
+	// fields.
 	OtherObjects int
 }
+
+// otherObjects counts the space objects that are not minefields; each
+// wormhole end is one object.
+func (s *Space) otherObjects() int { return s.OtherObjects + 2*len(s.Wormholes) }
 
 // SortMinefields puts the minefields in object order: owner, then number.
 func (s *Space) SortMinefields() {
@@ -302,7 +308,7 @@ func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResu
 		return LayResult{Kind: k, Amount: amount, Field: best}
 	}
 	num, ok := s.freeNumber(owner)
-	if !ok || len(s.Minefields)+s.OtherObjects >= MaxObjects {
+	if !ok || len(s.Minefields)+s.otherObjects() >= MaxObjects {
 		return LayResult{Kind: k, Amount: amount, Field: -1}
 	}
 	s.Minefields = append(s.Minefields, Minefield{Owner: owner, Number: num, Kind: k, Pos: pos, Count: amount})
@@ -318,7 +324,7 @@ func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResu
 // freeNumber is the owner's lowest unused field number below the limit.
 func (s *Space) freeNumber(owner int) (int, bool) {
 	used := map[int]bool{}
-	later := s.OtherObjects > 0
+	later := s.otherObjects() > 0
 	for _, m := range s.Minefields {
 		if m.Owner == owner {
 			used[m.Number] = true

@@ -76,9 +76,8 @@ func (g *Game) designInUse(d int) bool {
 // cannot edit a design in use by ships or a starbase, so that refusal is
 // Elegy's rule and never fires on a legal order).
 //
-// Not modelled: production has no ship or starbase items yet, so no
-// queue entry builds a design and the queue-only case is reached only as
-// a slot with nothing in play.
+// A queue entry names the slot, not the design, so after an edit it
+// builds the edited design (CO-08).
 //
 // Malformed fills are dropped or cut, never rejecting the design
 // (ORDERS.md "Design read, four malformed cases"): a part the slot
@@ -199,9 +198,13 @@ func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
 // fleet's capacity) of each, fuel by tank and cargo by hold, and the rest
 // stays with the survivors unclamped (CO-07c).
 //
-// Not modelled: production has no ship or starbase items yet, so no queue
-// entry building the design is dropped. The entry in Game.Designs stays,
-// so other indices do not move.
+// Every queue entry of the player's that builds the slot is dropped, even
+// with progress (MEASURED CO-07: dropped at 66% done).
+//
+// ASSUMPTION P4: a queue the drop leaves empty is removed, as production
+// removes a queue emptied during the year; KERNEL.md says a zero-item
+// queue does not arise in play. The entry in
+// Game.Designs stays, so other indices do not move.
 type DeleteDesignOrder struct {
 	Starbase bool
 	Slot     int
@@ -214,6 +217,28 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	d := g.DesignSlots[i].Design
 	g.DesignSlots = append(g.DesignSlots[:i:i], g.DesignSlots[i+1:]...)
+	kind := ItemShip
+	if o.Starbase {
+		kind = ItemStarbase
+	}
+	for k := range g.Planets {
+		p := &g.Planets[k]
+		if p.Owner != player || !p.HasQueue {
+			continue
+		}
+		var q []QueueItem
+		for _, it := range p.Queue {
+			if it.Kind != kind || it.Slot != o.Slot {
+				q = append(q, it)
+			}
+		}
+		if len(q) != len(p.Queue) {
+			p.Queue = q
+			if len(q) == 0 {
+				p.HasQueue = false // ASSUMPTION P4
+			}
+		}
+	}
 	for k := range g.Planets {
 		p := &g.Planets[k]
 		if p.Owner == player && p.HasStarbase && p.StarbaseDesign == d {
