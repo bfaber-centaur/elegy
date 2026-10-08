@@ -39,6 +39,9 @@ unless the project decides otherwise.
 | Rototill's turn: research, starbase designs, U, planet loop and colony-ship production, fleet passes 1 and 2 | rototill.md §1–§3 | MEASURED AI-14..AI-17 (branches marked not exercised there are BINARY-ONLY) | `ai/rototill.go` | `TestRototill*` |
 | Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |
 | Planet automation: starbases for hubs, starbase upgrade, defenses, mines and factories fill | AI.md §7 | BINARY-ONLY (AI-7 not run) | `ai/automation.go`, `ai/economy.go` | `TestMinesAndFactories`, `TestStarbaseUpgrade`, `TestDefenses`, `TestDesignCostMatchesEngine` |
+| Ship-design builder and store: hull and class lists, delete-then-create, picture, name; ageing | AI.md §10 | BINARY-ONLY (builder CONFIRMED through AI-8, AI-19) | `ai/designs.go` | `TestAgeGroup` |
+| Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
+| Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
@@ -69,6 +72,9 @@ check.
 | A13 | Starbase upgrade: the draw comes before the mineral test, and the upgrade is appended. |
 | A14 | Defenses' "room" is the operable defenses less those installed and queued, and "population/8,000" is in colonists. |
 | A15 | Mines and factories: "resources" is the planet's available resources; the mines' "resources left" is after the factories just queued; the alchemy is appended. Room counts queued plain items only. |
+| A16 | Cybertron's list range `a..b`: `Random(m)` indexes the lists left in increasing order, and the list tried is removed (cybertron.md §2 checked ranges as sets of outcomes, AI-19). |
+| A17 | Cybertron's warship group: when the big ships leave the target at the group's first slot, that slot gets the "first" Cruiser range (the last 9 lists); "slot g itself range 17..19" applies when the fill reaches it from above. |
+| A18 | Robotoid's step 7 writes no delete for a slot 0 that is already empty (the original repeats it every year; Elegy's engine would reject it and it changes nothing). |
 
 ## Spec questions
 
