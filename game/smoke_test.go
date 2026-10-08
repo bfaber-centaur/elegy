@@ -215,7 +215,7 @@ func smokeRun(t *testing.T, g *Game, years int) []string {
 
 func newSmoke(t *testing.T, seed uint64) *Game {
 	t.Helper()
-	g, err := New(smokeSettings(), seed)
+	g, err := New(engine.ElegyRules(), smokeSettings(), seed)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -375,7 +375,7 @@ func TestLoadRejects(t *testing.T) {
 	for name, doc := range map[string]string{
 		"not json":      "{",
 		"format":        strings.Replace(string(b), `"elegy-save"`, `"other"`, 1),
-		"version":       strings.Replace(string(b), `"version": 1`, `"version": 99`, 1),
+		"version":       strings.Replace(string(b), `"version": 2`, `"version": 99`, 1),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
 		if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {

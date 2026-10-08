@@ -25,7 +25,7 @@ import (
 // See docs/GAME-LOOP.md.
 const (
 	SaveFormat  = "elegy-save"
-	SaveVersion = 1
+	SaveVersion = 2
 )
 
 // saveFile is the saved document. Field order is the encoding order.
@@ -161,6 +161,9 @@ func Load(r io.Reader) (*Game, error) {
 		return nil, fmt.Errorf("%w: version %d; this build reads version %d", ErrSave, f.Version, SaveVersion)
 	}
 	st := f.Game
+	if err := st.Rules.Validate(); err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrSave, err)
+	}
 	if f.Objects != nil {
 		st.Objects = f.Objects
 	}

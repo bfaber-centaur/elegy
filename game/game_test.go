@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -149,5 +150,76 @@ func TestReportSurvivesSaveLoad(t *testing.T) {
 	r, _ := loaded.Report(2)
 	if len(r.Orders) != 1 || !errors.Is(r.Orders[0].Err, engine.ErrNoSuchObject) {
 		t.Fatalf("player 2's outcomes after reload: %+v", r.Orders)
+	}
+}
+
+// TestRulesetsCoexist: games with the Elegy and the faithful rulesets
+// run side by side in one process, each keeps its own ruleset through
+// every year and a save and load, and the two save differently.
+func TestRulesetsCoexist(t *testing.T) {
+	newGame := func(rules engine.Ruleset) *Game {
+		g, err := New(rules, smokeSettings(), smokeSeed)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return g
+	}
+	elegy, faithful := newGame(engine.ElegyRules()), newGame(engine.FaithfulRules())
+	he, _ := elegy.Hash()
+	hf, _ := faithful.Hash()
+	if he == hf {
+		t.Fatal("two rulesets give the same save")
+	}
+	// Interleave the years of the two games.
+	drivers := smokeDrivers(3)
+	for range 10 {
+		for _, g := range []*Game{elegy, faithful} {
+			if _, err := g.Advance(drivers); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	for want, g := range map[engine.Ruleset]*Game{engine.ElegyRules(): elegy, engine.FaithfulRules(): faithful} {
+		if g.State.Rules != want {
+			t.Fatalf("after ten years the game has ruleset %q, want %q", g.State.Rules.ID, want.ID)
+		}
+		var buf bytes.Buffer
+		if err := g.Save(&buf); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err := Load(&buf)
+		if err != nil {
+			t.Fatal(err)
+		}
+		h0, _ := g.Hash()
+		h1, _ := loaded.Hash()
+		if loaded.State.Rules != want || h0 != h1 {
+			t.Fatalf("%s: reload gives ruleset %+v, hash equal %v", want.ID, loaded.State.Rules, h0 == h1)
+		}
+	}
+	// The same game alone matches the interleaved one.
+	alone := newGame(engine.FaithfulRules())
+	if err := alone.Run(10, drivers); err != nil {
+		t.Fatal(err)
+	}
+	ha, _ := alone.Hash()
+	hf, _ = faithful.Hash()
+	if ha != hf {
+		diverged(t, "a game run next to another ruleset's", alone.State.Year, alone, faithful)
+	}
+}
+
+func TestLoadRejectsInvalidRuleset(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	b, err := g.Encode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc := strings.Replace(string(b), `"id": "`+engine.ElegyRulesID+`"`, `"id": ""`, 1)
+	if doc == string(b) {
+		t.Fatal("test setup: ruleset id not found in the save")
+	}
+	if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {
+		t.Fatalf("err = %v, want ErrSave", err)
 	}
 }

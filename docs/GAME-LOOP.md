@@ -6,7 +6,7 @@ program: generate a galaxy, ask each player for orders, advance years with
 report of only what that player knows. There is no UI.
 
 ```go
-g, err := game.New(settings, seed)      // newgame.Settings, uint64
+g, err := game.New(rules, settings, seed) // engine.Ruleset, newgame.Settings, uint64
 err = g.Run(40, drivers)                // or g.Advance(drivers) per year
 r, err := g.Report(player)              // what that player knows now
 err = g.Save(w); g2, err := game.Load(rd)
@@ -32,6 +32,11 @@ the turn.
 - `Check` tests Elegy's data model, not game rules: every owner is a
   player, every fleet has ships of existing designs, quantities are not
   negative, ids and design slots are unique.
+
+`New` takes the game's ruleset (`engine.ElegyRules()`,
+`engine.FaithfulRules()` or another valid `engine.Ruleset`); the game
+carries it for its whole life, so games with different rulesets run side
+by side in one process (`TestRulesetsCoexist`).
 
 `New` gives the game one generator, `newgame.NewRand(seed)`, for
 everything: creation, then the starting knowledge, then every year
@@ -94,10 +99,12 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 1, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 2, ...}`, not any of the original's
 file formats. It holds:
 
-- the engine state;
+- the engine state, including the game's ruleset (`engine.Game.Rules`:
+  identity, version and every legacy switch, docs/RULESET.md), which
+  `Load` validates;
 - the space objects and race designs (the engine's `Objects` and `Races`)
   and whether terraforming is on;
 - the generator state;

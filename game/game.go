@@ -40,7 +40,7 @@ type Game struct {
 	nameIndex []int
 }
 
-// New creates a game from new-game settings and a seed.
+// New creates a game from a ruleset, new-game settings and a seed.
 //
 // ELEGY CHOICE: one generator, newgame.NewRand(seed), makes every draw
 // of the game: creation, then the starting knowledge, then each year's
@@ -52,7 +52,12 @@ type Game struct {
 // the game's stream right after creation. The original writes each
 // player's first file at creation; how it draws those estimates is not
 // in the spec.
-func New(s newgame.Settings, seed uint64) (*Game, error) {
+//
+// rules is the game's ruleset (engine.Ruleset, docs/RULESET.md): it
+// replaces s.Rules and stays with the game, and its save, for the game's
+// whole life.
+func New(rules engine.Ruleset, s newgame.Settings, seed uint64) (*Game, error) {
+	s.Rules = rules
 	rng := newgame.NewRand(seed)
 	res, err := newgame.Generate(s, rng)
 	if err != nil {
@@ -207,7 +212,7 @@ func (g *Game) Advance(drivers []Driver) (Year, error) {
 		}
 		files = append(files, engine.PlayerOrders{Player: p, GameID: g.State.ID, Year: g.State.Year, Orders: orders})
 	}
-	res, err := engine.GenerateTurn(g.State, files, engine.Jrc3(), rng)
+	res, err := engine.GenerateTurn(g.State, files, rng)
 	if err != nil {
 		return Year{}, &TurnError{Year: g.State.Year, Err: err}
 	}
