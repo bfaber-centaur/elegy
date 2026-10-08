@@ -129,13 +129,16 @@ checks every case's expectations:
 - CONFIRMED and LEGACY BUG cases are exact-match targets.
 - MEASURED cases are tallied apart.
 - Cases are skipped for an order, object or expectation Elegy does not
-  model yet, or when the vector marks the outcome as varying by stream.
+  model yet. An expectation tagged with one oracle stream is skipped; the
+  case's other expectations are still checked, also when the case is
+  marked as varying by stream.
 - A LEGACY BUG case whose switch is off by default is reported as
   "differs".
 - Each vector runs with 8 seed variants. The harness's random stream is
   not the original's, so a case whose result changes with the seed only
   matches by chance. It is reported as "random", with how many seeds it
-  passes with and the reference seed's comparison.
+  passes with and the reference seed's comparison. The tally counts the
+  random cases whose reference seed fails in their own column.
 
 `go test -run TestParityVectors -v ./engine` prints the per-corpus tally
 and every case that does not pass. `baseline.txt` lists the passing

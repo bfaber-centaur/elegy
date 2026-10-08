@@ -110,6 +110,7 @@ type pvPlanet struct {
 	Defenses            *int  `json:"defenses"`
 	PlanetaryScanner    *int  `json:"planetary_scanner"`
 	LeftoverToResearch  *bool `json:"leftover_to_research"`
+	RouteTo             *int  `json:"route_to"`
 	Starbase            *struct {
 		Design *int `json:"design"`
 		Damage int  `json:"damage"`
@@ -145,6 +146,7 @@ type pvFleet struct {
 	Fuel       int            `json:"fuel"`
 	BattlePlan int            `json:"battle_plan"`
 	Waypoints  []pvWaypoint   `json:"waypoints"`
+	Repeat     bool           `json:"repeat_orders"`
 }
 
 type pvShips struct {
@@ -166,8 +168,10 @@ type pvWaypoint struct {
 		Owner *int   `json:"owner"`
 	} `json:"target"`
 	Task struct {
-		Kind   string `json:"kind"`
-		Orders map[string]struct {
+		Kind     string `json:"kind"`
+		Range    int    `json:"range"`
+		ToPlayer int    `json:"to_player"`
+		Orders   map[string]struct {
 			Action string `json:"action"`
 			Value  int    `json:"value"`
 		} `json:"orders"`
@@ -477,6 +481,9 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		if p.LeftoverToResearch != nil {
 			pl.LeftoverOnly = *p.LeftoverToResearch
 		}
+		if p.RouteTo != nil {
+			pl.HasRoute, pl.RouteTo = true, *p.RouteTo+1
+		}
 		if pl.Owner != NoOwner {
 			// A planet the state lists no queue for has none: its
 			// resources all go to research (KERNEL.md "Production").
@@ -531,7 +538,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	}
 	for _, f := range s.Fleets {
 		key := pvFleetKey(f.Owner, f.ID)
-		ef := Fleet{ID: l.fleetID[key], Number: f.ID + 1, Owner: f.Owner, Pos: Point{f.X, f.Y}, Fuel: f.Fuel, Plan: f.BattlePlan}
+		ef := Fleet{ID: l.fleetID[key], Number: f.ID + 1, Owner: f.Owner, Pos: Point{f.X, f.Y}, Fuel: f.Fuel, Plan: f.BattlePlan, Repeat: f.Repeat}
 		for _, sh := range f.Ships {
 			st := Stack{Design: l.design[[2]int{f.Owner, sh.Design}], Count: sh.Count}
 			if sh.Damage != nil {
@@ -663,7 +670,7 @@ func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
 		if w.Target.Owner != nil {
 			owner = *w.Target.Owner
 		}
-		wp.Target, wp.ID = TargetFleet, l.fleetID[pvFleetKey(owner, *w.Target.ID)]
+		wp.Target, wp.ID = TargetFleet, pvElegyFleetID(owner, *w.Target.ID)
 	default:
 		why = "target " + w.Target.Kind
 	}
@@ -677,6 +684,10 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 		return Task{}, ""
 	case "colonize":
 		return Task{Kind: TaskColonize}, ""
+	case "route":
+		return Task{Kind: TaskRoute}, ""
+	case "transfer":
+		return Task{Kind: TaskTransferFleet, Player: w.Task.ToPlayer}, ""
 	case "merge":
 		owner := 0
 		if w.Target.Owner != nil {
@@ -738,7 +749,8 @@ type pvResult struct {
 	id, corpus, tag string
 	status          string // pass, fail, skip, differs, random
 	why             string
-	passes          int // seed variants the case passes with
+	passes          int    // seed variants the case passes with
+	refStatus       string // for a random case, the reference seed's status
 }
 
 // pvCheck compares one expectation with a generated game; "" passes, a
@@ -751,17 +763,23 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 	if len(e.Equals) > 0 && json.Unmarshal(e.Equals, &eq) != nil {
 		return "skip: " + e.Kind + " list"
 	}
+	// fleet finds a vector fleet: one from the start by its id, and one
+	// made during the run (a gift) by its owner and number.
 	fleet := func(owner, id int) *Fleet {
 		fid, ok := l.fleetID[pvFleetKey(owner, id)]
+		started := map[int]bool{}
+		for _, v := range l.fleetID {
+			started[v] = true
+		}
 		for i := range g.Fleets {
 			f := &g.Fleets[i]
-			if ok && f.ID == fid && fid != 0 {
+			if ok && f.ID == fid {
 				return f
 			}
-			// A fleet built during the run is known by its fleet number:
-			// the vector stores it from 0, the client shows it from 1
-			// (PRODUCTION-LAUNCH.md "The new fleet").
-			if !ok && f.Owner == owner && f.Number == id+1 {
+			// A fleet made during the run (built or given) is known by its
+			// fleet number: the vector stores it from 0, the client shows
+			// it from 1 (PRODUCTION-LAUNCH.md "The new fleet").
+			if !ok && !started[f.ID] && f.Owner == owner && f.Number == id+1 {
 				return f
 			}
 		}
@@ -782,7 +800,7 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		if f == nil {
 			return "fleet gone"
 		}
-		return l.fleetEquals(f, eq)
+		return l.fleetEquals(g, f, eq)
 	case "fleet_at":
 		for _, k := range pvKeys2(l.unsupported) {
 			if l.start[k] == (Point{*e.X, *e.Y}) {
@@ -793,7 +811,7 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		for i := range g.Fleets {
 			f := &g.Fleets[i]
 			if f.Owner == *e.Owner && f.Pos == (Point{*e.X, *e.Y}) {
-				if last = l.fleetEquals(f, eq); last == "" {
+				if last = l.fleetEquals(g, f, eq); last == "" {
 					return ""
 				}
 			}
@@ -892,8 +910,12 @@ func pvMismatch(field string, got, want any) string {
 	return fmt.Sprintf("%s = %v, want %v", field, got, want)
 }
 
-func (l *pvLoaded) fleetEquals(f *Fleet, eq map[string]json.RawMessage) string {
+// fleetEquals compares a fleet with an expectation's fields. A field the
+// harness cannot compare makes the check a skip only when every field it
+// did compare matched; a mismatch is always reported.
+func (l *pvLoaded) fleetEquals(g *Game, f *Fleet, eq map[string]json.RawMessage) string {
 	var errs []string
+	skip := ""
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
 		switch k {
@@ -940,7 +962,14 @@ func (l *pvLoaded) fleetEquals(f *Fleet, eq map[string]json.RawMessage) string {
 			}
 			w := map[int]int{}
 			for _, s := range want {
-				w[l.design[[2]int{f.Owner, s.Design}]] += s.Count
+				d, ok := l.design[[2]int{f.Owner, s.Design}]
+				if !ok {
+					// A design the player gained during the run (a gift).
+					if d, ok = g.PlayerDesign(f.Owner, false, s.Design); !ok {
+						d = -1 - s.Design
+					}
+				}
+				w[d] += s.Count
 			}
 			if !reflect.DeepEqual(got, w) {
 				errs = append(errs, pvMismatch("ships", got, w))
@@ -967,6 +996,42 @@ func (l *pvLoaded) fleetEquals(f *Fleet, eq map[string]json.RawMessage) string {
 					errs = append(errs, fmt.Sprintf("damage: no stack of design %d", d.Design))
 				}
 			}
+		case "orbiting":
+			var want *int
+			json.Unmarshal(raw, &want)
+			id, ok := l.g.OrbitedPlanet(f)
+			if w := pvPtr(want); !ok && want != nil || ok && (want == nil || l.planet[*want] != id) {
+				got := "null"
+				for vid, eid := range l.planet {
+					if ok && eid == id {
+						got = fmt.Sprint(vid)
+					}
+				}
+				errs = append(errs, pvMismatch(k, got, w))
+			}
+		case "battle_plan":
+			var want int
+			json.Unmarshal(raw, &want)
+			if f.Plan != want {
+				errs = append(errs, pvMismatch(k, f.Plan, want))
+			}
+		case "repeat_orders":
+			var want bool
+			json.Unmarshal(raw, &want)
+			if f.Repeat != want {
+				errs = append(errs, pvMismatch(k, f.Repeat, want))
+			}
+		case "waypoints":
+			var want []pvWaypoint
+			json.Unmarshal(raw, &want)
+			msg := l.waypointsEqual(f, want)
+			if strings.HasPrefix(msg, "skip: ") {
+				skip = msg
+				continue
+			}
+			if msg != "" {
+				errs = append(errs, msg)
+			}
 		case "first_waypoint_task":
 			var want string
 			json.Unmarshal(raw, &want)
@@ -975,7 +1040,50 @@ func (l *pvLoaded) fleetEquals(f *Fleet, eq map[string]json.RawMessage) string {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
 		default:
-			return "skip: fleet field " + k
+			skip = "skip: fleet field " + k
+		}
+	}
+	if len(errs) == 0 {
+		return skip
+	}
+	return strings.Join(errs, "; ")
+}
+
+// waypointsEqual compares a fleet's waypoint list with the vector's, where
+// waypoint 0 is the fleet's own location. Elegy keeps only waypoint 0's
+// task (Fleet.Task), so its warp and target are not compared.
+func (l *pvLoaded) waypointsEqual(f *Fleet, want []pvWaypoint) string {
+	if len(want) == 0 {
+		return "skip: no waypoint 0"
+	}
+	var errs []string
+	if p := (Point{want[0].X, want[0].Y}); p != f.Pos {
+		errs = append(errs, pvMismatch("waypoints[0] position", f.Pos, p))
+	}
+	task, why := l.task(want[0])
+	if why != "" {
+		return "skip: waypoint " + why
+	}
+	if !reflect.DeepEqual(f.Task, task) {
+		errs = append(errs, pvMismatch("waypoints[0] task", f.Task, task))
+	}
+	if len(f.Waypoints) != len(want)-1 {
+		got := make([]Point, len(f.Waypoints))
+		for i, wp := range f.Waypoints {
+			got[i] = wp.Pos
+		}
+		return strings.Join(append(errs, fmt.Sprintf("%d waypoints after waypoint 0 %v, want %d", len(f.Waypoints), got, len(want)-1)), "; ")
+	}
+	for i, w := range want[1:] {
+		wp, why := l.waypoint(f.Owner, w)
+		if why != "" {
+			return "skip: waypoint " + why
+		}
+		if wp.Task, why = l.task(w); why != "" {
+			return "skip: waypoint " + why
+		}
+		if got := f.Waypoints[i]; !reflect.DeepEqual(got, wp) {
+			errs = append(errs, pvMismatch(fmt.Sprintf("waypoints[%d]", i+1), got, wp))
 		}
 	}
 	return strings.Join(errs, "; ")
@@ -1136,13 +1244,6 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "skip", why)
 			continue
 		}
-		// A case that varies by stream is skipped whole. In the sl corpus
-		// the varying expectations are tagged: those are skipped below
-		// and the rest are checked.
-		if c.VariesByStream && !(v.corpus == "sl" && pvStreamTagged(c)) {
-			res(c, "skip", "random outcome")
-			continue
-		}
 		var fails, skips []string
 		checked := 0
 		for _, e := range c.Expect {
@@ -1195,15 +1296,6 @@ var pvNotModelled = map[string]string{
 	"KX-002-R4": "the next research field choice is not in the vector",
 }
 
-func pvStreamTagged(c pvCase) bool {
-	for _, e := range c.Expect {
-		if e.Stream != "" {
-			return true
-		}
-	}
-	return false
-}
-
 func pvUnique(xs []string) []string {
 	var out []string
 	seen := map[string]bool{}
@@ -1221,7 +1313,9 @@ func pvUnique(xs []string) []string {
 // vectors), so a case whose outcome depends on the draws matches only by
 // chance. Such a case passes with some seeds and fails with others; it is
 // reported as "random" with its pass count and the reference seed's
-// comparison kept, and it cannot sit in the baseline.
+// comparison kept. The tally counts random cases whose reference seed
+// fails apart, and the baseline lists each random case with its pass
+// count.
 const pvSeeds = 8
 
 // pvStreamCheck folds one vector's seed variants into one result per case.
@@ -1245,6 +1339,7 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 			}
 			out[i].status = "random"
 			out[i].passes = passes
+			out[i].refStatus = r.status
 			out[i].why = fmt.Sprintf("passes with %d of %d seeds; reference seed %s: %s", passes, len(runs), r.status, why)
 		}
 	}
@@ -1260,7 +1355,7 @@ func TestParityVectors(t *testing.T) {
 		}
 		all = append(all, pvStreamCheck(runs)...)
 	}
-	type tally struct{ pass, fail, skip, measured, differs, random int }
+	type tally struct{ pass, fail, skip, measured, differs, random, randomFail int }
 	per := map[string]*tally{}
 	var corpora []string
 	for _, r := range all {
@@ -1275,6 +1370,8 @@ func TestParityVectors(t *testing.T) {
 			tl.skip++
 		case r.status == "differs":
 			tl.differs++
+		case r.status == "random" && r.refStatus == "fail":
+			tl.randomFail++
 		case r.status == "random":
 			tl.random++
 		case r.tag == "MEASURED":
@@ -1287,7 +1384,7 @@ func TestParityVectors(t *testing.T) {
 	}
 	for _, c := range corpora {
 		tl := per[c]
-		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.measured)
+		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail, tl.measured)
 	}
 	for _, r := range all {
 		if r.status != "pass" {
