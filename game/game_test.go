@@ -118,10 +118,9 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	}
 }
 
-// TestReportObjects: a player's report shows the space objects it saw
-// this year, its own with their owner-only settings, and nothing of
-// another player's packet warp, destination or cargo or field's detonate
-// setting (ASSUMPTION V4); an object it did not see is not reported.
+// TestReportObjects: a player's report shows each space object it saw
+// this year in full, whoever owns it (stars-elegy SCANNING.md "Space
+// objects", MEASURED SC-038); an object it did not see is not reported.
 func TestReportObjects(t *testing.T) {
 	g := newSmoke(t, smokeSeed)
 	sp := space(g.State)
@@ -151,18 +150,21 @@ func TestReportObjects(t *testing.T) {
 	want := objects.ObjectReport{
 		Minefields: []objects.MinefieldSighting{
 			{Owner: a, Number: 0, Pos: posA, Mines: 1600, Kind: objects.Standard, Detonate: true},
-			{Owner: b, Number: 0, Pos: posB, Mines: 900, Kind: objects.Heavy},
+			{Owner: b, Number: 0, Pos: posB, Mines: 900, Kind: objects.Heavy, Detonate: true},
 		},
 		Packets: []objects.PacketSighting{
-			{Owner: a, Number: 0, Pos: posA, Own: &objects.OwnPacket{Warp: 9, Target: 7, Cargo: engine.Minerals{88, 0, 0}}},
-			{Owner: b, Number: 0, Pos: posB},
+			{Owner: a, Number: 0, Pos: posA, Target: 7, Warp: 9, Class: 2, Cargo: engine.Minerals{88, 0, 0}},
+			{Owner: b, Number: 0, Pos: posB, Target: 2, Warp: 10, Class: 1, Cargo: engine.Minerals{0, 50, 0}},
 		},
 	}
 	if !reflect.DeepEqual(r.Objects, want) {
 		t.Fatalf("player %d's objects =\n%+v\nwant\n%+v", a, r.Objects, want)
 	}
 
-	// Player b sees its own items in full and nothing of a's.
+	// Player b sees only what it saw: its own field and both its packets,
+	// the hidden one included, and nothing of a's. Every sighting is the
+	// whole object (stars-elegy SCANNING.md "Space objects", MEASURED
+	// SC-038).
 	r, err = g.Report(b)
 	if err != nil {
 		t.Fatal(err)
@@ -170,13 +172,12 @@ func TestReportObjects(t *testing.T) {
 	if len(r.Objects.Minefields) != 1 || !r.Objects.Minefields[0].Detonate || r.Objects.Minefields[0].Owner != b {
 		t.Errorf("player %d's minefields: %+v", b, r.Objects.Minefields)
 	}
-	if len(r.Objects.Packets) != 2 {
-		t.Fatalf("player %d's packets: %+v", b, r.Objects.Packets)
+	wantB := []objects.PacketSighting{
+		{Owner: b, Number: 0, Pos: posB, Target: 2, Warp: 10, Class: 1, Cargo: engine.Minerals{0, 50, 0}},
+		{Owner: b, Number: 1, Pos: posHidden, Target: 3, Warp: 8, Class: 1, Cargo: engine.Minerals{0, 0, 40}},
 	}
-	for _, p := range r.Objects.Packets {
-		if p.Owner != b || p.Own == nil {
-			t.Errorf("player %d's packet %+v: want its own, with details", b, p)
-		}
+	if !reflect.DeepEqual(r.Objects.Packets, wantB) {
+		t.Errorf("player %d's packets =\n%+v\nwant\n%+v", b, r.Objects.Packets, wantB)
 	}
 }
 
