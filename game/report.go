@@ -87,7 +87,9 @@ type Report struct {
 	// part word, OBJECTS.md "Encounters"). Only the player's own: other
 	// players' parts are not shown. A computer player's can-build test
 	// counts an owned Trader part whose tech requirements it also meets
-	// (AI.md §5 "AI part classes", BINARY-ONLY).
+	// (AI.md §5 "AI part classes", BINARY-ONLY). It is a set: callers
+	// must not depend on its iteration order (objects.TraderPartNames gives the
+	// bit order).
 	TraderItems map[string]bool
 
 	// Rand draws from the game's random stream. The loop sets it; a
