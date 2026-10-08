@@ -76,8 +76,20 @@ func (g *Game) plan(player, i int) BattlePlan {
 	return BattlePlan{}
 }
 
-// Salvage is a deep-space salvage object.
+// Salvage is a deep-space salvage object (stars-elegy OBJECTS.md
+// "Salvage"; its rules are in package objects).
 type Salvage struct {
 	Pos      Point
 	Minerals Minerals
+	// Owner is the player whose ships or cargo made it, and Number its
+	// number in that owner's packet numbers (OBJECTS.md "Salvage",
+	// "Owner"). Set where the object is created.
+	Owner, Number int
+	// Fresh marks an object made or added to since the last decay, which
+	// skips that decay (OBJECTS.md "Salvage", "Decay").
+	Fresh bool
+	// Steps is the stored size in 10 kT steps, Σ⌈m/10⌉ when the object
+	// was last made, added to or decayed; it bounds unloading into it
+	// (OBJECTS.md "Salvage", "Loading").
+	Steps int
 }

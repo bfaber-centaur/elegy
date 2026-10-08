@@ -247,14 +247,26 @@ func TestConfirmedPacketFlight(t *testing.T) {
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom || full.Packets[r.Packet].Number != 511 {
 		t.Errorf("511 with nothing after: %+v", r)
 	}
-	// Unowned salvage (OtherObjects) blocks nothing (ASSUMPTION P5); a
-	// Trader does.
+	// Salvage shares the pool (OBJECTS.md "Salvage", "Owner"): a lower
+	// player's salvage does not block 511, a higher player's does, and
+	// the owner's own salvage takes numbers; a Trader blocks 511.
 	full.Packets = full.Packets[:511]
-	full.OtherObjects = 3
+	l.g.Salvage = []engine.Salvage{{Owner: 0, Number: 600}}
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom {
-		t.Errorf("salvage blocked 511: %+v", r)
+		t.Errorf("own salvage elsewhere in the pool blocked 511: %+v", r)
 	}
 	full.Packets = full.Packets[:511]
+	l.g.Salvage = []engine.Salvage{{Owner: 1}}
+	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoRoom {
+		t.Errorf("higher player's salvage did not block 511: %+v", r)
+	}
+	full.Packets = full.Packets[:510]
+	l.g.Salvage = []engine.Salvage{{Owner: 0, Number: 510}}
+	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom || full.Packets[r.Packet].Number != 511 {
+		t.Errorf("own salvage number 510: %+v", r)
+	}
+	l.g.Salvage = nil
+	full.Packets = append(full.Packets[:510], Packet{Owner: 0, Number: 510, From: 9})
 	full.Traders = []Trader{{}}
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoRoom || r.Spend[0] != 110 || len(full.Packets) != 511 {
 		t.Errorf("no room: %+v", r)

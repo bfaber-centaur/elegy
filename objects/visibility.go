@@ -27,8 +27,10 @@ type Sightings struct {
 	Packets    []int
 	Wormholes  []WormholeSighting
 	Traders    []int
-	// Owners are the other players made known by a sighted minefield or
-	// packet, ascending.
+	// Salvage indexes engine.Game.Salvage.
+	Salvage []int
+	// Owners are the other players made known by a sighted minefield,
+	// packet or salvage object, ascending.
 	Owners []int
 }
 
@@ -71,8 +73,10 @@ func (s *Space) PacketScanners(g *engine.Game, v int) []Scanner {
 //   - Own packets are always seen; others within d² ≤ R²; a PP player
 //     sees every packet (OB-012).
 //   - Every Trader is seen by everyone (OB-011-J).
-//   - Seeing another player's minefield or packet makes that player
-//     known; wormholes and Traders have no owner (OB-017).
+//   - Salvage is seen as another player's packet is, its owner's own
+//     included (OBJECTS.md "Salvage", "Visibility").
+//   - Seeing another player's minefield, packet or salvage makes that
+//     player known; wormholes and Traders have no owner (OB-017).
 func (s *Space) Scan(g *engine.Game, v int, scanners []Scanner) Sightings {
 	scanners = append(append([]Scanner(nil), scanners...), s.PacketScanners(g, v)...)
 	var out Sightings
@@ -110,6 +114,17 @@ func (s *Space) Scan(g *engine.Game, v int, scanners []Scanner) Sightings {
 	}
 	for i := range s.Traders {
 		out.Traders = append(out.Traders, i)
+	}
+	// Salvage is seen as a packet is, with no exception for its owner's
+	// own; it never scans (OBJECTS.md "Salvage", "Visibility").
+	for i, sv := range g.Salvage {
+		if !pp && !within(sv.Pos, scanners, func(sc Scanner) int { return sc.R * sc.R }) {
+			continue
+		}
+		out.Salvage = append(out.Salvage, i)
+		if sv.Owner != v && sv.Owner >= 0 {
+			owners[sv.Owner] = true
+		}
 	}
 	for o := range owners {
 		out.Owners = append(out.Owners, o)
