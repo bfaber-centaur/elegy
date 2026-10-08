@@ -377,6 +377,15 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
   otherwise checked: RD-P11 (2), RD-P12 (2), RD-P20 (9), RD-P21 (6).
   Their race expectations are compared.
 
+- CB-009 and CB-010 load designs written straight into the oracle's
+  state with a Beam Deflector in a shield-or-armor slot; the harness keeps
+  such a part, as the original keeps and uses a stored design (TAKEOVER.md
+  "Design parts dropped when the year is generated"). CB-010 passes.
+  CB-009 is `random 1`: its `salvage_at` amounts follow which ships the
+  battle's draws killed (its `fleet_gone` expectations are samples), but
+  the salvage expectations are not marked `sample`; inferred from 1 of 8
+  seeds matching, reported to the vectors' owners.
+
 **Expectations skipped inside checked cases** (reference seed, as of this
 list; `TestParityVectors -v` prints the current counts as "expectations
 skipped in checked cases"): other oracle random streams 4222, `message`

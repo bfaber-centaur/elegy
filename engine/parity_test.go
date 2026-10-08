@@ -546,6 +546,12 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		}
 		name := fmt.Sprintf("p%d d%d", d.Owner, d.Slot)
 		ds, err := cat.NewDesign(name, d.Hull, fills)
+		if err != nil && strings.Contains(err.Error(), "does not take") {
+			// A design written directly into the oracle's state, with a
+			// part in a slot the client would not allow: the original keeps
+			// and uses it (TAKEOVER.md "Design legality").
+			ds, err = cat.newDesign(name, d.Hull, fills, false)
+		}
 		if err != nil && !starbase {
 			// A design without a full set of engines (FM-105): build it
 			// with the slot filled, then take the missing engines off.
