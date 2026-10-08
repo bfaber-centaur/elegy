@@ -319,6 +319,20 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   further waypoint, so a fleet already routed is not routed again before
   it leaves.
 
+## Year invariants
+
+`engine.CheckYear(prev, result)` checks one generated year's structural
+invariants (engine/invariants.go): ids, owners and indexes; planets
+unmoved, and an unowned planet without population, defenses, starbase or
+queue; fleets with ships, unique numbers, and fuel and cargo within their
+tanks and holds; research levels that never fall; and each player's view
+holding exactly their own planets at the own-planet level, with every
+report and sighting naming a real object at its real position. These are
+Elegy's consistency checks, not oracle rules. Mass conservation is not
+checked: mining, production, scrapping and battles all change it.
+`TestCheckYearReports` checks that each kind of corruption is reported.
+Long multi-seed runs that call it every year belong to the game loop.
+
 ## Known parity failures
 
 `TestParityVectors -v` prints every case that does not pass. These are
