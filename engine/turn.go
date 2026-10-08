@@ -261,8 +261,11 @@ func GenerateTurn(
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
-	// The waypoint check after the orders (step 1a.3), first retargeting
-	// waypoints that name a fleet merged away in the replay.
+	// Following fleets, then the waypoint check after the orders (step
+	// 1a.3), first retargeting waypoints that name a fleet merged away in
+	// the replay.
+	following, ev := g.follow(applied.follows)
+	events = append(events, ev...)
 	g.chaseMerged(applied.merged, rng)
 	g.waypointCheck()
 
@@ -305,6 +308,7 @@ func GenerateTurn(
 	}
 	moveEvents, gated := g.moveAll(rng)
 	events = append(events, moveEvents...)
+	events = append(events, g.endFollow(following)...)
 	for i := range g.Fleets {
 		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
 			events = append(events, g.radiatingColonists(f)...)

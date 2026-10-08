@@ -345,6 +345,34 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   draws as ORDERS.md says, but its battle-plan preference and weight are
   not modelled, because ORDERS.md defines neither. The research lane may
   pin them.
+- **Following fleets** (`follow.go`; ORDERS.md "Waypoint 0 aimed at a
+  fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138,
+  stars-elegy c3aab85). Only a `FollowOrder` starts a follow, and it lasts
+  the year: Elegy keeps the leader link in the year's replay state, not
+  in `Game`, so no saved game carries it (`TestFollowDoesNotPersist`).
+  Before the waypoint check, up to 8 passes in fleet order give each
+  follower a copy of its leader's next waypoint carrying the follower's
+  own task (BINARY-ONLY); a follower whose leader is gone, or has no
+  orders and is not following, gets 0x138 and stops (CONFIRMED fo/fo04).
+  At the end of movement every fleet still following drops its follow
+  step and gets 0x137 (CONFIRMED fo/fo02, fo/fo03). That followers of a
+  fleet with orders move with it and end where it does, and that
+  followers of an idle fleet do not move, is MEASURED for the computer
+  players' orders only (AI-27). `TestFollow*`.
+- **F1 (ASSUMPTION).** A follow order naming a leader that does not exist
+  when it applies, including one merged away earlier in the replay, or
+  the fleet itself, is rejected; a leader merged away later in the replay
+  is gone at step 1a.3 (0x138). ORDERS.md's merge retargeting covers
+  waypoints, not waypoint 0. The stale-id issue below applies to a
+  leader too.
+- **F2 (ASSUMPTION).** Within a pass the followers are taken one at a
+  time, so one resolved earlier in the pass leads the rest of it.
+- **F3 (ASSUMPTION).** A follower still unresolved after the 8 passes (a
+  circular chain, or a longer chain) gets no message and no waypoint, does
+  not move, and gets 0x137. MESSAGES.md says only that circular chains
+  get no 0x138.
+- **F4 (ASSUMPTION).** A follower that reaches the copied waypoint gets
+  Elegy's arrival message as well as 0x137.
 - **Known issue: a stale chase id can be reused.** `Fleet.ID` is Elegy's
   internal key, and a new fleet takes the highest id plus one
   (`Game.newFleetID`). If the merged-away fleet held the highest id, a
