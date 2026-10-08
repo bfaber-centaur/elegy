@@ -7,7 +7,8 @@ import "testing"
 // planet has; fill clears after its load, wait only once met. ASSUMPTION
 // T8: the target is per cargo type and rounded down (33% of 210 is 69),
 // so 60 kT of ironium already aboard leaves 45 to fill to 50%, whatever
-// else is aboard; T9: wait is met at the target.
+// else is aboard; T9: wait is met at the target. A wait is also
+// satisfied once the hold is full (KERNEL.md "Which loads are unmet").
 func TestFillAndWaitFor(t *testing.T) {
 	for _, tt := range []struct {
 		name          string
@@ -27,6 +28,8 @@ func TestFillAndWaitFor(t *testing.T) {
 		{"wait 50%, met", Transport{WaitFor, 50}, 500, 0, 0, 105, Transport{}},
 		{"wait 50%, met exactly aboard", Transport{WaitFor, 50}, 0, 105, 0, 0, Transport{}},
 		{"wait 50%, one short", Transport{WaitFor, 50}, 0, 104, 0, 0, Transport{WaitFor, 50}},
+		{"wait 100%, hold filled with boranium", Transport{WaitFor, 100}, 500, 0, 200, 10, Transport{}},
+		{"wait 100%, one kT of space left", Transport{WaitFor, 100}, 9, 0, 200, 9, Transport{WaitFor, 100}},
 	} {
 		l := newTKLab(t, 3)
 		medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
@@ -37,7 +40,7 @@ func TestFillAndWaitFor(t *testing.T) {
 		f.Cargo.Minerals = Minerals{tt.held, tt.boranium, 0}
 		f.Task = Task{Kind: TaskTransport}
 		f.Task.Transport[Ironium] = tt.tr
-		l.g.load(f)
+		l.g.load(f, false)
 		if got := f.Cargo.Minerals[Ironium] - tt.held; got != tt.load || l.g.Planets[pi].Surface[Ironium] != tt.surface-tt.load {
 			t.Errorf("%s: loaded %d (surface %d), want %d", tt.name, got, l.g.Planets[pi].Surface[Ironium], tt.load)
 		}
@@ -49,8 +52,11 @@ func TestFillAndWaitFor(t *testing.T) {
 
 // A fleet whose transport task is still current after the load pass
 // holds its place; one whose loads were satisfied moves (KERNEL.md "Other
-// movement rules", CONFIRMED KB-4A T1, FO-01 I and J). The freighter sits
-// at its own planet with 50 kT of ironium, heading 30 ly away at warp 6.
+// movement rules", CONFIRMED KB-4A T1, FO-01 I and J). A short load
+// exactly is satisfied (MEASURED TK-302: its task ended), so under that
+// rule the fleet moves; that it moves on is measured only for fill to
+// (FO-01 J). The freighter sits at its own planet with 50 kT of ironium,
+// heading 30 ly away at warp 6.
 func TestTransportTaskHoldsFleet(t *testing.T) {
 	for _, tt := range []struct {
 		name string
@@ -60,7 +66,7 @@ func TestTransportTaskHoldsFleet(t *testing.T) {
 		{"load all", Transport{LoadAll, 0}, true},
 		{"fill to 100%", Transport{FillTo, 100}, true},
 		{"load exactly 30", Transport{LoadExactly, 30}, true},
-		{"load exactly 300, short", Transport{LoadExactly, 300}, false},
+		{"load exactly 300, short", Transport{LoadExactly, 300}, true},
 		{"wait for 100%, short", Transport{WaitFor, 100}, false},
 	} {
 		l := newTKLab(t, 3)

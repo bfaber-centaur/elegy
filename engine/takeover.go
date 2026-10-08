@@ -20,6 +20,13 @@ const (
 	EventColonizeFailed                                        // Player, Fleet, Planet (or -1)
 )
 
+// Load messages (KERNEL.md "Other movement rules"; MESSAGES.md). Elegy's
+// wording.
+const (
+	EventLoadRefused EventKind = iota + EventSalvageEmptiedFirst + 1 // Player, Fleet, Planet (-1: deep space), Axes[0] = cargo type: a load from a target that is not a source was cancelled after movement (0x123, 0x11f)
+	EventLoadWaiting                                                 // Player, Fleet, Planet (-1: away from a planet), Count = the set amount, Axes[0] = cargo type: a "set amount to" waits for more (0x121; 0x122 for colonists)
+)
+
 // TaskKind is a waypoint task. Only the takeover tasks are modelled.
 type TaskKind int
 
@@ -456,34 +463,31 @@ func (g *Game) removeFleets(ids map[int]bool) {
 	g.Fleets = fleets
 }
 
-// load runs a transport task's load actions at the orbited planet in the
-// load pass (TAKEOVER.md "Unload and load amounts", CONFIRMED TK-301,
-// TK-302, TK-201 G): "load all" moves min(A, free space), "load exactly
+// load runs a transport task's load actions in a load pass, after is
+// the pass after movement (TAKEOVER.md "Unload and load amounts",
+// CONFIRMED TK-301, TK-302, TK-201 G; KERNEL.md "Other movement rules",
+// "Which loads are unmet", "Loads with no usable source"). At the
+// owner's own planet "load all" moves min(A, free space), "load exactly
 // v" min(v, A, free space), with A the planet's surface mineral or its
 // population and the free space the fleet's hold less its cargo. Loading
 // colonists may take the whole population; the planet stays owned until
-// this year's growth.
-//
-// ASSUMPTION T4: loads come only from a planet the fleet's owner owns
-// (as CargoOrder: taking from another player is refused); elsewhere the
-// actions wait. Cargo types load in order (ironium, boranium, germanium,
-// colonists), each from the space the earlier ones left. "Load all" is
-// then satisfied and clears; "load exactly" keeps what it could not load
-// and clears when that reaches 0 ("load actions persist until
-// satisfied"). The other actions are loadWant's and loaded's. A
-// task left with no action is no task, as after unloads.
+// this year's growth. ASSUMPTION T4: cargo types load in order (ironium,
+// boranium, germanium, colonists), each from the space the earlier ones
+// left. loaded settles each action; a task left with no action is no
+// task, as after unloads.
 //
 // Away from a planet the loads come from salvage (ASSUMPTION T5, see
-// loadSalvage).
-func (g *Game) load(f *Fleet) {
+// loadSalvage). Deep space with no salvage, and another player's planet,
+// are not sources (noSource).
+func (g *Game) load(f *Fleet, after bool) []Event {
 	pi := g.planetAt(f.Pos)
-	if pi < 0 {
-		g.loadSalvage(f)
-		return
-	}
-	if g.Planets[pi].Owner != f.Owner {
-		g.settleSets(f)
-		return
+	switch {
+	case pi < 0 && g.salvageAt(f.Pos) >= 0:
+		return g.loadSalvage(f, after)
+	case pi < 0:
+		return g.noSource(f, after, -1)
+	case g.Planets[pi].Owner != f.Owner:
+		return g.noSource(f, after && !g.stealsFromPlanets(f), g.Planets[pi].ID)
 	}
 	p := &g.Planets[pi]
 	capacity := g.cargoCapacity(f)
@@ -503,11 +507,9 @@ func (g *Game) load(f *Fleet) {
 		*avail -= amount
 		*held += amount
 		free -= amount
-		t.loaded(amount, capacity, *held, *avail)
+		t.loaded(capacity, *held, *avail, free)
 	}
-	if f.Task.Transport == ([NumCargo]Transport{}) {
-		f.Task = Task{}
-	}
+	return g.settled(f, after, p.ID)
 }
 
 // loadWant is how much load action t would take of a cargo type the
@@ -544,31 +546,26 @@ func (t *Transport) percentTarget(capacity int) int {
 	return t.Amount * capacity / 100
 }
 
-// loaded settles load action t after it moved amount, with the fleet now
-// holding `held` of the type and the source avail: "load all" and "fill
-// to" are satisfied and clear (FO-01 J: an unmet fill to 100% let the
-// fleet leave); "load exactly" keeps what it could not load and clears
-// at 0; "wait for" clears once held reaches its target, and until then
-// keeps the task, which holds the fleet (FO-01 I; KERNEL.md "Other
-// movement rules", CONFIRMED KB-4A T1). ASSUMPTION T9: "met" is held ≥
-// the target.
+// loaded settles load action t after its load, with the fleet now
+// holding `held` of the type, the source avail and free space left in
+// the hold (KERNEL.md "Other movement rules", "Which loads are unmet"):
+// "load all", "load exactly" and "fill to" are satisfied and clear, short
+// or not (MEASURED: TK-302's short load exactly ended its task, FO-01 J's
+// short fill to ended and the fleet moved on); "wait for" clears once
+// held reaches its target or the hold is full (BINARY-ONLY), and until
+// then keeps the task, which holds the fleet (FO-01 I; CONFIRMED KB-4A
+// T1); "set amount to" more than the fleet can get keeps it. ASSUMPTION
+// T9: "met" is held ≥ the target.
 //
-// ASSUMPTION T11: "set amount to v" and "set waypoint to v" are load
-// actions when they load, so they persist until satisfied (held ≥ v, or
-// avail ≤ v), like "load exactly" ("load actions persist until
-// satisfied"); TAKEOVER.md does not say. Their unload direction is
-// unload's and clears there. Otherwise the load pass settles them,
-// wherever the fleet is (settleSets), so the target's holding is read
-// after every unload and drop of the phase, whatever the fleet order.
-func (t *Transport) loaded(amount, capacity, held, avail int) {
+// "Set amount to v" short of v is unmet and persists (KERNEL.md). ASSUMPTION
+// T11: so does "set waypoint to v" until avail ≤ v; KERNEL.md does not
+// name it. Their unload direction is unload's and clears there. Otherwise the load pass settles them,
+// wherever the fleet is, so the target's holding is read after every
+// unload and drop of the phase, whatever the fleet order.
+func (t *Transport) loaded(capacity, held, avail, free int) {
 	switch t.Action {
-	case LoadExactly:
-		t.Amount -= amount
-		if t.Amount > 0 {
-			return
-		}
 	case WaitFor:
-		if held < t.percentTarget(capacity) {
+		if held < t.percentTarget(capacity) && free > 0 {
 			return
 		}
 	case SetAmount:
@@ -714,54 +711,138 @@ func (g *Game) salvageAt(pos Point) int {
 	return -1
 }
 
-// loadSalvage runs a transport task's mineral loads from the salvage
-// object at the fleet's position (OBJECTS.md "Salvage", "Loading",
-// BINARY-ONLY): the usual load amount, capped by what the salvage holds
+// loadSalvage runs a transport task's loads from the salvage object at
+// the fleet's position (OBJECTS.md "Salvage", "Loading", BINARY-ONLY):
+// the usual load amount, capped by what the salvage holds
 // (SpaceObjects.SalvageLoad), whoever owns the salvage and the fleet.
 // Minerals load in order, each from the space the earlier ones left, and
-// the actions clear as for a planet. Colonists cannot be loaded from
-// salvage; ASSUMPTION T6: a colonist load action waits, as a load away
-// from the owner's planet does (T4). An emptied object stays until the
-// next decay.
-func (g *Game) loadSalvage(f *Fleet) {
-	si := g.salvageAt(f.Pos)
-	if si < 0 {
-		g.settleSets(f)
-		return
-	}
-	sv := &g.Salvage[si]
+// the actions settle as at a planet. Colonists cannot be loaded from
+// salvage; ASSUMPTION T6: for colonists it is a source holding none, so
+// their actions settle as at a planet with no population. An emptied
+// object stays until the next decay.
+func (g *Game) loadSalvage(f *Fleet, after bool) []Event {
+	sv := &g.Salvage[g.salvageAt(f.Pos)]
 	capacity := g.cargoCapacity(f)
 	free := capacity - f.Cargo.mass()
-	for c := range NumMinerals {
+	for c := range NumCargo {
 		t := &f.Task.Transport[c]
-		want, ok := t.loadWant(capacity, f.Cargo.Minerals[c], free, sv.Minerals[c])
+		avail := 0
+		if c < NumMinerals {
+			avail = sv.Minerals[c]
+		}
+		want, ok := t.loadWant(capacity, *held(f, c), free, avail)
 		if !ok {
 			continue
 		}
-		amount := g.Objects.SalvageLoad(*sv, c, max(0, want))
-		sv.Minerals[c] -= amount
-		f.Cargo.Minerals[c] += amount
-		free -= amount
-		t.loaded(amount, capacity, f.Cargo.Minerals[c], sv.Minerals[c])
+		if c < NumMinerals {
+			amount := g.Objects.SalvageLoad(*sv, c, max(0, want))
+			sv.Minerals[c] -= amount
+			f.Cargo.Minerals[c] += amount
+			free -= amount
+			avail = sv.Minerals[c]
+		}
+		t.loaded(capacity, *held(f, c), avail, free)
 	}
-	g.settleSets(f)
+	return g.settled(f, after, -1)
 }
 
-// settleSets settles the "set amount to" and "set waypoint to" actions
-// where the load pass loads nothing of their type: a planet the fleet's
-// owner does not own, deep space, or colonists at salvage. One already
-// satisfied clears; one that would load keeps waiting (ASSUMPTION T10,
-// T11). A task left with no action is no task.
-func (g *Game) settleSets(f *Fleet) {
-	capacity := g.cargoCapacity(f)
+// settled ends a load pass for f at a source (planet id, or -1 for
+// salvage). After movement a "set amount to" still waiting because the
+// target holds less than it needs is told so each year (KERNEL.md "Which
+// loads are unmet"; MESSAGES.md 0x121, 0x122, BINARY-ONLY). A task left
+// with no action is no task.
+func (g *Game) settled(f *Fleet, after bool, planet int) []Event {
+	var events []Event
 	for c := range NumCargo {
-		if t := &f.Task.Transport[c]; t.Action == SetAmount || t.Action == SetWaypoint {
-			t.loaded(0, capacity, *held(f, c), g.targetHolds(f, c))
+		t := f.Task.Transport[c]
+		if after && t.Action == SetAmount && g.targetHolds(f, c) < t.Amount-*held(f, c) {
+			events = append(events, g.loadWaiting(f, c, planet))
 		}
 	}
 	if f.Task.Transport == ([NumCargo]Transport{}) {
 		f.Task = Task{}
 	}
+	return events
+}
+
+// noSource settles f's loads where the target is not a source: deep
+// space with no salvage (planet -1), or another player's planet for a
+// fleet that cannot steal from planets (KERNEL.md "Loads with no usable
+// source", BINARY-ONLY). A load that wants nothing is satisfied and
+// clears silently. One that wants more waits before movement, holding
+// the fleet with no message; when cancel is set, after movement, the
+// task is cancelled with "could not load" (MESSAGES.md 0x123 in deep
+// space, 0x11f at a planet), a "set amount to" more than the target holds
+// first being told it waits (0x121, 0x122).
+//
+// ASSUMPTION T13: the actions are taken in cargo order and the first that
+// wants more is the one refused; the cancel ends the whole task, so no
+// later cargo type is told.
+func (g *Game) noSource(f *Fleet, cancel bool, planet int) []Event {
+	capacity := g.cargoCapacity(f)
+	for c := range NumCargo {
+		t := &f.Task.Transport[c]
+		want, ok := t.sourceWant(capacity, *held(f, c), g.targetHolds(f, c))
+		switch {
+		case !ok:
+		case want <= 0:
+			t.Action, t.Amount = TransportNone, 0
+		case cancel:
+			var events []Event
+			if t.Action == SetAmount && want > g.targetHolds(f, c) {
+				events = append(events, g.loadWaiting(f, c, planet))
+			}
+			f.Task = Task{}
+			return append(events, Event{Kind: EventLoadRefused, Player: f.Owner, Planet: planet, Fleet: f.ID, Axes: []int{c}})
+		}
+	}
+	if f.Task.Transport == ([NumCargo]Transport{}) {
+		f.Task = Task{}
+	}
+	return nil
+}
+
+// sourceWant is what load action t wants of a cargo type the fleet holds
+// `held` of from a target holding avail, before any cap (KERNEL.md "Which
+// loads are unmet"): "load all" what the target holds, "load exactly v"
+// v, "fill to", "wait for" and "set amount to" the shortfall to their
+// target, and "set waypoint to v" avail − v (TAKEOVER.md "Unload and
+// load amounts"). ok is false for an action that is not a load.
+func (t *Transport) sourceWant(capacity, held, avail int) (want int, ok bool) {
+	switch t.Action {
+	case LoadAll:
+		return avail, true
+	case LoadExactly:
+		return t.Amount, true
+	case FillTo, WaitFor:
+		return t.percentTarget(capacity) - held, true
+	case SetAmount:
+		return t.Amount - held, true
+	case SetWaypoint:
+		return avail - t.Amount, true
+	}
+	return 0, false
+}
+
+func (g *Game) loadWaiting(f *Fleet, c, planet int) Event {
+	return Event{Kind: EventLoadWaiting, Player: f.Owner, Planet: planet, Fleet: f.ID, Count: f.Task.Transport[c].Amount, Axes: []int{c}}
+}
+
+// stealsFromPlanets reports a fleet with a part that steals cargo from
+// planets (COMPONENTS.md steals_cargo "fleets_and_planets": the Robber
+// Baron Scanner), for which another player's planet is a source
+// (KERNEL.md "Loads with no usable source"). Stealing is not modelled;
+// ASSUMPTION T10: such a fleet's loads there wait and are never
+// cancelled, holding the fleet until it gets new orders.
+func (g *Game) stealsFromPlanets(f *Fleet) bool {
+	for _, st := range f.Stacks {
+		for _, sl := range g.Designs[st.Design].Slots {
+			if st.Count > 0 && sl.Count > 0 && sl.Part.DetailedPlanetScan {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // unloadSalvage unloads amount kT of mineral c into salvage object si,

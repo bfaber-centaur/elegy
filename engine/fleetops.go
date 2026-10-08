@@ -221,7 +221,7 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		f := &g.Fleets[i]
 		switch {
 		case f.Task.Kind == TaskTransport:
-			g.load(f)
+			events = append(events, g.load(f, afterMovement)...)
 		case f.Task.Kind == TaskMerge:
 			if ev, ok := g.mergeTask(f, gone); ok {
 				gone[id] = true

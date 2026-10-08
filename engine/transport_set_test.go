@@ -44,7 +44,7 @@ func TestSetAmountAndWaypointLoad(t *testing.T) {
 		l := setLab(t, Ironium, tt.tr, Cargo{Minerals: Minerals{tt.held, 0, 0}})
 		l.g.Planets[0].Surface[Ironium] = tt.surface
 		f := &l.g.Fleets[0]
-		l.g.load(f)
+		l.g.load(f, false)
 		if got := f.Cargo.Minerals[Ironium] - tt.held; got != tt.load || l.g.Planets[0].Surface[Ironium] != tt.surface-tt.load {
 			t.Errorf("%s: loaded %d (surface %d), want %d", tt.name, got, l.g.Planets[0].Surface[Ironium], tt.load)
 		}
@@ -135,24 +135,26 @@ func TestSetAmountAndWaypointFromSalvage(t *testing.T) {
 	}
 }
 
-// A set action with nothing to move is satisfied and clears in the unload
-// phase wherever the fleet is, so it moves on (ASSUMPTION T11), even
-// where the load pass loads nothing: another player's planet (T4) or
-// deep space. A real load at another player's planet still waits and
-// holds the fleet (T10). The freighter heads 30 ly away at warp 6.
+// A set action with nothing to move is satisfied wherever the fleet is,
+// so it moves on (ASSUMPTION T11; KERNEL.md "Loads with no usable source":
+// a load that wants nothing is satisfied), even where the load pass loads
+// nothing: another player's planet or deep space. A real load at another
+// player's planet waits before movement, holding the fleet that year, and
+// is cancelled after movement. The freighter heads 30 ly away at warp 6.
 func TestSetActionNothingToMove(t *testing.T) {
 	for _, tt := range []struct {
-		name  string
-		where string // "own", "enemy" or "deep"
-		tr    Transport
-		held  int
-		move  bool
+		name    string
+		where   string // "own", "enemy" or "deep"
+		tr      Transport
+		held    int
+		move    bool
+		cleared bool
 	}{
-		{"own planet, set amount 50 with 50", "own", Transport{SetAmount, 50}, 50, true},
-		{"enemy planet, set amount 50 with 50", "enemy", Transport{SetAmount, 50}, 50, true},
-		{"deep space, set amount 50 with 50", "deep", Transport{SetAmount, 50}, 50, true},
-		{"deep space, set waypoint 50, empty", "deep", Transport{SetWaypoint, 50}, 0, true},
-		{"enemy planet, set waypoint 0, empty: a load", "enemy", Transport{SetWaypoint, 0}, 0, false},
+		{"own planet, set amount 50 with 50", "own", Transport{SetAmount, 50}, 50, true, true},
+		{"enemy planet, set amount 50 with 50", "enemy", Transport{SetAmount, 50}, 50, true, true},
+		{"deep space, set amount 50 with 50", "deep", Transport{SetAmount, 50}, 50, true, true},
+		{"deep space, set waypoint 50, empty", "deep", Transport{SetWaypoint, 50}, 0, true, true},
+		{"enemy planet, set waypoint 0, empty: a load", "enemy", Transport{SetWaypoint, 0}, 0, false, true},
 	} {
 		l := newTKLab(t, 3)
 		medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
@@ -178,8 +180,8 @@ func TestSetActionNothingToMove(t *testing.T) {
 		if moved := g.Fleets[0].Pos != start; moved != tt.move {
 			t.Errorf("%s: at %v, moved %v, want %v (task %+v)", tt.name, g.Fleets[0].Pos, moved, tt.move, g.Fleets[0].Task)
 		}
-		if cleared := g.Fleets[0].Task.Kind == TaskNone; cleared != tt.move {
-			t.Errorf("%s: task %+v, want cleared %v", tt.name, g.Fleets[0].Task, tt.move)
+		if cleared := g.Fleets[0].Task.Kind == TaskNone; cleared != tt.cleared {
+			t.Errorf("%s: task %+v, want cleared %v", tt.name, g.Fleets[0].Task, tt.cleared)
 		}
 	}
 }
@@ -221,7 +223,7 @@ func TestSetWaypointAfterOtherUnloads(t *testing.T) {
 
 // Colonists at salvage: a set amount already met clears in the load
 // pass, though nothing loads colonists there; one that would load waits
-// (ASSUMPTION T6, T10, T11).
+// (ASSUMPTION T6, T11; KERNEL.md "Which loads are unmet").
 func TestSetColonistsAtSalvage(t *testing.T) {
 	for _, tt := range []struct {
 		v, held int
