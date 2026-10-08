@@ -243,8 +243,11 @@ func TestMeasuredRouteTaskStargate(t *testing.T) {
 		t.Errorf("waypoints %v events %v, want %v and a routed message", f.Waypoints, ev, want)
 	}
 	for name, change := range map[string]func(g *Game, f *Fleet){
-		"friend's gate": func(g *Game, f *Fleet) { g.Planets[1].Owner = 1 },
-		"cargo":         func(g *Game, f *Fleet) { f.Cargo.Minerals[Ironium] = 1 },
+		"friend's gate": func(g *Game, f *Fleet) {
+			g.Planets[1].Owner = 1
+			g.Players[0].Relations = []Relation{RelationFriend, RelationFriend}
+		},
+		"cargo": func(g *Game, f *Fleet) { f.Cargo.Minerals[Ironium] = 1 },
 	} {
 		g, f := setup()
 		change(g, &f)
