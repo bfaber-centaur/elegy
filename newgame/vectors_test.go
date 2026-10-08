@@ -214,7 +214,10 @@ func loadUG(t *testing.T) []ugVector {
 	// The race-creation vectors (corpus "rw", RD-1..RD-7, RW08) have the
 	// same form; their human races are race files, and case -R gives
 	// each human player's race as created.
-	rw, _ := filepath.Glob(filepath.Join("..", "engine", "testdata", "vectors", "rw", "*.json"))
+	rw, err := filepath.Glob(filepath.Join("..", "engine", "testdata", "vectors", "rw", "*.json"))
+	if err != nil || len(rw) == 0 {
+		t.Fatalf("no rw vectors: %v", err)
+	}
 	paths = append(paths, rw...)
 	var out []ugVector
 	for _, p := range paths {

@@ -78,24 +78,23 @@ engine's parity harness has no new-game path):
   - homeworld and second-planet population and installations, and fleet
     counts;
   - the stored victory conditions.
-- A computer player with level 0 uses the level in `computer.drawn` when
-  the vector records it. Vectors without it get a fallback: the test runs
-  that player at easy and, only if its start differs, tries each level.
-  Levels below expert give the same start, so the fallback cannot tell
-  easy, standard and harder apart. Seven players in UG05, UG10 and UG15
-  match only at expert.
+- A computer player with level 0 uses the level in `computer.drawn`
+  (UG05, UG10..UG15 record it). A vector without it would get a
+  fallback: the test runs that player at easy and, only if its start
+  differs, tries each level. Levels below expert give the same start, so
+  the fallback cannot tell easy, standard and harder apart. No current
+  vector needs the fallback.
 
-All 124 player expectations and all 214 sample checks pass.
+The same test reads the RD/RW race-creation vectors
+(`engine/testdata/vectors/rw`, stars-elegy #111) and fails if either
+directory is empty. Each player's race as created (case `-R`) is
+compared exactly with `Generate`'s. A raw 255 is read as the stored
+immune marker in each field, so a file holding it in the low alone is
+repaired at creation (RACES.md "Repairs", RW08). A Random race takes the
+race the vector records.
 
-The same test also reads the RD/RW race-creation vectors
-(`engine/testdata/vectors/rw`, stars-elegy #111) when they are in the
-corpus. Each player's race as created (case `-R`) is compared exactly
-with `Generate`'s. A raw 255 is read as the stored immune marker in each
-field, so a file holding it in the low alone is repaired at creation
-(RACES.md "Repairs", RW08). A Random race takes the race the vector
-records. Against #111's files, every race-as-created check and every
-sample passes. This was checked locally, since the kernel's vector sync
-has not brought them into `main` yet.
+All 291 player expectations (124 UG, 167 RD/RW) and all sample checks
+(planet counts 38, starting planets 211, victory 38, wormholes 38) pass.
 
 ## LEGACY BUG switches
 
@@ -148,16 +147,13 @@ The new-game generation lane (`newgame/`, `races/`, `objects/` except
 `engine_adapter.go`, `terraform/`) is closed. Each item below says where
 it lives and what would settle it.
 
-Waiting on the vector corpus:
+Vector corpus:
 
-1. **RD/RW vectors**: not in `main` until the kernel's sync brings
-   stars-elegy #111; the test then runs them with no code change.
-2. **Drawn computer levels**: `computer.drawn {type, level}` is coming
-   to the UG vectors. Once it is in the corpus, UG05, UG10 and UG15 use
-   it and the per-level fallback stops running for them. `Generate`
-   never draws a random computer type or level: the caller passes a
-   type 1–6 and a level (`ComputerPlayer`). The test uses the vector's
-   recorded race and its drawn level.
+1. **RD/RW vectors** are in the corpus and run in `TestUGVectors`.
+2. **Drawn computer levels**: `Generate` never draws a random computer
+   type or level: the caller passes a type 1–6 and a level
+   (`ComputerPlayer`). The test uses the vector's recorded race and
+   `computer.drawn` level.
 
 Spec gaps to send to stars-elegy (Elegy follows the vectors):
 
