@@ -23,12 +23,14 @@ type Packet struct {
 // Mixed is the mineral argument for a mixed packet item.
 const Mixed = -1
 
-// maxPacketMineral caps one launch per mineral (OBJECTS.md "Launch",
-// BINARY-ONLY); mergeLimit is the total under which a packet still takes
+// maxPacketMineral caps one launch, and a merged mineral above 32,767,
+// per mineral (OBJECTS.md "Launch", BINARY-ONLY); mergeLimit bounds the
+// sum over a packet's minerals of ⌈m/10⌉ under which it still takes
 // merges (BINARY-ONLY).
 const (
 	maxPacketMineral = 32760
-	mergeLimit       = 16300
+	mergeLimit       = 1630
+	maxPacketNumber  = 511
 )
 
 // DriverWarp is a starbase design's driver warp Dw and the two-driver
@@ -92,9 +94,7 @@ func DecayClass(w, dw, t int, it bool) int {
 // (OBJECTS.md "Launch", MEASURED OB-028, OB-029): 100 kT of one mineral
 // (Packet Physics 70) for 110 kT (Interstellar Traveler 120, PP 70); a
 // mixed item 40 kT of each (PP 25) for 44 kT of each (PP 25).
-//
-// ASSUMPTION P1: an Interstellar Traveler's mixed item spends 48 kT of
-// each (its 120% of the 40 kT launched, as for a single mineral).
+// An Interstellar Traveler's mixed item spends 48 kT of each (BINARY-ONLY).
 func PacketItem(race engine.Race, mixed bool) (launch, spend int) {
 	switch {
 	case race.PRT == engine.PRTPacketPhysics && mixed:
@@ -124,25 +124,33 @@ type Launch struct {
 	// NoDriver: no mass driver or no destination; nothing is built and
 	// the player gets a message (CONFIRMED OB-028-F).
 	NoDriver bool
-	Packet   int // index into Space.Packets
-	Merged   bool
-	Cargo    engine.Minerals // launched
-	Spend    engine.Minerals // taken from the surface by production
+	// NoRoom: no free packet number or object slot; the item still
+	// counts as built, but no packet appears (BINARY-ONLY).
+	NoRoom bool
+	Packet int // index into Space.Packets
+	Merged bool
+	Cargo  engine.Minerals // launched
+	Spend  engine.Minerals // taken from the surface by production
 }
 
 // Launch launches count packet items of mineral (engine.Ironium ..
 // engine.Germanium, or Mixed) from planet pi (OBJECTS.md "Launch",
 // CONFIRMED OB-028, OB-029; caps and the merge limit BINARY-ONLY). The
 // launch needs a mass driver on the planet's starbase and a destination.
-// The amount is per item × count, at most 32,760 per mineral. A packet
-// launched from the same planet this year with the same warp,
-// destination and class takes the cargo while its total is under 16,300
-// kT. Production spends Launch.Spend from the surface.
+// The amount is per item × count, at most 32,760 per mineral.
+// Production spends Launch.Spend from the surface.
 //
-// ASSUMPTION P2: the 16,300 kT test is on the earlier packet's total
-// before this launch is added. ASSUMPTION P3: a new packet takes its
-// owner's lowest unused packet number, from 0; packets stay in object
-// order (owner, then number).
+// The cargo joins any packet of the same owner lying exactly at the
+// planet with the same warp, destination and class, whatever its
+// minerals. The merge test is on that packet before the add: the sum over
+// its minerals of ⌈m/10⌉ below 1,630; a merged
+// mineral above 32,767 becomes 32,760. A new packet takes its owner's
+// lowest unused number from 0 to 510; 511 only when no object sorts after
+// the owner's packets (BINARY-ONLY). Packets stay in object order (owner,
+// then number).
+//
+// ASSUMPTION P5: the space objects this package does not hold
+// (OtherObjects, salvage) count as sorting after the owner's packets.
 func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int) Launch {
 	p := &g.Planets[pi]
 	if !p.HasStarbase || o.Dest < 0 || p.Owner < 0 {
@@ -165,23 +173,37 @@ func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int
 	}
 	for i := range s.Packets {
 		q := &s.Packets[i]
-		if q.New && q.From == p.ID && q.Warp == w && q.Target == o.Dest && q.Class == k && total(q.Cargo) < mergeLimit {
+		if q.Owner == p.Owner && q.Pos == p.Pos && q.Warp == w && q.Target == o.Dest && q.Class == k && tenths(q.Cargo) < mergeLimit {
 			for m := range q.Cargo {
 				q.Cargo[m] += l.Cargo[m]
+				if q.Cargo[m] > 32767 {
+					q.Cargo[m] = maxPacketMineral
+				}
 			}
 			l.Packet, l.Merged = i, true
 			return l
 		}
 	}
 	used := map[int]bool{}
+	later := s.OtherObjects > 0 || len(s.Wormholes) > 0 || len(s.Traders) > 0
 	for _, q := range s.Packets {
 		if q.Owner == p.Owner {
 			used[q.Number] = true
+		} else if q.Owner > p.Owner {
+			later = true
 		}
+	}
+	limit := maxPacketNumber
+	if !later {
+		limit++
 	}
 	n := 0
 	for used[n] {
 		n++
+	}
+	if n >= limit || len(s.Minefields)+s.otherObjects() >= MaxObjects {
+		l.NoRoom, l.Packet = true, -1
+		return l
 	}
 	at := len(s.Packets)
 	for i, q := range s.Packets {
@@ -196,6 +218,14 @@ func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int
 	return l
 }
 
+func tenths(m engine.Minerals) int {
+	t := 0
+	for _, v := range m {
+		t += (v + 9) / 10
+	}
+	return t
+}
+
 func total(m engine.Minerals) int {
 	return m[engine.Ironium] + m[engine.Boranium] + m[engine.Germanium]
 }
@@ -204,31 +234,41 @@ func total(m engine.Minerals) int {
 // Physics owner (OBJECTS.md "Flight and decay", CONFIRMED OB-003, OB-023).
 var decayPct = [2][4]int{{0, 10, 25, 50}, {0, 5, 12, 25}}
 
-// Decay takes share of a year's decay from a packet (OBJECTS.md "Flight
-// and decay", CONFIRMED OB-003, OB-023, OB-028): each non-empty mineral
-// loses its class's rate × share, at least 10 kT (Packet Physics 5) and
-// at most what it has.
-//
-// ASSUMPTION P4: the loss is ⌊m · rate · share / 100⌋, computed in
-// floating point (the vectors agree: 100 kT class 2 for half a year →
-// 88, 500 kT class 3 for half of 0.7 → 413).
-func Decay(c engine.Minerals, class int, pp bool, share float64) engine.Minerals {
+// Decay takes pct percent of a year's decay from a packet (OBJECTS.md
+// "Flight and decay", CONFIRMED OB-003, OB-023, OB-028; arithmetic
+// BINARY-ONLY): each non-empty mineral m loses min(m, max(floor,
+// ⌊m·r·pct/10000⌋)), r the class's yearly rate (10, 25, 50; Packet
+// Physics 5, 12, 25) and floor 10 kT (PP 5).
+func Decay(c engine.Minerals, class int, pp bool, pct int) engine.Minerals {
 	row, floor := 0, 10
 	if pp {
 		row, floor = 1, 5
 	}
-	pct := decayPct[row][class]
-	if pct == 0 {
+	r := decayPct[row][class]
+	if r == 0 {
 		return c
 	}
 	for m := range c {
 		if c[m] <= 0 {
 			continue
 		}
-		loss := int(float64(c[m]) * float64(pct) * share / 100)
-		c[m] -= min(c[m], max(loss, floor))
+		c[m] -= min(c[m], max(floor, c[m]*r*pct/10000))
 	}
 	return c
+}
+
+// arrivalPct is the share of the year flown on arrival (OBJECTS.md
+// "Flight and decay", BINARY-ONLY): round(trunc(d)·100/move), a whole
+// percent clamped to 0..100, halved rounding down on the launch year.
+func arrivalPct(d float64, move int, launchYear bool) int {
+	p := 100
+	if move > 0 {
+		p = min(100, max(0, (int(d)*200+move)/(2*move)))
+	}
+	if launchYear {
+		p /= 2
+	}
+	return p
 }
 
 // ImpactContext supplies what the impact needs from the engine.
@@ -350,14 +390,7 @@ func (s *Space) fly(g *engine.Game, ctx ImpactContext, i, move int, launchYear b
 	if !arrived {
 		return Impact{}, false
 	}
-	share := 1.0
-	if move > 0 {
-		share = min(1, d/float64(move))
-	}
-	if launchYear {
-		share /= 2
-	}
-	pk.Cargo = Decay(pk.Cargo, pk.Class, s.ppOwner(g, pk.Owner), share)
+	pk.Cargo = Decay(pk.Cargo, pk.Class, s.ppOwner(g, pk.Owner), arrivalPct(d, move, launchYear))
 	return hit(g, ctx, *pk, ti, rng), true
 }
 
@@ -391,10 +424,11 @@ func (s *Space) FlyLaunched(g *engine.Game, ctx ImpactContext, rng engine.Rand) 
 	out := s.flyAll(g, ctx, true, rng)
 	for i := range s.Packets {
 		if s.Packets[i].New {
-			s.Packets[i].Cargo = Decay(s.Packets[i].Cargo, s.Packets[i].Class, s.ppOwner(g, s.Packets[i].Owner), 0.5)
+			s.Packets[i].Cargo = Decay(s.Packets[i].Cargo, s.Packets[i].Class, s.ppOwner(g, s.Packets[i].Owner), 50)
 			s.Packets[i].New = false
 		}
 	}
+	s.dropEmpty()
 	return out
 }
 
@@ -428,10 +462,22 @@ func (s *Space) flyAll(g *engine.Game, ctx ImpactContext, launched bool, rng eng
 }
 
 // DecayPackets decays every packet in flight for a full year (OBJECTS.md
-// "Turn placement" step 5, CONFIRMED OB-003 J, K, OB-023).
+// "Turn placement" step 5, CONFIRMED OB-003 J, K, OB-023); a packet with
+// nothing left is removed (BINARY-ONLY).
 func (s *Space) DecayPackets(g *engine.Game) {
 	for i := range s.Packets {
 		pk := &s.Packets[i]
-		pk.Cargo = Decay(pk.Cargo, pk.Class, s.ppOwner(g, pk.Owner), 1)
+		pk.Cargo = Decay(pk.Cargo, pk.Class, s.ppOwner(g, pk.Owner), 100)
 	}
+	s.dropEmpty()
+}
+
+func (s *Space) dropEmpty() {
+	kept := s.Packets[:0]
+	for _, pk := range s.Packets {
+		if total(pk.Cargo) > 0 {
+			kept = append(kept, pk)
+		}
+	}
+	s.Packets = kept
 }

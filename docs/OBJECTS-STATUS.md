@@ -1,7 +1,7 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `2a4e48e`) and its Mystery Trader appearance
+(as of stars-elegy `main` at `1a630e6`) and its Mystery Trader appearance
 in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
@@ -185,15 +185,24 @@ count toward the object limit.
 
 ### Assumptions (spec gaps)
 
-1. **P1** An Interstellar Traveler's mixed item spends 48 kT of each
-   mineral (120% of 40, as for a single mineral).
-2. **P2** The 16,300 kT merge limit is tested on the earlier packet's
-   total before the new cargo is added.
-3. **P3** A new packet takes its owner's lowest unused packet number,
-   from 0.
-4. **P4** A decay loss is ⌊m · rate · share / 100⌋ in floating point,
-   with share = distance flown / the year's move (halved on the launch
-   year).
+OBJECTS.md now answers P1–P4 (BINARY-ONLY):
+- An IT mixed item spends 48 kT of each mineral.
+- New cargo joins any packet of the same owner lying exactly at the
+  planet with the same warp, destination and class, whatever its
+  minerals. The merge test is Σ⌈m/10⌉ < 1,630 on that packet before the
+  add.
+  A merged mineral above 32,767 becomes 32,760.
+- Packet numbers run 0..510, and 511 is used only when nothing sorts after
+  the owner's packets. With no number or object slot left, the item is
+  built but no packet appears (`Launch.NoRoom`).
+- Decay is integer: `min(m, max(floor, ⌊m·r·p/10000⌋))`, with arrival
+  `p = round(trunc(d)·100/move)`, halved on the launch year. A packet
+  with nothing left is removed.
+
+Still open:
+
+1. **P5** Objects this package does not hold (`OtherObjects`, salvage)
+   count as sorting after the owner's packets for the 511 rule.
 
 ### What the turn engine needs to call (packets)
 
