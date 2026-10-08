@@ -152,10 +152,9 @@ func universeSize(v *View) int {
 // Ship hull.
 func colonyHull(h string) bool { return h == "Mini-Colony Ship" || h == "Colony Ship" }
 
-// colonizerTest is §3's colonizer test, once per turn.
-//
-// ASSUMPTION A37: the ships ever built of the colony designs (b) are not
-// known to Elegy's planner, so the rule on b is skipped.
+// colonizerTest is §3's colonizer test, once per turn. b is the ships
+// ever built of the colony designs in the player's slots
+// (engine.DesignSlot.Built).
 func (t *robotoidTurn) colonizerTest() bool {
 	v := t.v
 	if t.lvl == Easy && t.y%2 == 1 {
@@ -164,9 +163,12 @@ func (t *robotoidTurn) colonizerTest() bool {
 	if t.y < 30 {
 		return true
 	}
-	any := false
+	any, b := false, 0
 	for _, d := range v.Ships {
-		any = any || colonyHull(d.Design.Hull.Name)
+		if colonyHull(d.Design.Hull.Name) {
+			any = true
+			b += d.Built
+		}
 	}
 	if !any {
 		return false
@@ -183,6 +185,9 @@ func (t *robotoidTurn) colonizerTest() bool {
 	}
 	if 5*(e+c) > 4*len(v.Universe) {
 		return false
+	}
+	if x := b - (e + c); x >= 0 && x <= 25 {
+		return true
 	}
 	if c < 5 {
 		return t.rng.Intn(2) == 0

@@ -183,3 +183,35 @@ func TestArmadaInvades(t *testing.T) {
 		}
 	}
 }
+
+// robotoid.md §3's colonizer test at year index 40 with one owned planet
+// known (e = 1) and no colony fleets (c = 0): 0 ≤ b − (e + c) ≤ 25 says
+// yes, so b = 1 and b = 26 pass; b = 0 and b = 27 fall through to c < 5,
+// where Random(2) draws 1 and says no. Ships built of other designs (the
+// scout here) do not count. With one own fleet holding a colony ship (c =
+// 1), b = 2 and b = 27 say yes and b = 1 and b = 28 do not.
+func TestColonizerTestBuilt(t *testing.T) {
+	for _, c := range []struct {
+		built, other, fleets int
+		want                 bool
+	}{
+		{0, 0, 0, false}, {1, 0, 0, true}, {26, 0, 0, true}, {27, 0, 0, false}, {0, 1, 0, false},
+		{1, 0, 1, false}, {2, 0, 1, true}, {27, 0, 1, true}, {28, 0, 1, false},
+	} {
+		v := caView(t, 2440)
+		for i := range v.Ships {
+			if colonyHull(v.Ships[i].Design.Hull.Name) {
+				v.Ships[i].Built = c.built
+			} else {
+				v.Ships[i].Built = c.other
+			}
+		}
+		for i := range c.fleets {
+			v.Fleets = append(v.Fleets, engine.Fleet{ID: 100 + i, Owner: 0, Pos: v.Planets[0].Pos, Stacks: []engine.Stack{{Design: 11, Count: 1}}})
+		}
+		rt := &robotoidTurn{turn: newTurn(v, top{}, &Result{})}
+		if got := rt.colonizerTest(); got != c.want {
+			t.Errorf("b = %d, other %d, c = %d: colonizer test %v, want %v", c.built, c.other, c.fleets, got, c.want)
+		}
+	}
+}

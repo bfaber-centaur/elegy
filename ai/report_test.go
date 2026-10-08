@@ -20,3 +20,15 @@ func TestViewOfForeignDesigns(t *testing.T) {
 		t.Errorf("Foreign %v, want design 4 only", v.Foreign)
 	}
 }
+
+// ViewOf carries each own slot's ever-built count (engine.DesignSlot.Built).
+func TestViewOfBuilt(t *testing.T) {
+	r := game.Report{Designs: []game.OwnDesign{
+		{Index: 3, Slot: engine.DesignSlot{Slot: 1, Design: 3, Built: 7}},
+		{Index: 4, Slot: engine.DesignSlot{Starbase: true, Slot: 0, Design: 4}},
+	}}
+	v := ViewOf(r, Expert)
+	if len(v.Ships) != 1 || v.Ships[0].Built != 7 {
+		t.Errorf("Ships %+v, want slot 1 with Built 7", v.Ships)
+	}
+}

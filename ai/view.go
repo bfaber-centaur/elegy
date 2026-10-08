@@ -61,6 +61,9 @@ type Design struct {
 	Design  engine.Design
 	Created int // calendar year stored
 	Picture int
+	// Built is how many ships of the slot's design were ever built
+	// (engine.DesignSlot.Built); a design stored this turn has 0 (L29).
+	Built int
 }
 
 // PlanetPos is a planet's id and position.
