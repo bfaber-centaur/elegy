@@ -46,6 +46,7 @@ One observation is counted but is not a failure:
 
 - **unsupported computer steps:** the total of `ai.Driver.Unsupported`,
   the steps a computer player could not order yet (AI-STATUS).
+  A case that stops early keeps the count of the years it played.
 
 A failure gives the game year being generated, the detail, the first
 JSON paths where two copies differ (`game.Diff`), and the command that
@@ -62,6 +63,11 @@ Rototill and Cybertron each alone, then all three. That makes 24 games
 of 60 years, reloaded after 23 years. 60 years reach Cybertron's first
 warship group. The cases run in parallel; the job takes about 30
 seconds.
+
+The scheduled "Long games" workflow runs nightly, and on demand from
+the Actions tab. It has 12 seeds (1–12), both rulesets and the same 4
+opponent sets: 96 games of 150 years on a medium map, reloaded after 77
+years. On demand, its seeds and years can be changed.
 
 To replay a case or run another matrix:
 
