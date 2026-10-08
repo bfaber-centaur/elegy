@@ -1354,19 +1354,22 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet_gone",
      "owner": 0,
      "id": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet_gone",
      "owner": 1,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "trader",
@@ -1375,7 +1378,8 @@
       "x": 1084,
       "y": 1230
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "trader",
@@ -1384,7 +1388,8 @@
       "x": 1084,
       "y": 1230
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -1394,7 +1399,8 @@
        "Jump Gate"
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "player",
@@ -1404,7 +1410,8 @@
        "Mega Poly Shell"
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "all three fleets consumed: Trader 0 takes player 0 fleet 0 and player 1 fleet 0 (player 0 fleet 1 refused, \"still recovering\"), Trader 1 takes player 0 fleet 1"

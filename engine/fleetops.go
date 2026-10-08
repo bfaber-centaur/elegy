@@ -13,8 +13,10 @@ const (
 	EventMergeRefused EventKind = iota + EventColonizeFailed + 1 // Player, Fleet: a Merge with Fleet task was refused
 )
 
-// maxStackShips is the merge order's per-design limit (ORDERS.md "Merge",
-// BINARY-ONLY).
+// maxStackShips is the merge order's per-design limit, Elegy's chosen rule
+// (ORDERS.md "Merge": unconfirmed, the merge order's own clamp was never
+// reached by a legal order; the exchange path's measured 32765 is
+// maxExchangeStack).
 const maxStackShips = 32766
 
 // legacyMergeDilution reproduces the original's LEGACY BUG in merging
@@ -32,12 +34,38 @@ const legacyMergeDilution = true
 // order's cap (absorb).
 const legacyMergeOverflow = false
 
-// mergeDamage combines two stacks of one design (ORDERS.md "Merge",
-// CONFIRMED FO-01..07): with D = max(1, pct·count/100) damaged ships per
-// damaged stack and n ships after the merge, the percentage is
-// ceil(100·ΣD/n); one damaged stack keeps its units; two give
-// ceil(Σ(D·units)/n) (dilute, the LEGACY BUG) or ceil(Σ(D·units)/ΣD).
-func mergeDamage(a, b Stack, dilute bool) Damage {
+// mergeRule says how mergeDamage averages two damaged stacks' units.
+type mergeRule int
+
+const (
+	// mergeDilute divides by all ships, ceil(Σ(D·units)/n): the Merge
+	// with Fleet task's LEGACY BUG (ORDERS.md "Merge", CONFIRMED FO-01..07).
+	mergeDilute mergeRule = iota
+	// mergeTaskDamaged divides by the damaged ships, rounding up,
+	// ceil(Σ(D·units)/ΣD): the task with legacyMergeDilution off (Elegy's
+	// chosen rule).
+	mergeTaskDamaged
+	// mergeOrderDamaged divides by the damaged ships, rounding down,
+	// floor(Σ(D·units)/ΣD): the merge order and ship moves (ORDERS.md
+	// "Merge order", CONFIRMED CO-05, CO-05b, CO-05c).
+	mergeOrderDamaged
+)
+
+// taskMergeRule is the Merge with Fleet task's rule under
+// legacyMergeDilution.
+func taskMergeRule() mergeRule {
+	if legacyMergeDilution {
+		return mergeDilute
+	}
+	return mergeTaskDamaged
+}
+
+// mergeDamage combines two stacks of one design (ORDERS.md "Merge"): with
+// D = max(1, pct·count/100) damaged ships per damaged stack and n ships
+// after the merge, the percentage is ceil(100·ΣD/n) (CONFIRMED FO-01..07,
+// CO-05c); one damaged stack keeps its units; two average their units by
+// rule.
+func mergeDamage(a, b Stack, rule mergeRule) Damage {
 	n := a.Count + b.Count
 	damaged := func(s Stack) int { return max(1, s.Damage.Pct*s.Count/100) }
 	switch {
@@ -49,20 +77,26 @@ func mergeDamage(a, b Stack, dilute bool) Damage {
 		return Damage{Pct: ceilDiv(100*damaged(b), n), Units: b.Damage.Units}
 	}
 	da, db := damaged(a), damaged(b)
-	div := n
-	if !dilute {
-		div = da + db
+	sum := da*a.Damage.Units + db*b.Damage.Units
+	var units int
+	switch rule {
+	case mergeDilute:
+		units = ceilDiv(sum, n)
+	case mergeTaskDamaged:
+		units = ceilDiv(sum, da+db)
+	default:
+		units = sum / (da + db)
 	}
-	return Damage{Pct: ceilDiv(100*(da+db), n), Units: ceilDiv(da*a.Damage.Units+db*b.Damage.Units, div)}
+	return Damage{Pct: ceilDiv(100*(da+db), n), Units: units}
 }
 
 // absorb adds src's ships, cargo and fuel to dst: ships add per design
-// (ORDERS.md "Merge"), damage combined by mergeDamage with dilute. Unless
+// (ORDERS.md "Merge"), damage combined by mergeDamage with rule. Unless
 // overflow is set, a stack that would pass 32767 is held to maxStackShips
 // and the ships above it are lost; a total of exactly 32767 is kept
-// (ORDERS.md "Merge order", BINARY-ONLY). With overflow, a stack above
+// (ORDERS.md "Merge", Elegy's chosen rule). With overflow, a stack above
 // 32767 empties dst of ships (the Merge with Fleet task's LEGACY BUG).
-func (g *Game) absorb(dst, src *Fleet, overflow, dilute bool) {
+func (g *Game) absorb(dst, src *Fleet, overflow bool, rule mergeRule) {
 	for _, s := range src.Stacks {
 		if s.Count <= 0 {
 			continue
@@ -78,7 +112,7 @@ func (g *Game) absorb(dst, src *Fleet, overflow, dilute bool) {
 			j = g.insertStack(dst, s)
 		} else {
 			d := &dst.Stacks[j]
-			d.Damage = mergeDamage(*d, s, dilute)
+			d.Damage = mergeDamage(*d, s, rule)
 			d.Count += s.Count
 		}
 		if !overflow && dst.Stacks[j].Count > 32767 {
@@ -131,11 +165,12 @@ func (g *Game) shipSlot(owner, d int) int {
 	return maxShipDesigns + d
 }
 
-// MergeFleets is the merge order (ORDERS.md "Merge order", BINARY-ONLY):
+// MergeFleets is the merge order (ORDERS.md "Merge"):
 // the fleets with ids from join the fleet with id into, all at one
 // location and all the owner's, and are removed; into keeps its id. The
 // order combines damage by its own rule, the units averaged over the
-// damaged ships only (no dilution), and holds each design to 32766. Elegy
+// damaged ships only and rounded down (CONFIRMED CO-05), and holds each design
+// to 32766 (Elegy's chosen rule, unconfirmed). Elegy
 // validates ownership on every order (ORDERS.md "Ownership", chosen rule).
 func (g *Game) MergeFleets(owner, into int, from []int) error {
 	t := g.fleetIndex(into)
@@ -156,7 +191,7 @@ func (g *Game) MergeFleets(owner, into int, from []int) error {
 		ids[id] = true
 	}
 	for _, id := range from {
-		g.absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, false)
+		g.absorb(&g.Fleets[g.fleetIndex(into)], &g.Fleets[g.fleetIndex(id)], false, mergeOrderDamaged)
 	}
 	g.removeFleets(ids)
 	return nil
@@ -207,7 +242,7 @@ func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}
-	g.absorb(&g.Fleets[t], f, legacyMergeOverflow, legacyMergeDilution)
+	g.absorb(&g.Fleets[t], f, legacyMergeOverflow, taskMergeRule())
 	return Event{}, true
 }
 
