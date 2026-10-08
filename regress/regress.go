@@ -11,9 +11,12 @@
 //     hash the same as the primary every year after that.
 //
 // Every year must also pass game.Check (game.Advance refuses a year that
-// fails it) and every check in Case.Checks. Run stops a copy at its first
-// failure and reports it with the year, the first differing JSON paths
-// (game.Diff) and the command that reproduces it.
+// fails it) and every check in Case.Checks. Run stops the case at the
+// primary's first refused year or failed check, and the replay or reload
+// copy at its first difference, and reports each failure with the year,
+// the first differing JSON paths (game.Diff) and the command that
+// reproduces it. Rejected computer orders are counted, and the case plays
+// on.
 //
 // The harness reports what it finds. It does not decide whether a
 // finding is an engine, AI or game-loop bug.
@@ -33,22 +36,30 @@ import (
 	"github.com/bfaber-centaur/elegy/races"
 )
 
-// Opponents are the computer players the harness plays against: the
+// opponent is a computer player the harness plays against, by name: the
 // three personalities Elegy implements (stars-elegy AI.md "Project
-// policy"), by definition-file type.
-var Opponents = map[string]struct {
-	Type        int
-	Personality ai.Personality
-}{
-	"robotoid":  {1, ai.Robotoid},
-	"rototill":  {4, ai.Rototill},
-	"cybertron": {5, ai.Cybertron},
+// policy"), with their definition-file type.
+func opponent(name string) (typ int, p ai.Personality, ok bool) {
+	switch name {
+	case "robotoid":
+		return 1, ai.Robotoid, true
+	case "rototill":
+		return 4, ai.Rototill, true
+	case "cybertron":
+		return 5, ai.Cybertron, true
+	}
+	return 0, 0, false
 }
 
-// Rulesets are the built-in rulesets by id.
-var Rulesets = map[string]func() engine.Ruleset{
-	engine.ElegyRulesID:    engine.ElegyRules,
-	engine.FaithfulRulesID: engine.FaithfulRules,
+// ruleset is the built-in ruleset with the given id.
+func ruleset(id string) (engine.Ruleset, bool) {
+	switch id {
+	case engine.ElegyRulesID:
+		return engine.ElegyRules(), true
+	case engine.FaithfulRulesID:
+		return engine.FaithfulRules(), true
+	}
+	return engine.Ruleset{}, false
 }
 
 // A Check tests one year's game state and returns its problems.
@@ -60,9 +71,9 @@ type Check struct {
 // Case is one long game.
 type Case struct {
 	Seed  uint64
-	Rules string // a key of Rulesets
+	Rules string // a built-in ruleset id: "elegy" or "jrc3-faithful"
 	// Opponents are computer players after the idle human player 0, by
-	// name (a key of Opponents), at expert level.
+	// name ("robotoid", "rototill" or "cybertron"), at expert level.
 	Opponents []string
 	Size      newgame.Size
 	Years     int
@@ -161,30 +172,31 @@ type copyGame struct {
 }
 
 func (c Case) newGame() (*game.Game, error) {
-	rules, ok := Rulesets[c.Rules]
+	rules, ok := ruleset(c.Rules)
 	if !ok {
 		return nil, fmt.Errorf("no ruleset %q", c.Rules)
 	}
 	s := newgame.Settings{Size: c.Size, Density: newgame.Normal, Positions: newgame.Moderate,
 		Players: []newgame.PlayerSetup{{Race: races.Default()}}}
 	for _, name := range c.Opponents {
-		o, ok := Opponents[name]
+		typ, _, ok := opponent(name)
 		if !ok {
 			return nil, fmt.Errorf("no computer player %q", name)
 		}
-		ps, err := newgame.ComputerPlayer(o.Type, newgame.Expert)
+		ps, err := newgame.ComputerPlayer(typ, newgame.Expert)
 		if err != nil {
 			return nil, err
 		}
 		s.Players = append(s.Players, ps)
 	}
-	return game.New(rules(), s, c.Seed)
+	return game.New(rules, s, c.Seed)
 }
 
 func (c Case) drivers() []game.Driver {
 	ds := make([]game.Driver, len(c.Opponents)+1)
 	for i, name := range c.Opponents {
-		ds[i+1] = ai.NewDriver(Opponents[name].Personality, ai.Expert)
+		_, p, _ := opponent(name)
+		ds[i+1] = ai.NewDriver(p, ai.Expert)
 	}
 	return ds
 }
@@ -250,6 +262,7 @@ func Run(c Case) Result {
 		for _, ch := range c.Checks {
 			if probs := ch.Check(a.g.State); len(probs) > 0 {
 				fail(CheckFails, year, "%s: %d problems, first: %s", ch.Name, len(probs), probs[0])
+				return res
 			}
 		}
 		if b != nil {

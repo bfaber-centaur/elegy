@@ -73,7 +73,7 @@ func matrix(t *testing.T) []Case {
 	for _, seed := range seeds {
 		for _, r := range rules {
 			for _, o := range opps {
-				cases = append(cases, Case{Seed: seed, Rules: r, Opponents: o, Size: size, Years: years, SaveAt: saveAt, Checks: yearChecks})
+				cases = append(cases, Case{Seed: seed, Rules: r, Opponents: o, Size: size, Years: years, SaveAt: saveAt, Checks: yearChecks()})
 			}
 		}
 	}
@@ -115,8 +115,11 @@ func TestHarnessReportsFailures(t *testing.T) {
 			return nil
 		}}}}
 	r := Run(c)
-	if !r.Failed() || r.Findings[0].Category != CheckFails || r.Findings[0].Year != 2402 {
-		t.Fatalf("findings %+v", r.Findings)
+	if len(r.Findings) != 1 || r.Findings[0].Category != CheckFails || r.Findings[0].Year != 2402 {
+		t.Fatalf("findings %+v: want exactly the one year-check failure, in the year played from 2402", r.Findings)
+	}
+	if r.Years != 3 {
+		t.Errorf("played %d years: want the case stopped after the failing third year", r.Years)
 	}
 	rep := r.Report()
 	for _, want := range []string{"planted problem", c.Command(), "seed5/elegy/rototill"} {

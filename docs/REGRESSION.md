@@ -49,8 +49,10 @@ One observation is counted but is not a failure:
 
 A failure gives the game year being generated, the detail, the first
 JSON paths where two copies differ (`game.Diff`), and the command that
-replays the case alone. A case stops at its primary's first failure.
-The replay and reload copies stop at their own first difference.
+replays the case alone. A case stops at its primary's first failure:
+a refused year or a failed year check. A rejected computer order does
+not stop it; the case plays on and counts the rejections. The replay and
+reload copies stop at their own first difference.
 
 ## Matrices
 

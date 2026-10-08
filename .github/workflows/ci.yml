@@ -29,6 +29,7 @@ jobs:
   long-games:
     name: long-game regression (PR subset)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
