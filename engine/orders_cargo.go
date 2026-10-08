@@ -16,6 +16,15 @@ const (
 	EventColonistsLostGiven                                      // Player = giver, Planet, Count = colonists (units of 100) put onto an unowned planet or a starbase's planet
 )
 
+// EventSalvageEmptiedFirst: a manual load by Player's Fleet from salvage
+// got only Count kT (0: none) of the mineral Axes[0], because the object
+// held less (MESSAGES.md 0x0db, 0x0dc, BINARY-ONLY). Elegy's wording.
+const EventSalvageEmptiedFirst EventKind = EventTraderPartFound + 1
+
+// TargetSalvage is a cargo order's salvage object: CargoOrder.Owner's
+// object number CargoOrder.ID (OBJECTS.md "Salvage", "Owner").
+const TargetSalvage TargetKind = TargetTrader + 1
+
 // CargoOrder moves cargo between one of the player's fleets and a planet
 // or another fleet at the same place. Amounts holds, per cargo type (the
 // three minerals, colonists, fuel), how much the fleet takes from the
@@ -64,12 +73,25 @@ const (
 // free hold and what the source holds; Elegy applies the same caps to
 // any order.
 //
+// Salvage (OBJECTS.md "Salvage", "Loading", BINARY-ONLY): a fleet at the
+// object's position loads minerals from it, whoever owns it, capped by
+// what it holds and by the hold; minerals given to it go in up to its
+// room (SpaceObjects.SalvageRoom), the rest staying aboard (ASSUMPTION
+// T7). Loads apply at once, so players' loads are taken in replay order,
+// and a load that gets less than asked because the object held less is
+// told so (EventSalvageEmptiedFirst; MESSAGES.md 0x0db, 0x0dc).
+// ASSUMPTION L30: colonists or fuel in a salvage order reject it ("colonists
+// and fuel cannot be loaded from it"; nothing says they can be put in), and
+// the message is sent whenever the object held less than the load could
+// take, since a legal client caps its request to what it shows.
+//
 // ASSUMPTION L7: any failed check other than planet fuel rejects the
 // whole order.
 type CargoOrder struct {
 	Fleet   int
-	Target  TargetKind // TargetPlanet or TargetFleet
+	Target  TargetKind // TargetPlanet, TargetFleet or TargetSalvage
 	ID      int
+	Owner   int // the salvage object's owner, for TargetSalvage
 	Amounts [NumCargo + 1]int
 }
 
@@ -179,8 +201,47 @@ func (o CargoOrder) apply(g *Game, player int, a *Applied) error {
 			*held(dst, c) += n
 		}
 		return nil
+	case TargetSalvage:
+		return g.salvageCargo(f, o, a)
 	}
 	return fmt.Errorf("cargo: target: %w", ErrOutOfRange)
+}
+
+// salvageCargo is a cargo order with a salvage object (CargoOrder).
+func (g *Game) salvageCargo(f *Fleet, o CargoOrder, a *Applied) error {
+	si := -1
+	for i, sv := range g.Salvage {
+		if sv.Owner == o.Owner && sv.Number == o.ID {
+			si = i
+		}
+	}
+	if si < 0 || g.Objects == nil {
+		return fmt.Errorf("cargo: salvage %d of player %d: %w", o.ID, o.Owner, ErrNoSuchObject)
+	}
+	sv := &g.Salvage[si]
+	if sv.Pos != f.Pos {
+		return fmt.Errorf("cargo: fleet %d and salvage %d: %w", f.ID, o.ID, ErrNotTogether)
+	}
+	if o.Amounts[CargoColonists] != 0 || o.Amounts[CargoFuel] != 0 {
+		return fmt.Errorf("cargo: salvage takes and gives only minerals: %w", ErrOutOfRange)
+	}
+	for c := range NumMinerals {
+		switch v := o.Amounts[c]; {
+		case v > 0:
+			want := min(v, g.free(f, c))
+			n := g.Objects.SalvageLoad(*sv, c, want)
+			sv.Minerals[c] -= n
+			f.Cargo.Minerals[c] += n
+			if n < want {
+				a.Events = append(a.Events, Event{Kind: EventSalvageEmptiedFirst, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: n, Axes: []int{c}})
+			}
+		case v < 0:
+			n := min(-v, f.Cargo.Minerals[c], g.Objects.SalvageRoom(*sv))
+			sv.Minerals[c] += n
+			f.Cargo.Minerals[c] -= n
+		}
+	}
+	return nil
 }
 
 // exchangeWithPlanet moves cargo between a fleet and its owner's planet.
