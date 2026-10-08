@@ -38,6 +38,7 @@ unless the project decides otherwise.
 | Rototill's turn: research, starbase designs, U, planet loop and colony-ship production, fleet passes 1 and 2 | rototill.md §1–§3 | MEASURED AI-14..AI-17 (branches marked not exercised there are BINARY-ONLY) | `ai/rototill.go` | `TestRototill*` |
 | Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |
 | Planet automation: starbases for hubs, starbase upgrade, defenses, mines and factories fill | AI.md §7 | BINARY-ONLY (AI-7 not run) | `ai/automation.go`, `ai/economy.go` | `TestMinesAndFactories`, `TestStarbaseUpgrade`, `TestDefenses`, `TestDesignCostMatchesEngine` |
+| Under attack: quick defenses (and alchemy) at a planet a foreign bomber orbits, from year index (universe size + 2)·10 | AI.md §7 step 4 | BINARY-ONLY | `ai/automation.go` `underAttack` | `TestUnderAttack` |
 | Ship-design builder and store: hull and class lists, delete-then-create, picture, name; ageing | AI.md §10 | BINARY-ONLY (builder CONFIRMED through AI-8, AI-19) | `ai/designs.go` | `TestAgeGroup` |
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
@@ -132,6 +133,8 @@ them it stayed on its homeworld.
 | A57 | Retired: the warp re-pick's minefield rule is implemented from the minefields in the player's report (`game.Report.Objects`). |
 | A58 | The raw-cap exception for an own planet at the waypoint reads the planet's starbase design index even when it has no starbase (§11: the slot is read). Such a planet holds its last starbase's design (the engine keeps it when a starbase is destroyed or scrapped), or 0 if it never had one. The index is looked up only among the player's starbase designs; any other index (a ship design, or a deleted starbase design) counts as no design, so the cap stays. |
 | A59 | Robotoid's armada invasion at another player's planet (AI.md §11 "Armada (invasion) fleets", BINARY-ONLY) uses `need` (colonists) and the cargo `c` (kT) as plain numbers, with no conversion between them, as §11 reads; §11 marks the mix UNRESOLVED (a probable unit slip). The drop is a waypoint-0 unload-exactly task, with no move that turn. |
+| A60 | Under attack (AI.md §7 step 4): a ship is a bomber when its design, known in full, carries a bomb part; a design known only by hull and mass does not count. A fleet orbits a planet when its sighting is at the planet's position. |
+| A61 | Under attack: when n ≤ m (§7 names only n > m), the n defenses go to the front. "None queued" is no defense item in the queue; resources and minerals are the planet's available ones (§7 "available"), and the defense room is A14's. |
 
 ## Spec questions
 
@@ -176,7 +179,7 @@ test). It is a determinism check, not a parity check.
 
 ## Not implemented yet
 
-- Automation steps 4 (under attack) and 5 (blocked queues).
+- Automation step 5 (blocked queues).
 - Load-task kinds the engine does not model yet: fill, wait and set
   amount (#80 added load all and load exactly). A hub freighter's
   "fills" is ordered as load exactly (A56).
