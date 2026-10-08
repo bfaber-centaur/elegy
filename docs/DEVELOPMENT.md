@@ -2,117 +2,97 @@
 
 ## Goal
 
-Build a small deterministic simulation engine first, then grow it into a complete 4X game.
+Build a deterministic simulation engine, then grow it into a complete 4X game.
 
-A J-RC3-compatible ruleset is a major target, but compatibility behavior should be based on measured/documented evidence rather than intuition. Explicitly fixed or modernized rulesets can coexist later.
+A J-RC3-compatible ruleset is a major target, but compatibility behavior should be based on measured/documented evidence rather than intuition. Explicitly fixed or modernized rulesets coexist with it as separate per-game rulesets.
 
-The immediate goal is not UI parity, original-file compatibility, networking, AI opponents, or a Steam-ready application.
+The current goal is a self-contained game that Elegy plays by itself, first with scripted players and then with the approved computer opponents (see "Milestones"). UI parity, original-file compatibility, networking and a Steam-ready application are not current goals.
 
 ## Core architecture
 
-Conceptually:
-
 ```text
-GameState + PlayerOrders + Ruleset + explicit RNG state
+Game (state + ruleset) + order files + explicit RNG state
                          ↓
-                    GenerateTurn
+                engine.GenerateTurn
                          ↓
-                 TurnResult / reports
+      TurnResult: next Game, events, per-player views, scores
 ```
 
-The simulation should not depend on:
+The simulation does not depend on:
 
 - a graphical or terminal UI;
 - wall-clock time;
 - ambient filesystem state;
 - networking;
 - original Stars! save formats;
-- hidden global randomness.
+- hidden global randomness or process-wide settings.
+
+Packages:
+
+| Package | Role | Status |
+|---|---|---|
+| `engine/` | state types, orders, `GenerateTurn`, scanning and views, the component table, rulesets | [KERNEL-STATUS.md](KERNEL-STATUS.md), [ORDERS-LAYER-STATUS.md](ORDERS-LAYER-STATUS.md), [ORDERS-STATUS.md](ORDERS-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md), [SCANNING-STATUS.md](SCANNING-STATUS.md), [TAKEOVER-STATUS.md](TAKEOVER-STATUS.md), [COMPONENTS-STATUS.md](COMPONENTS-STATUS.md), [RULESET.md](RULESET.md) |
+| `objects/` | minefields, wormholes, the Mystery Trader, packets, stargates, salvage, reached through `engine.SpaceObjects` | [OBJECTS-STATUS.md](OBJECTS-STATUS.md) |
+| `terraform/` | terraforming, Orbital Adjusters, PP packet terraforming, remote mining | [TERRAFORM-STATUS.md](TERRAFORM-STATUS.md) |
+| `races/` | race points, repairs, Random races, built-in computer races, the yearly race check | [RACES-STATUS.md](RACES-STATUS.md) |
+| `newgame/` | a new game from settings and a seed | [UNIVERSE-STATUS.md](UNIVERSE-STATUS.md) |
+| `game/` | the game loop: drivers, reports, save/load, hash, diff, order files | [GAME-LOOP.md](GAME-LOOP.md) |
+| `ai/` | Robotoid, Rototill and Cybertron as game drivers | [AI-STATUS.md](AI-STATUS.md) |
+| `cmd/elegy` | the command line | [GAME-LOOP.md](GAME-LOOP.md) "Command line" |
+
+Each status file says what is implemented, which tests are ground truth and which are predictions, and the open spec gaps. Packages depend downward: `objects/`, `terraform/` and `races/` import `engine/` and plug into it through interfaces on `engine.Game`; `game/` builds on all of them; `ai/` sees only `game.Report`.
 
 ### Truth versus player knowledge
 
-Authoritative universe state and player-visible information should remain separate concepts.
-
-Eventually:
-
-```text
-GameState → ViewForPlayer(player) → PlayerView
-```
-
-A client should not need omniscient state and then be trusted to hide secrets.
+Authoritative state and player-visible information are separate. `GenerateTurn` returns one `engine.PlayerView` per player, and `game.Report` gives a driver that view plus the player's own objects and history, never the authoritative game. Computer players, scripted players and front ends all work from a `Report`.
 
 ### Rulesets
 
-Compatibility differences should be explicit rather than scattered through unrelated conditionals. The exact interface can remain small until real variation requires it.
-
-Likely long-term rulesets include:
-
-- J-RC3-compatible;
-- J-RC3 with explicitly chosen fixes;
-- modern/experimental rules.
+Each game carries an immutable typed `engine.Ruleset` (identity, version and one setting per compatibility switch). It is set at creation and saved with the game. There is no process-wide compatibility setting, so games with different rulesets run in one process. The built-in rulesets are `elegy` (the default) and `jrc3-faithful`. [RULESET.md](RULESET.md) is the inventory of every switch, its default in each ruleset and its evidence. A new compatibility difference is a new ruleset setting, not a constant or package variable.
 
 ### Data first
 
 Favor straightforward data structures and testable transformations. Split packages when real subsystem boundaries appear rather than pre-creating a large architecture.
 
-## Current state
+## Milestones
 
-`engine/` implements the J-RC3 peaceful kernel and ordinary fleet movement
-from the public stars-elegy specification (`docs/KERNEL.md` there):
-habitability, maximum population, growth with the persistent carry,
-resources and installation caps, mining and depletion, research, production
-queues, fleet movement, fuel, fleet chases and starbase refuelling.
-`GenerateTurn` runs them in KERNEL.md's turn order, with battles
-(`COMBAT.md`), bombing, invasion and colonization (`TAKEOVER.md`) and
-per-player views (`SCANNING.md`). Parts, hulls and
-planetary items come from the measured component table (`COMPONENTS.md`).
+### Done
 
-`newgame/` builds a new game (galaxy, homeworlds, starting players,
-designs, fleets and wormholes) from the stars-elegy `UNIVERSE.md` spec; it
-reads the engine's state types and leaves the engine unchanged. `races/`
-scores, repairs and generates race designs (`RACES.md`). `objects/`
-implements the space objects of `OBJECTS.md` as step and query functions
-the turn engine calls; minefields first. `terraform/` implements
-terraforming (production units, Orbital Adjusters, PP packets) and
-remote mining (`KERNEL.md`, `OBJECTS.md`) the same way.
+- **Kernel and economy:** population, economy, research and production, with a homeworld simulated 2407–2436 against oracle values.
+- **Expansion:** galaxy generation, designs, fleets, movement and fuel, cargo, colonization.
+- **Information model:** scanning and `PlayerView`, and per-player reports with planet history.
+- **Combat and the long tail:** battles, bombing and invasion, starbases, minefields, terraforming, packets, gates, wormholes, the Mystery Trader and random events.
+- **Per-game rulesets** replacing compile-time and process-wide switches.
+- **The game loop, save/load and a command line.**
 
-See [KERNEL-STATUS.md](KERNEL-STATUS.md), [COMBAT-STATUS.md](COMBAT-STATUS.md),
-[SCANNING-STATUS.md](SCANNING-STATUS.md),
-[COMPONENTS-STATUS.md](COMPONENTS-STATUS.md),
-[TAKEOVER-STATUS.md](TAKEOVER-STATUS.md),
-[ORDERS-STATUS.md](ORDERS-STATUS.md),
-[UNIVERSE-STATUS.md](UNIVERSE-STATUS.md),
-[RACES-STATUS.md](RACES-STATUS.md),
-[OBJECTS-STATUS.md](OBJECTS-STATUS.md) and
-[TERRAFORM-STATUS.md](TERRAFORM-STATUS.md) for what is implemented, which
-tests are ground truth and which are predictions, and the open spec gaps.
+### Next: Elegy plays a long game by itself
 
-## Near-term milestones
+The headline milestone is an Elegy game generated and advanced for many years entirely without the original executable, with deterministic replay, valid player views and actionable diagnostics. The original remains the independent parity oracle.
 
-### 1–2. Population and peaceful economy (implemented)
+What the tests show today:
 
-The population model and the peaceful economy vertical slice are in place,
-with a deterministic homeworld scenario simulated 2407–2436 against oracle
-values. Remaining work there is the spec gaps in KERNEL-STATUS.md and the
-items it lists as not modelled.
+- `game` `TestSmokeGame`: a three-player galaxy played for 40 years by a scripted driver that researches, builds, colonizes and scouts, with every order accepted.
+- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes.
+- `TestRulesetsCoexist`: two games with different rulesets in one process.
+- `TestReportHoldsOnlyOwnObjects`: a report holds only the player's own objects in full.
+- `Game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
+- `elegy play` runs any number of years with idle players and prints a hash per year.
 
-### 3. Expansion
+Known gaps that a long game can reach:
 
-Add galaxy generation, ship designs, fleets, movement/fuel, cargo, and colonization.
+- An Alternate Reality colony gets no starbase (TAKEOVER-STATUS.md "Not modelled"). Under `elegy` its year continues. Under `jrc3-faithful` the `zero_max_population_stop` setting stops it, as the original does (RULESET.md).
+- Waypoint tasks that load cargo or scrap ships are not modelled, and a minefield detonate order is refused (`engine/orders.go` `validTask`, `DetonateOrder`).
+- Races and computer players cannot be chosen from the command line yet (GAME-LOOP.md "Not done yet").
 
-### 4. Information model
+### After that: games against the computer opponents
 
-Add scanning and stale player intel, then expose a safe `PlayerView`.
-
-### 5. Combat and remaining systems
-
-Build combat as a deterministic subsystem with tiny scenarios before integrating the long tail: starbases, minefields, terraforming, packets, gates, racial mechanics, bombing/invasion, diplomacy, and special events.
+Robotoid, Rototill and Cybertron play first one at a time, then together. They already play 40- and 60-year smoke games in `ai/`'s tests (AI-STATUS.md). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
 
 ## Front ends
 
 The engine should support more than one client.
 
-Near-term experimentation may include a keyboard-first TUI. A bespoke graphical desktop client can become the mainstream product later. Neither should own simulation rules.
+Near-term experimentation may include a keyboard-first TUI. A bespoke graphical desktop client can become the mainstream product later. Neither should own simulation rules. Today the only front end is `cmd/elegy`, which reads and writes save files and order files.
 
 ## Testing
 
@@ -121,37 +101,27 @@ Use several layers:
 - formula/unit tests;
 - subsystem interaction tests;
 - complete turn tests;
-- multi-turn deterministic scenarios;
+- multi-turn deterministic scenarios (the `game` and `ai` smoke games);
 - J-RC3 parity tests promoted from the research repository.
 
-The stars-elegy parity vectors are copied into `engine/testdata/vectors`
-and run by `TestParityVectors` (`engine/parity_test.go`). Each vector's
-start becomes an Elegy game. The harness generates the run's years and
-checks every case's expectations:
+Test names carry their evidence: `TestConfirmed*` is ground truth from oracle observations and must not be changed to make code pass, `TestPrediction*` pins a BINARY-ONLY rule from the spec, and `TestElegyDecision*` pins one of Elegy's own choices. `go test -run Confirmed ./...` runs only the ground truth.
 
-- CONFIRMED and LEGACY BUG cases are exact-match targets.
-- MEASURED cases are tallied apart.
-- Cases are skipped for an order, object or expectation Elegy does not
-  model yet. An expectation tagged with one oracle stream is skipped; the
-  case's other expectations are still checked, also when the case is
-  marked as varying by stream.
-- A LEGACY BUG case whose switch is off by default is reported as
-  "differs".
-- Each vector runs with 8 seed variants. The harness's random stream is
-  not the original's, so a case whose result changes with the seed only
-  matches by chance. It is reported as "random", with how many seeds it
-  passes with and the reference seed's comparison. The tally counts the
-  random cases whose reference seed fails in their own column.
+### Parity vectors
 
-`go test -run TestParityVectors -v ./engine` prints the per-corpus tally
-and every case that does not pass. `baseline.txt` lists the passing
-cases, MEASURED ones included, and each random case with its pass count.
-The test fails if a listed case stops passing or a random one passes with
-fewer seeds. After a change that moves the results, check each change
-and then refresh the list with
-`PARITY_BASELINE=write go test -run TestParityVectors ./engine`. A change
-in how many draws the turn makes (the player shuffle, for one) moves
-every random case's count.
+The stars-elegy parity vectors are copied into `engine/testdata/vectors` and run by `TestParityVectors` (`engine/parity_test.go`) under the `elegy` ruleset. Each vector's start becomes an Elegy game; the harness generates the run's years and checks every case's expectations. Each vector runs with 8 seed variants, because the harness's random stream is not the original's. A case gets one result:
+
+- **pass:** every compared expectation matches with every seed. CONFIRMED and LEGACY BUG cases are exact-match targets. MEASURED passes are counted in their own column, because one observation backs them.
+- **sample-only:** every compared expectation is a sample (one stream's random outcome) and matched. It is evidence of the rule, not of an exact value.
+- **random:** the result changes with the seed. It is reported with how many seeds pass and the reference seed's comparison. A case like this matches only by chance.
+- **differs:** a LEGACY BUG case whose setting is off in `elegy`.
+- **fail:** a compared expectation does not match. MEASURED cases fail here too.
+- **skip:** the case needs an order, object, expectation or state Elegy does not model or the vector does not carry. The output names the reason. A sample mismatch is skipped, never failed. An expectation tagged with one oracle stream is skipped while the case's other expectations are still checked. When a year's orders include one Elegy cannot load, every case of that vector is skipped.
+
+`go test -run TestParityVectors -v ./engine` prints the per-corpus tally and every case that does not pass. The known failures and the skipped groups are listed in [KERNEL-STATUS.md](KERNEL-STATUS.md) "Known parity failures" and "Integration handoff list". `baseline.txt` lists the passing cases, with each random and sample-only case's count. The test fails if a listed case regresses. After a change that moves the results, check each change and then refresh the list with `PARITY_BASELINE=write go test -run TestParityVectors ./engine`. A change in how many draws the turn makes moves every random case's count.
+
+New-game vectors (`ug`, `rw`) run through `newgame` in `TestUGVectors` instead, because the engine harness has no new-game path.
+
+Passing tests are not proof of exact parity. Never turn a skip into a pass, or count a sample as proof.
 
 For uncertain compatibility behavior:
 
@@ -161,8 +131,6 @@ hypothesis → experiment / evidence → specification → test → implementati
 
 ## Persistence
 
-Do not reproduce the original binary formats as Elegy's native save model.
+A saved game is Elegy's own deterministic, versioned JSON document (`"format": "elegy-save"`), described in [GAME-LOOP.md](GAME-LOOP.md) "Saved games". It holds the whole state, the ruleset and the random stream, and a game saves back byte for byte. Order files are Elegy's own JSON too.
 
-Early tests can construct state directly. When persistence becomes useful, choose a deterministic, versioned, inspectable format around Elegy's own domain model.
-
-Original Stars! formats, if supported, are import/export compatibility.
+The original binary formats are not Elegy's save model. If they are ever supported, it will be as import/export compatibility.

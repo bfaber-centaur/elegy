@@ -6,7 +6,7 @@ The long-term goal is a complete game with a faithful J-RC3-compatible ruleset, 
 
 ## Status
 
-Elegy can generate a galaxy and play it for many years without the original program. The turn is complete enough for that, but it is not complete: there is no front end, and several rules are partial or missing. Each package's `docs/*-STATUS.md` file lists what it implements and what it does not.
+Elegy can generate a galaxy and play it for many years without the original program. The turn is complete enough for that, but it is not complete: there is no front end, and several rules are partial or missing. Each package's `docs/*-STATUS.md` file lists what it implements and what it does not. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) has the architecture and the next milestone.
 
 - **The turn** (`engine/`): orders, movement and fuel, production of installations, ships, starbases, packets and terraforming, population, research, random events, battles, bombing, invasion, colonization, scanning and per-player views, scores and victory. Each rule is tested against the stars-elegy specification, and many against observations of the original game.
 - **Space objects** (`objects/`, `terraform/`): minefields, wormholes, the Mystery Trader, mineral packets, stargates, salvage, terraforming, Orbital Adjusters and remote mining.
