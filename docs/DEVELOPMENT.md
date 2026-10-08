@@ -72,22 +72,21 @@ The headline milestone is an Elegy game generated and advanced for many years en
 What the tests show today:
 
 - `game` `TestSmokeGame`: a three-player galaxy played for 40 years by a scripted driver that researches, builds, colonizes and scouts, with every order accepted.
-- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes. This proves save/load continuation for the scripted driver only; with computer players it is not proven yet ([#70](https://github.com/bfaber-centaur/elegy/issues/70)).
+- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes. With computer players, `ai` `TestDriversSaveReload` shows the same: a game with Robotoid, Rototill and Cybertron saved and reloaded into fresh drivers, mid-way or every year, continues to the uninterrupted game's hashes for 50 years, under both built-in rulesets.
 - `TestRulesetsCoexist`: two games with different rulesets in one process.
 - `TestReportHoldsOnlyOwnObjects`: a report holds only the player's own objects in full.
 - `game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
-- `cmd/elegy` `TestCLIComputerPlayers`: `elegy play -ai ...` plays a human against Robotoid, Rototill and Cybertron, alone and together, for 40 years, with no rejected orders and the same output on a second run. This shows uninterrupted replay only; see the save/reload gap below.
+- `cmd/elegy` `TestCLIComputerPlayers`: `elegy play -ai ...` plays a human against Robotoid, Rototill and Cybertron, alone and together, for 40 years, with no rejected orders and the same output on a second run. Save/reload continuation with computer players is `TestDriversSaveReload` above.
 - `engine` `TestConfirmedAlternateRealityColonyStarbase` and `TestAlternateRealityColonyGeneratesYears`: a new Alternate Reality colony gets its owner's first starbase design and the game keeps generating years.
 
 Known gaps that a long game can reach:
 
-- Save/reload continuation with computer players is not proven. `ai.Driver` keeps its stored designs' creation year and picture outside the saved game (AI-STATUS.md), so a game with computer players that is saved and reloaded mid-way may diverge from the uninterrupted run. No test compares the two yet. Owner: the computer-opponents work ([#70](https://github.com/bfaber-centaur/elegy/issues/70)).
 - Waypoint tasks that load cargo or scrap ships are not modelled, and a minefield detonate order is refused (`engine/orders.go` `validTask`, `DetonateOrder`).
 - An Alternate Reality colony whose owner has no starbase design gets none (TAKEOVER-STATUS.md, UNRESOLVED).
 
 ### After that: games against the computer opponents
 
-Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. Replay with computer players counts as deterministic only once a mid-game save and reload is shown to continue identically to the uninterrupted game ([#70](https://github.com/bfaber-centaur/elegy/issues/70)). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
+Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. A game with computer players replays identically, uninterrupted or across a save and reload into fresh drivers (`TestDriversSaveReload`, [#70](https://github.com/bfaber-centaur/elegy/issues/70)). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
 
 ## Front ends
 
@@ -132,6 +131,6 @@ hypothesis → experiment / evidence → specification → test → implementati
 
 ## Persistence
 
-A saved game is Elegy's own deterministic, versioned JSON document (`"format": "elegy-save"`), described in [GAME-LOOP.md](GAME-LOOP.md) "Saved games". It holds the whole game state, the ruleset and the random stream, and a game saves back byte for byte. It does not hold the computer players' own memory: `ai.Driver` keeps its designs' creation years and pictures outside the save ([#70](https://github.com/bfaber-centaur/elegy/issues/70)). Order files are Elegy's own JSON too.
+A saved game is Elegy's own deterministic, versioned JSON document (`"format": "elegy-save"`), described in [GAME-LOOP.md](GAME-LOOP.md) "Saved games". It holds the whole game state, the ruleset and the random stream, and a game saves back byte for byte. Computer players keep no state of their own: their designs' creation years and pictures are design-slot fields the save holds. Order files are Elegy's own JSON too.
 
 The original binary formats are not Elegy's save model. If they are ever supported, it will be as import/export compatibility.

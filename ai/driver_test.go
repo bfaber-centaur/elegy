@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -9,10 +10,9 @@ import (
 	"github.com/bfaber-centaur/elegy/races"
 )
 
-// loopGame plays an idle human and expert Robotoid, Rototill and
-// Cybertron through the game loop (game.Game.Advance) for years years. It
-// returns the game, each year's state hash and every rejected order.
-func loopGame(t *testing.T, rules engine.Ruleset, seed uint64, years int) (*game.Game, []string, []string) {
+// loopSetup is a new tiny game with an idle human and expert Robotoid,
+// Rototill and Cybertron, and fresh drivers for them.
+func loopSetup(t *testing.T, rules engine.Ruleset, seed uint64) (*game.Game, []game.Driver) {
 	t.Helper()
 	s := newgame.Settings{Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate,
 		Players: []newgame.PlayerSetup{{Race: races.Default()}}}
@@ -27,8 +27,17 @@ func loopGame(t *testing.T, rules engine.Ruleset, seed uint64, years int) (*game
 	if err != nil {
 		t.Fatal(err)
 	}
-	drivers := []game.Driver{game.Idle, NewDriver(Robotoid, Expert), NewDriver(Rototill, Expert), NewDriver(Cybertron, Expert)}
-	var hashes, rejected []string
+	return g, freshDrivers()
+}
+
+func freshDrivers() []game.Driver {
+	return []game.Driver{game.Idle, NewDriver(Robotoid, Expert), NewDriver(Rototill, Expert), NewDriver(Cybertron, Expert)}
+}
+
+// advance plays years years and returns each year's state hash and every
+// rejected order.
+func advance(t *testing.T, g *game.Game, drivers []game.Driver, years int) (hashes, rejected []string) {
+	t.Helper()
 	for range years {
 		y, err := g.Advance(drivers)
 		if err != nil {
@@ -45,6 +54,16 @@ func loopGame(t *testing.T, rules engine.Ruleset, seed uint64, years int) (*game
 		}
 		hashes = append(hashes, h)
 	}
+	return hashes, rejected
+}
+
+// loopGame plays the game of loopSetup through the game loop
+// (game.Game.Advance) for years years. It returns the game, each year's
+// state hash and every rejected order.
+func loopGame(t *testing.T, rules engine.Ruleset, seed uint64, years int) (*game.Game, []string, []string) {
+	t.Helper()
+	g, drivers := loopSetup(t, rules, seed)
+	hashes, rejected := advance(t, g, drivers, years)
 	return g, hashes, rejected
 }
 
@@ -86,5 +105,53 @@ func TestDriversInGameLoop(t *testing.T) {
 func TestDriverNeedsRand(t *testing.T) {
 	if _, err := NewDriver(Rototill, Expert).Orders(game.Report{}); err != ErrNoRand {
 		t.Errorf("error %v, want ErrNoRand", err)
+	}
+}
+
+// A game saved in the middle and reloaded into fresh drivers continues
+// exactly as the uninterrupted game: every year's state hash matches,
+// for 50 years. So does a game saved and reloaded into fresh drivers
+// every year, as cmd/elegy's turn command runs it. Under Elegy's rules and
+// jrc3-faithful's.
+func TestDriversSaveReload(t *testing.T) {
+	const years, at = 50, 25
+	reload := func(t *testing.T, g *game.Game) *game.Game {
+		t.Helper()
+		var buf bytes.Buffer
+		if err := g.Save(&buf); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err := game.Load(&buf)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return loaded
+	}
+	for _, rules := range []engine.Ruleset{engine.ElegyRules(), engine.FaithfulRules()} {
+		t.Run(rules.ID, func(t *testing.T) {
+			_, want, _ := loopGame(t, rules, 7, years)
+			check := func(how string, got []string) {
+				t.Helper()
+				for i := range want {
+					if got[i] != want[i] {
+						t.Fatalf("%s: year %d differs from the uninterrupted game", how, 2401+i)
+					}
+				}
+			}
+
+			g, drivers := loopSetup(t, rules, 7)
+			first, _ := advance(t, g, drivers, at)
+			rest, _ := advance(t, reload(t, g), freshDrivers(), years-at)
+			check("reloaded after 2425", append(first, rest...))
+
+			g, _ = loopSetup(t, rules, 7)
+			var yearly []string
+			for range years {
+				h, _ := advance(t, g, freshDrivers(), 1)
+				yearly = append(yearly, h...)
+				g = reload(t, g)
+			}
+			check("reloaded every year", yearly)
+		})
 	}
 }

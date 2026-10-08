@@ -150,29 +150,18 @@ order is accepted, each keeps a planet, and two runs from the same seed
 give the same state hash every year. It is a smoke test, not a parity
 check.
 
-The driver's only state is the creation year and picture of the designs
-it stored (AI.md §5, §10), which the engine's designs do not carry. It
-does not survive a save and load (`game.Driver`'s ELEGY CHOICE); after a
-load those designs count as created in the first year with picture 0.
-
-**Open issue ([#70](https://github.com/bfaber-centaur/elegy/issues/70)):
-save and reload.** The smoke tests show deterministic uninterrupted
-games only. A game with computer players that is saved mid-way and
-reloaded into fresh drivers does not continue identically. In a local
-run of the equivalence test that will land with the fix
-(`TestDriversSaveReload`: 50 years, saved after 2425), the state differed
-from 2426 on, under both `elegy` and `jrc3-faithful`, while the same
-game reloaded with the same drivers matched every year. The driver's design metadata
-is the only cause found, and the report cannot rebuild it. The
-proposed fix puts both values on the engine's stored design and in the
-save. Until #70 is closed, nothing here claims save/reload determinism
-for computer players. Owner: this lane (ai/), with the engine and save
-changes routed to their lanes.
+The driver keeps no state between years. Each design's creation year
+and picture (AI.md §5, §10) are the game's: the design order stores
+them on the engine's design slot, the save keeps them, and the report
+gives them to the planner (`OwnDesign.Slot`). `TestDriversSaveReload`
+plays the 50-year loop game under `elegy` and `jrc3-faithful`, saved and
+reloaded into fresh drivers after 2425 and, separately, after every
+year; every year's state hash matches the uninterrupted game
+([#70](https://github.com/bfaber-centaur/elegy/issues/70), closed by this
+test). It is a determinism check, not a parity check.
 
 ## Inputs the planners need from outside `ai/`
 
-- Each design's creation year and picture, in the game state, so that
-  the planners' ageing and picture rules survive a save and load.
 - Other players' PRT (the report withholds it; every other player counts
   as not Alternate Reality).
 - The parts of another player's fully known starbase design, for the

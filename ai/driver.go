@@ -14,18 +14,15 @@ import (
 // original runs each computer player before the year in player order
 // (AI.md §1 "Random numbers").
 //
-// Its only state across years is the creation year and picture of the
-// designs it stored (AI.md §5, §10), which the engine's designs do not
-// carry. ELEGY CHOICE (game.Driver): that state is the driver's and does
-// not survive a save and load; after a load, the designs count as created
-// in the first year with picture 0, as NewView says, until the engine
-// carries the two values. The planners keep no other memory (AI.md §1,
-// CONFIRMED AI-10).
+// A driver keeps no state between years: the planners keep no memory
+// (AI.md §1, CONFIRMED AI-10), and the creation year and picture of each
+// design (AI.md §10) are the game's, in the report's design slots. So a
+// game saved and loaded continues with fresh drivers exactly as it would
+// have (TestDriversSaveReload).
 type Driver struct {
 	Personality Personality
 	Level       Level
 
-	created map[SlotKey]NewDesign
 	// Unsupported holds the steps of the last turn Elegy could not order
 	// (Result.Unsupported), for diagnostics.
 	Unsupported []string
@@ -33,7 +30,7 @@ type Driver struct {
 
 // NewDriver returns a driver for a computer player.
 func NewDriver(p Personality, lvl Level) *Driver {
-	return &Driver{Personality: p, Level: lvl, created: map[SlotKey]NewDesign{}}
+	return &Driver{Personality: p, Level: lvl}
 }
 
 // ErrNoRand is returned when the report carries no random stream.
@@ -44,10 +41,7 @@ func (d *Driver) Orders(r game.Report) ([]engine.Order, error) {
 	if r.Rand == nil {
 		return nil, ErrNoRand
 	}
-	if d.created == nil {
-		d.created = map[SlotKey]NewDesign{}
-	}
-	v := ViewOf(r, d.Level, d.created)
+	v := ViewOf(r, d.Level)
 	var res Result
 	switch d.Personality {
 	case Robotoid:
@@ -58,9 +52,6 @@ func (d *Driver) Orders(r game.Report) ([]engine.Order, error) {
 		res = PlayCybertron(v, r.Rand)
 	default:
 		return nil, fmt.Errorf("ai: personality %v is not implemented", d.Personality)
-	}
-	for _, nd := range res.Designs {
-		d.created[SlotKey{nd.Starbase, nd.Slot}] = nd
 	}
 	d.Unsupported = res.Unsupported
 	return res.Orders, nil
@@ -75,7 +66,7 @@ func (d *Driver) Orders(r game.Report) ([]engine.Order, error) {
 //
 // Other players' PRT is not in the report, so every other player counts
 // as not Alternate Reality (the game withholds it).
-func ViewOf(r game.Report, lvl Level, created map[SlotKey]NewDesign) *View {
+func ViewOf(r game.Report, lvl Level) *View {
 	var universe []PlanetPos
 	for _, p := range r.Universe {
 		universe = append(universe, PlanetPos{ID: p.ID, Pos: p.Pos})
@@ -84,7 +75,7 @@ func ViewOf(r game.Report, lvl Level, created map[SlotKey]NewDesign) *View {
 	for _, h := range r.History {
 		history[h.Report.Planet] = h.Report
 	}
-	v := NewView(r, lvl, universe, history, created)
+	v := NewView(r, lvl, universe, history)
 	for _, w := range r.Wormholes {
 		v.Wormholes = append(v.Wormholes, Wormhole{End: w.End, Pos: w.Pos, Known: true, Class: w.Stability})
 	}

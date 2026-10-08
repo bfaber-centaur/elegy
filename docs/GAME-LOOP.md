@@ -105,7 +105,7 @@ revealed, not whether later files keep it.
 **ELEGY CHOICE:** a driver's own state between years belongs to the
 driver, not the game. A saved game holds the game, its stream and the
 players' histories. A driver that must survive a save and load rebuilds
-its state from its reports. AI.md §1 says the original's computer players
+its state from its reports; `ai.Driver` keeps none. AI.md §1 says the original's computer players
 keep no memory between years beyond the planet history (CONFIRMED
 AI-10).
 
@@ -217,12 +217,12 @@ Rototill, PP Cybertron). `turn` refuses an order file for a computer
 player.
 
 `turn` loads the game for every year, so its computer players start
-each year with fresh drivers. `ai.Driver` keeps the creation year and
-picture of the designs it stores, and that state does not survive a save
-and load (its ELEGY CHOICE). The engine's design slots now carry both
-values and the save keeps them; what remains is for the driver to read
-them from `OwnDesign.Slot`. Until then, a game advanced year by year
-with `turn` can differ from the same game run in one `play`. Each path on its own is deterministic.
+each year with fresh drivers. `ai.Driver` keeps no state between years:
+it reads its designs' creation years and pictures from `OwnDesign.Slot`,
+which the save keeps. `ai`'s `TestDriversSaveReload` shows a game with
+all three computer players, saved and reloaded into fresh drivers after
+year 25 or after every year, continuing to the same hash as the
+uninterrupted game for 50 years, under `elegy` and `jrc3-faithful`.
 
 **ELEGY CHOICE:** a race file is Elegy's own versioned JSON document,
 `{"format": "elegy-race", "version": 1, "race": {...}}`, holding a
@@ -239,9 +239,3 @@ steps Elegy cannot order yet (`ai.Result.Unsupported`).
 and against all three together. Every computer player's order must be
 accepted, every computer player must keep a planet, and the same seed
 must give the same hashes.
-
-## Not done yet
-
-- `ai.Driver` reading its designs' creation years and pictures from
-  `OwnDesign.Slot`, which the save now keeps (save version 5), instead of
-  its own memory (see above).
