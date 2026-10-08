@@ -363,17 +363,22 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 
 **Whole corpora or case groups skipped, and why:**
 
-- rp (race penalty): skipped wholesale (`l.global` in
-  `parity_test.go`) from before the race check was wired. With the skip
-  lifted as a trial, RD-P7 skips (out-of-range PRT 10), RD-P8, RD-P11,
-  RD-P12, RD-P17, RD-P20 and RD-P21 fail (populations, factories,
-  surface minerals, fleet positions and fuel; not diagnosed), and the
-  other RD-P cases pass. Next move: lift the skip, baseline the passes
-  and diagnose the failures.
+- rp (race penalty): no longer skipped; RD-P1..RD-P21 pass and are in
+  the baseline. Race expectations compare the whole race and the wizard
+  settings (leftover spend, stat 15, techs start high) after the year's
+  race check. The harness reads stored habitat values as signed bytes
+  (RACES.md "Repairs": 251 is −5, a low of 255 the immune marker) and an
+  out-of-range PRT as an invalid one, which the check clamps (RD-P7).
+- Computer players without orders in the vector: their fleets, planets
+  and production queues are not compared ("a computer player's planned
+  orders"), since the host plans them each year and the harness runs no
+  planner (RD-P11, RD-P12, RD-P20, RD-P21 have such expectations). Their
+  race expectations are compared.
+- `message` expectations: not compared (Elegy's events are its own).
 - UG01-A..UG30-A: "player not in the state" (the expectation names a
   player the initial state lacks).
 - RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
-  files, which `newgame/vectors_test.go` checks; this harness has no
+  files, which `newgame/vectors_test.go` checks (elegy #42); this harness has no
   players for them and skips them ("player not in the state", samples).
 - `client_estimate` (159) and `sample` mismatches (155): client-side
   estimates are not modelled, and one stream's random outcome is never a
