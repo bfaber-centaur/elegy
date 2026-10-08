@@ -97,7 +97,7 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m engine.PVMaps) (e
 			if !ok {
 				return nil, fmt.Errorf("minefield type %q", o.Type)
 			}
-			s.Minefields = append(s.Minefields, objects.Minefield{Owner: o.Owner, Number: o.ID, Kind: k, Pos: engine.Point{X: o.X, Y: o.Y}, Count: o.Mines, Detonate: o.Detonate})
+			s.Minefields = append(s.Minefields, objects.Minefield{Owner: o.Owner, Number: o.ID, Kind: k, Pos: engine.Point{X: o.X, Y: o.Y}, Count: o.Mines, Detonate: o.Detonate, Known: pvMarks(o.KnownTo)})
 		case "wormhole":
 			id := m.EndID[o.ID]
 			for len(s.Wormholes) <= id/2 {
@@ -195,13 +195,12 @@ func pvPacket(s *objects.Space, owner, id int) *objects.Packet {
 
 var pvKindNames = map[objects.MineKind]string{objects.Standard: "standard", objects.Heavy: "heavy", objects.SpeedBump: "speed_bump"}
 
-// pvKnowledge is the reason minefield knowledge is not compared: the
-// objects package keeps no per-player minefield knowledge yet (SCANNING.md
-// "Space objects").
-const pvKnowledge = "minefield knowledge (scanning of space objects)"
+// pvRadius is the reason a minefield's radius is not compared: SCANNING.md
+// defines no per-player known radius.
+const pvRadius = "minefield radius (SCANNING.md defines no known radius)"
 
 func minefieldFields(m *objects.Minefield) map[string]any {
-	return map[string]any{"kind": "minefield", "owner": m.Owner, "id": m.Number, "x": m.Pos.X, "y": m.Pos.Y, "mines": m.Count, "type": pvKindNames[m.Kind], "detonating": m.Detonate}
+	return map[string]any{"kind": "minefield", "owner": m.Owner, "id": m.Number, "x": m.Pos.X, "y": m.Pos.Y, "mines": m.Count, "type": pvKindNames[m.Kind], "detonating": m.Detonate, "known_to": pvMarked(m.Known)}
 }
 
 func traderFields(t objects.Trader, id int) map[string]any {
@@ -242,7 +241,7 @@ func (pvObjects) Check(g *engine.Game, e engine.PVExpect, m engine.PVMaps) strin
 		if f == nil {
 			return fmt.Sprintf("minefield %d/%d gone", *e.Owner, *e.ID)
 		}
-		return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"known_to": pvKnowledge, "radius": "minefield radius"})
+		return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"radius": pvRadius})
 	case "wormhole":
 		id, ok := m.EndID[*e.ID]
 		if !ok || id/2 >= len(s.Wormholes) {
@@ -281,7 +280,7 @@ func (pvObjects) Check(g *engine.Game, e engine.PVExpect, m engine.PVMaps) strin
 			if f == nil {
 				return fmt.Sprintf("minefield %d/%d missing", o.Owner, o.ID)
 			}
-			return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"known_to": pvKnowledge})
+			return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"radius": pvRadius})
 		}
 		return "skip: object " + o.Kind
 	case "object_gone":

@@ -127,8 +127,23 @@ KERNEL.md "Turn order" puts them:
 - 6c.2: mine laying, with the after-movement unloads.
 - 7.1: mine sweeping, before repair. A fleet that jumped through a
   stargate is not repaired that year.
-- Before the views: each player's scanners record the wormhole ends
-  they see.
+- Before the views: each player's scanners see the space objects
+  (SCANNING.md "Space objects"): seen minefields and wormhole ends
+  become known, a fleet hit by a minefield learns it, a Packet Physics
+  player's packets in flight scan fleets and planets, a Space
+  Demolition player's minefields see the fleets inside them, and the
+  owners of the minefields and packets seen become known players.
+  `PlayerView.Objects` lists the objects seen.
+
+The race check (RACES.md "In a running game") runs at KERNEL.md step
+2a, after the before-movement tasks and before movement, through
+`Game.Races` (`races.GameRaces`); a nil `Game.Races` skips it. A
+checker that keeps state implements `RaceCloner`, so `GenerateTurn`
+leaves the input game's checker unchanged.
+
+An Interstellar Traveler gets a normal report of every planet whose
+starbase has a stargate within range of one of its own planets' gates
+(SCANNING.md, CONFIRMED OB-013).
 
 The parity harness loads `initial_state.objects` and checks the
 minefield, wormhole, trader, packet, object and object_gone
@@ -147,17 +162,20 @@ Choices where OBJECTS.md is silent:
 - **O12 (ASSUMPTION).** A waypoint aimed at a wormhole end its owner
   does not know follows the end only while known; one that moved unseen
   becomes a plain position where the end was.
+- **O13 (ASSUMPTION).** The space objects are seen, with the Space
+  Demolition cloak draws, before the population estimates draw.
+- **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
+  uses the gate's range as P; an unlimited gate shows every starbase.
 
 Not modelled yet: following fleets (step 1a.3; Elegy does not keep
 waypoint 0's target), the stargate choice of the route task, waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol and
-lay mines (load, scrap; ORDERS-STATUS.md), per-player minefield
-knowledge, the Trader's planet trades with computer players (their
+lay mines (load, scrap; ORDERS-STATUS.md), the Trader's planet trades with computer players (their
 levels are a PLACEHOLDER), packets launched from production (the
 orders lane adds `Launch`), terraforming other than the Claim
 Adjuster's year-end step (production items, Orbital Adjusters), remote
 mining, Super Stealth research stealing, the duplicate-serial penalty,
-ships/starbases in the queue, the turn-time race check, and the
+ships/starbases in the queue, and the
 BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses,
 Radiating Hydro-Ram colonist deaths and transport tasks.
 
@@ -288,14 +306,15 @@ production queue on a planet that changed owner is skipped: it takes
 the new owner's default queue, which the vectors do not carry (TK-108-A
 and TK-108-C).
 
-- **SL-starbases** (CONFIRMED). Not modelled: the turn-time race check
-  (RACES.md "In a running game"). In the original the check degraded the
-  race, so planet 15's replacement starbase reached only 88% in year 1
-  and its ships came in year 2. Elegy finishes the starbase in year 1 and
-  numbers planet 15's fleet ahead of 18 and 19, and the surface minerals
-  follow. With the degraded race values loaded, Elegy matches the vector
-  exactly. The fleet check did not run until the harness compared the
-  orbit field.
+- **SL-starbases** (CONFIRMED). With the race check, year 1 matches,
+  fleet numbers included. Year 2 fails on planet 4's surface minerals:
+  Elegy has 5, 1 and 7 kT less than the original. Not modelled: remote
+  mining. Player 1's Mini-Miner, built at planet 4 in year 1 with two
+  Robo-Mini-Miners (8 mining points), mines its owner's Alternate
+  Reality planet in year 2 as a separate mining step (KERNEL.md
+  "Owned planets", CONFIRMED KB-1B). That step gives trunc(conc·8/100)
+  plus the random remainder: 4 + 1, 0 + 1 and 6 + 1 at concentrations
+  62, 10 and 87, the observed gap.
 - **MF-02, MF-03h, MF-03s, MF-04, MF-04b, MF-04d, MF-05b, MF-09h,
   MF-09s** (CONFIRMED and MEASURED). Not diagnostic. Where a fleet stops
   in a minefield is decided by the hit draws (OBJECTS.md "Hits on
@@ -307,9 +326,22 @@ and TK-108-C).
   Elegy loads it as a packet for planet 0 at warp 4, decay class 0, and
   keeps 1000. Asked the vectors owner whether it is salvage exported as
   a packet.
-- **Minefield knowledge** is skipped, not failed: `known_to` and
-  `radius` in minefield expectations are not compared until the
-  objects keep per-player minefield knowledge.
+- **MF-13a, MF-13c** (CONFIRMED). The lone minefield at 1400,1400,
+  with no scanner of either player near it, ends the year known to
+  nobody, not even its owner. Elegy's sight rule makes a player's own
+  minefields always known (`objects.Space.Scan`), so it marks the
+  owner. These passed before only because `known_to` was not compared.
+  Sent to the objects lane as a rule question.
+- A minefield's `radius` is not compared: SCANNING.md defines no
+  per-player known radius.
+
+The harness checks `view` expectations (vectors README.md) from each
+year's `PlayerView`s: a planet's report level (0 none, 1 position, 3
+normal, 4 detailed, PARITY.md "Co-location and orbit reports") and
+starbase visibility, a fleet's level (3 seen, 4 with its cargo) and
+`known`, and whether a minefield, packet, wormhole end or Trader was
+seen that year. Other view fields are skipped. SC028-T75-out is
+skipped as a setup artifact (PARITY.md).
 
 ## Open spec questions
 

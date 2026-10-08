@@ -142,3 +142,45 @@ func TestPredictionTurnAppliesOrders(t *testing.T) {
 		t.Errorf("planet 2 owner %d, want 1", p.Owner)
 	}
 }
+
+// stubRaces is a RaceChecker that keeps a count, to test where
+// GenerateTurn calls the race check and that it copies the checker.
+type stubRaces struct{ calls int }
+
+func (s *stubRaces) CheckRaces(g *Game) []Event {
+	s.calls++
+	g.Players[0].Race.GrowthRate = 1
+	return []Event{{Kind: EventRacePenalized, Player: 0, Planet: -1, Fleet: -1}}
+}
+
+func (s *stubRaces) CloneRaces() RaceChecker { c := *s; return &c }
+
+// The race check runs once a year at KERNEL.md step 2a, and its change
+// applies to the year's growth (RACES.md "In a running game"); the input
+// game's checker is left unchanged.
+func TestPredictionRaceCheckInTurn(t *testing.T) {
+	g := pgHomeworld()
+	before := pgHomeworld()
+	stub := &stubRaces{}
+	g.Races = stub
+	r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stub.calls != 0 || r.Game.Races.(*stubRaces).calls != 1 {
+		t.Errorf("calls: input %d, result %d; want 0 and 1", stub.calls, r.Game.Races.(*stubRaces).calls)
+	}
+	n := 0
+	for _, e := range r.Events {
+		if e.Kind == EventRacePenalized {
+			n++
+		}
+	}
+	if n != 1 || r.Game.Players[0].Race.GrowthRate != 1 {
+		t.Errorf("%d penalty events, growth rate %d; want 1 and 1", n, r.Game.Players[0].Race.GrowthRate)
+	}
+	plain, _ := GenerateTurn(before, nil, Jrc3(), highRand{})
+	if r.Game.Planets[0].Population >= plain.Game.Planets[0].Population {
+		t.Errorf("population %d with the checked race, %d without; want less growth", r.Game.Planets[0].Population, plain.Game.Planets[0].Population)
+	}
+}

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -85,6 +86,9 @@ type pvPlayer struct {
 		Mine                 pvEconomy         `json:"mine"`
 		ResearchCost         map[string]string `json:"research_cost"`
 		FactoriesCostLess    bool              `json:"factories_cost_less"`
+		LeftoverSpend        string            `json:"leftover_spend"`
+		Stat15               int               `json:"stat_15"`
+		TechsStartHigh       bool              `json:"techs_start_high"`
 	} `json:"race"`
 }
 
@@ -204,6 +208,8 @@ type pvExpect struct {
 	// Sample marks one stream's random outcome (README.md "sample"):
 	// a match counts, a mismatch is skipped as a sample.
 	Sample bool `json:"sample"`
+	// Viewer is a view expectation's viewing player.
+	Viewer *int `json:"viewer"`
 }
 
 // pvSpace loads a vector's space objects and checks the expectations
@@ -233,6 +239,22 @@ type PVExpect struct {
 }
 
 var pvSpaceObjects pvSpace
+
+// PVRaceSettings is what the race check needs of a vector player beyond
+// the engine's Race (vectors README.md "race").
+type PVRaceSettings struct {
+	ExpensiveAt3  bool
+	Spend, Stat15 int
+	Computer      bool
+}
+
+// pvRaces builds the game's race checker (KERNEL.md step 2a) from the
+// loaded players and their settings. Package races imports the engine,
+// so the external test package supplies it (races_parity_test.go).
+var pvRaces func(g *Game, settings []PVRaceSettings) RaceChecker
+
+// pvLeftoverSpend maps a race's leftover_spend to its wizard number.
+var pvLeftoverSpend = map[string]int{"surface_minerals": 0, "mineral_concentrations": 1, "mines": 2, "factories": 3, "defenses": 4}
 
 func (p *pvBattlePlan) UnmarshalJSON(b []byte) error {
 	var q struct {
@@ -292,6 +314,8 @@ type pvLoaded struct {
 	// endID maps a vector wormhole end id to its waypoint target ID
 	// (pvWormholeEnds).
 	endID map[int]int
+	// views is each generated year's player views, by year.
+	views [][]PlayerView
 }
 
 // pvWormholeEnds pairs the vector's wormhole ends: in id order, an end not
@@ -443,6 +467,17 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 			fmt.Sscan(other, &o)
 			pl.Relations[o] = map[string]Relation{"friend": RelationFriend, "neutral": RelationNeutral, "enemy": RelationEnemy}[rel]
 		}
+	}
+	if pvRaces != nil && l.global == "" {
+		settings := make([]PVRaceSettings, len(s.Players))
+		for _, p := range s.Players {
+			spend, ok := pvLeftoverSpend[p.Race.LeftoverSpend]
+			if !ok {
+				return nil, fmt.Errorf("leftover_spend %q", p.Race.LeftoverSpend)
+			}
+			settings[p.ID] = PVRaceSettings{ExpensiveAt3: p.Race.TechsStartHigh, Spend: spend, Stat15: p.Race.Stat15, Computer: p.Computer}
+		}
+		g.Races = pvRaces(g, settings)
 	}
 
 	addDesign := func(d pvDesign, starbase bool) error {
@@ -748,8 +783,8 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 }
 
 // waypoint converts a waypoint's position, warp and target for a fleet of
-// owner, or names what Elegy cannot model. A stargate jump (warp 11)
-// holds the fleet.
+// owner, or names what Elegy cannot model. Warp 11 is a stargate jump
+// (movement runs it); a higher warp is not modelled.
 func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
 	wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp}
 	why := ""
@@ -902,6 +937,9 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 			}
 		}
 		return nil
+	}
+	if e.Kind == "view" {
+		return l.viewCheck(g, e, eq, fleet)
 	}
 	switch e.Kind {
 	case "fleet", "fleet_gone":
@@ -1335,6 +1373,7 @@ func runVector(v *pvVector, k int) []pvResult {
 	}
 	// Generate year by year, keeping each year's game.
 	games := []Game{l.g}
+	l.views = [][]PlayerView{nil}
 	g := l.g
 	var genErr error
 	for y := 1; y <= v.Years; y++ {
@@ -1352,6 +1391,7 @@ func runVector(v *pvVector, k int) []pvResult {
 		}
 		g = r.Game
 		games = append(games, g)
+		l.views = append(l.views, r.Views)
 	}
 	for _, c := range v.Cases {
 		if l.global != "" {
@@ -1400,6 +1440,95 @@ func runVector(v *pvVector, k int) []pvResult {
 	return out
 }
 
+// pvPlanetLevels is the vectors' planet report level for each of
+// Elegy's (SCANNING.md "What a planet report contains"; PARITY.md
+// "Co-location and orbit reports": 1 position, 3 normal, 4 detailed).
+var pvPlanetLevels = map[ReportLevel]int{ReportNone: 0, ReportPosition: 1, ReportNormal: 3, ReportDetailed: 4}
+
+// viewCheck checks a view expectation: what player viewer knows of a
+// planet, a fleet or a space object at the end of the year (vectors
+// README.md "view").
+func (l *pvLoaded) viewCheck(g *Game, e pvExpect, eq map[string]json.RawMessage, fleet func(owner, id int) *Fleet) string {
+	if e.Viewer == nil || e.Year >= len(l.views) || *e.Viewer >= len(l.views[e.Year]) {
+		return "skip: view without its viewer"
+	}
+	v := l.views[e.Year][*e.Viewer]
+	var sub struct {
+		Kind  string `json:"kind"`
+		Owner int    `json:"owner"`
+		ID    int    `json:"id"`
+	}
+	json.Unmarshal(e.Subject, &sub)
+	got := map[string]any{}
+	switch sub.Kind {
+	case "planet":
+		id := l.planet[sub.ID]
+		level, sb := ReportNone, false
+		for _, r := range v.Planets {
+			if r.Planet == id {
+				level, sb = r.Level, r.Starbase
+			}
+		}
+		if level == ReportOwn {
+			return "skip: view of an own planet"
+		}
+		got["level"], got["starbase_visible"] = pvPlanetLevels[level], sb
+	case "fleet":
+		if sub.Owner == *e.Viewer {
+			return "skip: view of an own fleet"
+		}
+		f := fleet(sub.Owner, sub.ID)
+		level := 0
+		if f != nil {
+			for _, s := range v.Fleets {
+				if s.Fleet == f.ID {
+					// Seen (3), or seen with its cargo (4: PARITY.md
+					// "Co-location and orbit reports").
+					level = 3
+					if s.Cargo != nil {
+						level = 4
+					}
+				}
+			}
+		}
+		got["level"], got["known"] = level, level > 0
+		if level != 4 {
+			// Cargo not shown reads as all zero (SC027).
+			got["cargo_shown"] = []int{0, 0, 0, 0}
+		}
+	case "minefield", "packet":
+		// "known" is whether the object is in the viewer's file this
+		// year: seen (SCANNING.md "Space objects").
+		list := v.Objects.Minefields
+		if sub.Kind == "packet" {
+			list = v.Objects.Packets
+		}
+		got["known"] = slices.Contains(list, [2]int{sub.Owner, sub.ID})
+	case "wormhole":
+		id, ok := l.endID[sub.ID]
+		got["known"] = ok && slices.Contains(v.Objects.Wormholes, id)
+	case "trader":
+		got["known"] = slices.Contains(v.Objects.Traders, sub.ID)
+	default:
+		return "skip: view of a " + sub.Kind
+	}
+	for k, w := range eq {
+		gv, ok := got[k]
+		if !ok {
+			return "skip: view field " + k
+		}
+		var want any
+		json.Unmarshal(w, &want)
+		gb, _ := json.Marshal(gv)
+		var gn any
+		json.Unmarshal(gb, &gn)
+		if fmt.Sprint(gn) != fmt.Sprint(want) {
+			return pvMismatch(sub.Kind+" "+k, gv, want)
+		}
+	}
+	return ""
+}
+
 const pvBaseline = "testdata/vectors/baseline.txt"
 
 // pvLegacyOff names the LEGACY BUG cases whose switch is off by default,
@@ -1414,6 +1543,9 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
+	// PARITY.md: the original put the fleet at y 1000, not the vector's
+	// y 920, inside the cloak bound; SC-033 repeats the case.
+	"SC028-T75-out": "setup artifact (PARITY.md \"SC-028-T75-out\")",
 }
 
 func pvUnique(xs []string) []string {
