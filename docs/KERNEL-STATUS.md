@@ -295,12 +295,14 @@ Places where the original has no behavior to copy, and Elegy chose one.
 - **Alternate Reality planet with population, habitability ≥ 0 and no
   starbase** (maximum population 0). The original stops turn generation
   with an integer divide by zero (KERNEL.md, CONFIRMED KX-001 Z1, LEGACY
-  BUG). Elegy: `GenerateTurn` returns a `*ZeroMaxPopulationError` naming
-  the planet before changing anything. The rule lives in `checkGenerable`
-  (`turn.go`), so a different choice is a change there and in the
-  population rule. A hostile planet in the same state generates normally
-  (hostile deaths, 1 resource; KX-001 Z3). Calling `GrowPopulation`
-  directly with maximum 0 still treats the planet as fully overcrowded.
+  BUG). Elegy's ruleset switch `Legacy.ZeroMaxPopulationStop` decides:
+  on (`jrc3-faithful`, `elegy` v1), `GenerateTurn` returns a
+  `*ZeroMaxPopulationError` naming the planet before changing anything;
+  off (`elegy` v2, the default; INTENTIONALLY DIFFERENT, Bobby's "Keep
+  going"), the year is generated and the planet's growth treats it as
+  maximally overcrowded (`crowdingPermille`): more than 10 units lose 12%
+  a year, 10 or fewer stay. See RULESET.md. A hostile planet in the same
+  state generates normally (hostile deaths, 1 resource; KX-001 Z3).
 
 Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
 
