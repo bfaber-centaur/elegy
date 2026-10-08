@@ -78,8 +78,10 @@ type SpaceObjects interface {
 
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When
-	// knowledge is computed", "Space objects").
-	SeeObjects(g *Game, scanners []ObjectScanner)
+	// knowledge is computed", "Space objects"), and returns, by player,
+	// what the objects add to that player's sight of fleets, planets and
+	// players. cloak gives a fleet's cloak percent, by fleet index.
+	SeeObjects(g *Game, scanners []ObjectScanner, cloak func(fleet int) int, rng Rand) []ObjectSight
 }
 
 // ObjectScanner is one of a player's viewing objects, a fleet or a
@@ -101,6 +103,29 @@ func (g *Game) ObjectScanners() []ObjectScanner {
 		}
 	}
 	return out
+}
+
+// ObjectSight is what the space objects add to one player's view: more
+// scanners (a Packet Physics player's packets in flight, SCANNING.md "PP
+// packet scanners"), other players' fleets seen by its Space Demolition
+// minefields (fleet indices, SCANNING.md "Space Demolition (SD)
+// minefields"), and the other players made known by a minefield or
+// packet it sees (SCANNING.md "Space objects").
+type ObjectSight struct {
+	Scanners []ObjectScanner
+	Fleets   []int
+	Owners   []int
+	// Seen is the space objects the player sees this year.
+	Seen ObjectsSeen
+}
+
+// ObjectsSeen names the space objects a player sees in a year
+// (SCANNING.md "Space objects"), in object order: minefields and packets
+// by owner and number, wormhole ends by waypoint target ID, Traders by
+// index.
+type ObjectsSeen struct {
+	Minefields, Packets [][2]int
+	Wormholes, Traders  []int
 }
 
 // MineLayer is a fleet laying mines this year (OBJECTS.md "Laying"):

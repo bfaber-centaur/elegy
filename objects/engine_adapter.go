@@ -124,8 +124,10 @@ func (s *Space) MineCheck(g *engine.Game, fi int, from, toward engine.Point, dis
 }
 
 // MineHit is ApplyHit for fleet fi; the destroyed ships' minerals become
-// salvage at the stop point.
+// salvage at the stop point. The fleet's owner learns the fields that
+// stopped it (LearnHit), before the hit can destroy the fleet.
 func (s *Space) MineHit(g *engine.Game, fi int, kind int, rng engine.Rand) []engine.Event {
+	s.LearnHit(g, &g.Fleets[fi], Stop{Hit: true, Kind: MineKind(kind)}, g.Fleets[fi].Pos)
 	h := ApplyHit(g, s, fi, MineKind(kind), rng)
 	f := &g.Fleets[fi]
 	out := []engine.Event{{Kind: engine.EventMineHit, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: h.Paid}}
@@ -328,23 +330,39 @@ func (s *Space) SweepMines(g *engine.Game) []engine.Event {
 	return out
 }
 
-// SeeObjects marks the wormhole ends each player sees this year as known
-// (SCANNING.md "Space objects", CONFIRMED OB-011, OB-017, OB-018): never
-// beyond a scanner's normal range R; within it, an end is seen when the
-// player already knows it, or d² ≤ P², or d² ≤ ⌊R²/16⌋. Minefield
-// knowledge is not kept yet.
-func (s *Space) SeeObjects(g *engine.Game, scanners []engine.ObjectScanner) {
-	for wi := range s.Wormholes {
-		for ei := range s.Wormholes[wi].Ends {
-			e := &s.Wormholes[wi].Ends[ei]
-			for _, sc := range scanners {
-				d := d2(e.Pos, sc.Pos)
-				if d <= sc.R*sc.R && (e.KnownBy(sc.Player) || d <= sc.P*sc.P || d <= sc.R*sc.R/16) {
-					e.MarkKnown(sc.Player)
-				}
+// SeeObjects runs Scan for each player with that player's scanners
+// (SCANNING.md "Space objects"), which records the minefields and
+// wormhole ends seen as known, then returns what the objects add to each
+// player's sight: its PP packet scanners, the fleets its Space Demolition
+// minefields see (DemolitionSightings, players in order), the owners
+// made known and the objects seen.
+func (s *Space) SeeObjects(g *engine.Game, scanners []engine.ObjectScanner, cloak func(int) int, rng engine.Rand) []engine.ObjectSight {
+	out := make([]engine.ObjectSight, len(g.Players))
+	for v := range g.Players {
+		var scs []Scanner
+		for _, sc := range scanners {
+			if sc.Player == v {
+				scs = append(scs, Scanner{Pos: sc.Pos, R: sc.R, P: sc.P, Fleet: sc.Fleet})
 			}
 		}
+		seen := s.Scan(g, v, scs)
+		for _, ps := range s.PacketScanners(g, v) {
+			out[v].Scanners = append(out[v].Scanners, engine.ObjectScanner{Player: v, Pos: ps.Pos, R: ps.R, P: ps.P})
+		}
+		out[v].Owners = seen.Owners
+		for _, i := range seen.Minefields {
+			out[v].Seen.Minefields = append(out[v].Seen.Minefields, [2]int{s.Minefields[i].Owner, s.Minefields[i].Number})
+		}
+		for _, i := range seen.Packets {
+			out[v].Seen.Packets = append(out[v].Seen.Packets, [2]int{s.Packets[i].Owner, s.Packets[i].Number})
+		}
+		for _, w := range seen.Wormholes {
+			out[v].Seen.Wormholes = append(out[v].Seen.Wormholes, WormholeEndID(w.Wormhole, w.End))
+		}
+		out[v].Seen.Traders = seen.Traders
+		out[v].Fleets = s.DemolitionSightings(g, v, cloak, rng)
 	}
+	return out
 }
 
 // Stargate runs Jump and reports it to the engine; ships destroyed, a lost

@@ -46,6 +46,7 @@ type PlayerView struct {
 	Designs []DesignSighting // other players' designs seen, by design index
 	Players []PlayerSighting // other known players, in player order
 	Scores  []ScoreRecord    // score records this player may see (scores.go)
+	Objects ObjectsSeen      // the space objects seen this year
 }
 
 // FleetSighting is another player's fleet as a player sees it.
@@ -404,17 +405,39 @@ func Views(g Game, estimates map[int]int) []PlayerView {
 // planet reports and designs, and the bombing checks made at the bombing
 // step (bombs[v] holds the planet indexes viewer v would bomb).
 func views(g Game, estimates map[int]int, battles []battleSeen, bombs []map[int]bool) []PlayerView {
+	return viewsWith(g, estimates, battles, bombs, nil)
+}
+
+// viewsWith is views with what the space objects add to each player's
+// sight (ObjectSight, by player; nil for none).
+func viewsWith(g Game, estimates map[int]int, battles []battleSeen, bombs []map[int]bool, sights []ObjectSight) []PlayerView {
 	out := make([]PlayerView, len(g.Players))
 	for v := range g.Players {
-		out[v] = g.view(v, estimates, battles, bombs[v])
+		var sight ObjectSight
+		if v < len(sights) {
+			sight = sights[v]
+		}
+		out[v] = g.view(v, estimates, battles, bombs[v], sight)
 	}
 	return out
 }
 
-func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs map[int]bool) PlayerView {
-	view := PlayerView{Player: v}
+func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs map[int]bool, sight ObjectSight) PlayerView {
+	view := PlayerView{Player: v, Objects: sight.Seen}
 	scs := g.scanners(v)
+	// A PP player's packets scan like penetrating planet scanners
+	// (SCANNING.md "PP packet scanners").
+	for _, s := range sight.Scanners {
+		scs = append(scs, scanner{pos: s.Pos, R: s.R, P: s.P, tachyon: 100})
+	}
+	sdSeen := map[int]bool{}
+	for _, fi := range sight.Fleets {
+		sdSeen[fi] = true
+	}
 	known := map[int]bool{}
+	for _, p := range sight.Owners {
+		known[p] = true
+	}
 	designs := map[int]bool{}
 	// Designs disclosed in full: every other player's design that fought
 	// the viewer in a battle, even when all its ships were destroyed
@@ -466,7 +489,7 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 		cloak := g.fleetCloak(f)
 		// Every enemy fleet orbiting the viewer's planet is seen
 		// (SCANNING.md "Fleets at your planets", CONFIRMED SC-024, SC-026).
-		seen := orbit && owner == v
+		seen := orbit && owner == v || sdSeen[i]
 		cargo := false
 		for _, s := range scs {
 			if seesFleet(s, f.Pos, orbit, cloak) {
@@ -497,7 +520,24 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 		view.Fleets = append(view.Fleets, fs)
 	}
 
-	// Planets.
+	// Planets. An Interstellar Traveler gets a normal report of every
+	// planet whose starbase has a stargate within range of one of its own
+	// planets' gates (SCANNING.md "Interstellar Traveler through gates",
+	// CONFIRMED OB-013).
+	type itGate struct {
+		pos Point
+		r   int // -1 for any range
+	}
+	var itGates []itGate
+	if g.Players[v].Race.PRT == PRTInterstellarTraveler {
+		for i := range g.Planets {
+			if p := &g.Planets[i]; p.Owner == v {
+				if r, ok := g.gateRange(p); ok {
+					itGates = append(itGates, itGate{p.Pos, r})
+				}
+			}
+		}
+	}
 	for i := range g.Planets {
 		p := &g.Planets[i]
 		if p.Owner == v {
@@ -516,6 +556,20 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 		}
 		if leftOutPlanets[i] || bombs[i] {
 			level = max(level, ReportNormal)
+		}
+		// An IT viewer's gates report the gated planets in their range.
+		for _, gt := range itGates {
+			if _, ok := g.gateRange(p); ok {
+				dd := d2(gt.pos, p.Pos)
+				if gt.r < 0 || dd <= gt.r*gt.r {
+					level = max(level, ReportNormal)
+					// ASSUMPTION S5: the starbase cloak bound uses the
+					// gate's range as P (BINARY-ONLY in SCANNING.md).
+					if gt.r < 0 || dd <= (100-sbCloak)*(100-sbCloak)*gt.r*gt.r/10000 {
+						sbShown = true
+					}
+				}
+			}
 		}
 		for _, s := range scs {
 			dd := d2(s.pos, p.Pos)
@@ -672,4 +726,27 @@ func (g *Game) defenseEstimate(p *Planet) int {
 	}
 	k := int(100*s + 0.5)
 	return max(1, min(15, (104-k)/6))
+}
+
+// gateRange is the safe range in ly of the stargate on planet p's
+// starbase, -1 for any range (OBJECTS.md "What makes a gate": the
+// component table's safe_range, null meaning any).
+func (g *Game) gateRange(p *Planet) (int, bool) {
+	if p.Owner == NoOwner || !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) {
+		return 0, false
+	}
+	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+		if sl.Count <= 0 || sl.Part.Kind != PartStargate {
+			continue
+		}
+		c, ok := Components().Lookup(sl.Part.Name)
+		if !ok {
+			continue
+		}
+		if r, ok := c.Stats["safe_range"].(float64); ok {
+			return int(r), true
+		}
+		return -1, true
+	}
+	return 0, false
 }

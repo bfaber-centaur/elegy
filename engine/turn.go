@@ -85,6 +85,16 @@ type Game struct {
 	// Objects is the game's minefields, wormholes and Mystery Traders
 	// (objects.go), or nil for none.
 	Objects SpaceObjects
+	// Races runs the yearly race check (racecheck.go), or nil to skip it.
+	// A checker that keeps state of its own implements RaceCloner, so
+	// GenerateTurn leaves the input game's checker unchanged.
+	Races RaceChecker
+}
+
+// RaceCloner is a RaceChecker that keeps state between years and copies
+// it for GenerateTurn's copy of the game.
+type RaceCloner interface {
+	CloneRaces() RaceChecker
 }
 
 type Player struct {
@@ -249,6 +259,11 @@ func GenerateTurn(
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
 	events = append(events, g.loadPass(false)...)
+
+	// The race check (KERNEL.md "Turn order" step 2a).
+	if g.Races != nil {
+		events = append(events, g.Races.CheckRaces(&g)...)
+	}
 
 	// Objects move before fleets, then the waypoint check again
 	// (step 3.2).
@@ -440,10 +455,14 @@ func GenerateTurn(
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
+	//
+	// ASSUMPTION O13: the space objects are seen, with their Space
+	// Demolition cloak draws, before the population estimates draw.
+	var sights []ObjectSight
 	if g.Objects != nil {
-		g.Objects.SeeObjects(&g, g.ObjectScanners())
+		sights = g.Objects.SeeObjects(&g, g.ObjectScanners(), func(fi int) int { return g.fleetCloak(&g.Fleets[fi]) }, rng)
 	}
-	views := views(g, PopulationEstimates(g, rng), fights.seen, bombs)
+	views := viewsWith(g, PopulationEstimates(g, rng), fights.seen, bombs, sights)
 	for v := range views {
 		views[v].Scores = g.visibleScores(v, scores)
 	}
@@ -478,6 +497,9 @@ func (g Game) clone() Game {
 	}
 	if g.Objects != nil {
 		c.Objects = g.Objects.CloneObjects()
+	}
+	if r, ok := g.Races.(RaceCloner); ok {
+		c.Races = r.CloneRaces()
 	}
 	return c
 }
