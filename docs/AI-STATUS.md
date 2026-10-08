@@ -44,6 +44,7 @@ unless the project decides otherwise.
 | Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
 | Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
+| Lay-mines tasks: Robotoid's idle scouts from year index 41, Cybertron's slot-0 fleets (here, or at a random nearby planet) | robotoid.md §4, cybertron.md §5 | BINARY-ONLY (Cybertron's not exercised) | `ai/fleet.go` `layMines` | `TestDriversLayMines`, `TestCybertronMinelayer` |
 | Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestDriversOrderSplitFleets` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
@@ -123,6 +124,8 @@ them it stayed on its homeworld.
 | A50 | An attack-packet target's catch warp c (the Dw + t of its starbase design known in full, OBJECTS.md "Impact") is not halved for an Interstellar Traveler owner: §6 names no halving, and the view holds no PRT. A target whose c is at least w is skipped, since a packet no faster than its catcher does no damage. |
 | A51 | Retired: the scanner shot's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset switches `CybertronPacketMarkNextID` and `CybertronScannerShotOverflow` (off in elegy, on in jrc3-faithful); with them off, the mark is on the destination. |
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
+| A53 | The lay-mines task the planners give lays indefinitely: robotoid.md gives Robotoid's scouts the task with parameters 5 and 5 without reading them, and cybertron.md names no duration. |
+| A54 | Robotoid does not clear an attack fleet's waypoint-0 marker task: robotoid.md §4 refers to it without defining it, and the only task Elegy's Robotoid sets that could be one, the scouts' lay mines, is never on an attack fleet. |
 
 ## Spec questions
 
@@ -171,8 +174,6 @@ test). It is a determinism check, not a parity check.
   attack) and 5 (blocked queues).
 - Orders the engine does not accept yet: load tasks, and unloading
   colonists at another player's planet (freighter invasion).
-- The lay-mines steps: the engine now has a lay-mines task, but the
-  planners do not order it yet and report the step as unsupported.
 - Battle plan 4 is ordered now that every new player starts with the
   five plans (newgame, COMBAT.md "Starting plans"); a player with fewer
   plans reports it as unsupported.

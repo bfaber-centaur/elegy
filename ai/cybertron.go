@@ -30,7 +30,7 @@ import (
 //
 // Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
 // automation steps 4 and 5; docs/AI-STATUS.md lists them. Steps the
-// engine cannot order (lay mines, invasion) go to Result.Unsupported.
+// engine cannot order (invasion) go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -452,9 +452,7 @@ func (t *cyberTurn) nearestColonizable(from engine.Point, skipTaken bool) (int, 
 	return best, bd
 }
 
-// minelayer is pass B's slot-0 rule (not exercised in AIX). Elegy cannot
-// lay mines yet, so the task is reported; a move to a random nearby planet
-// is still given, with no task.
+// minelayer is pass B's slot-0 rule (not exercised in AIX).
 func (t *cyberTurn) minelayer(i int) {
 	v := t.v
 	f := &v.Fleets[i]
@@ -466,12 +464,13 @@ func (t *cyberTurn) minelayer(i int) {
 	if t.count(f, 0) > 6 && t.rng.Intn(5) == 0 {
 		if id, ok := t.randomNearby(f.Pos, 105, true); ok {
 			pos, _ := v.planetPos(id)
-			t.emit(f, moveOrder(f, toPlanet(id, pos, 4, engine.Task{})))
-			t.res.unsupported("fleet %d: lay-mines task at the new waypoint", f.ID)
+			t.emit(f, moveOrder(f, toPlanet(id, pos, 4, layMines)))
 			return
 		}
 	}
-	t.res.unsupported("fleet %d: lay mines here (cybertron.md §5 slot-0 fleets)", f.ID)
+	if f.Task.Kind != engine.TaskLayMines {
+		t.emit(f, taskHere(f, layMines))
+	}
 }
 
 // freighter is §5's freighter rule.

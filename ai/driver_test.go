@@ -289,3 +289,46 @@ func TestDriversOrderSplitFleets(t *testing.T) {
 		t.Errorf("Robotoid gave %d splits and %d orders naming a new fleet, want some of each", splits, named)
 	}
 }
+
+// taskSpy records, for the year just played, the indices of a driver's
+// waypoint orders that give the task kind on waypoint 0 or a waypoint.
+type taskSpy struct {
+	d    *Driver
+	kind engine.TaskKind
+	hits []int
+}
+
+func (s *taskSpy) Orders(r game.Report) ([]engine.Order, error) {
+	os, err := s.d.Orders(r)
+	s.hits = nil
+	for k, o := range os {
+		if w, ok := o.(engine.WaypointOrder); ok && (w.Task.Kind == s.kind || slices.ContainsFunc(w.Waypoints, func(p engine.Waypoint) bool { return p.Task.Kind == s.kind })) {
+			s.hits = append(s.hits, k)
+		}
+	}
+	return os, err
+}
+
+// From year index 41 Robotoid's idle scouts lay mines (robotoid.md §4),
+// and the game accepts every such order over 70 years.
+func TestDriversLayMines(t *testing.T) {
+	g, _ := loopSetup(t, engine.ElegyRules(), 1)
+	rb := &taskSpy{d: NewDriver(Robotoid, Expert), kind: engine.TaskLayMines}
+	drivers := []game.Driver{game.Idle, rb, NewDriver(Rototill, Expert), NewDriver(Cybertron, Expert)}
+	n := 0
+	for range 70 {
+		y, err := g.Advance(drivers)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, o := range y.Result.Orders {
+			if o.Player == 1 && slices.Contains(rb.hits, o.Index) && o.Err != nil {
+				t.Errorf("Robotoid order %d rejected: %v", o.Index, o.Err)
+			}
+		}
+		n += len(rb.hits)
+	}
+	if n == 0 {
+		t.Error("Robotoid gave no lay-mines task in 70 years")
+	}
+}
