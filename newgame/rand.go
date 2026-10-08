@@ -38,3 +38,7 @@ func (r *Source) Intn(n int) int {
 		}
 	}
 }
+
+// State is the generator's whole state: NewRand(r.State()) continues the
+// stream exactly where r is, so a saved game can resume its draws.
+func (r *Source) State() uint64 { return r.s }

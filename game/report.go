@@ -48,6 +48,67 @@ type Report struct {
 	// previous year: one entry per order, plus an entry with Index −1
 	// when the whole file was refused.
 	Orders []OrderOutcome
+
+	// History is the player's planet history: for every planet ever
+	// reported to the player, the latest report and the year it
+	// describes, by planet id. It includes the player's own colonies it
+	// has since lost, still recorded as its own (stars-elegy AI.md §1
+	// "What it sees", CONFIRMED AI-12, uses that record). See
+	// PlanetRecord.
+	History []PlanetRecord
+
+	// Universe is every planet of the galaxy, seen or not: id, position
+	// and name index. Every player knows where every planet is: a
+	// computer player flies colonizers to planets it has never scanned
+	// (stars-elegy AI.md §1 "What it sees", CONFIRMED AI-12) and scouts
+	// to the nearest planet it has never seen (ai/rototill.md §3, MEASURED
+	// AI-17). Nothing else about an unseen planet is known.
+	Universe []UniversePlanet
+	// Wormholes are the wormhole ends the player knows (OBJECTS.md
+	// "Wormholes"), in end order.
+	Wormholes []KnownWormholeEnd
+
+	// Rand draws from the game's random stream. The loop sets it; a
+	// driver that needs random numbers must draw them from it, and only
+	// during its Orders call (AI.md §1 "Random numbers": computer players
+	// draw from the host's single generator before the year is generated,
+	// in player order). Nil outside the loop.
+	Rand engine.Rand `json:"-"`
+}
+
+// UniversePlanet is a planet as every player knows it. NameIndex is the
+// planet's index into the original's 999-name list (newgame.PlanetName
+// gives Elegy's placeholder text).
+type UniversePlanet struct {
+	ID        int
+	Pos       engine.Point
+	NameIndex int
+}
+
+// KnownWormholeEnd is a wormhole end a player knows. End is the end's
+// object id (2 × wormhole + end, objects.WormholeEndID). Stability is
+// the jump chance the wormhole report names, 0 Rock Solid .. 6 Extremely
+// Volatile (OBJECTS.md "Stability", BINARY-ONLY); the end's own class is
+// not shown. Destination is where the end leads, set only when the
+// player knows it and sees the other end this year (OBJECTS.md
+// "Destination knowledge", objects.Space.Destination).
+type KnownWormholeEnd struct {
+	End         int
+	Pos         engine.Point
+	Stability   int
+	Destination *engine.Point `json:",omitempty"`
+}
+
+// PlanetRecord is one planet of a player's planet history: the latest
+// report the player received about it and the year that report
+// describes (the game year whose start it shows).
+//
+// ASSUMPTION G1: a newer report replaces the whole record, whatever its
+// level. stars-elegy does not say how the original merges a lower-level
+// report into its history record.
+type PlanetRecord struct {
+	Year   int
+	Report engine.PlanetReport
 }
 
 // OwnDesign is one of the player's designs: its slot and the design.
@@ -74,6 +135,9 @@ type OrderOutcome struct {
 // events and the order results (engine.TurnResult's Views, Events and
 // Orders). For a new game, views are the starting knowledge and events
 // and results are empty.
+//
+// NewReport leaves History, Universe, Wormholes and Rand empty; the
+// loop's Game.Report fills them.
 func NewReport(g engine.Game, player int, views []engine.PlayerView, events []engine.Event, results []engine.OrderResult) (Report, error) {
 	if player < 0 || player >= len(g.Players) {
 		return Report{}, fmt.Errorf("game: no player %d in a %d-player game", player, len(g.Players))
