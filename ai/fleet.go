@@ -111,9 +111,12 @@ func scrapOrder(f *engine.Fleet) engine.WaypointOrder {
 // layMines is the lay-mines task the planners give (robotoid.md §4
 // scouts, cybertron.md §5 slot-0 fleets).
 //
-// ASSUMPTION A53: it lays indefinitely. robotoid.md gives Robotoid's task
-// the parameters 5 and 5 without reading them, and cybertron.md names no
-// duration.
+// Robotoid's task lays indefinitely: its duration field 5 is the
+// "indefinitely" value (robotoid.md §4, MEASURED AI-25). ASSUMPTION A53:
+// the order's second field, also 5, is not modelled (its meaning is
+// UNRESOLVED there, and the laying rules use only the duration), and
+// Cybertron's task, for which cybertron.md names no duration, is the
+// same.
 var layMines = engine.Task{Kind: engine.TaskLayMines, Years: engine.YearsIndefinitely}
 
 // taskHere sets waypoint 0's task and keeps the route.
