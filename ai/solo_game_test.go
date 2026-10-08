@@ -100,9 +100,13 @@ func TestRototillPlaysAlone(t *testing.T) {
 
 // A Cybertron game runs 60 years with every order accepted, and replays
 // identically from the same seed. 60 years reach its Privateers,
-// Destroyers and first warship group (cybertron.md §2).
+// Destroyers and first warship group (cybertron.md §2). Cybertron sees
+// other planets only through its scanner-shot packets (§6), so owning
+// more than its homeworld shows they run.
 func TestCybertronPlaysAlone(t *testing.T) {
-	soloCheck(t, "Cybertron", 5, PlayCybertron, 60)
+	if owned := soloCheck(t, "Cybertron", 5, PlayCybertron, 60); owned < 2 {
+		t.Errorf("Cybertron owns %d planets, want more than its homeworld", owned)
+	}
 }
 
 // A Robotoid game runs 60 years with every order accepted, and replays
@@ -111,7 +115,9 @@ func TestRobotoidPlaysAlone(t *testing.T) {
 	soloCheck(t, "Robotoid", 1, PlayRobotoid, 60)
 }
 
-func soloCheck(t *testing.T, name string, typ int, play func(*View, engine.Rand) Result, years int) {
+// soloCheck plays the solo game, checks it and returns the planets the
+// computer player owns at the end.
+func soloCheck(t *testing.T, name string, typ int, play func(*View, engine.Rand) Result, years int) int {
 	g, problems := soloGame(t, typ, play, 11, years)
 	for _, p := range problems {
 		if len(p) >= 9 && p[:9] == "rejected:" {
@@ -142,6 +148,7 @@ func soloCheck(t *testing.T, name string, typ int, play func(*View, engine.Rand)
 	if string(a) != string(b) {
 		t.Error("the same seed gave a different game")
 	}
+	return owned
 }
 
 // Robotoid, Rototill and Cybertron play one game together for 60 years:

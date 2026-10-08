@@ -80,8 +80,8 @@ takes the switch as a parameter from a caller that does.
 | `trader_last_redraw` | `TraderLastRedraw` | on | on | `objects/trader.go` `Space.reward` | OBJECTS.md "Encounters", LEGACY BUG, BINARY-ONLY |
 | `shared_homeworld_minerals` | `SharedHomeworldMinerals` | on | on | `newgame/players.go` `setUpHomeworld` | UNIVERSE.md "Shared starting minerals", LEGACY BUG, CONFIRMED UG16–UG21 |
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
-| `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | `ai/packets.go`, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
-| `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | `ai/packets.go`, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
+| `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
+| `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
 
 Not every off setting has been exercised. One known gap: with
 `colocation` off, a fleet with no scanner still sees a cloaked fleet at its

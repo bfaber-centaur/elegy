@@ -63,8 +63,9 @@ Cybertron explores only with its scanner-shot packets (cybertron.md
 §6): it scraps its starting Scout (Elegy reports the scrap as
 unsupported), a non-penetrating planetary scanner reports no planets,
 and its colony ships take only planets it has seen. With the packets
-built it owns 21 planets after 60 years in its solo smoke game (seed
-and map as in the test); before them it stayed on its homeworld.
+built, `TestCybertronPlaysAlone` requires it to own more than its
+homeworld after 60 years (it logged 21 planets on this branch); before
+them it stayed on its homeworld.
 
 ## Assumptions
 

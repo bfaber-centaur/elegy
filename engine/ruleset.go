@@ -135,13 +135,15 @@ type Legacy struct {
 	// CybertronPacketMarkNextID: Cybertron's scanner shot tests and sets
 	// the packet mark of the planet whose id is one higher than the
 	// shot's destination, not the destination's own (stars-elegy
-	// ai/cybertron.md §6 "Packet marks", LEGACY BUG, MEASURED AI-24).
-	// ai/packets.go, read from the report's ruleset.
+	// ai/cybertron.md §6 "Packet marks", LEGACY BUG, MEASURED AI-24). Not
+	// read yet: Cybertron's packet step is not implemented. The computer
+	// opponents will read it from Report.Rules when they build §6.
 	CybertronPacketMarkNextID bool `json:"cybertron_packet_mark_next_id"`
 	// CybertronScannerShotOverflow: for a warp w of 14 or more, the
 	// scanner shot's minimum-distance test (d² < w⁴) overflows and
 	// passes every planet (stars-elegy ai/cybertron.md §6 "Scanner
-	// shot" step 5, LEGACY BUG, BINARY-ONLY). ai/packets.go.
+	// shot" step 5, LEGACY BUG, BINARY-ONLY). Not read yet, like
+	// CybertronPacketMarkNextID.
 	CybertronScannerShotOverflow bool `json:"cybertron_scanner_shot_overflow"`
 }
 

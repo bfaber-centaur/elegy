@@ -44,11 +44,14 @@ func shot(t *testing.T, v *View, legacy packetLegacy, draws ...int) (*cyberTurn,
 // (310, 0); the inset Random(64) = 20 gives (310, 20). Planet 2 at
 // (312, 20) is nearest: the destination is set at warp 8 and one
 // ironium packet goes to the front of the queue. Clean marks name the
-// destination; the LEGACY BUG marks the planet one id higher.
+// destination (Elegy's rules); jrc3-faithful's LEGACY BUG marks the
+// planet one id higher.
 func TestScannerShot(t *testing.T) {
-	for _, legacy := range []bool{false, true} {
+	for _, rules := range []engine.Ruleset{engine.ElegyRules(), engine.FaithfulRules()} {
+		legacy := rules.ID == engine.FaithfulRules().ID
 		v := shotView(t, "Mass Driver 5", engine.Point{X: 312, Y: 20}, engine.Point{X: 300, Y: 40})
-		ct, marked, rng := shot(t, v, packetLegacy{markNextID: legacy}, 0, 70, 20)
+		v.Rules = rules
+		ct, marked, rng := shot(t, v, packetLegacyOf(v.Rules), 0, 70, 20)
 		if got := rng.bounds; len(got) != 3 || got[0] != 7 || got[1] != 120 || got[2] != 64 {
 			t.Errorf("draw bounds %v, want [7 120 64]", got)
 		}
@@ -65,7 +68,7 @@ func TestScannerShot(t *testing.T) {
 			want = 3
 		}
 		if len(marked) != 1 || !marked[want] {
-			t.Errorf("legacy %v: marks %v, want planet %d", legacy, marked, want)
+			t.Errorf("%s: marks %v, want planet %d", rules.ID, marked, want)
 		}
 	}
 }
