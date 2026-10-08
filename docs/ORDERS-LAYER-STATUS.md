@@ -7,7 +7,9 @@ specification stars-elegy on main (`b654cb3`): `docs/ORDERS.md`, with
 battle plans and their order validation from `docs/COMBAT.md`, research
 and the replay shuffle from `docs/KERNEL.md`, manual transfers to other
 players and the planet side of cargo from `docs/TAKEOVER.md`, and queue
-replace, setting orders, names and design slots from `docs/LIMITS.md`. Nothing else was used.
+replace, setting orders, names and design slots from `docs/LIMITS.md`,
+and the packet settings and items from `docs/OBJECTS.md` "The settings"
+and `docs/KERNEL.md` "Packet items" (stars-elegy `c0bee4b`). Nothing else was used.
 
 The merge order and the design read are the kernel lane's
 `Game.MergeFleets` and `Catalog.ReadDesign` (`engine/fleetops.go`,
@@ -48,7 +50,7 @@ at the end of the replay, before any waypoint task.
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
 | `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
 | `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, a sent percentage kept only against an unused old item of the same kind with exactly that percentage (chosen rule) | LIMITS.md "Production-queue replace" | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueNoNewProgress` |
-| `PlanetSettingsOrder` | own planet; leftover-only and route destination | LIMITS.md "Setting orders" | BINARY-ONLY | `TestPredictionSettingOrders` |
+| `PlanetSettingsOrder` | own planet; leftover-only, route destination, packet destination (unchecked) and packet speed (0 or 4..19, L19) | LIMITS.md "Setting orders"; OBJECTS.md "The settings" | BINARY-ONLY; chosen rule | `TestPredictionSettingOrders`, `TestPacketSettingsOrder` |
 | `RelationsOrder` | only the sender's row | LIMITS.md "Setting orders" | BINARY-ONLY | `TestPredictionSettingOrders` |
 
 ## Implementation assumptions
@@ -76,6 +78,7 @@ and has been sent to stars-elegy as a question.
 | L16 | A relations row needs one entry per player in range; the sender's own entry stays friend. | LIMITS.md says only the sender's row changes. |
 | L17 | (settled: ORDERS.md "Cross-owner cargo", a recipient whose orders replay after the giver's can use the gift the same year, BINARY-ONLY) | |
 | L18 | A patrol task with a negative range rejects the waypoint order. | ORDERS.md gives no check on the patrol range. |
+| L19 | A packet speed other than 0 (unset) or 4..19 refuses the planet-settings order. | OBJECTS.md "The settings": the stored field holds warps 4..19. |
 
 ## Ships leaving production
 
@@ -110,6 +113,10 @@ item.
 | Design delete drops the slot's queue entries | `DeleteDesignOrder` | MEASURED (CO-07) | `TestMeasuredDesignDeleteDropsQueue` |
 | Design edit: a queue entry builds the edited design | queue items name the slot | MEASURED (CO-08) | `TestMeasuredDesignEditQueueBuildsEdited` |
 | Ship item dock check at order validation | `QueueOrder`, `DockAllows` | chosen rule | `TestQueueOrderDesignItems` |
+| Packet item costs | `ItemCost` | minerals MEASURED (OB-028, OB-029) except IT mixed; resources BINARY-ONLY (KERNEL.md "Item costs") | `TestPacketItemCostMatchesLaunch` |
+| Packet items: unit loop, one launch per item per year | `PlanetProduction`, `launchPackets` | BINARY-ONLY (KERNEL.md "Packet items") | `TestPacketItemUnitLoop` |
+| No driver or destination: the item removed, cancel then "completed its orders" | `plain` | MEASURED (OB-028-F) | `TestMeasuredPacketItemNoDestination` |
+| Auto Mineral Packets: mixed units up to the count (at most 1000), auto skip and partial rules, nothing without a driver | `autoInstall` | BINARY-ONLY (KERNEL.md "Packet items") | `TestAutoMineralPackets` |
 
 Production assumptions:
 
@@ -119,10 +126,14 @@ Production assumptions:
 | P2 | A same-hull starbase replacement whose designs do not record slot positions is charged the fresh cost. | Designs from `NewDesign` record them (`Design.SlotPos`). |
 | P3 | A queue order with a design item naming an empty or out-of-range slot is refused. | The host checks no item ids (LIMITS.md "Production-queue replace"). |
 | P4 | A queue that a design delete leaves empty is removed. | KERNEL.md says a zero-item queue does not arise in play. |
+| P6 | A packet destination naming no planet counts as no destination. | OBJECTS.md "The settings": the original reads past its planet table; Elegy needs a chosen rule. |
+| P7 | An Auto Alchemy prefix before a packet item removed for want of a driver or destination stays and stands before the next item. | KERNEL.md does not say what happens to the prefix. |
 
 Not modelled there: stargate routing, the Alternate Reality remote-mining
 task, the "did not move" mark (GenerateTurn must not mark a fleet built
-this year as stationary), mass drivers, and the route task on arrival.
+this year as stationary), and the route task on arrival. Packet items
+need `Game.Objects`; without it, and in `RunProduction`, they stop the
+queue.
 
 ## Not modelled
 
@@ -131,5 +142,4 @@ this year as stationary), mass drivers, and the route task on arrival.
   legal order is known to reach (ORDERS.md, stars-elegy #87:
   UNRESOLVED);
 - Mystery Trader items (the player owns none), minefields, stargates;
-- mass drivers and packets in planet settings;
 - stargate hops (waypoint warp 11).

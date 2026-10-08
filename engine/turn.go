@@ -166,6 +166,14 @@ type Planet struct {
 	// id (launch.go).
 	HasRoute bool
 	RouteTo  int
+
+	// HasPacketDest and PacketDest are the planet's mass-driver packet
+	// destination, a planet id, and PacketSpeed its packet-speed setting
+	// (0 when unset), stored as the owner sends them (OBJECTS.md "The
+	// settings"; production.go).
+	HasPacketDest bool
+	PacketDest    int
+	PacketSpeed   int
 }
 
 // Stubs: keep these small until real rules require shape. PlayerOrders

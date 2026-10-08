@@ -712,3 +712,26 @@ func TestPredictionPlayerShuffle(t *testing.T) {
 		t.Errorf("order %v, %d draws left", got, len(r.draws))
 	}
 }
+
+func TestPacketSettingsOrder(t *testing.T) {
+	// OBJECTS.md "The settings" (BINARY-ONLY): the packet destination and
+	// speed are stored as sent, the destination unchecked; a speed outside
+	// 0 or 4..19 is refused (ASSUMPTION L19). Packet items are accepted in
+	// a queue.
+	g := ordersGame()
+	errs, _ := apply(g, 0,
+		PlanetSettingsOrder{Planet: 1, HasPacketDest: true, PacketDest: 99, PacketSpeed: 13},
+		PlanetSettingsOrder{Planet: 1, HasPacketDest: true, PacketDest: 3, PacketSpeed: 3},
+		PlanetSettingsOrder{Planet: 1, HasPacketDest: true, PacketDest: 3, PacketSpeed: 20},
+		QueueOrder{Planet: 1, Queue: []QueueItem{{Kind: ItemIroniumPacket, Count: 2}, {Kind: ItemAutoPackets, Count: 1000}}},
+	)
+	if errs[0] != nil || !errors.Is(errs[1], ErrOutOfRange) || !errors.Is(errs[2], ErrOutOfRange) || errs[3] != nil {
+		t.Fatal(errs)
+	}
+	if p := g.Planets[0]; !p.HasPacketDest || p.PacketDest != 99 || p.PacketSpeed != 13 || len(p.Queue) != 2 {
+		t.Errorf("planet %+v", p)
+	}
+	if errs, _ := apply(g, 0, PlanetSettingsOrder{Planet: 1}); errs[0] != nil || g.Planets[0].HasPacketDest || g.Planets[0].PacketDest != 0 || g.Planets[0].PacketSpeed != 0 {
+		t.Errorf("cleared: %v %+v", errs, g.Planets[0])
+	}
+}

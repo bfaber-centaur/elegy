@@ -1,7 +1,7 @@
 package engine
 
-// ItemKind is a production-queue item type. Terraforming, packets and
-// scanners are not modelled yet.
+// ItemKind is a production-queue item type. Terraforming and scanners are
+// not modelled yet.
 type ItemKind int
 
 const (
@@ -18,9 +18,33 @@ const (
 	// items": a design item names its slot, CONFIRMED).
 	ItemShip
 	ItemStarbase
+	// The mineral packet items (KERNEL.md "Packet items"; OBJECTS.md
+	// "Launch"). ItemAutoPackets builds Mixed Mineral Packets.
+	ItemIroniumPacket
+	ItemBoraniumPacket
+	ItemGermaniumPacket
+	ItemMixedPacket
+	ItemAutoPackets
 )
 
-func (k ItemKind) auto() bool { return k >= ItemAutoMines && k <= ItemAutoAlchemy }
+// maxAutoPackets is the most units Auto Mineral Packets builds in a year
+// (KERNEL.md "Packet items").
+const maxAutoPackets = 1000
+
+func (k ItemKind) auto() bool {
+	return k >= ItemAutoMines && k <= ItemAutoAlchemy || k == ItemAutoPackets
+}
+
+// packet reports whether k builds mineral packets.
+func (k ItemKind) packet() bool { return k >= ItemIroniumPacket && k <= ItemAutoPackets }
+
+// packetMineral is the mineral a packet item launches, or PacketMixed.
+func (k ItemKind) packetMineral() int {
+	if r := k.real(); r != ItemMixedPacket {
+		return int(r - ItemIroniumPacket)
+	}
+	return PacketMixed
+}
 
 // design reports whether k builds a design.
 func (k ItemKind) design() bool { return k == ItemShip || k == ItemStarbase }
@@ -36,6 +60,8 @@ func (k ItemKind) real() ItemKind {
 		return ItemDefenses
 	case ItemAutoAlchemy:
 		return ItemMineralAlchemy
+	case ItemAutoPackets:
+		return ItemMixedPacket
 	}
 	return k
 }
@@ -55,7 +81,29 @@ type QueueItem struct {
 // 4 kT germanium (3 with "factories cost 1 kT less germanium"), mines at
 // the race's cost, defenses 15 + 5/5/5 (Inner Strength: 3/5 of each
 // component), alchemy 100 resources (25 with Mineral Alchemy).
+//
+// Packet items (KERNEL.md "Item costs"; minerals MEASURED OB-028, OB-029
+// except the Interstellar Traveler mixed item, resources BINARY-ONLY): 10
+// resources (Packet Physics 5), and 110 kT of the item's mineral
+// (Interstellar Traveler 120, PP 70) or 44 kT of each for a mixed item
+// (IT 48, PP 25).
 func ItemCost(race Race, k ItemKind) Cost {
+	if k.packet() {
+		res, one, each := 10, 110, 44
+		switch race.PRT {
+		case PRTPacketPhysics:
+			res, one, each = 5, 70, 25
+		case PRTInterstellarTraveler:
+			one, each = 120, 48
+		}
+		c := Cost{Resources: res}
+		if m := k.packetMineral(); m != PacketMixed {
+			c.Minerals[m] = one
+		} else {
+			c.Minerals = Minerals{each, each, each}
+		}
+		return c
+	}
 	switch k.real() {
 	case ItemMine:
 		return Cost{Resources: race.MineCost}
@@ -126,6 +174,9 @@ type production struct {
 	blocked  bool // an auto item was skipped for minerals
 	research int
 	bought   int // alchemy units bought by an Auto Alchemy prefix
+	// cancelled is set when plain removed a packet item for want of a
+	// mass driver or destination.
+	cancelled bool
 }
 
 // RunProduction runs one planet's production queue for the year and returns
@@ -156,6 +207,23 @@ func RunProduction(p *Planet, in ProductionInput) (research int, events []Event)
 // ASSUMPTION P2: a starbase item replacing a starbase of the same hull
 // whose designs do not record slot positions (Design.SlotPos) is charged
 // the fresh starbase cost.
+//
+// Packet items (KERNEL.md "Packet items") go through the same unit loop;
+// the units an item completes in a year are one launch (Game.Objects'
+// LaunchPacket, OBJECTS.md "Launch"), reported as EventBuilt. A regular
+// packet item reached on a planet without a mass driver on its starbase or
+// without a packet destination is removed whatever its count, with
+// EventPacketNoDriver and nothing spent (MEASURED OB-028-F); Auto Mineral
+// Packets there builds nothing, sends nothing and stays. Without
+// Game.Objects packet items stop the queue, as RunProduction stops at
+// design and packet items.
+//
+// ASSUMPTION P6: a packet destination naming no planet counts as no
+// destination (OBJECTS.md "The settings": the original reads past its
+// planet table; no measured behaviour).
+//
+// ASSUMPTION P7: an Auto Alchemy prefix before a regular packet item that
+// is removed this way stays in the queue and stands before the next item.
 func (g *Game) PlanetProduction(pi int, in ProductionInput) (research int, events []Event) {
 	return runProduction(g, pi, &g.Planets[pi], in)
 }
@@ -295,6 +363,10 @@ func (pr *production) complete(k ItemKind, n int) {
 	if n == 0 {
 		return
 	}
+	if k.packet() {
+		pr.launchPackets(k, n)
+		return
+	}
 	if inst := pr.installed(k); inst != nil {
 		*inst += n
 		pr.event(EventBuilt, k.real(), n)
@@ -347,6 +419,19 @@ func (pr *production) plain(i int, alch bool) bool {
 		if it.Count > limit {
 			it.Count = max(0, limit)
 			pr.event(EventOrderClipped, it.Kind, it.Count)
+		}
+	}
+	pr.cancelled = false
+	if it.Kind.packet() {
+		if !pr.packetsModelled() {
+			pr.stopped = true
+			return false
+		}
+		if _, ok := pr.packetDest(); !ok {
+			pr.event(EventPacketNoDriver, it.Kind, it.Count)
+			it.Count = 0
+			pr.cancelled = true
+			return true
 		}
 	}
 	c := pr.cost(it.Kind)
@@ -430,6 +515,40 @@ func (pr *production) designCost(it QueueItem) (Cost, bool) {
 	return StarbaseBuildCost(nd, race, levels), true // fresh, or ASSUMPTION P2
 }
 
+// packetsModelled reports whether packet items can be built: production
+// runs for a game with space objects.
+func (pr *production) packetsModelled() bool {
+	return pr.g != nil && pr.g.Objects != nil
+}
+
+// packetDest is the planet's packet destination when it can launch: its
+// starbase carries a mass driver and the destination names a planet
+// (ASSUMPTION P6).
+func (pr *production) packetDest() (int, bool) {
+	g, p := pr.g, pr.planet
+	if !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) || !p.HasPacketDest || g.planetIndex(p.PacketDest) < 0 {
+		return -1, false
+	}
+	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+		if sl.Count > 0 && sl.Part.Kind == PartMassDriver {
+			return p.PacketDest, true
+		}
+	}
+	return -1, false
+}
+
+// launchPackets launches the n units a packet item completed this year as
+// one launch (KERNEL.md "Packet items"). Production has already charged
+// their cost.
+func (pr *production) launchPackets(k ItemKind, n int) {
+	dest, _ := pr.packetDest()
+	built, _, ev := pr.g.Objects.LaunchPacket(pr.g, pr.pi, dest, pr.planet.PacketSpeed, k.packetMineral(), n)
+	pr.events = append(pr.events, ev...)
+	if built {
+		pr.event(EventBuilt, k.real(), n)
+	}
+}
+
 // launch is a ship item's build event for the n ships it completed this
 // year (PRODUCTION-LAUNCH.md "When it happens": one event per item).
 func (pr *production) launch(slot, n int) {
@@ -475,15 +594,28 @@ func (pr *production) afterEarlierHull(i int) {
 	pr.planet.Queue = out
 }
 
-// autoInstall processes Auto Mines/Factories/Defenses at index i and returns
-// the next index. They build at most operable − installed (KERNEL.md
-// "Caps", CONFIRMED PQ C04, C09, C13, C14). Behind an Auto Alchemy prefix
-// (alch), a mineral-short unit buys the lowest component's shortfall
-// without a partial.
+// autoInstall processes Auto Mines/Factories/Defenses or Auto Mineral
+// Packets at index i and returns the next index. Installations build at
+// most operable − installed (KERNEL.md "Caps", CONFIRMED PQ C04, C09, C13,
+// C14); Auto Mineral Packets at most 1000, and nothing without a mass
+// driver or destination (KERNEL.md "Packet items"). Behind an Auto Alchemy
+// prefix (alch), a mineral-short unit buys the lowest component's
+// shortfall without a partial.
 func (pr *production) autoInstall(i int, alch bool) int {
 	it := pr.planet.Queue[i]
 	c := pr.cost(it.Kind)
-	limit := min(it.Count, pr.operable(it.Kind)-*pr.installed(it.Kind))
+	var limit int
+	switch {
+	case !it.Kind.packet():
+		limit = min(it.Count, pr.operable(it.Kind)-*pr.installed(it.Kind))
+	case !pr.packetsModelled():
+		pr.stopped = true
+		return i + 1
+	default:
+		if _, ok := pr.packetDest(); ok {
+			limit = min(it.Count, maxAutoPackets)
+		}
+	}
 	built := 0
 	for built < limit {
 		if pr.affordable(c, 0) {
@@ -597,6 +729,10 @@ func (pr *production) autoAlchemy(i int) int {
 		return pr.autoInstall(i+1, true)
 	}
 	if pr.plain(i+1, true) {
+		if pr.cancelled {
+			pr.remove(i + 1) // ASSUMPTION P7
+			return i
+		}
 		// The item finished: it and its prefix leave the queue.
 		pr.remove(i + 1)
 		pr.remove(i)
