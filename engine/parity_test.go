@@ -40,17 +40,15 @@ type pvVector struct {
 }
 
 type pvState struct {
-	Year            int            `json:"year"`
-	Game            pvGame         `json:"game"`
-	Players         []pvPlayer     `json:"players"`
-	Planets         []pvPlanet     `json:"planets"`
-	Designs         []pvDesign     `json:"designs"`
-	StarbaseDesigns []pvDesign     `json:"starbase_designs"`
-	BattlePlans     []pvBattlePlan `json:"battle_plans"`
-	Fleets          []pvFleet      `json:"fleets"`
-	Objects         []struct {
-		Kind string `json:"kind"`
-	} `json:"objects"`
+	Year             int               `json:"year"`
+	Game             pvGame            `json:"game"`
+	Players          []pvPlayer        `json:"players"`
+	Planets          []pvPlanet        `json:"planets"`
+	Designs          []pvDesign        `json:"designs"`
+	StarbaseDesigns  []pvDesign        `json:"starbase_designs"`
+	BattlePlans      []pvBattlePlan    `json:"battle_plans"`
+	Fleets           []pvFleet         `json:"fleets"`
+	Objects          []json.RawMessage `json:"objects"`
 	ProductionQueues []struct {
 		Planet int               `json:"planet"`
 		Items  []json.RawMessage `json:"items"`
@@ -68,6 +66,7 @@ type pvPlayer struct {
 	Tech                map[string]int    `json:"tech"`
 	ResearchAccumulated map[string]int    `json:"research_accumulated"`
 	ResearchPercent     int               `json:"research_percent"`
+	Computer            bool              `json:"computer"`
 	ResearchField       string            `json:"research_field"`
 	ResearchNextField   json.RawMessage   `json:"research_next_field"`
 	Relations           map[string]string `json:"relations"`
@@ -168,9 +167,10 @@ type pvWaypoint struct {
 		Owner *int   `json:"owner"`
 	} `json:"target"`
 	Task struct {
-		Kind     string `json:"kind"`
-		Range    int    `json:"range"`
-		ToPlayer int    `json:"to_player"`
+		Kind     string          `json:"kind"`
+		Range    int             `json:"range"`
+		ToPlayer int             `json:"to_player"`
+		Years    json.RawMessage `json:"years"`
 		Orders   map[string]struct {
 			Action string `json:"action"`
 			Value  int    `json:"value"`
@@ -199,7 +199,37 @@ type pvExpect struct {
 	Equals json.RawMessage `json:"equals"`
 	// Tolerance is, as an object, the difference allowed per field.
 	Tolerance json.RawMessage `json:"tolerance"`
+	// Subject names an object_gone or view expectation's object.
+	Subject json.RawMessage `json:"subject"`
 }
+
+// pvSpace loads a vector's space objects and checks the expectations
+// about them. Package objects imports the engine, so the external test
+// package supplies it (objects_parity_test.go); without it every vector
+// with space objects is skipped.
+type pvSpace interface {
+	// Load returns the objects of initial_state.objects.
+	Load(g *Game, objects []json.RawMessage, m PVMaps) (SpaceObjects, error)
+	// Check checks an expectation of kind minefield, wormhole, trader,
+	// packet, object or object_gone as pvCheck does ("" passes, a
+	// leading "skip: " skips).
+	Check(g *Game, e PVExpect, m PVMaps) string
+}
+
+// PVMaps maps vector ids to Elegy's: EndID a wormhole end id to its
+// waypoint target ID, Planet a planet id to the Elegy planet ID.
+type PVMaps struct {
+	EndID, Planet map[int]int
+}
+
+// PVExpect is an expectation as pvSpace sees it.
+type PVExpect struct {
+	Kind                       string
+	Owner, ID                  *int
+	Equals, Tolerance, Subject json.RawMessage
+}
+
+var pvSpaceObjects pvSpace
 
 func (p *pvBattlePlan) UnmarshalJSON(b []byte) error {
 	var q struct {
@@ -256,6 +286,41 @@ type pvLoaded struct {
 	// queued marks the players with a production queue the harness does
 	// not load.
 	queued map[int]bool
+	// endID maps a vector wormhole end id to its waypoint target ID
+	// (pvWormholeEnds).
+	endID map[int]int
+}
+
+// pvWormholeEnds pairs the vector's wormhole ends: in id order, an end not
+// yet paired starts the next wormhole as end 0 and its partner is end 1.
+// The target ID is 2 × wormhole + end (objects.WormholeEndID).
+func pvWormholeEnds(objects []json.RawMessage) (map[int]int, error) {
+	type end struct {
+		Kind    string `json:"kind"`
+		ID      int    `json:"id"`
+		Partner int    `json:"partner"`
+	}
+	var ends []end
+	for _, raw := range objects {
+		var e end
+		if err := json.Unmarshal(raw, &e); err != nil {
+			return nil, err
+		}
+		if e.Kind == "wormhole" {
+			ends = append(ends, e)
+		}
+	}
+	sort.Slice(ends, func(i, j int) bool { return ends[i].ID < ends[j].ID })
+	m := map[int]int{}
+	n := 0
+	for _, e := range ends {
+		if _, ok := m[e.ID]; ok {
+			continue
+		}
+		m[e.ID], m[e.Partner] = 2*n, 2*n+1
+		n++
+	}
+	return m, nil
 }
 
 func pvFleetKey(owner, id int) [2]int { return [2]int{owner, id} }
@@ -267,6 +332,10 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	s := v.InitialState
 	cat := Components()
 	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]Point{}, queued: map[int]bool{}}
+	var err error
+	if l.endID, err = pvWormholeEnds(s.Objects); err != nil {
+		return nil, err
+	}
 	g := &l.g
 	g.Year = s.Year
 	g.RandomEvents = s.Game.RandomEvents
@@ -278,6 +347,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	g.Players = make([]Player, len(s.Players))
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
+		pl.Computer = p.Computer
 		r := &pl.Race
 		// An out-of-range PRT is given as its stored number (FORMAT.md).
 		var name string
@@ -504,8 +574,21 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		}
 		g.Planets = append(g.Planets, pl)
 	}
-	if len(s.Objects) > 0 {
-		l.global = "space objects (" + s.Objects[0].Kind + ")"
+	switch {
+	case pvSpaceObjects != nil:
+		// Every game holds space objects, so the Trader's appearance
+		// draws run with random events on.
+		obj, err := pvSpaceObjects.Load(g, s.Objects, PVMaps{l.endID, l.planet})
+		if err != nil {
+			l.global = "space objects: " + err.Error()
+		}
+		g.Objects = obj
+	case len(s.Objects) > 0:
+		var o struct {
+			Kind string `json:"kind"`
+		}
+		json.Unmarshal(s.Objects[0], &o)
+		l.global = "space objects (" + o.Kind + ")"
 	}
 	// Production queues (FORMAT.md "Queue items"). A queue holding an
 	// item Elegy does not build (designs, terraforming, packets, scanners,
@@ -659,8 +742,8 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
 	wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp}
 	why := ""
-	if w.Warp > 10 {
-		why, wp.Warp = "stargate", 0
+	if w.Warp > StargateWarp {
+		why, wp.Warp = "warp "+strconv.Itoa(w.Warp), 0
 	}
 	switch w.Target.Kind {
 	case "space":
@@ -671,6 +754,14 @@ func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
 			owner = *w.Target.Owner
 		}
 		wp.Target, wp.ID = TargetFleet, pvElegyFleetID(owner, *w.Target.ID)
+	case "wormhole":
+		id, ok := l.endID[*w.Target.ID]
+		if !ok {
+			why = "wormhole end " + strconv.Itoa(*w.Target.ID)
+		}
+		wp.Target, wp.ID = TargetWormhole, id
+	case "trader":
+		wp.Target, wp.ID = TargetTrader, *w.Target.ID
 	default:
 		why = "target " + w.Target.Kind
 	}
@@ -688,6 +779,16 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 		return Task{Kind: TaskRoute}, ""
 	case "transfer":
 		return Task{Kind: TaskTransferFleet, Player: w.Task.ToPlayer}, ""
+	case "patrol":
+		return Task{Kind: TaskPatrol, Range: w.Task.Range}, ""
+	case "lay_mines":
+		// The years word w lays w + 1 years (PARITY.md "Lay-mines
+		// duration", CONFIRMED OB-002-N, OB-019, OB-025).
+		var word int
+		if json.Unmarshal(w.Task.Years, &word) != nil {
+			return Task{Kind: TaskLayMines, Years: YearsIndefinitely}, ""
+		}
+		return Task{Kind: TaskLayMines, Years: word + 1}, ""
 	case "merge":
 		owner := 0
 		if w.Target.Owner != nil {
@@ -756,8 +857,14 @@ type pvResult struct {
 // pvCheck compares one expectation with a generated game; "" passes, a
 // leading "skip: " skips.
 func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
-	if e.Kind == "production_queue" {
+	switch e.Kind {
+	case "production_queue":
 		return l.queueEquals(g, e)
+	case "minefield", "wormhole", "trader", "packet", "object", "object_gone":
+		if pvSpaceObjects == nil {
+			return "skip: space objects"
+		}
+		return pvSpaceObjects.Check(g, PVExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, PVMaps{l.endID, l.planet})
 	}
 	var eq map[string]json.RawMessage
 	if len(e.Equals) > 0 && json.Unmarshal(e.Equals, &eq) != nil {
@@ -1035,7 +1142,7 @@ func (l *pvLoaded) fleetEquals(g *Game, f *Fleet, eq map[string]json.RawMessage)
 		case "first_waypoint_task":
 			var want string
 			json.Unmarshal(raw, &want)
-			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge"}[f.Task.Kind]
+			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge", TaskRoute: "route", TaskPatrol: "patrol", TaskTransferFleet: "transfer", TaskLayMines: "lay_mines"}[f.Task.Kind]
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
