@@ -46,6 +46,7 @@ One observation is counted but is not a failure:
 
 - **unsupported computer steps:** the total of `ai.Driver.Unsupported`,
   the steps a computer player could not order yet (AI-STATUS).
+  A case that stops early keeps the count of the years it played.
 
 A failure gives the game year being generated, the detail, the first
 JSON paths where two copies differ (`game.Diff`), and the command that

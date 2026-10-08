@@ -221,6 +221,14 @@ func Run(c Case) Result {
 	b := &copyGame{replay, c.drivers()}
 	var r *copyGame // the reloaded copy, from SaveAt
 	unsupported, rejected := 0, -1
+	// observed adds the observations made so far: a case that stops early
+	// keeps those of the years it played.
+	observed := func() Result {
+		if unsupported > 0 {
+			res.Findings = append(res.Findings, Finding{Category: Unsupported, Count: unsupported})
+		}
+		return res
+	}
 
 	for y := 0; y < c.Years; y++ {
 		if c.SaveAt > 0 && y == c.SaveAt {
@@ -241,7 +249,7 @@ func Run(c Case) Result {
 		ya, err := a.g.Advance(a.drivers)
 		if err != nil {
 			fail(categorize(err), year, "%v", err)
-			return res
+			return observed()
 		}
 		res.Years++
 		for _, o := range ya.Result.Orders {
@@ -262,7 +270,7 @@ func Run(c Case) Result {
 		for _, ch := range c.Checks {
 			if probs := ch.Check(a.g.State); len(probs) > 0 {
 				fail(CheckFails, year, "%s: %d problems, first: %s", ch.Name, len(probs), probs[0])
-				return res
+				return observed()
 			}
 		}
 		if b != nil {
@@ -285,10 +293,7 @@ func Run(c Case) Result {
 		}
 	}
 	res.Hash, _ = a.g.Hash()
-	if unsupported > 0 {
-		res.Findings = append(res.Findings, Finding{Category: Unsupported, Count: unsupported})
-	}
-	return res
+	return observed()
 }
 
 // differs is "" when two games hash the same, else their first

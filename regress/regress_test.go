@@ -135,6 +135,21 @@ func TestHarnessReportsFailures(t *testing.T) {
 	}
 }
 
+// A case stopped early keeps the observations of the years it played.
+func TestStoppedCaseKeepsObservations(t *testing.T) {
+	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"robotoid"}, Size: newgame.Tiny, Years: 6,
+		Checks: []Check{{Name: "fails from 2403", Check: func(g engine.Game) []string {
+			if g.Year >= 2403 {
+				return []string{"planted problem"}
+			}
+			return nil
+		}}}}
+	r := Run(c)
+	if len(r.Findings) != 2 || r.Findings[0].Category != CheckFails || r.Findings[1].Category != Unsupported || r.Findings[1].Count == 0 {
+		t.Fatalf("findings %+v: want the year-check failure, then the unsupported steps of the years played", r.Findings)
+	}
+}
+
 // differs names the first differing paths of two games, and nothing for
 // equal ones.
 func TestDiffers(t *testing.T) {
