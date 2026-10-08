@@ -6,17 +6,17 @@ The long-term goal is a complete game with a faithful J-RC3-compatible ruleset, 
 
 ## Status
 
-Elegy can generate a galaxy and play it for many years without the original program. The turn is complete enough for that, but it is not complete: there is no front end, and several rules are partial or missing. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) has the full picture and the next milestone.
+Elegy can generate a galaxy and play it for many years without the original program. The turn is complete enough for that, but it is not complete: there is no front end, and several rules are partial or missing. Each package's `docs/*-STATUS.md` file lists what it implements and what it does not.
 
 - **The turn** (`engine/`): orders, movement and fuel, production of installations, ships, starbases, packets and terraforming, population, research, random events, battles, bombing, invasion, colonization, scanning and per-player views, scores and victory. Each rule is tested against the stars-elegy specification, and many against observations of the original game.
 - **Space objects** (`objects/`, `terraform/`): minefields, wormholes, the Mystery Trader, mineral packets, stargates, salvage, terraforming, Orbital Adjusters and remote mining.
 - **New games** (`newgame/`, `races/`): galaxy, homeworlds, starting players and fleets, race scoring and repair, the 24 built-in computer races.
 - **Rulesets**: each game carries its own typed ruleset (`elegy` by default, or `jrc3-faithful`). Every compatibility switch is a setting of it. See [docs/RULESET.md](docs/RULESET.md).
 - **Game loop** (`game/`): advance years with per-player drivers, per-player reports, a versioned save format with a state hash, deterministic replay and diffs between games. See [docs/GAME-LOOP.md](docs/GAME-LOOP.md).
-- **Computer players** (`ai/`): Robotoid, Rototill and Cybertron, as game drivers. They play smoke games inside the tests. They are not yet selectable from the command line. See [docs/AI-STATUS.md](docs/AI-STATUS.md).
+- **Computer players** (`ai/`): Robotoid, Rototill and Cybertron, as game drivers. They play smoke games inside the tests. Their turns are partial: the steps not implemented yet are listed in [docs/AI-STATUS.md](docs/AI-STATUS.md) "Not implemented yet". They are not yet selectable from the command line.
 - **Command line** (`cmd/elegy`): new games, order files, turns, reports and hashes. There is no other front end yet.
 
-Parity with the original game is measured by the parity vectors in `engine/testdata/vectors`; [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) "Testing" explains what a pass, a sample and a skip mean. Passing those tests does not mean exact parity in every case.
+Parity with the original game is measured by the parity vectors in `engine/testdata/vectors`. `go test -run TestParityVectors -v ./engine` prints each corpus's passes, samples, failures and skips, with every skip's reason. [engine/testdata/vectors/README.md](engine/testdata/vectors/README.md) explains what a sample is. Passing those tests does not mean exact parity in every case.
 
 ## Quick start
 
