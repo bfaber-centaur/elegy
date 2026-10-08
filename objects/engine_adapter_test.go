@@ -420,3 +420,48 @@ func TestDetonateOrderThroughEngine(t *testing.T) {
 		t.Errorf("detonate settings %v %v %v", s.Minefields[0].Detonate, s.Minefields[1].Detonate, s.Minefields[2].Detonate)
 	}
 }
+
+// A fleet removed by the unload pass after movement (an arriving colony
+// ship that colonizes) sits before a mine layer in Game.Fleets, with
+// another fleet after it: the layer, not that fleet, lays its field and
+// its duration counts down (KERNEL.md
+// "Turn order" step 6c.2; the layers are taken after that pass).
+func TestLayMinesAfterColonizerRemoved(t *testing.T) {
+	l := newLab(t)
+	d, err := engine.Components().NewDesign("Colony", "Colony Ship", []engine.SlotFill{
+		{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 1, Part: "Colonization Module", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l.designs["Colony"] = len(l.g.Designs)
+	l.g.Designs = append(l.g.Designs, d)
+	target := at(400, 0)
+	l.g.Planets = []engine.Planet{{ID: 1, Owner: engine.NoOwner, Pos: target, Env: [3]int{50, 50, 50}, OrigEnv: [3]int{50, 50, 50}}}
+	ci := l.fleet(0, at(390, 0), "Colony", 1)
+	c := &l.g.Fleets[ci]
+	c.Fuel, c.Cargo.Colonists = 200, 25
+	c.Waypoints = []engine.Waypoint{{Pos: target, Warp: 5, Target: engine.TargetPlanet, ID: 1, Task: engine.Task{Kind: engine.TaskColonize}}}
+	mi := l.fleet(0, origin, "MML", 1)
+	layer := l.g.Fleets[mi].ID
+	l.g.Fleets[mi].Task = engine.Task{Kind: engine.TaskLayMines, Years: 2}
+	// A fleet after the layer, which a stale index would name instead.
+	l.fleet(0, at(300, 300), "Tank", 1)
+	r := &l.g.Players[0].Race
+	r.GrowthRate, r.ColonistsPerResource, r.FactoryOutput, r.FactoryCost, r.FactoriesOperated = 15, 1000, 10, 10, 10
+	r.MineOutput, r.MineCost, r.MinesOperated = 10, 5, 10
+	for a := range r.Env {
+		r.Env[a] = engine.EnvRange{Center: 50, Low: 15, High: 85}
+	}
+	l.g.Objects = &Space{}
+
+	g := turn(t, *l.g, top{})
+	if len(g.Fleets) != 2 || g.Fleets[0].ID != layer {
+		t.Fatalf("fleets %+v, want the layer and the tank (the colony ship consumed)", g.Fleets)
+	}
+	if m := space(g).Minefields; len(m) != 1 || m[0].Count != 160 || m[0].Owner != 0 || m[0].Pos != origin {
+		t.Errorf("fields %+v, want one 160 field of player 0 at the layer", m)
+	}
+	if tk := g.Fleets[0].Task; tk.Kind != engine.TaskLayMines || tk.Years != 1 {
+		t.Errorf("layer's task %+v, want lay mines with 1 year left", tk)
+	}
+}

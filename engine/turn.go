@@ -444,9 +444,6 @@ func GenerateTurn(
 			moved[f.ID] = true
 		}
 	}
-	if g.Objects != nil {
-		layers = g.layers(moved)
-	}
 	// Remote mining by a fleet that did not move this year, in its place
 	// in fleet order (KERNEL.md "Remote mining", CONFIRMED T-35, KB-1B).
 	queue, ev = g.unloadTasks(owned, func(i int) {
@@ -455,6 +452,16 @@ func GenerateTurn(
 		}
 	}, nil)
 	events = append(events, ev...)
+	// The layers are taken after the unload pass, which removes the
+	// fleets that colonized or scrapped, so MineLayer's fleet indexes
+	// stay valid through LayMines and endLayYear. In KERNEL.md "Turn
+	// order" step 6c.2 each fleet runs one task, and a colonize or scrap
+	// task is not mine laying. ASSUMPTION O15: a Space Demolition fleet
+	// consumed in that pass, whose next waypoint is "lay mines", lays
+	// nothing.
+	if g.Objects != nil {
+		layers = g.layers(moved)
+	}
 	if len(layers) > 0 {
 		events = append(events, g.Objects.LayMines(&g, layers)...)
 		g.endLayYear(layers)
