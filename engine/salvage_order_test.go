@@ -107,3 +107,16 @@ func TestSalvageCargoOrderGiveAndRefusals(t *testing.T) {
 		t.Errorf("no space objects: %v", errs[0])
 	}
 }
+
+// One order giving two minerals: each takes the room the earlier left.
+// Room 10: 7 Fe, then 3 of the 7 Ge, the rest aboard (ASSUMPTION T7).
+func TestSalvageCargoOrderGiveTwoMinerals(t *testing.T) {
+	l := salvageLab(t, Salvage{Steps: 1}, Task{})
+	l.g.Fleets[0].Cargo.Minerals = Minerals{7, 0, 7}
+	if errs, _ := apply(&l.g, 0, salvageOrder(1, -7, 0, -7)); errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	if sv, f := l.g.Salvage[0].Minerals, l.g.Fleets[0].Cargo.Minerals; sv != (Minerals{7, 0, 3}) || f != (Minerals{0, 0, 4}) {
+		t.Errorf("salvage %v, fleet %v; want [7 0 3] and [0 0 4]", sv, f)
+	}
+}
