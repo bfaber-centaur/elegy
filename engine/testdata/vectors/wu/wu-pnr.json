@@ -1,0 +1,1360 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "WU-PNR",
+ "title": "patrol with repeat on, and a repeat control at its own position",
+ "years": 1,
+ "random": "single_stream",
+ "streams": 1,
+ "initial_state": {
+  "year": 2400,
+  "game": {
+   "name": "Combat Lab",
+   "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "sparse",
+   "players": 2,
+   "slower_tech": false,
+   "random_events": false,
+   "public_scores": false,
+   "victory_conditions": {
+    "planets_owned_percent": {
+     "value": 60,
+     "enabled": true
+    },
+    "tech_level": {
+     "value": 22,
+     "enabled": true
+    },
+    "tech_fields": {
+     "value": 4
+    },
+    "score": {
+     "value": 11000,
+     "enabled": false
+    },
+    "lead_over_second_percent": {
+     "value": 100,
+     "enabled": true
+    },
+    "resources_thousands": {
+     "value": 100,
+     "enabled": false
+    },
+    "capital_ships": {
+     "value": 100,
+     "enabled": false
+    },
+    "highest_score_after_years": {
+     "value": 100,
+     "enabled": false
+    },
+    "conditions_needed": {
+     "value": 1
+    },
+    "minimum_years": {
+     "value": 30
+    }
+   }
+  },
+  "players": [
+   {
+    "id": 0,
+    "tech": {
+     "energy": 3,
+     "weapons": 3,
+     "propulsion": 3,
+     "construction": 3,
+     "electronics": 3,
+     "biotechnology": 3
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 15,
+    "research_field": "energy",
+    "research_next_field": "same",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 6,
+     "starbase_designs": 1
+    }
+   },
+   {
+    "id": 1,
+    "tech": {
+     "energy": 3,
+     "weapons": 3,
+     "propulsion": 3,
+     "construction": 3,
+     "electronics": 3,
+     "biotechnology": 3
+    },
+    "research_accumulated": {
+     "energy": 0,
+     "weapons": 0,
+     "propulsion": 0,
+     "construction": 0,
+     "electronics": 0,
+     "biotechnology": 0
+    },
+    "research_percent": 15,
+    "research_field": "energy",
+    "research_next_field": "same",
+    "relations": {},
+    "mystery_trader_items": [],
+    "race": {
+     "prt": "JOAT",
+     "lrt": [],
+     "growth_percent": 15,
+     "habitability": {
+      "gravity": [
+       50,
+       15,
+       85
+      ],
+      "temperature": [
+       50,
+       15,
+       85
+      ],
+      "radiation": [
+       50,
+       15,
+       85
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 10,
+      "cost": 5,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    },
+    "counts": {
+     "ship_designs": 6,
+     "starbase_designs": 1
+    }
+   }
+  ],
+  "planets": [
+   {
+    "id": 0,
+    "x": 1045,
+    "y": 1291,
+    "owner": -1,
+    "concentrations": [
+     20,
+     17,
+     89
+    ],
+    "environment": [
+     88,
+     79,
+     69
+    ]
+   },
+   {
+    "id": 1,
+    "x": 1071,
+    "y": 1087,
+    "owner": -1,
+    "concentrations": [
+     73,
+     9,
+     47
+    ],
+    "environment": [
+     19,
+     23,
+     64
+    ]
+   },
+   {
+    "id": 2,
+    "x": 1090,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     112,
+     84,
+     56
+    ],
+    "environment": [
+     40,
+     7,
+     9
+    ]
+   },
+   {
+    "id": 3,
+    "x": 1129,
+    "y": 1265,
+    "owner": -1,
+    "concentrations": [
+     88,
+     14,
+     7
+    ],
+    "environment": [
+     41,
+     11,
+     62
+    ]
+   },
+   {
+    "id": 4,
+    "x": 1143,
+    "y": 1103,
+    "owner": -1,
+    "concentrations": [
+     62,
+     10,
+     87
+    ],
+    "environment": [
+     46,
+     74,
+     22
+    ]
+   },
+   {
+    "id": 5,
+    "x": 1146,
+    "y": 1180,
+    "owner": -1,
+    "concentrations": [
+     13,
+     89,
+     87
+    ],
+    "environment": [
+     63,
+     78,
+     91
+    ]
+   },
+   {
+    "id": 6,
+    "x": 1166,
+    "y": 1017,
+    "owner": -1,
+    "concentrations": [
+     4,
+     50,
+     71
+    ],
+    "environment": [
+     58,
+     4,
+     63
+    ]
+   },
+   {
+    "id": 7,
+    "x": 1166,
+    "y": 1382,
+    "owner": -1,
+    "concentrations": [
+     81,
+     25,
+     78
+    ],
+    "environment": [
+     8,
+     23,
+     93
+    ]
+   },
+   {
+    "id": 8,
+    "x": 1169,
+    "y": 1145,
+    "owner": 1,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 9,
+    "x": 1208,
+    "y": 1297,
+    "owner": -1,
+    "concentrations": [
+     100,
+     86,
+     95
+    ],
+    "environment": [
+     20,
+     39,
+     47
+    ]
+   },
+   {
+    "id": 10,
+    "x": 1224,
+    "y": 1359,
+    "owner": -1,
+    "concentrations": [
+     94,
+     104,
+     24
+    ],
+    "environment": [
+     84,
+     13,
+     35
+    ]
+   },
+   {
+    "id": 11,
+    "x": 1243,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     79,
+     49,
+     13
+    ],
+    "environment": [
+     85,
+     20,
+     63
+    ]
+   },
+   {
+    "id": 12,
+    "x": 1245,
+    "y": 1158,
+    "owner": -1,
+    "concentrations": [
+     15,
+     82,
+     45
+    ],
+    "environment": [
+     95,
+     10,
+     52
+    ]
+   },
+   {
+    "id": 13,
+    "x": 1249,
+    "y": 1354,
+    "owner": -1,
+    "concentrations": [
+     114,
+     97,
+     14
+    ],
+    "environment": [
+     54,
+     61,
+     50
+    ]
+   },
+   {
+    "id": 14,
+    "x": 1268,
+    "y": 1317,
+    "owner": -1,
+    "concentrations": [
+     68,
+     78,
+     76
+    ],
+    "environment": [
+     70,
+     71,
+     98
+    ]
+   },
+   {
+    "id": 15,
+    "x": 1281,
+    "y": 1064,
+    "owner": -1,
+    "concentrations": [
+     89,
+     53,
+     71
+    ],
+    "environment": [
+     88,
+     82,
+     1
+    ]
+   },
+   {
+    "id": 16,
+    "x": 1284,
+    "y": 1383,
+    "owner": -1,
+    "concentrations": [
+     27,
+     49,
+     53
+    ],
+    "environment": [
+     75,
+     47,
+     62
+    ]
+   },
+   {
+    "id": 17,
+    "x": 1306,
+    "y": 1060,
+    "owner": 0,
+    "concentrations": [
+     30,
+     30,
+     89
+    ],
+    "environment": [
+     50,
+     50,
+     50
+    ],
+    "surface_minerals": [
+     423,
+     487,
+     459
+    ],
+    "population": 250,
+    "excess": 0,
+    "mines": 10,
+    "factories": 10,
+    "defenses": 10,
+    "planetary_scanner": 0,
+    "leftover_to_research": false,
+    "starbase": {
+     "design": 0,
+     "damage": 0
+    }
+   },
+   {
+    "id": 18,
+    "x": 1324,
+    "y": 1192,
+    "owner": -1,
+    "concentrations": [
+     57,
+     27,
+     81
+    ],
+    "environment": [
+     25,
+     31,
+     17
+    ]
+   },
+   {
+    "id": 19,
+    "x": 1342,
+    "y": 1123,
+    "owner": -1,
+    "concentrations": [
+     23,
+     38,
+     74
+    ],
+    "environment": [
+     52,
+     78,
+     29
+    ]
+   },
+   {
+    "id": 20,
+    "x": 1348,
+    "y": 1290,
+    "owner": -1,
+    "concentrations": [
+     1,
+     57,
+     30
+    ],
+    "environment": [
+     72,
+     44,
+     10
+    ]
+   },
+   {
+    "id": 21,
+    "x": 1359,
+    "y": 1121,
+    "owner": -1,
+    "concentrations": [
+     10,
+     7,
+     62
+    ],
+    "environment": [
+     41,
+     43,
+     64
+    ]
+   },
+   {
+    "id": 22,
+    "x": 1368,
+    "y": 1292,
+    "owner": -1,
+    "concentrations": [
+     70,
+     52,
+     88
+    ],
+    "environment": [
+     22,
+     10,
+     84
+    ]
+   },
+   {
+    "id": 23,
+    "x": 1380,
+    "y": 1295,
+    "owner": -1,
+    "concentrations": [
+     91,
+     70,
+     3
+    ],
+    "environment": [
+     75,
+     59,
+     96
+    ]
+   }
+  ],
+  "designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     }
+    ],
+    "mass": 23
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     }
+    ],
+    "mass": 25
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "hull": "Colony Ship",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Colonization Module"
+     }
+    ],
+    "mass": 61
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "hull": "Medium Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Crobmnium"
+     }
+    ],
+    "mass": 130
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     },
+     {
+      "count": 1,
+      "part": "Alpha Torpedo"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 2,
+      "part": "Crobmnium"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     },
+     {
+      "count": 1,
+      "part": "Battle Computer"
+     }
+    ],
+    "mass": 186
+   },
+   {
+    "owner": 0,
+    "slot": 5,
+    "hull": "Mini-Miner",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     }
+    ],
+    "mass": 574
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     }
+    ],
+    "mass": 23
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "hull": "Scout",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     }
+    ],
+    "mass": 25
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "hull": "Colony Ship",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Colonization Module"
+     }
+    ],
+    "mass": 61
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "hull": "Medium Freighter",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Crobmnium"
+     }
+    ],
+    "mass": 130
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "hull": "Destroyer",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "X-Ray Laser"
+     },
+     {
+      "count": 1,
+      "part": "Alpha Torpedo"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 2,
+      "part": "Crobmnium"
+     },
+     {
+      "count": 1,
+      "part": "Fuel Tank"
+     },
+     {
+      "count": 1,
+      "part": "Battle Computer"
+     }
+    ],
+    "mass": 186
+   },
+   {
+    "owner": 1,
+    "slot": 5,
+    "hull": "Mini-Miner",
+    "slots": [
+     {
+      "count": 1,
+      "part": "Long Hump 6"
+     },
+     {
+      "count": 1,
+      "part": "Rhino Scanner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     },
+     {
+      "count": 1,
+      "part": "Robo-Mini-Miner"
+     }
+    ],
+    "mass": 574
+   }
+  ],
+  "starbase_designs": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "hull": "Space Station",
+    "slots": [
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Laser"
+     },
+     null,
+     {
+      "count": 8,
+      "part": "Mole-skin Shield"
+     }
+    ],
+    "mass": 64
+   }
+  ],
+  "battle_plans": [
+   {
+    "owner": 0,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 0,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 0,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 0,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 0,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   },
+   {
+    "owner": 1,
+    "slot": 0,
+    "tactic": 4,
+    "primary": 3,
+    "secondary": 1,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Default"
+   },
+   {
+    "owner": 1,
+    "slot": 1,
+    "tactic": 4,
+    "primary": 2,
+    "secondary": 3,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Kill Starbase"
+   },
+   {
+    "owner": 1,
+    "slot": 2,
+    "tactic": 3,
+    "primary": 3,
+    "secondary": 4,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Max-Defense"
+   },
+   {
+    "owner": 1,
+    "slot": 3,
+    "tactic": 1,
+    "primary": 5,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Sniper"
+   },
+   {
+    "owner": 1,
+    "slot": 4,
+    "tactic": 0,
+    "primary": 1,
+    "secondary": 0,
+    "attack_who": 2,
+    "dump_cargo": false,
+    "name": "Chicken"
+   }
+  ],
+  "fleets": [
+   {
+    "owner": 0,
+    "id": 50,
+    "x": 1150,
+    "y": 1230,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 2000,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1150,
+      "y": 1230,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "patrol",
+       "range": 250
+      }
+     }
+    ],
+    "repeat_orders": true
+   },
+   {
+    "owner": 0,
+    "id": 51,
+    "x": 1160,
+    "y": 1240,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 500,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1160,
+      "y": 1240,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ],
+    "repeat_orders": true
+   }
+  ],
+  "objects": [],
+  "production_queues": []
+ },
+ "cases": [
+  {
+   "id": "WU-PNR",
+   "rule": "ORDERS \"Waypoint upkeep and the remaining tasks\"",
+   "setup": "patrol with repeat on, and a repeat control at its own position",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "kind": "planet",
+     "id": 8,
+     "equals": {
+      "surface_minerals": [
+       426,
+       490,
+       468
+      ],
+      "population": 287,
+      "excess": 50
+     },
+     "tolerance": {
+      "surface_minerals": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "planet",
+     "id": 17,
+     "equals": {
+      "surface_minerals": [
+       426,
+       490,
+       468
+      ],
+      "population": 287,
+      "excess": 50
+     },
+     "tolerance": {
+      "surface_minerals": 1
+     },
+     "year": 1
+    },
+    {
+     "kind": "player",
+     "id": 0,
+     "equals": {
+      "research_accumulated": {
+       "energy": 35,
+       "weapons": 0,
+       "propulsion": 0,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 0
+      }
+     },
+     "year": 1
+    },
+    {
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "research_accumulated": {
+       "energy": 35,
+       "weapons": 0,
+       "propulsion": 0,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 0
+      }
+     },
+     "year": 1
+    },
+    {
+     "kind": "message",
+     "player": 0,
+     "message_id": 63,
+     "present": true,
+     "year": 1
+    },
+    {
+     "kind": "player",
+     "id": 0,
+     "equals": {
+      "score_record": {
+       "rank": 1,
+       "score": 25,
+       "resources": 38,
+       "planets": 1,
+       "starbases": 1,
+       "unarmed_ships": 0,
+       "escort_ships": 2,
+       "capital_ships": 0,
+       "tech_level_sum": 18,
+       "victory_conditions_met": []
+      }
+     },
+     "seen_by": 0,
+     "year": 1
+    },
+    {
+     "kind": "message",
+     "player": 1,
+     "message_id": 63,
+     "present": true,
+     "year": 1
+    },
+    {
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "score_record": {
+       "rank": 2,
+       "score": 23,
+       "resources": 38,
+       "planets": 1,
+       "starbases": 1,
+       "unarmed_ships": 0,
+       "escort_ships": 0,
+       "capital_ships": 0,
+       "tech_level_sum": 18,
+       "victory_conditions_met": []
+      }
+     },
+     "seen_by": 1,
+     "year": 1
+    },
+    {
+     "kind": "fleet",
+     "owner": 0,
+     "id": 50,
+     "year": 1,
+     "equals": {
+      "x": 1150,
+      "y": 1230,
+      "waypoints": [
+       {
+        "x": 1150,
+        "y": 1230,
+        "warp": 0,
+        "target": {
+         "kind": "space"
+        },
+        "task": {
+         "kind": "patrol",
+         "range": 250
+        }
+       }
+      ],
+      "repeat_orders": true
+     }
+    },
+    {
+     "kind": "fleet",
+     "owner": 0,
+     "id": 51,
+     "year": 1,
+     "equals": {
+      "x": 1160,
+      "y": 1240,
+      "waypoints": [
+       {
+        "x": 1160,
+        "y": 1240,
+        "warp": 0,
+        "target": {
+         "kind": "space"
+        },
+        "task": {
+         "kind": "none"
+        }
+       }
+      ],
+      "repeat_orders": true
+     }
+    }
+   ],
+   "verdict": "the patrol fleet kept its patrol task, station and single waypoint under repeat orders; the control kept its one plain waypoint"
+  }
+ ],
+ "source": {
+  "experiment": "experiments/wu",
+  "spec_rules": "docs/ORDERS.md \"Waypoint upkeep and the remaining tasks\"",
+  "parity": "experiments/wu/README.md (turn orders lane)",
+  "raw_evidence": "stars-oracle-apparatus evidence/wu/wuPNR (private)"
+ }
+}

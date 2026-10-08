@@ -5,21 +5,20 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
 OT runs and the turn order and random draw order). The parity vectors
-are copied from stars-elegy `main` at `20634ab` (stars-elegy #107).
+are copied from stars-elegy `main` at `6fba6a3` (stars-elegy #111, #113).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
 
 The milestone is `GenerateTurn` running the players' orders, waypoint
 tasks, production and the space objects in KERNEL.md's turn order, with
-the MF, OB, WT and WU vectors (and GT stargate vectors once they exist
-in the copied corpus; none do yet) running through it in
+the GT, MF, OB, WT and WU vectors running through it in
 `TestParityVectors`, and every failure listed below under "Known parity
-failures" with its real reason. As of this change: OB 89 pass, 3
-random; WT 22 pass, 3 random; WU 28 pass; MF 12 pass, the rest listed
-below. The production queue can launch packets through
-`SpaceObjects.LaunchPacket`; the packet item itself belongs to the
-orders lane.
+failures" with its real reason. As of this change, in the baseline: GT
+4 pass; MF 23 pass, 2 random; OB 119 pass, 6 random; WT 23 pass, 5
+random; WU 28 pass. Packet items build and launch through
+`SpaceObjects.LaunchPacket`; the harness does not map them (vectors
+carry no packet destination).
 
 ## Tests: ground truth versus predictions
 
@@ -69,9 +68,10 @@ planet in id order: resources, research tax, production queue (caps use
 the grown population); population growth for every planet; research
 level-ups; random events (when `Game.RandomEvents` is on); starbase
 refuelling; battles, bombing and the after-movement waypoint tasks
-(unloads, colonize, route, drops, the research check, merges and fleet
-transfers; COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; the Claim
-Adjuster year-end step; the end-of-year waypoint check (step 7a.2); year
+(unloads, colonize, route, remote mining, drops, the research check,
+merges and fleet transfers; COMBAT-STATUS.md, TAKEOVER-STATUS.md);
+repair; the Claim Adjuster year-end step; the Orbital Adjusters; the
+end-of-year waypoint check (step 7a.2); year
 + 1; scores, victory flags and deciding the game
 (`TurnResult.Scores`, each view's visible records). Its random draws
 follow KERNEL.md "Random draws" for the same steps.
@@ -150,6 +150,21 @@ The race check (RACES.md "In a running game") runs at KERNEL.md step
 checker that keeps state implements `RaceCloner`, so `GenerateTurn`
 leaves the input game's checker unchanged.
 
+Remote mining and the Orbital Adjusters run through `Game.Terraform`
+(`terraform.Rules`); a nil `Game.Terraform` skips them. A fleet with
+the remote-mining task (`TaskRemoteMine`) that did not move this year
+mines in its place in fleet order at step 6c.2 (KERNEL.md "Remote
+mining", CONFIRMED T-35, KB-1B); a fleet built this year counts as moved
+(CONFIRMED SL-03). An Alternate Reality player's new fleet that can mine
+gets the task at its build planet (PRODUCTION-LAUNCH.md "Default task",
+CONFIRMED SL-11). The Orbital Adjusters run at step 7.4, after the Claim
+Adjuster step (CONFIRMED OT-4); a change of the planet owner's value
+tells the fleet owner, and the planet owner when it is someone else
+(MESSAGES.md 0x12c, 0x15a). A Packet Physics player whose packet a
+starbase caught learns that starbase's design in full that year
+(`EventPacketDesignSeen`; OBJECTS.md "Impact" step 4, SCANNING.md
+"Designs", BINARY-ONLY).
+
 An Interstellar Traveler gets a normal report of every planet whose
 starbase has a stargate within range of one of its own planets' gates
 (SCANNING.md, CONFIRMED OB-013).
@@ -184,11 +199,10 @@ waypoint 0's target), the stargate choice of the route task, waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol and
 lay mines (load, scrap and loading from or unloading into salvage;
 ORDERS-STATUS.md), the Trader's planet trades with computer players
-(their levels are a PLACEHOLDER), packet items in the production queue
-(the orders lane adds them; the harness skips packets of a player whose
-queue it did not load), terraforming other than the Claim
-Adjuster's year-end step (production items, Orbital Adjusters), remote
-mining, Super Stealth research stealing, the duplicate-serial penalty,
+(their levels are a PLACEHOLDER), terraforming production items (the
+orders lane adds them through `Game.Terraform`), the messages for
+an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
+0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
 ships/starbases in the queue, and the
 BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses,
 Radiating Hydro-Ram colonist deaths and transport tasks.
@@ -320,28 +334,11 @@ production queue on a planet that changed owner is skipped: it takes
 the new owner's default queue, which the vectors do not carry (TK-108-A
 and TK-108-C).
 
-- **SL-starbases** (CONFIRMED). With the race check, year 1 matches,
-  fleet numbers included. Year 2 fails on planet 4's surface minerals:
-  Elegy has 5, 1 and 7 kT less than the original. Not modelled: remote
-  mining. Player 1's Mini-Miner, built at planet 4 in year 1 with two
-  Robo-Mini-Miners (8 mining points), mines its owner's Alternate
-  Reality planet in year 2 as a separate mining step (KERNEL.md
-  "Owned planets", CONFIRMED KB-1B). That step gives trunc(conc·8/100)
-  plus the random remainder: 4 + 1, 0 + 1 and 6 + 1 at concentrations
-  62, 10 and 87, the observed gap.
-- **OB-030-A** (MEASURED). Not diagnostic: the AR planet's mining
-  remainder is a random draw (KERNEL.md "Mining"), and the vector gives
-  both planets' surface minerals exactly, with no mining tolerance.
-  Seed 1 matches planet 20 (germanium 10) but then misses the control
-  planet 22 by 1 kT. Asked the vectors owner for the 1 kT tolerance.
-- **MF-13a, MF-13c** (CONFIRMED). The lone minefield at 1400,1400,
-  with no scanner of either player near it, ends the year known to
-  nobody, not even its owner. Elegy's sight rule makes a player's own
-  minefields always known (`objects.Space.Scan`), so it marks the
-  owner. Owning a field does not make it known (stars-elegy #108,
-  SCANNING.md): the known mask gains a player only by sight, a hit or a
-  sweep. The fix is in `objects.Space.Scan` (objects lane); the two
-  cases return to the baseline with it.
+- **WU-CAP** (MEASURED). Year 1 energy `research_accumulated` is 35
+  in Elegy and 64 in the original; everything else matches. Not
+  diagnosed. A colonist drop captures an undefended planet here, so
+  research credited by the capture is one candidate (inferred, not
+  checked against the spec).
 - A minefield's `radius` is not compared: SCANNING.md defines no
   per-player known radius.
 
@@ -353,11 +350,71 @@ starbase visibility, a fleet's level (3 seen, 4 with its cargo) and
 seen that year. Other view fields are skipped. SC028-T75-out is
 skipped as a setup artifact (PARITY.md).
 
+## Integration handoff list
+
+The durable list for the next integration owner, as of the merge of
+elegy #40. `TestParityVectors -v` prints each case's status and reason.
+
+**Parity failures** (not in the baseline):
+
+- WU-CAP: research accumulated after a capture (above), not diagnosed.
+- FO-03-E, FO-06-G: "differs" only because `legacyMergeOverflow` is off
+  by default; they pass with the LEGACY BUG switch on.
+
+**Whole corpora or case groups skipped, and why:**
+
+- rp (race penalty): skipped wholesale (`l.global` in
+  `parity_test.go`) from before the race check was wired. With the skip
+  lifted as a trial, RD-P7 skips (out-of-range PRT 10), RD-P8, RD-P11,
+  RD-P12, RD-P17, RD-P20 and RD-P21 fail (populations, factories,
+  surface minerals, fleet positions and fuel; not diagnosed), and the
+  other RD-P cases pass. Next move: lift the skip, baseline the passes
+  and diagnose the failures.
+- UG01-A..UG30-A: "player not in the state" (the expectation names a
+  player the initial state lacks).
+- RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
+  files, which `newgame/vectors_test.go` checks; this harness has no
+  players for them and skips them ("player not in the state", samples).
+- `client_estimate` (159) and `sample` mismatches (155): client-side
+  estimates are not modelled, and one stream's random outcome is never a
+  failure (above).
+- `view` of `other_players` (96), `player` (56) and `design` (4), and
+  the view fields `population_estimate`, `defense_estimate`, `heading`,
+  `mass_shown` and `environment_visible`: not compared yet.
+- `battle` and `battle_actions` expectations (18, CS-003-C): battle
+  records are compared only through their effects.
+- Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
+  scrap (14), load actions and other transport actions, `design` and
+  `design_delete` orders, `waypoint_change` with loads.
+- Production queues with unmapped planetary items (14 and more): the
+  packet items 6 and 14–17 (vectors carry no packet destination) and the
+  terraform items 4, 5 and 12 until the orders lane's items land. Packets
+  launched from such a queue are skipped too ("a packet from a
+  production queue").
+- Stream cycles beyond the harness's seeds, "original environment null",
+  "design read needs the order layer's design source", and KX-002-R3/R4
+  (the next research field choice is not in the vector).
+- SC028-T75-out: a setup artifact.
+
+**Sample-only and random cases:** a case listed as `random k` in the
+baseline passes with k of 8 seeds; it is evidence of the rule, never of
+exact parity. A `sample: true` expectation counts only when it matches.
+
+**Unmodelled steps:** see "Not modelled yet" above.
+
+**Open questions:** K2 and K7 below; ASSUMPTIONs O9–O14, W1–W5, P1 and
+S5 above.
+
 ## Open spec questions
 
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
+- **K7 (ASSUMPTION), growth estimate for the caps.** Growth (step 4a)
+  runs after every planet's production, with the environment production
+  terraformed (KX-002 T1, T2 populations). The grown population the
+  production caps read is estimated before production, from the
+  environment before its terraforming; that is not measured.
 
 - **K1, K3–K6** are answered by KERNEL.md (OT-6, KX-003): the AR
   loss applies whenever the next waypoint's warp is above 0; ship power

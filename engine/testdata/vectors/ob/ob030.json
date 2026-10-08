@@ -1318,6 +1318,9 @@
        10
       ]
      },
+     "tolerance": {
+      "surface_minerals": 1
+     },
      "year": 1
     },
     {
@@ -1330,6 +1333,9 @@
        16,
        27
       ]
+     },
+     "tolerance": {
+      "surface_minerals": 1
      },
      "year": 1
     }

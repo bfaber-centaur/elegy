@@ -530,7 +530,7 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 		return fmt.Errorf("production queue: %d items: %w", len(o.Queue), ErrOutOfRange)
 	}
 	for _, it := range o.Queue {
-		if it.Kind < ItemMine || it.Kind > ItemAutoPackets || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+		if it.Kind < ItemMine || it.Kind > ItemAutoMaxTerraform || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
 			return fmt.Errorf("production queue item %+v: %w", it, ErrOutOfRange)
 		}
 		if !it.Kind.design() {
