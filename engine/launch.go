@@ -40,14 +40,17 @@ var (
 		"Trans-Galactic Mizer Scoop": true, "Galaxy Scoop": true}
 )
 
-// idealWarp is the fleet's ideal warp (PRODUCTION-LAUNCH.md "Ideal warp of
+// IdealWarp is the fleet's ideal warp (FleetShips.IdealWarp).
+func (g *Game) IdealWarp(f *Fleet) int { return g.Ships(f).IdealWarp() }
+
+// IdealWarp is the ships' ideal warp (PRODUCTION-LAUNCH.md "Ideal warp of
 // the fleet", CONFIRMED for Long Hump 6 and Quick Jump 5 via SL-04..SL-07,
-// BINARY-ONLY for other engines): from warp 10, each design in fleet order
-// in turn lowers it.
-func (g *Game) idealWarp(f *Fleet) int {
+// BINARY-ONLY for other engines; ESTIMATES.md "Fleets" uses the same
+// value): from warp 10, each design in fleet order in turn lowers it.
+func (s FleetShips) IdealWarp() int {
 	w := 10
-	for _, s := range f.Stacks {
-		d := g.Designs[s.Design]
+	for _, st := range s.Stacks {
+		d := st.Design
 		if d.Engines == 0 {
 			w = 0
 			continue
@@ -96,7 +99,7 @@ func (g *Game) starbaseDock(pi int) bool {
 // task (ORDERS.md "Route task", wuRSG2).
 func (g *Game) routeWarp(f *Fleet, src, dst int) int {
 	d := int(distance(g.Planets[src].Pos, g.Planets[dst].Pos))
-	w := g.idealWarp(f)
+	w := g.IdealWarp(f)
 	own := g.Planets[dst].Owner == f.Owner && g.hasStarbase(src) && g.hasStarbase(dst)
 	if own && g.gateSafe(f, src, dst, d) {
 		return StargateWarp

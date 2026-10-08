@@ -214,6 +214,9 @@ type pvExpect struct {
 	Sample bool `json:"sample"`
 	// Viewer is a view expectation's viewing player.
 	Viewer *int `json:"viewer"`
+	// Screen and Field name a client_estimate expectation's reading.
+	Screen string `json:"screen"`
+	Field  string `json:"field"`
 }
 
 // pvSpace loads a vector's space objects and checks the expectations
@@ -1030,6 +1033,8 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 	switch e.Kind {
 	case "view":
 		return l.viewCheck(g, e, eq, fleet)
+	case "client_estimate":
+		return l.estimateCheck(g, e, eq, fleet)
 	case "salvage_at":
 		// One of the salvage objects at (x, y) holds exactly these
 		// minerals (several when a battle's salvage overflowed, CB-040).
@@ -1617,6 +1622,53 @@ func runVector(v *pvVector, k int) []pvResult {
 		}
 	}
 	return out
+}
+
+// estimateCheck checks a client_estimate expectation (ESTIMATES.md) on
+// the fleet estimates Elegy computes: "Est. range" and "Est. fuel usage".
+// Other readings are skipped by screen and field.
+func (l *pvLoaded) estimateCheck(g *Game, e pvExpect, eq map[string]json.RawMessage, fleet func(owner, id int) *Fleet) string {
+	var sub struct {
+		Kind     string `json:"kind"`
+		Owner    int    `json:"owner"`
+		ID       int    `json:"id"`
+		Waypoint int    `json:"waypoint"`
+	}
+	json.Unmarshal(e.Subject, &sub)
+	reading := e.Screen + " " + e.Field
+	if sub.Kind != "fleet" || (reading != "fleet_composition range" && reading != "fleet_waypoints fuel_usage") {
+		return "skip: client estimate " + reading
+	}
+	if l.planned(sub.Owner) {
+		return "skip: " + pvPlannedWhy
+	}
+	f := fleet(sub.Owner, sub.ID)
+	if f == nil {
+		return "fleet gone"
+	}
+	got := map[string]any{}
+	if e.Field == "range" {
+		if r, unlimited := g.EstRange(f); unlimited {
+			got["state"] = "infinite"
+		} else {
+			got["light_years"] = r
+		}
+	} else {
+		mg := g.EstFuelUsage(f, sub.Waypoint)
+		got["mg"] = mg
+		if mg > f.Fuel {
+			got["warning"] = true
+		}
+	}
+	gb, _ := json.Marshal(got)
+	var gm, wm map[string]any
+	json.Unmarshal(gb, &gm)
+	wb, _ := json.Marshal(eq)
+	json.Unmarshal(wb, &wm)
+	if !reflect.DeepEqual(gm, wm) {
+		return fmt.Sprintf("%s: %s, want %s", reading, gb, wb)
+	}
+	return ""
 }
 
 // pvPlanetLevels is the vectors' planet report level for each of

@@ -133,21 +133,21 @@ type fleetDesign struct {
 // f(w), with the fleet's cargo assigned to them in that order up to each
 // group's capacity. Ties in f(w) keep the fleet's own design order
 // (KERNEL.md "Fuel cost", BINARY-ONLY).
-func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
+func (s FleetShips) groups(warp int) []fleetDesign {
 	var out []fleetDesign
 	index := map[int]int{}
-	for _, s := range f.Stacks {
-		if i, ok := index[s.Design]; ok {
-			out[i].n += s.Count
+	for _, st := range s.Stacks {
+		if i, ok := index[st.Index]; ok {
+			out[i].n += st.Count
 			continue
 		}
-		index[s.Design] = len(out)
-		out = append(out, fleetDesign{d: g.Designs[s.Design], n: s.Count})
+		index[st.Index] = len(out)
+		out = append(out, fleetDesign{d: st.Design, n: st.Count})
 	}
 	sort.SliceStable(out, func(a, b int) bool {
-		return g.fleetFactor(f, out[a].d, warp) < g.fleetFactor(f, out[b].d, warp)
+		return s.factor(out[a].d, warp) < s.factor(out[b].d, warp)
 	})
-	left := f.Cargo.mass()
+	left := s.CargoMass
 	for i := range out {
 		take := min(left, out[i].n*out[i].d.CargoCapacity)
 		out[i].cargo = take
@@ -159,9 +159,16 @@ func (g *Game) groups(f *Fleet, warp int) []fleetDesign {
 // FuelCost is the fuel in mg a fleet uses to move dist light-years at warp.
 // KERNEL.md "Fuel cost", CONFIRMED (FM-001..003).
 func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
+	return g.Ships(f).FuelCost(warp, dist)
+}
+
+// FuelCost is the fuel in mg the ships use to move dist light-years at
+// warp (KERNEL.md "Fuel cost", CONFIRMED FM-001..003): cargo on the
+// cheapest engine first, rounded up once.
+func (s FleetShips) FuelCost(warp, dist int) int {
 	tenths := 0
-	for _, gr := range g.groups(f, warp) {
-		tenths += g.fuelTerm(g.fleetFactor(f, gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo)
+	for _, gr := range s.groups(warp) {
+		tenths += fuelTermWrap(s.factor(gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo, s.wrap())
 	}
 	return (tenths + 9) / 10
 }
@@ -180,26 +187,22 @@ func engineFactor(d Design, warp int) int {
 	return d.Engine.Fuel[warp]
 }
 
-// fleetFactor is f for a design in fleet f: the engine factor, less
+// factor is f for a design among the ships: the engine factor, less
 // trunc(15f/100) for an Improved Fuel Efficiency owner (KERNEL.md "Other
 // movement rules", CONFIRMED KB-4A E, FM-101). The under-engined factor
 // is not reduced (FM-105 with an IFE owner).
-func (g *Game) fleetFactor(f *Fleet, d Design, warp int) int {
+func (s FleetShips) factor(d Design, warp int) int {
 	e := engineFactor(d, warp)
-	if e != underEngined && f.Owner >= 0 && f.Owner < len(g.Players) && g.Players[f.Owner].Race.LRT.ImprovedFuelEfficiency {
+	if e != underEngined && s.ImprovedFuelEfficiency {
 		e -= 15 * e / 100
 	}
 	return e
 }
 
-// fuelTerm is one stack's fuel term trunc(f·L·M/2000) in tenths of a mg
-// (KERNEL.md "Fuel cost"), for factor f, L light-years and mass M (ships
-// plus cargo, kT), under the game's FuelWrap switch.
-func (g *Game) fuelTerm(f, l, m int) int {
-	return fuelTermWrap(f, l, m, g.Rules.Legacy.FuelWrap)
-}
-
-// fuelTermWrap is the fuel term; wrap reproduces the original's LEGACY
+// fuelTermWrap is one stack's fuel term trunc(f·L·M/2000) in tenths of
+// a mg (KERNEL.md "Fuel cost"), for factor f, L light-years and mass M
+// (ships plus cargo, kT), under the game's FuelWrap switch
+// (FleetShips, from NewFleetShips); wrap reproduces the original's LEGACY
 // BUG (Legacy.FuelWrap; KERNEL.md "Designs without a full set of
 // engines", CONFIRMED FM-105): in its integer form the product f·L·M
 // keeps its low 32 bits and is divided as a signed 32-bit number. Only an
@@ -216,18 +219,27 @@ func fuelTermWrap(f, l, m int, wrap bool) int {
 // fuelRange is R, the distance the fleet's fuel pays for at warp, and
 // whether it is unlimited.
 func (g *Game) fuelRange(f *Fleet, warp int) (r int, unlimited bool) {
+	return g.Ships(f).FuelRange(f.Fuel, warp)
+}
+
+// FuelRange is R, the distance fuel mg pays for at warp, and whether it
+// is unlimited (KERNEL.md "Not enough fuel"; ESTIMATES.md "Est. range",
+// CONFIRMED ES-001): with C1000 the cost of 1000 ly, truncated,
+// unlimited when C1000 is 0, else trunc(fuel·1000/C1000), or
+// trunc(fuel/trunc(C1000/1000)) above 100,000.
+func (s FleetShips) FuelRange(fuel, warp int) (r int, unlimited bool) {
 	sum := 0
-	for _, gr := range g.groups(f, warp) {
-		sum += g.fuelTerm(g.fleetFactor(f, gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo)
+	for _, gr := range s.groups(warp) {
+		sum += fuelTermWrap(s.factor(gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo, s.wrap())
 	}
 	c1000 := sum / 10
 	switch {
 	case c1000 == 0:
 		return 0, true
 	case c1000 > 100_000:
-		return f.Fuel / (c1000 / 1000), false
+		return fuel / (c1000 / 1000), false
 	}
-	return f.Fuel * 1000 / c1000, false
+	return fuel * 1000 / c1000, false
 }
 
 // freeWarp is the fastest warp at which a leg of dist light-years costs no
@@ -256,9 +268,13 @@ func (g *Game) tankCapacity(f *Fleet) int {
 // light-years. CONFIRMED (FM-002..004) for one engine per ship in the first
 // slot; more than one engine per ship (e > 1) is BINARY-ONLY.
 func (g *Game) ramScoopGain(f *Fleet, warp, dist int) int {
+	return g.Ships(f).ramScoopGain(warp, dist)
+}
+
+func (s FleetShips) ramScoopGain(warp, dist int) int {
 	gain := 0
-	for _, s := range f.Stacks {
-		d := g.Designs[s.Design]
+	for _, st := range s.Stacks {
+		d := st.Design
 		if engineFactor(d, warp) != 0 {
 			continue
 		}
@@ -267,7 +283,7 @@ func (g *Game) ramScoopGain(f *Fleet, warp, dist int) int {
 			free = j
 		}
 		k := [...]int{1, 3, 6, 10}[free]
-		gain += s.Count * d.Engines * k * dist
+		gain += st.Count * d.Engines * k * dist
 	}
 	return gain
 }
