@@ -211,8 +211,7 @@ Choices where OBJECTS.md is silent:
 - **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
   uses the gate's range as P; an unlimited gate shows every starbase.
 
-Not modelled yet: following fleets (step 1a.3; Elegy does not keep
-waypoint 0's target), waypoint
+Not modelled yet: waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
 by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
@@ -345,6 +344,52 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   draws as ORDERS.md says, but its battle-plan preference and weight are
   not modelled, because ORDERS.md defines neither. The research lane may
   pin them.
+- **Following fleets** (`follow.go`; ORDERS.md "Waypoint 0 aimed at a
+  fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138,
+  stars-elegy d4eafd9). Only a `FollowOrder` starts a follow, and it lasts
+  the year: Elegy keeps the leader link in the year's replay state, not
+  in `Game`, so no saved game carries it (`TestFollowDoesNotPersist`).
+  Before the waypoint check, a leader not at its follower's position is
+  re-chosen among the fleets of the leader's owner at that position,
+  which can be the follower itself (BINARY-ONLY). MESSAGES.md 0x138 names
+  the leader's owner and KERNEL.md says only "the same owner"; Elegy
+  follows MESSAGES.md. A merge task aimed at the old leader is re-aimed
+  with it, so a follower left following itself completes a merge with
+  itself, merging nothing (MESSAGES.md 0x04e (a); Elegy sends no 0x04e
+  for a task that ends). The outcome for a follower aimed at an idle
+  leader 195 ly away, no move, no merge, no 0x138, no 0x137 and its task
+  cleared, is CONFIRMED (FO-03-F, `TestFollowLeaderElsewhere`). Then up to
+  8 passes in fleet order give each follower a copy of its leader's next
+  waypoint carrying the follower's own task (BINARY-ONLY); a follower
+  whose leader is gone, or has no orders and is not following, gets 0x138
+  and stops (CONFIRMED for followers at their leader's position: fo/fo04,
+  fo/fo02, fo/fo03 A-E). At the end of movement every follower that
+  followed drops its follow step and gets 0x137, CONFIRMED for followers
+  at the position of a leader that is not itself a follower (fo/fo02,
+  fo/fo03 A-E) and for a follower merged into its leader before movement,
+  which no longer exists (fo/fo03 G, `TestFollowMergedAway`). That
+  followers of a fleet with orders move with it and end where it does,
+  and that followers of an idle fleet do not move, is MEASURED for the
+  computer players' orders only (AI-27). `TestFollow*`.
+- **F1 (ASSUMPTION).** A follow order naming a leader that does not exist
+  when it applies, including one merged away earlier in the replay, or
+  the fleet itself, is rejected; a leader merged away later in the replay
+  is gone at step 1a.3 (0x138), and is not re-chosen. ORDERS.md's merge
+  retargeting covers waypoints, not waypoint 0. The stale-id issue below
+  applies to a leader too.
+- **F2 (ASSUMPTION).** Within a pass the followers are taken one at a
+  time, so one resolved earlier in the pass leads the rest of it.
+- **F3.** A follower still unresolved after the 8 passes gets no message,
+  no waypoint and no 0x137, and does not move. CONFIRMED for a follower
+  left following itself (FO-03-F); ASSUMPTION for a cycle of two or more
+  fleets and for a chain longer than the passes reach. MESSAGES.md says
+  circular chains get no message.
+- **F4 (ASSUMPTION).** A follower that reaches the copied waypoint gets
+  Elegy's arrival message as well as 0x137.
+- **F5 (ASSUMPTION).** When several fleets of the leader's owner are at
+  the follower's position, the first in fleet order becomes the leader.
+- **F6 (ASSUMPTION).** When none is (a leader of another player,
+  elsewhere), the leader is treated as gone: 0x138.
 - **Known issue: a stale chase id can be reused.** `Fleet.ID` is Elegy's
   internal key, and a new fleet takes the highest id plus one
   (`Game.newFleetID`). If the merged-away fleet held the highest id, a

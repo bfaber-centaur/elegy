@@ -218,8 +218,7 @@ type TurnResult struct {
 // after movement (TAKEOVER.md), the after-movement research level-up check and
 // repair. Each player's view of the result (SCANNING.md) comes last.
 //
-// Not yet modelled: following fleets and the waypoint check after the
-// orders (step 1a.3), waypoint tasks other than unloads, colonize, load
+// Not yet modelled: waypoint tasks other than unloads, colonize, load
 // and merge, space objects
 // other than battle salvage, the Mystery Trader, fuel generators, mine
 // sweeping, terraforming other than the Claim Adjuster's year-end step,
@@ -261,8 +260,11 @@ func GenerateTurn(
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
-	// The waypoint check after the orders (step 1a.3), first retargeting
-	// waypoints that name a fleet merged away in the replay.
+	// Following fleets, then the waypoint check after the orders (step
+	// 1a.3), first retargeting waypoints that name a fleet merged away in
+	// the replay.
+	followDone, ev := g.follow(applied.follows)
+	events = append(events, ev...)
 	g.chaseMerged(applied.merged, rng)
 	g.waypointCheck()
 
@@ -305,6 +307,7 @@ func GenerateTurn(
 	}
 	moveEvents, gated := g.moveAll(rng)
 	events = append(events, moveEvents...)
+	events = append(events, g.endFollow(followDone)...)
 	for i := range g.Fleets {
 		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
 			events = append(events, g.radiatingColonists(f)...)

@@ -77,6 +77,10 @@ type Applied struct {
 	// ELEGY CHOICE: Elegy's fleet ids do not carry the owner, so the
 	// replay records it.
 	merged map[int]int
+	// follows maps each fleet a follow order left following to its leader
+	// for this year's step 1a.3 (FollowOrder, Game.follow). It is replay
+	// state only: the follow lasts one year.
+	follows map[int]int
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
@@ -498,6 +502,7 @@ func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 	f := &g.Fleets[i]
 	f.Task = o.Task
 	f.Waypoints = wps
+	delete(a.follows, f.ID)
 	return nil
 }
 
