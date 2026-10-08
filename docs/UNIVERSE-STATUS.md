@@ -57,6 +57,7 @@ Test names follow the engine's convention:
 | Leftover-point spends | `players.go` | CONFIRMED |
 | Starbase designs and loadouts | `designs.go` | CONFIRMED |
 | Starting ships and part upgrades | `designs.go` | CONFIRMED |
+| Starting designs recorded in `Game.DesignSlots`: starbase slots 0/1, each new ship design the next ship slot | `designs.go` | CONFIRMED (UNIVERSE.md "Starbases", "Starting ships"; UG01..UG21); wired for the engine 2026-10-08, `TestConfirmedStartingDesignSlots` |
 | Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `legacySecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
@@ -78,11 +79,23 @@ engine's parity harness has no new-game path):
   - homeworld and second-planet population and installations, and fleet
     counts;
   - the stored victory conditions.
-- A computer player with level 0 has a random level the vector does not
-  record; the test tries each level for that player. Every such player in
-  UG05, UG10 and UG15 matches expert.
+- A computer player with level 0 uses the level in `computer.drawn`
+  (UG05, UG10..UG15 record it). A vector without it would get a
+  fallback: the test runs that player at easy and, only if its start
+  differs, tries each level. Levels below expert give the same start, so
+  the fallback cannot tell easy, standard and harder apart. No current
+  vector needs the fallback.
 
-All 124 player expectations and all 214 sample checks pass.
+The same test reads the RD/RW race-creation vectors
+(`engine/testdata/vectors/rw`, stars-elegy #111) and fails if either
+directory is empty. Each player's race as created (case `-R`) is
+compared exactly with `Generate`'s. A raw 255 is read as the stored
+immune marker in each field, so a file holding it in the low alone is
+repaired at creation (RACES.md "Repairs", RW08). A Random race takes the
+race the vector records.
+
+All 291 player expectations (124 UG, 167 RD/RW) and all sample checks
+(planet counts 38, starting planets 211, victory 38, wormholes 38) pass.
 
 ## LEGACY BUG switches
 
@@ -128,6 +141,56 @@ level)` (AI.md "Built-in races"). One point is open:
 
 Human races are scored, repaired or replaced and Random races generated
 by `races/` (see [RACES-STATUS.md](RACES-STATUS.md)).
+
+## Open items (lane handoff, 2026-10-08)
+
+The new-game generation lane (`newgame/`, `races/`, `objects/` except
+`engine_adapter.go`, `terraform/`) is closed. Each item below says where
+it lives and what would settle it.
+
+Vector corpus:
+
+1. **RD/RW vectors** are in the corpus and run in `TestUGVectors`.
+2. **Drawn computer levels**: `Generate` never draws a random computer
+   type or level: the caller passes a type 1–6 and a level
+   (`ComputerPlayer`). The test uses the vector's recorded race and
+   `computer.drawn` level.
+
+Spec gaps to send to stars-elegy (Elegy follows the vectors):
+
+3. Expert +10% before the BBS factor (MEASURED UG03, UG21): not in
+   UNIVERSE.md.
+4. Stored victory conditions, a disabled condition stored as 0 (MEASURED
+   UG01-E..UG30-E): not in UNIVERSE.md or KERNEL.md.
+5. **ASSUMPTION B1**: built-in race leftover spend (here and
+   RACES-STATUS.md).
+6. **PLACEHOLDER** relations with no human player, planet names and
+   computer-player names (above).
+
+Labelled Elegy choices and assumptions in the lane's other packages
+(each documented where it lives):
+
+7. Generation: every `ELEGY CHOICE` above.
+8. Objects ([OBJECTS-STATUS.md](OBJECTS-STATUS.md)): minefields O6, O9,
+   O10; packets P6 (a destination naming no planet is no destination);
+   stargates G4 (`D > s` destroys every ship of the design); salvage S1;
+   visibility V1–V3. P5 is answered.
+9. Terraforming ([TERRAFORM-STATUS.md](TERRAFORM-STATUS.md)): T1–T3, R1.
+   P1–P3 are answered.
+10. Spec question still open: OBJECTS.md's hostile-adjuster example
+    "137 against 67" fits radiation (67), not temperature, for a 50
+    (15–85) habitat. The `terraform/` tests assert all three scores.
+
+Unimplemented behaviour:
+
+11. Salvage as a space object: it stays in `engine.Game.Salvage`.
+    Salvage numbering, decay and loading exist in `objects/`; the spec
+    gaps on owner, merging and pickup are with the objects research lane.
+12. Not wired by the kernel yet: the terraforming production items, the
+    remote-mining task, Orbital Adjusters and `Impact.DiscloseDesign`
+    (TERRAFORM-STATUS.md "Turn wiring"); the yearly race check
+    (RACES-STATUS.md "Not wired yet").
+13. Generation itself, under "Not modelled" below.
 
 ## Not modelled
 
