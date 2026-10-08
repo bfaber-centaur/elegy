@@ -46,6 +46,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Colonization (requirements, whole fleet, ⌊3C/4⌋ minerals) | `colonize` | CONFIRMED (T-1, T-30, T-31); requirements BINARY-ONLY | `TestConfirmedColonyMinerals`, `TestConfirmedTakeoverTiming` |
 | Timing (in orbit before growth, arriving after; bombing before arrivals) | `GenerateTurn` | CONFIRMED (TK-001..003) | `TestConfirmedTakeoverTiming` |
 | Colonize is tried once: any failure clears the task and keeps the cargo | `colonize` | CONFIRMED (TK-113, #37) | `TestConfirmedColonizeTriedOnce` |
+| Load all and load exactly at the owner's own planet, in the load passes; load exactly keeps its shortfall, load all clears (ASSUMPTION T4) | `load`, `loadPass` | CONFIRMED (TK-301, TK-302, TK-201 G; FO-01-A..D, K and WP-1 vectors) | `TestConfirmedLoadAmounts` |
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
@@ -70,10 +71,11 @@ spec does not give the scan's start value. The code says so at
 
 ## Not modelled
 
-- load actions ("load all", "fill to", "wait for", "set amount to", "set
-  waypoint to"). Fleet transfers, remote mining, mine laying,
-  cargo given to other players' fleets and colonists dropped by a manual
-  cargo order are implemented (KERNEL-STATUS.md, ORDERS-LAYER-STATUS.md);
+- the load actions "fill to", "wait for", "set amount to" and "set
+  waypoint to". "Load all", "load exactly", fleet transfers, remote
+  mining, mine laying, cargo given to other players' fleets and colonists
+  dropped by a manual cargo order are implemented (KERNEL-STATUS.md,
+  ORDERS-LAYER-STATUS.md);
 - ancient artifacts;
 - the design check at generation that drops parts above the owner's tech:
   designs have owners through `Game.DesignSlots`, but `Catalog.ReadDesign`

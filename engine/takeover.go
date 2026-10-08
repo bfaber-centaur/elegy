@@ -40,14 +40,17 @@ const (
 )
 
 // TransportAction is a transport order's action for one cargo type
-// (TAKEOVER.md "Unload and load amounts"). Only the unload actions are
-// modelled.
+// (TAKEOVER.md "Unload and load amounts"). The unload actions and "load
+// all" and "load exactly" are modelled; fill, wait, set-amount and
+// set-waypoint are not.
 type TransportAction int
 
 const (
 	TransportNone TransportAction = iota
 	UnloadAll                     // C
 	UnloadExactly                 // min(v, C)
+	LoadAll                       // min(A, free space)
+	LoadExactly                   // min(v, A, free space)
 )
 
 // Transport is one cargo type's action and amount v (kT; colonists in
@@ -448,6 +451,55 @@ func (g *Game) removeFleets(ids map[int]bool) {
 		}
 	}
 	g.Fleets = fleets
+}
+
+// load runs a transport task's load actions at the orbited planet in the
+// load pass (TAKEOVER.md "Unload and load amounts", CONFIRMED TK-301,
+// TK-302, TK-201 G): "load all" moves min(A, free space), "load exactly
+// v" min(v, A, free space), with A the planet's surface mineral or its
+// population and the free space the fleet's hold less its cargo. Loading
+// colonists may take the whole population; the planet stays owned until
+// this year's growth.
+//
+// ASSUMPTION T4: loads come only from a planet the fleet's owner owns
+// (as CargoOrder: taking from another player is refused); elsewhere the
+// actions wait. Cargo types load in order (ironium, boranium, germanium,
+// colonists), each from the space the earlier ones left. "Load all" is
+// then satisfied and clears; "load exactly" keeps what it could not load
+// and clears when that reaches 0 ("load actions persist until
+// satisfied"). A task left with no action is no task, as after unloads.
+func (g *Game) load(f *Fleet) {
+	pi := g.planetAt(f.Pos)
+	if pi < 0 || g.Planets[pi].Owner != f.Owner {
+		return
+	}
+	p := &g.Planets[pi]
+	free := g.cargoCapacity(f) - f.Cargo.mass()
+	for c := range NumCargo {
+		t := &f.Task.Transport[c]
+		if t.Action != LoadAll && t.Action != LoadExactly {
+			continue
+		}
+		avail := &p.Population
+		held := &f.Cargo.Colonists
+		if c < NumMinerals {
+			avail, held = &p.Surface[c], &f.Cargo.Minerals[c]
+		}
+		amount := max(0, min(*avail, free))
+		if t.Action == LoadExactly {
+			amount = min(amount, t.Amount)
+			t.Amount -= amount
+		}
+		*avail -= amount
+		*held += amount
+		free -= amount
+		if t.Action == LoadAll || t.Amount <= 0 {
+			t.Action, t.Amount = TransportNone, 0
+		}
+	}
+	if f.Task.Transport == ([NumCargo]Transport{}) {
+		f.Task = Task{}
+	}
 }
 
 // unload runs a transport task's unload actions at the orbited planet

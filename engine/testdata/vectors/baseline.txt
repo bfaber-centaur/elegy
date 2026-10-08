@@ -241,6 +241,11 @@ FM-104-F
 FM-105-A
 FM-105-B
 FM-105-C
+FO-01-A
+FO-01-B
+FO-01-C
+FO-01-D
+FO-01-K
 FO-03-A
 FO-03-B
 FO-03-C
@@ -1137,5 +1142,6 @@ WU-WARP90
 PQ-1-explore
 PQ-1
 WP-1-explore
+WP-1
 XF-1-explore
 XF-1

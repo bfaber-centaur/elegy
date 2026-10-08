@@ -490,7 +490,7 @@ func validTask(t Task) error {
 		}
 	case TaskTransport:
 		for _, tr := range t.Transport {
-			if tr.Action < TransportNone || tr.Action > UnloadExactly || tr.Amount < 0 {
+			if tr.Action < TransportNone || tr.Action > LoadExactly || tr.Amount < 0 {
 				return fmt.Errorf("transport task: %w", ErrOutOfRange)
 			}
 		}
