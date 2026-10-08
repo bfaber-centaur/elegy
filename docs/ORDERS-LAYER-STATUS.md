@@ -194,6 +194,8 @@ settled by the specs (L13 was never used).
 - L19: whether a packet speed outside 4..19 can be stored.
 - P6: a packet destination that names no planet.
 - P7: the Auto Alchemy prefix before a removed packet item.
-- The two stack caps: the merge order keeps 32766 per design (ORDERS.md
-  "Merge order", BINARY-ONLY) while a ship move keeps 32765 (MEASURED CO-06); a case
-  checking the split path at the cap would confirm both stand.
+- The two stack caps: the merge order keeps 32766 per design, which is
+  Elegy's chosen rule and unconfirmed because no case reached the merge
+  order's own clamp (ORDERS.md "Merge order"), while a ship move keeps
+  32765 (MEASURED CO-06). A case reaching the merge clamp would settle
+  whether the two differ.
