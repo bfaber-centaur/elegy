@@ -60,6 +60,7 @@ Test names follow the engine's convention:
 | Starting designs recorded in `Game.DesignSlots`: starbase slots 0/1, each new ship design the next ship slot | `designs.go` | CONFIRMED (UNIVERSE.md "Starbases", "Starting ships"; UG01..UG21); wired for the engine 2026-10-08, `TestConfirmedStartingDesignSlots` |
 | Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `Legacy.SecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
+| Starting battle plans: the same five (Default, Kill Starbase, Max-Defense, Sniper, Chicken) for every player | `players.go` `StartingPlans` | MEASURED (COMBAT.md "Starting plans", UG01..UG21), `TestMeasuredStartingPlans` |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
 | Expert +10% before the BBS factor, each truncating, then the second-planet split | `players.go` | MEASURED (UG03 player 2: 736/368; UG21 player 9: 768); not in UNIVERSE.md yet |
 | Game options carried into `engine.Game`: random events, size, public scores | `newgame.go` | used by the turn (KERNEL.md "Game options during a turn") |
