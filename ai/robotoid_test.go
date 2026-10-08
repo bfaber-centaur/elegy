@@ -104,21 +104,40 @@ func TestAssignHubs(t *testing.T) {
 	}
 }
 
-// AI.md §11 hub freighters' load task at an own planet: mode 0 loads all
-// three minerals; mode 1 or 2 loads 66 % of the room in the scarce
-// mineral and 33 % in the others, split between them (ASSUMPTION A56).
+// AI.md §11 "Hub freighters" step 3 away from the source (MEASURED for
+// Robotoid, AI-26). Boranium is scarce; the fleet has 700 kT free.
 func TestHubLoad(t *testing.T) {
-	all := hubLoad(0, engine.Boranium, 300)
-	for m := range engine.NumMinerals {
-		if all.Kind != engine.TaskTransport || all.Transport[m] != (engine.Transport{Action: engine.LoadAll}) {
-			t.Errorf("mode 0 mineral %d: %+v, want load all", m, all.Transport[m])
+	all := engine.Transport{Action: engine.LoadAll}
+	none := engine.Transport{}
+	fill := func(v int) engine.Transport { return engine.Transport{Action: engine.FillTo, Amount: v} }
+	for _, c := range []struct {
+		name  string
+		mode  int
+		have  int
+		owned bool
+		want  [3]engine.Transport
+	}{
+		{"mode 0", 0, 699, true, [3]engine.Transport{all, all, all}},
+		{"mode 0, scarce ≥ free", 0, 700, true, [3]engine.Transport{all, all, all}},
+		{"mode 2", 2, 699, true, [3]engine.Transport{none, all, none}},
+		{"mode 2, unowned", 2, 699, false, [3]engine.Transport{none, all, none}},
+		{"mode 1, scarce < free", 1, 699, true, [3]engine.Transport{fill(33), fill(66), fill(33)}},
+		{"mode 1, scarce = free", 1, 700, true, [3]engine.Transport{none, all, none}},
+		{"mode 1, scarce > free", 1, 701, true, [3]engine.Transport{none, all, none}},
+		{"mode 1, unowned, scarce < free", 1, 699, false, [3]engine.Transport{all, all, all}},
+		{"mode 1, unowned, scarce = free", 1, 700, false, [3]engine.Transport{none, all, none}},
+	} {
+		got := hubLoad(c.mode, engine.Boranium, c.have, 700, c.owned)
+		if got.Kind != engine.TaskTransport {
+			t.Errorf("%s: task %v", c.name, got.Kind)
 		}
-	}
-	got := hubLoad(2, engine.Boranium, 300)
-	want := [3]int{49, 198, 49}
-	for m, n := range want {
-		if got.Transport[m] != (engine.Transport{Action: engine.LoadExactly, Amount: n}) {
-			t.Errorf("mode 2 mineral %d: %+v, want load exactly %d", m, got.Transport[m], n)
+		for m, w := range c.want {
+			if got.Transport[m] != w {
+				t.Errorf("%s: mineral %d %+v, want %+v", c.name, m, got.Transport[m], w)
+			}
+		}
+		if got.Transport[engine.CargoColonists] != none {
+			t.Errorf("%s: colonists %+v", c.name, got.Transport[engine.CargoColonists])
 		}
 	}
 }
@@ -212,6 +231,47 @@ func TestColonizerTestBuilt(t *testing.T) {
 		rt := &robotoidTurn{turn: newTurn(v, top{}, &Result{})}
 		if got := rt.colonizerTest(); got != c.want {
 			t.Errorf("b = %d, other %d, c = %d: colonizer test %v, want %v", c.built, c.other, c.fleets, got, c.want)
+		}
+	}
+}
+
+// TestHubFreighterLoad: a mode 1 hub freighter at an own target reads the
+// target's scarce mineral against its free hold (AI.md §11 step 3, AI-26).
+// Boranium is the source's scarce mineral (300 under half of 1,000); the
+// fleet holds 300 of 1,000 kT, so 700 kT are free.
+func TestHubFreighterLoad(t *testing.T) {
+	for _, c := range []struct {
+		have int
+		fill bool
+	}{{699, true}, {700, false}, {701, false}} {
+		v := heView(2430, [engine.NumFields]int{})
+		v.Ships = []Design{{Slot: 1, Index: 5, Design: engine.Design{CargoCapacity: 1000}}}
+		v.Planets = []engine.Planet{
+			{ID: 1, Pos: engine.Point{X: 500, Y: 0}, Surface: [engine.NumMinerals]int{1000, 300, 1000}},
+			{ID: 2, Pos: engine.Point{X: 10, Y: 0}, Surface: [engine.NumMinerals]int{2000, c.have, 2000}},
+		}
+		v.Universe = []PlanetPos{{ID: 1, Pos: v.Planets[0].Pos}, {ID: 2, Pos: v.Planets[1].Pos}}
+		v.Fleets = []engine.Fleet{{ID: 100, Pos: engine.Point{}, Stacks: []engine.Stack{{Design: 5, Count: 1}},
+			Cargo: engine.Cargo{Minerals: [engine.NumMinerals]int{100, 100, 100}}}}
+		var res Result
+		rt := &robotoidTurn{turn: newTurn(v, top{}, &res)}
+		rt.hubFreighter(&v.Fleets[0], 1)
+		if len(res.Orders) != 1 {
+			t.Fatalf("have %d: orders %+v", c.have, res.Orders)
+		}
+		wp := res.Orders[0].(engine.WaypointOrder).Waypoints
+		if len(wp) != 1 || wp[0].ID != 2 {
+			t.Fatalf("have %d: waypoints %+v", c.have, wp)
+		}
+		tr := wp[0].Task.Transport
+		want := [3]engine.Transport{{}, {Action: engine.LoadAll}, {}}
+		if c.fill {
+			want = [3]engine.Transport{{Action: engine.FillTo, Amount: 33}, {Action: engine.FillTo, Amount: 66}, {Action: engine.FillTo, Amount: 33}}
+		}
+		for m, w := range want {
+			if tr[m] != w {
+				t.Errorf("have %d: mineral %d %+v, want %+v", c.have, m, tr[m], w)
+			}
 		}
 	}
 }
