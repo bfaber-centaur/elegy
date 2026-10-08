@@ -44,7 +44,7 @@ unless the project decides otherwise.
 | Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
 | Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
-| Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs` |
+| Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestDriversOrderSplitFleets` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
@@ -169,9 +169,6 @@ test). It is a determinism check, not a parity check.
 
 - Automation steps 1 (warp re-pick, AI.md §11 "Warp choice"), 4 (under
   attack) and 5 (blocked queues).
-- Orders to a fleet split off in the same turn: the engine gives the new
-  fleet an id the order file cannot name yet (engine request open); such
-  orders go to `Result.Unsupported`.
 - Orders the engine does not accept yet: load tasks, and unloading
   colonists at another player's planet (freighter invasion).
 - The lay-mines steps: the engine now has a lay-mines task, but the
