@@ -19,8 +19,8 @@ import (
 //  4. planet automation and the queue fill (AI.md §7), with the turn's
 //     shuffled planet order (AI.md §2) and hubs (AI.md §6).
 //
-// Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
-// automation steps 4 and 5; docs/AI-STATUS.md lists them.
+// Not yet run: automation steps 4 and 5, and the warp re-pick's
+// minefield rule (A57); docs/AI-STATUS.md lists them.
 func PlayRototill(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -39,7 +39,7 @@ func PlayRototill(v *View, rng engine.Rand) Result {
 	t.planets()
 	t.pass1()
 	t.pass2()
-	auto := &automation{v: v, pers: Rototill, rng: rng, q: t.q, order: order, hubs: hubs,
+	auto := &automation{v: v, res: &res, pers: Rototill, rng: rng, q: t.q, order: order, hubs: hubs,
 		marked: t.flagged, budget: ResearchBudget(Rototill, y, v.Self.Research.Levels)}
 	auto.run()
 	res.Orders = append(res.Orders, t.q.flush()...)

@@ -94,14 +94,20 @@ func TestRototillColonyShips(t *testing.T) {
 }
 
 // Pass 2 step 1, no colonists and away from home: an engine of Fuel Mizer
-// or later goes to the nearest own starbase at warp 4.
+// or later goes to the nearest own starbase at warp 4. The warp re-pick
+// (AI.md §11 "Warp choice") then rewrites the warp: 60 ly with 100 mg of
+// fuel, uncapped for a colony ship, and warp 5 would take a year longer,
+// so 6.
 func TestRototillEmptyColonyShipGoesHome(t *testing.T) {
 	v := caView(t, 2401)
 	v.Fleets = []engine.Fleet{fleet(100, 1, v.Universe[2].Pos, 11, 1)}
 	res := PlayRototill(v, top{})
 	wps := ordersOf[engine.WaypointOrder](res.Orders)
-	if len(wps) != 1 || wps[0].Waypoints[0].ID != 1 || wps[0].Waypoints[0].Warp != 4 || wps[0].Waypoints[0].Task.Kind != engine.TaskNone {
-		t.Errorf("orders %+v", wps)
+	if len(wps) != 2 || wps[0].Waypoints[0].ID != 1 || wps[0].Waypoints[0].Warp != 4 || wps[0].Waypoints[0].Task.Kind != engine.TaskNone {
+		t.Fatalf("orders %+v", wps)
+	}
+	if w := wps[1].Waypoints[0]; wps[1].Fleet != 100 || w.ID != 1 || w.Warp != 6 {
+		t.Errorf("re-pick %+v, want warp 6 to planet 1", wps[1])
 	}
 }
 
@@ -164,7 +170,9 @@ func TestRototillProduction(t *testing.T) {
 }
 
 // Pass 2 step 4: the scout goes to the nearest planet never seen that no
-// other own fleet targets, at its ideal warp, with no task.
+// other own fleet targets, at its ideal warp, with no task. The other
+// fleet's warp 5 is re-picked to 6 (AI.md §11 "Warp choice"): its 30 ly
+// take one year at warp 6 and two at warp 5.
 func TestRototillScout(t *testing.T) {
 	v := caView(t, 2401)
 	home := v.Universe[0].Pos
@@ -174,7 +182,10 @@ func TestRototillScout(t *testing.T) {
 	v.Fleets = []engine.Fleet{fleet(100, 1, home, 10, 1), other}
 	res := PlayRototill(v, top{})
 	wps := ordersOf[engine.WaypointOrder](res.Orders)
-	if len(wps) != 1 || wps[0].Fleet != 100 || wps[0].Waypoints[0].ID != 4 || wps[0].Waypoints[0].Warp != 6 {
-		t.Errorf("orders %+v", wps)
+	if len(wps) != 2 || wps[0].Fleet != 100 || wps[0].Waypoints[0].ID != 4 || wps[0].Waypoints[0].Warp != 6 {
+		t.Fatalf("orders %+v", wps)
+	}
+	if wps[1].Fleet != 101 || wps[1].Waypoints[0].ID != 3 || wps[1].Waypoints[0].Warp != 6 {
+		t.Errorf("re-pick %+v, want fleet 101 at warp 6", wps[1])
 	}
 }

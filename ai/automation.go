@@ -20,10 +20,14 @@ import (
 // Cybertron, and CA cannot build terraform items), and the mines and
 // factories fill.
 //
-// Not implemented: step 1 (the warp re-pick, AI.md §11 "Warp choice"),
-// step 4 (under attack) and step 5 (blocked queues); docs/AI-STATUS.md.
+// Step 1 (the warp re-pick, AI.md §11 "Warp choice") runs first, without
+// its minefield rule (ASSUMPTION A57).
+//
+// Not implemented: step 4 (under attack) and step 5 (blocked queues);
+// docs/AI-STATUS.md.
 type automation struct {
 	v      *View
+	res    *Result
 	pers   Personality
 	rng    engine.Rand
 	q      *queues
@@ -34,6 +38,7 @@ type automation struct {
 }
 
 func (a *automation) run() {
+	a.repickWarps()
 	if a.pers == Cybertron {
 		a.cybertronStarbases()
 	} else {

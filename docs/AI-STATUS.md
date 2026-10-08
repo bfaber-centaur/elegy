@@ -46,6 +46,7 @@ unless the project decides otherwise.
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
 | Lay-mines tasks: Robotoid's idle scouts from year index 41, Cybertron's slot-0 fleets (here, or at a random nearby planet) | robotoid.md §4, cybertron.md §5 | BINARY-ONLY (Cybertron's not exercised) | `ai/fleet.go` `layMines` | `TestDriversLayMines`, `TestCybertronMinelayer` |
 | Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs`, `TestDriversOrderSplitFleets` |
+| Warp re-pick: every fleet's first waypoint, from 9 down while short of fuel, the raw cap and its exceptions, the slowest warp with the same years | AI.md §7 step 1, §11 "Warp choice" | CONFIRMED AI-11 (rule); the minefield rule not taken (A57) | `ai/warp.go` | `TestWarpChoice*`, `TestRototillScout`, `TestRototillEmptyColonyShipGoesHome` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
@@ -126,6 +127,8 @@ them it stayed on its homeworld.
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 | A53 | The lay-mines task the planners give lays indefinitely: robotoid.md gives Robotoid's scouts the task with parameters 5 and 5 without reading them, and cybertron.md names no duration. |
 | A54 | Robotoid does not clear an attack fleet's waypoint-0 marker task: robotoid.md §4 refers to it without defining it, and the only task Elegy's Robotoid sets that could be one, the scouts' lay mines, is never on an attack fleet. |
+| A57 | The warp re-pick skips §11's minefield rule: the report carries no minefield positions or sizes, so no fleet is known to be inside another player's field and no Random(10) is drawn. Each turn with a fleet to re-pick reports the rule in Result.Unsupported. |
+| A58 | The raw-cap exception for an own planet at the waypoint reads the planet's starbase design slot even when it has no starbase (§11: the slot is read); a design the view does not hold counts as no design, so the cap stays. |
 
 ## Spec questions
 
@@ -170,8 +173,8 @@ test). It is a determinism check, not a parity check.
 
 ## Not implemented yet
 
-- Automation steps 1 (warp re-pick, AI.md §11 "Warp choice"), 4 (under
-  attack) and 5 (blocked queues).
+- Automation steps 4 (under attack) and 5 (blocked queues), and the warp
+  re-pick's minefield rule (A57).
 - Orders the engine does not accept yet: load tasks, and unloading
   colonists at another player's planet (freighter invasion).
 - Battle plan 4 is ordered now that every new player starts with the

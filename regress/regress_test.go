@@ -123,7 +123,16 @@ func TestHarnessReportsFailures(t *testing.T) {
 			return nil
 		}}}}
 	r := Run(c)
-	if len(r.Findings) != 1 || r.Findings[0].Category != CheckFails || r.Findings[0].Year != 2402 {
+	// Rototill's own unsupported steps (the warp re-pick's minefield rule,
+	// ai ASSUMPTION A57) are observations, not failures; they are not
+	// this test's.
+	var found []Finding
+	for _, f := range r.Findings {
+		if f.Category.IsFailure() {
+			found = append(found, f)
+		}
+	}
+	if len(found) != 1 || found[0].Category != CheckFails || found[0].Year != 2402 {
 		t.Fatalf("findings %+v: want exactly the one year-check failure, in the year played from 2402", r.Findings)
 	}
 	if r.Years != 3 {
