@@ -1311,3 +1311,35 @@ func TestConfirmedBuiltInComputerPlayers(t *testing.T) {
 		t.Error("type 7 accepted")
 	}
 }
+
+// ELEGY DECISION: each player's starting designs fill its design slots
+// in Game.DesignSlots, numbered from 0 in PlayerStart order, so the
+// engine's design orders and starbase rules find them.
+func TestElegyDecisionStartingDesignSlots(t *testing.T) {
+	var players []PlayerSetup
+	for _, prt := range allPRTs {
+		players = append(players, human(prt))
+	}
+	res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, 8)
+	g := res.Game
+	for i, st := range res.Players {
+		for k, d := range st.StarbaseDesigns {
+			if got, ok := g.PlayerDesign(i, true, k); !ok || got != d {
+				t.Errorf("player %d starbase slot %d = %d, %v; want design %d", i, k, got, ok, d)
+			}
+		}
+		for k, d := range st.ShipDesigns {
+			if got, ok := g.PlayerDesign(i, false, k); !ok || got != d {
+				t.Errorf("player %d ship slot %d = %d, %v; want design %d", i, k, got, ok, d)
+			}
+		}
+	}
+	if want := func() (n int) {
+		for _, st := range res.Players {
+			n += len(st.StarbaseDesigns) + len(st.ShipDesigns)
+		}
+		return
+	}(); len(g.DesignSlots) != want {
+		t.Errorf("%d design slots, want %d", len(g.DesignSlots), want)
+	}
+}

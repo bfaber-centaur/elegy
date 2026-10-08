@@ -120,6 +120,10 @@ Marked `ELEGY CHOICE` in the code:
 - the ARM Midget Miners are two one-ship fleets; fleet ids run across the
   whole game in creation order;
 - a wormhole end's class is drawn before its position.
+- the starting designs take the player's design slots in
+  `Game.DesignSlots`, numbered from 0 in `PlayerStart` order
+  (`TestElegyDecisionStartingDesignSlots`), so design orders and the
+  engine's starbase rules find them.
 
 ## Placeholders (spec gaps)
 

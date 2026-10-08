@@ -305,6 +305,15 @@ func (g *generator) addDesignsAndFleets(i int, ps player, start *PlayerStart) er
 		}
 		g.addFleet(i, d, hw.Pos, start)
 	}
+	// The engine finds a player's designs through Game.DesignSlots
+	// (design orders, starbase upgrades, gifts), so the starting designs
+	// take their slots there too, numbered from 0 in the order above.
+	for k, d := range start.StarbaseDesigns {
+		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Starbase: true, Slot: k, Design: d})
+	}
+	for k, d := range start.ShipDesigns {
+		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Slot: k, Design: d})
+	}
 	return nil
 }
 
