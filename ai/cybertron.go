@@ -29,7 +29,7 @@ import (
 // would come only from a legacy ruleset switch, which is not implemented.
 //
 // Not yet run: automation steps 4 and 5; docs/AI-STATUS.md lists them.
-// Steps the engine cannot order (invasion) go to Result.Unsupported.
+// Steps it cannot order yet go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -506,8 +506,26 @@ func (t *cyberTurn) freighter(f *engine.Fleet) {
 				dest = t.pickup(f.Pos)
 			}
 		default:
-			t.res.unsupported("fleet %d: freighter invasion (cybertron.md §5, not exercised)", f.ID)
-			return
+			// Invasion (cybertron.md §5, not exercised).
+			//
+			// ASSUMPTION A55: the fleet unloads all its colonists (a
+			// transport task on waypoint 0) and moves to the pickup, or
+			// to the nearest own starbase planet when there is none: the
+			// spec's "move toward the nearest own starbase, and look
+			// for a pickup" read as one move, the pickup being itself an
+			// own starbase planet.
+			task := engine.Task{Kind: engine.TaskTransport}
+			task.Transport[engine.CargoColonists] = engine.Transport{Action: engine.UnloadAll}
+			f.Task = task
+			dest = t.pickup(f.Pos)
+			if dest < 0 {
+				id, ok := v.nearestOwnStarbase(f.Pos)
+				if !ok {
+					t.emit(f, taskHere(f, task))
+					return
+				}
+				dest = id
+			}
 		}
 	}
 	if dest < 0 {

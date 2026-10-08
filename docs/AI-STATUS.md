@@ -41,7 +41,7 @@ unless the project decides otherwise.
 | Ship-design builder and store: hull and class lists, delete-then-create, picture, name; ageing | AI.md §10 | BINARY-ONLY (builder CONFIRMED through AI-8, AI-19) | `ai/designs.go` | `TestAgeGroup` |
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
-| Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
+| Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` (the freighter invasion: `TestCybertronFreighterInvasion`, ASSUMPTION A55) |
 | Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
 | Scrap orders: waypoint 0's task set to scrap, route kept | AI.md §8; robotoid.md §4, rototill.md §3, cybertron.md §5 | Robotoid's MEASURED AI-3; a 2400 scrap by every expert but Rototill in the captured orders (AI.md §8); the rest BINARY-ONLY | `ai/fleet.go` `scrapOrder` | `TestDriversScrapStartingScouts` |
 | Lay-mines tasks: Robotoid's idle scouts from year index 41, Cybertron's slot-0 fleets (here, or at a random nearby planet) | robotoid.md §4, cybertron.md §5 | BINARY-ONLY (Cybertron's not exercised) | `ai/fleet.go` `layMines` | `TestDriversLayMines`, `TestCybertronMinelayer` |
@@ -127,6 +127,7 @@ them it stayed on its homeworld.
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 | A53 | The lay-mines task the planners give lays indefinitely: robotoid.md gives Robotoid's scouts the task with parameters 5 and 5 without reading them, and cybertron.md names no duration. |
 | A54 | Robotoid does not clear an attack fleet's waypoint-0 marker task: robotoid.md §4 refers to it without defining it, and the only task Elegy's Robotoid sets that could be one, the scouts' lay mines, is never on an attack fleet. |
+| A55 | Cybertron's freighter at another player's planet (cybertron.md §5, not exercised) unloads all its colonists there and moves to the pickup, or to the nearest own starbase planet when there is none: "move toward the nearest own starbase, and look for a pickup" read as one move. |
 | A57 | Retired: the warp re-pick's minefield rule is implemented from the minefields in the player's report (`game.Report.Objects`). |
 | A58 | The raw-cap exception for an own planet at the waypoint reads the planet's starbase design index even when it has no starbase (§11: the slot is read). Such a planet holds its last starbase's design (the engine keeps it when a starbase is destroyed or scrapped), or 0 if it never had one. The index is looked up only among the player's starbase designs; any other index (a ship design, or a deleted starbase design) counts as no design, so the cap stays. |
 
@@ -174,8 +175,7 @@ test). It is a determinism check, not a parity check.
 ## Not implemented yet
 
 - Automation steps 4 (under attack) and 5 (blocked queues).
-- Orders the engine does not accept yet: load tasks, and unloading
-  colonists at another player's planet (freighter invasion).
+- Orders the engine does not accept yet: load tasks.
 - Battle plan 4 is ordered now that every new player starts with the
   five plans (newgame, COMBAT.md "Starting plans"); a player with fewer
   plans reports it as unsupported.
