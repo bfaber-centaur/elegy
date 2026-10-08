@@ -249,12 +249,14 @@ func (s *Space) MoveObjectsAgain(g *engine.Game, rng engine.Rand) []engine.Event
 	return out
 }
 
-// MeetTraders runs the Trader encounters.
-//
-// The engine marks computer players but holds no computer level, so no
-// planet trades (PLACEHOLDER until computer players are modelled).
+// MeetTraders runs the Trader encounters. A computer player's level is
+// engine.Player.Level.
 func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {
-	ctx := TraderContext{YearIndex: g.Year - 2400, Computer: func(p int) bool { return g.Players[p].Computer }}
+	ctx := TraderContext{
+		YearIndex: g.Year - 2400,
+		Computer:  func(p int) bool { return g.Players[p].Computer },
+		Level:     func(p int) int { return g.Players[p].Level },
+	}
 	for _, p := range g.Players {
 		if !p.Computer {
 			ctx.Humans++
