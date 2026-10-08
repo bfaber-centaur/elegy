@@ -110,8 +110,8 @@ func TestLongGames(t *testing.T) {
 // reproduction, and stops the game there.
 func TestHarnessReportsFailures(t *testing.T) {
 	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny, Years: 6, SaveAt: 3,
-		Checks: []Check{{Name: "fails from 2403", Check: func(g engine.Game) []string {
-			if g.Year >= 2403 {
+		Checks: []Check{{Name: "fails from 2403", Check: func(_ engine.Game, r engine.TurnResult) []string {
+			if r.Game.Year >= 2403 {
 				return []string{"planted problem"}
 			}
 			return nil
@@ -143,8 +143,8 @@ func TestHarnessReportsFailures(t *testing.T) {
 // computer players cannot order yet.
 func TestStoppedCaseKeepsObservations(t *testing.T) {
 	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny, Years: 6,
-		Checks: []Check{{Name: "fails from 2403", Check: func(g engine.Game) []string {
-			if g.Year >= 2403 {
+		Checks: []Check{{Name: "fails from 2403", Check: func(_ engine.Game, r engine.TurnResult) []string {
+			if r.Game.Year >= 2403 {
 				return []string{"planted problem"}
 			}
 			return nil
@@ -160,6 +160,22 @@ type oneUnsupported struct{}
 
 func (oneUnsupported) Orders(game.Report) ([]engine.Order, error) { return nil, nil }
 func (oneUnsupported) unsupportedSteps() int                      { return 1 }
+
+// The year checks include engine.CheckYear: a result whose year did not
+// advance is reported.
+func TestYearChecksRunCheckYear(t *testing.T) {
+	g, err := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny}.newGame()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var probs []string
+	for _, ch := range yearChecks() {
+		probs = append(probs, ch.Check(g.State, engine.TurnResult{Game: g.State})...)
+	}
+	if len(probs) == 0 || !strings.Contains(strings.Join(probs, "; "), "year") {
+		t.Fatalf("problems %q: want CheckYear's year problem", probs)
+	}
+}
 
 // differs names the first differing paths of two games, and nothing for
 // equal ones.

@@ -62,10 +62,11 @@ func ruleset(id string) (engine.Ruleset, bool) {
 	return engine.Ruleset{}, false
 }
 
-// A Check tests one year's game state and returns its problems.
+// A Check tests one generated year, from the game before it (prev) to
+// the engine's result r, and returns its problems.
 type Check struct {
 	Name  string
-	Check func(engine.Game) []string
+	Check func(prev engine.Game, r engine.TurnResult) []string
 }
 
 // Case is one long game.
@@ -80,7 +81,7 @@ type Case struct {
 	// SaveAt is the number of years played before the save and load;
 	// 0 or ≥ Years skips the reload copy.
 	SaveAt int
-	// Checks run on every year's state, after game.Check.
+	// Checks run on every generated year, after game.Check.
 	Checks []Check
 }
 
@@ -259,7 +260,7 @@ func run(c Case, newDrivers func() []game.Driver) Result {
 				}
 			}
 		}
-		year := a.g.State.Year
+		year, prev := a.g.State.Year, a.g.State
 		ya, err := a.g.Advance(a.drivers)
 		if err != nil {
 			fail(categorize(err), year, "%v", err)
@@ -280,7 +281,7 @@ func run(c Case, newDrivers func() []game.Driver) Result {
 			unsupported += unsupportedSteps(d)
 		}
 		for _, ch := range c.Checks {
-			if probs := ch.Check(a.g.State); len(probs) > 0 {
+			if probs := ch.Check(prev, ya.Result); len(probs) > 0 {
 				fail(CheckFails, year, "%s: %d problems, first: %s", ch.Name, len(probs), probs[0])
 				return observed()
 			}
