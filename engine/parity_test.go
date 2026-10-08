@@ -1541,7 +1541,7 @@ func runVector(v *pvVector, k int) []pvResult {
 			}
 			return out
 		}
-		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
+		r, err := GenerateTurn(withRules(g), files, rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
 		if err != nil {
 			genErr = err
 			break

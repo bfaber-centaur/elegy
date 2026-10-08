@@ -68,7 +68,7 @@ func TestPredictionTerraformInTurn(t *testing.T) {
 	}
 	stub := &stubTerraform{}
 	g.Terraform = stub
-	r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
 	if err != nil {
 		t.Fatal(err)
 	}
