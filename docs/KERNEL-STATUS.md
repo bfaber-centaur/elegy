@@ -5,7 +5,7 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
 OT runs and the turn order and random draw order). The parity vectors
-are copied from stars-elegy `main` at `f7e6aef` (stars-elegy #105).
+are copied from stars-elegy `main` at `20634ab` (stars-elegy #107).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
@@ -132,8 +132,17 @@ KERNEL.md "Turn order" puts them:
   become known, a fleet hit by a minefield learns it, a Packet Physics
   player's packets in flight scan fleets and planets, a Space
   Demolition player's minefields see the fleets inside them, and the
-  owners of the minefields and packets seen become known players.
-  `PlayerView.Objects` lists the objects seen.
+  owners of the minefields, packets and salvage seen become known
+  players. `PlayerView.Objects` lists the objects seen.
+
+Salvage (OBJECTS.md "Salvage") lives in `Game.Salvage`. A battle's
+deep-space salvage object belongs to the owner of its first addition
+and is marked fresh; an overflow object belongs to the owner of the
+addition that overflowed and is not marked; each new object takes its
+number from `SpaceObjects.SalvageNumber`. A mine hit's salvage joins the
+first object at the stop point (`objects.Space.AddMineSalvage`), and
+salvage decays at step 3a before packets. A fleet stopped by a
+minefield lands at OBJECTS.md's stop point (`objects.StopPoint`).
 
 The race check (RACES.md "In a running game") runs at KERNEL.md step
 2a, after the before-movement tasks and before movement, through
@@ -164,15 +173,20 @@ Choices where OBJECTS.md is silent:
   becomes a plain position where the end was.
 - **O13 (ASSUMPTION).** The space objects are seen, with the Space
   Demolition cloak draws, before the population estimates draw.
+- **O14 (ASSUMPTION).** In a game with no space objects (nil
+  `Game.Objects`), a new salvage object takes its owner's lowest unused
+  salvage number, with no object limit, and salvage does not decay.
 - **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
   uses the gate's range as P; an unlimited gate shows every starbase.
 
 Not modelled yet: following fleets (step 1a.3; Elegy does not keep
 waypoint 0's target), the stargate choice of the route task, waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol and
-lay mines (load, scrap; ORDERS-STATUS.md), the Trader's planet trades with computer players (their
-levels are a PLACEHOLDER), packets launched from production (the
-orders lane adds `Launch`), terraforming other than the Claim
+lay mines (load, scrap and loading from or unloading into salvage;
+ORDERS-STATUS.md), the Trader's planet trades with computer players
+(their levels are a PLACEHOLDER), packet items in the production queue
+(the orders lane adds them; the harness skips packets of a player whose
+queue it did not load), terraforming other than the Claim
 Adjuster's year-end step (production items, Orbital Adjusters), remote
 mining, Super Stealth research stealing, the duplicate-serial penalty,
 ships/starbases in the queue, and the
@@ -315,23 +329,19 @@ and TK-108-C).
   "Owned planets", CONFIRMED KB-1B). That step gives trunc(conc·8/100)
   plus the random remainder: 4 + 1, 0 + 1 and 6 + 1 at concentrations
   62, 10 and 87, the observed gap.
-- **MF-02, MF-03h, MF-03s, MF-04, MF-04b, MF-04d, MF-05b, MF-09h,
-  MF-09s** (CONFIRMED and MEASURED). Not diagnostic. Where a fleet stops
-  in a minefield is decided by the hit draws (OBJECTS.md "Hits on
-  moving fleets"), and each vector records one stream's stop positions
-  without marking them as samples. Elegy's stops change with the seed.
-  Asked the vectors owner to flag them.
-- **MF-13b packet** (CONFIRMED). The original shows the object at
-  1400,1400 with 900 kT of each mineral after one year and not moved;
-  Elegy loads it as a packet for planet 0 at warp 4, decay class 0, and
-  keeps 1000. Asked the vectors owner whether it is salvage exported as
-  a packet.
+- **OB-030-A** (MEASURED). Not diagnostic: the AR planet's mining
+  remainder is a random draw (KERNEL.md "Mining"), and the vector gives
+  both planets' surface minerals exactly, with no mining tolerance.
+  Seed 1 matches planet 20 (germanium 10) but then misses the control
+  planet 22 by 1 kT. Asked the vectors owner for the 1 kT tolerance.
 - **MF-13a, MF-13c** (CONFIRMED). The lone minefield at 1400,1400,
   with no scanner of either player near it, ends the year known to
   nobody, not even its owner. Elegy's sight rule makes a player's own
   minefields always known (`objects.Space.Scan`), so it marks the
-  owner. These passed before only because `known_to` was not compared.
-  Sent to the objects lane as a rule question.
+  owner. Owning a field does not make it known (stars-elegy #108,
+  SCANNING.md): the known mask gains a player only by sight, a hit or a
+  sweep. The fix is in `objects.Space.Scan` (objects lane); the two
+  cases return to the baseline with it.
 - A minefield's `radius` is not compared: SCANNING.md defines no
   per-player known radius.
 

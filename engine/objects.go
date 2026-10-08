@@ -30,9 +30,9 @@ type SpaceObjects interface {
 
 	// MineCheck checks one movement step of fleet fi, distance ly from
 	// `from` toward `toward`, for a minefield stop (OBJECTS.md "Hits on
-	// moving fleets"). stop is the distance from `from` at which the fleet
-	// stops; kind identifies the stopping field kind for MineHit.
-	MineCheck(g *Game, fi int, from, toward Point, distance int, rng Rand) (stop, kind int, hit bool)
+	// moving fleets"). stop is where the fleet stops (OBJECTS.md "Stop
+	// point"); kind identifies the stopping field kind for MineHit.
+	MineCheck(g *Game, fi int, from, toward Point, distance int, rng Rand) (stop Point, kind int, hit bool)
 	// MineHit applies a stop of fleet fi, already at its stop point.
 	MineHit(g *Game, fi int, kind int, rng Rand) []Event
 
@@ -45,8 +45,8 @@ type SpaceObjects interface {
 	// waypoint targets (OBJECTS.md "Travel").
 	TransitWormhole(g *Game, fi int, end int) []Event
 
-	// DecayObjects is step 3a: packet decay, detonations, then
-	// minefield decay.
+	// DecayObjects is step 3a: salvage decay, packet decay, detonations,
+	// then minefield decay.
 	DecayObjects(g *Game) []Event
 
 	// TraderAppears is the Mystery Trader's appearance at the end of step 4c.
@@ -75,6 +75,11 @@ type SpaceObjects interface {
 	// the owner. A launch with no room for a packet still counts as built.
 	// spend is what production takes from the surface.
 	LaunchPacket(g *Game, pi, dest, speed, mineral, count int) (built bool, spend Minerals, ev []Event)
+
+	// SalvageNumber is the number a new salvage object of owner takes,
+	// and whether there is room for one (OBJECTS.md "Salvage", "Owner":
+	// the owner's packet numbers, and a free object slot).
+	SalvageNumber(g *Game, owner int) (n int, ok bool)
 
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When
@@ -121,11 +126,11 @@ type ObjectSight struct {
 
 // ObjectsSeen names the space objects a player sees in a year
 // (SCANNING.md "Space objects"), in object order: minefields and packets
-// by owner and number, wormhole ends by waypoint target ID, Traders by
+// and salvage by owner and number, wormhole ends by waypoint target ID, Traders by
 // index.
 type ObjectsSeen struct {
-	Minefields, Packets [][2]int
-	Wormholes, Traders  []int
+	Minefields, Packets, Salvage [][2]int
+	Wormholes, Traders           []int
 }
 
 // MineLayer is a fleet laying mines this year (OBJECTS.md "Laying"):
@@ -269,4 +274,43 @@ func (g *Game) dropShiplessFleets() {
 	if len(gone) > 0 {
 		g.removeFleets(gone)
 	}
+}
+
+// newSalvage adds a deep-space salvage object of owner at pos holding m,
+// numbered from the owner's packet numbers (OBJECTS.md "Salvage",
+// "Owner"); fresh marks it to skip the next decay. With no room for it
+// (SpaceObjects.SalvageNumber) its minerals are lost (ASSUMPTION S1 of
+// package objects).
+//
+// ASSUMPTION O14: in a game with no space objects (nil Game.Objects) the
+// number is the owner's lowest unused salvage number, with no object
+// limit.
+func (g *Game) newSalvage(owner int, pos Point, m Minerals, fresh bool) {
+	n, ok := 0, true
+	if g.Objects != nil {
+		n, ok = g.Objects.SalvageNumber(g, owner)
+	} else {
+		used := map[int]bool{}
+		for _, s := range g.Salvage {
+			if s.Owner == owner {
+				used[s.Number] = true
+			}
+		}
+		for used[n] {
+			n++
+		}
+	}
+	if !ok {
+		return
+	}
+	g.Salvage = append(g.Salvage, Salvage{Pos: pos, Minerals: m, Owner: owner, Number: n, Fresh: fresh, Steps: salvageTenths(m)})
+}
+
+// salvageTenths is a salvage object's size in 10 kT steps, Σ⌈m/10⌉.
+func salvageTenths(m Minerals) int {
+	t := 0
+	for _, x := range m {
+		t += (x + 9) / 10
+	}
+	return t
 }

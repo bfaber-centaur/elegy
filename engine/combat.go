@@ -119,10 +119,10 @@ func (b *battle) finish() {
 	}
 	// Deep-space salvage, after the tech attempts in the draw order.
 	for _, add := range b.pending {
-		b.addSalvage(add)
+		b.addSalvage(add.m, add.owner)
 	}
-	for _, m := range b.salvage {
-		g.Salvage = append(g.Salvage, Salvage{Pos: b.loc.pos, Minerals: m})
+	for i, m := range b.salvage {
+		g.newSalvage(b.salvageOf[i].owner, b.loc.pos, m, b.salvageOf[i].fresh)
 	}
 }
 

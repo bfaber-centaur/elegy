@@ -788,10 +788,6 @@ func (g *Game) mineStop(fi int, m legMove, from Point, a int, arrived bool, rng 
 	if !hit {
 		return false, nil
 	}
-	f := &g.Fleets[fi]
-	f.Pos = along(from, m.dest, stop, m.d)
-	if stop == 0 {
-		f.Pos = from
-	}
+	g.Fleets[fi].Pos = stop
 	return true, g.Objects.MineHit(g, fi, kind, rng)
 }

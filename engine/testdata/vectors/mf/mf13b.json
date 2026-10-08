@@ -6793,19 +6793,16 @@
     "known_to": []
    },
    {
-    "kind": "packet",
+    "kind": "salvage",
     "owner": 0,
     "id": 0,
     "x": 1400,
     "y": 1400,
-    "destination_planet": 0,
-    "warp": 4,
     "minerals": [
      1000,
      1000,
      1000
-    ],
-    "decay_class": 0
+    ]
    }
   ],
   "production_queues": []
@@ -15541,21 +15538,15 @@
      "year": 1
     },
     {
-     "kind": "object",
+     "kind": "salvage_at",
+     "x": 1400,
+     "y": 1400,
      "equals": {
-      "kind": "packet",
-      "owner": 0,
-      "id": 0,
-      "x": 1400,
-      "y": 1400,
-      "destination_planet": 0,
-      "warp": 4,
       "minerals": [
        900,
        900,
        900
-      ],
-      "decay_class": 0
+      ]
      },
      "year": 1
     },
@@ -15625,7 +15616,7 @@
      "year": 1
     }
    ],
-   "verdict": "MF-13b-A HELD (MF-13): no new field; \"failed to lay\" message (0x17e) for that layer"
+   "verdict": "MF-13b-A HELD (MF-13): no new field; \"failed to lay\" message (0x17e) for that layer | the object at 1400,1400 is salvage: a packet-type object with packet-warp field 0 is salvage whatever its destination, and its loss of 10% is salvage decay (BINARY-ONLY: Objects decomp reading, OBJECTS.md line pending)"
   }
  ],
  "source": {

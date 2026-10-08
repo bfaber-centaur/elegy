@@ -117,14 +117,17 @@ func (s *Space) MoveObjects(g *engine.Game, rng engine.Rand) []engine.Event {
 	return append(out, impacts(g, s.MovePackets(g, impactContext(g), rng))...)
 }
 
-// MineCheck is CheckStep for fleet fi.
-func (s *Space) MineCheck(g *engine.Game, fi int, from, toward engine.Point, distance int, rng engine.Rand) (int, int, bool) {
+// MineCheck is CheckStep for fleet fi, with the stop at StopPoint.
+func (s *Space) MineCheck(g *engine.Game, fi int, from, toward engine.Point, distance int, rng engine.Rand) (engine.Point, int, bool) {
 	st := CheckStep(g, s, &g.Fleets[fi], from, toward, distance, rng)
-	return st.Distance, int(st.Kind), st.Hit
+	if !st.Hit {
+		return engine.Point{}, 0, false
+	}
+	return StopPoint(from, toward, st.Distance), int(st.Kind), true
 }
 
-// MineHit is ApplyHit for fleet fi; the destroyed ships' minerals become
-// salvage at the stop point. The fleet's owner learns the fields that
+// MineHit is ApplyHit for fleet fi; the destroyed ships' minerals join
+// the salvage at the stop point (AddMineSalvage). The fleet's owner learns the fields that
 // stopped it (LearnHit), before the hit can destroy the fleet.
 func (s *Space) MineHit(g *engine.Game, fi int, kind int, rng engine.Rand) []engine.Event {
 	s.LearnHit(g, &g.Fleets[fi], Stop{Hit: true, Kind: MineKind(kind)}, g.Fleets[fi].Pos)
@@ -132,9 +135,7 @@ func (s *Space) MineHit(g *engine.Game, fi int, kind int, rng engine.Rand) []eng
 	f := &g.Fleets[fi]
 	out := []engine.Event{{Kind: engine.EventMineHit, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: h.Paid}}
 	out = append(out, shipsLost(f, h.Designs)...)
-	if h.Salvage != (engine.Minerals{}) {
-		g.Salvage = append(g.Salvage, engine.Salvage{Pos: f.Pos, Minerals: h.Salvage})
-	}
+	s.AddMineSalvage(g, f.Owner, f.Pos, h.Salvage)
 	return out
 }
 
@@ -173,9 +174,10 @@ func (s *Space) TransitWormhole(g *engine.Game, fi int, end int) []engine.Event 
 	return []engine.Event{{Kind: engine.EventWormholeTransit, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: end}}
 }
 
-// DecayObjects is OBJECTS.md "Turn placement" step 5: packets decay,
-// detonating fields go off, then every field decays.
+// DecayObjects is OBJECTS.md "Turn placement" step 5: salvage and
+// packets decay, detonating fields go off, then every field decays.
 func (s *Space) DecayObjects(g *engine.Game) []engine.Event {
+	DecaySalvage(g)
 	s.DecayPackets(g)
 	var out []engine.Event
 	for _, d := range s.Detonate(g) {
@@ -355,6 +357,9 @@ func (s *Space) SeeObjects(g *engine.Game, scanners []engine.ObjectScanner, cloa
 		}
 		for _, i := range seen.Packets {
 			out[v].Seen.Packets = append(out[v].Seen.Packets, [2]int{s.Packets[i].Owner, s.Packets[i].Number})
+		}
+		for _, i := range seen.Salvage {
+			out[v].Seen.Salvage = append(out[v].Seen.Salvage, [2]int{g.Salvage[i].Owner, g.Salvage[i].Number})
 		}
 		for _, w := range seen.Wormholes {
 			out[v].Seen.Wormholes = append(out[v].Seen.Wormholes, WormholeEndID(w.Wormhole, w.End))

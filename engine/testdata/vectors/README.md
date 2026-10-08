@@ -27,7 +27,8 @@ vectors/<corpus>/<run>.json      one oracle run
 | `kx001`, `kx002` | KX-001, KX-002 cases | 38 | planet economy: production, Auto Alchemy, growth, research, mining (one year from an edited PG001 file) | `docs/KERNEL.md` |
 | `kx003` | KX-003 r1, r2, r3, r3l | 4 | score records, victory flags, slower tech, Claim Adjuster | `docs/KERNEL.md` |
 | `kx004` | KX-004 S1..S10 | 10 | random events and Mystery Trader appearance, 3 to 61 streams each | `docs/KERNEL.md` "Random events" |
-| `mf` | MF-01..11c | 20 | minefields: hits, sweeping, decay, detonation, speed bumps | `docs/OBJECTS.md` "Minefields" |
+| `mf` | MF-01..15 | 25 | minefields: hits, sweeping, decay, detonation, speed bumps, laying at the 511-object limit, salvage after a partial loss, due-north and due-south legs | `docs/OBJECTS.md` "Minefields" |
+| `gt` | GT-001..004 | 4 | stargates: limits, danger and loss rolls, friends, refusal order, what makes a gate (MEASURED, one pinned year each) | `docs/OBJECTS.md` "Stargates" |
 | `rp` | RD-P1..P21 | 21 | turn-time race penalty and repairs; P13..P21 (Round 3, MEASURED) add silent clamps, clamp before the check, habitat repairs, no second punishment and a computer player's repair | `docs/KERNEL.md` (race budget), PARITY "Turn-time penalty", "Race design" Round 3 |
 | `cb7` | CB-048, CB-049, SC-035, SC-036 | 5 | combat round 7 (Mystery Trader items from battle, movement) and scanning after battles | `docs/COMBAT.md`, `docs/SCANNING.md` |
 | `tk3` | TK-201..203 | 3 | takeover round 3: order across planets, unloads, mines floor, scrapping tech | `docs/TAKEOVER.md` |
@@ -41,7 +42,7 @@ vectors/<corpus>/<run>.json      one oracle run
 | `wu` | WU-A..WU-WARP90 | 28 | waypoint upkeep, repeat, followers, route and transfer tasks, patrol target choice | `docs/ORDERS.md` |
 | `cs` | CS-003 W, B, S, C, C2, D | 80 | warp 10 losses, fuel generation, bombs, colonizing, Orbital Adjuster, minefield sweeping and laying, torpedo hits, designer readouts | `docs/COMPONENTS.md` |
 | `es` | ES-001, ES-002 | 153 | client estimates: waypoint distance, travel time and fuel, range, report ETA, production completion, research, population, value, mining rate | `docs/ESTIMATES.md` |
-| `ob` | OB-001..005, 007..027 | 146 | minefields, packets, the Mystery Trader, wormholes, scanning, stargates | `docs/OBJECTS.md`, `docs/SCANNING.md` |
+| `ob` | OB-001..005, 007..031 | 174 | minefields, packets, the Mystery Trader, wormholes, scanning, stargates | `docs/OBJECTS.md`, `docs/SCANNING.md` |
 | `ug` | UG01..UG30 | 150 | new games: starting tech and designs, planet counts, homeworlds, wormholes, stored victory conditions (`new_game` vectors) | `docs/UNIVERSE.md` |
 | `pg` | PG-002, PG-003 | 4 | population growth and carry, uncrowded and crowded, 19 and 29 empty-order years | `docs/KERNEL.md` "Population growth" |
 | `pq` | PQ-001 C01..C14, P0 | 16 | one year of the production queue: partial builds, mineral shortfall, auto items, alchemy, research tax, order clips | `docs/KERNEL.md` "Production" |
@@ -114,7 +115,12 @@ file, so nothing in it is a default you have to guess.
 - A planet with a route has `route_to`, the destination planet.
 - `objects`: wormhole ends (partner, stability class, years since the last
   jump, players who know it, players who know where it leads), Mystery
-  Traders (destination, warp, players met), mineral packets, minefields.
+  Traders (destination, warp, players met), mineral packets, salvage
+  (`kind: "salvage"`: owner, number, position, minerals), minefields.
+  Packets and salvage are one kind of object in the game's files; one whose
+  stored packet warp is 0 (warp 4) is salvage whatever its destination
+  (BINARY-ONLY: Objects decomp reading). Changed or new salvage after a year
+  is written as `salvage_at`.
 
 Without an `orders` block, the orders a case tests are the fleets'
 waypoints and tasks and the other standing orders in this state; no other
@@ -339,6 +345,18 @@ CB-016 (Q-3, the station firing) check their CONFIRMED rules this way, and
 their `verdict` says so. In a several-stream vector, what
 differed between streams is listed per stream as usual.
 
+Minefields and stargates draw too. In the `mf` runs where fleets cross a
+field at a speed with a stop chance (MF-01, 02, 03h, 03s, 04, 04b, 04d,
+05b, 09h, 09s, 14, 15), the `fleet` and `fleet_gone` of every fleet that
+moved and every `salvage_at` carry `sample: true`, in every stream: where a
+fleet stops decides its position, fuel, cargo and damage. In the
+single-stream ones the `minefield` expectations do too, since every stop
+is paid by a field (MF-4). In `gt`, the fleets whose survivors a gate's
+loss roll decided (a predicted ship range, the O-65 fleets of which only
+some arrive, the GT-003 W cases) carry `sample: true`, and so do message
+ids that only some of those fleets got. In `ob`, a PP terraforming step's
+size is a draw, so OB-029's `environment` expectations are samples.
+
 ### New-game vectors
 
 A universe-generation vector has `new_game` (`settings` and `races`) in place
@@ -378,8 +396,7 @@ go test ./internal/vectors
   checker output.
 - CB-000 (ship designer readouts, no turn), CB-018 batch 1 (confounded by
   research), the superseded CB-046 morph v1, and CB-017's second year.
-- GT-001/002 (stargates): waiting for their public record in stars-elegy.
-  SC-035 v1 (did not test the claim) and the SL tooling check.
+- SC-035 v1 (did not test the claim) and the SL tooling check.
 - SC-015 (the tamper check fired; SC-015L repeats it) and SC-021 (invalid
   setup).
 - KX-001 M3 (the prediction was void: the race edit tripped the tamper

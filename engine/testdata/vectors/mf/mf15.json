@@ -1,10 +1,10 @@
 {
  "schema": "stars-elegy-vector/1",
- "id": "MF-02",
- "title": "MF 02",
+ "id": "MF-15",
+ "title": "MF 15",
  "years": 1,
- "random": "several_streams",
- "streams": 2,
+ "random": "single_stream",
+ "streams": 1,
  "initial_state": {
   "year": 2400,
   "game": {
@@ -1137,8 +1137,53 @@
    {
     "owner": 1,
     "id": 0,
+    "x": 1140,
+    "y": 1117,
+    "orbiting": null,
+    "ships": [
+     {
+      "design": 0,
+      "count": 1
+     }
+    ],
+    "cargo": {
+     "ironium": 0,
+     "boranium": 0,
+     "germanium": 0,
+     "colonists": 0
+    },
+    "fuel": 280,
+    "battle_plan": 0,
+    "waypoints": [
+     {
+      "x": 1140,
+      "y": 1117,
+      "warp": 0,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     },
+     {
+      "x": 1140,
+      "y": 1198,
+      "warp": 9,
+      "target": {
+       "kind": "space"
+      },
+      "task": {
+       "kind": "none"
+      }
+     }
+    ]
+   },
+   {
+    "owner": 1,
+    "id": 1,
     "x": 1160,
-    "y": 1134,
+    "y": 1105,
     "orbiting": null,
     "ships": [
      {
@@ -1157,7 +1202,7 @@
     "waypoints": [
      {
       "x": 1160,
-      "y": 1134,
+      "y": 1105,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1167,60 +1212,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1134,
+      "x": 1160,
+      "y": 1186,
       "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 1
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 1,
-    "x": 1170,
-    "y": 1134,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1170,
-      "y": 1134,
-      "warp": 0,
       "target": {
        "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1180,
-      "y": 1134,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 2
       },
       "task": {
        "kind": "none"
@@ -1232,7 +1228,7 @@
     "owner": 1,
     "id": 2,
     "x": 1180,
-    "y": 1134,
+    "y": 1099,
     "orbiting": null,
     "ships": [
      {
@@ -1251,7 +1247,7 @@
     "waypoints": [
      {
       "x": 1180,
-      "y": 1134,
+      "y": 1099,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1261,8 +1257,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1134,
+      "x": 1180,
+      "y": 1180,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1276,8 +1272,8 @@
    {
     "owner": 1,
     "id": 3,
-    "x": 1160,
-    "y": 1146,
+    "x": 1200,
+    "y": 1097,
     "orbiting": null,
     "ships": [
      {
@@ -1295,8 +1291,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1146,
+      "x": 1200,
+      "y": 1097,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1306,13 +1302,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1146,
+      "x": 1200,
+      "y": 1178,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 4
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1323,8 +1317,8 @@
    {
     "owner": 1,
     "id": 4,
-    "x": 1170,
-    "y": 1146,
+    "x": 1220,
+    "y": 1099,
     "orbiting": null,
     "ships": [
      {
@@ -1342,8 +1336,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1146,
+      "x": 1220,
+      "y": 1099,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1353,13 +1347,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1146,
+      "x": 1220,
+      "y": 1180,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 5
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1370,8 +1362,8 @@
    {
     "owner": 1,
     "id": 5,
-    "x": 1180,
-    "y": 1146,
+    "x": 1240,
+    "y": 1105,
     "orbiting": null,
     "ships": [
      {
@@ -1389,8 +1381,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1146,
+      "x": 1240,
+      "y": 1105,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1400,8 +1392,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1146,
+      "x": 1240,
+      "y": 1186,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1415,8 +1407,8 @@
    {
     "owner": 1,
     "id": 6,
-    "x": 1160,
-    "y": 1158,
+    "x": 1260,
+    "y": 1117,
     "orbiting": null,
     "ships": [
      {
@@ -1434,8 +1426,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1158,
+      "x": 1260,
+      "y": 1117,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1445,13 +1437,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1158,
+      "x": 1260,
+      "y": 1198,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 7
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1462,8 +1452,8 @@
    {
     "owner": 1,
     "id": 7,
-    "x": 1170,
-    "y": 1158,
+    "x": 1150,
+    "y": 1110,
     "orbiting": null,
     "ships": [
      {
@@ -1481,8 +1471,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1158,
+      "x": 1150,
+      "y": 1110,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1492,13 +1482,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1158,
+      "x": 1150,
+      "y": 1191,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 8
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1509,8 +1497,8 @@
    {
     "owner": 1,
     "id": 8,
-    "x": 1180,
-    "y": 1158,
+    "x": 1140,
+    "y": 1133,
     "orbiting": null,
     "ships": [
      {
@@ -1528,8 +1516,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1158,
+      "x": 1140,
+      "y": 1133,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1539,8 +1527,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1158,
+      "x": 1140,
+      "y": 1052,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1555,7 +1543,7 @@
     "owner": 1,
     "id": 9,
     "x": 1160,
-    "y": 1170,
+    "y": 1119,
     "orbiting": null,
     "ships": [
      {
@@ -1574,7 +1562,7 @@
     "waypoints": [
      {
       "x": 1160,
-      "y": 1170,
+      "y": 1119,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1584,13 +1572,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1170,
+      "x": 1160,
+      "y": 1038,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 10
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1601,8 +1587,8 @@
    {
     "owner": 1,
     "id": 10,
-    "x": 1170,
-    "y": 1170,
+    "x": 1180,
+    "y": 1112,
     "orbiting": null,
     "ships": [
      {
@@ -1620,8 +1606,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1170,
+      "x": 1180,
+      "y": 1112,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1632,12 +1618,10 @@
      },
      {
       "x": 1180,
-      "y": 1170,
+      "y": 1031,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 11
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1648,8 +1632,8 @@
    {
     "owner": 1,
     "id": 11,
-    "x": 1180,
-    "y": 1170,
+    "x": 1200,
+    "y": 1110,
     "orbiting": null,
     "ships": [
      {
@@ -1667,8 +1651,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1170,
+      "x": 1200,
+      "y": 1110,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1678,8 +1662,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1170,
+      "x": 1200,
+      "y": 1029,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1693,8 +1677,8 @@
    {
     "owner": 1,
     "id": 12,
-    "x": 1160,
-    "y": 1182,
+    "x": 1220,
+    "y": 1112,
     "orbiting": null,
     "ships": [
      {
@@ -1712,8 +1696,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1182,
+      "x": 1220,
+      "y": 1112,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1723,13 +1707,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1182,
+      "x": 1220,
+      "y": 1031,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 13
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1740,8 +1722,8 @@
    {
     "owner": 1,
     "id": 13,
-    "x": 1170,
-    "y": 1182,
+    "x": 1240,
+    "y": 1119,
     "orbiting": null,
     "ships": [
      {
@@ -1759,8 +1741,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1182,
+      "x": 1240,
+      "y": 1119,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1770,13 +1752,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1182,
+      "x": 1240,
+      "y": 1038,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 14
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1787,8 +1767,8 @@
    {
     "owner": 1,
     "id": 14,
-    "x": 1180,
-    "y": 1182,
+    "x": 1260,
+    "y": 1133,
     "orbiting": null,
     "ships": [
      {
@@ -1806,8 +1786,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1182,
+      "x": 1260,
+      "y": 1133,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1817,8 +1797,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1182,
+      "x": 1260,
+      "y": 1052,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1832,8 +1812,8 @@
    {
     "owner": 1,
     "id": 15,
-    "x": 1160,
-    "y": 1194,
+    "x": 1150,
+    "y": 1125,
     "orbiting": null,
     "ships": [
      {
@@ -1851,8 +1831,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1194,
+      "x": 1150,
+      "y": 1125,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1862,13 +1842,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1194,
+      "x": 1150,
+      "y": 1044,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 16
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1879,8 +1857,8 @@
    {
     "owner": 1,
     "id": 16,
-    "x": 1170,
-    "y": 1194,
+    "x": 1117,
+    "y": 1140,
     "orbiting": null,
     "ships": [
      {
@@ -1898,8 +1876,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1194,
+      "x": 1117,
+      "y": 1140,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1909,13 +1887,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1194,
+      "x": 1198,
+      "y": 1140,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 17
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -1926,8 +1902,8 @@
    {
     "owner": 1,
     "id": 17,
-    "x": 1180,
-    "y": 1194,
+    "x": 1105,
+    "y": 1160,
     "orbiting": null,
     "ships": [
      {
@@ -1945,8 +1921,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1194,
+      "x": 1105,
+      "y": 1160,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -1956,8 +1932,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1194,
+      "x": 1186,
+      "y": 1160,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -1971,8 +1947,8 @@
    {
     "owner": 1,
     "id": 18,
-    "x": 1180,
-    "y": 1206,
+    "x": 1099,
+    "y": 1180,
     "orbiting": null,
     "ships": [
      {
@@ -1990,8 +1966,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1206,
+      "x": 1099,
+      "y": 1180,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2001,8 +1977,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1206,
+      "x": 1180,
+      "y": 1180,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -2016,8 +1992,8 @@
    {
     "owner": 1,
     "id": 19,
-    "x": 1170,
-    "y": 1206,
+    "x": 1097,
+    "y": 1200,
     "orbiting": null,
     "ships": [
      {
@@ -2035,8 +2011,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1206,
+      "x": 1097,
+      "y": 1200,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2046,13 +2022,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1206,
+      "x": 1178,
+      "y": 1200,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 18
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -2063,8 +2037,8 @@
    {
     "owner": 1,
     "id": 20,
-    "x": 1160,
-    "y": 1206,
+    "x": 1099,
+    "y": 1220,
     "orbiting": null,
     "ships": [
      {
@@ -2082,8 +2056,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1206,
+      "x": 1099,
+      "y": 1220,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2093,13 +2067,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1206,
+      "x": 1180,
+      "y": 1220,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 19
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -2110,8 +2082,8 @@
    {
     "owner": 1,
     "id": 21,
-    "x": 1180,
-    "y": 1218,
+    "x": 1105,
+    "y": 1240,
     "orbiting": null,
     "ships": [
      {
@@ -2129,8 +2101,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1180,
-      "y": 1218,
+      "x": 1105,
+      "y": 1240,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2140,8 +2112,8 @@
       }
      },
      {
-      "x": 1261,
-      "y": 1218,
+      "x": 1186,
+      "y": 1240,
       "warp": 9,
       "target": {
        "kind": "space"
@@ -2155,8 +2127,8 @@
    {
     "owner": 1,
     "id": 22,
-    "x": 1170,
-    "y": 1218,
+    "x": 1117,
+    "y": 1260,
     "orbiting": null,
     "ships": [
      {
@@ -2174,8 +2146,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1170,
-      "y": 1218,
+      "x": 1117,
+      "y": 1260,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2185,13 +2157,11 @@
       }
      },
      {
-      "x": 1180,
-      "y": 1218,
+      "x": 1198,
+      "y": 1260,
       "warp": 9,
       "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 21
+       "kind": "space"
       },
       "task": {
        "kind": "none"
@@ -2202,8 +2172,8 @@
    {
     "owner": 1,
     "id": 23,
-    "x": 1160,
-    "y": 1218,
+    "x": 1110,
+    "y": 1150,
     "orbiting": null,
     "ships": [
      {
@@ -2221,8 +2191,8 @@
     "battle_plan": 0,
     "waypoints": [
      {
-      "x": 1160,
-      "y": 1218,
+      "x": 1110,
+      "y": 1150,
       "warp": 0,
       "target": {
        "kind": "space"
@@ -2232,569 +2202,11 @@
       }
      },
      {
-      "x": 1170,
-      "y": 1218,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 22
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 24,
-    "x": 1180,
-    "y": 1230,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1180,
-      "y": 1230,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1261,
-      "y": 1230,
+      "x": 1191,
+      "y": 1150,
       "warp": 9,
       "target": {
        "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 25,
-    "x": 1170,
-    "y": 1230,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1170,
-      "y": 1230,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1180,
-      "y": 1230,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 24
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 26,
-    "x": 1160,
-    "y": 1230,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1160,
-      "y": 1230,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1170,
-      "y": 1230,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 25
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 27,
-    "x": 1180,
-    "y": 1242,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1180,
-      "y": 1242,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1261,
-      "y": 1242,
-      "warp": 9,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 28,
-    "x": 1170,
-    "y": 1242,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1170,
-      "y": 1242,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1180,
-      "y": 1242,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 27
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 29,
-    "x": 1160,
-    "y": 1242,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1160,
-      "y": 1242,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1170,
-      "y": 1242,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 28
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 30,
-    "x": 1180,
-    "y": 1254,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1180,
-      "y": 1254,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1261,
-      "y": 1254,
-      "warp": 9,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 31,
-    "x": 1170,
-    "y": 1254,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1170,
-      "y": 1254,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1180,
-      "y": 1254,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 30
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 32,
-    "x": 1160,
-    "y": 1254,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1160,
-      "y": 1254,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1170,
-      "y": 1254,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 31
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 33,
-    "x": 1180,
-    "y": 1266,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1180,
-      "y": 1266,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1261,
-      "y": 1266,
-      "warp": 9,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 34,
-    "x": 1170,
-    "y": 1266,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1170,
-      "y": 1266,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1180,
-      "y": 1266,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 33
-      },
-      "task": {
-       "kind": "none"
-      }
-     }
-    ]
-   },
-   {
-    "owner": 1,
-    "id": 35,
-    "x": 1160,
-    "y": 1266,
-    "orbiting": null,
-    "ships": [
-     {
-      "design": 0,
-      "count": 1
-     }
-    ],
-    "cargo": {
-     "ironium": 0,
-     "boranium": 0,
-     "germanium": 0,
-     "colonists": 0
-    },
-    "fuel": 280,
-    "battle_plan": 0,
-    "waypoints": [
-     {
-      "x": 1160,
-      "y": 1266,
-      "warp": 0,
-      "target": {
-       "kind": "space"
-      },
-      "task": {
-       "kind": "none"
-      }
-     },
-     {
-      "x": 1170,
-      "y": 1266,
-      "warp": 9,
-      "target": {
-       "kind": "fleet",
-       "owner": 1,
-       "id": 34
       },
       "task": {
        "kind": "none"
@@ -2810,7 +2222,7 @@
     "id": 0,
     "x": 1200,
     "y": 1200,
-    "mines": 50000,
+    "mines": 10000,
     "type": "heavy",
     "detonating": false,
     "known_to": []
@@ -2820,11 +2232,11 @@
  },
  "cases": [
   {
-   "id": "MF-02",
-   "rule": "OBJECTS MF-2",
-   "setup": "MF 02",
+   "id": "MF-15",
+   "rule": "OBJECTS MF-15",
+   "setup": "MF 15",
    "tag": "MEASURED",
-   "prediction_held": false,
+   "prediction_held": true,
    "varies_by_stream": false,
    "expect": [
     {
@@ -2832,8 +2244,8 @@
      "owner": 1,
      "id": 0,
      "equals": {
-      "x": 1170,
-      "y": 1134,
+      "x": 1140,
+      "y": 1198,
       "orbiting": null,
       "ships": [
        {
@@ -2847,7 +2259,32 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 1,
+     "equals": {
+      "x": 1160,
+      "y": 1186,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -2857,17 +2294,13 @@
      "owner": 1,
      "id": 2,
      "equals": {
-      "x": 1232,
-      "y": 1134,
+      "x": 1180,
+      "y": 1180,
       "orbiting": null,
       "ships": [
        {
         "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
+        "count": 1
        }
       ],
       "cargo": {
@@ -2886,8 +2319,8 @@
      "owner": 1,
      "id": 3,
      "equals": {
-      "x": 1170,
-      "y": 1146,
+      "x": 1200,
+      "y": 1178,
       "orbiting": null,
       "ships": [
        {
@@ -2901,7 +2334,32 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 4,
+     "equals": {
+      "x": 1220,
+      "y": 1180,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -2911,17 +2369,13 @@
      "owner": 1,
      "id": 5,
      "equals": {
-      "x": 1252,
-      "y": 1146,
+      "x": 1240,
+      "y": 1186,
       "orbiting": null,
       "ships": [
        {
         "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
+        "count": 1
        }
       ],
       "cargo": {
@@ -2940,8 +2394,8 @@
      "owner": 1,
      "id": 6,
      "equals": {
-      "x": 1170,
-      "y": 1158,
+      "x": 1260,
+      "y": 1198,
       "orbiting": null,
       "ships": [
        {
@@ -2955,7 +2409,32 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 7,
+     "equals": {
+      "x": 1150,
+      "y": 1191,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -2965,8 +2444,33 @@
      "owner": 1,
      "id": 8,
      "equals": {
-      "x": 1182,
-      "y": 1158,
+      "x": 1140,
+      "y": 1052,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 9,
+     "equals": {
+      "x": 1160,
+      "y": 1110,
       "orbiting": null,
       "ships": [
        {
@@ -2992,10 +2496,10 @@
     {
      "kind": "fleet",
      "owner": 1,
-     "id": 9,
+     "id": 10,
      "equals": {
-      "x": 1170,
-      "y": 1170,
+      "x": 1180,
+      "y": 1031,
       "orbiting": null,
       "ships": [
        {
@@ -3009,7 +2513,7 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -3019,8 +2523,8 @@
      "owner": 1,
      "id": 11,
      "equals": {
-      "x": 1190,
-      "y": 1170,
+      "x": 1200,
+      "y": 1079,
       "orbiting": null,
       "ships": [
        {
@@ -3048,13 +2552,17 @@
      "owner": 1,
      "id": 12,
      "equals": {
-      "x": 1170,
-      "y": 1182,
+      "x": 1220,
+      "y": 1110,
       "orbiting": null,
       "ships": [
        {
         "design": 0,
-        "count": 1
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
        }
       ],
       "cargo": {
@@ -3063,7 +2571,36 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 13,
+     "equals": {
+      "x": 1240,
+      "y": 1109,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -3073,8 +2610,8 @@
      "owner": 1,
      "id": 14,
      "equals": {
-      "x": 1199,
-      "y": 1182,
+      "x": 1260,
+      "y": 1114,
       "orbiting": null,
       "ships": [
        {
@@ -3102,13 +2639,17 @@
      "owner": 1,
      "id": 15,
      "equals": {
-      "x": 1170,
-      "y": 1194,
+      "x": 1150,
+      "y": 1107,
       "orbiting": null,
       "ships": [
        {
         "design": 0,
-        "count": 1
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
        }
       ],
       "cargo": {
@@ -3117,7 +2658,36 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 274
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 16,
+     "equals": {
+      "x": 1159,
+      "y": 1140,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -3127,8 +2697,8 @@
      "owner": 1,
      "id": 17,
      "equals": {
-      "x": 1198,
-      "y": 1194,
+      "x": 1124,
+      "y": 1160,
       "orbiting": null,
       "ships": [
        {
@@ -3156,8 +2726,8 @@
      "owner": 1,
      "id": 18,
      "equals": {
-      "x": 1215,
-      "y": 1206,
+      "x": 1111,
+      "y": 1180,
       "orbiting": null,
       "ships": [
        {
@@ -3185,33 +2755,8 @@
      "owner": 1,
      "id": 19,
      "equals": {
-      "x": 1215,
-      "y": 1206,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 254
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 20,
-     "equals": {
-      "x": 1161,
-      "y": 1206,
+      "x": 1109,
+      "y": 1200,
       "orbiting": null,
       "ships": [
        {
@@ -3229,7 +2774,36 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 248
+      "fuel": 233
+     },
+     "year": 1,
+     "sample": true
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 20,
+     "equals": {
+      "x": 1116,
+      "y": 1220,
+      "orbiting": null,
+      "ships": [
+       {
+        "design": 0,
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
+       }
+      ],
+      "cargo": {
+       "ironium": 0,
+       "boranium": 0,
+       "germanium": 0,
+       "colonists": 0
+      },
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -3239,8 +2813,8 @@
      "owner": 1,
      "id": 21,
      "equals": {
-      "x": 1191,
-      "y": 1218,
+      "x": 1140,
+      "y": 1240,
       "orbiting": null,
       "ships": [
        {
@@ -3268,13 +2842,17 @@
      "owner": 1,
      "id": 22,
      "equals": {
-      "x": 1191,
-      "y": 1218,
+      "x": 1166,
+      "y": 1260,
       "orbiting": null,
       "ships": [
        {
         "design": 0,
-        "count": 1
+        "count": 1,
+        "damage": {
+         "units": 312,
+         "percent_of_ships": 100
+        }
        }
       ],
       "cargo": {
@@ -3283,7 +2861,7 @@
        "germanium": 0,
        "colonists": 0
       },
-      "fuel": 268
+      "fuel": 233
      },
      "year": 1,
      "sample": true
@@ -3293,33 +2871,8 @@
      "owner": 1,
      "id": 23,
      "equals": {
-      "x": 1191,
-      "y": 1218,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 262
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 24,
-     "equals": {
-      "x": 1184,
-      "y": 1230,
+      "x": 1127,
+      "y": 1150,
       "orbiting": null,
       "ships": [
        {
@@ -3338,297 +2891,6 @@
        "colonists": 0
       },
       "fuel": 233
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 25,
-     "equals": {
-      "x": 1184,
-      "y": 1230,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 272
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 26,
-     "equals": {
-      "x": 1184,
-      "y": 1230,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 266
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 27,
-     "equals": {
-      "x": 1184,
-      "y": 1242,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 233
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 28,
-     "equals": {
-      "x": 1184,
-      "y": 1242,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 272
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 29,
-     "equals": {
-      "x": 1184,
-      "y": 1242,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 266
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 30,
-     "equals": {
-      "x": 1188,
-      "y": 1254,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 233
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 31,
-     "equals": {
-      "x": 1188,
-      "y": 1254,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 269
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 32,
-     "equals": {
-      "x": 1188,
-      "y": 1254,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 263
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 33,
-     "equals": {
-      "x": 1205,
-      "y": 1266,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 233
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 34,
-     "equals": {
-      "x": 1205,
-      "y": 1266,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 259
-     },
-     "year": 1,
-     "sample": true
-    },
-    {
-     "kind": "fleet",
-     "owner": 1,
-     "id": 35,
-     "equals": {
-      "x": 1198,
-      "y": 1266,
-      "orbiting": null,
-      "ships": [
-       {
-        "design": 0,
-        "count": 1,
-        "damage": {
-         "units": 312,
-         "percent_of_ships": 100
-        }
-       }
-      ],
-      "cargo": {
-       "ironium": 0,
-       "boranium": 0,
-       "germanium": 0,
-       "colonists": 0
-      },
-      "fuel": 254
      },
      "year": 1,
      "sample": true
@@ -3657,7 +2919,7 @@
       "surface_minerals": [
        426,
        490,
-       468
+       467
       ],
       "population": 287,
       "excess": 50
@@ -3674,7 +2936,7 @@
      "equals": {
       "x": 1200,
       "y": 1200,
-      "mines": 20441,
+      "mines": 5847,
       "type": "heavy",
       "detonating": false,
       "known_to": [
@@ -3682,7 +2944,8 @@
        1
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",
@@ -3765,7 +3028,7 @@
        "resources": 38,
        "planets": 1,
        "starbases": 1,
-       "unarmed_ships": 36,
+       "unarmed_ships": 24,
        "escort_ships": 0,
        "capital_ships": 0,
        "tech_level_sum": 156,
@@ -3778,13 +3041,13 @@
      "year": 1
     }
    ],
-   "verdict": "MF-02-A CONTRADICTED (MF-2): C and B stopped at about the MF-1 rate; A never stopped (it moves in warp-4 steps)"
+   "verdict": "MF-15-A HELD (MF-15): none stopped: on a leg with no east-west component the path is cut at the start point, which lies outside the field | MF-15-B HELD (MF-15): checked from the start for trunc(sqrt(10000 - 8100)) = 43 ly whatever the direction: stops up to 42 ly out, about 73% stopped | MF-15-C OBSERVED (MF-15): stopped at the heavy rate (about 90% each)"
   }
  ],
  "source": {
   "experiment": "experiments/mf",
   "spec_rules": "docs/OBJECTS.md \"Minefields\"",
   "parity": "docs/PARITY.md \"Minefield lane (MF-1..MF-13)\"",
-  "raw_evidence": "stars-oracle-apparatus evidence/mf/{mf02,mf02-c25000} (private)"
+  "raw_evidence": "stars-oracle-apparatus evidence/mf/{mf15} (private)"
  }
 }
