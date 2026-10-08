@@ -182,7 +182,8 @@ func TestReportObjects(t *testing.T) {
 
 // Another player's design is reported with hull and mass when seen
 // partially, with all its parts once seen in full, and stays known in
-// later years out of sight (MEASURED SC-037), through a save and load.
+// later years out of sight (MEASURED SC-037, computer players' files),
+// through a save and load.
 // What is reported is what was shown: a design the owner later puts in
 // the same slot, under the same index, is not revealed.
 func TestReportKnownDesigns(t *testing.T) {
