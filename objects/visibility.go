@@ -65,9 +65,12 @@ func (s *Space) PacketScanners(g *engine.Game, v int) []Scanner {
 // independent, so the order in which the turn engine scans them does not
 // matter.
 //
-//   - Own minefields are always seen. Another player's is seen when
-//     d² ≤ P², d² ≤ ⌊R²/16⌋, the viewing fleet is inside it (fleets only,
-//     BINARY-ONLY), or v already knows it and d² ≤ R².
+//   - A minefield is seen when d² ≤ P², d² ≤ ⌊R²/16⌋, the viewing fleet
+//     is inside it (fleets only, BINARY-ONLY), or v already knows it and
+//     d² ≤ R². This applies to v's own fields too: ownership never makes
+//     a field known (SCANNING.md "Space objects", MEASURED MF-13a, MF-13c).
+//     Own fields are still always listed in Sightings, as the turn file
+//     lists them in the owner's view whatever the known set says.
 //   - A wormhole end is seen only within d² ≤ R², and then when it is
 //     known, d² ≤ P² or d² ≤ ⌊R²/16⌋.
 //   - Own packets are always seen; others within d² ≤ R²; a PP player
@@ -83,11 +86,14 @@ func (s *Space) Scan(g *engine.Game, v int, scanners []Scanner) Sightings {
 	owners := map[int]bool{}
 	for i := range s.Minefields {
 		m := &s.Minefields[i]
-		if m.Owner != v && !seesMinefield(*m, v, scanners) {
+		seen := seesMinefield(*m, v, scanners)
+		if seen {
+			m.learn(v)
+		}
+		if m.Owner != v && !seen {
 			continue
 		}
 		out.Minefields = append(out.Minefields, i)
-		m.learn(v)
 		if m.Owner != v {
 			owners[m.Owner] = true
 		}

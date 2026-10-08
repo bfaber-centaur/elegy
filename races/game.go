@@ -52,3 +52,14 @@ func (r *GameRaces) CheckRaces(g *engine.Game) []engine.Event {
 }
 
 var _ engine.RaceChecker = (*GameRaces)(nil)
+
+// CloneRaces is a copy of r that shares nothing with it, for
+// GenerateTurn's copy of the game (engine.RaceCloner): the check writes
+// the designs (the tampered flag among them), so the input game's
+// checker must not see a turn's changes.
+func (r *GameRaces) CloneRaces() engine.RaceChecker {
+	return &GameRaces{
+		Designs:  append([]Design(nil), r.Designs...),
+		Computer: append([]bool(nil), r.Computer...),
+	}
+}

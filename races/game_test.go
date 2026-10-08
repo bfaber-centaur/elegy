@@ -1,6 +1,7 @@
 package races
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -63,5 +64,25 @@ func TestGameRaceCheckComputerAndDead(t *testing.T) {
 	}
 	if g.Players[0].Race.ColonistsPerResource != 1000 || g.Players[0].ResearchBudget != 15 || g.Players[1].Race.ColonistsPerResource != 1000 {
 		t.Errorf("players %+v", g.Players)
+	}
+}
+
+func TestCloneRacesSharesNothing(t *testing.T) {
+	// A check run on the clone leaves the original's designs (and their
+	// tampered flags) as they were.
+	designs := slRaces()
+	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
+	before := append([]Design(nil), r.Designs...)
+	c := r.CloneRaces().(*GameRaces)
+	g := &engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}}
+	if ev := c.CheckRaces(g); len(ev) == 0 {
+		t.Fatal("the SL races were not penalized")
+	}
+	if !reflect.DeepEqual(r.Designs, before) || !c.Designs[0].Tampered {
+		t.Errorf("original %+v, clone %+v", r.Designs, c.Designs)
+	}
+	c.Computer[0] = true
+	if r.Computer[0] {
+		t.Error("Computer shared")
 	}
 }
