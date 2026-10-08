@@ -157,10 +157,8 @@ type Launch struct {
 // block 511; minefields and lower players' objects never do
 // (BINARY-ONLY).
 //
-// ASSUMPTION P5: Elegy's salvage (engine.Game.Salvage, counted in
-// OtherObjects) has no owner or number yet, so it takes no packet number
-// and blocks no 511 (OBJECTS.md "Numbering" gives the rule for owned
-// salvage).
+// The owner's salvage (engine.Game.Salvage) shares these numbers
+// (packetNumber; OBJECTS.md "Salvage", "Owner").
 func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int) Launch {
 	p := &g.Planets[pi]
 	if !p.HasStarbase || o.Dest < 0 || p.Owner < 0 || planetByID(g, o.Dest) < 0 {
@@ -194,24 +192,8 @@ func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int
 			return l
 		}
 	}
-	used := map[int]bool{}
-	later := len(s.Wormholes) > 0 || len(s.Traders) > 0
-	for _, q := range s.Packets {
-		if q.Owner == p.Owner {
-			used[q.Number] = true
-		} else if q.Owner > p.Owner {
-			later = true
-		}
-	}
-	limit := maxPacketNumber
-	if !later {
-		limit++
-	}
-	n := 0
-	for used[n] {
-		n++
-	}
-	if n >= limit || len(s.Minefields)+s.otherObjects() >= MaxObjects {
+	n, ok := s.packetNumber(g, p.Owner)
+	if !ok || s.objectCount(g) >= MaxObjects {
 		l.NoRoom, l.Packet = true, -1
 		return l
 	}

@@ -1,7 +1,7 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `c0bee4b`) and its Mystery Trader appearance
+(as of stars-elegy `main` at `0779d2f`) and its Mystery Trader appearance
 in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
@@ -26,11 +26,17 @@ below and KERNEL-STATUS.md "Space objects").
 | Sweep rating and amount | `SweepRating`, `Space.Sweep` | CONFIRMED (OB-001, OB-007, OB-008, OB-010-S); ratings agree with the table's mines-swept column |
 | Effective warp | `EffectiveWarp` | CONFIRMED (OB-010, MF-3) |
 | Stop checks along a step | `CheckStep` | CONFIRMED as rates (MF-1, MF-5, MF-6); safe-warp bonuses for SS and SD BINARY-ONLY |
-| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M) |
+| Path cut: whole-ly foot, entry and exit | `cut` | BINARY-ONLY; east legs CONFIRMED as rates (MF-1, MF-3) |
+| Due-north and due-south legs | `LegacyDueNorthSouthCut` (on) | LEGACY BUG, MEASURED (MF-15) |
+| Stretches: eight per kind, merging, draw order, stop offset | `addStretch`, `CheckStep` | BINARY-ONLY; stop offsets MEASURED (OB-010-S, MF-15) |
+| Stop point | `StopPoint` | BINARY-ONLY; exact on east legs |
+| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M); damage on existing damage BINARY-ONLY |
+| Cargo and fuel lost with destroyed ships | `ApplyHit`, `Space.Detonate` | MEASURED (MF-14); detonation BINARY-ONLY |
+| Survivors' minerals dropped as salvage | `LegacyMineSurvivorSalvage` (on) | LEGACY BUG candidate, MEASURED (MF-14) |
 | Mines lost, paying field | `MinesLost`, `PayingField`, `ApplyHit` | CONFIRMED (OB-010-S, OB-024, MF-4) |
-| Salvage from destroyed ships; empty fleet `rand(10)` | `ApplyHit` | MEASURED (OB-024); the empty-fleet drop is a LEGACY BUG candidate, `LegacyEmptyFleetSalvage` (on) |
+| Salvage at the stop point, none at a planet; all minerals when the whole fleet dies; empty fleet `rand(10)` | `ApplyHit` | MEASURED (OB-024, MF-14); the whole-fleet case BINARY-ONLY; the empty-fleet drop is a LEGACY BUG candidate, `LegacyEmptyFleetSalvage` (on) |
 | SD disclosure on hits and detonations | `Hit.Disclosed`, `Detonation.Disclosed` | CONFIRMED for detonations (MF-7) |
-| Detonation | `Space.Detonate` | CONFIRMED (OB-002-M, MF-7, MF-8) |
+| Detonation | `Space.Detonate` | CONFIRMED (OB-002-M, MF-7, MF-8); order and marking of several fields BINARY-ONLY |
 
 Tests follow the engine's naming: `TestConfirmed*` use the OB and MF
 vectors OBJECTS.md and PARITY.md give; `TestPrediction*` cover the rest.
@@ -38,30 +44,34 @@ The MF runs' "Tank" is a Destroyer with two Superlatanium (3200 armor).
 
 ### Assumptions (spec gaps)
 
-Marked `ASSUMPTION On` in the code and sent to the spec owner:
+OBJECTS.md now answers O1–O8 ("Laying", "Limits", "Hits on moving
+fleets", "Arithmetic details", "Detonation"; MF-14 MEASURED, MF-15
+MEASURED, the rest BINARY-ONLY):
+- An SD half lay halves each kind's amount; amounts are multiples of 10,
+  so it is exact.
+- Equally near own fields: the first in object order (lower number).
+- A new field takes the lowest number unused across all three kinds.
+- The path cut uses a whole-ly foot of the perpendicular; due-north and
+  due-south legs are a LEGACY BUG behind `LegacyDueNorthSouthCut`.
+- Stretches: at most eight per kind, merged when overlapping, touching or
+  ending 1 ly before another; equal entries go standard, heavy, speed
+  bump; draws `k = 0..b − a − 1`, the stop `a + k` ly from the start.
+- Damage on existing damage counts `⌊pct·n/100⌋` damaged ships and
+  stores `max(1, ⌊avg·500/A⌋)` units.
+- Destroyed ships' cargo and fuel shares are lost, and the survivors'
+  minerals become salvage behind `LegacyMineSurvivorSalvage`.
+- Detonating fields go in object order, and the first containing field
+  marks the fleet.
 
-1. **O1** A Space Demolition half lay halves each kind's amount,
-   truncating.
-2. **O2** Ties for the nearest own field when merging go to the first
-   field in object order.
-3. **O3** A new field takes the owner's lowest unused number.
-4. **O4** A step's stretch inside a field runs from the entry distance
-   rounded up to the exit distance rounded down, one draw per whole ly from
-   entry up to (not including) exit; a stop `k` ly into it is `entry + k`
-   from the step's start.
-5. **O5** A kind whose safe warp is at or above the effective warp makes
-   no draws; stretches with equal entries go standard, heavy, speed bump.
-6. **O6** Damage bookkeeping: groups are a fleet's stacks of one design;
-   shields absorb ships × the design's shield; existing damage is
-   `units·armor/500` per damaged ship, `damaged = ⌈pct·ships/100⌉`; new
-   damage is stored as pct 100 and `units = ⌊average·500/armor⌋`; a design
-   is destroyed when its average is greater than its armor; exempt layers
-   are left out of the fleet minimum.
-7. **O7** A destroyed group's share of the fleet's cargo is proportional
-   to its cargo capacity (to ship count when the fleet has none).
-8. **O8** A fleet inside several detonating fields is hit by the first in
-   object order.
+Still open:
 
+1. **O6** A design's ships are the fleet's stacks of that design, with
+   the first stack's stored damage; exempt layers are left out of the
+   fleet minimum.
+2. **O9** A new stretch merges into the first stretch it may join, in
+   entry order, and the result is not merged again.
+3. **O10** The empty-fleet `rand(10)` draws happen only where salvage can
+   form (not at a planet) and only when ships were destroyed.
 
 ## Wormholes
 
@@ -155,11 +165,10 @@ OBJECTS.md now answers P1–P4 (BINARY-ONLY):
 
 Still open:
 
-1. **P5** OBJECTS.md "Numbering" (BINARY-ONLY): a player's packets and
-   salvage share one 0..511 number pool, and only higher players'
-   packets and salvage, wormholes and the Trader block 511. Elegy's
-   salvage has no owner or number yet, so it takes no packet number and
-   blocks nothing.
+1. **P5** is answered (OBJECTS.md "Numbering", "Salvage", BINARY-ONLY): a
+   player's packets and salvage share one number pool (`packetNumber`),
+   and only higher players' packets and salvage, wormholes and the
+   Trader block 511.
 2. **P6** OBJECTS.md "The settings" leaves a destination that names no
    planet undefined and asks Elegy for a rule: Elegy treats it as no
    destination (`Launch.NoDriver`).
@@ -198,10 +207,31 @@ Still open:
    first stack's damage.
 
 
+## Salvage
+
+Salvage objects live in `engine.Game.Salvage`; the engine creates battle
+and scrap salvage. `engine.Salvage` carries `Owner`, `Number`, `Fresh`
+and `Steps` for these rules (OBJECTS.md "Salvage", BINARY-ONLY except
+where marked).
+
+| Rule | Function | Status |
+|---|---|---|
+| Owner's packet number pool, 511 rule, object limit | `Space.SalvageNumber` | BINARY-ONLY |
+| New object, the 30,000 kT overflow | `Space.NewSalvage` | BINARY-ONLY; overflow CONFIRMED (CB-040) |
+| Mine-hit salvage joins the first object at the stop point | `Space.AddMineSalvage` | BINARY-ONLY |
+| Decay: skip once after a make or add; `max(10, ⌊m/10⌋)` | `DecaySalvage` | BINARY-ONLY; fits T-34 |
+| Loading capped by contents; unloading by the stored size | `SalvageLoad`, `SalvageRoom` | BINARY-ONLY |
+| Seen as a packet; PP sees all; owner made known | `Space.Scan` | BINARY-ONLY |
+
+### Assumptions (spec gaps)
+
+1. **S1** With no free number or object slot, no salvage object is made
+   and its minerals are lost (LIMITS.md lists this as UNKNOWN).
+
 ## Visibility
 
 Who sees which space object comes from stars-elegy `docs/SCANNING.md`,
-"Space objects" (as of stars-elegy `main` at `c0bee4b`). The turn engine
+"Space objects" (as of stars-elegy `main` at `0779d2f`). The turn engine
 keeps the fleet and planet sightings; these functions cover the objects.
 
 | Rule (SCANNING.md) | Function | Status |
@@ -268,5 +298,13 @@ Not wired yet:
   packets see fleets and planets, OB-012) and
   `Space.DemolitionSightings` (OB-014-B) feed the engine's fleet views;
   `Sightings.Owners` its known players.
+- **Salvage** (engine call sites, the kernel's):
+  - Set `Owner`, `Number` (from `Space.SalvageNumber`), `Fresh` and `Steps`
+    where battle, overflow, takeover and scrap salvage is created.
+  - Call `DecaySalvage` at step 3a, before packet decay.
+  - `MineHit` passes `Hit.Salvage` to `Space.AddMineSalvage` in place of
+    its append, at the point `StopPoint` gives (`mineStop` places the
+    fleet with its own rounding today).
+  - Load and unload tasks use `SalvageLoad` and `SalvageRoom`.
 - **Computer players' planet trades** (`Space.Meet` needs their levels;
   PLACEHOLDER in the adapter).

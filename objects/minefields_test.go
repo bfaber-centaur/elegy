@@ -554,3 +554,107 @@ func TestConfirmedDetonation(t *testing.T) {
 		t.Errorf("speed bump detonation %d/500", u)
 	}
 }
+
+// The path cut (OBJECTS.md "Arithmetic details", "Path cut",
+// BINARY-ONLY; east legs CONFIRMED as rates MF-1, MF-3; due north and
+// south LEGACY BUG MEASURED MF-15).
+func TestConfirmedPathCut(t *testing.T) {
+	type c struct {
+		from, to, centre engine.Point
+		l, n             int
+		a, b             int
+		ok               bool
+	}
+	p := func(x, y int) engine.Point { return engine.Point{X: x, Y: y} }
+	for i, k := range []c{
+		{p(0, 0), p(100, 0), p(50, 3), 100, 100, 41, 59, true},  // exact entry rounded up, exit down
+		{p(0, 0), p(100, 0), p(-5, 0), 100, 100, 0, 5, true},    // centre behind the start
+		{p(0, 0), p(100, 0), p(50, 10), 100, 100, 0, 0, false},  // tangent
+		{p(0, 0), p(100, 0), p(50, 0), 30, 100, 0, 0, false},    // beyond this year's travel
+		{p(0, 0), p(0, 100), p(0, 50), 100, 100, 0, 0, false},   // due north from outside: never cut
+		{p(0, 90), p(0, 200), p(0, 0), 100, 10000, 0, 43, true}, // MF-15: inside, south, 43 ly
+	} {
+		a, b, ok := cut(k.from, k.to, k.l, k.centre, k.n)
+		if a != k.a || b != k.b || ok != k.ok {
+			t.Errorf("case %d: %d..%d %v, want %d..%d %v", i, a, b, ok, k.a, k.b, k.ok)
+		}
+	}
+	LegacyDueNorthSouthCut = false
+	a, b, ok := cut(p(0, 0), p(0, 100), 100, p(0, 50), 100)
+	LegacyDueNorthSouthCut = true
+	if a != 40 || b != 60 || !ok {
+		t.Errorf("exact foot: %d..%d %v", a, b, ok)
+	}
+}
+
+// Stretches merge on overlap, touch, or ending 1 ly before; at most eight
+// per kind (OBJECTS.md "Stretches", BINARY-ONLY).
+func TestPredictionStretches(t *testing.T) {
+	iv := addStretch(nil, 10, 20)
+	iv = addStretch(iv, 5, 9) // ends 1 ly before 10
+	if len(iv) != 1 || iv[0] != [2]int{5, 20} {
+		t.Errorf("1 ly before: %v", iv)
+	}
+	iv = addStretch(iv, 21, 30) // starts 1 ly after: separate
+	iv = addStretch(iv, 20, 21) // touches both: joins the first
+	if len(iv) != 2 || iv[0] != [2]int{5, 21} {
+		t.Errorf("touch: %v", iv)
+	}
+	iv = nil
+	for i := range 9 {
+		iv = addStretch(iv, 10*i, 10*i+3)
+	}
+	if len(iv) != 8 || iv[7][0] != 70 {
+		t.Errorf("ninth: %v", iv)
+	}
+	// Stop point: offset·s over the rounded leg length, rounded.
+	if got := StopPoint(engine.Point{X: 1000, Y: 1000}, engine.Point{X: 1003, Y: 1004}, 2); got != (engine.Point{X: 1001, Y: 1002}) {
+		t.Errorf("stop point %v", got)
+	}
+}
+
+// MF-14 (MEASURED; LEGACY BUG candidate): four 70 kT freighters and a
+// 250 kT Privateer carrying 100/100/100 kT and 50 kT of colonists; the
+// freighters die, taking 53/53/52/26, and the other 47/47/48 kT are
+// dropped as salvage, leaving 24 kT of colonists aboard.
+func TestConfirmedMineCargoMF14(t *testing.T) {
+	for _, legacy := range []bool{true, false} {
+		g := &engine.Game{Designs: []engine.Design{{CargoCapacity: 70, FuelCapacity: 100}, {CargoCapacity: 250, FuelCapacity: 400}}}
+		g.Fleets = []engine.Fleet{{Pos: origin, Stacks: []engine.Stack{{Design: 1, Count: 1}},
+			Cargo: engine.Cargo{Minerals: engine.Minerals{100, 100, 100}, Colonists: 50}, Fuel: 800}}
+		f := &g.Fleets[0]
+		LegacyMineSurvivorSalvage = legacy
+		got := mineCargo(g, f, []DesignHit{{Design: 0, Ships: 4, Destroyed: true}}, 530, 800, true, &count{})
+		LegacyMineSurvivorSalvage = true
+		want, aboard := engine.Minerals{47, 47, 48}, engine.Minerals{}
+		if !legacy {
+			want, aboard = engine.Minerals{}, engine.Minerals{47, 47, 48}
+		}
+		if got != want || f.Cargo.Minerals != aboard || f.Cargo.Colonists != 24 || f.Fuel != 400 {
+			t.Errorf("legacy %v: salvage %v, fleet %+v fuel %d", legacy, got, f.Cargo, f.Fuel)
+		}
+	}
+	// At a planet's exact position no salvage forms; the minerals stay.
+	g := &engine.Game{Designs: []engine.Design{{CargoCapacity: 70}, {CargoCapacity: 250}}, Planets: []engine.Planet{{Pos: origin}}}
+	g.Fleets = []engine.Fleet{{Pos: origin, Stacks: []engine.Stack{{Design: 1, Count: 1}}, Cargo: engine.Cargo{Minerals: engine.Minerals{100, 100, 100}, Colonists: 50}}}
+	if got := mineCargo(g, &g.Fleets[0], []DesignHit{{Design: 0, Ships: 4, Destroyed: true}}, 530, 0, true, &count{}); got != (engine.Minerals{}) || g.Fleets[0].Cargo.Minerals != (engine.Minerals{47, 47, 48}) {
+		t.Errorf("at a planet: %v, %+v", got, g.Fleets[0].Cargo)
+	}
+}
+
+// Existing damage counts ⌊pct·n/100⌋ damaged ships, and the stored units
+// round down with a minimum of 1 (OBJECTS.md "Damage on top of existing
+// damage", BINARY-ONLY).
+func TestPredictionMineDamageRounding(t *testing.T) {
+	l := newLab(t)
+	// 5 Laser DDs (armor 200) at 30% / 100 units: ⌊1.5⌋ = 1 damaged ship,
+	// X = ⌊1·200·100/500⌋ = 40; 5 × 100 standard, no shields: total 540,
+	// avg 108, units ⌊108·500/200⌋ = 270 (rounding up the damaged count
+	// would give 290).
+	fi := l.fleet(1, origin, "Laser DD", 5)
+	l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 30, Units: 100}
+	MineDamage(l.g, &l.g.Fleets[fi], Standard, nil)
+	if got := l.g.Fleets[fi].Stacks[0].Damage; got != (engine.Damage{Pct: 100, Units: 270}) {
+		t.Errorf("damage %+v", got)
+	}
+}

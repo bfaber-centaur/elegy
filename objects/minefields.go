@@ -262,7 +262,8 @@ type Layer struct {
 // merged before the next (OBJECTS.md "Laying", "Order", CONFIRMED MF-12).
 // A fleet with no dispensers lays nothing (the caller sends its message).
 //
-// ASSUMPTION O1: a half lay is each kind's amount halved, truncating.
+// A half lay halves each kind's amount on its own; amounts are multiples
+// of 10, so the half is exact (OBJECTS.md "Laying", BINARY-ONLY).
 func (s *Space) Lay(g *engine.Game, layers []Layer) []LayResult {
 	order := append([]Layer(nil), layers...)
 	sort.SliceStable(order, func(i, j int) bool {
@@ -298,9 +299,10 @@ func (s *Space) Lay(g *engine.Game, layers []Layer) []LayResult {
 // 999,999; the centre moves to ⌊(x·N + x_f·a)/(N + a)⌋ per axis.
 // Otherwise a new field is made at pos, if there is room.
 //
-// ASSUMPTION O2: ties for the nearest centre go to the first field in
-// object order. ASSUMPTION O3: a new field takes the owner's lowest
-// unused number (MF-11 measured only 0..510 taken → 511).
+// Equally near fields: the first in object order, the lower field number
+// (OBJECTS.md "Laying", BINARY-ONLY). A new field takes the lowest number
+// unused among the owner's fields of all three kinds (OBJECTS.md
+// "Limits", BINARY-ONLY; MF-11, MF-13 measured only the last number).
 func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResult {
 	best, bestD := -1, 0
 	for i, m := range s.Minefields {
@@ -552,30 +554,116 @@ type stretch struct {
 	entry, exit int
 }
 
-// cut is the stretch of the path from `from` along unit direction (ux,
-// uy), up to `dist` ly, inside a circle of centre c and d² ≤ n. A tangent
-// path does not count.
-//
-// ASSUMPTION O4: the entry is the path distance at which the path enters
-// the circle rounded up, the exit the distance at which it leaves rounded
-// down (each clamped to 0..dist), and the stretch holds one draw per whole
-// ly from entry up to, not including, exit; a stop k ly into the stretch is
-// entry + k ly from the start.
-func cut(from engine.Point, ux, uy float64, dist int, c engine.Point, n int) (int, int, bool) {
-	vx, vy := float64(c.X-from.X), float64(c.Y-from.Y)
-	b := vx*ux + vy*uy
-	disc := b*b - (vx*vx + vy*vy - float64(n))
-	if disc <= 0 {
+// LegacyDueNorthSouthCut reproduces the original's LEGACY BUG on legs
+// with no east-west component (OBJECTS.md "Arithmetic details", "Due-north
+// and due-south legs", MEASURED MF-15): the foot of the perpendicular is
+// taken at the fleet's start, so a fleet that starts outside a field and
+// flies due north or south into it is never checked, and one that starts
+// inside is checked from its start for trunc(√(N − d²)) ly whichever way
+// it flies. Set it to false to use the exact foot (Elegy's choice, not the
+// original's).
+var LegacyDueNorthSouthCut = true
+
+// floatFoot is the size of |dx·dy|, dx² or dy² from which the original
+// computes the foot's x in floating point (OBJECTS.md "Path cut" step 1).
+const floatFoot = 500001
+
+// cut is the whole-ly stretch [entry, exit) of a leg from `from` toward
+// `toward`, travelling l ly this step, inside a field of centre c and
+// count n (OBJECTS.md "Arithmetic details", "Path cut", BINARY-ONLY; east
+// legs CONFIRMED as rates, MF-1, MF-3). Divisions truncate toward zero.
+func cut(from, toward engine.Point, l int, c engine.Point, n int) (int, int, bool) {
+	sx, sy := from.X, from.Y
+	dx, dy := toward.X-sx, toward.Y-sy
+	fx, fy := sx, sy
+	switch {
+	case dx != 0:
+		den := dx*dx + dy*dy
+		if abs(dx*dy) >= floatFoot || dx*dx >= floatFoot || dy*dy >= floatFoot {
+			fx = int((float64(c.X)*float64(dx*dx) + float64(sx)*float64(dy*dy) + float64(c.Y-sy)*float64(dx)*float64(dy)) / float64(den))
+		} else {
+			fx = (c.X*dx*dx + sx*dy*dy + (c.Y-sy)*dx*dy) / den
+		}
+		fy = sy + (fx-sx)*dy/dx
+	case !LegacyDueNorthSouthCut:
+		fy = c.Y
+	}
+	p2 := (fx-c.X)*(fx-c.X) + (fy-c.Y)*(fy-c.Y)
+	if p2 >= n {
 		return 0, 0, false
 	}
-	r := math.Sqrt(disc)
-	t1, t2 := b-r, b+r
-	entry := max(0, int(math.Ceil(t1)))
-	exit := min(dist, int(math.Floor(t2)))
-	if exit <= entry {
+	h := isqrt((fx-sx)*(fx-sx) + (fy-sy)*(fy-sy))
+	if (dx != 0 && (fx-sx)*dx < 0) || (dx == 0 && (fy-sy)*dy < 0) {
+		h = -h
+	}
+	w := isqrt(n - p2)
+	entry, exit := max(0, h-w), min(l, h+w)
+	if exit <= 0 || entry >= l {
 		return 0, 0, false
 	}
 	return entry, exit, true
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+// isqrt is ⌊√x⌋ for x ≥ 0.
+func isqrt(x int) int {
+	r := int(math.Sqrt(float64(x)))
+	for r*r > x {
+		r--
+	}
+	for (r+1)*(r+1) <= x {
+		r++
+	}
+	return r
+}
+
+// maxStretches is the stretches kept per kind (OBJECTS.md "Stretches").
+const maxStretches = 8
+
+// addStretch adds [a, b) to one kind's stretches, kept sorted by entry
+// (OBJECTS.md "Stretches", BINARY-ONLY): it merges with an existing
+// stretch it overlaps or touches, or that starts exactly 1 ly after it
+// ends; otherwise it is inserted, and dropped when the kind already holds
+// eight.
+//
+// ASSUMPTION O9: the new stretch merges into the first such stretch in
+// entry order, and the merged stretch is not merged again with others.
+func addStretch(iv [][2]int, a, b int) [][2]int {
+	for i, x := range iv {
+		if a <= x[1] && b+1 >= x[0] {
+			iv[i] = [2]int{min(a, x[0]), max(b, x[1])}
+			sort.Slice(iv, func(i, j int) bool { return iv[i][0] < iv[j][0] })
+			return iv
+		}
+	}
+	if len(iv) >= maxStretches {
+		return iv
+	}
+	iv = append(iv, [2]int{a, b})
+	sort.Slice(iv, func(i, j int) bool { return iv[i][0] < iv[j][0] })
+	return iv
+}
+
+// StopPoint is where a fleet stopped s ly into a leg from `from` toward
+// `toward` lands (OBJECTS.md "Arithmetic details", "Stop point",
+// BINARY-ONLY; exact on east legs): each coordinate is the start plus its
+// offset times s divided by the leg length rounded to the nearest ly, the
+// result rounded to the nearest ly. The salvage and the paying field use
+// this point.
+func StopPoint(from, toward engine.Point, s int) engine.Point {
+	dx, dy := toward.X-from.X, toward.Y-from.Y
+	l := int(math.Round(math.Hypot(float64(dx), float64(dy))))
+	if l == 0 {
+		return from
+	}
+	step := func(o int) int { return int(math.Round(float64(o*s) / float64(l))) }
+	return engine.Point{X: from.X + step(dx), Y: from.Y + step(dy)}
 }
 
 // Stop is the outcome of checking one movement step.
@@ -593,42 +681,34 @@ type Stop struct {
 // waypoint and steps through a stargate are the caller's to skip, as are
 // later steps once a fleet has been stopped.
 //
-// The path is cut by each field that can stop the fleet into a stretch;
-// overlapping stretches of one kind merge; stretches are visited in
-// order of entry. For each whole ly of a stretch one draw:
-// rand(1000) < (e − safe)·h is a hit. A kind whose safe warp is at or
-// above e is not checked. Cloak plays no part (CONFIRMED MF-1).
-//
-// ASSUMPTION O5: a kind not checked makes no draws; equal entries are
-// visited standard, heavy, speed bump.
+// Each field that can stop the fleet cuts the path into a stretch (cut),
+// in object order; each kind keeps up to eight merged stretches
+// (addStretch). Stretches are visited by entry, equal entries standard,
+// heavy, speed bump; a kind whose safe warp is at or above e makes no
+// draws. A stretch [a, b) draws k = 0 .. b − a − 1, rand(1000) <
+// (e − safe)·h, and a hit at k stops the fleet a + k ly from its start
+// (OBJECTS.md "Stretches", BINARY-ONLY; stop offsets MEASURED OB-010-S,
+// MF-15). The caller places the fleet with StopPoint. Cloak plays no part
+// (CONFIRMED MF-1).
 func CheckStep(g *engine.Game, s *Space, f *engine.Fleet, from, toward engine.Point, distance int, rng engine.Rand) Stop {
 	if distance <= 0 || from == toward {
 		return Stop{}
 	}
 	e := EffectiveWarp(distance)
 	fp := prt(g, f.Owner)
-	dx, dy := float64(toward.X-from.X), float64(toward.Y-from.Y)
-	l := math.Hypot(dx, dy)
-	ux, uy := dx/l, dy/l
 
 	var byKind [NumMineKinds][][2]int
 	for _, m := range s.Minefields {
 		if m.Count <= 0 || !stopsFleet(g, m, f.Owner) || e <= safeWarp(m.Kind, fp) {
 			continue
 		}
-		if a, b, ok := cut(from, ux, uy, distance, m.Pos, m.Count); ok {
-			byKind[m.Kind] = append(byKind[m.Kind], [2]int{a, b})
+		if a, b, ok := cut(from, toward, distance, m.Pos, m.Count); ok {
+			byKind[m.Kind] = addStretch(byKind[m.Kind], a, b)
 		}
 	}
 	var all []stretch
 	for k := range NumMineKinds {
-		iv := byKind[k]
-		sort.Slice(iv, func(i, j int) bool { return iv[i][0] < iv[j][0] })
-		for _, x := range iv {
-			if n := len(all); n > 0 && all[n-1].kind == k && x[0] <= all[n-1].exit {
-				all[n-1].exit = max(all[n-1].exit, x[1])
-				continue
-			}
+		for _, x := range byKind[k] {
 			all = append(all, stretch{k, x[0], x[1]})
 		}
 	}
@@ -691,12 +771,16 @@ func designShield(d engine.Design) int {
 // exempt, if set, excludes designs (the owner's own mine layers in a
 // detonation).
 //
-// ASSUMPTION O6: a group is the fleet's stacks of one design, in order of
-// first appearance; shields absorb ships × the design's shield; the
-// existing damage is units·armor/500 per damaged ship, damaged =
-// ⌈pct·ships/100⌉; the new damage is stored as pct 100 and units =
-// ⌊average·500/armor⌋; a design is destroyed when the average is greater
-// than its armor; minimum and shortfall count only non-exempt ships.
+// On existing damage (OBJECTS.md "Damage on top of existing damage",
+// BINARY-ONLY; prior damage on all ships CONFIRMED MF-8): with n ships,
+// armor A and the stored pct and units, X = ⌊⌊pct·n/100⌋·A·units/500⌋;
+// total = X + D − min(⌊D/2⌋, shield·n); avg = ⌊total/n⌋. The design is
+// destroyed when avg > A; otherwise every ship is damaged (100%) with
+// max(1, ⌊avg·500/A⌋) units.
+//
+// ASSUMPTION O6: a design's ships are the fleet's stacks of that design,
+// in order of first appearance, with the first stack's stored damage; the
+// minimum and shortfall count only non-exempt ships.
 func MineDamage(g *engine.Game, f *engine.Fleet, k MineKind, exempt func(design int) bool) []DesignHit {
 	if k == SpeedBump {
 		return nil
@@ -749,21 +833,13 @@ func MineDamage(g *engine.Game, f *engine.Fleet, k MineKind, exempt func(design 
 		absorbed := min(raw/2, gr.ships*designShield(d))
 		hit := DesignHit{Design: gr.design, Ships: gr.ships, Damage: raw, Absorbed: absorbed}
 		armor := designArmor(d)
-		existing := 0
-		for _, st := range f.Stacks {
-			if st.Design == gr.design && st.Damage.Units > 0 && st.Damage.Pct > 0 {
-				damaged := (st.Damage.Pct*st.Count + 99) / 100
-				existing += st.Damage.Units * armor / 500 * damaged
-			}
-		}
+		old := firstDamage(f, gr.design)
+		existing := old.Pct * gr.ships / 100 * armor * old.Units / 500
 		avg := (existing + raw - absorbed) / gr.ships
 		if armor <= 0 || avg > armor {
 			hit.Destroyed = true
 		} else {
-			dmg := engine.Damage{Pct: 100, Units: avg * 500 / armor}
-			if dmg.Units == 0 {
-				dmg = engine.Damage{}
-			}
+			dmg := engine.Damage{Pct: 100, Units: max(1, avg*500/armor)}
 			for si := range f.Stacks {
 				if f.Stacks[si].Design == gr.design {
 					f.Stacks[si].Damage = dmg
@@ -827,8 +903,8 @@ type Hit struct {
 	Gone  bool
 	// Designs is the damage per design group.
 	Designs []DesignHit
-	// Salvage is what the destroyed ships leave at the stop point (none
-	// at a planet's exact position).
+	// Salvage is the minerals dropped at the stop point (mineCargo; none
+	// at a planet's exact position), for Space.AddMineSalvage.
 	Salvage engine.Minerals
 	// Disclosed lists the victim's designs the paying field's owner
 	// learns in full when that owner is Space Demolition: the damaged
@@ -842,15 +918,12 @@ type Hit struct {
 // Demolition disclosure. The fleet gets no ram-scoop fuel this year and
 // has spent the fuel for its whole leg; both are the caller's.
 //
-// Destroyed ships' share of cargo is lost and their minerals become
-// salvage. ASSUMPTION O7: a destroyed group's share of the fleet's
-// minerals is proportional to its ships' cargo capacity (to its ship
-// count when the fleet has no capacity); the rest stays with the fleet.
+// Cargo and salvage follow mineCargo.
 func ApplyHit(g *engine.Game, s *Space, fi int, k MineKind, rng engine.Rand) Hit {
 	f := &g.Fleets[fi]
 	h := Hit{Fleet: fi, Kind: k}
 	present := designsIn(f)
-	capBefore, shipsBefore := capacity(g, f)
+	capBefore, fuelBefore := fleetCargoCap(g, f), fleetFuelCap(g, f)
 	h.Designs = MineDamage(g, f, k, nil)
 	if p := PayingField(g, s, f.Owner, k, f.Pos); p >= 0 {
 		m := &s.Minefields[p]
@@ -865,10 +938,7 @@ func ApplyHit(g *engine.Game, s *Space, fi int, k MineKind, rng engine.Rand) Hit
 			h.Disclosed = disclosed(h.Designs, present)
 		}
 	}
-	h.Salvage = loseCargo(g, f, h.Designs, capBefore, shipsBefore, rng)
-	if atPlanet(g, f.Pos) {
-		h.Salvage = engine.Minerals{}
-	}
+	h.Salvage = mineCargo(g, f, h.Designs, capBefore, fuelBefore, true, rng)
 	return h
 }
 
@@ -897,17 +967,6 @@ func disclosed(hits []DesignHit, present []int) []int {
 	return ds
 }
 
-func capacity(g *engine.Game, f *engine.Fleet) (int, int) {
-	c, n := 0, 0
-	for _, st := range f.Stacks {
-		if st.Design >= 0 && st.Design < len(g.Designs) {
-			c += st.Count * g.Designs[st.Design].CargoCapacity
-			n += st.Count
-		}
-	}
-	return c, n
-}
-
 func atPlanet(g *engine.Game, p engine.Point) bool {
 	for _, pl := range g.Planets {
 		if pl.Pos == p {
@@ -917,42 +976,64 @@ func atPlanet(g *engine.Game, p engine.Point) bool {
 	return false
 }
 
-// loseCargo removes destroyed ships' share of the fleet's cargo and
-// returns their minerals as salvage.
-func loseCargo(g *engine.Game, f *engine.Fleet, hits []DesignHit, capBefore, shipsBefore int, rng engine.Rand) engine.Minerals {
-	lostCap, lostShips := 0, 0
+// LegacyMineSurvivorSalvage reproduces the original's LEGACY BUG
+// candidate that a mine hit which destroys some ships also drops every
+// mineral the survivors still carry as salvage (OBJECTS.md "Cargo when
+// ships are destroyed", MEASURED MF-14). On by default, as a deterministic
+// observable behavior; off, the survivors keep their minerals.
+var LegacyMineSurvivorSalvage = true
+
+// mineCargo applies the cargo rules when hits destroyed ships of fleet f
+// (OBJECTS.md "Cargo when ships are destroyed", MEASURED MF-14), given
+// the fleet's cargo and fuel capacity before the hit. The destroyed ships'
+// share is lost: ⌊C·lost/total⌋ of the cargo C by cargo capacity, split
+// per item with the remainder 1 kT at a time over ironium, boranium,
+// germanium and colonists (loseShare, as COMBAT.md "Salvage"), and
+// ⌊F·lost/total⌋ of the fuel by fuel capacity. With salvage (a mine hit,
+// not a detonation) the minerals then left aboard are dropped as salvage
+// (LegacyMineSurvivorSalvage; all of them when the whole fleet died),
+// except at a planet's exact position, where they stay aboard. A drop of
+// nothing becomes rand(10) kT of each mineral (LegacyEmptyFleetSalvage,
+// MEASURED OB-024). It returns the salvage.
+//
+// ASSUMPTION O10: the rand(10) draws are made only where salvage can
+// form (not at a planet), and only when ships were destroyed.
+func mineCargo(g *engine.Game, f *engine.Fleet, hits []DesignHit, capBefore, fuelBefore int, salvage bool, rng engine.Rand) engine.Minerals {
+	lostCap, lostFuel, lost := 0, 0, false
 	for _, h := range hits {
 		if h.Destroyed {
-			lostCap += h.Ships * g.Designs[h.Design].CargoCapacity
-			lostShips += h.Ships
+			d := g.Designs[h.Design]
+			lostCap += h.Ships * d.CargoCapacity
+			lostFuel += h.Ships * d.FuelCapacity
+			lost = true
 		}
 	}
-	var salvage engine.Minerals
-	if lostShips == 0 {
-		return salvage
+	var out engine.Minerals
+	if !lost {
+		return out
 	}
-	share := func(v int) int {
+	whole := len(f.Stacks) == 0
+	if !whole {
 		if capBefore > 0 {
-			return v * lostCap / capBefore
+			loseShare(&f.Cargo, lostCap, capBefore)
 		}
-		return v * lostShips / max(1, shipsBefore)
-	}
-	empty := true
-	for m := range engine.NumMinerals {
-		if f.Cargo.Minerals[m] > 0 {
-			empty = false
+		if fuelBefore > 0 {
+			f.Fuel -= f.Fuel * lostFuel / fuelBefore
 		}
-		lost := share(f.Cargo.Minerals[m])
-		f.Cargo.Minerals[m] -= lost
-		salvage[m] = lost
 	}
-	f.Cargo.Colonists -= share(f.Cargo.Colonists)
-	if empty && LegacyEmptyFleetSalvage {
+	if !salvage || atPlanet(g, f.Pos) {
+		return out
+	}
+	if whole || LegacyMineSurvivorSalvage {
+		out = f.Cargo.Minerals
+		f.Cargo.Minerals = engine.Minerals{}
+	}
+	if out == (engine.Minerals{}) && f.Cargo.Minerals == (engine.Minerals{}) && LegacyEmptyFleetSalvage {
 		for m := range engine.NumMinerals {
-			salvage[m] = rng.Intn(10)
+			out[m] = rng.Intn(10)
 		}
 	}
-	return salvage
+	return out
 }
 
 // --- Detonation ---
@@ -972,11 +1053,16 @@ type Detonation struct {
 // detonating field, of any owner including the field's, takes hit damage
 // of the field's kind, except the owner's own Mini Mine Layer and Super
 // Mine Layer hulls. No stop, no salvage, at most one detonation per fleet
-// per year. A speed-bump field damages nobody. The extra 25% decay is in
-// Decay.
+// per year. A destroyed ship's share of cargo and fuel is lost as for a
+// hit, and the survivors keep the rest (BINARY-ONLY). A speed-bump field
+// damages nobody. The extra 25% decay is in Decay.
 //
-// ASSUMPTION O8: a fleet inside several detonating fields is hit by the
-// first in object order.
+// Fields go off in object order, and the first detonating field that
+// contains a fleet marks it, even when it did the fleet no damage (the
+// owner's own layer hulls, a speed bump); later fields skip it that year
+// (OBJECTS.md "Several detonating fields", BINARY-ONLY). Each field's
+// decay touches only itself, so detonating every field before decaying
+// any matches "each just before its own decay".
 func (s *Space) Detonate(g *engine.Game) []Detonation {
 	var out []Detonation
 	done := map[int]bool{}
@@ -999,7 +1085,9 @@ func (s *Space) Detonate(g *engine.Game) []Detonation {
 				_, layer := hc.Stats["mine_layer_multiplier"]
 				return ok && layer
 			}
+			capBefore, fuelBefore := fleetCargoCap(g, f), fleetFuelCap(g, f)
 			hits := MineDamage(g, f, m.Kind, exempt)
+			mineCargo(g, f, hits, capBefore, fuelBefore, false, nil)
 			det := Detonation{Fleet: fi, Field: m, Designs: hits}
 			if prt(g, m.Owner) == engine.PRTSpaceDemolition && len(hits) > 0 {
 				det.Disclosed = disclosed(hits, present)
