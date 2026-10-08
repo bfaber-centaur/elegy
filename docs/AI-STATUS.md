@@ -39,6 +39,7 @@ unless the project decides otherwise.
 | Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |
 | Planet automation: starbases for hubs, starbase upgrade, defenses, mines and factories fill | AI.md §7 | BINARY-ONLY (AI-7 not run) | `ai/automation.go`, `ai/economy.go` | `TestMinesAndFactories`, `TestStarbaseUpgrade`, `TestDefenses`, `TestDesignCostMatchesEngine` |
 | Under attack: quick defenses (and alchemy) at a planet a foreign bomber orbits, from year index (universe size + 2)·10 | AI.md §7 step 4 | BINARY-ONLY | `ai/automation.go` `underAttack` | `TestUnderAttack` |
+| Blocked queues: mines or Auto Alchemy in front of a mineral-starved head, chosen by the head's completion estimate | AI.md §7 step 5; ESTIMATES.md "Production completion" (CONFIRMED, ES-001) for the estimate | BINARY-ONLY | `ai/automation.go` `blockedQueue`, `ai/estimate.go` | `TestBlockedQueue`, `TestBlockedQueueRun`, `TestBlockedQueueSkips`, `TestCompletion` |
 | Ship-design builder and store: hull and class lists, delete-then-create, picture, name; ageing | AI.md §10 | BINARY-ONLY (builder CONFIRMED through AI-8, AI-19) | `ai/designs.go` | `TestAgeGroup` |
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
@@ -135,6 +136,8 @@ them it stayed on its homeworld.
 | A59 | Robotoid's armada invasion at another player's planet (AI.md §11 "Armada (invasion) fleets", BINARY-ONLY) uses `need` (colonists) and the cargo `c` (kT) as plain numbers, with no conversion between them, as §11 reads; §11 marks the mix UNRESOLVED (a probable unit slip). The drop is a waypoint-0 unload-exactly task, with no move that turn. |
 | A60 | Under attack (AI.md §7 step 4): a ship is a bomber when its design, known in full, carries a bomb part; a design known only by hull and mass does not count. A fleet orbits a planet when its sighting is at the planet's position. |
 | A61 | Under attack: when n ≤ m (§7 names only n > m), the n defenses go to the front. "None queued" is no defense item in the queue; resources and minerals are the planet's available ones (§7 "available"), and the defense room is A14's. |
+| A62 | Completion estimate (ESTIMATES.md "Production completion"): the walk stops at the head, leaving out the items behind it; the head finishes when its count reaches 0, or when an automatic head builds its whole count in a year; a starbase costs its full build cost (as A12); a packet head is built as a plain item. |
+| A63 | Blocked queues (AI.md §7 step 5): "years" is the year the head's last unit finishes; "mines" and "terraforming" include their automatic items; the head's resource cost is what is left of it, counted as in `queueCost`; the planet's resources and the mine room are those of the mines-and-factories fill (A15). |
 
 ## Spec questions
 
@@ -179,7 +182,6 @@ test). It is a determinism check, not a parity check.
 
 ## Not implemented yet
 
-- Automation step 5 (blocked queues).
 - Load-task kinds the engine does not model yet: fill, wait and set
   amount (#80 added load all and load exactly). A hub freighter's
   "fills" is ordered as load exactly (A56).

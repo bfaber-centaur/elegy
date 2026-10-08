@@ -23,8 +23,7 @@ import (
 //  8. fleets (§4);
 //  9. planet automation (AI.md §7) and the queue fill.
 //
-// Not yet run: automation step 5. Steps it cannot order yet go
-// to Result.Unsupported.
+// Steps it cannot order yet go to Result.Unsupported.
 func PlayRobotoid(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()

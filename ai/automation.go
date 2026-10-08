@@ -26,7 +26,7 @@ import (
 // (universeSize, ASSUMPTION A36; Elegy has no tutorial games), over the
 // turn's planet order.
 //
-// Not implemented: step 5 (blocked queues); docs/AI-STATUS.md.
+// Step 5 (blocked queues) follows over the same order, every year.
 type automation struct {
 	v      *View
 	res    *Result
@@ -53,6 +53,9 @@ func (a *automation) run() {
 		for _, id := range a.order {
 			a.underAttack(a.v.ownPlanet(id))
 		}
+	}
+	for _, id := range a.order {
+		a.blockedQueue(a.v.ownPlanet(id))
 	}
 	for _, id := range a.order {
 		a.minesAndFactories(a.v.ownPlanet(id))
@@ -298,6 +301,56 @@ func (a *automation) underAttack(p *engine.Planet) {
 	extra := max(0, (r-m*k)/150)
 	a.q.add(p, engine.QueueItem{Kind: engine.ItemDefenses, Count: m + extra}, true)
 	a.q.add(p, engine.QueueItem{Kind: engine.ItemMineralAlchemy, Count: 5 * extra}, true)
+}
+
+// blockedQueue is AI.md §7 step 5, "Blocked queues": a head that is not
+// mines, auto alchemy, alchemy or terraforming, finishing after more than
+// a year (v.completion, ESTIMATES.md "Production completion") although its
+// resource cost is at most (years − 1) × the planet's resources, gets m =
+// min(mine room, resources / mine cost) mines or one Auto Alchemy in
+// front, whichever finishes the head sooner by the same estimate: Auto
+// Alchemy only when strictly sooner than both the queue as it is and the
+// mines, the mines when no later than Auto Alchemy and sooner than the
+// queue as it is. With m < 1, Auto Alchemy goes in front unconditionally.
+//
+// ASSUMPTION A63: "years" is the year the head's last unit finishes;
+// "mines" and "terraforming" include their automatic items; the head's
+// resource cost is what is left of it, counted as in queueCost; the
+// planet's resources and the mine room are minesAndFactories' (A15).
+func (a *automation) blockedQueue(p *engine.Planet) {
+	v := a.v
+	q := a.q.get(p)
+	if len(q) == 0 {
+		return
+	}
+	head := q[0]
+	switch head.Kind {
+	case engine.ItemMine, engine.ItemAutoMines, engine.ItemAutoAlchemy, engine.ItemMineralAlchemy,
+		engine.ItemTerraform, engine.ItemAutoMinTerraform, engine.ItemAutoMaxTerraform:
+		return
+	}
+	years := v.completion(p, q[:1], a.budget)
+	res := v.available(p, a.budget).Resources
+	if years <= 1 || v.queueCost(q[:1]).Resources > (years-1)*res {
+		return
+	}
+	col := engine.NewColony(p, &v.Self)
+	room := col.OperableMines(p.Population) - p.Mines - a.q.count(p, engine.ItemMine)
+	m := min(room, res/max(1, v.Self.Race.MineCost))
+	alch := engine.QueueItem{Kind: engine.ItemAutoAlchemy, Count: 1}
+	if m < 1 {
+		a.q.add(p, alch, true)
+		return
+	}
+	mines := engine.QueueItem{Kind: engine.ItemMine, Count: m}
+	withMines := v.completion(p, []engine.QueueItem{mines, head}, a.budget)
+	withAlch := v.completion(p, []engine.QueueItem{alch, head}, a.budget)
+	switch {
+	case withAlch < years && withAlch < withMines:
+		a.q.add(p, alch, true)
+	case withMines <= withAlch && withMines < years:
+		a.q.add(p, mines, true)
+	}
 }
 
 // bombed reports whether another player's fleet holding a bomber (A60)

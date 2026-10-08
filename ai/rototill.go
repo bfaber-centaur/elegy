@@ -18,8 +18,6 @@ import (
 //  3. fleet passes 1 and 2 (§3);
 //  4. planet automation and the queue fill (AI.md §7), with the turn's
 //     shuffled planet order (AI.md §2) and hubs (AI.md §6).
-//
-// Not yet run: automation step 5; docs/AI-STATUS.md lists them.
 func PlayRototill(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
