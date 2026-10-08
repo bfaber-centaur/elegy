@@ -1721,7 +1721,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1749,7 +1750,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1773,7 +1775,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1801,7 +1804,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1829,7 +1833,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1857,7 +1862,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1885,7 +1891,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1913,7 +1920,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1937,7 +1945,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1965,7 +1974,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -1993,7 +2003,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2021,7 +2032,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "planet",
@@ -2072,7 +2084,8 @@
        1
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "message",

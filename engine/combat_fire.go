@@ -399,7 +399,21 @@ func (b *battle) killEvent(e *token, kills int) {
 	for m := range NumMinerals {
 		s[m] -= s[m] / 4
 	}
-	b.pending = append(b.pending, s)
+	b.pending = append(b.pending, salvageAdd{s, e.player})
+}
+
+// salvageAdd is a deep-space salvage addition and the player whose ships
+// or cargo it came from.
+type salvageAdd struct {
+	m     Minerals
+	owner int
+}
+
+// salvageMeta is a battle salvage object's owner and whether it is
+// marked fresh (OBJECTS.md "Salvage", "Owner", "Decay").
+type salvageMeta struct {
+	owner int
+	fresh bool
 }
 
 // salvageSteps is a salvage object's limit: 30000 kT in 10 kT steps.
@@ -412,7 +426,12 @@ const salvageSteps = 3000
 // out and re-added with the new ones, ironium, boranium, germanium; a
 // mineral that does not fit fills the object to exactly 3000 steps, and
 // the rest goes into a new object at the same position in a new pass.
-func (b *battle) addSalvage(add Minerals) {
+//
+// The battle's object belongs to the owner of its first addition and is
+// marked fresh, as is the object each addition starts in; an overflow
+// object belongs to the owner of the addition that overflowed and is not
+// marked (OBJECTS.md "Salvage", "Owner", "Decay").
+func (b *battle) addSalvage(add Minerals, owner int) {
 	for add == (Minerals{}) {
 		for m := range NumMinerals {
 			add[m] = b.rng.Intn(10)
@@ -420,8 +439,10 @@ func (b *battle) addSalvage(add Minerals) {
 	}
 	if len(b.salvage) == 0 {
 		b.salvage = append(b.salvage, Minerals{})
+		b.salvageOf = append(b.salvageOf, salvageMeta{owner: owner})
 	}
 	last := len(b.salvage) - 1
+	b.salvageOf[last].fresh = true
 	for m := range NumMinerals {
 		add[m] += b.salvage[last][m]
 	}
@@ -451,6 +472,7 @@ func (b *battle) addSalvage(add Minerals) {
 			return
 		}
 		b.salvage = append(b.salvage, Minerals{})
+		b.salvageOf = append(b.salvageOf, salvageMeta{owner: owner})
 	}
 }
 

@@ -111,6 +111,16 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m engine.PVMaps) (e
 				return nil, fmt.Errorf("packet minerals %v", o.Minerals)
 			}
 			s.Packets = append(s.Packets, objects.Packet{Owner: o.Owner, Number: o.ID, Pos: engine.Point{X: o.X, Y: o.Y}, Target: m.Planet[o.Target], From: -1, Warp: o.Warp, Class: o.Decay, Cargo: engine.Minerals{o.Minerals[0], o.Minerals[1], o.Minerals[2]}})
+		case "salvage":
+			if len(o.Minerals) != engine.NumMinerals {
+				return nil, fmt.Errorf("salvage minerals %v", o.Minerals)
+			}
+			m := engine.Minerals{o.Minerals[0], o.Minerals[1], o.Minerals[2]}
+			steps := 0
+			for _, x := range m {
+				steps += (x + 9) / 10
+			}
+			g.Salvage = append(g.Salvage, engine.Salvage{Pos: engine.Point{X: o.X, Y: o.Y}, Minerals: m, Owner: o.Owner, Number: o.ID, Steps: steps})
 		default:
 			return nil, fmt.Errorf("object kind %q", o.Kind)
 		}

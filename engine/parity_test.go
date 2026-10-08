@@ -910,6 +910,22 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		if pvSpaceObjects == nil {
 			return "skip: space objects"
 		}
+		// A packet of a player whose queue was not loaded may come from
+		// a packet item.
+		owner := e.Owner
+		if e.Kind == "object" {
+			var o struct {
+				Kind  string `json:"kind"`
+				Owner int    `json:"owner"`
+			}
+			json.Unmarshal(e.Equals, &o)
+			if o.Kind == "packet" {
+				owner = &o.Owner
+			}
+		}
+		if (e.Kind == "packet" || e.Kind == "object") && owner != nil && l.queued[*owner] {
+			return "skip: a packet from a production queue"
+		}
 		return pvSpaceObjects.Check(g, PVExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, PVMaps{l.endID, l.planet})
 	}
 	var eq map[string]json.RawMessage
@@ -938,8 +954,29 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		}
 		return nil
 	}
-	if e.Kind == "view" {
+	switch e.Kind {
+	case "view":
 		return l.viewCheck(g, e, eq, fleet)
+	case "salvage_at":
+		// One of the salvage objects at (x, y) holds exactly these
+		// minerals (several when a battle's salvage overflowed, CB-040).
+		if why := l.unsupportedAt(-1); why != "" {
+			return "skip: " + why
+		}
+		var want struct{ Minerals []int }
+		if json.Unmarshal(e.Equals, &want) != nil || len(want.Minerals) != NumMinerals {
+			return "skip: salvage_at " + string(e.Equals)
+		}
+		var got []Minerals
+		for _, s := range g.Salvage {
+			if s.Pos == (Point{*e.X, *e.Y}) {
+				if s.Minerals == (Minerals{want.Minerals[0], want.Minerals[1], want.Minerals[2]}) {
+					return ""
+				}
+				got = append(got, s.Minerals)
+			}
+		}
+		return pvMismatch("salvage", got, want.Minerals)
 	}
 	switch e.Kind {
 	case "fleet", "fleet_gone":

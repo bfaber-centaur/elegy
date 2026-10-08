@@ -56,9 +56,11 @@ type battle struct {
 	in       map[int]bool // players still in the battle
 	hits     []BattleHit
 	salvage  []Minerals // this battle's deep-space salvage objects
-	pending  []Minerals // deep-space salvage additions, added after the battle
-	seen     [NumFields]int
-	killed   map[int]bool // players that lost ships or a starbase
+	// salvageOf is each salvage object's owner and fresh mark.
+	salvageOf []salvageMeta
+	pending   []salvageAdd // deep-space salvage additions, added after the battle
+	seen      [NumFields]int
+	killed    map[int]bool // players that lost ships or a starbase
 }
 
 func dist(ax, ay, bx, by int) int {
@@ -120,7 +122,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 					g.Planets[b.loc.planet].Surface[m] += f.Cargo.Minerals[m]
 				}
 			} else {
-				b.pending = append(b.pending, f.Cargo.Minerals)
+				b.pending = append(b.pending, salvageAdd{f.Cargo.Minerals, f.Owner})
 			}
 			f.Cargo.Minerals = Minerals{}
 		}

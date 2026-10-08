@@ -427,7 +427,7 @@ func TestConfirmedSalvage(t *testing.T) {
 		tb.killEvent(e, k)
 	}
 	for _, add := range tb.pending {
-		tb.addSalvage(add)
+		tb.addSalvage(add.m, add.owner)
 	}
 	if !reflect.DeepEqual(tb.salvage, []Minerals{{10, 0, 13}}) {
 		t.Errorf("deep space salvage %v, want one object [10 0 13]", tb.salvage)
@@ -1078,7 +1078,7 @@ func TestPredictionEmptySalvageGetsTokenAmount(t *testing.T) {
 	// until the total is above 0.
 	d := []Design{testDesign(tFrigate, 10)}
 	tb := newTestBattle(&seqRand{draws: []int{0, 0, 0, 3, 4, 5}}, d)
-	tb.pending = []Minerals{{}}
+	tb.pending = []salvageAdd{{}}
 	tb.finish()
 	if len(tb.g.Salvage) != 1 || tb.g.Salvage[0].Minerals != (Minerals{3, 4, 5}) {
 		t.Errorf("salvage %+v", tb.g.Salvage)
@@ -1090,7 +1090,7 @@ func TestConfirmedSalvageOverflow(t *testing.T) {
 	// object of 30000 ironium and a second of 6098 ironium and 50
 	// germanium.
 	tb := newTestBattle(panicRand{}, nil)
-	tb.addSalvage(Minerals{36098, 0, 50})
+	tb.addSalvage(Minerals{36098, 0, 50}, 0)
 	if want := []Minerals{{30000, 0, 0}, {6098, 0, 50}}; !reflect.DeepEqual(tb.salvage, want) {
 		t.Errorf("salvage %v, want %v", tb.salvage, want)
 	}
@@ -1100,15 +1100,21 @@ func TestPredictionSalvageLimit(t *testing.T) {
 	// 3000 steps of 10 kT per object; a mineral that does not fit fills
 	// the object and the rest goes into a new object.
 	tb := newTestBattle(panicRand{}, nil)
-	tb.addSalvage(Minerals{29995, 20, 0})
+	tb.addSalvage(Minerals{29995, 20, 0}, 0)
 	if want := []Minerals{{29995, 0, 0}, {0, 20, 0}}; !reflect.DeepEqual(tb.salvage, want) {
 		t.Errorf("salvage %v, want %v", tb.salvage, want)
 	}
 	tb = newTestBattle(panicRand{}, nil)
-	tb.addSalvage(Minerals{0, 0, 100})
-	tb.addSalvage(Minerals{29950, 0, 0})
+	tb.addSalvage(Minerals{0, 0, 100}, 0)
+	tb.addSalvage(Minerals{29950, 0, 0}, 1)
 	if want := []Minerals{{29950, 0, 50}, {0, 0, 50}}; !reflect.DeepEqual(tb.salvage, want) {
 		t.Errorf("salvage %v, want %v", tb.salvage, want)
+	}
+	// OBJECTS.md "Salvage": the battle's object keeps its first owner and
+	// is marked fresh; the overflow object belongs to the addition that
+	// overflowed and is not marked.
+	if want := []salvageMeta{{0, true}, {1, false}}; !reflect.DeepEqual(tb.salvageOf, want) {
+		t.Errorf("salvage owners %+v, want %+v", tb.salvageOf, want)
 	}
 }
 

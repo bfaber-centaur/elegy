@@ -2531,7 +2531,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2555,7 +2556,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2579,7 +2581,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2603,7 +2606,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2627,7 +2631,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2651,7 +2656,8 @@
       },
       "fuel": 233
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "planet",
@@ -2803,7 +2809,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2832,7 +2839,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2861,7 +2869,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2890,7 +2899,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2919,7 +2929,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2948,7 +2959,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -2977,7 +2989,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3006,7 +3019,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3035,7 +3049,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3064,7 +3079,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3093,7 +3109,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3122,7 +3139,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3151,7 +3169,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3180,7 +3199,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3209,7 +3229,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3238,7 +3259,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3267,7 +3289,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3296,7 +3319,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3325,7 +3349,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3354,7 +3379,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3383,7 +3409,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3412,7 +3439,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3441,7 +3469,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3470,7 +3499,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -3525,7 +3555,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3554,7 +3585,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3583,7 +3615,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3612,7 +3645,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3641,7 +3675,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3670,7 +3705,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3699,7 +3735,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3728,7 +3765,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3757,7 +3795,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3786,7 +3825,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3815,7 +3855,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3844,7 +3885,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3873,7 +3915,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3902,7 +3945,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3931,7 +3975,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3960,7 +4005,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -3989,7 +4035,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4018,7 +4065,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4047,7 +4095,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4076,7 +4125,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4105,7 +4155,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4134,7 +4185,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4163,7 +4215,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4192,7 +4245,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -4239,7 +4293,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4268,7 +4323,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4297,7 +4353,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4326,7 +4383,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4355,7 +4413,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4384,7 +4443,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4413,7 +4473,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4442,7 +4503,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4471,7 +4533,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4500,7 +4563,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4529,7 +4593,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4558,7 +4623,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4587,7 +4653,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4616,7 +4683,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4645,7 +4713,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4674,7 +4743,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4703,7 +4773,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4732,7 +4803,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4761,7 +4833,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4790,7 +4863,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4819,7 +4893,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4848,7 +4923,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4877,7 +4953,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4906,7 +4983,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -4953,7 +5031,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4982,7 +5061,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5011,7 +5091,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5040,7 +5121,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5069,7 +5151,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5098,7 +5181,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5127,7 +5211,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5156,7 +5241,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5185,7 +5271,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5214,7 +5301,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5243,7 +5331,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5268,7 +5357,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5297,7 +5387,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5322,7 +5413,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5351,7 +5443,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5380,7 +5473,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5409,7 +5503,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5438,7 +5533,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5467,7 +5563,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5496,7 +5593,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5525,7 +5623,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5554,7 +5653,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5583,7 +5683,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5612,7 +5713,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -5667,7 +5769,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5696,7 +5799,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5725,7 +5829,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5754,7 +5859,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5783,7 +5889,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5812,7 +5919,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5841,7 +5949,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5870,7 +5979,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5899,7 +6009,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5928,7 +6039,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5957,7 +6069,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5982,7 +6095,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6011,7 +6125,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6036,7 +6151,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6065,7 +6181,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6094,7 +6211,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6123,7 +6241,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6152,7 +6271,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6181,7 +6301,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6210,7 +6331,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6239,7 +6361,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6268,7 +6391,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6297,7 +6421,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6326,7 +6451,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "minefield",
@@ -6381,7 +6507,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6410,7 +6537,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6439,7 +6567,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6468,7 +6597,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6497,7 +6627,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6526,7 +6657,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6555,7 +6687,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6584,7 +6717,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6613,7 +6747,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6642,7 +6777,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6671,7 +6807,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6696,7 +6833,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6725,7 +6863,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6750,7 +6889,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6779,7 +6919,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6808,7 +6949,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6837,7 +6979,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6866,7 +7009,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6895,7 +7039,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6924,7 +7069,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6953,7 +7099,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -6982,7 +7129,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -7011,7 +7159,8 @@
       "fuel": 233
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -7040,7 +7189,8 @@
       "fuel": 232
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "minefield",
