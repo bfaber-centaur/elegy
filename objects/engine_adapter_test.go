@@ -586,3 +586,21 @@ func TestSalvageFirstAtPosition(t *testing.T) {
 		t.Errorf("fleet ironium %d, salvage ironium %v; want 50 and [100 0 70]", g.Fleets[0].Cargo.Minerals[0], got)
 	}
 }
+
+// The adapter's Trader part word for the engine's tech attempts: bits in
+// OBJECTS.md "Encounters" order (CONFIRMED CB-048: a success at k gives
+// bit k). The Mini Morph hull and the Genesis Device have bits but never
+// sit in a slot, and bit 12, the ship-gift bit, has no part name
+// (COMBAT.md "Mystery Trader chances", stars-elegy #127).
+func TestTraderBitAdapter(t *testing.T) {
+	s := &Space{}
+	for part, want := range map[string]int{"Multi Cargo Pod": BitMultiCargoPod, "Enigma Pulsar": BitEnigmaPulsar, "Jump Gate": BitJumpGate, "Laser": -1} {
+		if got := s.TraderBit(part); got != want {
+			t.Errorf("%s: bit %d, want %d", part, got, want)
+		}
+	}
+	s.GiveTraderBit(2, BitLangstonShell)
+	if !s.OwnsTraderBit(2, BitLangstonShell) || s.OwnsTraderBit(1, BitLangstonShell) || !s.TraderItems(2)["Langston Shell"] {
+		t.Errorf("parts %v", s.TraderParts)
+	}
+}

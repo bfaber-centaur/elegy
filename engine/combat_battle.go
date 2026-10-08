@@ -60,7 +60,10 @@ type battle struct {
 	salvageOf []salvageMeta
 	pending   []salvageAdd // deep-space salvage additions, added after the battle
 	seen      [NumFields]int
-	killed    map[int]bool // players that lost ships or a starbase
+	// traderChance is each Mystery Trader item's chance in this battle's
+	// tech attempts (COMBAT.md "Mystery Trader chances").
+	traderChance traderChances
+	killed       map[int]bool // players that lost ships or a starbase
 }
 
 func dist(ax, ay, bx, by int) int {

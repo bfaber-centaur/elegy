@@ -97,6 +97,13 @@ type SpaceObjects interface {
 	// name, as Catalog.ReadDesign takes them (OBJECTS.md "Encounters":
 	// the player's part word; ORDERS.md "Design legality").
 	TraderItems(player int) map[string]bool
+	// TraderBit is a component's bit in the Trader part word, or -1 for
+	// a component that is not a Mystery Trader part (OBJECTS.md
+	// "Encounters"). OwnsTraderBit and GiveTraderBit read and set a
+	// player's bit (COMBAT.md "Tech from battle", step 3).
+	TraderBit(part string) int
+	OwnsTraderBit(player, bit int) bool
+	GiveTraderBit(player, bit int)
 
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When

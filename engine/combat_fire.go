@@ -375,6 +375,10 @@ func (b *battle) killEvent(e *token, kills int) {
 	for f := range NumFields {
 		b.seen[f] = max(b.seen[f], r[f])
 	}
+	// Each kill event adds the design's Trader part counts once, whatever
+	// the number of ships killed (COMBAT.md "Mystery Trader chances",
+	// CONFIRMED CB-048).
+	b.traderChance.addParts(g, d, 1)
 	var s Minerals
 	for m := range NumMinerals {
 		s[m] = e.minerals[m] * kills / 3

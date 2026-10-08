@@ -260,6 +260,22 @@ func (s *Space) SalvageLoad(sv engine.Salvage, k, want int) int { return Salvage
 // SalvageRoom is the package's SalvageRoom.
 func (s *Space) SalvageRoom(sv engine.Salvage) int { return SalvageRoom(sv) }
 
+// TraderBit is the part's bit in TraderPartNames, or -1.
+func (s *Space) TraderBit(part string) int {
+	for b, n := range TraderPartNames {
+		if n == part {
+			return b
+		}
+	}
+	return -1
+}
+
+// OwnsTraderBit reports whether the player owns Trader part bit b.
+func (s *Space) OwnsTraderBit(player, b int) bool { return s.TraderParts.Owns(player, b) }
+
+// GiveTraderBit gives the player Trader part bit b.
+func (s *Space) GiveTraderBit(player, b int) { s.TraderParts.give(player, b) }
+
 // MeetTraders runs the Trader encounters. A computer player's level is
 // engine.Player.Level.
 func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {
