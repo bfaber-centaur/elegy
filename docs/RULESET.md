@@ -62,7 +62,7 @@ switch as a parameter from a caller that does.
 | Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `Game.fuelTerm` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
-| `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014 |
+| `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014. Off: a scanner is needed and cloaking applies at distance 0 too, so a fleet with no scanner part sees no fleet, also at its own position (Elegy choice, `TestElegyDecisionColocationOff`) |
 | `drop_scan` | `DropScan` | on | on | `engine/takeover.go` `Game.dropWinner` | TAKEOVER.md "Several players dropping at once", LEGACY BUG, CONFIRMED T-32 |
 | `starbase_armed_class` | `StarbaseArmedClass` | on | on | `engine/combat_battle.go`, `starbaseClass` | COMBAT.md "Starbases in battle", LEGACY BUG, CONFIRMED CB-011..013 S4/S5 |
 | `observer_tech_mask` | `ObserverTechMask` | on | on | `engine/combat.go` `battle.techAttempts` | COMBAT.md "Tech from battle", LEGACY BUG, CONFIRMED CB-031-obs, CB-037 |
@@ -82,12 +82,6 @@ switch as a parameter from a caller that does.
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
 | `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
 | `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
-
-Not every off setting has been exercised. One known gap: with
-`colocation` off, a fleet with no scanner still sees a cloaked fleet at its
-own position, because the range test passes at distance 0, so the off
-setting does not yet do what its comment says (found while writing the
-coexistence test; the off path was never reachable before rulesets).
 
 ## Alternate Reality with maximum population 0
 
