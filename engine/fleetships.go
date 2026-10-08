@@ -13,25 +13,59 @@ type ShipStack struct {
 // in fleet order, its cargo mass in kT (minerals and colonists), whether
 // its owner has Improved Fuel Efficiency, and the game's
 // Legacy.FuelWrap setting. A planner that holds only its own view of the
-// designs (and the game's ruleset, which every player knows) can build
-// one without a Game. FuelWrap has no default: it must be copied from the
-// game's Rules.Legacy.FuelWrap (Report.Rules for a player), as Game.Ships
-// does.
+// designs (and the game's ruleset, which every player knows from
+// Report.Rules) builds one with NewFleetShips, without a Game.
+//
+// The FuelWrap setting has no default: it is unexported and set only by
+// NewFleetShips from a valid ruleset, and the fuel methods refuse (panic)
+// a FleetShips not made by it, so a zero value never runs with wrap off.
 type FleetShips struct {
 	Stacks                 []ShipStack
 	CargoMass              int
 	ImprovedFuelEfficiency bool
-	FuelWrap               bool
+
+	fuelWrap bool
+	ruled    bool
 }
 
-// Ships is fleet f as FleetShips.
-func (g *Game) Ships(f *Fleet) FleetShips {
-	s := FleetShips{CargoMass: f.Cargo.mass(), FuelWrap: g.Rules.Legacy.FuelWrap}
-	for _, st := range f.Stacks {
-		s.Stacks = append(s.Stacks, ShipStack{Index: st.Design, Design: g.Designs[st.Design], Count: st.Count})
+// NewFleetShips is a fleet's ships under ruleset rules, which must be
+// valid (Ruleset.Validate).
+func NewFleetShips(rules Ruleset, stacks []ShipStack, cargoMass int, improvedFuelEfficiency bool) (FleetShips, error) {
+	if err := rules.Validate(); err != nil {
+		return FleetShips{}, err
 	}
+	return FleetShips{
+		Stacks:                 stacks,
+		CargoMass:              cargoMass,
+		ImprovedFuelEfficiency: improvedFuelEfficiency,
+		fuelWrap:               rules.Legacy.FuelWrap,
+		ruled:                  true,
+	}, nil
+}
+
+// wrap is the game's Legacy.FuelWrap setting.
+func (s FleetShips) wrap() bool {
+	if !s.ruled {
+		panic("engine: FleetShips not made by NewFleetShips has no FuelWrap setting")
+	}
+	return s.fuelWrap
+}
+
+// Ships is fleet f as FleetShips under the game's ruleset. A game without
+// a valid ruleset cannot reach here through GenerateTurn (ErrNoRuleset);
+// any other caller gets a panic rather than a guessed setting.
+func (g *Game) Ships(f *Fleet) FleetShips {
+	var stacks []ShipStack
+	for _, st := range f.Stacks {
+		stacks = append(stacks, ShipStack{Index: st.Design, Design: g.Designs[st.Design], Count: st.Count})
+	}
+	ife := false
 	if f.Owner >= 0 && f.Owner < len(g.Players) {
-		s.ImprovedFuelEfficiency = g.Players[f.Owner].Race.LRT.ImprovedFuelEfficiency
+		ife = g.Players[f.Owner].Race.LRT.ImprovedFuelEfficiency
+	}
+	s, err := NewFleetShips(g.Rules, stacks, f.Cargo.mass(), ife)
+	if err != nil {
+		panic(err)
 	}
 	return s
 }

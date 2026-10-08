@@ -168,7 +168,7 @@ func (g *Game) FuelCost(f *Fleet, warp, dist int) int {
 func (s FleetShips) FuelCost(warp, dist int) int {
 	tenths := 0
 	for _, gr := range s.groups(warp) {
-		tenths += fuelTermWrap(s.factor(gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo, s.FuelWrap)
+		tenths += fuelTermWrap(s.factor(gr.d, warp), dist, gr.n*gr.d.Mass+gr.cargo, s.wrap())
 	}
 	return (tenths + 9) / 10
 }
@@ -202,7 +202,7 @@ func (s FleetShips) factor(d Design, warp int) int {
 // fuelTermWrap is one stack's fuel term trunc(f·L·M/2000) in tenths of
 // a mg (KERNEL.md "Fuel cost"), for factor f, L light-years and mass M
 // (ships plus cargo, kT), under the game's FuelWrap switch
-// (FleetShips.FuelWrap); wrap reproduces the original's LEGACY
+// (FleetShips, from NewFleetShips); wrap reproduces the original's LEGACY
 // BUG (Legacy.FuelWrap; KERNEL.md "Designs without a full set of
 // engines", CONFIRMED FM-105): in its integer form the product f·L·M
 // keeps its low 32 bits and is divided as a signed 32-bit number. Only an
@@ -230,7 +230,7 @@ func (g *Game) fuelRange(f *Fleet, warp int) (r int, unlimited bool) {
 func (s FleetShips) FuelRange(fuel, warp int) (r int, unlimited bool) {
 	sum := 0
 	for _, gr := range s.groups(warp) {
-		sum += fuelTermWrap(s.factor(gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo, s.FuelWrap)
+		sum += fuelTermWrap(s.factor(gr.d, warp), 1000, gr.n*gr.d.Mass+gr.cargo, s.wrap())
 	}
 	c1000 := sum / 10
 	switch {
