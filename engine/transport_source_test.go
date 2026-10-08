@@ -111,7 +111,7 @@ func TestStealerLoadWaits(t *testing.T) {
 // At a source, a "set amount to" the target cannot meet waits and, after
 // movement, is told so each year (KERNEL.md "Which loads are unmet";
 // MESSAGES.md 0x121, 0x122 for colonists, BINARY-ONLY). One held back by
-// the fleet's hold, not the target, is not told.
+// the fleet's hold, not the target, is released instead (T14).
 func TestSetAmountWaitingMessage(t *testing.T) {
 	for _, tt := range []struct {
 		name  string
@@ -134,12 +134,16 @@ func TestSetAmountWaitingMessage(t *testing.T) {
 			}
 		}
 	}
-	// Held back by the hold: 300 wanted and there, 210 kT of space.
-	l, pi := sourceLab(t, "own", Transport{SetAmount, 300}, Transport{}, 0)
-	l.g.Planets[pi].Surface[Ironium] = 300
-	f := &l.g.Fleets[0]
-	if ev := l.g.load(f, true); len(ev) != 0 || f.Cargo.Minerals[Ironium] != 210 || f.Task.Kind != TaskTransport {
-		t.Errorf("hold-limited: events %+v, holds %d, task %+v; want none, 210 and kept", ev, f.Cargo.Minerals[Ironium], f.Task)
+	// Held back by the hold: 300 wanted, 1000 there, 210 kT of space. The
+	// full hold releases the action, as for "wait for" (ASSUMPTION T14),
+	// with no message, before or after movement.
+	for _, after := range []bool{false, true} {
+		l, pi := sourceLab(t, "own", Transport{SetAmount, 300}, Transport{}, 0)
+		l.g.Planets[pi].Surface[Ironium] = 1000
+		f := &l.g.Fleets[0]
+		if ev := l.g.load(f, after); len(ev) != 0 || f.Cargo.Minerals[Ironium] != 210 || f.Task.Kind != TaskNone {
+			t.Errorf("hold full, after %v: events %+v, holds %d, task %+v; want none, 210 and released", after, ev, f.Cargo.Minerals[Ironium], f.Task)
+		}
 	}
 	// Colonists at salvage, which holds none (ASSUMPTION T6).
 	task := Task{Kind: TaskTransport}

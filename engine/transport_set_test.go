@@ -20,8 +20,10 @@ func setLab(t *testing.T, c int, tr Transport, cargo Cargo) *tkLab {
 
 // The load direction of "set amount to v" (v − C) and "set waypoint to
 // v" (A − v), in the load pass (TAKEOVER.md "Unload and load amounts",
-// CONFIRMED FO-01 G, H). ASSUMPTION T11: a load that falls short keeps
-// the action, like "load exactly"; one with nothing to load is satisfied.
+// CONFIRMED FO-01 G, H). A set amount short of v keeps the action
+// (KERNEL.md "Which loads are unmet") until the hold is full (ASSUMPTION
+// T14); ASSUMPTION T11: so does a short set waypoint. One with nothing to
+// load is satisfied.
 func TestSetAmountAndWaypointLoad(t *testing.T) {
 	for _, tt := range []struct {
 		name      string
@@ -33,7 +35,7 @@ func TestSetAmountAndWaypointLoad(t *testing.T) {
 	}{
 		{"set amount 80", Transport{SetAmount, 80}, 0, 300, 80, false},
 		{"set amount 80, 30 aboard", Transport{SetAmount, 80}, 30, 300, 50, false},
-		{"set amount 300, hold short", Transport{SetAmount, 300}, 0, 300, 210, true},
+		{"set amount 300, hold full: released (T14)", Transport{SetAmount, 300}, 0, 300, 210, false},
 		{"set amount 100, surface short", Transport{SetAmount, 100}, 0, 40, 40, true},
 		{"set amount 80, 100 aboard", Transport{SetAmount, 80}, 100, 300, 0, false},
 		{"set waypoint 100", Transport{SetWaypoint, 100}, 0, 300, 200, false},

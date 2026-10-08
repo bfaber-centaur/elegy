@@ -554,8 +554,10 @@ func (t *Transport) percentTarget(capacity int) int {
 // short fill to ended and the fleet moved on); "wait for" clears once
 // held reaches its target or the hold is full (BINARY-ONLY), and until
 // then keeps the task, which holds the fleet (FO-01 I; CONFIRMED KB-4A
-// T1); "set amount to" more than the fleet can get keeps it. ASSUMPTION
-// T9: "met" is held ≥ the target.
+// T1); "set amount to" short of v keeps it (KERNEL.md, BINARY-ONLY).
+// ASSUMPTION T9: "met" is held ≥ the target. ASSUMPTION T14: "set amount
+// to" is also released once the hold is full, as "wait for" is; KERNEL.md
+// states only the case of a target holding too little.
 //
 // "Set amount to v" short of v is unmet and persists (KERNEL.md). ASSUMPTION
 // T11: so does "set waypoint to v" until avail ≤ v; KERNEL.md does not
@@ -569,7 +571,7 @@ func (t *Transport) loaded(capacity, held, avail, free int) {
 			return
 		}
 	case SetAmount:
-		if held < t.Amount {
+		if held < t.Amount && free > 0 {
 			return
 		}
 	case SetWaypoint:
