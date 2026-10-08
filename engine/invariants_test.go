@@ -1,6 +1,8 @@
 package engine_test
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -44,32 +46,98 @@ func checkYearFixture(t *testing.T) []engine.TurnResult {
 }
 
 // CheckYear reports a broken invariant: each corruption of a good year
-// is named.
+// is reported with its own problem.
 func TestCheckYearReports(t *testing.T) {
 	rs := checkYearFixture(t)
-	prev, good := rs[0].Game, rs[1]
-	corrupt := func(name string, f func(r *engine.TurnResult)) {
+	good := rs[1]
+	corrupt := func(name, want string, f func(prev *engine.Game, r *engine.TurnResult)) {
+		prev := rs[0].Game
+		prev.Players = append([]engine.Player(nil), prev.Players...)
 		r := good
 		r.Game.Planets = append([]engine.Planet(nil), good.Game.Planets...)
 		r.Game.Fleets = append([]engine.Fleet(nil), good.Game.Fleets...)
 		r.Game.Players = append([]engine.Player(nil), good.Game.Players...)
 		r.Views = append([]engine.PlayerView(nil), good.Views...)
-		f(&r)
-		if engine.CheckYear(prev, r) == nil {
-			t.Errorf("%s: not reported", name)
+		f(&prev, &r)
+		err := engine.CheckYear(prev, r)
+		var ie *engine.InvariantError
+		if !errors.As(err, &ie) {
+			t.Errorf("%s: got %v, want an *InvariantError", name, err)
+			return
+		}
+		if len(ie.Problems) != 1 || !strings.Contains(ie.Problems[0], want) {
+			t.Errorf("%s: problems %q, want only one containing %q", name, ie.Problems, want)
 		}
 	}
-	corrupt("unowned population", func(r *engine.TurnResult) {
+	unowned := func(r *engine.TurnResult) int {
 		for i := range r.Game.Planets {
 			if r.Game.Planets[i].Owner == engine.NoOwner {
-				r.Game.Planets[i].Population = 5
+				return i
+			}
+		}
+		t.Fatal("no unowned planet")
+		return -1
+	}
+	corrupt("unowned population", "unowned planet", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Game.Planets[unowned(r)].Population = 5
+	})
+	corrupt("negative population", "population -1", func(_ *engine.Game, r *engine.TurnResult) {
+		for i := range r.Game.Planets {
+			if r.Game.Planets[i].Owner != engine.NoOwner {
+				r.Game.Planets[i].Population = -1
 				return
 			}
 		}
 	})
-	corrupt("fleet without ships", func(r *engine.TurnResult) { r.Game.Fleets[0].Stacks = nil })
-	corrupt("duplicate fleet id", func(r *engine.TurnResult) { r.Game.Fleets[1].ID = r.Game.Fleets[0].ID })
-	corrupt("research fell", func(r *engine.TurnResult) { r.Game.Players[0].Research.Levels[0] = -1 })
-	corrupt("own planet missing from view", func(r *engine.TurnResult) { r.Views[0].Planets = nil })
-	corrupt("year", func(r *engine.TurnResult) { r.Game.Year++ })
+	corrupt("environment", "environment", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Game.Planets[unowned(r)].Env[0] = 100
+	})
+	corrupt("fleet without ships", "has no ships", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Game.Fleets[0].Stacks, r.Game.Fleets[0].Fuel = nil, 0
+	})
+	corrupt("duplicate fleet id", "twice", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Game.Fleets[1].ID = r.Game.Fleets[0].ID
+	})
+	corrupt("duplicate fleet number", "duplicate or below 1", func(_ *engine.Game, r *engine.TurnResult) {
+		for i := 1; i < len(r.Game.Fleets); i++ {
+			if r.Game.Fleets[i].Owner == r.Game.Fleets[0].Owner {
+				r.Game.Fleets[i].Number = r.Game.Fleets[0].Number
+				return
+			}
+		}
+		t.Fatal("no second fleet of one owner")
+	})
+	// The level stays in range: the year before had it one higher.
+	corrupt("research fell", "fell from", func(prev *engine.Game, r *engine.TurnResult) {
+		lv := r.Game.Players[0].Research.Levels[0]
+		if lv >= engine.MaxTechLevel {
+			t.Fatal("field 0 at the top level")
+		}
+		prev.Players[0].Research.Levels[0] = lv + 1
+	})
+	corrupt("research out of range", "level 27", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Game.Players[0].Research.Levels[0] = engine.MaxTechLevel + 1
+	})
+	corrupt("own planet missing from view", "lacks their planet", func(_ *engine.Game, r *engine.TurnResult) {
+		r.Views[0].Planets = nil
+	})
+	corrupt("year", "after", func(_ *engine.Game, r *engine.TurnResult) { r.Game.Year++ })
+}
+
+// An owned planet may end the year with no colonists (TAKEOVER.md "Unload
+// and load amounts": a load after movement can take them all, and the
+// planet is lost only at the next year's growth); CheckYear allows it.
+func TestCheckYearAllowsOwnedEmptyPlanet(t *testing.T) {
+	rs := checkYearFixture(t)
+	r := rs[1]
+	r.Game.Planets = append([]engine.Planet(nil), r.Game.Planets...)
+	for i := range r.Game.Planets {
+		if r.Game.Planets[i].Owner != engine.NoOwner {
+			r.Game.Planets[i].Population = 0
+			break
+		}
+	}
+	if err := engine.CheckYear(rs[0].Game, r); err != nil {
+		t.Fatal(err)
+	}
 }

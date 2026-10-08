@@ -17,29 +17,67 @@ func (e *InvariantError) Error() string {
 
 // CheckYear checks the structural invariants of one generated year, from
 // the game before it (prev) to GenerateTurn's result r, and returns an
-// *InvariantError naming each problem, or nil. These are Elegy's
-// consistency checks, not rules of the original: every one follows from
-// the specs (a planet never moves, an unowned planet has no population,
-// starbase or queue, TAKEOVER.md "Capture: what a planet keeps"; research
-// levels never fall; a fleet has ships) or from the engine's own data
-// model (ids unique, indexes in range). A game loop can call it after each
-// year; a long test run checks it every year.
+// *InvariantError naming each problem, or nil. A game loop can call it
+// after each year; a long test run checks it every year. Each check cites
+// the stars-elegy rule it follows from or carries a label; an ELEGY CHOICE
+// check is a data-model invariant and says what it protects.
 //
-// Checked:
-//   - the year advances by one; players, planets and their ids and
-//     positions are unchanged;
-//   - a planet's owner is a player or NoOwner; an owned planet has
-//     population; an unowned one has no population, defenses, starbase or
-//     queue; counts, surface minerals and environment values are in range;
-//   - a fleet's owner is a player; fleet ids are unique, and so are fleet
-//     numbers per owner (1 and up); every fleet has ships of ship designs
-//     that exist; fuel and cargo are non-negative and within the fleet's
-//     tanks and holds; no player has more than 512 fleets;
-//   - research levels stay within 0..26 and never fall;
-//   - each player's view has their own planets, at the own-planet report
-//     level, and only theirs; every report and fleet sighting names an
-//     object that exists, and a sighting shows the fleet's real owner and
-//     position and never one of the viewer's own fleets.
+// Year and planets:
+//   - The year advances by one (KERNEL.md "8. Year end, scores and
+//     files", step 1).
+//   - Players and planets keep their count, and planets their ids and
+//     positions. ELEGY CHOICE: the planet list is fixed when the universe
+//     is generated (UNIVERSE.md "Planets") and no specified rule adds,
+//     removes or moves a planet; it protects the ids and indexes orders,
+//     views and saves refer to.
+//   - A planet's owner is a player or NoOwner, and a starbase's design
+//     exists. ELEGY CHOICE: it protects index lookups.
+//   - An unowned planet has no population, defenses, starbase or queue
+//     (TAKEOVER.md "Capture: what a planet keeps", CONFIRMED).
+//   - Population is never negative. An owned planet may end the year
+//     with 0 colonists: a load after movement can take every colonist,
+//     and the planet stays owned until the next year's growth
+//     (TAKEOVER.md "Unload and load amounts", CONFIRMED TK-201 G; the
+//     after-movement loads come after growth, "Where each task happens in
+//     the year"). So CheckYear does not require population on an owned
+//     planet. ELEGY CHOICE for the sign: it protects arithmetic on counts.
+//   - Mines, factories, defenses and surface minerals are not negative.
+//     ELEGY CHOICE: counts and amounts, protecting arithmetic on them.
+//   - Environment and original environment are each 1..99 (LIMITS.md
+//     "Environment", BINARY-ONLY; KERNEL.md clamps every change to 1..99).
+//
+// Fleets:
+//   - A fleet's owner is a player and fleet ids are unique. ELEGY CHOICE:
+//     it protects index lookups.
+//   - Fleet numbers are 1 and up and unique per owner. A new fleet takes
+//     its owner's lowest unused number (PRODUCTION-LAUNCH.md "The new
+//     fleet", CONFIRMED SL-02; Elegy stores the number the client shows,
+//     #1 first), and fleet order is by owner, then number (KERNEL.md "Turn
+//     order"). ELEGY CHOICE for uniqueness: it protects orders and fleet
+//     order, which name a fleet by owner and number.
+//   - Every fleet has ships of ship designs that exist; fuel and cargo are
+//     not negative and fit the fleet's tanks and holds. ELEGY CHOICE: it
+//     protects the fleet arithmetic (FleetShips, loads, movement).
+//   - No player owns more than 512 fleets (PRODUCTION-LAUNCH.md "The
+//     512-fleet limit", CONFIRMED SL-08..SL-10; maxFleets).
+//
+// Research:
+//   - Levels are 0..26 (LIMITS.md "Tech level", CONFIRMED KX-002 R6).
+//   - Levels never fall. ASSUMPTION: no rule in stars-elegy lowers a
+//     level; research only raises one (KERNEL.md "Allocation").
+//
+// Views:
+//   - Each player's view holds all of their own planets at the own-planet
+//     level and no other planet at that level (SCANNING.md "When
+//     knowledge is computed": a player knows everything about its own
+//     planets; "What a planet report contains").
+//   - Every planet report and fleet sighting names an object that exists,
+//     at its real position, and a sighting shows the fleet's real owner
+//     (SCANNING.md "Disclosure: what each sighting reveals", Fleets).
+//   - A sighting is never one of the viewer's own fleets. ELEGY CHOICE:
+//     the player knows its own fleets from its own state (SCANNING.md "When
+//     knowledge is computed"); it protects views from listing a fleet
+//     twice.
 func CheckYear(prev Game, r TurnResult) error {
 	g := r.Game
 	var bad []string
@@ -72,8 +110,9 @@ func CheckYear(prev Game, r TurnResult) error {
 			}
 		case !player(p.Owner):
 			add("planet %d owner %d", p.ID, p.Owner)
-		case p.Population <= 0:
-			add("planet %d owned by %d with population %d", p.ID, p.Owner, p.Population)
+		}
+		if p.Population < 0 {
+			add("planet %d: population %d", p.ID, p.Population)
 		}
 		if p.Mines < 0 || p.Factories < 0 || p.Defenses < 0 {
 			add("planet %d: mines %d factories %d defenses %d", p.ID, p.Mines, p.Factories, p.Defenses)
