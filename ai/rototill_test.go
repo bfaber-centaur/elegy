@@ -25,7 +25,7 @@ func caView(t *testing.T, year int) *View {
 		FactoryOutput: 15, FactoryCost: 10, FactoriesOperated: 15, MineOutput: 15, MineCost: 5, MinesOperated: 15}
 	race.Env = [3]engine.EnvRange{{Immune: true}, {Center: 50, Low: 24, High: 76}, {Center: 50, Low: 25, High: 75}}
 	v := &View{
-		Year: year, Player: 0, Level: Expert,
+		Year: year, Player: 0, Level: Expert, Rules: engine.ElegyRules(),
 		Self: engine.Player{Race: race, Research: engine.ResearchState{Levels: [engine.NumFields]int{3, 3, 3, 3, 3, 0}, Current: engine.Biotech}},
 		Ships: []Design{
 			{Slot: 0, Index: 10, Design: mk("Scout", "Scout", fill(0, "Long Hump 6", 1), fill(1, "Bat Scanner", 1)), Created: 2400},
