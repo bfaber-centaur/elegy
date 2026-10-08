@@ -20,7 +20,7 @@ import (
 //  6. from year index 81, splits (AI.md §10);
 //  7. planet notes (§4.1), fleets (§5) and production (§4.2);
 //  8. planet automation (AI.md §7) with Cybertron's starbase rule (§4.3),
-//     then the queue fill.
+//     packets (§6), then the queue fill.
 //
 // Under Elegy's clean per-player state the armada parameters are 0
 // (cybertron.md §1 step 4; AI.md §1 "State leaking between computer
@@ -28,8 +28,8 @@ import (
 // original's inherited values, which kept AIX's armadas at home (AI-18),
 // would come only from a legacy ruleset switch, which is not implemented.
 //
-// Not yet run: packets (§6), the warp re-pick (AI.md §11 "Warp choice")
-// and automation steps 4 and 5; docs/AI-STATUS.md lists them. Steps the
+// Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
+// automation steps 4 and 5; docs/AI-STATUS.md lists them. Steps the
 // engine cannot order (scrap, lay mines, invasion) go to
 // Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
@@ -69,9 +69,10 @@ func PlayCybertron(v *View, rng engine.Rand) Result {
 	}
 	auto := &automation{v: v, pers: Cybertron, rng: rng, q: t.q, order: order, budget: budget}
 	auto.run()
-	if len(v.Planets) > 0 {
-		res.unsupported("packets (cybertron.md §6) not implemented")
-	}
+	// The two packet LEGACY BUGs are ruleset switches (on in
+	// jrc3-faithful); until the ruleset carries them, the planner takes
+	// Elegy's setting, off.
+	t.packets(order, budget, packetLegacy{})
 	res.Orders = append(res.Orders, t.q.flush()...)
 	return res
 }
@@ -171,11 +172,13 @@ func (t *cyberTurn) ageing() {
 // armedSlots are the slots pass A counts as armed (cybertron.md §5).
 var armedSlots = []int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
-// passA is §5 pass A.
-//
-// ASSUMPTION A28: cybertron.md says armed fleets count as Destroyer
-// fleets while only group 6–9 aged out this turn; in every other case
-// they count as group fleets.
+// passA is §5 pass A. Armed fleets are Destroyer fleets or group fleets
+// by a test that does not look at their designs (LEGACY BUG, BINARY-ONLY):
+// while group 6–9 aged out this turn and group 10–13 did not, every armed
+// fleet is a Destroyer fleet; otherwise a fleet whose waypoint 1 is a
+// planet, or which orbits a planet, is a group fleet, and any other is a
+// Destroyer fleet. A group fleet marks its planet (waypoint 1's planet,
+// else the orbited one) as targeted when another player owns it.
 func (t *cyberTurn) passA() {
 	v := t.v
 	ddMode := t.aged6 && !t.aged10
@@ -192,16 +195,19 @@ func (t *cyberTurn) passA() {
 			continue
 		}
 		t.attack = append(t.attack, f.ID)
-		if ddMode {
+		id, group := 0, false
+		if len(f.Waypoints) > 0 && f.Waypoints[0].Target == engine.TargetPlanet {
+			id, group = f.Waypoints[0].ID, true
+		} else {
+			id, group = v.planetAt(f.Pos)
+		}
+		if ddMode || !group {
 			t.ddFleets++
 			continue
 		}
 		t.grFleets++
-		id, ok := t.headsTo(f)
-		if ok {
-			if o := v.owner(id); o != engine.NoOwner && o != v.Player {
-				t.targeted[id] = true
-			}
+		if o := v.owner(id); o != engine.NoOwner && o != v.Player {
+			t.targeted[id] = true
 		}
 	}
 	for i := range v.Fleets {
@@ -700,24 +706,29 @@ func (t *cyberTurn) queueAttackFleet(p *engine.Planet, add func(engine.QueueItem
 	if r2 < need {
 		return
 	}
-	ship := func(k, n int) {
+	// Each attack-fleet item queued adds one to the count of its kind
+	// (cybertron.md §5 pass A), so later planets this turn see it.
+	// ASSUMPTION A47: an item counts only when its slot holds a design and
+	// it is queued.
+	ship := func(k, n int, count *int) {
 		if k >= 0 && t.sd.slots[k].present {
 			add(engine.QueueItem{Kind: engine.ItemShip, Slot: k, Count: n})
+			*count++
 		}
 	}
 	switch {
 	case gr >= 0 && r1 > 50:
-		ship(gr, 2)
-		ship(gr+1, 2)
+		ship(gr, 2, &t.grFleets)
+		ship(gr+1, 2, &t.grFleets)
 		if t.rng.Intn(100) < 75 {
-			ship(gr+2, 1)
+			ship(gr+2, 1, &t.grFleets)
 		}
 		if t.rng.Intn(100) < 50 {
-			ship(gr+3, 1)
+			ship(gr+3, 1, &t.grFleets)
 		}
 	case guard >= 0 && r1 > 25:
-		ship(guard, 1)
+		ship(guard, 1, &t.guardFleets)
 	default:
-		ship(dd, 1)
+		ship(dd, 1, &t.ddFleets)
 	}
 }
