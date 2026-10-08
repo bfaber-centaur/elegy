@@ -56,19 +56,6 @@ const MaxObjects = 4050
 // (OBJECTS.md "Laying", CONFIRMED MF-10).
 const mergeCap = 999_999
 
-// LegacyFieldLimit511 reproduces the original's LEGACY BUG that a player's
-// last field number, 511, is given only when no other space object sorts
-// after that player's minefields (OBJECTS.md "Laying", MEASURED MF-13).
-// Off by default: Elegy's chosen rule is a plain limit of 512.
-var LegacyFieldLimit511 = false
-
-// LegacyEmptyFleetSalvage reproduces the original's LEGACY BUG candidate
-// that a fleet with no minerals that loses ships to a mine hit drops
-// rand(10) kT of each mineral as salvage (OBJECTS.md "Hits on moving
-// fleets", MEASURED OB-024). On by default, as a deterministic
-// observable behavior.
-var LegacyEmptyFleetSalvage = true
-
 // Space holds the space objects this package models, in object order
 // (OBJECTS.md "Conventions": by kind, then owner, then number).
 type Space struct {
@@ -86,7 +73,7 @@ type Space struct {
 	// OtherObjects counts the space objects of kinds this package does
 	// not hold yet (salvage). Like wormhole ends and Traders,
 	// they sort after every minefield, count toward
-	// MaxObjects and, with LegacyFieldLimit511, hold every player to 511
+	// MaxObjects and, with Legacy.FieldLimit511, hold every player to 511
 	// fields.
 	OtherObjects int
 }
@@ -288,7 +275,7 @@ func (s *Space) Lay(g *engine.Game, layers []Layer) []LayResult {
 			if a <= 0 {
 				continue
 			}
-			out = append(out, s.lay(f.Owner, f.Pos, k, a))
+			out = append(out, s.lay(f.Owner, f.Pos, k, a, g.Rules.Legacy.FieldLimit511))
 		}
 	}
 	return out
@@ -303,7 +290,7 @@ func (s *Space) Lay(g *engine.Game, layers []Layer) []LayResult {
 // (OBJECTS.md "Laying", BINARY-ONLY). A new field takes the lowest number
 // unused among the owner's fields of all three kinds (OBJECTS.md
 // "Limits", BINARY-ONLY; MF-11, MF-13 measured only the last number).
-func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResult {
+func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int, limit511 bool) LayResult {
 	best, bestD := -1, 0
 	for i, m := range s.Minefields {
 		if m.Owner != owner || m.Kind != k || !m.Contains(pos) {
@@ -323,7 +310,7 @@ func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResu
 		m.Count = n + amount
 		return LayResult{Kind: k, Amount: amount, Field: best}
 	}
-	num, ok := s.freeNumber(owner)
+	num, ok := s.freeNumber(owner, limit511)
 	if !ok || len(s.Minefields)+s.otherObjects() >= MaxObjects {
 		return LayResult{Kind: k, Amount: amount, Field: -1}
 	}
@@ -338,7 +325,12 @@ func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int) LayResu
 }
 
 // freeNumber is the owner's lowest unused field number below the limit.
-func (s *Space) freeNumber(owner int) (int, bool) {
+// freeNumber is the lowest field number free for owner. limit511
+// reproduces the original's LEGACY BUG that a player's last field number,
+// 511, is given only when no other space object sorts after that player's
+// minefields (Legacy.FieldLimit511; OBJECTS.md "Laying", MEASURED MF-13).
+// Without it (the Elegy ruleset) the limit is a plain 512.
+func (s *Space) freeNumber(owner int, limit511 bool) (int, bool) {
 	used := map[int]bool{}
 	later := s.otherObjects() > 0
 	for _, m := range s.Minefields {
@@ -349,7 +341,7 @@ func (s *Space) freeNumber(owner int) (int, bool) {
 		}
 	}
 	limit := MaxFields
-	if LegacyFieldLimit511 && later {
+	if limit511 && later {
 		limit = MaxFields - 1
 	}
 	for n := range limit {
@@ -554,25 +546,23 @@ type stretch struct {
 	entry, exit int
 }
 
-// LegacyDueNorthSouthCut reproduces the original's LEGACY BUG on legs
-// with no east-west component (OBJECTS.md "Arithmetic details", "Due-north
-// and due-south legs", MEASURED MF-15): the foot of the perpendicular is
-// taken at the fleet's start, so a fleet that starts outside a field and
-// flies due north or south into it is never checked, and one that starts
-// inside is checked from its start for trunc(√(N − d²)) ly whichever way
-// it flies. Set it to false to use the exact foot (Elegy's choice, not the
-// original's).
-var LegacyDueNorthSouthCut = true
-
 // floatFoot is the size of |dx·dy|, dx² or dy² from which the original
 // computes the foot's x in floating point (OBJECTS.md "Path cut" step 1).
 const floatFoot = 500001
 
+// dueNS reproduces the original's LEGACY BUG on legs with no east-west
+// component (Legacy.DueNorthSouthCut; OBJECTS.md "Arithmetic details",
+// "Due-north and due-south legs", MEASURED MF-15): the foot of the
+// perpendicular is taken at the fleet's start, so a fleet that starts
+// outside a field and flies due north or south into it is never checked,
+// and one that starts inside is checked from its start for
+// trunc(√(N − d²)) ly whichever way it flies. Without it the exact foot is
+// used (Elegy's choice, not the original's).
 // cut is the whole-ly stretch [entry, exit) of a leg from `from` toward
 // `toward`, travelling l ly this step, inside a field of centre c and
 // count n (OBJECTS.md "Arithmetic details", "Path cut", BINARY-ONLY; east
 // legs CONFIRMED as rates, MF-1, MF-3). Divisions truncate toward zero.
-func cut(from, toward engine.Point, l int, c engine.Point, n int) (int, int, bool) {
+func cut(from, toward engine.Point, l int, c engine.Point, n int, dueNS bool) (int, int, bool) {
 	sx, sy := from.X, from.Y
 	dx, dy := toward.X-sx, toward.Y-sy
 	fx, fy := sx, sy
@@ -585,7 +575,7 @@ func cut(from, toward engine.Point, l int, c engine.Point, n int) (int, int, boo
 			fx = (c.X*dx*dx + sx*dy*dy + (c.Y-sy)*dx*dy) / den
 		}
 		fy = sy + (fx-sx)*dy/dx
-	case !LegacyDueNorthSouthCut:
+	case !dueNS:
 		fy = c.Y
 	}
 	p2 := (fx-c.X)*(fx-c.X) + (fy-c.Y)*(fy-c.Y)
@@ -702,7 +692,7 @@ func CheckStep(g *engine.Game, s *Space, f *engine.Fleet, from, toward engine.Po
 		if m.Count <= 0 || !stopsFleet(g, m, f.Owner) || e <= safeWarp(m.Kind, fp) {
 			continue
 		}
-		if a, b, ok := cut(from, toward, distance, m.Pos, m.Count); ok {
+		if a, b, ok := cut(from, toward, distance, m.Pos, m.Count, g.Rules.Legacy.DueNorthSouthCut); ok {
 			byKind[m.Kind] = addStretch(byKind[m.Kind], a, b)
 		}
 	}
@@ -976,13 +966,6 @@ func atPlanet(g *engine.Game, p engine.Point) bool {
 	return false
 }
 
-// LegacyMineSurvivorSalvage reproduces the original's LEGACY BUG
-// candidate that a mine hit which destroys some ships also drops every
-// mineral the survivors still carry as salvage (OBJECTS.md "Cargo when
-// ships are destroyed", MEASURED MF-14). On by default, as a deterministic
-// observable behavior; off, the survivors keep their minerals.
-var LegacyMineSurvivorSalvage = true
-
 // mineCargo applies the cargo rules when hits destroyed ships of fleet f
 // (OBJECTS.md "Cargo when ships are destroyed", MEASURED MF-14), given
 // the fleet's cargo and fuel capacity before the hit. The destroyed ships'
@@ -991,9 +974,9 @@ var LegacyMineSurvivorSalvage = true
 // germanium and colonists (loseShare, as COMBAT.md "Salvage"), and
 // ⌊F·lost/total⌋ of the fuel by fuel capacity. With salvage (a mine hit,
 // not a detonation) the minerals then left aboard are dropped as salvage
-// (LegacyMineSurvivorSalvage; all of them when the whole fleet died),
+// (Legacy.MineSurvivorSalvage; all of them when the whole fleet died),
 // except at a planet's exact position, where they stay aboard. A drop of
-// nothing becomes rand(10) kT of each mineral (LegacyEmptyFleetSalvage,
+// nothing becomes rand(10) kT of each mineral (Legacy.EmptyFleetSalvage,
 // MEASURED OB-024). It returns the salvage.
 //
 // ASSUMPTION O10: the rand(10) draws are made only where salvage can
@@ -1024,11 +1007,20 @@ func mineCargo(g *engine.Game, f *engine.Fleet, hits []DesignHit, capBefore, fue
 	if !salvage || atPlanet(g, f.Pos) {
 		return out
 	}
-	if whole || LegacyMineSurvivorSalvage {
+	// Legacy.MineSurvivorSalvage reproduces the original's LEGACY BUG
+	// candidate that a mine hit which destroys some ships also drops every
+	// mineral the survivors still carry as salvage (OBJECTS.md "Cargo when
+	// ships are destroyed", MEASURED MF-14); off, the survivors keep their
+	// minerals.
+	if whole || g.Rules.Legacy.MineSurvivorSalvage {
 		out = f.Cargo.Minerals
 		f.Cargo.Minerals = engine.Minerals{}
 	}
-	if out == (engine.Minerals{}) && f.Cargo.Minerals == (engine.Minerals{}) && LegacyEmptyFleetSalvage {
+	// Legacy.EmptyFleetSalvage reproduces the original's LEGACY BUG
+	// candidate that a fleet with no minerals that loses ships to a mine
+	// hit drops rand(10) kT of each mineral as salvage (OBJECTS.md "Hits
+	// on moving fleets", MEASURED OB-024).
+	if out == (engine.Minerals{}) && f.Cargo.Minerals == (engine.Minerals{}) && g.Rules.Legacy.EmptyFleetSalvage {
 		for m := range engine.NumMinerals {
 			out[m] = rng.Intn(10)
 		}

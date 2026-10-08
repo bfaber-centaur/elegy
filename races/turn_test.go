@@ -19,8 +19,8 @@ func TestGenerateTurnLeavesInputRaces(t *testing.T) {
 	designs := slRaces()
 	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
 	before := append([]Design(nil), r.Designs...)
-	g := engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}, Races: r}
-	res, err := engine.GenerateTurn(g, nil, engine.Jrc3(), zeroRand{})
+	g := engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}, Races: r}
+	res, err := engine.GenerateTurn(withRules(g), nil, zeroRand{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,4 +30,10 @@ func TestGenerateTurnLeavesInputRaces(t *testing.T) {
 	if out := res.Game.Races.(*GameRaces); !out.Designs[0].Tampered || !out.Designs[1].Tampered {
 		t.Errorf("result checker %+v, want both races tampered", out.Designs)
 	}
+}
+
+// withRules is g under the Elegy ruleset.
+func withRules(g engine.Game) engine.Game {
+	g.Rules = engine.ElegyRules()
+	return g
 }

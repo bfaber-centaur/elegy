@@ -166,7 +166,8 @@ func (v ugVector) settings(t *testing.T) Settings {
 	sizes := map[string]Size{"tiny": Tiny, "small": Small, "medium": Medium, "large": Large, "huge": Huge}
 	dens := map[string]Density{"sparse": Sparse, "normal": Normal, "dense": Dense, "packed": Packed}
 	s := Settings{
-		Size: sizes[st.Size], Density: dens[st.Density], Positions: Positions(st.Positions),
+		Rules: engine.ElegyRules(),
+		Size:  sizes[st.Size], Density: dens[st.Density], Positions: Positions(st.Positions),
 		MaxMinerals: st.Options["maximum_minerals"], SlowerTech: st.Slower, BBS: st.Options["accelerated_bbs"],
 		NoRandomEvents: !st.Random, Clumping: st.Options["galaxy_clumping"], PublicScores: st.Public,
 		ComputerAlliances: st.Options["flag_5"],

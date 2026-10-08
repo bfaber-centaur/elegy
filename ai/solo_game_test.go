@@ -33,7 +33,7 @@ func aiGame(t *testing.T, seed uint64, years int, ais ...aiPlayer) (engine.Game,
 		}
 		setups = append(setups, ps)
 	}
-	s := newgame.Settings{Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate, Players: setups}
+	s := newgame.Settings{Rules: engine.ElegyRules(), Size: newgame.Tiny, Density: newgame.Normal, Positions: newgame.Moderate, Players: setups}
 	rng := newgame.NewRand(seed)
 	res, err := newgame.Generate(s, rng)
 	if err != nil {
@@ -72,7 +72,7 @@ func aiGame(t *testing.T, seed uint64, years int, ais ...aiPlayer) (engine.Game,
 			}
 			files = append(files, engine.PlayerOrders{Player: me, GameID: g.ID, Year: g.Year, Orders: out.Orders})
 		}
-		tr, err := engine.GenerateTurn(g, files, engine.Jrc3(), rng)
+		tr, err := engine.GenerateTurn(g, files, rng)
 		if err != nil {
 			t.Fatalf("year %d: %v", g.Year, err)
 		}

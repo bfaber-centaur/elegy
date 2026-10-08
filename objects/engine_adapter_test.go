@@ -32,7 +32,7 @@ func (leave) Intn(n int) int {
 
 func turn(t *testing.T, g engine.Game, rng engine.Rand) engine.Game {
 	t.Helper()
-	r, err := engine.GenerateTurn(g, nil, engine.Jrc3(), rng)
+	r, err := engine.GenerateTurn(withRules(g), nil, rng)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func TestPredictionLayMinesIndefinitely(t *testing.T) {
 		l.g.Fleets[fi].Task = engine.Task{Kind: engine.TaskLayMines, Years: engine.YearsIndefinitely}
 	}
 	l.g.Objects = &Space{}
-	r, err := engine.GenerateTurn(*l.g, nil, engine.Jrc3(), top{})
+	r, err := engine.GenerateTurn(withRules(*l.g), nil, top{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func TestPredictionTraderLeftInTurn(t *testing.T) {
 	l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: origin, Warp: 0, Target: engine.TargetTrader, ID: 0}}
 	l.g.Objects = s
 	// rand(2) = 0 on arrival removes the Trader.
-	r, err := engine.GenerateTurn(*l.g, nil, engine.Jrc3(), leave{})
+	r, err := engine.GenerateTurn(withRules(*l.g), nil, leave{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -311,7 +311,7 @@ func TestPredictionTraderAppearsInTurn(t *testing.T) {
 	l.g.Year = 2400 + 42
 	l.g.RandomEvents = true
 	l.g.Objects = &Space{}
-	r, err := engine.GenerateTurn(*l.g, nil, engine.Jrc3(), zero{})
+	r, err := engine.GenerateTurn(withRules(*l.g), nil, zero{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -366,4 +366,10 @@ func TestConfirmedLaunchPacketInterface(t *testing.T) {
 	if _, spend, _ := o.LaunchPacket(l.g, 0, 7, 0, engine.PacketMixed, 1); spend != (engine.Minerals{44, 44, 44}) {
 		t.Errorf("mixed spend %v", spend)
 	}
+}
+
+// withRules is g under the Elegy ruleset.
+func withRules(g engine.Game) engine.Game {
+	g.Rules = engine.ElegyRules()
+	return g
 }

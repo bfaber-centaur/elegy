@@ -151,6 +151,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		pl := &g.Planets[b.loc.planet]
 		sd, race := g.Designs[pl.StarbaseDesign], g.Players[owner].Race
 		t := tokenValues(sd, race, true, designCost(sd, race, g.Players[owner].Research.Levels))
+		t.class = starbaseClass(t, g.Rules.Legacy.StarbaseArmedClass)
 		t.player, t.fleet, t.stack, t.planet, t.design = owner, -1, -1, b.loc.planet, pl.StarbaseDesign
 		t.ships, t.dmg = 1, Damage{Pct: 100, Units: pl.StarbaseDamage}
 		t.tactic, t.primary, t.secondary = TacticMaximizeDamage, TargetAny, TargetAny

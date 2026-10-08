@@ -29,6 +29,7 @@ type tkLab struct {
 
 func newTKLab(t *testing.T, energy int) *tkLab {
 	l := &tkLab{t: t}
+	l.g.Rules = ElegyRules()
 	for range 2 {
 		pl := Player{Race: tkRace(), Research: ResearchState{Current: Biotech, Next: NextSameField}}
 		pl.Relations = []Relation{RelationEnemy, RelationEnemy}
@@ -356,7 +357,7 @@ func TestConfirmedColonyMinerals(t *testing.T) {
 // and fleets moving to a planet use a fuel-free engine.
 func (l *tkLab) turn(rng Rand) TurnResult {
 	l.t.Helper()
-	r, err := GenerateTurn(l.g, nil, Jrc3(), rng)
+	r, err := GenerateTurn(withRules(l.g), nil, rng)
 	if err != nil {
 		l.t.Fatal(err)
 	}

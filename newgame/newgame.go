@@ -117,6 +117,10 @@ type player struct {
 // Settings are a new game's settings (UNIVERSE.md "Settings that shape a
 // new game").
 type Settings struct {
+	// Rules is the game's ruleset (engine.Ruleset), which the new game
+	// carries for its whole life (engine.Game.Rules). It must be valid.
+	Rules engine.Ruleset
+
 	Size      Size
 	Density   Density
 	Positions Positions
@@ -202,6 +206,9 @@ var (
 const MaxPlayers = 16
 
 func (s Settings) validate() error {
+	if err := s.Rules.Validate(); err != nil {
+		return fmt.Errorf("%w: %w", ErrSettings, err)
+	}
 	switch {
 	case s.Size < Tiny || s.Size > Huge:
 		return fmt.Errorf("%w: size %d", ErrSettings, s.Size)
@@ -256,6 +263,7 @@ func (g *generator) rand(n int) int { return g.rng.Intn(n) }
 func (g *generator) run() (Result, error) {
 	g.res.Game = engine.Game{
 		Year:           2400,
+		Rules:          g.s.Rules,
 		SlowerTech:     g.s.SlowerTech,
 		RandomEvents:   !g.s.NoRandomEvents,
 		Size:           int(g.s.Size),
