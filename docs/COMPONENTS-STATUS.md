@@ -56,7 +56,9 @@ These follow from what the columns mean rather than from a separate rule:
   `mine_layer_multiplier` (minefields), `safe_mass` and `safe_range`
   (stargates), `warp` (mass drivers);
 - `terraform/`: `mining_rate` (remote mining), `terraform_pct`, `amount`
-  and `axis` (terraforming and Orbital Adjusters).
+  and `axis` (terraforming and Orbital Adjusters);
+- `engine/` itself: `safe_mass` and `safe_range` (`launch.go`,
+  `scanning.go`), `amount` and `axis` (`terraform.go`).
 
 No Elegy code reads `mines_swept`, `jump_gate` or `orbital_construction`.
 

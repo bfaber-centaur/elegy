@@ -78,6 +78,12 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 | 7.4, Orbital Adjusters | `Adjust(g)` after `claimAdjusterYearEnd`, after research | Fleet owner told per `Adjustment`; planet owner when `HabChanged` |
 
 KX-005 is in the parity corpus and passes. The engine harness skips
-the OB-029 cases, whose packets are launched from a production queue
-(skip reason "production queue: planetary item 17"). The OB-029 rules are tested from the spec's worked examples in
+every OB-029 case, with these reasons:
+
+- "production queue: planetary item 17": OB-029-T1, -T2, -T3, -Ac, -Bc
+  and -D;
+- "a packet from a production queue": OB-029-A and -B;
+- "expectation sample": OB-029-D2.
+
+The OB-029 rules are tested from the spec's worked examples in
 `terraform/` tests.

@@ -289,7 +289,12 @@ Also wired: minefield knowledge (`MineHit`
 calls `LearnHit`; `SeeObjects` calls `Space.Scan` per player), fleet and
 player sight from PP packets and SD minefields, the salvage call sites
 (`AddMineSalvage`, `DecaySalvage`) and PP starbase design disclosure
-(`objects/engine_adapter.go`; KERNEL-STATUS.md "Space objects").
+(`objects/engine_adapter.go`; KERNEL-STATUS.md "Space objects"). Tests:
+the OB-011..OB-018 parity cases pass through the whole turn;
+`TestPredictionMinefieldKnowledge`, `TestConfirmedPacketScanners`,
+`TestConfirmedDemolitionSight`, `TestPredictionSalvageDecay`,
+`TestPredictionMineSalvage` and `TestPredictionPacketDesignSeen` cover
+the rules each call uses.
 
 Not wired yet:
 

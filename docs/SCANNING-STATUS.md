@@ -59,16 +59,20 @@ These are implemented outside `scanning.go`:
   and Traders before the views, with PP packet scanners, SD minefield
   detection and the owners made known through them
   (`objects/engine_adapter.go` `SeeObjects`, OBJECTS-STATUS.md).
-  `PlayerView.Objects` lists what was seen.
-- IT gate reports (CONFIRMED OB-013) and a PP player's view of a catching
-  starbase's design (`EventPacketDesignSeen`), KERNEL-STATUS.md "Space
-  objects".
+  `PlayerView.Objects` lists what was seen. Tests: the OB-011..OB-018
+  parity cases pass through the whole turn; the rules are in
+  `objects/visibility_test.go` (`TestConfirmedMinefieldSight`,
+  `TestConfirmedWormholeSight`, `TestConfirmedPacketAndTraderSight`,
+  `TestConfirmedPacketScanners`, `TestConfirmedDemolitionSight`).
+- IT gate reports (CONFIRMED OB-013, parity OB-013-A..C) and a PP
+  player's view of a catching starbase's design (`EventPacketDesignSeen`,
+  `TestPredictionPacketDesignSeen`), KERNEL-STATUS.md "Space objects".
 - Patrol target choice at the end of the turn (KERNEL-STATUS.md, ORDERS.md
-  Q3, BINARY-ONLY).
+  Q3, BINARY-ONLY; `TestPredictionPatrolNeverRepeats`).
 - Public scores: `PlayerView.Scores` holds the records the viewer may see
-  (`scores.go`).
+  (`scores.go`, `TestConfirmedPublicScores`).
 - The report history: `game.Report.History` keeps every planet's latest
-  report (GAME-LOOP.md).
+  report (GAME-LOOP.md, `TestHistoryKeepsLatestAndLostColonies`).
 
 ## Not modelled
 
