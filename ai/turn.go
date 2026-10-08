@@ -25,7 +25,11 @@ type turn struct {
 	threat   map[int]int
 	targeted map[int]bool
 
-	nextSplit int // ids for fleets split off this turn, counting down from −1
+	// nextSplit is the last id given to a fleet split off this turn,
+	// counting down from −1. The split order names the new fleet with it
+	// (engine.SplitOrder.NewFleet, ASSUMPTION L28), so later orders in the
+	// file can use it.
+	nextSplit int
 }
 
 func newTurn(v *View, rng engine.Rand, res *Result) *turn {
@@ -33,14 +37,9 @@ func newTurn(v *View, rng engine.Rand, res *Result) *turn {
 		sd: newShipDesigns(v, rng, res), obsolete: map[int]bool{}, threat: map[int]int{}, targeted: map[int]bool{}}
 }
 
-// emit appends an order for a fleet. A fleet split off this turn has no
-// id the order file can name yet (an engine request is open), so the
-// order is reported instead.
+// emit appends an order for a fleet. A fleet split off this turn has the
+// negative id its split order named (turn.nextSplit).
 func (t *turn) emit(f *engine.Fleet, o engine.Order) {
-	if f.ID < 0 {
-		t.res.unsupported("fleet split off this turn: %T not given", o)
-		return
-	}
 	t.res.Orders = append(t.res.Orders, o)
 }
 
@@ -129,7 +128,9 @@ func absorb(a, b *engine.Fleet) {
 // owns at most 500 fleets, the first own fleet holding ships of both
 // tested and other slots is split, the tested ships moving to a new
 // fleet at the same place with the same waypoints and battle plan, and
-// the scan restarts.
+// the scan restarts. The split order names the new fleet (engine
+// SplitOrder.NewFleet), so later orders this turn can give it orders,
+// split it again or have others join it.
 func (t *turn) splitOut(test func(slot int) bool) {
 	v := t.v
 	for len(v.Fleets) <= 500 {
@@ -160,12 +161,8 @@ func (t *turn) splitOut(test func(slot int) bool) {
 				kept = append(kept, s)
 			}
 		}
-		if src.ID < 0 {
-			t.res.unsupported("split of a fleet split off this turn")
-			return
-		}
-		t.res.Orders = append(t.res.Orders, engine.SplitOrder{Fleet: src.ID, Ships: moved})
 		t.nextSplit--
+		t.res.Orders = append(t.res.Orders, engine.SplitOrder{Fleet: src.ID, Ships: moved, NewFleet: t.nextSplit})
 		nf := engine.Fleet{ID: t.nextSplit, Number: t.freeNumber(), Owner: src.Owner, Pos: src.Pos, Stacks: moved,
 			Waypoints: slices.Clone(src.Waypoints), Plan: src.Plan, Task: src.Task, Repeat: src.Repeat}
 		capOf := func(st []engine.Stack) int {
@@ -247,10 +244,6 @@ func (t *turn) joinBuddy(i int, slots []int, r1, r2 int) bool {
 		return false
 	}
 	b := &v.Fleets[best]
-	if b.ID < 0 {
-		t.res.unsupported("fleet %d: join a fleet split off this turn", f.ID)
-		return true
-	}
 	f.Task = engine.Task{}
 	t.emit(f, moveOrder(f, engine.Waypoint{Pos: b.Pos, Warp: 6, Target: engine.TargetFleet, ID: b.ID}))
 	return true

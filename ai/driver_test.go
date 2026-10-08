@@ -3,6 +3,7 @@ package ai
 import (
 	"bytes"
 	"errors"
+	"slices"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -225,5 +226,66 @@ func TestDriversScrapStartingScouts(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+// splitSpy records, for the year just played, the indices of a driver's
+// split orders and of the later orders that name a fleet split off the
+// same turn (a negative fleet id, the split's NewFleet).
+type splitSpy struct {
+	d             *Driver
+	splits, named []int
+}
+
+func (s *splitSpy) Orders(r game.Report) ([]engine.Order, error) {
+	os, err := s.d.Orders(r)
+	s.splits, s.named = nil, nil
+	for k, o := range os {
+		names := false
+		switch o := o.(type) {
+		case engine.SplitOrder:
+			if o.NewFleet < 0 {
+				s.splits = append(s.splits, k)
+			}
+			names = o.Fleet < 0
+		case engine.WaypointOrder:
+			names = o.Fleet < 0 || slices.ContainsFunc(o.Waypoints, func(w engine.Waypoint) bool { return w.Target == engine.TargetFleet && w.ID < 0 })
+		case engine.MergeOrder:
+			names = o.Into < 0 || slices.ContainsFunc(o.From, func(id int) bool { return id < 0 })
+		}
+		if names {
+			s.named = append(s.named, k)
+		}
+	}
+	return os, err
+}
+
+// From year index 81 Robotoid splits fleets (AI.md §10 "Splitting") and
+// gives the new fleets orders the same turn, naming them by the split's
+// NewFleet (engine ASSUMPTION L28). Over 100 years the game accepts every
+// such order.
+func TestDriversOrderSplitFleets(t *testing.T) {
+	g, _ := loopSetup(t, engine.ElegyRules(), 1)
+	rb := &splitSpy{d: NewDriver(Robotoid, Expert)}
+	drivers := []game.Driver{game.Idle, rb, NewDriver(Rototill, Expert), NewDriver(Cybertron, Expert)}
+	splits, named := 0, 0
+	for range 100 {
+		y, err := g.Advance(drivers)
+		if err != nil {
+			t.Fatal(err)
+		}
+		check := map[int]bool{}
+		for _, k := range append(rb.splits, rb.named...) {
+			check[k] = true
+		}
+		for _, o := range y.Result.Orders {
+			if o.Player == 1 && check[o.Index] && o.Err != nil {
+				t.Errorf("Robotoid order %d rejected: %v", o.Index, o.Err)
+			}
+		}
+		splits, named = splits+len(rb.splits), named+len(rb.named)
+	}
+	if splits == 0 || named == 0 {
+		t.Errorf("Robotoid gave %d splits and %d orders naming a new fleet, want some of each", splits, named)
 	}
 }
