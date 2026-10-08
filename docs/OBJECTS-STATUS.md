@@ -239,6 +239,7 @@ keeps the fleet and planet sightings; these functions cover the objects.
 |---|---|---|
 | Minefields: own; `P`, `R/4`; inside (fleets only); known within `R` | `Space.Scan` | CONFIRMED (OB-018, OB-018-C, E–G); fleets-only inside BINARY-ONLY |
 | Minefield knowledge from sight, sweeps and hits | `Space.Scan`, `Space.Sweep`, `Space.LearnHit` | sight CONFIRMED; sweeps and hits BINARY-ONLY |
+| Ownership does not make a field known; own fields still listed in the owner's view | `Space.Scan` | MEASURED (MF-13a, MF-13c; stars-elegy #108); with `SeeObjects` calling `Scan` and the harness comparing `known_to`, both cases pass locally |
 | Wormhole ends: within `R` only; known, `P` or `R/4`; known once seen | `Space.Scan` | CONFIRMED (OB-011-H, OB-017, OB-018 H, I, WT batch); the known band BINARY-ONLY |
 | Packets within `R`; PP sees all | `Space.Scan` | CONFIRMED (OB-018 J, K, OB-012) |
 | Mystery Trader seen by all | `Space.Scan` | CONFIRMED (OB-011-J) |
@@ -291,7 +292,8 @@ Not wired yet:
   hits. The adapter's `SeeObjects` still marks only wormhole ends, and
   `MineHit` does not call `LearnHit`. For the harness's `known_to`
   checks, `SeeObjects` can call `Space.Scan` once per player with that
-  player's scanners. `Scan` applies the same wormhole rule and adds the
+  player's scanners (checked locally: MF-13a and MF-13c then match their
+  `known_to` expectations once the harness compares them). `Scan` applies the same wormhole rule and adds the
   minefield rule, PP packet scanners, packets, Traders and the owners
   made known. `MineHit` can call `LearnHit` with the stop point. Known
   is copied before it changes, so `CloneObjects` needs no change.

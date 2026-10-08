@@ -39,10 +39,22 @@ func TestConfirmedMinefieldSight(t *testing.T) {
 	if got := sp.Scan(l.g, 0, []Scanner{{Pos: origin, R: 50}}); got.Minefields != nil {
 		t.Errorf("planet inside: %+v", got)
 	}
-	// Own fields are always seen and make nobody known.
-	sp = &Space{Minefields: []Minefield{{Owner: 0, Pos: at(900, 0), Count: 100}}}
-	if got := sp.Scan(l.g, 0, nil); !reflect.DeepEqual(got.Minefields, []int{0}) || got.Owners != nil {
-		t.Errorf("own: %+v", got)
+	// Own fields are always listed and make nobody known, but ownership
+	// does not make a field known: only the owner's own sight does
+	// (SCANNING.md "Space objects", MEASURED MF-13a, MF-13c: a lone field
+	// beyond every scanner ends the year with an empty known set).
+	sp = &Space{Minefields: []Minefield{{Owner: 0, Pos: at(900, 0), Count: 100}, {Owner: 0, Pos: at(10, 0), Count: 100}}}
+	if got := sp.Scan(l.g, 0, []Scanner{rhino(origin)}); !reflect.DeepEqual(got.Minefields, []int{0, 1}) || got.Owners != nil ||
+		sp.Minefields[0].KnownBy(0) || !sp.Minefields[1].KnownBy(0) {
+		t.Errorf("own: %+v, known %v %v", got, sp.Minefields[0].Known, sp.Minefields[1].Known)
+	}
+	// MF-13c: a field the owner's fleet sits inside is known to the owner
+	// only.
+	sp = &Space{Minefields: []Minefield{{Owner: 1, Pos: at(500, 0), Count: 400}}}
+	sp.Scan(l.g, 1, []Scanner{rhino(at(500, 0))})
+	sp.Scan(l.g, 0, []Scanner{rhino(origin)})
+	if m := sp.Minefields[0]; !m.KnownBy(1) || m.KnownBy(0) {
+		t.Errorf("laid under the owner's fleet: %v", m.Known)
 	}
 }
 
