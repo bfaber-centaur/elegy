@@ -960,6 +960,10 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 				t.Transport[c] = Transport{Action: LoadAll}
 			case "load_exactly":
 				t.Transport[c] = Transport{Action: LoadExactly, Amount: o.Value}
+			case "fill_to_percent":
+				t.Transport[c] = Transport{Action: FillTo, Amount: o.Value}
+			case "wait_for_percent":
+				t.Transport[c] = Transport{Action: WaitFor, Amount: o.Value}
 			default:
 				return Task{}, "transport " + o.Action
 			}
