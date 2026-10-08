@@ -10,6 +10,7 @@
 package objects
 
 import (
+	"errors"
 	"math"
 	"sort"
 
@@ -120,6 +121,41 @@ func prt(g *engine.Game, player int) engine.PRT {
 		return engine.PRTOther
 	}
 	return g.Players[player].Race.PRT
+}
+
+// Detonate-setting refusals (OBJECTS.md "The detonate setting").
+var (
+	ErrNoField         = errors.New("objects: the player has no such minefield")
+	ErrNotDemolition   = errors.New("objects: only a Space Demolition player may set detonation")
+	ErrNotStandardMine = errors.New("objects: only a standard minefield takes the detonate setting")
+)
+
+// SetDetonate applies player's order turning detonation on or off for the
+// player's own minefield number. OBJECTS.md "The detonate setting"
+// (BINARY-ONLY; ORDERS.md "Minefield detonate-setting") gives the chosen
+// rule for an independent implementation: accept the setting only from
+// the field's owner, only when that owner is Space Demolition, and only
+// for a standard field, which is what an unmodified client can send. The
+// original host checks only that the order names a minefield (LEGACY
+// BUG); Elegy does not reproduce that. A field of another kind that
+// already has the setting (from an edited game) still detonates (MF-7,
+// MF-8).
+func (s *Space) SetDetonate(g *engine.Game, player, number int, on bool) error {
+	for i := range s.Minefields {
+		m := &s.Minefields[i]
+		if m.Owner != player || m.Number != number {
+			continue
+		}
+		if prt(g, player) != engine.PRTSpaceDemolition {
+			return ErrNotDemolition
+		}
+		if m.Kind != Standard {
+			return ErrNotStandardMine
+		}
+		m.Detonate = on
+		return nil
+	}
+	return ErrNoField
 }
 
 // --- Decay ---
