@@ -1312,10 +1312,11 @@ func TestConfirmedBuiltInComputerPlayers(t *testing.T) {
 	}
 }
 
-// ELEGY DECISION: each player's starting designs fill its design slots
-// in Game.DesignSlots, numbered from 0 in PlayerStart order, so the
-// engine's design orders and starbase rules find them.
-func TestElegyDecisionStartingDesignSlots(t *testing.T) {
+// Starting design slots (UNIVERSE.md "Starbases" and "Starting ships",
+// CONFIRMED UG01..UG21): the starbase designs are starbase slots 0 and 1
+// and each new ship design takes the next ship slot, recorded in
+// Game.DesignSlots in PlayerStart order.
+func TestConfirmedStartingDesignSlots(t *testing.T) {
 	var players []PlayerSetup
 	for _, prt := range allPRTs {
 		players = append(players, human(prt))
