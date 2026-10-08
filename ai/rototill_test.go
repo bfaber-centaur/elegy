@@ -19,7 +19,10 @@ func caView(t *testing.T, year int) *View {
 		}
 		return d
 	}
-	race := engine.Race{PRT: engine.PRTClaimAdjuster, GrowthRate: 15}
+	// AI.md §3, CA expert: 800 colonists per resource, factories
+	// 15/10/15, mines 15/5/15.
+	race := engine.Race{PRT: engine.PRTClaimAdjuster, GrowthRate: 15, ColonistsPerResource: 800,
+		FactoryOutput: 15, FactoryCost: 10, FactoriesOperated: 15, MineOutput: 15, MineCost: 5, MinesOperated: 15}
 	race.Env = [3]engine.EnvRange{{Immune: true}, {Center: 50, Low: 24, High: 76}, {Center: 50, Low: 25, High: 75}}
 	v := &View{
 		Year: year, Player: 0, Level: Expert,
@@ -32,22 +35,15 @@ func caView(t *testing.T, year int) *View {
 		Known: map[int]engine.PlanetReport{},
 		PRT:   map[int]engine.PRT{},
 	}
-	sb := mk("Starbase", "Space Station")
-	for k, name := range []string{"Starbase", "", "Fort A", "Fort B", "Station C"} {
-		if name == "" {
-			continue
-		}
-		h := spaceStation
+	station, fort := mk("Station", "Space Station"), mk("Fort", "Orbital Fort")
+	for k := range 5 {
+		d := station
 		if k == 1 || k == 3 {
-			h = orbitalFort
+			d = fort
 		}
-		d := sb
-		d.Name, d.Hull.Name = name, h
+		d.Name = starbaseNames[k]
 		v.Starbases = append(v.Starbases, Design{Slot: k, Index: 20 + k, Design: d, Created: 2400, Picture: k / 2})
 	}
-	// Slot 1 too, so no starbase design is created.
-	fort := mk("Fort", "Orbital Fort")
-	v.Starbases = append(v.Starbases, Design{Slot: 1, Index: 21, Design: fort, Created: 2400})
 	for i := 1; i <= 5; i++ {
 		v.Universe = append(v.Universe, PlanetPos{ID: i, Pos: engine.Point{X: 1000 + 30*(i-1), Y: 1000}})
 	}
@@ -83,7 +79,7 @@ func TestRototillColonyShips(t *testing.T) {
 	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: engine.NoOwner, Env: [3]int{50, 99, 50}} // hostile even after terraforming
 	v.Known[4] = engine.PlanetReport{Planet: 4, Level: engine.ReportNormal, Owner: engine.NoOwner, Env: [3]int{10, 60, 40}}
 	v.Known[5] = engine.PlanetReport{Planet: 5, Level: engine.ReportNormal, Owner: engine.NoOwner, Env: [3]int{10, 50, 50}}
-	res := PlayRototill(v, &script{t: t})
+	res := PlayRototill(v, top{})
 	loads := ordersOf[engine.CargoOrder](res.Orders)
 	if len(loads) != 2 || loads[0].Amounts[engine.CargoColonists] != 25 || loads[0].ID != 1 {
 		t.Errorf("loads %+v", loads)
@@ -102,7 +98,7 @@ func TestRototillColonyShips(t *testing.T) {
 func TestRototillEmptyColonyShipGoesHome(t *testing.T) {
 	v := caView(t, 2401)
 	v.Fleets = []engine.Fleet{fleet(100, 1, v.Universe[2].Pos, 11, 1)}
-	res := PlayRototill(v, &script{t: t})
+	res := PlayRototill(v, top{})
 	wps := ordersOf[engine.WaypointOrder](res.Orders)
 	if len(wps) != 1 || wps[0].Waypoints[0].ID != 1 || wps[0].Waypoints[0].Warp != 4 || wps[0].Waypoints[0].Task.Kind != engine.TaskNone {
 		t.Errorf("orders %+v", wps)
@@ -121,7 +117,7 @@ func TestRototillPassOne(t *testing.T) {
 	v.Fleets = []engine.Fleet{f, g}
 	v.Known[4] = engine.PlanetReport{Planet: 4, Level: engine.ReportNormal, Owner: 1, Env: [3]int{10, 60, 40}}
 	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: 1, Env: [3]int{50, 99, 50}}
-	res := PlayRototill(v, &script{t: t})
+	res := PlayRototill(v, top{})
 	wps := ordersOf[engine.WaypointOrder](res.Orders)
 	if len(wps) != 2 {
 		t.Fatalf("orders %+v", wps)
@@ -152,11 +148,17 @@ func TestRototillProduction(t *testing.T) {
 		if c.alive {
 			v.Fleets = []engine.Fleet{fleet(100, 1, v.Universe[3].Pos, 11, 1)}
 		}
-		res := PlayRototill(v, &script{t: t, draws: []int{0, 0, 0, 0}})
-		qs := ordersOf[engine.QueueOrder](res.Orders)
-		got := len(qs) == 1 && len(qs[0].Queue) == 1 && qs[0].Queue[0] == (engine.QueueItem{Kind: engine.ItemShip, Slot: 1, Count: 1})
-		if got != c.want || (!c.want && len(qs) != 0) {
-			t.Errorf("%+v: queue orders %+v", c, qs)
+		res := PlayRototill(v, top{})
+		got := false
+		for _, q := range ordersOf[engine.QueueOrder](res.Orders) {
+			for _, it := range q.Queue {
+				if it.Kind == engine.ItemShip {
+					got = got || it == (engine.QueueItem{Kind: engine.ItemShip, Slot: 1, Count: 1})
+				}
+			}
+		}
+		if got != c.want {
+			t.Errorf("%+v: colony ship queued %v", c, got)
 		}
 	}
 }
@@ -170,7 +172,7 @@ func TestRototillScout(t *testing.T) {
 	other := fleet(101, 2, v.Universe[3].Pos, 12, 1)
 	other.Waypoints = []engine.Waypoint{toPlanet(3, v.Universe[2].Pos, 5, engine.Task{})}
 	v.Fleets = []engine.Fleet{fleet(100, 1, home, 10, 1), other}
-	res := PlayRototill(v, &script{t: t})
+	res := PlayRototill(v, top{})
 	wps := ordersOf[engine.WaypointOrder](res.Orders)
 	if len(wps) != 1 || wps[0].Fleet != 100 || wps[0].Waypoints[0].ID != 4 || wps[0].Waypoints[0].Warp != 6 {
 		t.Errorf("orders %+v", wps)

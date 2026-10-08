@@ -37,6 +37,8 @@ unless the project decides otherwise.
 | Starbase designs: missing slots, the year-50 family switch, counts per variant, picture, name | AI.md §5 | CONFIRMED AI-2 | `ai/starbase.go` | `TestStarbase*` |
 
 | Rototill's turn: research, starbase designs, U, planet loop and colony-ship production, fleet passes 1 and 2 | rototill.md §1–§3 | MEASURED AI-14..AI-17 (branches marked not exercised there are BINARY-ONLY) | `ai/rototill.go` | `TestRototill*` |
+| Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |
+| Planet automation: starbases for hubs, starbase upgrade, defenses, mines and factories fill | AI.md §7 | BINARY-ONLY (AI-7 not run) | `ai/automation.go`, `ai/economy.go` | `TestMinesAndFactories`, `TestStarbaseUpgrade`, `TestDefenses`, `TestDesignCostMatchesEngine` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
@@ -57,12 +59,16 @@ check.
 | A3 | "A slot with fewer than 4 that holds an orbital part or more than one item loses one" (variant 1) is read as: the chosen part is an orbital part, or the count is above 1. Orbital parts in the starbase classes are mass drivers, which only PP can build, and Cybertron is exempt, so the orbital clause never acts for the three personalities. A slot reduced to 0 is left empty. |
 | A4 | A starbase design being replaced still counts for picture and name choice, as AI.md §10 says for ship designs. |
 | A5 | After 20 failed name tries the name is `<name> <n>` with `n` from `Random(100)`; AI.md calls the original's form BINARY-ONLY. Elegy uses its own 13 starbase names (AI.md §5 allows it). |
-
 | A6 | A planet report's current environment stands for the planet's original values in "habitability after terraforming" (ESTIMATES.md "Value and optimal value"); a player's report does not carry them. |
 | A7 | An armed Meta Morph with 500 kT of cargo is not yet recognised as a transport (AI.md §11 "Fleet classes"); it needs the design-power formula. Rototill never has one. |
 | A8 | Rototill's "known at level 3 or more" (rototill.md §1, §2; its meaning is an open experiment there) is an Elegy report at normal level or above, which carries environment and concentrations. "Desirability" is the planet's value for the race. |
 | A9 | The scout's "wormhole within that distance" (rototill.md §3 step 4) is the nearest one, and `Random(100)` is drawn only when one exists. |
 | A10 | The scout fallback's "best armada destination counted from the homeworld" is the highest §2 destination score, ties to the planet nearer the homeworld. |
+| A11 | The turn's shuffled planet order (AI.md §2) is drawn right after the starbase designs. Hubs take own planets in that order, starbase planets first (robotoid.md §4 pass B; AI.md §6 does not order the rest). |
+| A12 | The "full cost of the queue" (AI.md §7) counts auto items at their count like plain items, and a starbase item at its full build cost. |
+| A13 | Starbase upgrade: the draw comes before the mineral test, and the upgrade is appended. |
+| A14 | Defenses' "room" is the operable defenses less those installed and queued, and "population/8,000" is in colonists. |
+| A15 | Mines and factories: "resources" is the planet's available resources; the mines' "resources left" is after the factories just queued; the alchemy is appended. Room counts queued plain items only. |
 
 ## Spec questions
 
@@ -97,8 +103,9 @@ check.
 
 ## Not implemented yet
 
-- Hubs (AI.md §6), planet automation and the queue fill (AI.md §7), the
-  shared fleet rules and warp choice (AI.md §11).
+- Hub freighter assignment (AI.md §6 steps 3–4), automation steps 1
+  (warp re-pick, AI.md §11 "Warp choice"), 4 (under attack) and 5
+  (blocked queues); the shared fleet rules of AI.md §11.
 - Robotoid's and Cybertron's turns: ship designs, ageing, splitting,
   merging, production, fleets, packets.
 - Orders the engine does not accept yet: scrap and lay-mines tasks. A
