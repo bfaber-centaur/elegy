@@ -554,14 +554,13 @@ func (t *Transport) percentTarget(capacity int) int {
 // short fill to ended and the fleet moved on); "wait for" clears once
 // held reaches its target or the hold is full (BINARY-ONLY), and until
 // then keeps the task, which holds the fleet (FO-01 I; CONFIRMED KB-4A
-// T1); "set amount to" short of v keeps it (KERNEL.md, BINARY-ONLY).
-// ASSUMPTION T9: "met" is held ≥ the target. ASSUMPTION T14: "set amount
-// to" is also released once the hold is full, as "wait for" is; KERNEL.md
-// states only the case of a target holding too little.
+// T1); "set amount to v" is unmet while the target holds less than v −
+// held, whatever the free hold, so with enough there it ends even when the
+// hold took less (BINARY-ONLY). ASSUMPTION T9: "met" is held ≥ the target.
 //
-// "Set amount to v" short of v is unmet and persists (KERNEL.md). ASSUMPTION
-// T11: so does "set waypoint to v" until avail ≤ v; KERNEL.md does not
-// name it. Their unload direction is unload's and clears there. Otherwise the load pass settles them,
+// ASSUMPTION T11: "set waypoint to v" persists until avail ≤ v; KERNEL.md
+// does not name it. The unload direction of either set action is
+// unload's and clears there. Otherwise the load pass settles them,
 // wherever the fleet is, so the target's holding is read after every
 // unload and drop of the phase, whatever the fleet order.
 func (t *Transport) loaded(capacity, held, avail, free int) {
@@ -571,7 +570,7 @@ func (t *Transport) loaded(capacity, held, avail, free int) {
 			return
 		}
 	case SetAmount:
-		if held < t.Amount && free > 0 {
+		if avail < t.Amount-held {
 			return
 		}
 	case SetWaypoint:

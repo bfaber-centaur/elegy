@@ -110,8 +110,7 @@ func TestStealerLoadWaits(t *testing.T) {
 
 // At a source, a "set amount to" the target cannot meet waits and, after
 // movement, is told so each year (KERNEL.md "Which loads are unmet";
-// MESSAGES.md 0x121, 0x122 for colonists, BINARY-ONLY). One held back by
-// the fleet's hold, not the target, is released instead (T14).
+// MESSAGES.md 0x121, 0x122 for colonists, BINARY-ONLY).
 func TestSetAmountWaitingMessage(t *testing.T) {
 	for _, tt := range []struct {
 		name  string
@@ -134,16 +133,34 @@ func TestSetAmountWaitingMessage(t *testing.T) {
 			}
 		}
 	}
-	// Held back by the hold: 300 wanted, 1000 there, 210 kT of space. The
-	// full hold releases the action, as for "wait for" (ASSUMPTION T14),
-	// with no message, before or after movement.
+	// "Set amount to" tests only what the target holds, never the free
+	// hold (KERNEL.md "Which loads are unmet", BINARY-ONLY). 210 kT hold,
+	// set amount 300: with 1000 there it loads 210 and ends, untold.
 	for _, after := range []bool{false, true} {
 		l, pi := sourceLab(t, "own", Transport{SetAmount, 300}, Transport{}, 0)
 		l.g.Planets[pi].Surface[Ironium] = 1000
 		f := &l.g.Fleets[0]
 		if ev := l.g.load(f, after); len(ev) != 0 || f.Cargo.Minerals[Ironium] != 210 || f.Task.Kind != TaskNone {
-			t.Errorf("hold full, after %v: events %+v, holds %d, task %+v; want none, 210 and released", after, ev, f.Cargo.Minerals[Ironium], f.Task)
+			t.Errorf("1000 there, after %v: events %+v, holds %d, task %+v; want none, 210 and ended", after, ev, f.Cargo.Minerals[Ironium], f.Task)
 		}
+	}
+	// With 250 there it loads 210 and stays unmet: the next year it wants
+	// 90 against 40, with the hold full, and is told so after movement;
+	// once the planet holds 90 it is satisfied with nothing loaded.
+	l, pi := sourceLab(t, "own", Transport{SetAmount, 300}, Transport{}, 0)
+	p := &l.g.Planets[pi]
+	p.Surface[Ironium] = 250
+	f := &l.g.Fleets[0]
+	told := []Event{{Kind: EventLoadWaiting, Player: 0, Planet: 0, Fleet: 1, Count: 300, Axes: []int{Ironium}}}
+	if ev := l.g.load(f, true); !reflect.DeepEqual(ev, told) || f.Cargo.Minerals[Ironium] != 210 || p.Surface[Ironium] != 40 || f.Task.Kind != TaskTransport {
+		t.Errorf("250 there: events %+v, holds %d, planet %d, task %+v; want 0x121, 210, 40 and kept", ev, f.Cargo.Minerals[Ironium], p.Surface[Ironium], f.Task)
+	}
+	if ev := l.g.load(f, true); !reflect.DeepEqual(ev, told) || f.Cargo.Minerals[Ironium] != 210 || f.Task.Kind != TaskTransport {
+		t.Errorf("next year, 40 there: events %+v, holds %d, task %+v; want 0x121, 210 and kept", ev, f.Cargo.Minerals[Ironium], f.Task)
+	}
+	p.Surface[Ironium] = 90
+	if ev := l.g.load(f, true); len(ev) != 0 || f.Cargo.Minerals[Ironium] != 210 || p.Surface[Ironium] != 90 || f.Task.Kind != TaskNone {
+		t.Errorf("90 there: events %+v, holds %d, planet %d, task %+v; want none, 210, 90 and ended", ev, f.Cargo.Minerals[Ironium], p.Surface[Ironium], f.Task)
 	}
 	// Colonists at salvage, which holds none (ASSUMPTION T6).
 	task := Task{Kind: TaskTransport}
