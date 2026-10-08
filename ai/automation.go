@@ -316,7 +316,9 @@ func (a *automation) underAttack(p *engine.Planet) {
 // ASSUMPTION A63: "years" is the year the head's last unit finishes;
 // "mines" and "terraforming" include their automatic items; the head's
 // resource cost is what is left of it, counted as in queueCost; the
-// planet's resources and the mine room are minesAndFactories' (A15).
+// planet's resources are its available resources (A15), with no research
+// share on a planet that sends only leftover resources to research, as in
+// completion; the mine room is minesAndFactories'.
 func (a *automation) blockedQueue(p *engine.Planet) {
 	v := a.v
 	q := a.q.get(p)
@@ -330,7 +332,11 @@ func (a *automation) blockedQueue(p *engine.Planet) {
 		return
 	}
 	years := v.completion(p, q[:1], a.budget)
-	res := v.available(p, a.budget).Resources
+	budget := a.budget
+	if p.LeftoverOnly {
+		budget = 0 // as completion does
+	}
+	res := v.available(p, budget).Resources
 	if years <= 1 || v.queueCost(q[:1]).Resources > (years-1)*res {
 		return
 	}
