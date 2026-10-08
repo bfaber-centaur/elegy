@@ -18,4 +18,12 @@ func init() {
 		}
 		return r
 	})
+	engine.SetParityRaceSettings(func(c engine.RaceChecker, player int) (engine.PVRaceSettings, bool) {
+		r, ok := c.(*races.GameRaces)
+		if !ok || player >= len(r.Designs) {
+			return engine.PVRaceSettings{}, false
+		}
+		d := r.Designs[player]
+		return engine.PVRaceSettings{ExpensiveAt3: d.ExpensiveAt3, Spend: d.Spend, Stat15: d.Stat15, Computer: r.Computer[player]}, true
+	})
 }
