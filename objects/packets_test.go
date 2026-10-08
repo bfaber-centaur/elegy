@@ -247,6 +247,13 @@ func TestConfirmedPacketFlight(t *testing.T) {
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom || full.Packets[r.Packet].Number != 511 {
 		t.Errorf("511 with nothing after: %+v", r)
 	}
+	// Unowned salvage (OtherObjects) blocks nothing (ASSUMPTION P5); a
+	// Trader does.
+	full.Packets = full.Packets[:511]
+	full.OtherObjects = 3
+	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom {
+		t.Errorf("salvage blocked 511: %+v", r)
+	}
 	full.Packets = full.Packets[:511]
 	full.Traders = []Trader{{}}
 	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoRoom || r.Spend[0] != 110 || len(full.Packets) != 511 {
