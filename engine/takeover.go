@@ -65,6 +65,7 @@ type Task struct {
 	Fleet     int                 // target fleet id, for TaskMerge
 	Range     int                 // patrol range in ly, for TaskPatrol
 	Player    int                 // recipient, for TaskTransferFleet
+	Years     int                 // duration, for TaskLayMines (objects.go)
 }
 
 // planetOrder is the planet indices in planet-id order.

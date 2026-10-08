@@ -23,21 +23,32 @@ const (
 // galaxy when ordered (ORDERS.md "Waypoint coordinates"), and refreshed
 // positions are fleet positions, so nothing here needs clamping.
 //
+// A waypoint aimed at a wormhole end or a Mystery Trader takes the
+// object's position the same way, and becomes a plain go-to when the
+// object is gone ("Ordering with moving objects").
+//
 // Not modelled: the exception bit that holds a waypoint's coordinates
-// (BINARY-ONLY; no order sets it), moving-object targets (Elegy has no
-// Trader or wormhole yet), and following fleets (step 1a.3): Elegy does
-// not keep waypoint 0's target, which that rule reads.
+// (BINARY-ONLY; no order sets it) and following fleets (step 1a.3): Elegy
+// does not keep waypoint 0's target, which that rule reads.
 func (g *Game) waypointCheck() {
 	for i := range g.Fleets {
 		for j := range g.Fleets[i].Waypoints {
 			wp := &g.Fleets[i].Waypoints[j]
-			if wp.Target != TargetFleet {
-				continue
-			}
-			if t := g.fleetIndex(wp.ID); t >= 0 {
-				wp.Pos = g.Fleets[t].Pos
-			} else {
-				wp.Target, wp.ID = TargetSpace, 0
+			switch wp.Target {
+			case TargetFleet:
+				if t := g.fleetIndex(wp.ID); t >= 0 {
+					wp.Pos = g.Fleets[t].Pos
+				} else {
+					wp.Target, wp.ID = TargetSpace, 0
+				}
+			case TargetWormhole, TargetTrader:
+				if g.Objects == nil {
+					wp.Target, wp.ID = TargetSpace, 0
+				} else if p, ok := g.Objects.ObjectPos(wp.Target, wp.ID); ok {
+					wp.Pos = p
+				} else {
+					wp.Target, wp.ID = TargetSpace, 0
+				}
 			}
 		}
 	}
@@ -186,5 +197,74 @@ func (g *Game) transferFleet(fi int, gone map[int]bool) []Event {
 	return []Event{
 		{Kind: EventFleetGiven, Player: from, Planet: -1, Fleet: nf.ID, Count: to},
 		{Kind: EventFleetReceived, Player: to, Planet: -1, Fleet: nf.ID, Count: from},
+	}
+}
+
+// patrolRadius is the patrol's engage radius in ly (ORDERS.md "Patrol
+// task", CONFIRMED: an enemy at 50 ly was engaged, one at 55 ly was not).
+const patrolRadius = 50
+
+// fileRetarget is the retarget made as each player's file is written
+// (ORDERS.md "Targets that moved, died or were captured", BINARY-ONLY,
+// seen in WU-A): a waypoint aimed at another player's fleet becomes a
+// deep-space waypoint at that fleet's position, which the end-of-year
+// waypoint check has just set. A waypoint aimed at the owner's own fleet
+// stays a fleet target.
+//
+// ASSUMPTION W5: the written file is the game's state, so the waypoint
+// no longer tracks the fleet in later years.
+func (g *Game) fileRetarget() {
+	for i := range g.Fleets {
+		f := &g.Fleets[i]
+		for j := range f.Waypoints {
+			wp := &f.Waypoints[j]
+			if wp.Target != TargetFleet {
+				continue
+			}
+			if t := g.fleetIndex(wp.ID); t >= 0 && g.Fleets[t].Owner != f.Owner {
+				wp.Target, wp.ID = TargetSpace, 0
+			}
+		}
+	}
+}
+
+// patrol chooses each patrolling fleet's intercept at the end of the
+// year, as the players' files are written (ORDERS.md "Patrol task",
+// CONFIRMED for the choice, tie and warp; the timing BINARY-ONLY): a fleet
+// whose waypoint-0 task is patrol and that has no other waypoint takes the
+// nearest enemy fleet its owner sees this year within 50 ly, ties going to
+// fleet order. The intercept is a waypoint aimed at that fleet, at its
+// position, at warp min(10, range/5), carrying the patrol task (WU-SW50,
+// WU-RNG20). The fleet moves the next year.
+//
+// ASSUMPTION P1: "enemy" is a fleet whose owner the patrolling player
+// treats as an enemy.
+func (g *Game) patrol(views []PlayerView) {
+	order := g.fleetOrder()
+	for _, i := range order {
+		f := &g.Fleets[i]
+		if f.Task.Kind != TaskPatrol || len(f.Waypoints) > 0 || f.Owner < 0 || f.Owner >= len(views) {
+			continue
+		}
+		seen := map[int]bool{}
+		for _, s := range views[f.Owner].Fleets {
+			seen[s.Fleet] = true
+		}
+		best, bestD := -1, 0
+		for _, j := range order {
+			e := &g.Fleets[j]
+			if !seen[e.ID] || g.relation(f.Owner, e.Owner) != RelationEnemy {
+				continue
+			}
+			dx, dy := e.Pos.X-f.Pos.X, e.Pos.Y-f.Pos.Y
+			if d := dx*dx + dy*dy; d <= patrolRadius*patrolRadius && (best < 0 || d < bestD) {
+				best, bestD = j, d
+			}
+		}
+		if best < 0 {
+			continue
+		}
+		e := &g.Fleets[best]
+		f.Waypoints = []Waypoint{{Pos: e.Pos, Warp: min(10, f.Task.Range/5), Target: TargetFleet, ID: e.ID, Task: f.Task}}
 	}
 }

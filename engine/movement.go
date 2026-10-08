@@ -106,9 +106,10 @@ type Fleet struct {
 	Plan      int // battle plan index in the owner's Plans
 	// Name is the name the owner gave the fleet, or empty (orders.go).
 	Name string
-	// Task is the task at the fleet's current location (the original's
-	// waypoint 0). A fleet that moves leaves it, and takes up the task of
-	// the waypoint it arrives at.
+	// Task is the task of the original's waypoint 0. A fleet in transit
+	// keeps it (ORDERS.md "Waypoint 0 and a task still in progress",
+	// MEASURED WU-ROUTE), and takes up the task of the waypoint it
+	// arrives at.
 	Task Task
 	// Heading and HeadingWarp are the direction of this year's last
 	// movement step (halved until each component fits in ±127) and its
@@ -441,15 +442,23 @@ func (g *Game) radiatingColonists(f *Fleet) []Event {
 	return []Event{g.fleetEvent(f, EventColonistsKilledByEngine, lost)}
 }
 
+// moving reports a fleet that moves this year. A fleet whose current task
+// is "lay mines" holds its place (KERNEL.md "Other movement rules",
+// CONFIRMED OB-014-D, OB-019).
 func moving(f *Fleet) bool {
-	return len(f.Waypoints) > 0 && f.Waypoints[0].Warp > 0
+	return len(f.Waypoints) > 0 && f.Waypoints[0].Warp > 0 && f.Task.Kind != TaskLayMines
 }
 
 // moveFleets runs the movement phase: ordinary fleets in fleet order
 // (owner, then fleet number), then fleets chasing other fleets in rounds,
 // then waypoint settlement. KERNEL.md "Turn order" step 3 and "Fleet
 // movement".
-func moveFleets(g *Game) []Event {
+func moveFleets(g *Game) []Event { return g.moveAll(nil) }
+
+// moveAll is moveFleets with the year's generator for minefield checks,
+// and wormhole transit on arrival (KERNEL.md "Turn order" step 3.3).
+// rng may be nil when the game has no space objects.
+func (g *Game) moveAll(rng Rand) []Event {
 	order := g.fleetOrder()
 
 	for i := range g.Fleets {
@@ -462,15 +471,14 @@ func moveFleets(g *Game) []Event {
 		if !moving(f) {
 			continue
 		}
-		f.Task = Task{}
 		events = append(events, g.arColonistLoss(f)...)
 		if f.Waypoints[0].Target == TargetFleet && g.fleetIndex(f.Waypoints[0].ID) >= 0 {
 			chasers = append(chasers, i)
 			continue
 		}
-		events = append(events, g.moveOrdinary(f)...)
+		events = append(events, g.moveOrdinary(i, rng)...)
 	}
-	events = append(events, g.moveChasers(chasers)...)
+	events = append(events, g.moveChasers(chasers, rng)...)
 	return append(events, g.settleWaypoints(order)...)
 }
 
@@ -557,17 +565,22 @@ func (g *Game) afterMove(m legMove, a int, arrived bool) (int, []Event) {
 }
 
 // moveOrdinary moves a fleet toward a fixed destination for one year.
-func (g *Game) moveOrdinary(f *Fleet) []Event {
+func (g *Game) moveOrdinary(fi int, rng Rand) []Event {
+	f := &g.Fleets[fi]
 	wp := &f.Waypoints[0]
 	m := g.newLegMove(f, wp.Warp, g.destination(*wp))
 	r, unl := g.fuelRange(f, m.warp)
 	a, rLimited := m.limit(min(m.leg, m.warp*m.warp), r, unl)
 
+	from := f.Pos
 	arrived := m.place(a, rLimited)
 	cost := g.FuelCost(f, m.warp, a)
 	f.Fuel = max(0, f.Fuel-cost)
 	if rLimited {
 		f.Fuel = 0
+	}
+	if hit, ev := g.mineStop(fi, m, from, a, arrived, rng); hit {
+		return ev
 	}
 
 	if m.ranDry(rLimited, cost, arrived, a) {
@@ -582,7 +595,7 @@ func (g *Game) moveOrdinary(f *Fleet) []Event {
 // year's total are CONFIRMED (FM-001..003); the per-round fuel rules (rule
 // 6: R reduced by the distance already moved, running dry, top-up and ram
 // scoop per round) are BINARY-ONLY.
-func (g *Game) moveChasers(chasers []int) []Event {
+func (g *Game) moveChasers(chasers []int, rng Rand) []Event {
 	type chase struct {
 		rem, moved int
 		// fuel0 is the start-of-year fuel plus any top-up and ram-scoop
@@ -615,6 +628,7 @@ func (g *Game) moveChasers(chasers []int) []Event {
 				step = min(c.rem, (c.rem+c.moved+4)/5)
 			}
 			m := g.newLegMove(f, wp.Warp, g.Fleets[ti].Pos)
+			from := f.Pos
 			start := *f
 			start.Fuel = c.fuel0
 			r, unl := g.fuelRange(&start, m.warp)
@@ -632,6 +646,11 @@ func (g *Game) moveChasers(chasers []int) []Event {
 			}
 			cost := before - f.Fuel
 
+			if hit, ev := g.mineStop(i, m, from, a, arrived, rng); hit {
+				events = append(events, ev...)
+				c.active = false
+				continue
+			}
 			if arrived {
 				c.active = false
 				if targetChasing {
@@ -674,10 +693,35 @@ func (g *Game) settleWaypoints(order []int) []Event {
 	for _, i := range order {
 		f := &g.Fleets[i]
 		if len(f.Waypoints) > 0 && g.destination(f.Waypoints[0]) == f.Pos {
+			reached := f.Waypoints[0]
 			events = append(events, g.arrive(f)...)
+			if reached.Target == TargetWormhole && g.Objects != nil {
+				events = append(events, g.transit(i, reached.ID)...)
+			}
 		}
 	}
 	return events
+}
+
+// transit takes fleet fi through the wormhole end it reached (OBJECTS.md
+// "Travel", CONFIRMED OB-005 C, D): only a waypoint aimed at the end
+// itself, not a plain position on it. Other players' waypoints aimed at
+// the fleet lose it and become plain positions where it entered.
+func (g *Game) transit(fi, end int) []Event {
+	f := &g.Fleets[fi]
+	entry := f.Pos
+	ev := g.Objects.TransitWormhole(g, fi, end)
+	for j := range g.Fleets {
+		if g.Fleets[j].Owner == f.Owner {
+			continue
+		}
+		for k := range g.Fleets[j].Waypoints {
+			if wp := &g.Fleets[j].Waypoints[k]; wp.Target == TargetFleet && wp.ID == f.ID {
+				wp.Target, wp.ID, wp.Pos = TargetSpace, 0, entry
+			}
+		}
+	}
+	return ev
 }
 
 // refuelFleets sets every fleet orbiting a planet of its owner's that has a
@@ -696,4 +740,32 @@ func refuelFleets(g *Game) {
 			}
 		}
 	}
+}
+
+// mineStop checks a fleet's movement step of a ly from `from` (the fleet
+// has already been placed at the step's end) for a minefield stop
+// (OBJECTS.md "Hits on moving fleets"): only at warp 1–10, only when the
+// fleet moved, and with every field the space objects hold. On a hit the
+// fleet goes back to its stop point, the hit is applied, and the step
+// ends: no arrival, no top-up and no ram-scoop fuel ("On a hit"; the fuel
+// for the step is already charged). A chaser stopped this way moves no
+// further this year.
+//
+// ASSUMPTION O11: "the fuel for the full planned leg is already spent"
+// is the step's normal charge, made before the check; the stop does not
+// run the fleet dry.
+func (g *Game) mineStop(fi int, m legMove, from Point, a int, arrived bool, rng Rand) (bool, []Event) {
+	if g.Objects == nil || rng == nil || a <= 0 || m.warp < 1 || m.warp > 10 || m.d == 0 {
+		return false, nil
+	}
+	stop, kind, hit := g.Objects.MineCheck(g, fi, from, m.dest, a, rng)
+	if !hit {
+		return false, nil
+	}
+	f := &g.Fleets[fi]
+	f.Pos = along(from, m.dest, stop, m.d)
+	if stop == 0 {
+		f.Pos = from
+	}
+	return true, g.Objects.MineHit(g, fi, kind, rng)
 }
