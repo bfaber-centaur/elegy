@@ -23,4 +23,23 @@ jobs:
           cache: true
 
       - name: Run tests
-        run: go test ./...
+        # The long games run in their own job below.
+        run: go test -skip '^TestLongGames$' ./...
+
+  long-games:
+    name: long-game regression (PR subset)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Play the long games
+        # docs/REGRESSION.md: 24 games of 60 years, each replayed and
+        # reloaded; findings are reported by category.
+        run: go test ./regress -run '^TestLongGames$' -count=1 -v

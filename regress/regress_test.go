@@ -1,0 +1,151 @@
+package regress
+
+import (
+	"flag"
+	"fmt"
+	"strings"
+	"sync"
+	"testing"
+
+	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/newgame"
+)
+
+// Flags select a matrix other than the PR subset, for reproducing a case
+// or for the long scheduled run:
+//
+//	go test ./regress -run TestLongGames -count=1 -args -seeds=7 -rules=elegy -ai=rototill -years=40 -save-at=17
+var (
+	seedsFlag  = flag.String("seeds", "", "comma-separated seeds (default: the PR subset)")
+	rulesFlag  = flag.String("rules", "", "comma-separated rulesets (default: both)")
+	aiFlag     = flag.String("ai", "", "comma-separated opponent sets, each personality+personality (default: each alone, then all three)")
+	yearsFlag  = flag.Int("years", 0, "years per game")
+	saveAtFlag = flag.Int("save-at", 0, "years before the save and load")
+	sizeFlag   = flag.Int("size", -1, "universe size, 0 tiny .. 4 huge")
+)
+
+// The PR subset: 3 seeds × 2 rulesets × 4 opponent sets = 24 games of 60
+// years on a small map, each played three times (primary, replay,
+// reload after 23 years). 60 years reach Cybertron's first warship group
+// (ai/cybertron.md §2).
+var (
+	prSeeds     = []uint64{1, 2, 3}
+	prOpponents = [][]string{{"robotoid"}, {"rototill"}, {"cybertron"}, {"robotoid", "rototill", "cybertron"}}
+	prYears     = 60
+	prSaveAt    = 23
+	prSize      = newgame.Small
+)
+
+func matrix(t *testing.T) []Case {
+	seeds := prSeeds
+	if *seedsFlag != "" {
+		seeds = nil
+		for _, s := range strings.Split(*seedsFlag, ",") {
+			var v uint64
+			if _, err := fmt.Sscan(s, &v); err != nil {
+				t.Fatalf("-seeds %q: %v", s, err)
+			}
+			seeds = append(seeds, v)
+		}
+	}
+	rules := []string{"elegy", "jrc3-faithful"}
+	if *rulesFlag != "" {
+		rules = strings.Split(*rulesFlag, ",")
+	}
+	opps := prOpponents
+	if *aiFlag != "" {
+		opps = nil
+		for _, set := range strings.Split(*aiFlag, ",") {
+			opps = append(opps, strings.Split(set, "+"))
+		}
+	}
+	years, saveAt, size := prYears, prSaveAt, prSize
+	if *yearsFlag > 0 {
+		years = *yearsFlag
+	}
+	if *saveAtFlag > 0 {
+		saveAt = *saveAtFlag
+	}
+	if *sizeFlag >= 0 {
+		size = newgame.Size(*sizeFlag)
+	}
+	var cases []Case
+	for _, seed := range seeds {
+		for _, r := range rules {
+			for _, o := range opps {
+				cases = append(cases, Case{Seed: seed, Rules: r, Opponents: o, Size: size, Years: years, SaveAt: saveAt, Checks: yearChecks})
+			}
+		}
+	}
+	return cases
+}
+
+// TestLongGames plays the matrix and reports findings by category. Any
+// failure fails the test, with its reproduction.
+func TestLongGames(t *testing.T) {
+	cases := matrix(t)
+	results := make([]Result, len(cases))
+	var wg sync.WaitGroup
+	for i, c := range cases {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			results[i] = Run(c)
+		}()
+	}
+	wg.Wait()
+	for _, r := range results {
+		if r.Failed() {
+			t.Error(r.Report())
+		} else {
+			t.Log(r.Report())
+		}
+	}
+	t.Log(Summary(results))
+}
+
+// The harness reports a failing year check with its year, category and
+// reproduction, and stops the game there.
+func TestHarnessReportsFailures(t *testing.T) {
+	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny, Years: 6, SaveAt: 3,
+		Checks: []Check{{Name: "fails from 2403", Check: func(g engine.Game) []string {
+			if g.Year >= 2403 {
+				return []string{"planted problem"}
+			}
+			return nil
+		}}}}
+	r := Run(c)
+	if !r.Failed() || r.Findings[0].Category != CheckFails || r.Findings[0].Year != 2402 {
+		t.Fatalf("findings %+v", r.Findings)
+	}
+	rep := r.Report()
+	for _, want := range []string{"planted problem", c.Command(), "seed5/elegy/rototill"} {
+		if !strings.Contains(rep, want) {
+			t.Errorf("report lacks %q:\n%s", want, rep)
+		}
+	}
+	if s := Summary([]Result{r, Run(Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny, Years: 2})}); !strings.Contains(s, "2 cases: 1 with no failure") || !strings.Contains(s, string(CheckFails)+" (failure): 1 cases") {
+		t.Errorf("summary:\n%s", s)
+	}
+	if bad := Run(Case{Seed: 5, Rules: "nonesuch", Years: 1}); len(bad.Findings) != 1 || bad.Findings[0].Category != SetupFailed {
+		t.Errorf("unknown ruleset: %+v", bad.Findings)
+	}
+}
+
+// differs names the first differing paths of two games, and nothing for
+// equal ones.
+func TestDiffers(t *testing.T) {
+	c := Case{Seed: 5, Rules: "elegy", Opponents: []string{"rototill"}, Size: newgame.Tiny}
+	a, err := c.newGame()
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := c.newGame()
+	if d := differs(a, b); d != "" {
+		t.Fatalf("equal games differ: %s", d)
+	}
+	b.State.Players[1].ResearchBudget++
+	if d := differs(a, b); !strings.Contains(d, "ResearchBudget") {
+		t.Fatalf("differs = %q", d)
+	}
+}
