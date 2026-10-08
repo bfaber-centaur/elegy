@@ -14,12 +14,16 @@ import "fmt"
 // Picture its picture, 0..3 (AI.md "Storing a design", "Picture"; the
 // computer players' starbase family switch and design ageing read them,
 // CONFIRMED AI-2, AI-8, AI-19). Created 0 means a slot not made by a
-// design order. Nothing reads the two fields yet: the computer players
-// still keep their own copy until their driver reads the game state. This
-// change leaves game.SaveVersion as it is: a save (which holds the whole
-// Game) writes the fields, and an older save loads them as 0. The game
-// package's next save version refuses older saves and gives the starting
-// slots the start year and picture 0.
+// design order.
+//
+// Built is how many ships of the slot's design were ever built
+// (stars-elegy ai/turindrone.md: a design's "built" count; robotoid.md
+// §3 reads it). Production counts every ship it completes, also ships
+// lost at the fleet limit. A save holds the whole Game, so it writes
+// Built; an older save of the same version loads it as 0.
+//
+// ASSUMPTION L29: an edit in place starts Built again at 0, as a new
+// design does; a starbase slot counts nothing.
 type DesignSlot struct {
 	Owner    int
 	Starbase bool
@@ -27,6 +31,7 @@ type DesignSlot struct {
 	Design   int
 	Created  int
 	Picture  int
+	Built    int
 }
 
 // designPictures is the number of pictures per hull (AI.md "Picture":
@@ -158,7 +163,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 			return fmt.Errorf("design slot %d: the design in it is in use: %w", o.Slot, ErrOutOfRange)
 		}
 		g.DesignSlots = append([]DesignSlot(nil), g.DesignSlots...)
-		g.DesignSlots[i].Created, g.DesignSlots[i].Picture = g.Year, o.Picture
+		g.DesignSlots[i].Created, g.DesignSlots[i].Picture, g.DesignSlots[i].Built = g.Year, o.Picture, 0
 		if g.designShared(old, i) {
 			// A design index another slot also names (a state built
 			// without design orders) is not overwritten under it.
