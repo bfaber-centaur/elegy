@@ -81,6 +81,10 @@ type Game struct {
 	// Defenses is the catalogue of planetary defense types, for the
 	// defense coverage estimate.
 	Defenses []DefenseType
+
+	// Objects is the game's minefields, wormholes and Mystery Traders
+	// (objects.go), or nil for none.
+	Objects SpaceObjects
 }
 
 type Player struct {
@@ -103,6 +107,10 @@ type Player struct {
 	// Dead is set when the player has no planets and no ships (KERNEL.md
 	// "Victory conditions").
 	Dead bool
+	// Computer marks a computer player. Elegy runs no computer players
+	// yet; the flag decides only the rules that name them (a gifted
+	// fleet is refused; Mystery Trader trades).
+	Computer bool
 }
 
 type Planet struct {
@@ -242,17 +250,31 @@ func GenerateTurn(
 	}
 	events = append(events, g.loadPass(false)...)
 
+	// Objects move before fleets, then the waypoint check again
+	// (step 3.2).
+	if g.Objects != nil {
+		events = append(events, g.Objects.MoveObjects(&g, rng)...)
+		g.waypointCheck()
+	}
+
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
 		start[f.ID] = f.Pos
 	}
-	events = append(events, moveFleets(&g)...)
+	moveEvents, gated := g.moveAll(rng)
+	events = append(events, moveEvents...)
 	for i := range g.Fleets {
 		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
 			events = append(events, g.radiatingColonists(f)...)
 		}
 	}
 	g.generateFuel()
+	// Detonations and decay (step 3a).
+	if g.Objects != nil {
+		g.dropShiplessFleets()
+		events = append(events, g.Objects.DecayObjects(&g)...)
+		g.dropShiplessFleets()
+	}
 
 	type growth struct{ pop, carry int }
 	grown := make([]growth, len(g.Planets))
@@ -333,6 +355,13 @@ func GenerateTurn(
 	// Research level-ups, then random events (KERNEL.md "Turn order"
 	// steps 4b and 4c), then starbase refuelling (step 5.2).
 	events = append(events, g.randomEvents(rng)...)
+	if g.Objects != nil {
+		// The Mystery Trader's appearance ends step 4c; wormholes move
+		// after fleets, then the waypoint check again (step 5.1).
+		events = append(events, g.Objects.TraderAppears(&g, rng)...)
+		events = append(events, g.Objects.MoveObjectsAgain(&g, rng)...)
+		g.waypointCheck()
+	}
 	refuelFleets(&g)
 
 	// Battles, bombing, the waypoint tasks after movement, then the
@@ -345,14 +374,46 @@ func GenerateTurn(
 	events = append(events, fights.events...)
 	bombs := g.bombChecks()
 	events = append(events, bombing(&g, rng)...)
+	// Mystery Trader encounters (step 6b), then the tasks after movement
+	// with mine laying (6c.2).
+	var layers []MineLayer
+	if g.Objects != nil {
+		met := g.Objects.MeetTraders(&g, rng)
+		events = append(events, met...)
+		g.dropShiplessFleets()
+		// A Trader's gift fleet counts as not moved this year
+		// (OBJECTS-STATUS.md, the Mystery Trader's turn hooks).
+		for _, e := range met {
+			if e.Kind == EventTraderGift {
+				if fi := g.fleetIndex(e.Fleet); fi >= 0 {
+					start[e.Fleet] = g.Fleets[fi].Pos
+				}
+			}
+		}
+		moved := map[int]bool{}
+		for _, f := range g.Fleets {
+			if p, ok := start[f.ID]; !ok || p != f.Pos {
+				moved[f.ID] = true
+			}
+		}
+		layers = g.layers(moved)
+	}
 	queue, ev = g.unloadPhase(owned)
 	events = append(events, ev...)
+	if len(layers) > 0 {
+		events = append(events, g.Objects.LayMines(&g, layers)...)
+		g.endLayYear(layers)
+	}
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
 	for i := range g.Players {
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
 	events = append(events, g.loadPass(true)...)
+	// Mine sweeping (step 7.1).
+	if g.Objects != nil {
+		events = append(events, g.Objects.SweepMines(&g)...)
+	}
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
 		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
@@ -360,6 +421,11 @@ func GenerateTurn(
 		if p, ok := start[f.ID]; !ok || p != f.Pos {
 			moved[f.ID] = true
 		}
+	}
+	// A fleet that jumped by stargate gets no repair this year
+	// (OBJECTS.md "Stargates").
+	for id := range gated {
+		fights.fleets[id] = true
 	}
 	repair(&g, moved, fights)
 	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
@@ -374,10 +440,17 @@ func GenerateTurn(
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").
+	if g.Objects != nil {
+		g.Objects.SeeObjects(&g, g.ObjectScanners())
+	}
 	views := views(g, PopulationEstimates(g, rng), fights.seen, bombs)
 	for v := range views {
 		views[v].Scores = g.visibleScores(v, scores)
 	}
+	// As each player's file is written: the retarget of other players'
+	// fleets, then patrol intercepts (ORDERS.md).
+	g.fileRetarget()
+	g.patrol(views)
 
 	return TurnResult{
 		Game:   g,
@@ -402,6 +475,9 @@ func (g Game) clone() Game {
 	for i := range c.Fleets {
 		c.Fleets[i].Stacks = append([]Stack(nil), g.Fleets[i].Stacks...)
 		c.Fleets[i].Waypoints = append([]Waypoint(nil), g.Fleets[i].Waypoints...)
+	}
+	if g.Objects != nil {
+		c.Objects = g.Objects.CloneObjects()
 	}
 	return c
 }

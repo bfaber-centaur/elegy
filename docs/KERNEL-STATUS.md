@@ -74,17 +74,79 @@ The orders layer does not accept the patrol and transfer-fleet tasks or
 the repeat flag in an order yet; `validTask` in `orders.go` belongs to
 that lane.
 
+Waypoint 0 keeps its task while the fleet is in transit (ORDERS.md Q2,
+MEASURED WU-ROUTE). When the year's files are written, a waypoint aimed
+at another player's fleet becomes a plain position (ORDERS.md Q1,
+BINARY-ONLY; WU-A fleet 13 shows the target's current position as
+space, and the vector agrees). At the end of the turn, a patrol fleet
+with no waypoint takes the nearest enemy fleet it sees within 50 ly,
+ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
+carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and
+WU-RNG20). A computer player never accepts a gifted fleet (ORDERS.md,
+CONFIRMED WU-AICOMP3/4; `Player.Computer`).
+
+- **W5 (ASSUMPTION).** The enemy-target rewrite is applied to the game
+  state itself, not only to the written file, so next year's waypoint
+  check sees a plain position.
+- **P1 (ASSUMPTION).** "Enemy" for patrol is the player relation enemy;
+  neutral fleets are not acquired.
+
+### Space objects
+
+Minefields, wormholes, the Mystery Trader, mineral packets and
+stargates are rules in package `objects` (OBJECTS-STATUS.md). The
+engine reaches them through the `SpaceObjects` interface
+(`engine/objects.go`), held in `Game.Objects` and implemented by
+`objects.Space` (`objects/engine_adapter.go`). A nil `Game.Objects` is a
+galaxy with no objects; its steps do nothing and draw nothing, so every
+earlier result is unchanged. `GenerateTurn` calls the objects where
+KERNEL.md "Turn order" puts them:
+
+- 3.2: the Traders move, then packets in flight; then the waypoint check.
+- 3.3: each fleet's movement step is checked for a minefield stop and
+  the hit applied; a warp-11 waypoint is a stargate jump instead of a
+  move; a reached waypoint on a wormhole end takes the fleet through.
+- 3a: packet decay, detonations, minefield decay.
+- 4c: after the random events, the Trader's appearance.
+- 5.1: packets launched this year fly half a year, the wormholes move,
+  then the waypoint check (step 5.2 refuelling follows).
+- 6b: Trader meetings, after battles and bombing.
+- 6c.2: mine laying, with the after-movement unloads.
+- 7.1: mine sweeping, before repair. A fleet that jumped through a
+  stargate is not repaired that year.
+- Before the views: each player's scanners record the wormhole ends
+  they see.
+
+The parity harness loads `initial_state.objects` and checks the
+minefield, wormhole, trader, packet, object and object_gone
+expectations through a hook in `engine/objects_parity_test.go`
+(package `engine_test`, because `objects` imports the engine).
+
+Choices where OBJECTS.md is silent:
+
+- **O9 (ASSUMPTION).** A fleet that arrived this year onto a "lay
+  mines" waypoint moved, so only a Space Demolition fleet lays that
+  year, and only half.
+- **O10 (ASSUMPTION).** A Space Demolition half lay does not count
+  toward the task's duration.
+- **O11 (ASSUMPTION).** A fleet stopped by a minefield is charged the
+  fuel for the whole step and gets no top-up or ram-scoop fuel for it.
+- **O12 (ASSUMPTION).** A waypoint aimed at a wormhole end its owner
+  does not know follows the end only while known; one that moved unseen
+  becomes a plain position where the end was.
+
 Not modelled yet: following fleets (step 1a.3; Elegy does not keep
-waypoint 0's target), the patrol task (its turn step is not published),
-the stargate choice of the route task, waypoint tasks other than unloads,
-colonize, merge, route and transfer (load, scrap; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
-sweeping,
-terraforming other than the Claim Adjuster's year-end step (production
-items, Orbital Adjusters), remote mining, Super Stealth research stealing, the
-duplicate-serial penalty, ships/starbases in the queue, fuel generators,
-friends' starbases, and the BINARY-ONLY movement rules for IFE, Cheap
-Engines, warp-10 losses, Radiating Hydro-Ram colonist
-deaths and transport/lay-mines tasks.
+waypoint 0's target), the stargate choice of the route task, waypoint
+tasks other than unloads, colonize, merge, route, transfer, patrol and
+lay mines (load, scrap; ORDERS-STATUS.md), per-player minefield
+knowledge, the Trader's planet trades with computer players (their
+levels are a PLACEHOLDER), packets launched from production (the
+orders lane adds `Launch`), terraforming other than the Claim
+Adjuster's year-end step (production items, Orbital Adjusters), remote
+mining, Super Stealth research stealing, the duplicate-serial penalty,
+ships/starbases in the queue, the turn-time race check, and the
+BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses,
+Radiating Hydro-Ram colonist deaths and transport tasks.
 
 ## Corrected upstream
 
@@ -215,14 +277,6 @@ listed; its comparison is in the test output.
   one side is gone, after round 8 to 11 against the oracle's 8. COMBAT.md
   specifies how the battle ends; the gap is in the vectors (stars-elegy
   #96 marks battle draws as samples in single-stream vectors only).
-- **WU-A fleet 13** (MEASURED). A waypoint aimed at another player's
-  fleet that still exists takes the fleet's position, but the original
-  also shows its target as plain space. ORDERS.md does not say the
-  target is cleared; asked upstream.
-- **WU-ROUTE** (MEASURED). After moving part-way, the original's waypoint
-  0 still holds the route task; Elegy drops a fleet's task when it
-  leaves. Asked upstream whether every task stays with waypoint 0 in
-  transit.
 - **SL-starbases** (CONFIRMED). Not modelled: the turn-time race check
   (RACES.md "In a running game"). In the original the check degraded the
   race, so planet 15's replacement starbase reached only 88% in year 1
@@ -237,6 +291,21 @@ listed; its comparison is in the test output.
   the seed (seeds 3, 5 and 7 match every fleet). The rest of the failure
   is surface minerals 1 kT off, from mining's random remainder;
   stars-elegy #96 adds the 1 kT tolerance.
+
+- **MF-02, MF-03h, MF-03s, MF-04, MF-04b, MF-04d, MF-05b, MF-09h,
+  MF-09s** (CONFIRMED and MEASURED). Not diagnostic. Where a fleet stops
+  in a minefield is decided by the hit draws (OBJECTS.md "Hits on
+  moving fleets"), and each vector records one stream's stop positions
+  without marking them as samples. Elegy's stops change with the seed.
+  Asked the vectors owner to flag them.
+- **MF-13b packet** (CONFIRMED). The original shows the object at
+  1400,1400 with 900 kT of each mineral after one year and not moved;
+  Elegy loads it as a packet for planet 0 at warp 4, decay class 0, and
+  keeps 1000. Asked the vectors owner whether it is salvage exported as
+  a packet.
+- **Minefield knowledge** is skipped, not failed: `known_to` and
+  `radius` in minefield expectations are not compared until the
+  objects keep per-player minefield knowledge.
 
 ## Open spec questions
 
