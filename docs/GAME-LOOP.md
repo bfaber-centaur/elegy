@@ -97,7 +97,9 @@ and the report keeps the old design until a view shows the new one.
 
 **ASSUMPTION G3:** a known design stays in the report in later years
 when no view shows it, and a design once shown in full stays known in
-full while later sightings show the same design. stars-elegy says what a player's file holds the year a design is
+full. A partial sighting whose hull and mass match keeps the full design
+last shown, which may be stale; one with another hull or mass replaces
+it. stars-elegy says what a player's file holds the year a design is
 revealed, not whether later files keep it.
 
 **ELEGY CHOICE:** a driver's own state between years belongs to the

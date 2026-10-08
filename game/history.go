@@ -1,7 +1,6 @@
 package game
 
 import (
-	"reflect"
 	"sort"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -139,10 +138,11 @@ type designRecord struct {
 type designHistory []map[int]designRecord
 
 // record adds the designs each view showed this year. designs is the
-// game's design list as the views show it. A design once seen in full
-// stays known in full while later sightings show the same design
-// (ASSUMPTION G3); a sighting of a different design under that index
-// replaces the record. year is the year the views describe.
+// game's design list as the views show it. A full sighting snapshots the
+// whole design. A partial sighting whose hull and mass match the full
+// snapshot keeps it, which may be stale (ASSUMPTION G3): a player cannot
+// tell from hull and mass that the parts changed. Any other partial
+// sighting replaces the record. year is the year the views describe.
 func (h designHistory) record(year int, views []engine.PlayerView, designs []engine.Design) designHistory {
 	for len(h) < len(views) {
 		h = append(h, map[int]designRecord{})
@@ -153,10 +153,13 @@ func (h designHistory) record(year int, views []engine.PlayerView, designs []eng
 				continue
 			}
 			r := designRecord{Design: d.Design, Year: year, Hull: d.Hull, Mass: d.Mass}
-			cur := designs[d.Design]
-			if old := h[v][d.Design].Full; d.Full || (old != nil && reflect.DeepEqual(*old, cur)) {
-				full := deepCopy(cur)
+			old := h[v][d.Design]
+			switch {
+			case d.Full:
+				full := deepCopy(designs[d.Design])
 				r.Full = &full
+			case old.Full != nil && old.Hull == d.Hull && old.Mass == d.Mass:
+				r.Full = old.Full
 			}
 			h[v][d.Design] = r
 		}

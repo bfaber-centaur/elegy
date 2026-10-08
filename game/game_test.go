@@ -199,19 +199,28 @@ func TestReportKnownDesigns(t *testing.T) {
 		}
 	}
 
-	// 2403: a partial sighting of the new design replaces the record and
-	// drops the old full design.
+	// 2403: a partial sighting of the new design (another mass) replaces
+	// the record and drops the old full design.
 	see(2403, sight(theirs, false))
 	r, _ = g.Report(0)
 	if k = known(r, theirs); k == nil || k.Full || k.Design != nil || k.Mass != want.Mass+100 || k.Year != 2403 {
 		t.Fatalf("partial sighting of the replacement: %+v", k)
 	}
-	// 2404: a partial sighting of a design known in full keeps it full.
+	// 2404: seen in full. 2405: the owner refits it with other parts,
+	// keeping hull and mass; a partial sighting keeps the 2404 design in
+	// full, stale (ASSUMPTION G3), and does not reveal that the parts
+	// changed.
 	see(2404, sight(theirs, true))
+	if len(g.State.Designs[theirs].Slots) == 0 {
+		t.Fatal("test setup: the starbase design has no parts to change")
+	}
+	g.State.Designs = append([]engine.Design(nil), g.State.Designs...)
+	g.State.Designs[theirs].Name = "Refitted"
+	g.State.Designs[theirs].Slots = g.State.Designs[theirs].Slots[1:]
 	see(2405, sight(theirs, false))
 	r, _ = g.Report(0)
 	if k = known(r, theirs); k == nil || !k.Full || k.Design == nil || k.Design.Name != "Replaced" || k.Year != 2405 {
-		t.Fatalf("partial sighting of a design known in full: %+v", k)
+		t.Fatalf("partial sighting with the same hull and mass: %+v", k)
 	}
 }
 

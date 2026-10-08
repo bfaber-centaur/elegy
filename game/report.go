@@ -137,10 +137,11 @@ type KnownWormholeEnd struct {
 // shows the new one.
 //
 // ASSUMPTION G3: a design stays known, and stays known in full once shown
-// in full, in later years when no view shows it, and while later
-// sightings show the same design. stars-elegy says what a
-// player's file holds the year a design is revealed, not whether later
-// files keep it.
+// in full, in later years when no view shows it. A partial sighting whose
+// hull and mass match keeps the full design last shown, which may be
+// stale; a partial sighting with another hull or mass replaces it.
+// stars-elegy says what a player's file holds the year a design is
+// revealed, not whether later files keep it.
 type KnownDesign struct {
 	Index  int
 	Year   int
