@@ -40,7 +40,7 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 | Ironium → gravity, boranium → temperature, germanium → radiation; toward the PP player's ideal; original value unchanged without a permanent success | `PacketTerraform` | CONFIRMED (OB-029-T1..T3) |
 | Per 100 kT chunk `rand(200) < min(chunk, 100)`, permanent on `rand(10) == 0`; permanent moves the original value; successes move the current value within reach | `PacketTerraform` | BINARY-ONLY |
 | On owned and unowned planets, before the damage | objects impact (`Impact.Terraform`) | CONFIRMED (OB-029-T1..T3) for owned and unowned; the order is the spec's step order |
-| Catcher's starbase design known to the PP player | `Impact.DiscloseDesign` | BINARY-ONLY; not wired |
+| Catcher's starbase design known to the PP player | `Impact.DiscloseDesign` | BINARY-ONLY; the engine records it (`EventPacketDesignSeen`, KERNEL-STATUS.md "Space objects") |
 
 ## Remote mining
 
@@ -72,10 +72,12 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 
 | Turn step | Call | Notes |
 |---|---|---|
-| Production: Terraform Environment (planetary item 12), Auto Max / Auto Min Terraform | `UnitCost(owner race)` per unit, no minerals; when the queue reaches the item `ClipOrder(count, Capacity(p, owner race, Reach(owner race, levels before research)))`; each completed unit `Improve(p, owner race, reach)`; auto items build `AutoUnits(count, capacity, min, population change, Habitability)` | Needs the item kinds in `engine.ItemKind` and the harness's `pvQueue` (KX-002 T1–T3 skip on "planetary item 12") |
+| Production: Terraform Environment (planetary item 12), Auto Max / Auto Min Terraform | `UnitCost(owner race)` per unit, no minerals; when the queue reaches the item `ClipOrder(count, Capacity(p, owner race, Reach(owner race, levels before research)))`; each completed unit `Improve(p, owner race, reach)`; auto items build `AutoUnits(count, capacity, min, population change, Habitability)` | Wired (`engine/production_terraform.go`); parity KX-002 T1–T3 and KX-005 T0–T2 pass |
 | 3, packet impacts | none: `hit` calls `PacketTerraform` itself | Messages for a terraformed planet and `Impact.DiscloseDesign` are the kernel's |
-| 6c, remote mining | for each fleet in fleet order whose task is remote mining and that did not move this year: `RemoteMine(g, fi, rng)` | Needs a remote-mining task kind and the harness's `remote_mine` task (all 16 CS-003-B cases skip on it; X2 then checks `RemoteMine`) |
+| 6c, remote mining | for each fleet in fleet order whose task is remote mining and that did not move this year: `RemoteMine(g, fi, rng)` | Wired (`engine.TaskRemoteMine`); parity CS-003-B, X1 and X2 included, pass |
 | 7.4, Orbital Adjusters | `Adjust(g)` after `claimAdjusterYearEnd`, after research | Fleet owner told per `Adjustment`; planet owner when `HabChanged` |
 
-The parity corpus has no OB-029 or KX-005 vector yet; their rules are
-tested from the spec's worked examples in `terraform/` tests.
+KX-005 is in the parity corpus and passes. The engine harness skips
+the OB-029 cases, whose packets are launched from a production queue
+(skip reason "production queue: planetary item 17"). The OB-029 rules are tested from the spec's worked examples in
+`terraform/` tests.

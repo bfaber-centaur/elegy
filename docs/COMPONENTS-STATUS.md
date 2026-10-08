@@ -47,16 +47,18 @@ These follow from what the columns mean rather than from a separate rule:
 - A hull slot holds one part type, at most its `max`. A ship hull's
   engine slot must hold exactly `max` engines ("needs N").
 
-## Not used yet
+## Columns other packages read
 
-The table carries columns for rules Elegy does not have yet. They are
-listed in `deferredStats` and kept in `Component.Stats`:
+`Part` does not take over the columns in `deferredStats`; they stay in
+`Component.Stats`, where the packages that own those rules read them:
 
-- mine sweeping, laying and fields;
-- remote mining and the Orbital Adjuster;
-- stargates, mass drivers and jump gates;
-- the Anti-matter Generator's fuel per year;
-- the mine-layer hull multiplier.
+- `objects/`: `mines_laid`, `mines_per_year`, `field` and the hull's
+  `mine_layer_multiplier` (minefields), `safe_mass` and `safe_range`
+  (stargates), `warp` (mass drivers);
+- `terraform/`: `mining_rate` (remote mining), `terraform_pct`, `amount`
+  and `axis` (terraforming and Orbital Adjusters).
+
+No Elegy code reads `mines_swept`, `jump_gate` or `orbital_construction`.
 
 `GenerateTurn` still takes designs, planetary scanners and defenses as
 data. A game set up from the catalogue gets them from `NewDesign`,

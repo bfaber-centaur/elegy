@@ -50,23 +50,34 @@ tests can supply their own.
 | Allies do not share | `Views` | CONFIRMED (one run) | `TestConfirmedAlliesDoNotShare` |
 | Views at the end of the turn | `GenerateTurn` | BINARY-ONLY | `TestPredictionTurnViews` |
 
+## Space objects, history and scores
+
+These are implemented outside `scanning.go`:
+
+- Space-object visibility (SCANNING.md "Space objects", CONFIRMED by
+  OB-011..OB-018): `objects.Space` sees minefields, wormhole ends, packets
+  and Traders before the views, with PP packet scanners, SD minefield
+  detection and the owners made known through them
+  (`objects/engine_adapter.go` `SeeObjects`, OBJECTS-STATUS.md).
+  `PlayerView.Objects` lists what was seen.
+- IT gate reports (CONFIRMED OB-013) and a PP player's view of a catching
+  starbase's design (`EventPacketDesignSeen`), KERNEL-STATUS.md "Space
+  objects".
+- Patrol target choice at the end of the turn (KERNEL-STATUS.md, ORDERS.md
+  Q3, BINARY-ONLY).
+- Public scores: `PlayerView.Scores` holds the records the viewer may see
+  (`scores.go`).
+- The report history: `game.Report.History` keeps every planet's latest
+  report (GAME-LOOP.md).
+
 ## Not modelled
 
-Elegy's game has none of these yet, so their rules are not implemented:
-
-- space-object visibility (SCANNING.md "Space objects", CONFIRMED by
-  OB-011..OB-018): minefields, wormholes, mineral packets, the Mystery
-  Trader, PP packet scanners, SD minefield detection, and owners made
-  known through them. Elegy has none of these objects yet (stars-elegy
-  `OBJECTS.md`);
-- IT gate scans (no stargates), remote-mining reports (no remote mining);
+- remote-mining reports;
 - planet reports after minefield hits or a lost planet;
-- design disclosure after SD hits and PP catches;
-- chase retargeting and patrol target choice (orders that depend on
-  sight);
+- design disclosure after SD hits;
+- chase retargeting (an order that depends on sight);
 - original environment, artifacts and terraformed flags in reports;
-- public scores, messages that make a player known, and the client's
-  report history.
+- messages that make a player known.
 
 ## Choices where SCANNING.md is silent
 
