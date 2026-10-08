@@ -27,12 +27,29 @@ const maxExchangeStack = 32765
 // ASSUMPTION L21: the new fleet also takes the source's repeat-orders
 // flag, which belongs to its waypoint list (ORDERS.md "Reaching a
 // waypoint"), and has no name.
+//
+// NewFleet names the new fleet for the rest of the order file: when it is
+// below 0, a later order in the same file may give that value wherever it
+// names a fleet (its own fleet, a merge or move partner, a cargo or
+// waypoint target, a task's fleet), and it stands for the new fleet's id.
+// The id is the engine's, assigned as for any split; only the name is the
+// planner's. 0 names nothing.
+//
+// ASSUMPTION L28: a NewFleet above 0, or one already used by an earlier
+// split in the file, rejects the split (ErrOutOfRange). A name whose split
+// was rejected stays unbound, so the orders that use it are rejected as
+// naming no fleet. ORDERS.md has no such names: the original's client
+// knows a new fleet's number at once.
 type SplitOrder struct {
-	Fleet int
-	Ships []Stack // Design and Count; Damage is ignored
+	Fleet    int
+	Ships    []Stack // Design and Count; Damage is ignored
+	NewFleet int
 }
 
-func (o SplitOrder) apply(g *Game, player int, _ *Applied) error {
+func (o SplitOrder) apply(g *Game, player int, a *Applied) error {
+	if o.NewFleet > 0 || (o.NewFleet < 0 && a.newFleets[o.NewFleet] != 0) {
+		return fmt.Errorf("split fleet %d: new fleet name %d: %w", o.Fleet, o.NewFleet, ErrOutOfRange)
+	}
 	i, err := g.ownFleet(player, o.Fleet)
 	if err != nil {
 		return err
@@ -56,7 +73,71 @@ func (o SplitOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	g.Fleets = append(g.Fleets, nf)
 	g.moveShips(g.fleetIndex(src.ID), len(g.Fleets)-1, o.Ships)
+	if o.NewFleet < 0 {
+		a.newFleets[o.NewFleet] = nf.ID
+	}
 	return nil
+}
+
+// withNewFleets returns o with every fleet it names that is a new-fleet
+// name of the file (SplitOrder.NewFleet) replaced by that fleet's id.
+// Names not bound yet are left as they are.
+func withNewFleets(o Order, names map[int]int) Order {
+	if len(names) == 0 {
+		return o
+	}
+	id := func(v int) int {
+		if r, ok := names[v]; ok && v < 0 {
+			return r
+		}
+		return v
+	}
+	task := func(t Task) Task {
+		t.Fleet = id(t.Fleet)
+		return t
+	}
+	switch o := o.(type) {
+	case SplitOrder:
+		o.Fleet = id(o.Fleet)
+		return o
+	case MoveShipsOrder:
+		o.Fleet, o.With = id(o.Fleet), id(o.With)
+		return o
+	case MergeOrder:
+		o.Into = id(o.Into)
+		o.From = append([]int(nil), o.From...)
+		for k := range o.From {
+			o.From[k] = id(o.From[k])
+		}
+		return o
+	case FleetPlanOrder:
+		o.Fleet = id(o.Fleet)
+		return o
+	case RenameOrder:
+		o.Fleet = id(o.Fleet)
+		return o
+	case RepeatOrder:
+		o.Fleet = id(o.Fleet)
+		return o
+	case CargoOrder:
+		o.Fleet = id(o.Fleet)
+		if o.Target == TargetFleet {
+			o.ID = id(o.ID)
+		}
+		return o
+	case WaypointOrder:
+		o.Fleet = id(o.Fleet)
+		o.Task = task(o.Task)
+		o.Waypoints = append([]Waypoint(nil), o.Waypoints...)
+		for k := range o.Waypoints {
+			if o.Waypoints[k].Target == TargetFleet {
+				o.Waypoints[k].ID = id(o.Waypoints[k].ID)
+			}
+			o.Waypoints[k].Task = task(o.Waypoints[k].Task)
+		}
+		return o
+	}
+	return o
 }
 
 // MoveShipsOrder moves ships between two of the player's fleets at one

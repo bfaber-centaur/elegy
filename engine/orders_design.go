@@ -9,12 +9,29 @@ import "fmt"
 
 // DesignSlot gives one of a player's design slots its design, an index
 // into Game.Designs. Ship and starbase designs have separate slots.
+//
+// Created is the calendar year the design order stored the design, and
+// Picture its picture, 0..3 (AI.md "Storing a design", "Picture"; the
+// computer players' starbase family switch and design ageing read them,
+// CONFIRMED AI-2, AI-8, AI-19). Created 0 means a slot not made by a
+// design order. Nothing reads the two fields yet: the computer players
+// still keep their own copy until their driver reads the game state. This
+// change leaves game.SaveVersion as it is: a save (which holds the whole
+// Game) writes the fields, and an older save loads them as 0. The game
+// package's next save version refuses older saves and gives the starting
+// slots the start year and picture 0.
 type DesignSlot struct {
 	Owner    int
 	Starbase bool
 	Slot     int
 	Design   int
+	Created  int
+	Picture  int
 }
+
+// designPictures is the number of pictures per hull (AI.md "Picture":
+// "the hull's four pictures").
+const designPictures = 4
 
 // Design slots per player (LIMITS.md "Designs and battle plans",
 // BINARY-ONLY; the ship-slot count MEASURED by OB-026): a
@@ -91,6 +108,18 @@ func (g *Game) designInUse(d int) bool {
 // slot does not take; two fills for one slot, or an engine slot holding
 // fewer than its capacity, still reject the design (NewDesign).
 //
+// The slot records the year the order applies as the design's creation
+// year and the order's picture (AI.md "Storing a design": "The stored
+// design's creation year is the current year").
+//
+// ASSUMPTION L25: a picture outside 0..3 rejects the design; AI.md names
+// four pictures per hull and no order-time check.
+//
+// ASSUMPTION L26: a design edited in place in an occupied slot takes the
+// year of the edit as its creation year and the order's picture; AI.md
+// describes a computer player's replacement as a delete and a new design,
+// and says nothing of an edit.
+//
 // Mystery Trader items are not modelled: the player owns none.
 type DesignOrder struct {
 	Starbase bool
@@ -98,6 +127,7 @@ type DesignOrder struct {
 	Name     string
 	Hull     string
 	Fills    []SlotFill
+	Picture  int
 }
 
 func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
@@ -107,6 +137,9 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	if o.Slot < 0 || o.Slot >= limit || len(o.Name) > maxNameLength {
 		return fmt.Errorf("design %q slot %d: %w", o.Name, o.Slot, ErrOutOfRange)
+	}
+	if o.Picture < 0 || o.Picture >= designPictures {
+		return fmt.Errorf("design %q picture %d: %w", o.Name, o.Picture, ErrOutOfRange)
 	}
 	cat := Components()
 	if hc, ok := cat.Lookup(o.Hull); ok {
@@ -124,6 +157,8 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		if g.designInUse(old) {
 			return fmt.Errorf("design slot %d: the design in it is in use: %w", o.Slot, ErrOutOfRange)
 		}
+		g.DesignSlots = append([]DesignSlot(nil), g.DesignSlots...)
+		g.DesignSlots[i].Created, g.DesignSlots[i].Picture = g.Year, o.Picture
 		if g.designShared(old, i) {
 			// A design index another slot also names (a state built
 			// without design orders) is not overwritten under it.
@@ -138,7 +173,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	g.Designs = append(g.Designs[:len(g.Designs):len(g.Designs)], d)
 	g.DesignSlots = append(g.DesignSlots[:len(g.DesignSlots):len(g.DesignSlots)],
-		DesignSlot{Owner: player, Starbase: o.Starbase, Slot: o.Slot, Design: len(g.Designs) - 1})
+		DesignSlot{Owner: player, Starbase: o.Starbase, Slot: o.Slot, Design: len(g.Designs) - 1, Created: g.Year, Picture: o.Picture})
 	return nil
 }
 

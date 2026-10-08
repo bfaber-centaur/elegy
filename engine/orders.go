@@ -68,6 +68,9 @@ type Applied struct {
 	// "Manual cargo transfers to other players", CONFIRMED TK-501) at the
 	// front of its queue (TAKEOVER.md "Order inside a phase").
 	drops []drop
+	// newFleets maps the current file's new-fleet names to the fleets
+	// their splits made (SplitOrder.NewFleet).
+	newFleets map[int]int
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
@@ -132,11 +135,13 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 		if !ok {
 			continue
 		}
+		a.newFleets = map[int]int{}
 		for k, o := range files[i].Orders {
-			err := o.apply(g, p, a)
+			err := withNewFleets(o, a.newFleets).apply(g, p, a)
 			a.Results = append(a.Results, OrderResult{Player: p, Index: k, Err: err})
 		}
 	}
+	a.newFleets = nil
 	return a
 }
 
@@ -380,6 +385,14 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 // 1000 .. 1000 + W). A planet or fleet target takes that object's
 // position.
 //
+// A wormhole end or Mystery Trader target takes the object's position,
+// as the waypoint check gives it (ORDERS.md "Waypoint upkeep"; OBJECTS.md
+// "Travel": only a waypoint aimed at the end itself goes through), and
+// one that does not exist is rejected like a missing planet or fleet.
+//
+// ASSUMPTION L27: a wormhole or Trader target need not be known to the
+// player, as a planet or fleet target need not be.
+//
 // A warp outside 0..11, a target planet or fleet that does not exist,
 // and a negative transport amount reject the order (ORDERS.md "Waypoint
 // warp, target and transport", chosen rule). Warp 11 is
@@ -388,7 +401,8 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 //
 // Tasks: route, patrol and transfer fleet are accepted as well as
 // colonize, merge and transport (ORDERS.md "Waypoint upkeep and the
-// remaining tasks"), and so are remote mining and lay mines, whose
+// remaining tasks"), and so are scrap (TAKEOVER.md "Other waypoint
+// tasks"), remote mining and lay mines, whose
 // refusals (no mining modules, an inhabited planet, deep space, no
 // dispensers) happen when the task runs (KERNEL.md "Remote mining",
 // OBJECTS.md "Laying"). A transfer-fleet task is accepted whoever it names:
@@ -440,6 +454,15 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 				return fmt.Errorf("waypoint %d fleet %d: %w", k, wp.ID, ErrNoSuchObject)
 			}
 			wp.Pos = g.Fleets[t].Pos
+		case TargetWormhole, TargetTrader:
+			pos, ok := Point{}, false
+			if g.Objects != nil {
+				pos, ok = g.Objects.ObjectPos(wp.Target, wp.ID)
+			}
+			if !ok {
+				return fmt.Errorf("waypoint %d object %d: %w", k, wp.ID, ErrNoSuchObject)
+			}
+			wp.Pos = pos
 		case TargetSpace:
 			wp.Pos = g.clampToGalaxy(wp.Pos)
 		default:
@@ -456,7 +479,7 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 func validTask(t Task) error {
 	switch t.Kind {
 	case TaskNone, TaskColonize, TaskMerge, TaskRoute, TaskTransferFleet:
-	case TaskRemoteMine:
+	case TaskRemoteMine, TaskScrap:
 	case TaskLayMines:
 		if t.Years < 1 && t.Years != YearsIndefinitely {
 			return fmt.Errorf("lay mines for %d years: %w", t.Years, ErrOutOfRange)

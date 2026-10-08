@@ -884,6 +884,8 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 		return Task{Kind: TaskRoute}, ""
 	case "remote_mine":
 		return Task{Kind: TaskRemoteMine}, ""
+	case "scrap":
+		return Task{Kind: TaskScrap}, ""
 	case "transfer":
 		return Task{Kind: TaskTransferFleet, Player: w.Task.ToPlayer}, ""
 	case "patrol":
@@ -910,7 +912,8 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 			return Task{}, "fleet-to-fleet transport"
 		}
 		t := Task{Kind: TaskTransport}
-		for cargo, o := range w.Task.Orders {
+		for _, cargo := range pvKeys(w.Task.Orders) {
+			o := w.Task.Orders[cargo]
 			c, ok := pvCargo[cargo]
 			if !ok {
 				return Task{}, "transport " + cargo
@@ -1328,7 +1331,7 @@ func (l *pvLoaded) fleetEquals(g *Game, f *Fleet, eq map[string]json.RawMessage)
 		case "first_waypoint_task":
 			var want string
 			json.Unmarshal(raw, &want)
-			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge", TaskRoute: "route", TaskPatrol: "patrol", TaskTransferFleet: "transfer", TaskLayMines: "lay_mines", TaskRemoteMine: "remote_mine"}[f.Task.Kind]
+			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge", TaskRoute: "route", TaskPatrol: "patrol", TaskTransferFleet: "transfer", TaskLayMines: "lay_mines", TaskRemoteMine: "remote_mine", TaskScrap: "scrap"}[f.Task.Kind]
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
@@ -1682,7 +1685,8 @@ func (l *pvLoaded) viewCheck(g *Game, e pvExpect, eq map[string]json.RawMessage,
 	default:
 		return "skip: view of a " + sub.Kind
 	}
-	for k, w := range eq {
+	for _, k := range pvKeys(eq) {
+		w := eq[k]
 		gv, ok := got[k]
 		if !ok {
 			return "skip: view field " + k

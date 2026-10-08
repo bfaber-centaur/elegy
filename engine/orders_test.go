@@ -760,3 +760,44 @@ func TestPacketSettingsOrder(t *testing.T) {
 		t.Errorf("cleared: %v %+v", errs, g.Planets[0])
 	}
 }
+
+func TestDesignOrderCreatedAndPicture(t *testing.T) {
+	// AI.md "Storing a design": the stored design's creation year is the
+	// current year, and it has one of the hull's four pictures. ASSUMPTION
+	// L25: a picture outside 0..3 is rejected; L26: an edit in place
+	// restamps the year and picture.
+	g := ordersGame()
+	g.Year = 2410
+	scout := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
+	errs, _ := apply(g, 0,
+		DesignOrder{Slot: 3, Name: "S", Hull: "Scout", Fills: scout, Picture: 2},
+		DesignOrder{Starbase: true, Slot: 1, Name: "Fort", Hull: "Orbital Fort", Picture: 3},
+		DesignOrder{Slot: 4, Name: "X", Hull: "Scout", Fills: scout, Picture: 4},
+		DesignOrder{Slot: 4, Name: "Y", Hull: "Scout", Fills: scout, Picture: -1},
+	)
+	if errs[0] != nil || errs[1] != nil || !errors.Is(errs[2], ErrOutOfRange) || !errors.Is(errs[3], ErrOutOfRange) {
+		t.Fatalf("errors %v", errs)
+	}
+	slot := func(starbase bool, n int) DesignSlot {
+		for _, s := range g.DesignSlots {
+			if s.Owner == 0 && s.Starbase == starbase && s.Slot == n {
+				return s
+			}
+		}
+		t.Fatalf("no slot %v %d", starbase, n)
+		return DesignSlot{}
+	}
+	if s := slot(false, 3); s.Created != 2410 || s.Picture != 2 {
+		t.Errorf("ship slot 3: created %d picture %d, want 2410 and 2", s.Created, s.Picture)
+	}
+	if s := slot(true, 1); s.Created != 2410 || s.Picture != 3 {
+		t.Errorf("starbase slot 1: created %d picture %d, want 2410 and 3", s.Created, s.Picture)
+	}
+	g.Year = 2415
+	if errs, _ := apply(g, 0, DesignOrder{Slot: 3, Name: "S2", Hull: "Scout", Fills: scout, Picture: 1}); errs[0] != nil {
+		t.Fatal(errs[0])
+	}
+	if s := slot(false, 3); s.Created != 2415 || s.Picture != 1 {
+		t.Errorf("edited slot 3: created %d picture %d, want 2415 and 1", s.Created, s.Picture)
+	}
+}

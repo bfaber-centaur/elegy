@@ -265,7 +265,9 @@ func GenerateTurn(
 	// gained marks the players that gained tech this turn, from a capture
 	// or a battle.
 	gained := map[int]bool{}
-	queue, ev := g.unloadPhase(g.phaseStart())
+	// Scraps (TaskScrap) run in their place among these tasks.
+	recycled := scrapYear{}
+	queue, ev := g.unloadTasks(g.phaseStart(), nil, func(i int) []Event { return g.scrap(i, rng, gained, recycled) })
 	events = append(events, ev...)
 	queue = append(append([]drop(nil), applied.drops...), queue...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
@@ -355,6 +357,12 @@ func GenerateTurn(
 		gp, _ := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
 
 		res := col.Resources(p.Population, p.Factories)
+		if x := recycled[i]; x > 0 {
+			// Ships scrapped here this year (Ultimate Recycling).
+			added := recycledResources(res, x) - res
+			res += added
+			events = append(events, Event{Kind: EventScrapRecycled, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: added})
+		}
 		r, ev := g.PlanetProduction(i, ProductionInput{
 			Colony:         col,
 			Resources:      res,
@@ -444,7 +452,7 @@ func GenerateTurn(
 		if g.Terraform != nil && !moved[g.Fleets[i].ID] {
 			g.Terraform.RemoteMine(&g, i, rng)
 		}
-	})
+	}, nil)
 	events = append(events, ev...)
 	if len(layers) > 0 {
 		events = append(events, g.Objects.LayMines(&g, layers)...)

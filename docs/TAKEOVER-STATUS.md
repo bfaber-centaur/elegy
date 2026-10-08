@@ -50,6 +50,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
 | New colony with an empty default queue: no queue, all resources to research | `newColony` | MEASURED (WU-CAP) | `TestMeasuredEmptyDefaultQueueNoQueue` |
+| Scrap: before movement only; 4C/5, C/3, 9C/10, 9C/20 by starbase and the planet owner's Ultimate Recycling, C/3 as fresh salvage in deep space; cargo minerals on top; colonists to the owner's own planet; the planet owner's tech attempt at a starbase; the Ultimate Recycling production bonus (ASSUMPTION K9: the planet owner's trait) | `scrap`, `recycledResources` | CONFIRMED (T-34, TK-203, KB-2A) | `TestConfirmedScrapMinerals`, `TestConfirmedScrapRecycledResources`, `TestScrapOnlyBeforeMovement`, TK-111-S1..S10, M1..M4, TK-203 vectors |
 | New Alternate Reality colony: a starbase of the owner's first starbase design; "first" is the lowest occupied starbase slot (ASSUMPTION T3); with no starbase design, none (UNRESOLVED, the spec is silent) | `newColony`, `firstStarbaseDesign` | CONFIRMED (T-26, T-33) | `TestConfirmedAlternateRealityColonyStarbase`, `TestAlternateRealityColonyGeneratesYears` |
 | Starvation and AR starbase loss empty the planet | `GenerateTurn`, combat `finish` | as Capture | `TestPredictionEmptiedPlanet` |
 
@@ -70,7 +71,7 @@ spec does not give the scan's start value. The code says so at
 ## Not modelled
 
 - load actions ("load all", "fill to", "wait for", "set amount to", "set
-  waypoint to") and scrap. Fleet transfers, remote mining, mine laying,
+  waypoint to"). Fleet transfers, remote mining, mine laying,
   cargo given to other players' fleets and colonists dropped by a manual
   cargo order are implemented (KERNEL-STATUS.md, ORDERS-LAYER-STATUS.md);
 - ancient artifacts;
