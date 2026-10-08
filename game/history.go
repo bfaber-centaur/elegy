@@ -140,9 +140,11 @@ type designHistory []map[int]designRecord
 // record adds the designs each view showed this year. designs is the
 // game's design list as the views show it. A full sighting snapshots the
 // whole design. A partial sighting whose hull and mass match the full
-// snapshot keeps it, which may be stale (ASSUMPTION G3): a player cannot
-// tell from hull and mass that the parts changed. Any other partial
-// sighting replaces the record. year is the year the views describe.
+// snapshot keeps it (the higher level, MEASURED SC-037), which may be
+// stale (ASSUMPTION G3): a player cannot tell from hull and mass that the
+// parts changed. Any other partial sighting replaces the record (MEASURED
+// SC-037 for a partial record; ASSUMPTION G3 for a full one). Records are
+// never dropped. year is the year the views describe.
 func (h designHistory) record(year int, views []engine.PlayerView, designs []engine.Design) designHistory {
 	for len(h) < len(views) {
 		h = append(h, map[int]designRecord{})

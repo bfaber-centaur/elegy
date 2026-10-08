@@ -71,7 +71,7 @@ Computer opponents, scripted players and front ends all implement
 | `History` | for every planet ever reported to the player, the latest report and the year it describes; lost colonies stay recorded as the player's own | AI.md §1 "What it sees" (CONFIRMED AI-12); ASSUMPTION G1 below |
 | `Universe` | every planet's id, position and name index, seen or not | AI.md §1 (CONFIRMED AI-12: colonizers flown to never-scanned planets); ai/rototill.md §3 (MEASURED AI-17: scouts to the nearest never-seen planet) |
 | `Wormholes` | each wormhole end the player still knows, as last seen: the year, position and the stability its report named then; its destination when the player knows it and sees the other end this year | OBJECTS.md "Jiggle", "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); SCANNING.md (a known end beyond normal range is not seen); ASSUMPTION G2 below |
-| `KnownDesigns` | other players' designs the player knows: hull and mass for every design seen; the whole design, parts included, once shown in full (a War Monger viewer, or a battle the player took part in); the last year seen | SCANNING.md "Designs" (CONFIRMED SC-001..SC-023, SC-015, SC-031, SC-036); ASSUMPTION G3 below |
+| `KnownDesigns` | other players' designs the player knows: hull and mass for every design seen; the whole design, parts included, once shown in full (a War Monger viewer, or a battle the player took part in); the last year seen | SCANNING.md "Designs" (CONFIRMED SC-001..SC-023, SC-015, SC-031, SC-036; MEASURED SC-037 for what later years keep); ASSUMPTION G3 below |
 | `Objects` | the minefields, packets, Mystery Traders and salvage the player saw this year: owner, number and position; a minefield's mine count and kind; the detonate setting of its own fields and the warp, destination and cargo of its own packets only | SCANNING.md "Space objects" (CONFIRMED, who sees what); ASSUMPTION V4 in OBJECTS-STATUS.md (what a sighting shows; `objects.Space.Report`) |
 | `Rand` | the game's stream, during `Advance` only | AI.md §1 "Random numbers" |
 
@@ -96,12 +96,24 @@ A known design is reported as it was shown. An owner can put a new
 design in an unused slot under the same index (`engine.DesignOrder`),
 and the report keeps the old design until a view shows the new one.
 
-**ASSUMPTION G3:** a known design stays in the report in later years
-when no view shows it, and a design once shown in full stays known in
-full. A partial sighting whose hull and mass match keeps the full design
-last shown, which may be stale; one with another hull or mass replaces
-it. stars-elegy says what a player's file holds the year a design is
-revealed, not whether later files keep it.
+A known design stays in the report in later years when no view shows
+it, and a design once shown in full stays known in full: the original's
+history keeps every design it learned and merges each year's report,
+keeping the higher level (SCANNING.md "Designs", MEASURED SC-037, in
+computer players' files). A partial sighting of a different design in
+the same slot replaced a partial record (MEASURED once, SC-037).
+
+**ASSUMPTION G3** covers what SC-037 leaves UNRESOLVED or untested:
+
+- A partial sighting whose hull and mass match a full record keeps the
+  full design, which may be stale; one with another hull or mass
+  replaces it. Whether a different design replaces a full record is
+  UNRESOLVED.
+- A design its owner deleted stays known. Whether the original ever
+  drops it is UNRESOLVED.
+- Human players' reports follow the same rule. The original's client
+  writes a human player's history, and whether it behaves the same is
+  UNRESOLVED.
 
 **ELEGY CHOICE:** a driver's own state between years belongs to the
 driver, not the game. A saved game holds the game, its stream and the
