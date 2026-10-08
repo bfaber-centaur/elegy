@@ -81,6 +81,12 @@ type SpaceObjects interface {
 	// the owner's packet numbers, and a free object slot).
 	SalvageNumber(g *Game, owner int) (n int, ok bool)
 
+	// SetDetonate applies player's order turning detonation on or off
+	// for the player's own minefield number, or returns why it is
+	// refused (OBJECTS.md "The detonate setting"; ORDERS.md "Minefield
+	// detonate-setting"). A refused order changes nothing.
+	SetDetonate(g *Game, player, number int, on bool) error
+
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When
 	// knowledge is computed", "Space objects"), and returns, by player,

@@ -50,7 +50,7 @@ at the end of the replay, before any waypoint task.
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
 | `SplitOrder` | own fleet; a new fleet of the named ships with the source's plan, waypoints and task; cargo and fuel shared by capacity, rounded down, the remainder on the source; lowest free number (L20); repeat flag copied (L21); refused at 512 fleets; a NewFleet name below 0 stands for the new fleet in the file's later orders (L28) | ORDERS.md "Split" | CONFIRMED (CO-01, CO-02); FC-1 | `TestConfirmedSplitSharesByCapacity`, `TestConfirmedSplitAllRemainderOnSource`, `TestSplitNewFleetName` |
 | `MoveShipsOrder` | two own fleets at one place; ships move with their capacity share of cargo and fuel; damage combined by the merge order's rule; at most 32765 per stack, the rest lost; damaged stacks split keep their damage (L22); an emptied fleet removed (L23) | ORDERS.md "Split", "Merge" | CONFIRMED (CO-03); stack limit MEASURED (CO-06) | `TestConfirmedMoveShips`, `TestMoveShipsChecks` |
-| `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
+| `DetonateOrder` | sets the detonate setting of the player's own minefield through `SpaceObjects.SetDetonate`: owner only, Space Demolition only, standard fields only; a refusal is the order's error; no space objects: `ErrNoSuchObject` | ORDERS.md "Minefield detonate-setting", OBJECTS.md "The detonate setting" | BINARY-ONLY (chosen rule) | `TestDetonateWithoutObjects`, `TestDetonateOrderThroughEngine` (objects) |
 | `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, a sent percentage kept only against an unused old item of the same kind with exactly that percentage (chosen rule) | LIMITS.md "Production-queue replace" | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueNoNewProgress` |
 | `PlanetSettingsOrder` | own planet; leftover-only, route destination, packet destination (unchecked) and packet speed (0 or 4..19, L19) | LIMITS.md "Setting orders"; OBJECTS.md "The settings" | BINARY-ONLY; chosen rule | `TestPredictionSettingOrders`, `TestPacketSettingsOrder` |
 | `RelationsOrder` | only the sender's row | LIMITS.md "Setting orders" | BINARY-ONLY | `TestPredictionSettingOrders` |
@@ -157,9 +157,6 @@ successor needs before it can change.
 
 ### Orders Elegy does not implement
 
-- **Minefield detonate** (`DetonateOrder`): always `ErrNotModelled`.
-  ORDERS.md's rule (own minefield of a kind that can detonate) can be
-  applied once a minefield is reachable through `Game.Objects`.
 - **Mystery Trader items**: no order reaches them (the player owns none).
 - **The queued cross-player credit routine**: no legal order is known to
   reach it (ORDERS.md, stars-elegy #87, UNRESOLVED HYPOTHESIS).

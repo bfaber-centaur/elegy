@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -372,4 +373,50 @@ func TestConfirmedLaunchPacketInterface(t *testing.T) {
 func withRules(g engine.Game) engine.Game {
 	g.Rules = engine.ElegyRules()
 	return g
+}
+
+// A detonate order reaches the minefields through the engine's order
+// layer: the owner's Space Demolition order on its standard field is
+// applied, and each refusal comes back as the order's error and changes
+// nothing (OBJECTS.md "The detonate setting").
+func TestDetonateOrderThroughEngine(t *testing.T) {
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{
+		{Race: engine.Race{PRT: engine.PRTSpaceDemolition}},
+		{Race: engine.Race{PRT: engine.PRTJackOfAllTrades}},
+	}}
+	s := &Space{Minefields: []Minefield{
+		{Owner: 0, Number: 0, Kind: Standard, Count: 1000},
+		{Owner: 0, Number: 1, Kind: Heavy, Count: 1000},
+		{Owner: 1, Number: 0, Kind: Standard, Count: 1000},
+	}}
+	g.Objects = s
+	files := []engine.PlayerOrders{
+		{Player: 0, GameID: g.ID, Year: g.Year, Orders: []engine.Order{
+			engine.DetonateOrder{Minefield: 0, On: true},
+			engine.DetonateOrder{Minefield: 1, On: true},
+			engine.DetonateOrder{Minefield: 5, On: true},
+		}},
+		{Player: 1, GameID: g.ID, Year: g.Year, Orders: []engine.Order{
+			engine.DetonateOrder{Minefield: 0, On: true},
+		}},
+	}
+	a := engine.ApplyOrders(g, files, []int{0, 1})
+	want := map[[2]int]error{{0, 0}: nil, {0, 1}: ErrNotStandardMine, {0, 2}: ErrNoField, {1, 0}: ErrNotDemolition}
+	seen := 0
+	for _, r := range a.Results {
+		w, ok := want[[2]int{r.Player, r.Index}]
+		if !ok {
+			continue
+		}
+		seen++
+		if (w == nil) != (r.Err == nil) || (w != nil && !errors.Is(r.Err, w)) {
+			t.Errorf("player %d order %d: %v, want %v", r.Player, r.Index, r.Err, w)
+		}
+	}
+	if seen != len(want) {
+		t.Errorf("%d of %d order results", seen, len(want))
+	}
+	if !s.Minefields[0].Detonate || s.Minefields[1].Detonate || s.Minefields[2].Detonate {
+		t.Errorf("detonate settings %v %v %v", s.Minefields[0].Detonate, s.Minefields[1].Detonate, s.Minefields[2].Detonate)
+	}
 }
