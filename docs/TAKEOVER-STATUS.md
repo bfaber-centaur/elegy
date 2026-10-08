@@ -40,7 +40,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | "At the start of this phase" ownership | `phaseStart` | BINARY-ONLY (#34) | `TestPredictionPhaseStartOwnership` |
 | Unload amounts; own-planet unloads before or after growth; minerals on any planet | `unload` | BINARY-ONLY (#34) | `TestPredictionUnloadAmounts`, `TestPredictionForeignMinerals` |
 | Deep space: minerals destroyed (no salvage), colonists refused | `unload`, `deepSpace` | BINARY-ONLY (#37) | `TestPredictionDeepSpaceUnload` |
-| Salvage: a transport task loads minerals from it, capped by what it holds, and unloads minerals into it up to its stored size (ASSUMPTION T5–T7) | `loadSalvage`, `unloadSalvage`, `SpaceObjects.SalvageLoad`, `SalvageRoom` | BINARY-ONLY (OBJECTS.md "Salvage", "Loading") | `TestLoadFromSalvage`, `TestUnloadIntoSalvage` |
+| Salvage: a transport task loads minerals from it, capped by what it holds, and unloads minerals into it up to its stored size (ASSUMPTION T5–T7) | `loadSalvage`, `unloadSalvage`, `SpaceObjects.SalvageLoad`, `SalvageRoom` | BINARY-ONLY (OBJECTS.md "Salvage", "Loading") | `TestLoadFromSalvage`, `TestUnloadIntoSalvage`; through the adapter `TestSalvageLoadInTurn`, `TestSalvageUnloadInTurn`, `TestSalvageFirstAtPosition` |
 | Ground combat | `resolveDrops` | CONFIRMED (T-21..T-25); WM, IS, AR BINARY-ONLY | `TestConfirmedGroundCombat`, `TestPredictionGroundStrengthTraits` |
 | Drop resolution order | `resolveQueue` | BINARY-ONLY (#34) | none yet beyond one planet at a time |
 | Several players dropping | `dropWinner` (ruleset switch `Legacy.DropScan`) | LEGACY BUG, CONFIRMED (T-32) | `TestConfirmedSeveralPlayersDrop` |
