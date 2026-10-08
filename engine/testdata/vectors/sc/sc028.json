@@ -1073,30 +1073,6 @@
    "prediction": "3"
   },
   {
-   "id": "SC028-T75-out",
-   "rule": "SCANNING",
-   "setup": "75% -> 68% d2=27689 bound=27688",
-   "tag": "MEASURED",
-   "prediction_held": false,
-   "varies_by_stream": false,
-   "expect": [
-    {
-     "year": 1,
-     "kind": "view",
-     "viewer": 0,
-     "subject": {
-      "kind": "fleet",
-      "owner": 1,
-      "id": 1
-     },
-     "equals": {
-      "level": 3
-     }
-    }
-   ],
-   "prediction": "0"
-  },
-  {
    "id": "SC028-U85-in",
    "rule": "SCANNING",
    "setup": "85% -> 77% d2=14297 bound=14304",

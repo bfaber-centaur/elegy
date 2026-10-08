@@ -340,6 +340,29 @@ func TestWaypointOrderUpkeepTasks(t *testing.T) {
 	}
 }
 
+func TestWaypointOrderMiningAndLayingTasks(t *testing.T) {
+	// KERNEL.md "Remote mining" and OBJECTS.md "Laying": both tasks are
+	// accepted and refused, if at all, when they run. ASSUMPTION L24: a
+	// lay-mines duration below one year, other than indefinitely, is
+	// rejected.
+	g := ordersGame()
+	lay := Task{Kind: TaskLayMines, Years: 3}
+	forever := Task{Kind: TaskLayMines, Years: YearsIndefinitely}
+	mine := Task{Kind: TaskRemoteMine}
+	errs, _ := apply(g, 0,
+		WaypointOrder{Fleet: 1, Task: lay, Waypoints: []Waypoint{{Pos: Point{1100, 1100}, Task: mine}}},
+		WaypointOrder{Fleet: 2, Task: forever},
+		WaypointOrder{Fleet: 2, Task: Task{Kind: TaskLayMines}},
+		WaypointOrder{Fleet: 2, Task: Task{Kind: TaskLayMines, Years: -2}},
+	)
+	if errs[0] != nil || errs[1] != nil || !errors.Is(errs[2], ErrOutOfRange) || !errors.Is(errs[3], ErrOutOfRange) {
+		t.Fatalf("errors %v", errs)
+	}
+	if g.Fleets[0].Task != lay || g.Fleets[0].Waypoints[0].Task != mine || g.Fleets[1].Task != forever {
+		t.Errorf("tasks %+v, %+v and %+v", g.Fleets[0].Task, g.Fleets[0].Waypoints[0].Task, g.Fleets[1].Task)
+	}
+}
+
 func TestRepeatOrder(t *testing.T) {
 	// ORDERS.md "Reaching a waypoint": the repeat-orders flag; ownership
 	// checked (ORDERS.md "Ownership", chosen rule, against LIMITS.md's

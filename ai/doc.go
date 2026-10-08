@@ -20,7 +20,8 @@
 // armada parameters as 0 unless it set them itself. The original's
 // cross-player leaks are INTENTIONALLY DIFFERENT by project decision; a
 // legacy switch for them (legacy_ai_state_leak, off by default) is not
-// implemented yet. The planners keep no memory between years (AI.md §1,
+// implemented yet; if it is, it comes from the game's ruleset, never a
+// package-level setting. The planners keep no memory between years (AI.md §1,
 // CONFIRMED AI-10).
 //
 // Each rule cites its spec section and evidence label. Rules where the

@@ -356,7 +356,7 @@ func TestConfirmedColonyMinerals(t *testing.T) {
 // and fleets moving to a planet use a fuel-free engine.
 func (l *tkLab) turn(rng Rand) TurnResult {
 	l.t.Helper()
-	r, err := GenerateTurn(l.g, nil, Jrc3(), rng)
+	r, err := GenerateTurn(withRules(l.g), nil, rng)
 	if err != nil {
 		l.t.Fatal(err)
 	}

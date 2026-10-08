@@ -543,7 +543,7 @@ func TestPredictionSuperStealthAndStarbaseBonus(t *testing.T) {
 func TestPredictionTurnViews(t *testing.T) {
 	// GenerateTurn returns each player's view of the final state.
 	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
-	res, err := GenerateTurn(combatLabGame(prey, 6, 3), nil, Jrc3(), rand.New(rand.NewSource(3)))
+	res, err := GenerateTurn(withRules(combatLabGame(prey, 6, 3)), nil, rand.New(rand.NewSource(3)))
 	if err != nil {
 		t.Fatal(err)
 	}

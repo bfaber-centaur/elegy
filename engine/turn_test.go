@@ -7,10 +7,11 @@ import (
 
 func TestGenerateTurnAdvancesYear(t *testing.T) {
 	game := Game{
-		Year: 2400,
+		Year:  2400,
+		Rules: ElegyRules(),
 	}
 
-	result, err := GenerateTurn(game, nil, nil, highRand{})
+	result, err := GenerateTurn(game, nil, highRand{})
 	if err != nil {
 		t.Fatalf("GenerateTurn() error = %v", err)
 	}
@@ -21,7 +22,7 @@ func TestGenerateTurnAdvancesYear(t *testing.T) {
 }
 
 func TestGenerateTurnRejectsNilRand(t *testing.T) {
-	if _, err := GenerateTurn(pgHomeworld(), nil, Jrc3(), nil); err != ErrNilRand {
+	if _, err := GenerateTurn(withRules(pgHomeworld()), nil, nil); err != ErrNilRand {
 		t.Errorf("err = %v, want ErrNilRand", err)
 	}
 }
@@ -57,7 +58,7 @@ func TestConfirmedPGHomeworldTurns(t *testing.T) {
 	}
 	g := pgHomeworld()
 	for g.Year < 2436 {
-		r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+		r, err := GenerateTurn(withRules(g), nil, highRand{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -85,7 +86,7 @@ func TestConfirmedPGHomeworldTurns(t *testing.T) {
 
 func TestGenerateTurnDoesNotModifyInput(t *testing.T) {
 	g := pqGame(1050, []QueueItem{q(ItemFactory, 20, 0)})
-	if _, err := GenerateTurn(g, nil, Jrc3(), highRand{}); err != nil {
+	if _, err := GenerateTurn(withRules(g), nil, highRand{}); err != nil {
 		t.Fatal(err)
 	}
 	if g.Planets[0].Factories != 0 || g.Planets[0].Queue[0].Count != 20 || g.Planets[0].Population != 1050 {
@@ -120,7 +121,7 @@ func TestPredictionTurnAppliesOrders(t *testing.T) {
 		{Player: 1, GameID: g.ID, Year: g.Year - 1},
 	}
 	rng := &recordRand{}
-	r, err := GenerateTurn(*g, files, Jrc3(), rng)
+	r, err := GenerateTurn(withRules(*g), files, rng)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +164,7 @@ func TestPredictionRaceCheckInTurn(t *testing.T) {
 	before := pgHomeworld()
 	stub := &stubRaces{}
 	g.Races = stub
-	r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +180,7 @@ func TestPredictionRaceCheckInTurn(t *testing.T) {
 	if n != 1 || r.Game.Players[0].Race.GrowthRate != 1 {
 		t.Errorf("%d penalty events, growth rate %d; want 1 and 1", n, r.Game.Players[0].Race.GrowthRate)
 	}
-	plain, _ := GenerateTurn(before, nil, Jrc3(), highRand{})
+	plain, _ := GenerateTurn(withRules(before), nil, highRand{})
 	if r.Game.Planets[0].Population >= plain.Game.Planets[0].Population {
 		t.Errorf("population %d with the checked race, %d without; want less growth", r.Game.Planets[0].Population, plain.Game.Planets[0].Population)
 	}

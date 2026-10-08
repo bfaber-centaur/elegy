@@ -20,7 +20,8 @@ import (
 // expectations. A case is skipped, not failed, when it needs something
 // Elegy does not model yet (a task, target, object or expectation kind),
 // or when its outcome is random. CONFIRMED and LEGACY BUG cases are
-// exact-match targets; MEASURED ones are tallied apart.
+// exact-match targets; MEASURED passes are tallied apart, and every
+// failure, MEASURED or not, counts as a failure.
 //
 // testdata/vectors/baseline.txt lists the cases that pass, MEASURED ones
 // included, and the "random" cases with how many seed variants they pass
@@ -72,24 +73,27 @@ type pvPlayer struct {
 	ResearchNextField   json.RawMessage   `json:"research_next_field"`
 	Relations           map[string]string `json:"relations"`
 	MysteryTraderItems  []string          `json:"mystery_trader_items"`
-	Race                struct {
-		PRT           json.RawMessage `json:"prt"`
-		LRT           []string
-		GrowthPercent int `json:"growth_percent"`
-		Habitability  struct {
-			Gravity     [3]int `json:"gravity"`
-			Temperature [3]int `json:"temperature"`
-			Radiation   [3]int `json:"radiation"`
-		} `json:"habitability"`
-		ColonistsPerResource int               `json:"colonists_per_resource"`
-		Factory              pvEconomy         `json:"factory"`
-		Mine                 pvEconomy         `json:"mine"`
-		ResearchCost         map[string]string `json:"research_cost"`
-		FactoriesCostLess    bool              `json:"factories_cost_less"`
-		LeftoverSpend        string            `json:"leftover_spend"`
-		Stat15               int               `json:"stat_15"`
-		TechsStartHigh       bool              `json:"techs_start_high"`
-	} `json:"race"`
+	Race                pvRace            `json:"race"`
+}
+
+// pvRace is a vector race (FORMAT.md "race").
+type pvRace struct {
+	PRT           json.RawMessage `json:"prt"`
+	LRT           []string
+	GrowthPercent int `json:"growth_percent"`
+	Habitability  struct {
+		Gravity     [3]int `json:"gravity"`
+		Temperature [3]int `json:"temperature"`
+		Radiation   [3]int `json:"radiation"`
+	} `json:"habitability"`
+	ColonistsPerResource int               `json:"colonists_per_resource"`
+	Factory              pvEconomy         `json:"factory"`
+	Mine                 pvEconomy         `json:"mine"`
+	ResearchCost         map[string]string `json:"research_cost"`
+	FactoriesCostLess    bool              `json:"factories_cost_less"`
+	LeftoverSpend        string            `json:"leftover_spend"`
+	Stat15               int               `json:"stat_15"`
+	TechsStartHigh       bool              `json:"techs_start_high"`
 }
 
 type pvEconomy struct {
@@ -253,6 +257,10 @@ type PVRaceSettings struct {
 // so the external test package supplies it (races_parity_test.go).
 var pvRaces func(g *Game, settings []PVRaceSettings) RaceChecker
 
+// pvRaceSettingsOf reads a player's wizard settings back from the game's
+// race checker, after the year's check (races_parity_test.go).
+var pvRaceSettingsOf func(r RaceChecker, player int) (PVRaceSettings, bool)
+
 // pvTerraform is the game's remote mining and Orbital Adjusters
 // (terraformer.go). Package terraform imports the engine, so the external
 // test package supplies it (terraform_parity_test.go).
@@ -291,6 +299,94 @@ func (e *pvEconomy) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// pvOutOfRangePRT offsets an out-of-range stored PRT number (FORMAT.md
+// "race") into values no PRT constant takes, so the race check's clamp
+// sees an invalid PRT (RACES.md "In a running game" step 1, RD-P7).
+const pvOutOfRangePRT = 1000
+
+// pvByte reads a stored race setting as the signed byte the original
+// keeps (RACES.md "Repairs": a stored 251 is −5, the immune marker 255 is
+// −1).
+func pvByte(v int) int {
+	if v > 127 {
+		return v - 256
+	}
+	return v
+}
+
+// race is the vector race as an Elegy Race. An axis stored as 255 on all
+// three values is immune; any other habitat value is read as a signed
+// byte, so a low equal to the immune marker reaches the race check as
+// races.ImmuneMarker and is repaired there.
+func (q pvRace) race() (Race, error) {
+	var r Race
+	// An out-of-range PRT is given as its stored number (FORMAT.md).
+	var name string
+	if json.Unmarshal(q.PRT, &name) != nil {
+		var n int
+		if err := json.Unmarshal(q.PRT, &n); err != nil {
+			return r, fmt.Errorf("PRT %s", q.PRT)
+		}
+		r.PRT = PRT(pvOutOfRangePRT + n)
+	} else {
+		prt, ok := pvPRTs[name]
+		if !ok {
+			return r, fmt.Errorf("PRT %q", name)
+		}
+		r.PRT = prt
+	}
+	for _, t := range q.LRT {
+		switch t {
+		case "IFE":
+			r.LRT.ImprovedFuelEfficiency = true
+		case "TT":
+			r.LRT.TotalTerraforming = true
+		case "ARM":
+			r.LRT.AdvancedRemoteMining = true
+		case "ISB":
+			r.LRT.ImprovedStarbases = true
+		case "GR":
+			r.LRT.GeneralizedResearch = true
+		case "UR":
+			r.LRT.UltimateRecycling = true
+		case "MA":
+			r.LRT.MineralAlchemy = true
+		case "NRSE":
+			r.LRT.NoRamScoopEngines = true
+		case "CE":
+			r.LRT.CheapEngines = true
+		case "OBRM":
+			r.LRT.OnlyBasicRemoteMining = true
+		case "NAS":
+			r.LRT.NoAdvancedScanners = true
+		case "LSP":
+			r.LRT.LowStartingPopulation = true
+		case "BET":
+			r.LRT.BleedingEdgeTech = true
+		case "RS":
+			r.LRT.RegeneratingShields = true
+		default:
+			return r, fmt.Errorf("LRT %q", t)
+		}
+	}
+	r.GrowthRate = q.GrowthPercent
+	for axis, h := range [3][3]int{q.Habitability.Gravity, q.Habitability.Temperature, q.Habitability.Radiation} {
+		if h == [3]int{255, 255, 255} {
+			r.Env[axis] = EnvRange{Immune: true}
+			continue
+		}
+		r.Env[axis] = EnvRange{Center: pvByte(h[0]), Low: pvByte(h[1]), High: pvByte(h[2])}
+	}
+	r.ColonistsPerResource = q.ColonistsPerResource
+	r.FactoryOutput, r.FactoryCost, r.FactoriesOperated = q.Factory.Output, q.Factory.Cost, q.Factory.Per10k
+	r.MineOutput, r.MineCost, r.MinesOperated = q.Mine.Output, q.Mine.Cost, q.Mine.Per10k
+	r.FactoryLessGermanium = q.FactoriesCostLess
+	for name, c := range q.ResearchCost {
+		r.ResearchCosts[pvFields[name]] = map[string]ResearchCost{"normal": ResearchNormal, "expensive": ResearchExpensive, "cheap": ResearchCheap}[c]
+	}
+	return r, nil
+}
+
 var pvFields = map[string]int{"energy": Energy, "weapons": Weapons, "propulsion": Propulsion,
 	"construction": Construction, "electronics": Electronics, "biotechnology": Biotech}
 
@@ -316,6 +412,8 @@ type pvLoaded struct {
 	// queued marks the players with a production queue the harness does
 	// not load.
 	queued map[int]bool
+	// ordered marks the players the vector gives orders for.
+	ordered map[int]bool
 	// endID maps a vector wormhole end id to its waypoint target ID
 	// (pvWormholeEnds).
 	endID map[int]int
@@ -363,7 +461,10 @@ func pvElegyFleetID(owner, id int) int { return owner*100000 + id + 1 }
 func loadVector(v *pvVector) (*pvLoaded, error) {
 	s := v.InitialState
 	cat := Components()
-	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]Point{}, queued: map[int]bool{}}
+	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]Point{}, queued: map[int]bool{}, ordered: map[int]bool{}}
+	for _, b := range v.Orders {
+		l.ordered[b.Player] = true
+	}
 	var err error
 	if l.endID, err = pvWormholeEnds(s.Objects); err != nil {
 		return nil, err
@@ -380,63 +481,11 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
 		pl.Computer = p.Computer
-		r := &pl.Race
-		// An out-of-range PRT is given as its stored number (FORMAT.md).
-		var name string
-		if json.Unmarshal(p.Race.PRT, &name) != nil {
-			l.global = "out-of-range PRT " + string(p.Race.PRT)
-			continue
+		race, err := p.Race.race()
+		if err != nil {
+			return nil, err
 		}
-		prt, ok := pvPRTs[name]
-		if !ok {
-			return nil, fmt.Errorf("PRT %q", name)
-		}
-		r.PRT = prt
-		for _, t := range p.Race.LRT {
-			switch t {
-			case "IFE":
-				r.LRT.ImprovedFuelEfficiency = true
-			case "TT":
-				r.LRT.TotalTerraforming = true
-			case "ARM":
-				r.LRT.AdvancedRemoteMining = true
-			case "ISB":
-				r.LRT.ImprovedStarbases = true
-			case "GR":
-				r.LRT.GeneralizedResearch = true
-			case "UR":
-				r.LRT.UltimateRecycling = true
-			case "MA":
-				r.LRT.MineralAlchemy = true
-			case "NRSE":
-				r.LRT.NoRamScoopEngines = true
-			case "CE":
-				r.LRT.CheapEngines = true
-			case "OBRM":
-				r.LRT.OnlyBasicRemoteMining = true
-			case "NAS":
-				r.LRT.NoAdvancedScanners = true
-			case "LSP":
-				r.LRT.LowStartingPopulation = true
-			case "BET":
-				r.LRT.BleedingEdgeTech = true
-			case "RS":
-				r.LRT.RegeneratingShields = true
-			default:
-				return nil, fmt.Errorf("LRT %q", t)
-			}
-		}
-		r.GrowthRate = p.Race.GrowthPercent
-		for axis, h := range [3][3]int{p.Race.Habitability.Gravity, p.Race.Habitability.Temperature, p.Race.Habitability.Radiation} {
-			r.Env[axis] = EnvRange{Center: h[0], Low: h[1], High: h[2], Immune: h[0] == 255}
-		}
-		r.ColonistsPerResource = p.Race.ColonistsPerResource
-		r.FactoryOutput, r.FactoryCost, r.FactoriesOperated = p.Race.Factory.Output, p.Race.Factory.Cost, p.Race.Factory.Per10k
-		r.MineOutput, r.MineCost, r.MinesOperated = p.Race.Mine.Output, p.Race.Mine.Cost, p.Race.Mine.Per10k
-		r.FactoryLessGermanium = p.Race.FactoriesCostLess
-		for name, c := range p.Race.ResearchCost {
-			r.ResearchCosts[pvFields[name]] = map[string]ResearchCost{"normal": ResearchNormal, "expensive": ResearchExpensive, "cheap": ResearchCheap}[c]
-		}
+		pl.Race = race
 		for name, lv := range p.Tech {
 			pl.Research.Levels[pvFields[name]] = lv
 		}
@@ -723,6 +772,9 @@ func (l *pvLoaded) queueEquals(g *Game, e pvExpect) string {
 	if e.Planet == nil {
 		return "skip: production_queue without a planet"
 	}
+	if l.planned(l.startOwner(*e.Planet)) {
+		return "skip: " + pvPlannedWhy
+	}
 	if why := l.unsupportedAt(-1); why != "" {
 		return "skip: " + why
 	}
@@ -907,6 +959,9 @@ type pvResult struct {
 	why             string
 	passes          int    // seed variants the case passes with
 	refStatus       string // for a random case, the reference seed's status
+	// skipped is the reasons of the expectations skipped inside a case
+	// that was otherwise checked, one per expectation.
+	skipped []string
 }
 
 // pvCheck compares one expectation with a generated game; "" passes, a
@@ -986,6 +1041,20 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 			}
 		}
 		return pvMismatch("salvage", got, want.Minerals)
+	}
+	switch e.Kind {
+	case "fleet", "fleet_gone", "fleet_at", "no_fleet_at":
+		if l.planned(*e.Owner) {
+			return "skip: " + pvPlannedWhy
+		}
+	case "planet":
+		id := *e.ID
+		if e.Planet != nil {
+			id = *e.Planet
+		}
+		if l.planned(l.startOwner(id)) {
+			return "skip: " + pvPlannedWhy
+		}
 	}
 	switch e.Kind {
 	case "fleet", "fleet_gone":
@@ -1070,6 +1139,28 @@ func (l *pvLoaded) pvCheck(g *Game, e pvExpect) string {
 		return l.designEquals(g, *e.Owner, *e.Slot, eq)
 	}
 	return "skip: expectation " + e.Kind
+}
+
+// pvPlannedWhy is the reason a computer player's fleets, planets and
+// queues are not compared when the vector carries no orders for it: the
+// host plans a computer player's orders each year (FORMAT.md "players"),
+// and Elegy's harness runs no planner.
+const pvPlannedWhy = "a computer player's planned orders (not in the vector)"
+
+// planned reports whether owner is a computer player the vector gives no
+// orders for.
+func (l *pvLoaded) planned(owner int) bool {
+	return owner >= 0 && owner < len(l.g.Players) && l.g.Players[owner].Computer && !l.ordered[owner]
+}
+
+// startOwner is the owner of the vector's planet id at the start, or −1.
+func (l *pvLoaded) startOwner(id int) int {
+	for _, p := range l.g.Planets {
+		if p.ID == l.planet[id] {
+			return p.Owner
+		}
+	}
+	return -1
 }
 
 // unsupportedAt is a reason to skip a check that any of owner's fleets
@@ -1363,6 +1454,30 @@ func (l *pvLoaded) playerEquals(g *Game, id int, eq map[string]json.RawMessage) 
 					errs = append(errs, pvMismatch(k+"."+f, got, want[f]))
 				}
 			}
+		case "race":
+			var q pvRace
+			if err := json.Unmarshal(eq[k], &q); err != nil {
+				return "skip: race: " + err.Error()
+			}
+			want, err := q.race()
+			if err != nil {
+				return "skip: race: " + err.Error()
+			}
+			if got := g.Players[id].Race; got != want {
+				errs = append(errs, pvMismatch("race", fmt.Sprintf("%+v", got), fmt.Sprintf("%+v", want)))
+			}
+			if pvRaceSettingsOf == nil || g.Races == nil {
+				return "skip: race settings without a race check"
+			}
+			st, ok := pvRaceSettingsOf(g.Races, id)
+			if !ok {
+				return "skip: race settings without a race check"
+			}
+			spend := pvLeftoverSpend[q.LeftoverSpend]
+			if st.Spend != spend || st.Stat15 != q.Stat15 || st.ExpensiveAt3 != q.TechsStartHigh {
+				errs = append(errs, pvMismatch("race settings", fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", st.Spend, st.Stat15, st.ExpensiveAt3),
+					fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", spend, q.Stat15, q.TechsStartHigh)))
+			}
 		default:
 			return "skip: player field " + k
 		}
@@ -1407,10 +1522,6 @@ func runVector(v *pvVector, k int) []pvResult {
 		}
 		return out
 	}
-	if v.corpus == "rp" {
-		// Every rp case tests the race penalty.
-		l.global = "the turn-time race check (RACES.md \"In a running game\")"
-	}
 	if l.global != "" {
 		for _, c := range v.Cases {
 			res(c, "skip", l.global)
@@ -1430,7 +1541,7 @@ func runVector(v *pvVector, k int) []pvResult {
 			}
 			return out
 		}
-		r, err := GenerateTurn(g, files, Jrc3(), rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
+		r, err := GenerateTurn(withRules(g), files, rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
 		if err != nil {
 			genErr = err
 			break
@@ -1449,7 +1560,9 @@ func runVector(v *pvVector, k int) []pvResult {
 			continue
 		}
 		var fails, skips []string
-		checked := 0
+		// checked counts the compared expectations; exact, those of them
+		// that are not samples.
+		checked, exact := 0, 0
 		for _, e := range c.Expect {
 			if e.Stream != "" {
 				skips = append(skips, "stream "+e.Stream)
@@ -1467,9 +1580,13 @@ func runVector(v *pvVector, k int) []pvResult {
 				skips = append(skips, "sample: one stream's random outcome")
 			case msg != "":
 				checked++
+				exact++
 				fails = append(fails, fmt.Sprintf("y%d %s: %s", e.Year, e.Kind, msg))
 			default:
 				checked++
+				if !e.Sample {
+					exact++
+				}
 			}
 		}
 		switch {
@@ -1479,8 +1596,15 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "fail", strings.Join(fails, " | "))
 		case checked == 0:
 			res(c, "skip", strings.Join(pvUnique(skips), ", "))
+		case exact == 0:
+			// Only samples matched: evidence of the rule, never of an
+			// exact value.
+			res(c, "sample-only", "every compared expectation is a sample")
 		default:
 			res(c, "pass", "")
+		}
+		if checked > 0 {
+			out[len(out)-1].skipped = skips
 		}
 	}
 	return out
@@ -1589,9 +1713,6 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
-	// PARITY.md: the original put the fleet at y 1000, not the vector's
-	// y 920, inside the cloak bound; SC-033 repeats the case.
-	"SC028-T75-out": "setup artifact (PARITY.md \"SC-028-T75-out\")",
 }
 
 func pvUnique(xs []string) []string {
@@ -1620,17 +1741,28 @@ const pvSeeds = 8
 func pvStreamCheck(runs [][]pvResult) []pvResult {
 	out := runs[0]
 	for i, r := range out {
-		passes, same := 0, true
+		passes, samples, same, onlySamples := 0, 0, true, true
 		for _, run := range runs {
 			if run[i].id != r.id {
 				panic("parity: seed variants disagree on case order")
 			}
-			if run[i].status == "pass" {
+			switch run[i].status {
+			case "pass":
 				passes++
+			case "sample-only":
+				samples++
 			}
 			same = same && run[i].status == r.status
+			onlySamples = onlySamples && (run[i].status == "sample-only" || run[i].status == "skip")
 		}
-		if !same {
+		switch {
+		case !same && onlySamples:
+			// Each seed either matched only samples or had every sample
+			// miss: sample-only on the seeds that matched.
+			out[i].status = "sample-only"
+			out[i].passes = samples
+			out[i].why = fmt.Sprintf("sample-only with %d of %d seeds; every sample missed on the others", samples, len(runs))
+		case !same:
 			why := r.why
 			if why == "" {
 				why = "matches"
@@ -1639,6 +1771,8 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 			out[i].passes = passes
 			out[i].refStatus = r.status
 			out[i].why = fmt.Sprintf("passes with %d of %d seeds; reference seed %s: %s", passes, len(runs), r.status, why)
+		case r.status == "sample-only":
+			out[i].passes = len(runs)
 		}
 	}
 	return out
@@ -1646,14 +1780,25 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 
 func TestParityVectors(t *testing.T) {
 	var all []pvResult
+	// Expectations skipped inside checked cases, by reason, from the
+	// reference seed.
+	partial := map[string]int{}
 	for _, v := range loadVectors(t) {
 		runs := make([][]pvResult, pvSeeds)
 		for k := range runs {
 			runs[k] = runVector(v, k)
 		}
+		for _, r := range runs[0] {
+			for _, why := range r.skipped {
+				if strings.HasPrefix(why, "stream ") {
+					why = "stream (another oracle random stream)"
+				}
+				partial[why]++
+			}
+		}
 		all = append(all, pvStreamCheck(runs)...)
 	}
-	type tally struct{ pass, fail, skip, measured, differs, random, randomFail int }
+	type tally struct{ pass, fail, skip, measured, differs, random, randomFail, sampleOnly int }
 	per := map[string]*tally{}
 	var corpora []string
 	for _, r := range all {
@@ -1668,11 +1813,13 @@ func TestParityVectors(t *testing.T) {
 			tl.skip++
 		case r.status == "differs":
 			tl.differs++
+		case r.status == "sample-only":
+			tl.sampleOnly++
 		case r.status == "random" && r.refStatus == "fail":
 			tl.randomFail++
 		case r.status == "random":
 			tl.random++
-		case r.tag == "MEASURED":
+		case r.status == "pass" && r.tag == "MEASURED":
 			tl.measured++
 		case r.status == "pass":
 			tl.pass++
@@ -1682,12 +1829,15 @@ func TestParityVectors(t *testing.T) {
 	}
 	for _, c := range corpora {
 		tl := per[c]
-		t.Logf("%-4s pass %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d  measured %3d", c, tl.pass, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail, tl.measured)
+		t.Logf("%-5s pass %3d  measured pass %3d  sample-only %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d", c, tl.pass, tl.measured, tl.sampleOnly, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail)
 	}
 	for _, r := range all {
-		if r.status != "pass" {
+		if r.status != "pass" && r.status != "sample-only" {
 			t.Logf("%s %-10s %-4s %s", r.status, r.tag, r.id, r.why)
 		}
+	}
+	for _, why := range pvKeys(partial) {
+		t.Logf("expectations skipped in checked cases: %4d %s", partial[why], why)
 	}
 
 	if os.Getenv("PARITY_BASELINE") == "write" {
@@ -1698,10 +1848,19 @@ func TestParityVectors(t *testing.T) {
 		w := bufio.NewWriter(f)
 		fmt.Fprintln(w, "# Parity cases Elegy passes (TestParityVectors). One case id per line;")
 		fmt.Fprintf(w, "# \"random k\" after an id: the case passes with k of the %d seed variants.\n", pvSeeds)
+		fmt.Fprintln(w, "# \"sample-only\" after an id: every expectation the case compares is a sample")
+		fmt.Fprintln(w, "# that matched, so it is evidence of the rule, not of an exact value; \"sample-only k\":")
+		fmt.Fprintln(w, "# so on k seeds, with every sample missing on the others.")
 		for _, r := range all {
 			switch r.status {
 			case "pass":
 				fmt.Fprintln(w, r.id)
+			case "sample-only":
+				if r.passes < pvSeeds {
+					fmt.Fprintf(w, "%s sample-only %d\n", r.id, r.passes)
+				} else {
+					fmt.Fprintln(w, r.id, "sample-only")
+				}
 			case "random":
 				fmt.Fprintf(w, "%s random %d\n", r.id, r.passes)
 			}
@@ -1724,6 +1883,16 @@ func TestParityVectors(t *testing.T) {
 			continue
 		}
 		r := status[fields[0]]
+		if len(fields) >= 2 && fields[1] == "sample-only" {
+			want := pvSeeds
+			if len(fields) == 3 {
+				want, _ = strconv.Atoi(fields[2])
+			}
+			if r.status != "pass" && (r.status != "sample-only" || r.passes < want) {
+				t.Errorf("baseline case %s was sample-only with %d of %d seeds, now %s: %s", fields[0], want, pvSeeds, r.status, r.why)
+			}
+			continue
+		}
 		want := pvSeeds
 		if len(fields) == 3 && fields[1] == "random" {
 			want, _ = strconv.Atoi(fields[2])

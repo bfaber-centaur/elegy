@@ -21,3 +21,8 @@ func (s *script) Intn(n int) int {
 	}
 	return v
 }
+
+// top always draws the highest value: no chance-gated rule fires.
+type top struct{}
+
+func (top) Intn(n int) int { return n - 1 }

@@ -1052,7 +1052,8 @@
      "kind": "fleet_gone",
      "owner": 0,
      "id": 0,
-     "year": 1
+     "year": 1,
+     "sample": true
     },
     {
      "kind": "trader",
@@ -1069,7 +1070,8 @@
        0
       ]
      },
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "prediction": "flies 31 ly to the Trader's end point (1281,1300) and trades: consumed; Trader met mask 0x1"

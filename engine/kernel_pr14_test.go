@@ -123,7 +123,7 @@ func TestPredictionEmptyPlanetNoDeaths(t *testing.T) {
 	g := pgHomeworld()
 	g.Planets[0].Env = [3]int{0, 0, 0}
 	g.Planets[0].Population, g.Planets[0].GrowthCarry = 0, 0
-	r, err := GenerateTurn(g, nil, Jrc3(), highRand{})
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestPredictionMiningDrawOrder(t *testing.T) {
 	two.Pos = Point{1, 1}
 	g.Planets = []Planet{two, one}
 	// The player shuffle's draw comes first.
-	r, err := GenerateTurn(g, nil, Jrc3(), &seqRand{draws: []int{0, 0, 0, 99, 99, 99, 0}})
+	r, err := GenerateTurn(withRules(g), nil, &seqRand{draws: []int{0, 0, 0, 99, 99, 99, 0}})
 	if err != nil {
 		t.Fatal(err)
 	}

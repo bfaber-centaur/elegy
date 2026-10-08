@@ -68,7 +68,8 @@ func (o SplitOrder) apply(g *Game, player int, _ *Applied) error {
 // ships after a move; the rest are lost (MEASURED CO-06).
 //
 // Moved ships joining ships of their design combine damage by the merge
-// order's rule, the units averaged over the damaged ships (ORDERS.md
+// order's rule, the units averaged over the damaged ships and rounded
+// down (ORDERS.md
 // "Merge", CONFIRMED CO-05, CO-05b, CO-05c).
 //
 // ASSUMPTION L22: the moved ships of a damaged stack keep its damage
@@ -207,7 +208,7 @@ func (g *Game) moveShips(from, to int, ships []Stack) {
 			j = g.insertStack(dst, moved)
 		} else {
 			d := &dst.Stacks[j]
-			d.Damage = mergeDamage(*d, moved, false)
+			d.Damage = mergeDamage(*d, moved, mergeOrderDamaged)
 			d.Count += moved.Count
 		}
 		dst.Stacks[j].Count = min(dst.Stacks[j].Count, maxExchangeStack)
