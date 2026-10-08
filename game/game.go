@@ -155,7 +155,10 @@ func (g *Game) Report(player int) (Report, error) {
 			if wi >= len(sp.Wormholes) || !sp.Wormholes[wi].Ends[ei].KnownBy(player) {
 				continue
 			}
-			k := KnownWormholeEnd{End: w.End, Year: w.Year, Pos: w.Pos, Stability: w.Stability}
+			if r.Self.Computer && !seen[w.End] {
+				continue // SCANNING.md "Space objects", MEASURED SC-038
+			}
+			k := KnownWormholeEnd{End: w.End, Year: w.Year, Pos: w.Pos, Stability: w.Stability, Years: w.Years}
 			if d, ok := sp.Destination(wi, ei, player, seen[objects.WormholeEndID(wi, 1-ei)]); ok {
 				k.Destination = &d
 			}
