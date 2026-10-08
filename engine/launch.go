@@ -254,9 +254,9 @@ func designArmor(d Design) int {
 // the planet, in fleet order, whose stack of the design stays at or below
 // 32765, or are lost (CONFIRMED SL-08..SL-10).
 //
-// Not modelled: the Alternate Reality default remote-mining task (Elegy
-// has no remote mining), and the "did not move" mark, which GenerateTurn
-// must leave off a fleet built this year (CONFIRMED SL-03).
+// An Alternate Reality owner's fleet that can mine gets the remote-mining
+// task at the planet (defaultTask, CONFIRMED SL-11). GenerateTurn leaves
+// the "did not move" mark off a fleet built this year (CONFIRMED SL-03).
 func (g *Game) Launch(pi, design, count int) ([]Event, int) {
 	p := &g.Planets[pi]
 	owner := p.Owner
@@ -281,6 +281,7 @@ func (g *Game) Launch(pi, design, count int) ([]Event, int) {
 	}
 	f := Fleet{ID: g.newFleetID(), Number: g.lowestFreeFleetNumber(owner), Owner: owner, Pos: p.Pos, Stacks: []Stack{{Design: design, Count: count}}}
 	f.Fuel = g.tankCapacity(&f)
+	f.Task = g.defaultTask(&f)
 	events := []Event{{Kind: EventShipsBuilt, Player: owner, Planet: p.ID, Fleet: f.ID, Count: count}}
 	if p.HasRoute {
 		if dst := g.planetIndex(p.RouteTo); dst >= 0 {

@@ -132,6 +132,11 @@ type Settings struct {
 	ComputerAlliances bool
 	PublicScores      bool
 	Clumping          bool
+
+	// Victory is the victory-conditions dialog, in engine.Victory's
+	// encoding. The game stores it with each disabled condition's value
+	// as 0 (storedVictory).
+	Victory engine.Victory
 }
 
 // Width is the galaxy width W in light years (UNIVERSE.md "Conventions").
@@ -252,6 +257,10 @@ func (g *generator) run() (Result, error) {
 	g.res.Game = engine.Game{
 		Year:           2400,
 		SlowerTech:     g.s.SlowerTech,
+		RandomEvents:   !g.s.NoRandomEvents,
+		Size:           int(g.s.Size),
+		PublicScores:   g.s.PublicScores,
+		Victory:        storedVictory(g.s.Victory),
 		PlanetScanners: g.cat.PlanetScanners(),
 		Defenses:       g.cat.Defenses(),
 	}
@@ -277,6 +286,30 @@ func (g *generator) run() (Result, error) {
 	// a new game has only its wormholes. Result.Wormholes is the same slice.
 	g.res.Game.Objects = &objects.Space{Wormholes: g.res.Wormholes}
 	return g.res, nil
+}
+
+// storedVictory is the victory settings as a new game stores them: a
+// disabled condition's value is stored as 0, which decodes as that
+// condition's lowest value (tech: both the level and the field count);
+// enabled conditions, the number needed and the minimum years keep
+// their values.
+//
+// MEASURED: every UG vector's stored victory conditions (UG01-E ..
+// UG30-E, stars-elegy vectors "ug"). UNIVERSE.md and KERNEL.md do not
+// state the rule yet. It matters because a condition's flag is set in
+// the score record when met even when disabled (KERNEL.md "Yearly score
+// record").
+func storedVictory(v engine.Victory) engine.Victory {
+	vals := [engine.NumVictory]*int{&v.Planets, &v.TechLevel, &v.Score, &v.Lead, &v.Resources, &v.Capital, &v.Highest}
+	for c, p := range vals {
+		if !v.Enabled[c] {
+			*p = 0
+			if c == engine.VictoryTech {
+				v.TechFields = 0
+			}
+		}
+	}
+	return v
 }
 
 func d2(a, b engine.Point) int {

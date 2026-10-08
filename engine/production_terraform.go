@@ -1,23 +1,7 @@
 package engine
 
-// Terraformer is the terraforming rules production uses for Terraform
-// Environment (planetary item 12) and Auto Min / Auto Max Terraform
-// (KERNEL.md "Terraforming"). Package terraform implements it
-// (terraform.Rules); the engine cannot import that package. Each method is
-// the terraform function of the same name (docs/TERRAFORM-STATUS.md).
-type Terraformer interface {
-	// Reach is how far race at these tech levels terraforms each axis.
-	Reach(race Race, levels [NumFields]int) [3]int
-	// Capacity is the improving clicks still available on p.
-	Capacity(p Planet, race Race, reach [3]int) int
-	// Improve makes one improving click on p and returns the axis moved,
-	// or -1.
-	Improve(p *Planet, race Race, reach [3]int) int
-	// UnitCost is a Terraform Environment unit's resource cost.
-	UnitCost(race Race) int
-	// AutoUnits is how many units an auto item builds this year.
-	AutoUnits(count, capacity int, minOnly bool, popChange, hab int) int
-}
+// Terraform Environment (planetary item 12) and Auto Min / Auto Max
+// Terraform go through Game.Terraform (terraformer.go).
 
 // terraform reports whether k builds Terraform Environment units.
 func (k ItemKind) terraform() bool { return k.real() == ItemTerraform }

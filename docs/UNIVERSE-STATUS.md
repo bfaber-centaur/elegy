@@ -60,6 +60,29 @@ Test names follow the engine's convention:
 | Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `legacySecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
+| Expert +10% before the BBS factor, each truncating, then the second-planet split | `players.go` | MEASURED (UG03 player 2: 736/368; UG21 player 9: 768); not in UNIVERSE.md yet |
+| Game options carried into `engine.Game`: random events, size, public scores | `newgame.go` | used by the turn (KERNEL.md "Game options during a turn") |
+| Stored victory conditions: a disabled condition's value stored as 0 | `newgame.go` `storedVictory` | MEASURED (UG01-E..UG30-E); not in UNIVERSE.md or KERNEL.md yet |
+
+## UG vectors
+
+`newgame/vectors_test.go` runs the 30 UG vectors from
+`engine/testdata/vectors/ug` through `Generate` over 8 seeds (the
+engine's parity harness has no new-game path):
+
+- player expectations (starting tech, ship design count) are exact;
+- the samples are checked for what the rules decide:
+  - planet counts at or below N, reaching N when the original did;
+  - wormhole counts in OBJECTS.md's range per size, none with random
+    events off (the vectors count wormhole ends, two per pair);
+  - homeworld and second-planet population and installations, and fleet
+    counts;
+  - the stored victory conditions.
+- A computer player with level 0 has a random level the vector does not
+  record; the test tries each level for that player. Every such player in
+  UG05, UG10 and UG15 matches expert.
+
+All 124 player expectations and all 214 sample checks pass.
 
 ## LEGACY BUG switches
 
@@ -81,8 +104,6 @@ Marked `ELEGY CHOICE` in the code:
   wrap from 998 to 0;
 - players are assigned to homeworlds by a Fisher–Yates shuffle; second
   planets are picked in player order, after every homeworld is owned;
-- BBS before the expert +10%, each truncating, then the second-planet
-  split;
 - which hull slot holds each starting ship part, and the design names;
 - the ARM Midget Miners are two one-ship fleets; fleet ids run across the
   whole game in creation order;

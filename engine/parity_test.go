@@ -253,6 +253,11 @@ type PVRaceSettings struct {
 // so the external test package supplies it (races_parity_test.go).
 var pvRaces func(g *Game, settings []PVRaceSettings) RaceChecker
 
+// pvTerraform is the game's remote mining and Orbital Adjusters
+// (terraformer.go). Package terraform imports the engine, so the external
+// test package supplies it (terraform_parity_test.go).
+var pvTerraform Terraformer
+
 // pvLeftoverSpend maps a race's leftover_spend to its wizard number.
 var pvLeftoverSpend = map[string]int{"surface_minerals": 0, "mineral_concentrations": 1, "mines": 2, "factories": 3, "defenses": 4}
 
@@ -479,6 +484,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 		}
 		g.Races = pvRaces(g, settings)
 	}
+	g.Terraform = pvTerraform
 
 	addDesign := func(d pvDesign, starbase bool) error {
 		var fills []SlotFill
@@ -705,11 +711,10 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 // pvItemKinds maps the planetary queue item ids Elegy builds to its
 // items (FORMAT.md "Queue items"). The packet items (6, 14–17) stay unmapped: a
 // vector's planet carries no packet destination or speed, which they need.
-// Terraform items (4, 5, 12) stay unmapped until the loader sets
-// Game.Terraform: without it they stop the queue.
 var pvItemKinds = map[int]ItemKind{
 	0: ItemAutoMines, 1: ItemAutoFactories, 2: ItemAutoDefenses, 3: ItemAutoAlchemy,
-	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy,
+	4: ItemAutoMinTerraform, 5: ItemAutoMaxTerraform,
+	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy, 12: ItemTerraform,
 }
 
 // queueEquals checks a planet's production queue (FORMAT.md
@@ -825,6 +830,8 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 		return Task{Kind: TaskColonize}, ""
 	case "route":
 		return Task{Kind: TaskRoute}, ""
+	case "remote_mine":
+		return Task{Kind: TaskRemoteMine}, ""
 	case "transfer":
 		return Task{Kind: TaskTransferFleet, Player: w.Task.ToPlayer}, ""
 	case "patrol":
@@ -1230,7 +1237,7 @@ func (l *pvLoaded) fleetEquals(g *Game, f *Fleet, eq map[string]json.RawMessage)
 		case "first_waypoint_task":
 			var want string
 			json.Unmarshal(raw, &want)
-			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge", TaskRoute: "route", TaskPatrol: "patrol", TaskTransferFleet: "transfer", TaskLayMines: "lay_mines"}[f.Task.Kind]
+			got := map[TaskKind]string{TaskNone: "none", TaskTransport: "transport", TaskColonize: "colonize", TaskMerge: "merge", TaskRoute: "route", TaskPatrol: "patrol", TaskTransferFleet: "transfer", TaskLayMines: "lay_mines", TaskRemoteMine: "remote_mine"}[f.Task.Kind]
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
