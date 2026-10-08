@@ -86,7 +86,7 @@ Known gaps that a long game can reach:
 
 ### After that: games against the computer opponents
 
-Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. A game with computer players replays identically, uninterrupted or across a save and reload into fresh drivers (`TestDriversSaveReload`, [#70](https://github.com/bfaber-centaur/elegy/issues/70)). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
+Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. A game with computer players replays identically uninterrupted. Across a save and reload into fresh drivers, `TestDriversSaveReload` tests one tiny galaxy (seed 7) with the three at expert level, for 50 years under both rulesets ([#70](https://github.com/bfaber-centaur/elegy/issues/70)). Beyond that case, the claim rests on the drivers keeping no state between years (`ai/driver.go`). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
 
 ## Front ends
 
