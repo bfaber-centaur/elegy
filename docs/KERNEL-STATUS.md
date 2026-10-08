@@ -17,8 +17,9 @@ the GT, MF, OB, WT and WU vectors running through it in
 failures" with its real reason. As of this change, in the baseline: GT
 4 pass; MF 23 pass, 2 random; OB 119 pass, 6 random; WT 23 pass, 5
 random; WU 28 pass. Packet items build and launch through
-`SpaceObjects.LaunchPacket`; the harness does not map them (vectors
-carry no packet destination).
+`SpaceObjects.LaunchPacket`; the harness maps them (items 6, 14–17)
+since the vectors carry each planet's packet destination and warp
+(stars-elegy 4247afc).
 
 ## Tests: ground truth versus predictions
 
@@ -471,11 +472,9 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
   transport fuel and the fill, wait, set-amount and set-waypoint actions
   ("load all" and "load exactly" are loaded), `design` and
   `design_delete` orders.
-- Production queues with unmapped planetary items (14 and more): the
-  packet items 6 and 14–17 (vectors carry no packet destination) and the
-  terraform items 4, 5 and 12 until the orders lane's items land. Packets
-  launched from such a queue are skipped too ("a packet from a
-  production queue").
+- Production queues with unmapped planetary items: 10 (unused), 13
+  (the Genesis Device) and the scanners 18–27. Packets launched from such
+  a queue are skipped too ("a packet from a production queue").
 - Stream cycles beyond the harness's seeds, "original environment null",
   "design read needs the order layer's design source", and KX-002-R3/R4
   (the next research field choice is not in the vector).

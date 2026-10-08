@@ -255,6 +255,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 9,
+    "packet_destination": 23,
     "starbase": {
      "design": 2,
      "damage": 0
@@ -287,6 +289,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 11,
+    "packet_destination": 19,
     "starbase": {
      "design": 2,
      "damage": 0
@@ -319,6 +323,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 4,
+    "packet_destination": 21,
     "starbase": {
      "design": 3,
      "damage": 0
@@ -351,6 +357,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 4,
+    "packet_destination": 22,
     "starbase": {
      "design": 4,
      "damage": 0
@@ -383,6 +391,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 7,
+    "packet_destination": 20,
     "starbase": {
      "design": 2,
      "damage": 0
@@ -543,6 +553,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 10,
+    "packet_destination": 12,
     "starbase": {
      "design": 2,
      "damage": 0
@@ -607,6 +619,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 7,
+    "packet_destination": 7,
     "starbase": {
      "design": 1,
      "damage": 0
@@ -655,6 +669,8 @@
     "defenses": 0,
     "planetary_scanner": null,
     "leftover_to_research": false,
+    "packet_warp": 10,
+    "packet_destination": 9,
     "starbase": {
      "design": 1,
      "damage": 0

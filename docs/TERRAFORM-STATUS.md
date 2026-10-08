@@ -77,13 +77,12 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 | 6c, remote mining | for each fleet in fleet order whose task is remote mining and that did not move this year: `RemoteMine(g, fi, rng)` | Wired (`engine.TaskRemoteMine`); parity CS-003-B, X1 and X2 included, pass |
 | 7.4, Orbital Adjusters | `Adjust(g)` after `claimAdjusterYearEnd`, after research | Fleet owner told per `Adjustment`; planet owner when `HabChanged` |
 
-KX-005 is in the parity corpus and passes. The engine harness skips
-every OB-029 case, with these reasons:
-
-- "production queue: planetary item 17": OB-029-T1, -T2, -T3, -Ac, -Bc
-  and -D;
-- "a packet from a production queue": OB-029-A and -B;
-- "expectation sample": OB-029-D2.
+KX-005 is in the parity corpus and passes. Since the OB-029 vector
+carries the packet settings (stars-elegy 4247afc), the engine harness
+runs OB-029: -A, -Ac, -B, -Bc, -D, -T1, -T2 and -T3 pass on all 8 seeds
+on their exact expectations. The packet terraform samples of -T1..-T3
+(one each) are compared but never counted: they match on 3 of 24
+seed-samples. OB-029-D2 is skipped ("expectation sample").
 
 The OB-029 rules are tested from the spec's worked examples in
 `terraform/` tests.
