@@ -118,6 +118,68 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	}
 }
 
+// TestReportObjects: a player's report shows the space objects it saw
+// this year, its own with their owner-only settings, and nothing of
+// another player's packet warp, destination or cargo or field's detonate
+// setting (ASSUMPTION V4); an object it did not see is not reported.
+func TestReportObjects(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	sp := space(g.State)
+	if sp == nil {
+		t.Fatal("the game has no space objects")
+	}
+	a, b := 0, 1
+	posA, posB, posHidden := engine.Point{X: 1100, Y: 1100}, engine.Point{X: 1150, Y: 1100}, engine.Point{X: 1300, Y: 1300}
+	sp.Minefields = append(sp.Minefields,
+		objects.Minefield{Owner: a, Number: 0, Kind: objects.Standard, Pos: posA, Count: 1600, Detonate: true},
+		objects.Minefield{Owner: b, Number: 0, Kind: objects.Heavy, Pos: posB, Count: 900, Detonate: true},
+	)
+	sp.Packets = append(sp.Packets,
+		objects.Packet{Owner: a, Number: 0, Pos: posA, Target: 7, Warp: 9, Class: 2, Cargo: engine.Minerals{88, 0, 0}},
+		objects.Packet{Owner: b, Number: 0, Pos: posB, Target: 2, Warp: 10, Class: 1, Cargo: engine.Minerals{0, 50, 0}},
+		objects.Packet{Owner: b, Number: 1, Pos: posHidden, Target: 3, Warp: 8, Class: 1, Cargo: engine.Minerals{0, 0, 40}},
+	)
+	g.views[a].Objects.Minefields = [][2]int{{a, 0}, {b, 0}}
+	g.views[a].Objects.Packets = [][2]int{{a, 0}, {b, 0}}
+	g.views[b].Objects.Minefields = [][2]int{{b, 0}}
+	g.views[b].Objects.Packets = [][2]int{{b, 0}, {b, 1}}
+
+	r, err := g.Report(a)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := objects.ObjectReport{
+		Minefields: []objects.MinefieldSighting{
+			{Owner: a, Number: 0, Pos: posA, Mines: 1600, Kind: objects.Standard, Detonate: true},
+			{Owner: b, Number: 0, Pos: posB, Mines: 900, Kind: objects.Heavy},
+		},
+		Packets: []objects.PacketSighting{
+			{Owner: a, Number: 0, Pos: posA, Own: &objects.OwnPacket{Warp: 9, Target: 7, Cargo: engine.Minerals{88, 0, 0}}},
+			{Owner: b, Number: 0, Pos: posB},
+		},
+	}
+	if !reflect.DeepEqual(r.Objects, want) {
+		t.Fatalf("player %d's objects =\n%+v\nwant\n%+v", a, r.Objects, want)
+	}
+
+	// Player b sees its own items in full and nothing of a's.
+	r, err = g.Report(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(r.Objects.Minefields) != 1 || !r.Objects.Minefields[0].Detonate || r.Objects.Minefields[0].Owner != b {
+		t.Errorf("player %d's minefields: %+v", b, r.Objects.Minefields)
+	}
+	if len(r.Objects.Packets) != 2 {
+		t.Fatalf("player %d's packets: %+v", b, r.Objects.Packets)
+	}
+	for _, p := range r.Objects.Packets {
+		if p.Owner != b || p.Own == nil {
+			t.Errorf("player %d's packet %+v: want its own, with details", b, p)
+		}
+	}
+}
+
 // Another player's design is reported with hull and mass when seen
 // partially, with all its parts once seen in full, and stays known in
 // later years out of sight (ASSUMPTION G3), through a save and load.

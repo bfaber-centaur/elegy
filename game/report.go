@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // Report is what one player knows at the start of a year: the input a
@@ -73,6 +74,11 @@ type Report struct {
 	// KnownDesigns are the other players' designs the player knows, in
 	// design index order; see KnownDesign.
 	KnownDesigns []KnownDesign
+	// Objects is what the player is shown of the minefields, packets,
+	// Mystery Traders and salvage it saw in the year just generated
+	// (View.Objects; objects.Space.Report, ASSUMPTION V4). Wormhole ends
+	// are in Wormholes.
+	Objects objects.ObjectReport
 
 	// Rand draws from the game's random stream. The loop sets it; a
 	// driver that needs random numbers must draw them from it, and only
@@ -191,9 +197,8 @@ type OrderOutcome struct {
 // Orders). For a new game, views are the starting knowledge and events
 // and results are empty.
 //
-// NewReport leaves History, Universe, Wormholes, KnownDesigns and Rand
-// empty; the
-// loop's Game.Report fills them.
+// NewReport leaves History, Universe, Wormholes, KnownDesigns, Objects
+// and Rand empty; the loop's Game.Report fills them.
 func NewReport(g engine.Game, player int, views []engine.PlayerView, events []engine.Event, results []engine.OrderResult) (Report, error) {
 	if player < 0 || player >= len(g.Players) {
 		return Report{}, fmt.Errorf("game: no player %d in a %d-player game", player, len(g.Players))
