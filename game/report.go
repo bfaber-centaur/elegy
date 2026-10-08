@@ -82,6 +82,13 @@ type Report struct {
 	// always being listed, the decay-state mapping and the missing seen
 	// marker. Wormhole ends are in Wormholes.
 	Objects objects.ObjectReport
+	// TraderItems are the Mystery Trader parts the player owns, by
+	// component name (engine.Objects.TraderItems; the player's Trader
+	// part word, OBJECTS.md "Encounters"). Only the player's own: other
+	// players' parts are not shown. A computer player's can-build test
+	// counts an owned Trader part whose tech requirements it also meets
+	// (AI.md §5 "AI part classes", BINARY-ONLY).
+	TraderItems map[string]bool
 
 	// Rand draws from the game's random stream. The loop sets it; a
 	// driver that needs random numbers must draw them from it, and only
@@ -225,8 +232,8 @@ type OrderOutcome struct {
 // Orders). For a new game, views are the starting knowledge and events
 // and results are empty.
 //
-// NewReport leaves History, Universe, Wormholes, KnownDesigns, Objects
-// and Rand empty; the loop's Game.Report fills them.
+// NewReport leaves History, Universe, Wormholes, KnownDesigns, Objects,
+// TraderItems and Rand empty; the loop's Game.Report fills them.
 func NewReport(g engine.Game, player int, views []engine.PlayerView, events []engine.Event, results []engine.OrderResult) (Report, error) {
 	if player < 0 || player >= len(g.Players) {
 		return Report{}, fmt.Errorf("game: no player %d in a %d-player game", player, len(g.Players))
