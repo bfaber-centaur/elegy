@@ -44,7 +44,10 @@ type Legacy struct {
 	// engines", CONFIRMED FM-105). engine/movement.go.
 	FuelWrap bool `json:"fuel_wrap"`
 	// Colocation: every scanning test passes at distance 0 (SCANNING.md
-	// "Co-location", CONFIRMED SC-002, SC-014). engine/scanning.go.
+	// "Co-location", CONFIRMED SC-002, SC-014). Off, a scanner is needed
+	// and cloaking applies at distance 0 too: a fleet with no scanner part
+	// sees no fleet, also at its own position (Elegy choice).
+	// engine/scanning.go.
 	Colocation bool `json:"colocation"`
 	// DropScan: several players' drops pick the winner by the scan in
 	// player order (TAKEOVER.md "Several players dropping at once",

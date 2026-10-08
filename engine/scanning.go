@@ -346,11 +346,16 @@ func (g *Game) scanners(v int) []scanner {
 // at distance 0 (Legacy.Colocation; SCANNING.md "Co-location", CONFIRMED
 // SC-002, SC-014): a fleet at exactly an enemy's position sees it
 // whatever its own scanner and the target's cloak. Without it a scanner
-// is needed and cloaking applies at distance 0 too.
+// is needed and cloaking applies at distance 0 too: a fleet with no
+// scanner part sees no fleet anywhere (the range test alone would pass
+// at d² 0 ≤ 0), and the cloak bound is tested as at any distance.
 func seesFleet(s scanner, pos Point, orbit bool, cloak int, colocation bool) bool {
 	dd := d2(s.pos, pos)
 	if colocation && dd == 0 {
 		return true
+	}
+	if s.fleet && !s.anyScanner {
+		return false
 	}
 	if dd > s.R*s.R || (orbit && dd > s.P*s.P) {
 		return false
