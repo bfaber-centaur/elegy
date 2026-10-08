@@ -66,6 +66,7 @@ type pvPlayer struct {
 	Tech                map[string]int    `json:"tech"`
 	ResearchAccumulated map[string]int    `json:"research_accumulated"`
 	ResearchPercent     int               `json:"research_percent"`
+	Computer            bool              `json:"computer"`
 	ResearchField       string            `json:"research_field"`
 	ResearchNextField   json.RawMessage   `json:"research_next_field"`
 	Relations           map[string]string `json:"relations"`
@@ -346,6 +347,7 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 	g.Players = make([]Player, len(s.Players))
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
+		pl.Computer = p.Computer
 		r := &pl.Race
 		// An out-of-range PRT is given as its stored number (FORMAT.md).
 		var name string
@@ -740,8 +742,8 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (Waypoint, string) {
 	wp := Waypoint{Pos: Point{w.X, w.Y}, Warp: w.Warp}
 	why := ""
-	if w.Warp > 10 {
-		why, wp.Warp = "stargate", 0
+	if w.Warp > StargateWarp {
+		why, wp.Warp = "warp "+strconv.Itoa(w.Warp), 0
 	}
 	switch w.Target.Kind {
 	case "space":

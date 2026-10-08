@@ -112,8 +112,9 @@ func (g *Game) routeTask(f *Fleet) []Event {
 // PARITY.md "Transfer fleet task"). It is refused, the fleet keeping its
 // owner, when:
 //   - the recipient is not a live player (BINARY-ONLY);
-//   - the recipient treats the giver as an enemy (CONFIRMED). A computer
-//     player is refused by this check, as an expert computer is hostile;
+//   - the recipient treats the giver as an enemy (CONFIRMED), or is a
+//     computer player, which is hostile when the gift is evaluated
+//     whatever its stored relation (CONFIRMED, WU-AICOMP3/4: neutral);
 //   - the fleet carries colonists (CONFIRMED);
 //   - the recipient has no free or matching design slot for one of the
 //     fleet's designs, or already has 512 fleets (LIMITS.md, MESSAGES.md
@@ -143,7 +144,7 @@ func (g *Game) transferFleet(fi int, gone map[int]bool) []Event {
 	switch {
 	case to < 0 || to >= len(g.Players) || to == f.Owner || g.Players[to].Dead:
 		return refuse(GiftRecipientAbsent)
-	case g.relation(to, f.Owner) == RelationEnemy:
+	case g.relation(to, f.Owner) == RelationEnemy || g.Players[to].Computer:
 		return refuse(GiftRefusedByRecipient)
 	case f.Cargo.Colonists > 0:
 		return refuse(GiftColonistsAboard)

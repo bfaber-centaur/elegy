@@ -107,6 +107,10 @@ type Player struct {
 	// Dead is set when the player has no planets and no ships (KERNEL.md
 	// "Victory conditions").
 	Dead bool
+	// Computer marks a computer player. Elegy runs no computer players
+	// yet; the flag decides only the rules that name them (a gifted
+	// fleet is refused; Mystery Trader trades).
+	Computer bool
 }
 
 type Planet struct {
@@ -257,7 +261,8 @@ func GenerateTurn(
 	for _, f := range g.Fleets {
 		start[f.ID] = f.Pos
 	}
-	events = append(events, g.moveAll(rng)...)
+	moveEvents, gated := g.moveAll(rng)
+	events = append(events, moveEvents...)
 	for i := range g.Fleets {
 		if f := &g.Fleets[i]; start[f.ID] != f.Pos {
 			events = append(events, g.radiatingColonists(f)...)
@@ -416,6 +421,11 @@ func GenerateTurn(
 		if p, ok := start[f.ID]; !ok || p != f.Pos {
 			moved[f.ID] = true
 		}
+	}
+	// A fleet that jumped by stargate gets no repair this year
+	// (OBJECTS.md "Stargates").
+	for id := range gated {
+		fights.fleets[id] = true
 	}
 	repair(&g, moved, fights)
 	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn

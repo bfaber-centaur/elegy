@@ -453,18 +453,23 @@ func moving(f *Fleet) bool {
 // (owner, then fleet number), then fleets chasing other fleets in rounds,
 // then waypoint settlement. KERNEL.md "Turn order" step 3 and "Fleet
 // movement".
-func moveFleets(g *Game) []Event { return g.moveAll(nil) }
+func moveFleets(g *Game) []Event {
+	ev, _ := g.moveAll(nil)
+	return ev
+}
 
-// moveAll is moveFleets with the year's generator for minefield checks,
-// and wormhole transit on arrival (KERNEL.md "Turn order" step 3.3).
-// rng may be nil when the game has no space objects.
-func (g *Game) moveAll(rng Rand) []Event {
+// moveAll is moveFleets with the year's generator for minefield checks
+// and stargates, and wormhole transit on arrival (KERNEL.md "Turn order"
+// step 3.3). rng may be nil when the game has no space objects. gated
+// holds the fleets that jumped by stargate, which get no repair this
+// year.
+func (g *Game) moveAll(rng Rand) (events []Event, gated map[int]bool) {
+	gated = map[int]bool{}
 	order := g.fleetOrder()
 
 	for i := range g.Fleets {
 		g.Fleets[i].Heading, g.Fleets[i].HeadingWarp = Point{}, 0
 	}
-	var events []Event
 	var chasers []int
 	for _, i := range order {
 		f := &g.Fleets[i]
@@ -472,6 +477,10 @@ func (g *Game) moveAll(rng Rand) []Event {
 			continue
 		}
 		events = append(events, g.arColonistLoss(f)...)
+		if f.Waypoints[0].Warp == StargateWarp {
+			events = append(events, g.stargate(i, rng, gated)...)
+			continue
+		}
 		if f.Waypoints[0].Target == TargetFleet && g.fleetIndex(f.Waypoints[0].ID) >= 0 {
 			chasers = append(chasers, i)
 			continue
@@ -479,7 +488,33 @@ func (g *Game) moveAll(rng Rand) []Event {
 		events = append(events, g.moveOrdinary(i, rng)...)
 	}
 	events = append(events, g.moveChasers(chasers, rng)...)
-	return append(events, g.settleWaypoints(order)...)
+	return append(events, g.settleWaypoints(order)...), gated
+}
+
+// stargate is a fleet's stargate order (OBJECTS.md "Stargates"): on a
+// jump the fleet is at its waypoint, which settleWaypoints then
+// completes; it shows no heading or warp to others' scans, gets no
+// repair this year, and other players' fleets chasing it stop at its
+// departure point. A refused fleet stays with its waypoints. Without
+// space objects a stargate order does nothing.
+func (g *Game) stargate(fi int, rng Rand, gated map[int]bool) []Event {
+	if g.Objects == nil {
+		return nil
+	}
+	f := &g.Fleets[fi]
+	from := f.Pos
+	jumped, lost, ev := g.Objects.Stargate(g, fi, g.destination(f.Waypoints[0]), rng)
+	f = &g.Fleets[fi]
+	if lost {
+		f.Stacks = nil // removed after movement
+		return ev
+	}
+	if jumped {
+		gated[f.ID] = true
+		f.Heading, f.HeadingWarp = Point{}, 0
+		g.loseFollowers(f, from)
+	}
+	return ev
 }
 
 // legMove is one fuel-checked move toward dest: the fuel rules shared by
@@ -711,16 +746,7 @@ func (g *Game) transit(fi, end int) []Event {
 	f := &g.Fleets[fi]
 	entry := f.Pos
 	ev := g.Objects.TransitWormhole(g, fi, end)
-	for j := range g.Fleets {
-		if g.Fleets[j].Owner == f.Owner {
-			continue
-		}
-		for k := range g.Fleets[j].Waypoints {
-			if wp := &g.Fleets[j].Waypoints[k]; wp.Target == TargetFleet && wp.ID == f.ID {
-				wp.Target, wp.ID, wp.Pos = TargetSpace, 0, entry
-			}
-		}
-	}
+	g.loseFollowers(&g.Fleets[fi], entry)
 	return ev
 }
 

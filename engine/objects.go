@@ -36,6 +36,11 @@ type SpaceObjects interface {
 	// MineHit applies a stop of fleet fi, already at its stop point.
 	MineHit(g *Game, fi int, kind int, rng Rand) []Event
 
+	// Stargate runs fleet fi's stargate order to dest instead of moving
+	// it (OBJECTS.md "Stargates"). jumped reports the fleet at dest; lost
+	// a fleet the jump destroyed, which the engine removes.
+	Stargate(g *Game, fi int, dest Point, rng Rand) (jumped, lost bool, ev []Event)
+
 	// TransitWormhole takes fleet fi through the wormhole end its reached
 	// waypoint targets (OBJECTS.md "Travel").
 	TransitWormhole(g *Game, fi int, end int) []Event
@@ -104,6 +109,10 @@ const (
 	TargetTrader
 )
 
+// StargateWarp is a waypoint's warp for a stargate jump (OBJECTS.md
+// "Stargates").
+const StargateWarp = 11
+
 // TaskLayMines is the "lay mines" waypoint task. Task.Years is its
 // duration: 1 for "this year only", k for k years, YearsIndefinitely to
 // lay until the task is changed (OBJECTS.md "Laying", "Duration").
@@ -131,7 +140,27 @@ const (
 	EventTraderNoRoom                                                  // Player, Fleet = the traded fleet: no slot or fleet number for a gift
 	EventPacketImpact                                                  // Player = the planet's owner (or the packet's when unowned), Planet, Count = colonists killed (units)
 	EventWormholeMoved                                                 // Player = -1, Count = the end; a jump or jiggle
+	EventGateRefused                                                   // Player, Fleet, Count = the refusal (objects.GateRefusal)
+	EventGateUnloaded                                                  // Player = the source planet's owner, Planet, Fleet: cargo put down before a jump
+	EventGateShipsLost                                                 // Player, Fleet, Count = ships destroyed by a jump
+	EventGateFleetLost                                                 // Player, Fleet: the jump destroyed the fleet
 )
+
+// loseFollowers turns other players' waypoints aimed at fleet f into
+// plain positions at `at`: they lose a fleet that went through a
+// wormhole or a stargate (OBJECTS.md "Travel", "Stargates").
+func (g *Game) loseFollowers(f *Fleet, at Point) {
+	for j := range g.Fleets {
+		if g.Fleets[j].Owner == f.Owner {
+			continue
+		}
+		for k := range g.Fleets[j].Waypoints {
+			if wp := &g.Fleets[j].Waypoints[k]; wp.Target == TargetFleet && wp.ID == f.ID {
+				wp.Target, wp.ID, wp.Pos = TargetSpace, 0, at
+			}
+		}
+	}
+}
 
 // BombSurvival is the share of a normal bomb's kill that gets through
 // planet pi's defenses (TAKEOVER.md "Planetary defenses against bombs"),

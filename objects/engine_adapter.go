@@ -230,10 +230,15 @@ func (s *Space) MoveObjectsAgain(g *engine.Game, rng engine.Rand) []engine.Event
 
 // MeetTraders runs the Trader encounters.
 //
-// PLACEHOLDER: the engine has no computer players, so every player counts
-// as human (Humans is the player count) and no planet trades.
+// The engine marks computer players but holds no computer level, so no
+// planet trades (PLACEHOLDER until computer players are modelled).
 func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {
-	ctx := TraderContext{YearIndex: g.Year - 2400, Humans: len(g.Players)}
+	ctx := TraderContext{YearIndex: g.Year - 2400, Computer: func(p int) bool { return g.Players[p].Computer }}
+	for _, p := range g.Players {
+		if !p.Computer {
+			ctx.Humans++
+		}
+	}
 	enc, trades := s.Meet(g, ctx, rng)
 	var out []engine.Event
 	for _, e := range enc {
@@ -328,4 +333,35 @@ func (s *Space) SeeObjects(g *engine.Game, scanners []engine.ObjectScanner) {
 			}
 		}
 	}
+}
+
+// Stargate runs Jump and reports it to the engine; ships destroyed, a lost
+// fleet, a refusal and cargo put down on the source planet each send a
+// message.
+func (s *Space) Stargate(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) (bool, bool, []engine.Event) {
+	j := Jump(g, fi, dest, rng)
+	f := &g.Fleets[fi]
+	var out []engine.Event
+	if j.Unloaded != (engine.Cargo{}) && j.Source >= 0 {
+		p := &g.Planets[j.Source]
+		out = append(out, engine.Event{Kind: engine.EventGateUnloaded, Player: p.Owner, Planet: p.ID, Fleet: f.ID})
+	}
+	if j.Refused != GateOK {
+		return false, false, append(out, engine.Event{Kind: engine.EventGateRefused, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: int(j.Refused)})
+	}
+	n := 0
+	for _, d := range j.Designs {
+		if d.Lost {
+			n += d.Ships
+		} else {
+			n += d.Destroyed
+		}
+	}
+	if n > 0 && !j.FleetLost {
+		out = append(out, engine.Event{Kind: engine.EventGateShipsLost, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: n})
+	}
+	if j.FleetLost {
+		return false, true, append(out, engine.Event{Kind: engine.EventGateFleetLost, Player: f.Owner, Planet: -1, Fleet: f.ID})
+	}
+	return true, false, out
 }
