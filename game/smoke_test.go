@@ -375,7 +375,8 @@ func TestLoadRejects(t *testing.T) {
 	for name, doc := range map[string]string{
 		"not json":      "{",
 		"format":        strings.Replace(string(b), `"elegy-save"`, `"other"`, 1),
-		"version":       strings.Replace(string(b), `"version": 2`, `"version": 99`, 1),
+		"version":       strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 99`, 1),
+		"levels":        strings.Replace(string(b), `"levels": [`, `"levels": [0, `, 1),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
 		if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {

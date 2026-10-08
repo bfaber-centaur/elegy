@@ -321,12 +321,17 @@ func (g *generator) addDesignsAndFleets(i int, ps player, start *PlayerStart) er
 }
 
 // addFleet adds a one-ship fleet of design d with full fuel and battle
-// plan 0 (UNIVERSE.md "Starting ships", CONFIRMED). ELEGY CHOICE: fleet
-// ids are numbered across the whole game in creation order.
+// plan 0 (UNIVERSE.md "Starting ships", CONFIRMED). The owner's fleets
+// are numbered from 1 in the order they are added, which is that table's
+// order ("The fleets are numbered in this order", CONFIRMED; fleet
+// numbers are per owner and the lowest is #1, PRODUCTION-LAUNCH.md "The
+// new fleet"). ELEGY CHOICE: fleet ids are numbered across the whole game
+// in creation order.
 func (g *generator) addFleet(owner, d int, pos engine.Point, start *PlayerStart) {
 	game := &g.res.Game
 	f := engine.Fleet{
 		ID:     len(game.Fleets),
+		Number: len(start.Fleets) + 1,
 		Owner:  owner,
 		Pos:    pos,
 		Stacks: []engine.Stack{{Design: d, Count: 1}},

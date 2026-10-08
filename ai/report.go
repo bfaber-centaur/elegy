@@ -23,7 +23,7 @@ import (
 // Reality. docs/AI-STATUS.md tracks these inputs.
 func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]engine.PlanetReport, created map[SlotKey]NewDesign) *View {
 	v := &View{
-		Year: r.Year, Player: r.Player, Level: lvl,
+		Year: r.Year, Player: r.Player, Level: lvl, Rules: r.Rules,
 		Self: r.Self, Planets: r.Planets, Fleets: r.Fleets,
 		Universe: universe,
 		Known:    map[int]engine.PlanetReport{},
