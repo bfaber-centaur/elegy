@@ -49,7 +49,7 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 | Rate: Σ count × mining_rate, at most 4,000 | `MiningRate` | CONFIRMED (CS-003-B X1/X2, T-35, KB-1A) |
 | Output `conc·m/100`, random +1, depletion, no homeworld floor, race output ignored | `RemoteMine` (engine `MineYear`, eff 10) | CONFIRMED (T-35, CS-003-B, KB-1A); the +1 draw BINARY-ONLY |
 | Unowned planets only, except the owner's own miners at an Alternate Reality planet | `CanRemoteMine` | CONFIRMED (T-35, KB-1B) |
-| AR: a separate mining step from the planet's own | `RemoteMine` | CONFIRMED (KB-1B); the order of the two steps BINARY-ONLY |
+| AR: a separate mining step from the planet's own | `RemoteMine` | CONFIRMED (KB-1B); the order of the two steps BINARY-ONLY; regression for the SL-starbases year-2 gap (8 points at 62/10/87 → 5/1/7) |
 | A fleet that arrived or moved this year mines nothing | the caller | CONFIRMED (T-35) |
 
 ## Assumptions (spec gaps)

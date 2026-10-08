@@ -33,6 +33,7 @@ func newLab(t *testing.T) *lab {
 	add("Midget Miner", "Midget Miner", hump, engine.SlotFill{Slot: 1, Part: "Robo-Midget Miner", Count: 2})
 	add("Adjuster", "Midget Miner", hump, engine.SlotFill{Slot: 1, Part: "Orbital Adjuster", Count: 2})
 	add("Super", "Midget Miner", hump, engine.SlotFill{Slot: 1, Part: "Robo-Super-Miner", Count: 2})
+	add("Mini-Miner", "Mini-Miner", hump, engine.SlotFill{Slot: 2, Part: "Robo-Mini-Miner", Count: 1}, engine.SlotFill{Slot: 3, Part: "Robo-Mini-Miner", Count: 1})
 	add("Robo", "Midget Miner", hump, engine.SlotFill{Slot: 1, Part: "Robo-Miner", Count: 2})
 	return l
 }
@@ -143,6 +144,29 @@ func TestConfirmedRemoteMineAR(t *testing.T) {
 	}
 	if gain, ok := RemoteMine(l.g, other, &count{}); ok || gain != (engine.Minerals{}) {
 		t.Errorf("other player's miners at AR planet: %v %v", gain, ok)
+	}
+}
+
+// SL-starbases year 2 (parity regression; rule CONFIRMED KB-1B): a
+// Mini-Miner with two Robo-Mini-Miners (8 points) mines its owner's AR
+// planet 4 at 62/10/87 as its own step: 496, 80 and 696 hundredths, so
+// 4/0/6 kT plus the random +1 on each remainder, 5/1/7 when all three
+// draws hit.
+func TestConfirmedRemoteMineSLStarbases(t *testing.T) {
+	l := newLab(t)
+	l.g.Players[0].Race.PRT = engine.PRTAlternateReality
+	pi := l.planet(0, [3]int{50, 50, 50}, [3]int{62, 10, 87})
+	fi := l.fleet(0, pi, "Mini-Miner", 1)
+	if m := MiningRate(l.g, &l.g.Fleets[fi]); m != 8 {
+		t.Fatalf("rate %d", m)
+	}
+	rng := script{95, 79, 95}
+	if gain, ok := RemoteMine(l.g, fi, &rng); !ok || gain != (engine.Minerals{5, 1, 7}) || len(rng) != 0 {
+		t.Errorf("hits: %v %v", gain, ok)
+	}
+	l.g.Planets[pi].Deposits = [3]engine.Deposit{{Concentration: 62}, {Concentration: 10}, {Concentration: 87}}
+	if gain, _ := RemoteMine(l.g, fi, &script{96, 80, 96}); gain != (engine.Minerals{4, 0, 6}) {
+		t.Errorf("misses: %v", gain)
 	}
 }
 
