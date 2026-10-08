@@ -8,6 +8,19 @@ OT runs and the turn order and random draw order), and the parity vectors
 copied from that commit.
 Nothing here comes from the private archaeology repositories.
 
+## End-to-end parity milestone
+
+The milestone is `GenerateTurn` running the players' orders, waypoint
+tasks, production and the space objects in KERNEL.md's turn order, with
+the MF, OB, WT and WU vectors (and GT stargate vectors once they exist
+in the copied corpus; none do yet) running through it in
+`TestParityVectors`, and every failure listed below under "Known parity
+failures" with its real reason. As of this change: OB 89 pass, 3
+random; WT 22 pass, 3 random; WU 28 pass; MF 12 pass, the rest listed
+below. The production queue can launch packets through
+`SpaceObjects.LaunchPacket`; the packet item itself belongs to the
+orders lane.
+
 ## Tests: ground truth versus predictions
 
 KERNEL.md gives every rule a status. Test names follow it:

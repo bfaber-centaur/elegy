@@ -67,6 +67,15 @@ type SpaceObjects interface {
 	// SweepMines is step 7.1, mine sweeping.
 	SweepMines(g *Game) []Event
 
+	// LaunchPacket launches count packet items of mineral (Ironium ..
+	// Germanium, or PacketMixed) from planet pi toward planet dest at
+	// packet-speed setting speed (0 when unset), for the production queue
+	// (OBJECTS.md "Launch"). built is false when the planet has no mass
+	// driver or dest is -1: nothing is built and EventPacketNoDriver tells
+	// the owner. A launch with no room for a packet still counts as built.
+	// spend is what production takes from the surface.
+	LaunchPacket(g *Game, pi, dest, speed, mineral, count int) (built bool, spend Minerals, ev []Event)
+
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When
 	// knowledge is computed", "Space objects").
@@ -118,6 +127,9 @@ const StargateWarp = 11
 // lay until the task is changed (OBJECTS.md "Laying", "Duration").
 const TaskLayMines TaskKind = TaskRoute + 3
 
+// PacketMixed is LaunchPacket's mineral for a mixed packet.
+const PacketMixed = -1
+
 // YearsIndefinitely is TaskLayMines' duration "indefinitely".
 const YearsIndefinitely = -1
 
@@ -144,6 +156,7 @@ const (
 	EventGateUnloaded                                                  // Player = the source planet's owner, Planet, Fleet: cargo put down before a jump
 	EventGateShipsLost                                                 // Player, Fleet, Count = ships destroyed by a jump
 	EventGateFleetLost                                                 // Player, Fleet: the jump destroyed the fleet
+	EventPacketNoDriver                                                // Player, Planet: a packet item with no mass driver or destination
 )
 
 // loseFollowers turns other players' waypoints aimed at fleet f into
