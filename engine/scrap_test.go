@@ -101,19 +101,20 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	// makes a new object, and minerals go in under the 30,000 kT limit;
 	// COMBAT.md "Salvage" counts it in 10 kT steps, the overflow going into
 	// a new object at the same spot (CONFIRMED CB-040). The overflow object
-	// is the scrapped fleet owner's and is not marked fresh ("Decay": "An
+	// is the scrapped fleet owner's (player 1 here, so a piece given
+	// player 0 shows) and is not marked fresh ("Decay": "An
 	// overflow object made by the 30,000 kT limit is not marked"). The lab
 	// has no space objects, so no decay runs and the marks are as made.
 	l := newTKLab(t, 3)
 	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
 	pi := l.planet(NoOwner, 0, 100)
 	l.g.Planets[pi].Pos = Point{500, 500}
-	fi := l.fleet(0, 0, 0, Stack{Design: scout, Count: 1})
+	fi := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1})
 	l.g.Fleets[fi].Pos = Point{0, 0}
 	l.g.Planets = l.g.Planets[:0]
 	l.g.Fleets[fi].Cargo = Cargo{Minerals: Minerals{36000, 0, 500}}
 	l.g.Fleets[fi].Task = Task{Kind: TaskScrap}
-	c := designCost(l.g.Designs[scout], l.g.Players[0].Race, l.g.Players[0].Research.Levels)
+	c := designCost(l.g.Designs[scout], l.g.Players[1].Race, l.g.Players[1].Research.Levels)
 	var left Minerals
 	for m := range NumMinerals {
 		left[m] = c.Minerals[m]/3 + l.g.Fleets[fi].Cargo.Minerals[m]
@@ -128,8 +129,8 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	if a.Minerals != first || b.Minerals != rest {
 		t.Errorf("salvage %v and %v, want %v and %v (left %v)", a.Minerals, b.Minerals, first, rest, left)
 	}
-	if a.Owner != 0 || b.Owner != 0 || a.Number == b.Number || a.Pos != b.Pos {
-		t.Errorf("salvage %+v and %+v, want two objects of player 0 at one spot", a, b)
+	if a.Owner != 1 || b.Owner != 1 || a.Number == b.Number || a.Pos != b.Pos {
+		t.Errorf("salvage %+v and %+v, want two objects of player 1 at one spot", a, b)
 	}
 	if !a.Fresh || b.Fresh {
 		t.Errorf("fresh marks %v and %v, want true and false", a.Fresh, b.Fresh)
