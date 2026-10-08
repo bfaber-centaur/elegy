@@ -209,3 +209,48 @@ func TestPredictionTransferAfterMovementOnly(t *testing.T) {
 		t.Errorf("before movement: fleet %+v", g.Fleets[0])
 	}
 }
+
+func TestMeasuredRouteTaskStargate(t *testing.T) {
+	// ORDERS.md "Route task" (MEASURED wuRSG2, stars-elegy 09a9595): with
+	// gates at both of the owner's planets, a cargo-free fleet carrying the
+	// route task is re-routed through the gate, its waypoint at the gate
+	// setting, 11, for a ~161 ly hop. A friend's gate does not count, and
+	// cargo aboard rules the gate out (PRODUCTION-LAUNCH.md "Routing",
+	// "Gates"); both then take the ordinary route warp.
+	c := Components()
+	gated, err := c.NewDesign("Gate", "Space Station", []SlotFill{{Slot: 0, Part: "Stargate 100/250", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	scout, _ := slScouts(t)
+	setup := func() (*Game, Fleet) {
+		g := &Game{
+			Rules:   ElegyRules(),
+			Players: make([]Player, 2),
+			Designs: []Design{scout, gated},
+			Planets: []Planet{
+				{ID: 17, Owner: 0, Pos: Point{1000, 1000}, HasStarbase: true, StarbaseDesign: 1, StarbaseHull: 3, HasRoute: true, RouteTo: 8},
+				{ID: 8, Owner: 0, Pos: Point{1161, 1000}, HasStarbase: true, StarbaseDesign: 1, StarbaseHull: 3},
+			},
+			Objects: gateObjects{},
+		}
+		return g, Fleet{ID: 1, Owner: 0, Pos: g.Planets[0].Pos, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: 100, Task: Task{Kind: TaskRoute}}
+	}
+	g, f := setup()
+	ev := g.routeTask(&f)
+	want := []Waypoint{{Pos: Point{1161, 1000}, Warp: StargateWarp, Target: TargetPlanet, ID: 8, Task: Task{Kind: TaskRoute}}}
+	if !reflect.DeepEqual(f.Waypoints, want) || len(ev) != 1 || ev[0].Kind != EventFleetRouted {
+		t.Errorf("waypoints %v events %v, want %v and a routed message", f.Waypoints, ev, want)
+	}
+	for name, change := range map[string]func(g *Game, f *Fleet){
+		"friend's gate": func(g *Game, f *Fleet) { g.Planets[1].Owner = 1 },
+		"cargo":         func(g *Game, f *Fleet) { f.Cargo.Minerals[Ironium] = 1 },
+	} {
+		g, f := setup()
+		change(g, &f)
+		g.routeTask(&f)
+		if len(f.Waypoints) != 1 || f.Waypoints[0].Warp == StargateWarp || f.Waypoints[0].Warp != g.routeWarp(&f, 0, 1) {
+			t.Errorf("%s: waypoints %v, want the ordinary route warp", name, f.Waypoints)
+		}
+	}
+}
