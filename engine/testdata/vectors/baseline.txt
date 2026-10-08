@@ -1,5 +1,8 @@
 # Parity cases Elegy passes (TestParityVectors). One case id per line;
 # "random k" after an id: the case passes with k of the 8 seed variants.
+# "sample-only" after an id: every expectation the case compares is a sample
+# that matched, so it is evidence of the rule, not of an exact value; "sample-only k":
+# so on k seeds, with every sample missing on the others.
 BP-1
 BP-L
 CB-001
@@ -36,7 +39,7 @@ CB-027
 CB-028
 CB-029
 CB-030
-CB-031-n3
+CB-031-n3 sample-only
 CB-031-obs
 CB-033
 CB-035-lone
@@ -60,9 +63,9 @@ CB-042
 CB-043
 CB-044
 CB-045
-CB-046-bio
+CB-046-bio sample-only
 CB-046-morph
-CB-046
+CB-046 sample-only
 CB-047-ctl
 CB-047
 CB-048-ctl
@@ -392,8 +395,8 @@ OB-023-P3
 OB-023-P4
 OB-023-Q
 OB-023-R
-OB-023-T random 4
-OB-024-B random 7
+OB-023-T sample-only 4
+OB-024-B sample-only 7
 OB-024-D
 OB-025-A1
 OB-025-A2
@@ -401,9 +404,9 @@ OB-025-A3
 OB-025-B1
 OB-025-B2
 OB-025-B3
-OB-026-B random 7
+OB-026-B sample-only 7
 OB-030-A
-OB-030-T
+OB-030-T sample-only
 OB-031-A random 4
 PG-002-A
 PG-002-B
@@ -1000,26 +1003,26 @@ WT-001-B1
 WT-001-B2
 WT-001-C
 WT-001-D
-WT-001-E
+WT-001-E sample-only
 WT-001-F1
-WT-001-F2 random 7
+WT-001-F2 sample-only 7
 WT-002-A
-WT-002-B random 7
-WT-003-A00
-WT-003-A01 random 7
-WT-003-A02
-WT-003-A03
-WT-003-A04 random 7
-WT-003-A05
-WT-003-A06 random 6
-WT-003-A07
-WT-003-A08
-WT-003-A09
-WT-003-A10
-WT-003-A11
-WT-003-A
-WT-003-B
-WT-005-A
+WT-002-B sample-only 7
+WT-003-A00 sample-only
+WT-003-A01 sample-only 7
+WT-003-A02 sample-only
+WT-003-A03 sample-only
+WT-003-A04 sample-only 7
+WT-003-A05 sample-only
+WT-003-A06 sample-only 6
+WT-003-A07 sample-only
+WT-003-A08 sample-only
+WT-003-A09 sample-only
+WT-003-A10 sample-only
+WT-003-A11 sample-only
+WT-003-A sample-only
+WT-003-B sample-only
+WT-005-A sample-only
 WT-005-B
 WU-A
 WU-AICOMP3

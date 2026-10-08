@@ -1560,7 +1560,9 @@ func runVector(v *pvVector, k int) []pvResult {
 			continue
 		}
 		var fails, skips []string
-		checked := 0
+		// checked counts the compared expectations; exact, those of them
+		// that are not samples.
+		checked, exact := 0, 0
 		for _, e := range c.Expect {
 			if e.Stream != "" {
 				skips = append(skips, "stream "+e.Stream)
@@ -1578,9 +1580,13 @@ func runVector(v *pvVector, k int) []pvResult {
 				skips = append(skips, "sample: one stream's random outcome")
 			case msg != "":
 				checked++
+				exact++
 				fails = append(fails, fmt.Sprintf("y%d %s: %s", e.Year, e.Kind, msg))
 			default:
 				checked++
+				if !e.Sample {
+					exact++
+				}
 			}
 		}
 		switch {
@@ -1590,6 +1596,10 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "fail", strings.Join(fails, " | "))
 		case checked == 0:
 			res(c, "skip", strings.Join(pvUnique(skips), ", "))
+		case exact == 0:
+			// Only samples matched: evidence of the rule, never of an
+			// exact value.
+			res(c, "sample-only", "every compared expectation is a sample")
 		default:
 			res(c, "pass", "")
 		}
@@ -1731,17 +1741,28 @@ const pvSeeds = 8
 func pvStreamCheck(runs [][]pvResult) []pvResult {
 	out := runs[0]
 	for i, r := range out {
-		passes, same := 0, true
+		passes, samples, same, onlySamples := 0, 0, true, true
 		for _, run := range runs {
 			if run[i].id != r.id {
 				panic("parity: seed variants disagree on case order")
 			}
-			if run[i].status == "pass" {
+			switch run[i].status {
+			case "pass":
 				passes++
+			case "sample-only":
+				samples++
 			}
 			same = same && run[i].status == r.status
+			onlySamples = onlySamples && (run[i].status == "sample-only" || run[i].status == "skip")
 		}
-		if !same {
+		switch {
+		case !same && onlySamples:
+			// Each seed either matched only samples or had every sample
+			// miss: sample-only on the seeds that matched.
+			out[i].status = "sample-only"
+			out[i].passes = samples
+			out[i].why = fmt.Sprintf("sample-only with %d of %d seeds; every sample missed on the others", samples, len(runs))
+		case !same:
 			why := r.why
 			if why == "" {
 				why = "matches"
@@ -1750,6 +1771,8 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 			out[i].passes = passes
 			out[i].refStatus = r.status
 			out[i].why = fmt.Sprintf("passes with %d of %d seeds; reference seed %s: %s", passes, len(runs), r.status, why)
+		case r.status == "sample-only":
+			out[i].passes = len(runs)
 		}
 	}
 	return out
@@ -1775,7 +1798,7 @@ func TestParityVectors(t *testing.T) {
 		}
 		all = append(all, pvStreamCheck(runs)...)
 	}
-	type tally struct{ pass, fail, skip, measured, differs, random, randomFail int }
+	type tally struct{ pass, fail, skip, measured, differs, random, randomFail, sampleOnly int }
 	per := map[string]*tally{}
 	var corpora []string
 	for _, r := range all {
@@ -1790,6 +1813,8 @@ func TestParityVectors(t *testing.T) {
 			tl.skip++
 		case r.status == "differs":
 			tl.differs++
+		case r.status == "sample-only":
+			tl.sampleOnly++
 		case r.status == "random" && r.refStatus == "fail":
 			tl.randomFail++
 		case r.status == "random":
@@ -1804,10 +1829,10 @@ func TestParityVectors(t *testing.T) {
 	}
 	for _, c := range corpora {
 		tl := per[c]
-		t.Logf("%-5s pass %3d  measured pass %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d", c, tl.pass, tl.measured, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail)
+		t.Logf("%-5s pass %3d  measured pass %3d  sample-only %3d  fail %3d  skip %3d  differs %3d  random %3d  random, reference seed fails %3d", c, tl.pass, tl.measured, tl.sampleOnly, tl.fail, tl.skip, tl.differs, tl.random, tl.randomFail)
 	}
 	for _, r := range all {
-		if r.status != "pass" {
+		if r.status != "pass" && r.status != "sample-only" {
 			t.Logf("%s %-10s %-4s %s", r.status, r.tag, r.id, r.why)
 		}
 	}
@@ -1823,10 +1848,19 @@ func TestParityVectors(t *testing.T) {
 		w := bufio.NewWriter(f)
 		fmt.Fprintln(w, "# Parity cases Elegy passes (TestParityVectors). One case id per line;")
 		fmt.Fprintf(w, "# \"random k\" after an id: the case passes with k of the %d seed variants.\n", pvSeeds)
+		fmt.Fprintln(w, "# \"sample-only\" after an id: every expectation the case compares is a sample")
+		fmt.Fprintln(w, "# that matched, so it is evidence of the rule, not of an exact value; \"sample-only k\":")
+		fmt.Fprintln(w, "# so on k seeds, with every sample missing on the others.")
 		for _, r := range all {
 			switch r.status {
 			case "pass":
 				fmt.Fprintln(w, r.id)
+			case "sample-only":
+				if r.passes < pvSeeds {
+					fmt.Fprintf(w, "%s sample-only %d\n", r.id, r.passes)
+				} else {
+					fmt.Fprintln(w, r.id, "sample-only")
+				}
 			case "random":
 				fmt.Fprintf(w, "%s random %d\n", r.id, r.passes)
 			}
@@ -1849,6 +1883,16 @@ func TestParityVectors(t *testing.T) {
 			continue
 		}
 		r := status[fields[0]]
+		if len(fields) >= 2 && fields[1] == "sample-only" {
+			want := pvSeeds
+			if len(fields) == 3 {
+				want, _ = strconv.Atoi(fields[2])
+			}
+			if r.status != "pass" && (r.status != "sample-only" || r.passes < want) {
+				t.Errorf("baseline case %s was sample-only with %d of %d seeds, now %s: %s", fields[0], want, pvSeeds, r.status, r.why)
+			}
+			continue
+		}
 		want := pvSeeds
 		if len(fields) == 3 && fields[1] == "random" {
 			want, _ = strconv.Atoi(fields[2])

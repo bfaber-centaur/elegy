@@ -416,6 +416,10 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
 **Sample-only and random cases:** a case listed as `random k` in the
 baseline passes with k of 8 seeds; it is evidence of the rule, never of
 exact parity. A `sample: true` expectation counts only when it matches.
+A case whose compared expectations are all samples is reported as
+`sample-only`, not as a pass, and listed so in the baseline (`sample-only
+k` when every sample missed on the other seeds): 25 cases (CB 3, OB 4,
+WT 18) as of this list.
 
 **Unmodelled steps:** see "Not modelled yet" above.
 
