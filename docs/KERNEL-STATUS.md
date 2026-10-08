@@ -204,12 +204,17 @@ for. A case that is "random" (its result changes with the seed) is not
 listed; its comparison is in the test output.
 
 - **CB-039, CB-042, CB-043, CB-044** (the token cap; CONFIRMED, CB-039
-  MEASURED). In every seed Elegy keeps alive fleets the original
-  destroyed in both oracle streams: 10, 73, 16 and 10 of them. The
-  battles have 255 tokens, and CB-039's 25 left-out fleets match the
-  original's count (35 Elegy survivors against 26), so the difference is
-  in how the battle ends, not in which fleets join. Cause not yet
-  investigated.
+  MEASURED). Not diagnostic. Each vector lists, without a stream tag,
+  every fleet the original destroyed in both of its two oracle streams
+  (224, 193, 174 and 224 fleets). That is two samples of a battle whose
+  outcome depends on its draws, not a fixed result. In the reference
+  seed Elegy keeps 10, 73, 16 and 10 of them alive, and other fleets
+  die instead. Elegy's battles run like the recorded ones: CB-039's
+  kills per round in three seeds (72, 53, 37, 28 … from round 2) track
+  the oracle's stream 20000 (73, 54, 39, 27 …), and the battle ends when
+  one side is gone, after round 8 to 11 against the oracle's 8. COMBAT.md
+  specifies how the battle ends; the gap is in the vectors (stars-elegy
+  #96 marks battle draws as samples in single-stream vectors only).
 - **WU-A fleet 13** (MEASURED). A waypoint aimed at another player's
   fleet that still exists takes the fleet's position, but the original
   also shows its target as plain space. ORDERS.md does not say the
@@ -223,9 +228,12 @@ listed; its comparison is in the test output.
   19 and 15 are Elegy's fleets at 15, 18 and 19. The surface minerals
   differ too. Both were failing before; the fleet check did not run
   until the harness compared the orbit field. Production lane.
-- **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). In every
-  seed three fleets the original destroyed survive and one it kept is
-  gone. Cause not yet investigated.
+- **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). Not
+  diagnostic, for the same reason as CB-039: its untagged fleet results
+  are the two streams' common outcome. Which fleets survive changes with
+  the seed (seeds 3, 5 and 7 match every fleet). The rest of the failure
+  is surface minerals 1 kT off, from mining's random remainder;
+  stars-elegy #96 adds the 1 kT tolerance.
 
 ## Open spec questions
 
