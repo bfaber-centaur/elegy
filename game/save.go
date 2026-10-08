@@ -25,7 +25,7 @@ import (
 // See docs/GAME-LOOP.md.
 const (
 	SaveFormat  = "elegy-save"
-	SaveVersion = 3
+	SaveVersion = 4
 )
 
 // saveFile is the saved document. Field order is the encoding order.
@@ -57,6 +57,9 @@ type savedYear struct {
 	History [][]PlanetRecord `json:"history"`
 	// Wormholes is each player's wormhole sightings, in end order.
 	Wormholes [][]wormholeRecord `json:"wormholes"`
+	// Designs is each player's knowledge of other players' designs, in
+	// design index order.
+	Designs [][]designRecord `json:"designs"`
 }
 
 type savedResult struct {
@@ -104,6 +107,7 @@ func (g *Game) document() (saveFile, error) {
 	for p := range st.Players {
 		f.Last.History = append(f.Last.History, g.history.list(p))
 		f.Last.Wormholes = append(f.Last.Wormholes, g.wormholes.list(p))
+		f.Last.Designs = append(f.Last.Designs, g.designs.list(p))
 	}
 	st.Objects, st.Races, st.Terraform = nil, nil, nil
 	f.Game = st
@@ -217,6 +221,19 @@ func Load(r io.Reader) (*Game, error) {
 		g.wormholes[p] = map[int]wormholeRecord{}
 		for _, r := range recs {
 			g.wormholes[p][r.End] = r
+		}
+	}
+	if len(f.Last.Designs) != len(st.Players) {
+		return nil, fmt.Errorf("%w: design knowledge for %d of %d players", ErrSave, len(f.Last.Designs), len(st.Players))
+	}
+	g.designs = make(designHistory, len(f.Last.Designs))
+	for p, recs := range f.Last.Designs {
+		g.designs[p] = map[int]designRecord{}
+		for _, r := range recs {
+			if r.Design < 0 || r.Design >= len(st.Designs) {
+				return nil, fmt.Errorf("%w: player %d knows design %d of %d", ErrSave, p, r.Design, len(st.Designs))
+			}
+			g.designs[p][r.Design] = r
 		}
 	}
 	for _, s := range f.Last.Results {

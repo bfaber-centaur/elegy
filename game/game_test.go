@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -114,6 +115,112 @@ func TestReportWormholesLastSeen(t *testing.T) {
 	e.Known = nil
 	if r, _ = g.Report(0); end0(r) != nil {
 		t.Error("a forgotten end is still reported")
+	}
+}
+
+// Another player's design is reported with hull and mass when seen
+// partially, with all its parts once seen in full, and stays known in
+// later years out of sight (ASSUMPTION G3), through a save and load.
+// What is reported is what was shown: a design the owner later puts in
+// the same slot, under the same index, is not revealed.
+func TestReportKnownDesigns(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	slotOf := func(owner int, starbase bool) engine.DesignSlot {
+		for _, s := range g.State.DesignSlots {
+			if s.Owner == owner && s.Starbase == starbase {
+				return s
+			}
+		}
+		t.Fatalf("no design of player %d", owner)
+		return engine.DesignSlot{}
+	}
+	theirs, other := slotOf(1, true).Design, slotOf(2, false).Design
+	sight := func(d int, full bool) engine.DesignSighting {
+		des := g.State.Designs[d]
+		return engine.DesignSighting{Design: d, Full: full, Hull: des.Hull.Name, Mass: des.Mass}
+	}
+	see := func(year int, s ...engine.DesignSighting) {
+		g.State.Year = year
+		g.views[0].Designs = s
+		g.designs = g.designs.clone().record(year, g.views, g.State.Designs)
+	}
+	known := func(r Report, d int) *KnownDesign {
+		for i := range r.KnownDesigns {
+			if r.KnownDesigns[i].Index == d {
+				return &r.KnownDesigns[i]
+			}
+		}
+		return nil
+	}
+	want := deepCopy(g.State.Designs[theirs])
+	wantOther := deepCopy(g.State.Designs[other])
+	g.designs = nil
+
+	// 2400: player 0 sees player 1's starbase partially.
+	see(2400, sight(theirs, false))
+	r, _ := g.Report(0)
+	k := known(r, theirs)
+	if k == nil || k.Full || k.Design != nil || k.Hull != want.Hull.Name || k.Mass != want.Mass || k.Year != 2400 {
+		t.Fatalf("partial sighting: %+v", k)
+	}
+	// 2401: a battle shows it in full, and player 2's design partially.
+	see(2401, sight(theirs, true), sight(other, false))
+	// 2402: out of sight.
+	see(2402)
+
+	// The owners put new designs in both slots, under the same indexes
+	// (engine.DesignOrder replaces an unused slot's design in place).
+	g.State.Designs = append([]engine.Design(nil), g.State.Designs...)
+	g.State.Designs[theirs].Name, g.State.Designs[theirs].Mass = "Replaced", want.Mass+100
+	g.State.Designs[other].Hull.Name, g.State.Designs[other].Mass = "Other Hull", wantOther.Mass+7
+
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range []*Game{g, loaded} {
+		r, _ = x.Report(0)
+		k = known(r, theirs)
+		if k == nil || !k.Full || k.Year != 2401 || k.Design == nil || !reflect.DeepEqual(*k.Design, want) || k.Mass != want.Mass {
+			t.Fatalf("full design out of sight, then replaced: %+v", k)
+		}
+		if o := known(r, other); o == nil || o.Full || o.Design != nil || o.Hull != wantOther.Hull.Name || o.Mass != wantOther.Mass {
+			t.Fatalf("partial design, then replaced: %+v", o)
+		}
+		if len(r.KnownDesigns) != 2 {
+			t.Fatalf("%d known designs, want 2", len(r.KnownDesigns))
+		}
+		if r1, _ := x.Report(1); len(r1.KnownDesigns) != 0 {
+			t.Fatalf("player 1 knows %+v, which only player 0 saw", r1.KnownDesigns)
+		}
+	}
+
+	// 2403: a partial sighting of the new design (another mass) replaces
+	// the record and drops the old full design.
+	see(2403, sight(theirs, false))
+	r, _ = g.Report(0)
+	if k = known(r, theirs); k == nil || k.Full || k.Design != nil || k.Mass != want.Mass+100 || k.Year != 2403 {
+		t.Fatalf("partial sighting of the replacement: %+v", k)
+	}
+	// 2404: seen in full. 2405: the owner refits it with other parts,
+	// keeping hull and mass; a partial sighting keeps the 2404 design in
+	// full, stale (ASSUMPTION G3), and does not reveal that the parts
+	// changed.
+	see(2404, sight(theirs, true))
+	if len(g.State.Designs[theirs].Slots) == 0 {
+		t.Fatal("test setup: the starbase design has no parts to change")
+	}
+	g.State.Designs = append([]engine.Design(nil), g.State.Designs...)
+	g.State.Designs[theirs].Name = "Refitted"
+	g.State.Designs[theirs].Slots = g.State.Designs[theirs].Slots[1:]
+	see(2405, sight(theirs, false))
+	r, _ = g.Report(0)
+	if k = known(r, theirs); k == nil || !k.Full || k.Design == nil || k.Design.Name != "Replaced" || k.Year != 2405 {
+		t.Fatalf("partial sighting with the same hull and mass: %+v", k)
 	}
 }
 
