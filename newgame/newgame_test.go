@@ -1311,3 +1311,36 @@ func TestConfirmedBuiltInComputerPlayers(t *testing.T) {
 		t.Error("type 7 accepted")
 	}
 }
+
+// Starting design slots (UNIVERSE.md "Starbases" and "Starting ships",
+// CONFIRMED UG01..UG21): the starbase designs are starbase slots 0 and 1
+// and each new ship design takes the next ship slot, recorded in
+// Game.DesignSlots in PlayerStart order.
+func TestConfirmedStartingDesignSlots(t *testing.T) {
+	var players []PlayerSetup
+	for _, prt := range allPRTs {
+		players = append(players, human(prt))
+	}
+	res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, 8)
+	g := res.Game
+	for i, st := range res.Players {
+		for k, d := range st.StarbaseDesigns {
+			if got, ok := g.PlayerDesign(i, true, k); !ok || got != d {
+				t.Errorf("player %d starbase slot %d = %d, %v; want design %d", i, k, got, ok, d)
+			}
+		}
+		for k, d := range st.ShipDesigns {
+			if got, ok := g.PlayerDesign(i, false, k); !ok || got != d {
+				t.Errorf("player %d ship slot %d = %d, %v; want design %d", i, k, got, ok, d)
+			}
+		}
+	}
+	if want := func() (n int) {
+		for _, st := range res.Players {
+			n += len(st.StarbaseDesigns) + len(st.ShipDesigns)
+		}
+		return
+	}(); len(g.DesignSlots) != want {
+		t.Errorf("%d design slots, want %d", len(g.DesignSlots), want)
+	}
+}
