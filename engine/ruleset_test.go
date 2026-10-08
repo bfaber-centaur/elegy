@@ -178,9 +178,17 @@ func TestRulesetsCoexist(t *testing.T) {
 // A ruleset saved before a switch existed decodes it as off. Each
 // built-in version that predates a switch has it off, so its old saves
 // still validate: here jrc3-faithful v1 and elegy v2 without the two
-// Cybertron switches.
+// Cybertron switches, and both v2s without the AI wormhole switch.
 func TestRulesetSavedBeforeSwitch(t *testing.T) {
-	for _, r := range []Ruleset{faithfulRulesV1(), ElegyRules()} {
+	for _, c := range []struct {
+		r    Ruleset
+		keys []string
+	}{
+		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap"}},
+		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap"}},
+		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap"}},
+	} {
+		r := c.r
 		b, err := json.Marshal(r)
 		if err != nil {
 			t.Fatal(err)
@@ -189,8 +197,12 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 		if err := json.Unmarshal(b, &m); err != nil {
 			t.Fatal(err)
 		}
-		delete(m["legacy"].(map[string]any), "cybertron_packet_mark_next_id")
-		delete(m["legacy"].(map[string]any), "cybertron_scanner_shot_overflow")
+		for _, k := range c.keys {
+			if _, ok := m["legacy"].(map[string]any)[k]; !ok {
+				t.Fatalf("no saved name %q", k)
+			}
+			delete(m["legacy"].(map[string]any), k)
+		}
 		old, _ := json.Marshal(m)
 		var back Ruleset
 		if err := json.Unmarshal(old, &back); err != nil {
@@ -200,11 +212,19 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 			t.Errorf("%s v%d saved without the switch: %+v, %v", r.ID, r.Version, back, back.Validate())
 		}
 	}
-	v2 := FaithfulRules()
+	v2 := faithfulRulesV2()
 	v2.Version = 1
 	v2.Legacy.CybertronPacketMarkNextID = false
 	v2.Legacy.CybertronScannerShotOverflow = false
 	if v2 != faithfulRulesV1() {
 		t.Errorf("jrc3-faithful v2 differs from v1 beyond the Cybertron switches")
+	}
+	for _, c := range []struct{ v3, v2 Ruleset }{{ElegyRules(), elegyRulesV2()}, {FaithfulRules(), faithfulRulesV2()}} {
+		v3 := c.v3
+		v3.Version = 2
+		v3.Legacy.AIWormholeDistanceWrap = false
+		if c.v3.Version != 3 || v3 != c.v2 {
+			t.Errorf("%s v%d differs from v2 beyond ai_wormhole_distance_wrap", c.v3.ID, c.v3.Version)
+		}
 	}
 }

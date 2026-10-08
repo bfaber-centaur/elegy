@@ -25,9 +25,11 @@ included, not just the ID.
 
 | ID | Version | Settings |
 |---|---|---|
-| `elegy` | 2 | `engine.ElegyRules()`, the default: version 1 with `zero_max_population_stop` off, so an Alternate Reality planet with population and no starbase no longer stops the year (Bobby's "Keep going", 2026-10-08). |
+| `elegy` | 3 | `engine.ElegyRules()`, the default: version 2 with `ai_wormhole_distance_wrap` on. |
+| `elegy` | 2 | Version 1 with `zero_max_population_stop` off, so an Alternate Reality planet with population and no starbase no longer stops the year (Bobby's "Keep going", 2026-10-08). Kept for games saved under it. |
 | `elegy` | 1 | The behaviour Elegy had before rulesets existed. Every switch on except `merge_overflow`, `keep_unentitled_parts` and `field_limit_511`, where Elegy has chosen its own rule. Kept for games saved under it. |
-| `jrc3-faithful` | 2 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. Adds `cybertron_packet_mark_next_id` and `cybertron_scanner_shot_overflow` (both on) to version 1. |
+| `jrc3-faithful` | 3 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. Version 2 with `ai_wormhole_distance_wrap` on. |
+| `jrc3-faithful` | 2 | Version 1 with `cybertron_packet_mark_next_id` and `cybertron_scanner_shot_overflow` on. Kept for games saved under it. |
 | `jrc3-faithful` | 1 | Every switch that existed before the two Cybertron switches on. Kept for games saved under it. |
 
 A built-in ruleset's settings never change once released. A change is a
@@ -44,7 +46,8 @@ existed decodes it as `false`. So a built-in version released before a
 switch has it off: a new switch that is on in a built-in ruleset makes
 a new version of that ruleset, and one that is off leaves the version
 alone (the two Cybertron switches made `jrc3-faithful` v2 and left `elegy` at
-v2).
+v2; `ai_wormhole_distance_wrap`, on in both, made `elegy` v3 and
+`jrc3-faithful` v3).
 
 ## Switch inventory
 
@@ -59,7 +62,7 @@ opponents, the player report's `Rules`); no package-level compatibility
 constant or variable remains. A function that has no game takes the
 switch as a parameter from a caller that does.
 
-| Saved name | Field | `elegy` v2 | `jrc3-faithful` v2 | Read in | Spec and evidence |
+| Saved name | Field | `elegy` v3 | `jrc3-faithful` v3 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/fleetships.go` `NewFleetShips` (used by `Game.Ships` and by planners, from a valid ruleset), read by `fuelTermWrap` in `engine/movement.go` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
 | `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014. Off: a scanner is needed and cloaking applies at distance 0 too, so a fleet with no scanner part sees no fleet, also at its own position (ELEGY CHOICE, `TestElegyDecisionColocationOff`) |
@@ -82,6 +85,7 @@ switch as a parameter from a caller that does.
 | `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
 | `cybertron_packet_mark_next_id` | `CybertronPacketMarkNextID` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Packet marks": the scanner shot marks the planet one id above its destination, LEGACY BUG, MEASURED AI-24 |
 | `cybertron_scanner_shot_overflow` | `CybertronScannerShotOverflow` | off | on (off in v1) | `ai/packets.go` scannerShot, from `Report.Rules` | stars-elegy `docs/ai/cybertron.md` §6 "Scanner shot" step 5: for `w` ≥ 14 the `w⁴` distance test overflows and passes every planet, LEGACY BUG, BINARY-ONLY |
+| `ai_wormhole_distance_wrap` | `AIWormholeDistanceWrap` | on (off in v1, v2) | on (off in v1, v2) | Not read yet; the computer opponents will read it from `Report.Rules` | stars-elegy `docs/AI.md` §11 "Wormhole distance arithmetic": the wormhole preference compares a 16-bit wrapped, signed squared distance, so an end about 182 to 255 ly away counts as near, LEGACY BUG, BINARY-ONLY |
 
 ## Alternate Reality with maximum population 0
 
@@ -94,7 +98,7 @@ There is no original behaviour to copy, so each setting is a choice:
 - `zero_max_population_stop` on (`jrc3-faithful`, `elegy` v1): the
   closest Elegy comes to the original's stop. `GenerateTurn` returns a
   `*engine.ZeroMaxPopulationError` naming the planet and changes nothing.
-- Off (`elegy` v2), INTENTIONALLY DIFFERENT: the year is generated with
+- Off (`elegy` v2 and later), INTENTIONALLY DIFFERENT: the year is generated with
   every rule as KERNEL.md states it, and the one division takes its limit
   as the maximum goes to 0. The crowding permille is unbounded, so a
   planet with more than 10 units is overcrowded at the cap,
