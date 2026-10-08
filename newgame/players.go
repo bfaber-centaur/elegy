@@ -253,6 +253,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 			// research and production", MEASURED).
 			ResearchBudget: 15,
 			Research:       engine.ResearchState{Levels: levels, Current: engine.Energy, Next: engine.NextSameField},
+			Plans:          StartingPlans(),
 		}
 		// Relations (MEASURED): with exactly one human player every
 		// player starts as an enemy of every other; with two or more,
@@ -410,4 +411,20 @@ func (g *generator) setStarbase(p *engine.Planet, d int) {
 	p.StarbaseDesign = d
 	p.StarbaseHull = des.Hull.StarbaseNumber
 	p.StarbaseDock = des.Hull.Dock != 0
+}
+
+// StartingPlans are the five battle plans every player starts with
+// (COMBAT.md "Battle plans", "Starting plans", MEASURED UG01..UG21: every
+// player of every new game, 2 to 16 players, single-human and
+// multi-human). "Default" attacks neutrals and enemies in every game
+// (COMBAT.md, MEASURED UG01..UG21 and BP-2). Starting fleets use plan 0
+// (UNIVERSE.md "Starting ships").
+func StartingPlans() []engine.BattlePlan {
+	return []engine.BattlePlan{
+		{Name: "Default", Tactic: engine.TacticMaximizeRatio, Primary: engine.TargetArmed, Secondary: engine.TargetAny, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Kill Starbase", Tactic: engine.TacticMaximizeRatio, Primary: engine.TargetStarbase, Secondary: engine.TargetArmed, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Max-Defense", Tactic: engine.TacticMaximizeNet, Primary: engine.TargetArmed, Secondary: engine.TargetBombersFreighters, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Sniper", Tactic: engine.TacticDisengageIfChallenged, Primary: engine.TargetUnarmed, Secondary: engine.TargetNone, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Chicken", Tactic: engine.TacticDisengage, Primary: engine.TargetAny, Secondary: engine.TargetNone, Attack: engine.AttackNeutralsAndEnemies},
+	}
 }
