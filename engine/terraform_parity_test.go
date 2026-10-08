@@ -9,4 +9,4 @@ import (
 // "Turn order" steps 6c.2 and 7.4). This file is in package engine_test
 // because package terraform imports the engine.
 
-func init() { engine.SetParityTerraform(terraform.Engine{}) }
+func init() { engine.SetParityTerraform(terraform.Rules{}) }

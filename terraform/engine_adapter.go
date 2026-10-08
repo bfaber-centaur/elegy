@@ -2,18 +2,18 @@ package terraform
 
 import "github.com/bfaber-centaur/elegy/engine"
 
-// Engine is the engine.Terraformer GenerateTurn calls: remote mining at
+// Rules is the engine.Terraformer GenerateTurn calls: remote mining at
 // step 6c.2 and the Orbital Adjusters at step 7.4 (KERNEL.md "Turn
 // order"). It keeps no state.
-type Engine struct{}
+type Rules struct{}
 
-var _ engine.Terraformer = Engine{}
+var _ engine.Terraformer = Rules{}
 
 // MiningRate is MiningRate.
-func (Engine) MiningRate(g *engine.Game, f *engine.Fleet) int { return MiningRate(g, f) }
+func (Rules) MiningRate(g *engine.Game, f *engine.Fleet) int { return MiningRate(g, f) }
 
 // RemoteMine is RemoteMine.
-func (Engine) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Minerals, bool) {
+func (Rules) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Minerals, bool) {
 	return RemoteMine(g, fi, rng)
 }
 
@@ -24,7 +24,7 @@ func (Engine) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Minera
 //
 // Not modelled: the messages for a fleet that left the value unchanged
 // (0x12d, 0x15b).
-func (Engine) Adjust(g *engine.Game) []engine.Event {
+func (Rules) Adjust(g *engine.Game) []engine.Event {
 	var out []engine.Event
 	for _, a := range Adjust(g) {
 		if !a.HabChanged {

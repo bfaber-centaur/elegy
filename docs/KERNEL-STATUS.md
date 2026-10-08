@@ -152,7 +152,7 @@ checker that keeps state implements `RaceCloner`, so `GenerateTurn`
 leaves the input game's checker unchanged.
 
 Remote mining and the Orbital Adjusters run through `Game.Terraform`
-(`terraform.Engine`); a nil `Game.Terraform` skips them. A fleet with
+(`terraform.Rules`); a nil `Game.Terraform` skips them. A fleet with
 the remote-mining task (`TaskRemoteMine`) that did not move this year
 mines in its place in fleet order at step 6c.2 (KERNEL.md "Remote
 mining", CONFIRMED T-35, KB-1B); a fleet built this year counts as moved
@@ -365,6 +365,11 @@ skipped as a setup artifact (PARITY.md).
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
   `Game.Size` (0 tiny .. 4 huge) carry the game's option and universe
   size until new-game settings land; their names are Elegy's own.
+- **K7 (ASSUMPTION), growth estimate for the caps.** Growth (step 4a)
+  runs after every planet's production, with the environment production
+  terraformed (KX-002 T1, T2 populations). The grown population the
+  production caps read is estimated before production, from the
+  environment before its terraforming; that is not measured.
 
 - **K1, K3–K6** are answered by KERNEL.md (OT-6, KX-003): the AR
   loss applies whenever the next waypoint's warp is above 0; ship power

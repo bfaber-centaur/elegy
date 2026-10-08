@@ -302,8 +302,6 @@ func GenerateTurn(
 		g.dropShiplessFleets()
 	}
 
-	type growth struct{ pop, carry int }
-	grown := make([]growth, len(g.Planets))
 	research := make([]int, len(g.Players))
 
 	order := make([]int, len(g.Planets))
@@ -334,21 +332,22 @@ func GenerateTurn(
 		}
 	}
 
+	// Growth and deaths only act on owned planets with population
+	// (KERNEL.md "Population", BINARY-ONLY).
+	grows := make([]bool, len(g.Planets))
 	for _, i := range order {
 		p := &g.Planets[i]
-		grown[i] = growth{p.Population, p.GrowthCarry}
-		// Growth and deaths only act on owned planets with population
-		// (KERNEL.md "Population", BINARY-ONLY).
 		if p.Owner == NoOwner || p.Population <= 0 {
 			continue
 		}
+		grows[i] = true
 		player := &g.Players[p.Owner]
 		col := NewColony(p, player)
 
-		// Growth is applied after every planet's production, but the
-		// production caps read the grown population.
-		gp, gc := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
-		grown[i] = growth{gp, gc}
+		// The production caps read the grown population (ASSUMPTION K7:
+		// estimated from the environment before this year's production
+		// terraforming).
+		gp, _ := GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
 
 		res := col.Resources(p.Population, p.Factories)
 		r, ev := g.PlanetProduction(i, ProductionInput{
@@ -362,12 +361,18 @@ func GenerateTurn(
 		events = append(events, ev...)
 	}
 
+	// Growth (step 4a) comes after every planet's production, with the
+	// environment production terraformed (KERNEL.md "Turn order";
+	// MEASURED KX-002 T1, T2).
 	for i := range g.Planets {
+		if !grows[i] {
+			continue
+		}
 		p := &g.Planets[i]
-		starved := p.Owner != NoOwner && p.Population > 0 && grown[i].pop <= 0
-		p.Population = grown[i].pop
-		p.GrowthCarry = grown[i].carry
-		if starved {
+		player := &g.Players[p.Owner]
+		col := NewColony(p, player)
+		p.Population, p.GrowthCarry = GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
+		if p.Population <= 0 {
 			// A planet whose population dies out is emptied
 			// (TAKEOVER.md "Capture").
 			events = append(events, g.emptyPlanet(i))
