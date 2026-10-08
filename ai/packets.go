@@ -153,13 +153,15 @@ func (t *cyberTurn) supply(p *engine.Planet, budget int, marked map[int]bool) bo
 	return false
 }
 
-// attackPacket is §6's attack rule.
+// attackPacket is §6's attack rule. With need the truncated kill mass
+// and f = q^(D/w²) (D in ly, the share of the mass that arrives), a target
+// qualifies when need ≤ trunc(C·f), C = min(M, 70·((R/2 − 5)/5))
+// (BINARY-ONLY); the mass sent is A = trunc(min(need, M)/f), as ⌈A/70⌉
+// packets (MEASURED, AI-24).
 //
-// ASSUMPTION A49: M is the sum of the three minerals left; "the budget
-// can kill" is a kill mass of at most M; the kill mass is divided by
-// q^(distance/w²) (the mass a packet keeps over its flight, so a farther
-// target needs more), in floating point, with the distance in ly; the
-// packets are ⌈kill mass / packet mass⌉; ranges are inclusive.
+// ASSUMPTION A49: M is the sum of the three minerals left after the queue
+// and R the available resources before it (§6 names the queue only for
+// M); f is computed in floating point; the range test is inclusive.
 //
 // ASSUMPTION A50: the report does not carry the parts of another
 // player's starbase design, so its catch warp cannot be read: only planets
@@ -177,6 +179,8 @@ func (t *cyberTurn) attackPacket(p *engine.Planet, budget int, marked map[int]bo
 	if M <= 150 {
 		return false
 	}
+	R := v.available(p, budget).Resources
+	C := min(M, 70*((R/2-5)/5))
 	r, two := t.driver(p)
 	w := r + 3
 	q := 0.75
@@ -201,14 +205,15 @@ func (t *cyberTurn) attackPacket(p *engine.Planet, budget int, marked map[int]bo
 		}
 		pop := rep.PopEstimate / 400
 		c := 0 // no starbase, no catcher
-		kill := 16000 * float64(min(1000, 4*(pop+25))) / (float64(w*w-c*c) * float64(95-rep.DefenseEstimate))
-		kill /= math.Pow(q, dist/float64(w*w))
-		if kill > float64(M) {
+		need := 16000 * min(1000, 4*(pop+25)) / ((w*w - c*c) * (95 - rep.DefenseEstimate))
+		share := math.Pow(q, dist/float64(w*w))
+		if need > int(float64(C)*share) {
 			continue
 		}
 		if best < 0 || dd < bd {
 			best, bd = pp.ID, dd
-			bn = int(math.Ceil(kill / 70))
+			A := int(float64(min(need, M)) / share)
+			bn = (A + 69) / 70
 		}
 	}
 	if best < 0 {

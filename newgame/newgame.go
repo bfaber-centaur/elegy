@@ -289,6 +289,14 @@ func (g *generator) run() (Result, error) {
 	if err := g.setUpPlayers(hws); err != nil {
 		return Result{}, err
 	}
+	// Every planet's original environment is its environment at
+	// creation: the original value is the never-terraformed one
+	// (stars-elegy KERNEL.md "Terraforming"), and nothing has terraformed
+	// a new game.
+	for i := range g.res.Game.Planets {
+		p := &g.res.Game.Planets[i]
+		p.OrigEnv = p.Env
+	}
 	g.makeWormholes()
 	// The game carries its space objects into the turn (engine.Game.Objects);
 	// a new game has only its wormholes. Result.Wormholes is the same slice.
