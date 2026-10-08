@@ -1,5 +1,7 @@
 # Handoff
 
+> Historical: this is the handoff for elegy #8 (takeover), kept as written. For the current state see [README.md](README.md), [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) and the `docs/*-STATUS.md` files.
+
 ## Current question
 
 Implement TAKEOVER.md (bombing, invasion, colonization, capture) on top of
