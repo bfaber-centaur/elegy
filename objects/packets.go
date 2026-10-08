@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/terraform"
 )
 
 // Packet is a mass-driver mineral packet in flight (OBJECTS.md
@@ -282,9 +283,15 @@ type Impact struct {
 	// Emptied: the damage reached the population; the engine empties the
 	// planet as after bombing.
 	Emptied bool
-	// Unhandled: a Packet Physics launcher's terraforming and design
-	// disclosure (OBJECTS.md "Impact" step 4) are not modelled.
-	Unhandled bool
+	// Terraform is a Packet Physics launcher's terraforming (OBJECTS.md
+	// "Impact" step 4, terraform.PacketTerraform), applied before the
+	// damage; zero for other launchers and fully caught packets.
+	Terraform terraform.PacketResult
+	// DiscloseDesign: a Packet Physics launcher's uncaught packet hit
+	// another player's planet with a starbase, whose design becomes known
+	// to the launcher (OBJECTS.md "Impact" step 4, BINARY-ONLY). The turn
+	// engine records the knowledge.
+	DiscloseDesign bool
 }
 
 // CatcherWarp is planet pi's catcher warp C: its own Dw + t, 0 when
@@ -302,8 +309,10 @@ func CatcherWarp(g *engine.Game, pi int) int {
 // CONFIRMED OB-003, OB-009, OB-022, OB-030-A; marked parts BINARY-ONLY).
 // With w² = W² and c² = C² (⌊C²/2⌋ for an Interstellar Traveler owner):
 // caught q = 1000 when w² ≤ c², else ⌊c²·1000/w²⌋, 0 with no catcher;
-// each mineral adds ⌊m·(q + ⌊(1000 − q)/9⌋)/1000⌋. Unless fully caught,
-// unowned or Alternate Reality: dmg = ⌊s·⌊(w² − c²)·M/160⌋⌋, kill =
+// each mineral adds ⌊m·(q + ⌊(1000 − q)/9⌋)/1000⌋. Unless fully caught, a
+// Packet Physics launcher's packet terraforms the planet, owned or not
+// (terraform.PacketTerraform, its draws before the damage's). Unless
+// fully caught, unowned or Alternate Reality: dmg = ⌊s·⌊(w² − c²)·M/160⌋⌋, kill =
 // max(⌊P·dmg/1000⌋, dmg); kill ≥ P empties the planet; otherwise the
 // population drops by kill and defenses by Dk = ⌊def·dmg/1000⌋, 1 if that
 // is 0 and rand(20) < dmg, then min(def, max(Dk, ⌊dmg/20⌋)). The packet's
@@ -333,7 +342,8 @@ func hit(g *engine.Game, ctx ImpactContext, pk Packet, pi int, rng engine.Rand) 
 		return im
 	}
 	if pk.Owner >= 0 && pk.Owner < len(g.Players) && g.Players[pk.Owner].Race.PRT == engine.PRTPacketPhysics {
-		im.Unhandled = true
+		im.Terraform = terraform.PacketTerraform(g, pi, pk.Owner, terraform.Uncaught(pk.Cargo, q), rng)
+		im.DiscloseDesign = p.Owner >= 0 && p.Owner != pk.Owner && p.HasStarbase
 	}
 	if p.Owner < 0 || g.Players[p.Owner].Race.PRT == engine.PRTAlternateReality {
 		return im
