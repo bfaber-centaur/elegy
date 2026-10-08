@@ -36,7 +36,7 @@ at the end of the replay, before any waypoint task.
 | `BattlePlanOrder` | replaces a plan or adds the next one, at most 16; tactic and targets in range | COMBAT.md "Adding, replacing and deleting"; ORDERS.md "Battle-plan fields" | BINARY-ONLY; chosen rule | `TestPredictionBattlePlanOrders` |
 | `DeletePlanOrder` | never plan 0; later plans and fleets on them move down one | COMBAT.md (BP-1); ORDERS.md | CONFIRMED; chosen rule | `TestConfirmedDeletePlanRenumbers` |
 | `FleetPlanOrder` | own fleet, a plan the player has | ORDERS.md "Battle-plan fields" | chosen rule | `TestPredictionBattlePlanOrders` |
-| `DesignOrder` | read by `ReadDesign` against the player's race and tech; a slot whose design has ships or a starbase is refused; any other filled slot is overwritten in place | ORDERS.md "Design legality", "Design change into an occupied slot" | queue-only edit MEASURED (CO-08); refusal is Elegy's rule (the client cannot edit such a design) | `TestPredictionDesignOrders`, `TestMeasuredDesignEditQueueOnly` |
+| `DesignOrder` | read by `ReadDesign` against the player's race and tech; the slot records the year as `Created` and the order's `Picture` (AI.md "Storing a design"; L25, L26); a slot whose design has ships or a starbase is refused; any other filled slot is overwritten in place | ORDERS.md "Design legality", "Design change into an occupied slot" | queue-only edit MEASURED (CO-08); refusal is Elegy's rule (the client cannot edit such a design) | `TestPredictionDesignOrders`, `TestMeasuredDesignEditQueueOnly`, `TestDesignOrderCreatedAndPicture` |
 | `DesignOrder`, malformed fills | a part the slot does not take dropped, a count over capacity cut, parts above tech stripped, an empty engine slot back-filled with Quick Jump 5 | ORDERS.md "Design read, four malformed cases" (Q12) | BINARY-ONLY | `TestDesignMalformedFills` |
 | `DeleteDesignOrder` | the design's ships, fleets left empty and starbase removed, the population stays; the slot cleared in place, later slots keep their numbers; removed ships take ⌊amount × their capacity ÷ fleet capacity⌋ of the fleet's fuel and cargo | ORDERS.md "Design delete effect"; KERNEL.md "Maximum population" | MEASURED (CO-07, CO-07b, CO-07c); population BINARY-ONLY | `TestPredictionDesignOrders`, `TestMeasuredDesignDeleteInPlace`, `TestMeasuredDesignDeleteSharesFuel` |
 | `CargoOrder`, same owner | clamped to source, hold and tank (independent); own planet takes colonists at once | ORDERS.md "Cargo amounts and clamps"; TAKEOVER.md "Unload and load amounts" | CONFIRMED (FO-01..07, TK-201) | `TestConfirmedCargoClamps`, `TestConfirmedCargoOwnPlanet` |
@@ -86,6 +86,8 @@ and has been sent to stars-elegy as a question.
 | L22 | Ships moved out of a damaged stack keep its damage percentage and units, as do those left. | ORDERS.md does not say which ships of a stack are damaged. |
 | L23 | A ship move takes ships out of the order's fleet first, then out of the other; a fleet left with no ships is removed. | As merged fleets are (ORDERS.md "Merge"). |
 | L24 | A lay-mines task whose duration is neither indefinitely nor at least one year rejects the waypoint order. | OBJECTS.md "Duration" names the three durations and no order-time check. |
+| L25 | A design picture outside 0..3 rejects the design order. | AI.md "Picture" names four pictures per hull and no order-time check. |
+| L26 | A design edited in place takes the edit's year as its creation year, and the order's picture. | AI.md "Storing a design" covers a delete and a new design only. |
 
 ## Ships leaving production
 
@@ -174,7 +176,7 @@ successor needs before it can change.
 ### Labelled choices
 
 Every Elegy choice is in the tables above: L2, L4, L6, L7, L11, L14–L16,
-L18–L24 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
+L18–L26 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
 `ASSUMPTION` in the code. L1, L3, L5, L8–L10, L12 and L17 are
 settled by the specs (L13 was never used).
 
