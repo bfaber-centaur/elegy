@@ -38,7 +38,8 @@ type Minefield struct {
 	Count    int
 	Detonate bool
 	// Known marks the players who know the field: seen, hit by it or
-	// swept it (SCANNING.md "Space objects"). Its owner always knows it.
+	// swept it (SCANNING.md "Space objects"). Owning a field does not make
+	// it known (MEASURED MF-13a, MF-13c).
 	Known []bool
 }
 
@@ -1091,10 +1092,16 @@ type Detonation struct {
 // (OBJECTS.md "Several detonating fields", BINARY-ONLY). Each field's
 // decay touches only itself, so detonating every field before decaying
 // any matches "each just before its own decay".
+//
+// A player knows a field once it has been hit by it (SCANNING.md "Space
+// objects", BINARY-ONLY). ASSUMPTION V5: a detonation that damaged at
+// least one of a fleet's ships is such a hit, so the fleet's owner learns
+// the field; a fleet the field marked without damage learns nothing.
 func (s *Space) Detonate(g *engine.Game) []Detonation {
 	var out []Detonation
 	done := map[int]bool{}
-	for _, m := range s.Minefields {
+	for mi := range s.Minefields {
+		m := s.Minefields[mi]
 		if !m.Detonate || m.Count <= 0 {
 			continue
 		}
@@ -1116,6 +1123,9 @@ func (s *Space) Detonate(g *engine.Game) []Detonation {
 			capBefore, fuelBefore := fleetCargoCap(g, f), fleetFuelCap(g, f)
 			hits := MineDamage(g, f, m.Kind, exempt)
 			mineCargo(g, f, hits, capBefore, fuelBefore, false, nil)
+			if len(hits) > 0 {
+				s.Minefields[mi].learn(f.Owner)
+			}
 			det := Detonation{Fleet: fi, Field: m, Designs: hits}
 			if prt(g, m.Owner) == engine.PRTSpaceDemolition && len(hits) > 0 {
 				det.Disclosed = disclosed(hits, present)
