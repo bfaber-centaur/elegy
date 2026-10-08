@@ -103,3 +103,24 @@ func TestValidPercentTransport(t *testing.T) {
 		}
 	}
 }
+
+// The same targets from a salvage object (ASSUMPTION T5: the usual
+// amounts, capped by what it holds): 60 kT of ironium aboard leaves 45 to
+// fill to 50%; a wait for 50% the salvage cannot meet loads what it has
+// and keeps the task.
+func TestFillAndWaitForFromSalvage(t *testing.T) {
+	task := Task{Kind: TaskTransport}
+	task.Transport[Ironium] = Transport{FillTo, 50}
+	task.Transport[Boranium] = Transport{WaitFor, 50}
+	l := salvageLab(t, Salvage{Minerals: Minerals{500, 40, 0}, Steps: 60}, task)
+	l.g.Fleets[0].Cargo.Minerals = Minerals{60, 20, 0}
+	l.g.loadPass(false)
+	f, sv := l.g.Fleets[0], l.g.Salvage[0]
+	if f.Cargo.Minerals != (Minerals{105, 60, 0}) || sv.Minerals != (Minerals{455, 0, 0}) {
+		t.Errorf("fleet %v, salvage %v; want [105 60 0] and [455 0 0]", f.Cargo.Minerals, sv.Minerals)
+	}
+	want := [NumCargo]Transport{Boranium: {WaitFor, 50}}
+	if f.Task.Kind != TaskTransport || f.Task.Transport != want {
+		t.Errorf("task %+v, want %+v", f.Task, want)
+	}
+}
