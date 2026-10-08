@@ -247,7 +247,7 @@ keeps the fleet and planet sightings; these functions cover the objects.
 | Owners made known by minefields and packets | `Sightings.Owners` | CONFIRMED (OB-011, OB-017, OB-018) |
 | PP packet scanners, `R = P = warp²` | `Space.PacketScanners` | CONFIRMED (OB-012) |
 | SD minefields see fleets inside, not orbiting | `Space.DemolitionSightings` | CONFIRMED (OB-014-B); the cloak draw BINARY-ONLY |
-| What a sighting shows: minefields, packets, Traders, salvage | `Space.Report`, `ObjectReport` | ASSUMPTION V4 (stars-elegy does not say yet); reported as `game.Report.Objects` |
+| What a sighting shows: the whole object, whoever owns it; only the viewer's own "known" entry; seen this year only | `Space.Report`, `ObjectReport` | MEASURED (SC-038; SCANNING.md "Space objects" under "Disclosure"); reported as `game.Report.Objects` |
 
 ### Assumptions (spec gaps)
 
@@ -260,11 +260,13 @@ keeps the fleet and planet sightings; these functions cover the objects.
    elsewhere in SCANNING.md. A fleet at a planet's position is in orbit.
    Fleets are taken in fleet order, and each makes at most one cloak draw
    however many fields it is inside.
-4. **V4** A sighting shows an object's owner, number and position; a
-   minefield also its mine count and kind. Only the owner sees its
-   fields' detonate setting and its packets' warp, destination and cargo.
-   Nothing else is shown: not another player's packet's details, not
-   salvage contents, not a Trader's warp, destination or item.
+4. **V4** A player's own packets are always in its report
+   (`Space.Scan`; own minefields are, MEASURED MF-13). SC-038 saw own
+   packets beyond every scanner missing from their owner's file once
+   (OB-017 D–F); one observation, not adopted. A packet's "decay state
+   and whether it has moved" (SC-038) are Elegy's decay class and its
+   launched-this-year mark. Elegy keeps no per-year "seen" marker, so
+   none is reported.
 5. **V5** A detonation that damaged at least one of a fleet's ships is a
    hit, so the fleet's owner learns the field (`Space.Detonate`); a
    fleet the field marked without damage learns nothing.
