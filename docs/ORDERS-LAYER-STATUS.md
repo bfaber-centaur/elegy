@@ -83,9 +83,9 @@ slots, is spent on like any non-auto item (`KERNEL.md` "Production", the
 PQ-001 model), at the design's owner cost (ships), `StarbaseBuildCost`, or
 `StarbaseReplacementCost` where a starbase stands. The units an item
 completes in a year are one `Launch`; each starbase unit is built as it
-completes. `GenerateTurn` still calls `RunProduction`, which stops the
-queue at a design item; switching the call to `PlanetProduction` is the
-kernel lane's change.
+completes. `GenerateTurn` calls `PlanetProduction` for each planet;
+`RunProduction`, which has no game, still stops the queue at a design
+item.
 
 | Rule | Code | Status | Test |
 |---|---|---|---|

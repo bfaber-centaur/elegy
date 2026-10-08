@@ -629,6 +629,11 @@ func pvQueue(raw []json.RawMessage) ([]QueueItem, string) {
 			items = append(items, QueueItem{Kind: k, Count: it.Count, Percent: it.Percent, Slot: slot})
 			continue
 		}
+		if it.Kind == 0 {
+			// FORMAT.md lists production_queue expectation items as
+			// {id, count, percent}: without a kind the id is ambiguous.
+			return nil, "production queue item without a kind"
+		}
 		if it.Kind != 1 {
 			return nil, "production queue: item kind " + strconv.Itoa(it.Kind)
 		}
@@ -1131,7 +1136,10 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "skip", why)
 			continue
 		}
-		if c.VariesByStream {
+		// A case that varies by stream is skipped whole. In the sl corpus
+		// the varying expectations are tagged: those are skipped below
+		// and the rest are checked.
+		if c.VariesByStream && !(v.corpus == "sl" && pvStreamTagged(c)) {
 			res(c, "skip", "random outcome")
 			continue
 		}
@@ -1185,6 +1193,15 @@ var pvLegacyOff = map[string]string{
 var pvNotModelled = map[string]string{
 	"KX-002-R3": "the next research field choice is not in the vector",
 	"KX-002-R4": "the next research field choice is not in the vector",
+}
+
+func pvStreamTagged(c pvCase) bool {
+	for _, e := range c.Expect {
+		if e.Stream != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func pvUnique(xs []string) []string {
