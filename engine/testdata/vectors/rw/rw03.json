@@ -1,0 +1,2644 @@
+{
+ "schema": "stars-elegy-vector/1",
+ "id": "RD-3",
+ "title": "race design: RW03, 16 players",
+ "source": {
+  "experiment": "experiments/rd",
+  "spec_rules": "docs/RACES.md, docs/UNIVERSE.md",
+  "parity": "docs/PARITY.md \"Advantage points and leftover (MEASURED, RD-1..RD-4)\"",
+  "raw_evidence": "stars-oracle-apparatus evidence/rd/rw03 (private)"
+ },
+ "years": 0,
+ "random": "single_stream",
+ "streams": 1,
+ "new_game": {
+  "settings": {
+   "name": "RW03",
+   "size": "huge",
+   "density": "normal",
+   "player_positions": 1,
+   "seed": 3003,
+   "options": {
+    "maximum_minerals": false,
+    "flag_2": false,
+    "accelerated_bbs": false,
+    "no_random_events": false,
+    "flag_5": false,
+    "flag_6": false,
+    "galaxy_clumping": false
+   },
+   "victory_condition_lines": [
+    [
+     1,
+     60
+    ],
+    [
+     0,
+     26,
+     4
+    ],
+    [
+     0,
+     5000
+    ],
+    [
+     0,
+     100
+    ],
+    [
+     0,
+     100
+    ],
+    [
+     0,
+     100
+    ],
+    [
+     0,
+     100
+    ],
+    [
+     1,
+     50
+    ]
+   ],
+   "slower_tech": false,
+   "random_events": true,
+   "public_scores": false
+  },
+  "races": [
+   {
+    "player": 0,
+    "race_file": "rw03a.r1",
+    "race": {
+     "prt": "JOAT",
+     "lrt": [
+      "NAS"
+     ],
+     "growth_percent": 17,
+     "habitability": {
+      "gravity": [
+       53,
+       21,
+       85
+      ],
+      "temperature": [
+       22,
+       5,
+       40
+      ],
+      "radiation": [
+       70,
+       48,
+       92
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1100,
+     "factory": {
+      "output": 7,
+      "cost": 16,
+      "per_10k": 11
+     },
+     "mine": {
+      "output": 19,
+      "cost": 2,
+      "per_10k": 24
+     },
+     "research_cost": {
+      "energy": "expensive",
+      "weapons": "normal",
+      "propulsion": "expensive",
+      "construction": "expensive",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 1,
+    "race_file": "rw03b.r1",
+    "race": {
+     "prt": "IS",
+     "lrt": [
+      "IFE",
+      "TT",
+      "MA",
+      "NRSE",
+      "BET",
+      "RS"
+     ],
+     "growth_percent": 12,
+     "habitability": {
+      "gravity": [
+       255,
+       255,
+       255
+      ],
+      "temperature": [
+       53,
+       14,
+       92
+      ],
+      "radiation": [
+       48,
+       27,
+       69
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 2400,
+     "factory": {
+      "output": 6,
+      "cost": 18,
+      "per_10k": 20
+     },
+     "mine": {
+      "output": 11,
+      "cost": 2,
+      "per_10k": 11
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "expensive",
+      "propulsion": "cheap",
+      "construction": "cheap",
+      "electronics": "cheap",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 2,
+    "race_file": "rw03c.r1",
+    "race": {
+     "prt": "CA",
+     "lrt": [
+      "IFE",
+      "ARM",
+      "ISB",
+      "UR",
+      "MA"
+     ],
+     "growth_percent": 7,
+     "habitability": {
+      "gravity": [
+       29,
+       8,
+       50
+      ],
+      "temperature": [
+       75,
+       50,
+       100
+      ],
+      "radiation": [
+       56,
+       13,
+       100
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1000,
+     "factory": {
+      "output": 14,
+      "cost": 16,
+      "per_10k": 11
+     },
+     "mine": {
+      "output": 25,
+      "cost": 9,
+      "per_10k": 9
+     },
+     "research_cost": {
+      "energy": "expensive",
+      "weapons": "expensive",
+      "propulsion": "cheap",
+      "construction": "normal",
+      "electronics": "cheap",
+      "biotechnology": "cheap"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 3,
+    "race_file": "rw03d.r1",
+    "race": {
+     "prt": "SS",
+     "lrt": [
+      "NRSE",
+      "NAS",
+      "LSP",
+      "BET",
+      "RS"
+     ],
+     "growth_percent": 8,
+     "habitability": {
+      "gravity": [
+       38,
+       12,
+       64
+      ],
+      "temperature": [
+       255,
+       255,
+       255
+      ],
+      "radiation": [
+       50,
+       0,
+       100
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 900,
+     "factory": {
+      "output": 13,
+      "cost": 22,
+      "per_10k": 22
+     },
+     "mine": {
+      "output": 10,
+      "cost": 10,
+      "per_10k": 6
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "cheap",
+      "electronics": "cheap",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 4,
+    "race_file": "rw03e.r1",
+    "race": {
+     "prt": "IT",
+     "lrt": [
+      "TT",
+      "UR",
+      "MA"
+     ],
+     "growth_percent": 6,
+     "habitability": {
+      "gravity": [
+       50,
+       20,
+       80
+      ],
+      "temperature": [
+       255,
+       255,
+       255
+      ],
+      "radiation": [
+       62,
+       42,
+       83
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 900,
+     "factory": {
+      "output": 15,
+      "cost": 7,
+      "per_10k": 25
+     },
+     "mine": {
+      "output": 22,
+      "cost": 10,
+      "per_10k": 20
+     },
+     "research_cost": {
+      "energy": "expensive",
+      "weapons": "expensive",
+      "propulsion": "expensive",
+      "construction": "expensive",
+      "electronics": "expensive",
+      "biotechnology": "expensive"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 5,
+    "race_file": "rw03f.r1",
+    "race": {
+     "prt": "SD",
+     "lrt": [
+      "CE",
+      "BET",
+      "RS"
+     ],
+     "growth_percent": 16,
+     "habitability": {
+      "gravity": [
+       76,
+       54,
+       98
+      ],
+      "temperature": [
+       58,
+       26,
+       90
+      ],
+      "radiation": [
+       59,
+       24,
+       94
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 2500,
+     "factory": {
+      "output": 5,
+      "cost": 19,
+      "per_10k": 8
+     },
+     "mine": {
+      "output": 15,
+      "cost": 4,
+      "per_10k": 13
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "cheap",
+      "propulsion": "cheap",
+      "construction": "cheap",
+      "electronics": "cheap",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 6,
+    "race_file": "rw03g.r1",
+    "race": {
+     "prt": "SD",
+     "lrt": [
+      "ISB",
+      "GR",
+      "BET",
+      "RS"
+     ],
+     "growth_percent": 7,
+     "habitability": {
+      "gravity": [
+       84,
+       72,
+       97
+      ],
+      "temperature": [
+       67,
+       39,
+       95
+      ],
+      "radiation": [
+       36,
+       6,
+       66
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1700,
+     "factory": {
+      "output": 11,
+      "cost": 22,
+      "per_10k": 19
+     },
+     "mine": {
+      "output": 23,
+      "cost": 14,
+      "per_10k": 9
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "cheap",
+      "propulsion": "cheap",
+      "construction": "cheap",
+      "electronics": "cheap",
+      "biotechnology": "cheap"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 7,
+    "race_file": "rw03h.r1",
+    "race": {
+     "prt": "IS",
+     "lrt": [
+      "GR"
+     ],
+     "growth_percent": 18,
+     "habitability": {
+      "gravity": [
+       42,
+       0,
+       84
+      ],
+      "temperature": [
+       47,
+       22,
+       73
+      ],
+      "radiation": [
+       54,
+       13,
+       95
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1200,
+     "factory": {
+      "output": 13,
+      "cost": 24,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 11,
+      "cost": 6,
+      "per_10k": 19
+     },
+     "research_cost": {
+      "energy": "expensive",
+      "weapons": "expensive",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "expensive",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 8,
+    "race_file": "rw03i.r1",
+    "race": {
+     "prt": "IS",
+     "lrt": [],
+     "growth_percent": 7,
+     "habitability": {
+      "gravity": [
+       30,
+       11,
+       49
+      ],
+      "temperature": [
+       61,
+       33,
+       90
+      ],
+      "radiation": [
+       79,
+       64,
+       94
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 700,
+     "factory": {
+      "output": 5,
+      "cost": 7,
+      "per_10k": 10
+     },
+     "mine": {
+      "output": 20,
+      "cost": 6,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "expensive",
+      "weapons": "cheap",
+      "propulsion": "normal",
+      "construction": "expensive",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 9,
+    "race_file": "rw03j.r1",
+    "race": {
+     "prt": "SD",
+     "lrt": [
+      "IFE",
+      "MA",
+      "NAS"
+     ],
+     "growth_percent": 8,
+     "habitability": {
+      "gravity": [
+       37,
+       18,
+       56
+      ],
+      "temperature": [
+       60,
+       21,
+       99
+      ],
+      "radiation": [
+       77,
+       60,
+       95
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1400,
+     "factory": {
+      "output": 11,
+      "cost": 21,
+      "per_10k": 18
+     },
+     "mine": {
+      "output": 24,
+      "cost": 10,
+      "per_10k": 22
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "cheap",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 10,
+    "race_file": "rw03k.r1",
+    "race": {
+     "prt": "CA",
+     "lrt": [
+      "CE"
+     ],
+     "growth_percent": 7,
+     "habitability": {
+      "gravity": [
+       26,
+       3,
+       50
+      ],
+      "temperature": [
+       36,
+       6,
+       67
+      ],
+      "radiation": [
+       50,
+       6,
+       95
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1800,
+     "factory": {
+      "output": 13,
+      "cost": 6,
+      "per_10k": 11
+     },
+     "mine": {
+      "output": 23,
+      "cost": 2,
+      "per_10k": 25
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "cheap",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "expensive",
+      "biotechnology": "expensive"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 11,
+    "race_file": "rw03l.r1",
+    "race": {
+     "prt": "WM",
+     "lrt": [
+      "MA",
+      "NAS"
+     ],
+     "growth_percent": 8,
+     "habitability": {
+      "gravity": [
+       255,
+       255,
+       255
+      ],
+      "temperature": [
+       255,
+       255,
+       255
+      ],
+      "radiation": [
+       32,
+       16,
+       49
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 2100,
+     "factory": {
+      "output": 14,
+      "cost": 9,
+      "per_10k": 14
+     },
+     "mine": {
+      "output": 14,
+      "cost": 7,
+      "per_10k": 16
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "cheap",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 12,
+    "race_file": "rw03m.r1",
+    "race": {
+     "prt": "IT",
+     "lrt": [
+      "IFE",
+      "TT",
+      "MA",
+      "LSP",
+      "BET"
+     ],
+     "growth_percent": 8,
+     "habitability": {
+      "gravity": [
+       82,
+       71,
+       93
+      ],
+      "temperature": [
+       255,
+       255,
+       255
+      ],
+      "radiation": [
+       67,
+       39,
+       96
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1100,
+     "factory": {
+      "output": 15,
+      "cost": 15,
+      "per_10k": 11
+     },
+     "mine": {
+      "output": 8,
+      "cost": 12,
+      "per_10k": 18
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "cheap",
+      "propulsion": "normal",
+      "construction": "normal",
+      "electronics": "normal",
+      "biotechnology": "cheap"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 13,
+    "race_file": "rw03n.r1",
+    "race": {
+     "prt": "WM",
+     "lrt": [
+      "TT"
+     ],
+     "growth_percent": 13,
+     "habitability": {
+      "gravity": [
+       35,
+       18,
+       52
+      ],
+      "temperature": [
+       28,
+       0,
+       56
+      ],
+      "radiation": [
+       255,
+       255,
+       255
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 2300,
+     "factory": {
+      "output": 10,
+      "cost": 9,
+      "per_10k": 15
+     },
+     "mine": {
+      "output": 9,
+      "cost": 2,
+      "per_10k": 18
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "normal",
+      "propulsion": "cheap",
+      "construction": "cheap",
+      "electronics": "normal",
+      "biotechnology": "expensive"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": true,
+     "factories_cost_less": false
+    }
+   },
+   {
+    "player": 14,
+    "race_file": "rw03o.r1",
+    "race": {
+     "prt": "IT",
+     "lrt": [],
+     "growth_percent": 8,
+     "habitability": {
+      "gravity": [
+       60,
+       26,
+       94
+      ],
+      "temperature": [
+       42,
+       16,
+       68
+      ],
+      "radiation": [
+       66,
+       32,
+       100
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1100,
+     "factory": {
+      "output": 10,
+      "cost": 16,
+      "per_10k": 19
+     },
+     "mine": {
+      "output": 16,
+      "cost": 4,
+      "per_10k": 10
+     },
+     "research_cost": {
+      "energy": "normal",
+      "weapons": "normal",
+      "propulsion": "normal",
+      "construction": "cheap",
+      "electronics": "normal",
+      "biotechnology": "cheap"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": true
+    }
+   },
+   {
+    "player": 15,
+    "race_file": "rw03p.r1",
+    "race": {
+     "prt": "SD",
+     "lrt": [
+      "GR"
+     ],
+     "growth_percent": 20,
+     "habitability": {
+      "gravity": [
+       43,
+       14,
+       73
+      ],
+      "temperature": [
+       75,
+       65,
+       86
+      ],
+      "radiation": [
+       35,
+       23,
+       47
+      ],
+      "order": "center, low, high (255 = immune)"
+     },
+     "colonists_per_resource": 1800,
+     "factory": {
+      "output": 5,
+      "cost": 18,
+      "per_10k": 24
+     },
+     "mine": {
+      "output": 20,
+      "cost": 5,
+      "per_10k": 12
+     },
+     "research_cost": {
+      "energy": "cheap",
+      "weapons": "cheap",
+      "propulsion": "expensive",
+      "construction": "normal",
+      "electronics": "cheap",
+      "biotechnology": "normal"
+     },
+     "leftover_spend": "surface_minerals",
+     "stat_15": 0,
+     "techs_start_high": false,
+     "factories_cost_less": false
+    }
+   }
+  ]
+ },
+ "cases": [
+  {
+   "id": "RD-3-R",
+   "rule": "RACES race files at game creation",
+   "setup": "each human player's race as created",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 0,
+     "equals": {
+      "race": {
+       "prt": "JOAT",
+       "lrt": [
+        "NAS"
+       ],
+       "growth_percent": 17,
+       "habitability": {
+        "gravity": [
+         53,
+         21,
+         85
+        ],
+        "temperature": [
+         22,
+         5,
+         40
+        ],
+        "radiation": [
+         70,
+         48,
+         92
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1100,
+       "factory": {
+        "output": 7,
+        "cost": 16,
+        "per_10k": 11
+       },
+       "mine": {
+        "output": 19,
+        "cost": 2,
+        "per_10k": 24
+       },
+       "research_cost": {
+        "energy": "expensive",
+        "weapons": "normal",
+        "propulsion": "expensive",
+        "construction": "expensive",
+        "electronics": "normal",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "race": {
+       "prt": "IS",
+       "lrt": [
+        "IFE",
+        "TT",
+        "MA",
+        "NRSE",
+        "BET",
+        "RS"
+       ],
+       "growth_percent": 12,
+       "habitability": {
+        "gravity": [
+         255,
+         255,
+         255
+        ],
+        "temperature": [
+         53,
+         14,
+         92
+        ],
+        "radiation": [
+         48,
+         27,
+         69
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 2400,
+       "factory": {
+        "output": 6,
+        "cost": 18,
+        "per_10k": 20
+       },
+       "mine": {
+        "output": 11,
+        "cost": 2,
+        "per_10k": 11
+       },
+       "research_cost": {
+        "energy": "normal",
+        "weapons": "expensive",
+        "propulsion": "cheap",
+        "construction": "cheap",
+        "electronics": "cheap",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 2,
+     "equals": {
+      "race": {
+       "prt": "CA",
+       "lrt": [
+        "IFE",
+        "ARM",
+        "ISB",
+        "UR",
+        "MA"
+       ],
+       "growth_percent": 7,
+       "habitability": {
+        "gravity": [
+         29,
+         8,
+         50
+        ],
+        "temperature": [
+         75,
+         50,
+         100
+        ],
+        "radiation": [
+         56,
+         13,
+         100
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1000,
+       "factory": {
+        "output": 14,
+        "cost": 16,
+        "per_10k": 11
+       },
+       "mine": {
+        "output": 25,
+        "cost": 9,
+        "per_10k": 9
+       },
+       "research_cost": {
+        "energy": "expensive",
+        "weapons": "expensive",
+        "propulsion": "cheap",
+        "construction": "normal",
+        "electronics": "cheap",
+        "biotechnology": "cheap"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 3,
+     "equals": {
+      "race": {
+       "prt": "SS",
+       "lrt": [
+        "NRSE",
+        "NAS",
+        "LSP",
+        "BET",
+        "RS"
+       ],
+       "growth_percent": 8,
+       "habitability": {
+        "gravity": [
+         38,
+         12,
+         64
+        ],
+        "temperature": [
+         255,
+         255,
+         255
+        ],
+        "radiation": [
+         50,
+         0,
+         100
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 900,
+       "factory": {
+        "output": 13,
+        "cost": 22,
+        "per_10k": 22
+       },
+       "mine": {
+        "output": 10,
+        "cost": 10,
+        "per_10k": 6
+       },
+       "research_cost": {
+        "energy": "normal",
+        "weapons": "normal",
+        "propulsion": "normal",
+        "construction": "cheap",
+        "electronics": "cheap",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 4,
+     "equals": {
+      "race": {
+       "prt": "IT",
+       "lrt": [
+        "TT",
+        "UR",
+        "MA"
+       ],
+       "growth_percent": 6,
+       "habitability": {
+        "gravity": [
+         50,
+         20,
+         80
+        ],
+        "temperature": [
+         255,
+         255,
+         255
+        ],
+        "radiation": [
+         62,
+         42,
+         83
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 900,
+       "factory": {
+        "output": 15,
+        "cost": 7,
+        "per_10k": 25
+       },
+       "mine": {
+        "output": 22,
+        "cost": 10,
+        "per_10k": 20
+       },
+       "research_cost": {
+        "energy": "expensive",
+        "weapons": "expensive",
+        "propulsion": "expensive",
+        "construction": "expensive",
+        "electronics": "expensive",
+        "biotechnology": "expensive"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 5,
+     "equals": {
+      "race": {
+       "prt": "SD",
+       "lrt": [
+        "CE",
+        "BET",
+        "RS"
+       ],
+       "growth_percent": 16,
+       "habitability": {
+        "gravity": [
+         76,
+         54,
+         98
+        ],
+        "temperature": [
+         58,
+         26,
+         90
+        ],
+        "radiation": [
+         59,
+         24,
+         94
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 2500,
+       "factory": {
+        "output": 5,
+        "cost": 19,
+        "per_10k": 8
+       },
+       "mine": {
+        "output": 15,
+        "cost": 4,
+        "per_10k": 13
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "cheap",
+        "propulsion": "cheap",
+        "construction": "cheap",
+        "electronics": "cheap",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 6,
+     "equals": {
+      "race": {
+       "prt": "SD",
+       "lrt": [
+        "ISB",
+        "GR",
+        "BET",
+        "RS"
+       ],
+       "growth_percent": 7,
+       "habitability": {
+        "gravity": [
+         84,
+         72,
+         97
+        ],
+        "temperature": [
+         67,
+         39,
+         95
+        ],
+        "radiation": [
+         36,
+         6,
+         66
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1700,
+       "factory": {
+        "output": 11,
+        "cost": 22,
+        "per_10k": 19
+       },
+       "mine": {
+        "output": 23,
+        "cost": 14,
+        "per_10k": 9
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "cheap",
+        "propulsion": "cheap",
+        "construction": "cheap",
+        "electronics": "cheap",
+        "biotechnology": "cheap"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 7,
+     "equals": {
+      "race": {
+       "prt": "IS",
+       "lrt": [
+        "GR"
+       ],
+       "growth_percent": 18,
+       "habitability": {
+        "gravity": [
+         42,
+         0,
+         84
+        ],
+        "temperature": [
+         47,
+         22,
+         73
+        ],
+        "radiation": [
+         54,
+         13,
+         95
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1200,
+       "factory": {
+        "output": 13,
+        "cost": 24,
+        "per_10k": 10
+       },
+       "mine": {
+        "output": 11,
+        "cost": 6,
+        "per_10k": 19
+       },
+       "research_cost": {
+        "energy": "expensive",
+        "weapons": "expensive",
+        "propulsion": "normal",
+        "construction": "normal",
+        "electronics": "expensive",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 8,
+     "equals": {
+      "race": {
+       "prt": "IS",
+       "lrt": [],
+       "growth_percent": 7,
+       "habitability": {
+        "gravity": [
+         30,
+         11,
+         49
+        ],
+        "temperature": [
+         61,
+         33,
+         90
+        ],
+        "radiation": [
+         79,
+         64,
+         94
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 700,
+       "factory": {
+        "output": 5,
+        "cost": 7,
+        "per_10k": 10
+       },
+       "mine": {
+        "output": 20,
+        "cost": 6,
+        "per_10k": 10
+       },
+       "research_cost": {
+        "energy": "expensive",
+        "weapons": "cheap",
+        "propulsion": "normal",
+        "construction": "expensive",
+        "electronics": "normal",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 9,
+     "equals": {
+      "race": {
+       "prt": "SD",
+       "lrt": [
+        "IFE",
+        "MA",
+        "NAS"
+       ],
+       "growth_percent": 8,
+       "habitability": {
+        "gravity": [
+         37,
+         18,
+         56
+        ],
+        "temperature": [
+         60,
+         21,
+         99
+        ],
+        "radiation": [
+         77,
+         60,
+         95
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1400,
+       "factory": {
+        "output": 11,
+        "cost": 21,
+        "per_10k": 18
+       },
+       "mine": {
+        "output": 24,
+        "cost": 10,
+        "per_10k": 22
+       },
+       "research_cost": {
+        "energy": "normal",
+        "weapons": "normal",
+        "propulsion": "normal",
+        "construction": "normal",
+        "electronics": "cheap",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 10,
+     "equals": {
+      "race": {
+       "prt": "CA",
+       "lrt": [
+        "CE"
+       ],
+       "growth_percent": 7,
+       "habitability": {
+        "gravity": [
+         26,
+         3,
+         50
+        ],
+        "temperature": [
+         36,
+         6,
+         67
+        ],
+        "radiation": [
+         50,
+         6,
+         95
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1800,
+       "factory": {
+        "output": 13,
+        "cost": 6,
+        "per_10k": 11
+       },
+       "mine": {
+        "output": 23,
+        "cost": 2,
+        "per_10k": 25
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "cheap",
+        "propulsion": "normal",
+        "construction": "normal",
+        "electronics": "expensive",
+        "biotechnology": "expensive"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 11,
+     "equals": {
+      "race": {
+       "prt": "WM",
+       "lrt": [
+        "MA",
+        "NAS"
+       ],
+       "growth_percent": 8,
+       "habitability": {
+        "gravity": [
+         255,
+         255,
+         255
+        ],
+        "temperature": [
+         255,
+         255,
+         255
+        ],
+        "radiation": [
+         32,
+         16,
+         49
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 2100,
+       "factory": {
+        "output": 14,
+        "cost": 9,
+        "per_10k": 14
+       },
+       "mine": {
+        "output": 14,
+        "cost": 7,
+        "per_10k": 16
+       },
+       "research_cost": {
+        "energy": "normal",
+        "weapons": "normal",
+        "propulsion": "cheap",
+        "construction": "normal",
+        "electronics": "normal",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 12,
+     "equals": {
+      "race": {
+       "prt": "IT",
+       "lrt": [
+        "IFE",
+        "TT",
+        "MA",
+        "LSP",
+        "BET"
+       ],
+       "growth_percent": 8,
+       "habitability": {
+        "gravity": [
+         82,
+         71,
+         93
+        ],
+        "temperature": [
+         255,
+         255,
+         255
+        ],
+        "radiation": [
+         67,
+         39,
+         96
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1100,
+       "factory": {
+        "output": 15,
+        "cost": 15,
+        "per_10k": 11
+       },
+       "mine": {
+        "output": 8,
+        "cost": 12,
+        "per_10k": 18
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "cheap",
+        "propulsion": "normal",
+        "construction": "normal",
+        "electronics": "normal",
+        "biotechnology": "cheap"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 13,
+     "equals": {
+      "race": {
+       "prt": "WM",
+       "lrt": [
+        "TT"
+       ],
+       "growth_percent": 13,
+       "habitability": {
+        "gravity": [
+         35,
+         18,
+         52
+        ],
+        "temperature": [
+         28,
+         0,
+         56
+        ],
+        "radiation": [
+         255,
+         255,
+         255
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 2300,
+       "factory": {
+        "output": 10,
+        "cost": 9,
+        "per_10k": 15
+       },
+       "mine": {
+        "output": 9,
+        "cost": 2,
+        "per_10k": 18
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "normal",
+        "propulsion": "cheap",
+        "construction": "cheap",
+        "electronics": "normal",
+        "biotechnology": "expensive"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": true,
+       "factories_cost_less": false
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 14,
+     "equals": {
+      "race": {
+       "prt": "IT",
+       "lrt": [],
+       "growth_percent": 8,
+       "habitability": {
+        "gravity": [
+         60,
+         26,
+         94
+        ],
+        "temperature": [
+         42,
+         16,
+         68
+        ],
+        "radiation": [
+         66,
+         32,
+         100
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1100,
+       "factory": {
+        "output": 10,
+        "cost": 16,
+        "per_10k": 19
+       },
+       "mine": {
+        "output": 16,
+        "cost": 4,
+        "per_10k": 10
+       },
+       "research_cost": {
+        "energy": "normal",
+        "weapons": "normal",
+        "propulsion": "normal",
+        "construction": "cheap",
+        "electronics": "normal",
+        "biotechnology": "cheap"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": true
+      }
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 15,
+     "equals": {
+      "race": {
+       "prt": "SD",
+       "lrt": [
+        "GR"
+       ],
+       "growth_percent": 20,
+       "habitability": {
+        "gravity": [
+         43,
+         14,
+         73
+        ],
+        "temperature": [
+         75,
+         65,
+         86
+        ],
+        "radiation": [
+         35,
+         23,
+         47
+        ],
+        "order": "center, low, high (255 = immune)"
+       },
+       "colonists_per_resource": 1800,
+       "factory": {
+        "output": 5,
+        "cost": 18,
+        "per_10k": 24
+       },
+       "mine": {
+        "output": 20,
+        "cost": 5,
+        "per_10k": 12
+       },
+       "research_cost": {
+        "energy": "cheap",
+        "weapons": "cheap",
+        "propulsion": "expensive",
+        "construction": "normal",
+        "electronics": "cheap",
+        "biotechnology": "normal"
+       },
+       "leftover_spend": "surface_minerals",
+       "stat_15": 0,
+       "techs_start_high": false,
+       "factories_cost_less": false
+      }
+     }
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  },
+  {
+   "id": "RD-3-A",
+   "rule": "UNIVERSE Starting tech by PRT; starting designs",
+   "setup": "starting tech and design count per player",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 0,
+     "equals": {
+      "tech": {
+       "energy": 3,
+       "weapons": 3,
+       "propulsion": 3,
+       "construction": 3,
+       "electronics": 3,
+       "biotechnology": 3
+      },
+      "ship_design_count": 6
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 1,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 1,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 0
+      },
+      "ship_design_count": 2
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 2,
+     "equals": {
+      "tech": {
+       "energy": 1,
+       "weapons": 1,
+       "propulsion": 2,
+       "construction": 2,
+       "electronics": 0,
+       "biotechnology": 6
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 3,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 0,
+       "construction": 0,
+       "electronics": 5,
+       "biotechnology": 0
+      },
+      "ship_design_count": 3
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 4,
+     "equals": {
+      "tech": {
+       "energy": 3,
+       "weapons": 3,
+       "propulsion": 5,
+       "construction": 5,
+       "electronics": 3,
+       "biotechnology": 3
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 5,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 3,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 2
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 6,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 2,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 2
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 7,
+     "equals": {
+      "tech": {
+       "energy": 3,
+       "weapons": 3,
+       "propulsion": 0,
+       "construction": 0,
+       "electronics": 3,
+       "biotechnology": 0
+      },
+      "ship_design_count": 2
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 8,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 0,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 0
+      },
+      "ship_design_count": 2
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 9,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 3,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 2
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 10,
+     "equals": {
+      "tech": {
+       "energy": 1,
+       "weapons": 1,
+       "propulsion": 2,
+       "construction": 2,
+       "electronics": 3,
+       "biotechnology": 6
+      },
+      "ship_design_count": 3
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 11,
+     "equals": {
+      "tech": {
+       "energy": 1,
+       "weapons": 6,
+       "propulsion": 1,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 0
+      },
+      "ship_design_count": 2
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 12,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 6,
+       "construction": 5,
+       "electronics": 0,
+       "biotechnology": 0
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 13,
+     "equals": {
+      "tech": {
+       "energy": 1,
+       "weapons": 6,
+       "propulsion": 1,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 3
+      },
+      "ship_design_count": 2
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 14,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 5,
+       "construction": 5,
+       "electronics": 0,
+       "biotechnology": 0
+      },
+      "ship_design_count": 4
+     }
+    },
+    {
+     "year": 0,
+     "kind": "player",
+     "id": 15,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 2,
+       "construction": 0,
+       "electronics": 0,
+       "biotechnology": 2
+      },
+      "ship_design_count": 4
+     }
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  },
+  {
+   "id": "RD-3-B",
+   "rule": "UNIVERSE Planet counts",
+   "setup": "number of planets",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "sample",
+     "check": "planet_count",
+     "target": [],
+     "observed": 800,
+     "constraint": "PARITY.md \"Planet counts\""
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  },
+  {
+   "id": "RD-3-C",
+   "rule": "UNIVERSE Starting planets; leftover points",
+   "setup": "homeworlds and other starting planets per player",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "sample",
+     "check": "starting_planets",
+     "target": [],
+     "observed": {
+      "0": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          269,
+          714,
+          234
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 6,
+       "leftover_spend_code": 0
+      },
+      "1": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          292,
+          737,
+          278
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 2,
+       "leftover_spend_code": 0
+      },
+      "2": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          344,
+          789,
+          384
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 5,
+       "leftover_spend_code": 0
+      },
+      "3": {
+       "homeworld": [
+        {
+         "population": 175,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          259,
+          704,
+          214
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 3,
+       "leftover_spend_code": 0
+      },
+      "4": {
+       "homeworld": [
+        {
+         "population": 200,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          302,
+          747,
+          298
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [
+        {
+         "population": 100,
+         "mines": 10,
+         "factories": 4,
+         "defenses": 0,
+         "surface_minerals": [
+          294,
+          173,
+          135
+         ],
+         "concentrations": [
+          72,
+          88,
+          73
+         ]
+        }
+       ],
+       "fleets": 5,
+       "leftover_spend_code": 0
+      },
+      "5": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          267,
+          712,
+          228
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 4,
+       "leftover_spend_code": 0
+      },
+      "6": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          379,
+          824,
+          454
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 4,
+       "leftover_spend_code": 0
+      },
+      "7": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          304,
+          749,
+          304
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 2,
+       "leftover_spend_code": 0
+      },
+      "8": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          359,
+          804,
+          414
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 2,
+       "leftover_spend_code": 0
+      },
+      "9": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          284,
+          729,
+          264
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 4,
+       "leftover_spend_code": 0
+      },
+      "10": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          297,
+          742,
+          288
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 3,
+       "leftover_spend_code": 0
+      },
+      "11": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          294,
+          739,
+          284
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 2,
+       "leftover_spend_code": 0
+      },
+      "12": {
+       "homeworld": [
+        {
+         "population": 140,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          364,
+          809,
+          424
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [
+        {
+         "population": 70,
+         "mines": 10,
+         "factories": 4,
+         "defenses": 0,
+         "surface_minerals": [
+          169,
+          274,
+          155
+         ],
+         "concentrations": [
+          90,
+          57,
+          84
+         ]
+        }
+       ],
+       "fleets": 5,
+       "leftover_spend_code": 0
+      },
+      "13": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          307,
+          752,
+          308
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 2,
+       "leftover_spend_code": 0
+      },
+      "14": {
+       "homeworld": [
+        {
+         "population": 200,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          332,
+          777,
+          358
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [
+        {
+         "population": 100,
+         "mines": 10,
+         "factories": 4,
+         "defenses": 0,
+         "surface_minerals": [
+          246,
+          105,
+          114
+         ],
+         "concentrations": [
+          88,
+          92,
+          65
+         ]
+        }
+       ],
+       "fleets": 5,
+       "leftover_spend_code": 0
+      },
+      "15": {
+       "homeworld": [
+        {
+         "population": 250,
+         "mines": 10,
+         "factories": 10,
+         "defenses": 10,
+         "surface_minerals": [
+          327,
+          772,
+          348
+         ],
+         "concentrations": [
+          30,
+          97,
+          45
+         ]
+        }
+       ],
+       "other_planets": [],
+       "fleets": 4,
+       "leftover_spend_code": 0
+      }
+     },
+     "constraint": "PARITY.md \"Race design\": leftover L = points (at most 50) spent as the race says; every homeworld shares one surface draw (\"Shared homeworld minerals\")"
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  },
+  {
+   "id": "RD-3-D",
+   "rule": "OBJECTS Wormholes: Creation",
+   "setup": "wormholes in the new game",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "sample",
+     "check": "wormholes",
+     "target": [],
+     "observed": 12,
+     "constraint": "OBJECTS.md \"Creation\""
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  },
+  {
+   "id": "RD-3-E",
+   "rule": "KERNEL Victory conditions",
+   "setup": "victory conditions as stored in the new game",
+   "tag": "MEASURED",
+   "prediction_held": true,
+   "varies_by_stream": false,
+   "expect": [
+    {
+     "year": 0,
+     "kind": "sample",
+     "check": "stored_victory_conditions",
+     "target": [],
+     "observed": {
+      "planets_owned_percent": {
+       "value": 60,
+       "enabled": true
+      },
+      "tech_level": {
+       "value": 8,
+       "enabled": false
+      },
+      "tech_fields": {
+       "value": 2
+      },
+      "score": {
+       "value": 1000,
+       "enabled": false
+      },
+      "lead_over_second_percent": {
+       "value": 20,
+       "enabled": false
+      },
+      "resources_thousands": {
+       "value": 10,
+       "enabled": false
+      },
+      "capital_ships": {
+       "value": 10,
+       "enabled": false
+      },
+      "highest_score_after_years": {
+       "value": 30,
+       "enabled": false
+      },
+      "conditions_needed": {
+       "value": 1
+      },
+      "minimum_years": {
+       "value": 50
+      }
+     },
+     "constraint": "a disabled condition is stored as 0"
+    }
+   ],
+   "verdict": "the private comparison with the predicted game found 0 mismatches"
+  }
+ ]
+}

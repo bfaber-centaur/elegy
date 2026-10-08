@@ -5,7 +5,7 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
 OT runs and the turn order and random draw order). The parity vectors
-are copied from stars-elegy `main` at `20634ab` (stars-elegy #107).
+are copied from stars-elegy `main` at `07ad518` (stars-elegy #111).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
@@ -334,11 +334,11 @@ production queue on a planet that changed owner is skipped: it takes
 the new owner's default queue, which the vectors do not carry (TK-108-A
 and TK-108-C).
 
-- **OB-030-A** (MEASURED). Not diagnostic: the AR planet's mining
-  remainder is a random draw (KERNEL.md "Mining"), and the vector gives
-  both planets' surface minerals exactly, with no mining tolerance.
-  Seed 1 matches planet 20 (germanium 10) but then misses the control
-  planet 22 by 1 kT. Asked the vectors owner for the 1 kT tolerance.
+- **WU-CAP** (MEASURED). Year 1 energy `research_accumulated` is 35
+  in Elegy and 64 in the original; everything else matches. Not
+  diagnosed. A colonist drop captures an undefended planet here, so
+  research credited by the capture is one candidate (inferred, not
+  checked against the spec).
 - A minefield's `radius` is not compared: SCANNING.md defines no
   per-player known radius.
 
@@ -357,8 +357,7 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 
 **Parity failures** (not in the baseline):
 
-- OB-030-A: random mining remainder, with no tolerance (above). stars-elegy
-  #111 adds the tolerance; re-baseline after its vector sync.
+- WU-CAP: research accumulated after a capture (above), not diagnosed.
 - FO-03-E, FO-06-G: "differs" only because `legacyMergeOverflow` is off
   by default; they pass with the LEGACY BUG switch on.
 
@@ -373,6 +372,9 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
   and diagnose the failures.
 - UG01-A..UG30-A: "player not in the state" (the expectation names a
   player the initial state lacks).
+- RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
+  files, which `newgame/vectors_test.go` checks; this harness has no
+  players for them and skips them ("player not in the state", samples).
 - `client_estimate` (159) and `sample` mismatches (155): client-side
   estimates are not modelled, and one stream's random outcome is never a
   failure (above).
