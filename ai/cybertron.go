@@ -30,8 +30,7 @@ import (
 //
 // Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
 // automation steps 4 and 5; docs/AI-STATUS.md lists them. Steps the
-// engine cannot order (scrap, lay mines, invasion) go to
-// Result.Unsupported.
+// engine cannot order (lay mines, invasion) go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -281,7 +280,8 @@ func (t *cyberTurn) obsoleteFleet(f *engine.Fleet) bool {
 	if id, orbits := v.planetAt(f.Pos); orbits {
 		if p := v.ownPlanet(id); p != nil {
 			if p.HasStarbase || t.rng.Intn(5) == 0 {
-				t.res.unsupported("fleet %d: scrap (cybertron.md §5 pass B rule 1)", f.ID)
+				// Scrap (cybertron.md §5 pass B rule 1).
+				t.emit(f, scrapOrder(f))
 			}
 			return true
 		}
@@ -382,7 +382,8 @@ func (t *cyberTurn) unarmed(i int) {
 	f := &v.Fleets[i]
 	switch {
 	case t.y < 6 && v.holds(f, 0):
-		t.res.unsupported("fleet %d: scrap (cybertron.md §5 early scouts)", f.ID)
+		// Scrap (cybertron.md §5 early scouts).
+		t.emit(f, scrapOrder(f))
 	case v.holds(f, 1):
 		t.colonyShip(f)
 	case t.y > 40 && v.holds(f, 0) && !v.holds(f, 2, 3):
