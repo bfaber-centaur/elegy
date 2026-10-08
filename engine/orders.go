@@ -533,7 +533,7 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 		return fmt.Errorf("production queue: %d items: %w", len(o.Queue), ErrOutOfRange)
 	}
 	for _, it := range o.Queue {
-		if it.Kind < ItemMine || it.Kind > ItemStarbase || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+		if it.Kind < ItemMine || it.Kind > ItemAutoPackets || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
 			return fmt.Errorf("production queue item %+v: %w", it, ErrOutOfRange)
 		}
 		if !it.Kind.design() {
@@ -573,16 +573,25 @@ func (o QueueOrder) apply(g *Game, player int, _ *Applied) error {
 
 // PlanetSettingsOrder sets a planet's settings (LIMITS.md "Setting
 // orders", BINARY-ONLY): "contribute only leftover
-// resources to research" and the route destination for new ships. The
-// planet must be the sender's. Mass drivers are not modelled.
+// resources to research", the mass driver's packet destination and
+// packet speed, and the route destination for new ships. The planet must
+// be the sender's. The packet destination is stored unchecked (OBJECTS.md
+// "The settings"); production treats one naming no planet as none
+// (ASSUMPTION P6).
 //
 // ASSUMPTION L15: a route destination that is not a planet is refused.
 // The host does not check that it exists.
+//
+// ASSUMPTION L19: a packet speed other than 0 (unset) or warp 4..19, the
+// values the stored field holds (OBJECTS.md "The settings"), is refused.
 type PlanetSettingsOrder struct {
-	Planet       int
-	LeftoverOnly bool
-	HasRoute     bool
-	RouteTo      int
+	Planet        int
+	LeftoverOnly  bool
+	HasRoute      bool
+	RouteTo       int
+	HasPacketDest bool
+	PacketDest    int // a planet id
+	PacketSpeed   int
 }
 
 func (o PlanetSettingsOrder) apply(g *Game, player int, _ *Applied) error {
@@ -593,10 +602,17 @@ func (o PlanetSettingsOrder) apply(g *Game, player int, _ *Applied) error {
 	if o.HasRoute && g.planetIndex(o.RouteTo) < 0 {
 		return fmt.Errorf("route to planet %d: %w", o.RouteTo, ErrNoSuchObject)
 	}
+	if o.PacketSpeed != 0 && (o.PacketSpeed < 4 || o.PacketSpeed > 19) {
+		return fmt.Errorf("packet speed %d: %w", o.PacketSpeed, ErrOutOfRange) // ASSUMPTION L19
+	}
 	p := &g.Planets[pi]
 	p.LeftoverOnly, p.HasRoute, p.RouteTo = o.LeftoverOnly, o.HasRoute, o.RouteTo
 	if !o.HasRoute {
 		p.RouteTo = 0
+	}
+	p.HasPacketDest, p.PacketDest, p.PacketSpeed = o.HasPacketDest, o.PacketDest, o.PacketSpeed
+	if !o.HasPacketDest {
+		p.PacketDest = 0
 	}
 	return nil
 }
