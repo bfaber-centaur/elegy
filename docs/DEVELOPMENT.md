@@ -72,7 +72,7 @@ The headline milestone is an Elegy game generated and advanced for many years en
 What the tests show today:
 
 - `game` `TestSmokeGame`: a three-player galaxy played for 40 years by a scripted driver that researches, builds, colonizes and scouts, with every order accepted.
-- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: with the scripted driver, the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes.
+- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes. This proves save/load continuation for the scripted driver only; with computer players it is not proven yet ([#70](https://github.com/bfaber-centaur/elegy/issues/70)).
 - `TestRulesetsCoexist`: two games with different rulesets in one process.
 - `TestReportHoldsOnlyOwnObjects`: a report holds only the player's own objects in full.
 - `game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
@@ -132,6 +132,6 @@ hypothesis → experiment / evidence → specification → test → implementati
 
 ## Persistence
 
-A saved game is Elegy's own deterministic, versioned JSON document (`"format": "elegy-save"`), described in [GAME-LOOP.md](GAME-LOOP.md) "Saved games". It holds the whole state, the ruleset and the random stream, and a game saves back byte for byte. Order files are Elegy's own JSON too.
+A saved game is Elegy's own deterministic, versioned JSON document (`"format": "elegy-save"`), described in [GAME-LOOP.md](GAME-LOOP.md) "Saved games". It holds the whole game state, the ruleset and the random stream, and a game saves back byte for byte. It does not hold the computer players' own memory: `ai.Driver` keeps its designs' creation years and pictures outside the save ([#70](https://github.com/bfaber-centaur/elegy/issues/70)). Order files are Elegy's own JSON too.
 
 The original binary formats are not Elegy's save model. If they are ever supported, it will be as import/export compatibility.
