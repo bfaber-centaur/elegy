@@ -26,12 +26,14 @@ type shipDesigns struct {
 	year  int
 	race  engine.Race
 	lvls  [engine.NumFields]int
-	rng   engine.Rand
-	res   *Result
+	// trader is the player's Mystery Trader parts (View.TraderItems).
+	trader map[string]bool
+	rng    engine.Rand
+	res    *Result
 }
 
 func newShipDesigns(v *View, rng engine.Rand, res *Result) *shipDesigns {
-	s := &shipDesigns{year: v.Year, race: v.Self.Race, lvls: v.Self.Research.Levels, rng: rng, res: res}
+	s := &shipDesigns{year: v.Year, race: v.Self.Race, lvls: v.Self.Research.Levels, trader: v.TraderItems, rng: rng, res: res}
 	for k := range s.slots {
 		s.slots[k].created = FirstYear // year index 0
 	}
@@ -66,7 +68,7 @@ func (s *shipDesigns) build(hull string, classes []int) ([]engine.SlotFill, bool
 	if !ok {
 		return nil, false
 	}
-	if ok, err := hc.Buildable(s.race, s.lvls, false); !ok || err != nil {
+	if ok, err := hc.Buildable(s.race, s.lvls, s.trader[hull]); !ok || err != nil {
 		return nil, false
 	}
 	h, err := hc.Hull()
@@ -75,7 +77,7 @@ func (s *shipDesigns) build(hull string, classes []int) ([]engine.SlotFill, bool
 	}
 	fills := make([]engine.SlotFill, len(h.Slots))
 	for i, hs := range h.Slots {
-		comp, ok := classPart(cat, classes[i], s.race, s.lvls)
+		comp, ok := classPart(cat, classes[i], s.race, s.lvls, s.trader)
 		if !ok {
 			return nil, false
 		}
@@ -227,7 +229,7 @@ func (s *shipDesigns) syncView(v *View) {
 		if !sl.present || sl.fills == nil {
 			continue
 		}
-		d, err := engine.Components().ReadDesign(sl.name, sl.hull, sl.fills, s.race, s.lvls, nil, v.Rules)
+		d, err := engine.Components().ReadDesign(sl.name, sl.hull, sl.fills, s.race, s.lvls, s.trader, v.Rules)
 		if err != nil {
 			continue
 		}

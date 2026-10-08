@@ -50,6 +50,9 @@ type View struct {
 	// Foreign are other players' designs the player has been shown in
 	// full, by design index (game.Report.KnownDesigns with Full set).
 	Foreign map[int]engine.Design
+	// TraderItems are the Mystery Trader parts the player owns, by
+	// component name (game.Report.TraderItems). Read by lookup only.
+	TraderItems map[string]bool
 }
 
 // Design is one of the player's designs.

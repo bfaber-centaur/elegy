@@ -64,6 +64,8 @@ type StarbaseInput struct {
 	Designs [10]*SlotDesign
 	// Built marks the slots an own starbase is built from.
 	Built [10]bool
+	// TraderItems are the player's Mystery Trader parts (View.TraderItems).
+	TraderItems map[string]bool
 }
 
 // StarbaseDesigns is the yearly starbase-design upkeep of Robotoid,
@@ -186,7 +188,7 @@ func (s *starbaseRun) create(slot, v int) {
 	if !ok {
 		return
 	}
-	if ok, err := hc.Buildable(s.in.Race, s.in.Levels, false); !ok || err != nil {
+	if ok, err := hc.Buildable(s.in.Race, s.in.Levels, s.in.TraderItems[hullName]); !ok || err != nil {
 		return
 	}
 	hull, err := hc.Hull()
@@ -195,7 +197,7 @@ func (s *starbaseRun) create(slot, v int) {
 	}
 	var fills []engine.SlotFill
 	for i, hs := range hull.Slots {
-		comp, ok := classPart(cat, starbaseClasses[hullName][i], s.in.Race, s.in.Levels)
+		comp, ok := classPart(cat, starbaseClasses[hullName][i], s.in.Race, s.in.Levels, s.in.TraderItems)
 		if !ok {
 			return
 		}

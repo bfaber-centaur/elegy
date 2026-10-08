@@ -9,7 +9,7 @@ func researchAndStarbases(pers Personality, v *View, rng engine.Rand, res *Resul
 	if o, ok := Research(pers, y, v.Self.Research, v.Self.ResearchBudget); ok {
 		res.Orders = append(res.Orders, o)
 	}
-	sb := StarbaseInput{Personality: pers, Year: v.Year, Race: v.Self.Race, Levels: v.Self.Research.Levels}
+	sb := StarbaseInput{Personality: pers, Year: v.Year, Race: v.Self.Race, Levels: v.Self.Research.Levels, TraderItems: v.TraderItems}
 	for _, d := range v.Starbases {
 		if d.Slot >= 0 && d.Slot < len(sb.Designs) {
 			sb.Designs[d.Slot] = &SlotDesign{Hull: d.Design.Hull.Name, Name: d.Design.Name, Created: d.Created, Picture: d.Picture}
