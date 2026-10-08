@@ -72,21 +72,22 @@ The headline milestone is an Elegy game generated and advanced for many years en
 What the tests show today:
 
 - `game` `TestSmokeGame`: a three-player galaxy played for 40 years by a scripted driver that researches, builds, colonizes and scouts, with every order accepted.
-- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes.
+- `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: with the scripted driver, the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes.
 - `TestRulesetsCoexist`: two games with different rulesets in one process.
 - `TestReportHoldsOnlyOwnObjects`: a report holds only the player's own objects in full.
 - `game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
-- `cmd/elegy` `TestCLIComputerPlayers`: `elegy play -ai ...` plays a human against Robotoid, Rototill and Cybertron, alone and together, for 40 years, with no rejected orders and the same output on a second run.
+- `cmd/elegy` `TestCLIComputerPlayers`: `elegy play -ai ...` plays a human against Robotoid, Rototill and Cybertron, alone and together, for 40 years, with no rejected orders and the same output on a second run. This shows uninterrupted replay only; see the save/reload gap below.
 - `engine` `TestConfirmedAlternateRealityColonyStarbase` and `TestAlternateRealityColonyGeneratesYears`: a new Alternate Reality colony gets its owner's first starbase design and the game keeps generating years.
 
 Known gaps that a long game can reach:
 
+- Save/reload continuation with computer players is not proven. `ai.Driver` keeps its stored designs' creation year and picture outside the saved game (AI-STATUS.md), so a game with computer players that is saved and reloaded mid-way may diverge from the uninterrupted run. No test compares the two yet. Owner: the computer-opponents work ([#70](https://github.com/bfaber-centaur/elegy/issues/70)).
 - Waypoint tasks that load cargo or scrap ships are not modelled, and a minefield detonate order is refused (`engine/orders.go` `validTask`, `DetonateOrder`).
 - An Alternate Reality colony whose owner has no starbase design gets none (TAKEOVER-STATUS.md, UNRESOLVED).
 
 ### After that: games against the computer opponents
 
-Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
+Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. Replay with computer players counts as deterministic only once a mid-game save and reload is shown to continue identically to the uninterrupted game ([#70](https://github.com/bfaber-centaur/elegy/issues/70)). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
 
 ## Front ends
 
