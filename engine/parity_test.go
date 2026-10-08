@@ -959,6 +959,9 @@ type pvResult struct {
 	why             string
 	passes          int    // seed variants the case passes with
 	refStatus       string // for a random case, the reference seed's status
+	// skipped is the reasons of the expectations skipped inside a case
+	// that was otherwise checked, one per expectation.
+	skipped []string
 }
 
 // pvCheck compares one expectation with a generated game; "" passes, a
@@ -1590,6 +1593,9 @@ func runVector(v *pvVector, k int) []pvResult {
 		default:
 			res(c, "pass", "")
 		}
+		if checked > 0 {
+			out[len(out)-1].skipped = skips
+		}
 	}
 	return out
 }
@@ -1751,10 +1757,21 @@ func pvStreamCheck(runs [][]pvResult) []pvResult {
 
 func TestParityVectors(t *testing.T) {
 	var all []pvResult
+	// Expectations skipped inside checked cases, by reason, from the
+	// reference seed.
+	partial := map[string]int{}
 	for _, v := range loadVectors(t) {
 		runs := make([][]pvResult, pvSeeds)
 		for k := range runs {
 			runs[k] = runVector(v, k)
+		}
+		for _, r := range runs[0] {
+			for _, why := range r.skipped {
+				if strings.HasPrefix(why, "stream ") {
+					why = "stream (another oracle random stream)"
+				}
+				partial[why]++
+			}
 		}
 		all = append(all, pvStreamCheck(runs)...)
 	}
@@ -1793,6 +1810,9 @@ func TestParityVectors(t *testing.T) {
 		if r.status != "pass" {
 			t.Logf("%s %-10s %-4s %s", r.status, r.tag, r.id, r.why)
 		}
+	}
+	for _, why := range pvKeys(partial) {
+		t.Logf("expectations skipped in checked cases: %4d %s", partial[why], why)
 	}
 
 	if os.Getenv("PARITY_BASELINE") == "write" {

@@ -372,9 +372,22 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 - Computer players without orders in the vector: their fleets, planets
   and production queues are not compared ("a computer player's planned
   orders"), since the host plans them each year and the harness runs no
-  planner (RD-P11, RD-P12, RD-P20, RD-P21 have such expectations). Their
-  race expectations are compared.
-- `message` expectations: not compared (Elegy's events are its own).
+  planner. 19 expectations, each skipped alone inside a case that is
+  otherwise checked: RD-P11 (2), RD-P12 (2), RD-P20 (9), RD-P21 (6).
+  Their race expectations are compared.
+
+**Expectations skipped inside checked cases** (reference seed, as of this
+list; `TestParityVectors -v` prints the current counts as "expectations
+skipped in checked cases"): other oracle random streams 4222, `message`
+754 (Elegy's events are its own), `score_record` 319, samples that did
+not match 318, player default queue settings 103, `battle` 54 and
+`battle_actions` 42, planet `starbase` 22, transport `load_all` 21 and
+`set_amount_to` 5, computer players' planned orders 19, Super Stealth
+research stealing 13, `battle_plan` 13, wormhole objects 10,
+`no_battle` 9, player `research_field` 6, original environment null 5,
+`mystery_trader_items` 5, and 1 to 4 each for planet `concentrations`,
+`planetary_scanner` and `starbase_design`, player `counts` and
+`ship_design_count`, `no_new_fleets`, `sample` and the design read.
 - UG01-A..UG30-A: "player not in the state" (the expectation names a
   player the initial state lacks).
 - RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
