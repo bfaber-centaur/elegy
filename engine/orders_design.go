@@ -126,7 +126,9 @@ func (g *Game) designInUse(d int) bool {
 // describes a computer player's replacement as a delete and a new design,
 // and says nothing of an edit.
 //
-// Mystery Trader items are not modelled: the player owns none.
+// A Mystery Trader part counts as entitled when the player owns it
+// (Game.Objects' TraderItems; ORDERS.md "Design legality"); with no space
+// objects the player owns none.
 type DesignOrder struct {
 	Starbase bool
 	Slot     int
@@ -154,7 +156,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		}
 	}
 	pl := &g.Players[player]
-	d, err := cat.ReadDesign(o.Name, o.Hull, fitFills(cat, o.Hull, o.Fills), pl.Race, pl.Research.Levels, nil, g.Rules)
+	d, err := cat.ReadDesign(o.Name, o.Hull, fitFills(cat, o.Hull, o.Fills), pl.Race, pl.Research.Levels, g.traderItems(player), g.Rules)
 	if err != nil {
 		return err
 	}
@@ -326,4 +328,13 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 	}
 	g.removeFleets(empty)
 	return nil
+}
+
+// traderItems is the player's Mystery Trader items by component name, or
+// none without space objects.
+func (g *Game) traderItems(player int) map[string]bool {
+	if g.Objects == nil {
+		return nil
+	}
+	return g.Objects.TraderItems(player)
 }

@@ -249,6 +249,11 @@ func (s *Space) MoveObjectsAgain(g *engine.Game, rng engine.Rand) []engine.Event
 	return out
 }
 
+// TraderItems is the player's Trader parts by component name.
+func (s *Space) TraderItems(player int) map[string]bool {
+	return s.TraderParts.Items(player)
+}
+
 // MeetTraders runs the Trader encounters. A computer player's level is
 // engine.Player.Level.
 func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {

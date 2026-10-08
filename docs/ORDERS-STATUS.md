@@ -55,6 +55,7 @@ above.
 - loads (direct or by task), cargo transfers between the player's own
   fleets, cargo given to other players' fleets, and splits (the
   transfer-fleet task is now `waypoints.go`, KERNEL-STATUS.md);
-- Mystery Trader items: `ReadDesign` takes the owned items by part name,
-  and no game state holds them yet. Designs in `Game` still have no
+- Mystery Trader items: `ReadDesign` takes the owned items by part name;
+  a design order passes the player's parts from `Game.Objects`
+  (`TraderItems`, the objects' part word). Designs in `Game` still have no
   owner, so the design read is not applied to them.

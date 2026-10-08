@@ -87,6 +87,11 @@ type SpaceObjects interface {
 	// detonate-setting"). A refused order changes nothing.
 	SetDetonate(g *Game, player, number int, on bool) error
 
+	// TraderItems is the player's Mystery Trader items by component
+	// name, as Catalog.ReadDesign takes them (OBJECTS.md "Encounters":
+	// the player's part word; ORDERS.md "Design legality").
+	TraderItems(player int) map[string]bool
+
 	// SeeObjects records what each player's scanners see of the objects
 	// this year, as knowledge carried to later years (SCANNING.md "When
 	// knowledge is computed", "Space objects"), and returns, by player,

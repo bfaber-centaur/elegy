@@ -487,3 +487,30 @@ func TestMeetTradersComputerLevel(t *testing.T) {
 		}
 	}
 }
+
+// A design order reads the player's Trader parts (ORDERS.md "Design
+// legality"; OBJECTS.md "Encounters"): under the Elegy rules a Multi Cargo
+// Pod is kept when the player owns it and dropped when it does not.
+func TestDesignOrderTraderParts(t *testing.T) {
+	cargo := func(owns bool) int {
+		s := &Space{}
+		if owns {
+			s.TraderParts.give(0, BitMultiCargoPod)
+		}
+		g := &engine.Game{Rules: engine.ElegyRules(), Year: 2410, Objects: s, Players: []engine.Player{{
+			Race:     engine.Race{PRT: engine.PRTJackOfAllTrades},
+			Research: engine.ResearchState{Levels: [engine.NumFields]int{11, 11, 11, 11, 11, 11}},
+		}}}
+		a := engine.ApplyOrders(g, []engine.PlayerOrders{{Player: 0, GameID: g.ID, Year: g.Year, Orders: []engine.Order{engine.DesignOrder{
+			Slot: 0, Name: "Pod", Hull: "Small Freighter",
+			Fills: []engine.SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}, {Slot: 1, Part: "Multi Cargo Pod", Count: 1}},
+		}}}}, []int{0})
+		if a.Results[0].Err != nil {
+			t.Fatal(a.Results[0].Err)
+		}
+		return g.Designs[g.DesignSlots[0].Design].CargoCapacity
+	}
+	if with, without := cargo(true), cargo(false); with-without != 250 {
+		t.Errorf("cargo %d with the pod owned, %d without; want 250 more", with, without)
+	}
+}
