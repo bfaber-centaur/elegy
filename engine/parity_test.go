@@ -964,6 +964,10 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 				t.Transport[c] = Transport{Action: FillTo, Amount: o.Value}
 			case "wait_for_percent":
 				t.Transport[c] = Transport{Action: WaitFor, Amount: o.Value}
+			case "set_amount_to":
+				t.Transport[c] = Transport{Action: SetAmount, Amount: o.Value}
+			case "set_waypoint_to":
+				t.Transport[c] = Transport{Action: SetWaypoint, Amount: o.Value}
 			default:
 				return Task{}, "transport " + o.Action
 			}

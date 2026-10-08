@@ -40,9 +40,8 @@ const (
 )
 
 // TransportAction is a transport order's action for one cargo type
-// (TAKEOVER.md "Unload and load amounts"). The unload actions, "load
-// all", "load exactly", "fill to" and "wait for" are modelled;
-// set-amount and set-waypoint are not.
+// (TAKEOVER.md "Unload and load amounts"). Every action but the fuel
+// ones is modelled; fuel has no transport action in Elegy.
 type TransportAction int
 
 const (
@@ -53,6 +52,8 @@ const (
 	LoadExactly                   // min(v, A, free space)
 	FillTo                        // up to v% of capacity
 	WaitFor                       // as FillTo; the task holds until met
+	SetAmount                     // v − C: load if positive, unload if negative
+	SetWaypoint                   // A − v: load the excess, or unload the shortfall
 )
 
 // Transport is one cargo type's action and amount v (kT; colonists in
@@ -469,7 +470,7 @@ func (g *Game) removeFleets(ids map[int]bool) {
 // colonists), each from the space the earlier ones left. "Load all" is
 // then satisfied and clears; "load exactly" keeps what it could not load
 // and clears when that reaches 0 ("load actions persist until
-// satisfied"). "Fill to" and "wait for" are loadWant's and loaded's. A
+// satisfied"). The other actions are loadWant's and loaded's. A
 // task left with no action is no task, as after unloads.
 //
 // Away from a planet the loads come from salvage (ASSUMPTION T5, see
@@ -493,7 +494,7 @@ func (g *Game) load(f *Fleet) {
 		if c < NumMinerals {
 			avail, held = &p.Surface[c], &f.Cargo.Minerals[c]
 		}
-		want, ok := t.loadWant(capacity, *held, free)
+		want, ok := t.loadWant(capacity, *held, free, *avail)
 		if !ok {
 			continue
 		}
@@ -501,7 +502,7 @@ func (g *Game) load(f *Fleet) {
 		*avail -= amount
 		*held += amount
 		free -= amount
-		t.loaded(amount, capacity, *held)
+		t.loaded(amount, capacity, *held, *avail)
 	}
 	if f.Task.Transport == ([NumCargo]Transport{}) {
 		f.Task = Task{}
@@ -509,16 +510,18 @@ func (g *Game) load(f *Fleet) {
 }
 
 // loadWant is how much load action t would take of a cargo type the
-// fleet holds `held` of, before what the source has: "load all" the free
-// space, "load exactly v" min(v, free space), "fill to" and "wait for"
-// up to v% of the fleet's capacity, min(target − held, free space)
-// (TAKEOVER.md "Unload and load amounts", CONFIRMED FO-01 F, I, J). ok is
-// false for an action that is not a load.
+// fleet holds `held` of, from a source holding avail, before the cap at
+// avail: "load all" the free space, "load exactly v" min(v, free space),
+// "fill to" and "wait for" up to v% of the fleet's capacity, min(target −
+// held, free space), "set amount to v" min(v − held, free space) and
+// "set waypoint to v" min(avail − v, free space) (TAKEOVER.md "Unload and
+// load amounts", CONFIRMED FO-01 F to J). A want of 0 or less loads
+// nothing. ok is false for an action that is not a load.
 //
 // ASSUMPTION T8: the percentage target is per cargo type, ⌊v·capacity/100⌋
 // of that type, not of the whole hold; FO-01 loaded into empty holds,
 // where the two agree.
-func (t *Transport) loadWant(capacity, held, free int) (want int, ok bool) {
+func (t *Transport) loadWant(capacity, held, free, avail int) (want int, ok bool) {
 	switch t.Action {
 	case LoadAll:
 		return free, true
@@ -526,6 +529,10 @@ func (t *Transport) loadWant(capacity, held, free int) (want int, ok bool) {
 		return min(t.Amount, free), true
 	case FillTo, WaitFor:
 		return min(t.percentTarget(capacity)-held, free), true
+	case SetAmount:
+		return min(t.Amount-held, free), true
+	case SetWaypoint:
+		return min(avail-t.Amount, free), true
 	}
 	return 0, false
 }
@@ -537,13 +544,20 @@ func (t *Transport) percentTarget(capacity int) int {
 }
 
 // loaded settles load action t after it moved amount, with the fleet now
-// holding `held` of the type: "load all" and "fill to" are satisfied and
-// clear (FO-01 J: an unmet fill to 100% let the fleet leave); "load
-// exactly" keeps what it could not load and clears at 0; "wait for"
-// clears once held reaches its target, and until then keeps the task,
-// which holds the fleet (FO-01 I; KERNEL.md "Other movement rules",
-// CONFIRMED KB-4A T1). ASSUMPTION T9: "met" is held ≥ the target.
-func (t *Transport) loaded(amount, capacity, held int) {
+// holding `held` of the type and the source avail: "load all" and "fill
+// to" are satisfied and clear (FO-01 J: an unmet fill to 100% let the
+// fleet leave); "load exactly" keeps what it could not load and clears
+// at 0; "wait for" clears once held reaches its target, and until then
+// keeps the task, which holds the fleet (FO-01 I; KERNEL.md "Other
+// movement rules", CONFIRMED KB-4A T1). ASSUMPTION T9: "met" is held ≥
+// the target.
+//
+// ASSUMPTION T11: "set amount to v" and "set waypoint to v" are load
+// actions when they load, so they persist until satisfied (held ≥ v, or
+// avail ≤ v), like "load exactly" ("load actions persist until
+// satisfied"); TAKEOVER.md does not say. Their unload direction is
+// unload's and clears there.
+func (t *Transport) loaded(amount, capacity, held, avail int) {
 	switch t.Action {
 	case LoadExactly:
 		t.Amount -= amount
@@ -552,6 +566,14 @@ func (t *Transport) loaded(amount, capacity, held int) {
 		}
 	case WaitFor:
 		if held < t.percentTarget(capacity) {
+			return
+		}
+	case SetAmount:
+		if held < t.Amount {
+			return
+		}
+	case SetWaypoint:
+		if avail > t.Amount {
 			return
 		}
 	}
@@ -595,6 +617,10 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 			amount = have
 		case UnloadExactly:
 			amount = min(t.Amount, have)
+		case SetAmount, SetWaypoint:
+			if amount = t.unloadWant(have, g.targetHolds(f, c)); amount <= 0 {
+				continue // a load, or nothing to move: the load pass's
+			}
 		default:
 			continue
 		}
@@ -636,6 +662,35 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 	return events
 }
 
+// unloadWant is how much "set amount to v" or "set waypoint to v"
+// unloads of a cargo type the fleet holds `have` of, at a target holding
+// avail: C − v, or the shortfall v − A capped by the cargo (TAKEOVER.md
+// "Unload and load amounts", CONFIRMED TK-114 U4, U5). 0 or less means
+// the action loads instead, or is already satisfied.
+func (t *Transport) unloadWant(have, avail int) int {
+	if t.Action == SetAmount {
+		return have - t.Amount
+	}
+	return min(t.Amount-avail, have)
+}
+
+// targetHolds is A for a "set waypoint to" action of cargo type c: the
+// planet's surface mineral or population at the fleet's position, else
+// the salvage object's mineral there (ASSUMPTION T5), else 0 (ASSUMPTION
+// T12: TAKEOVER.md defines A only for a planet).
+func (g *Game) targetHolds(f *Fleet, c int) int {
+	if pi := g.planetAt(f.Pos); pi >= 0 {
+		if c < NumMinerals {
+			return g.Planets[pi].Surface[c]
+		}
+		return g.Planets[pi].Population
+	}
+	if si := g.salvageAt(f.Pos); si >= 0 && c < NumMinerals {
+		return g.Salvage[si].Minerals[c]
+	}
+	return 0
+}
+
 // salvageAt is the index of the first salvage object at pos, in object
 // order, or -1. ASSUMPTION T5: Elegy's task does not record what its
 // waypoint pointed at, so a transport task away from a planet acts on the
@@ -673,7 +728,7 @@ func (g *Game) loadSalvage(f *Fleet) {
 	free := capacity - f.Cargo.mass()
 	for c := range NumMinerals {
 		t := &f.Task.Transport[c]
-		want, ok := t.loadWant(capacity, f.Cargo.Minerals[c], free)
+		want, ok := t.loadWant(capacity, f.Cargo.Minerals[c], free, sv.Minerals[c])
 		if !ok {
 			continue
 		}
@@ -681,7 +736,7 @@ func (g *Game) loadSalvage(f *Fleet) {
 		sv.Minerals[c] -= amount
 		f.Cargo.Minerals[c] += amount
 		free -= amount
-		t.loaded(amount, capacity, f.Cargo.Minerals[c])
+		t.loaded(amount, capacity, f.Cargo.Minerals[c], sv.Minerals[c])
 	}
 	if f.Task.Transport == ([NumCargo]Transport{}) {
 		f.Task = Task{}

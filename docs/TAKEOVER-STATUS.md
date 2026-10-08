@@ -49,6 +49,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Colonize is tried once: any failure clears the task and keeps the cargo | `colonize` | CONFIRMED (TK-113, #37) | `TestConfirmedColonizeTriedOnce` |
 | Load all and load exactly at the owner's own planet, in the load passes; load exactly keeps its shortfall, load all clears (ASSUMPTION T4) | `load`, `loadPass` | CONFIRMED (TK-301, TK-302, TK-201 G; FO-01-A..D and K vectors); MEASURED (WP-1 vector) | `TestConfirmedLoadAmounts` |
 | Fill to and wait for v%: up to v% of the fleet's cargo capacity; fill clears after its load, wait keeps the task until met (ASSUMPTION T8, T9); also from salvage (T5) | `Transport.loadWant`, `Transport.loaded`, `load`, `loadSalvage` | CONFIRMED (TAKEOVER.md "Unload and load amounts"; FO-01-F, I, J vectors) | `TestFillAndWaitFor`, `TestFillAndWaitForFromSalvage`, `TestValidPercentTransport` |
+| Set amount to v (v − C) and set waypoint to v (A − v): unload in the unload phase, load in the load pass; a short load keeps the action (ASSUMPTION T11); A away from a planet is the salvage's, else 0 (T5, T12) | `Transport.unloadWant`, `targetHolds`, `unload`, `Transport.loadWant`, `Transport.loaded` | CONFIRMED (TAKEOVER.md "Unload and load amounts"; FO-01-G, H and TK-114-U4, U5 vectors) | `TestSetAmountAndWaypointLoad`, `TestSetAmountAndWaypointUnload`, `TestSetWaypointAwayFromPlanet`, `TestSetAmountAndWaypointFromSalvage` |
 | A fleet whose transport task is still current after the load pass (an unmet load) does not move; this includes a load exactly shortfall, under KERNEL.md's general rule (KB-4A T1 is a held "wait for" and T2 a satisfied unload that moved; no vector holds a load exactly shortfall directly), and the waiting loads of T4 and T6 (ASSUMPTION T10) | `moving` | CONFIRMED (KERNEL.md "Other movement rules", KB-4A T1, T2; FO-01-I vector) | `TestTransportTaskHoldsFleet` |
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
@@ -72,6 +73,8 @@ established Stars! behavior; each is marked `ASSUMPTION Tn` in the code.
 | T8 | A "fill to" or "wait for" v% target is ⌊v·capacity/100⌋ of that cargo type, counting only that type's cargo aboard, not the whole hold. | TAKEOVER.md says "up to v% of capacity"; FO-01 loaded into empty holds, where per-type and whole-hold targets agree, and its 50% of 210 is exact. |
 | T9 | "Wait for" is met when the fleet holds at least its target of that type; then it clears like any satisfied load. | TAKEOVER.md says the fleet "waits until met" without defining met; FO-01-I (100% with 100 of 210 available) stayed unmet. |
 | T10 | A load that waits under T4 (at a planet the fleet's owner does not own) or T6 (colonists at salvage) keeps the task current, so the fleet holds its place until it gets new orders. | A consequence of T4 and T6 under KERNEL.md's rule that a current transport task does not move; no measurement covers these waits. |
+| T11 | "Set amount to" and "set waypoint to" that load keep the action until satisfied (cargo ≥ v, or the source ≤ v), so a short load holds the fleet, as "load exactly" does; once they unload they clear. | TAKEOVER.md says load actions persist until satisfied and unload actions clear, but not which these are; every vector case was satisfied in one pass. |
+| T12 | Away from a planet, "set waypoint to" takes A from the salvage object at the fleet's position (T5), and in deep space A is 0, so the shortfall is unloaded and destroyed. | TAKEOVER.md defines A only for a planet. |
 
 The scan for several drops starts at the first dropping player, so a lone
 attacker of strength 0 (Alternate Reality colonists, `k = 0`) lands; the
@@ -80,9 +83,9 @@ spec does not give the scan's start value. The code says so at
 
 ## Not modelled
 
-- the actions "set amount to" and "set waypoint to", and every fuel
-  action of a transport task. "Load all", "load exactly", "fill to",
-  "wait for", fleet transfers, remote
+- every fuel action of a transport task. "Load all", "load exactly",
+  "fill to", "wait for", "set amount to", "set waypoint to", fleet
+  transfers, remote
   mining, mine laying, cargo given to other players' fleets and colonists
   dropped by a manual cargo order are implemented (KERNEL-STATUS.md,
   ORDERS-LAYER-STATUS.md);
