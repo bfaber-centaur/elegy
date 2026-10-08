@@ -69,10 +69,7 @@ func PlayCybertron(v *View, rng engine.Rand) Result {
 	}
 	auto := &automation{v: v, pers: Cybertron, rng: rng, q: t.q, order: order, budget: budget}
 	auto.run()
-	// The two packet LEGACY BUGs are ruleset switches (on in
-	// jrc3-faithful); until the ruleset carries them, the planner takes
-	// Elegy's setting, off.
-	t.packets(order, budget, packetLegacy{})
+	t.packets(order, budget, packetLegacyOf(v.Rules))
 	res.Orders = append(res.Orders, t.q.flush()...)
 	return res
 }

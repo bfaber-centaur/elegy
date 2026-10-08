@@ -10,10 +10,15 @@ import (
 // packetLegacy holds the two LEGACY BUGs of Cybertron's packets
 // (cybertron.md §6): the scanner shot tests and sets the mark of the
 // planet one id higher than its destination, and for w ≥ 14 its
-// distance test passes every planet. Both come from the game's ruleset;
-// Elegy's rules leave them off.
+// distance test passes every planet. Both come from the game's ruleset
+// (engine.Legacy CybertronPacketMarkNextID, CybertronScannerShotOverflow):
+// off in Elegy's rules, on in jrc3-faithful.
 type packetLegacy struct {
 	markNextID, overflow bool
+}
+
+func packetLegacyOf(r engine.Ruleset) packetLegacy {
+	return packetLegacy{markNextID: r.Legacy.CybertronPacketMarkNextID, overflow: r.Legacy.CybertronScannerShotOverflow}
 }
 
 // packets is cybertron.md §6 (AI-24): own planets with a starbase at the

@@ -142,3 +142,14 @@ func TestAttackPacket(t *testing.T) {
 		t.Errorf("queue %+v, settings %+v, marks %v; want 7 ironium packets to planet 2 at warp 8", q, set, marked)
 	}
 }
+
+// The packet LEGACY BUGs come from the game's ruleset: off under Elegy's
+// rules, on under jrc3-faithful's.
+func TestPacketLegacyFromRules(t *testing.T) {
+	if got := packetLegacyOf(engine.ElegyRules()); got != (packetLegacy{}) {
+		t.Errorf("elegy: %+v, want both off", got)
+	}
+	if got := packetLegacyOf(engine.FaithfulRules()); got != (packetLegacy{markNextID: true, overflow: true}) {
+		t.Errorf("jrc3-faithful: %+v, want both on", got)
+	}
+}

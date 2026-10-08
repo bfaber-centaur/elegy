@@ -120,7 +120,7 @@ and map as in the test); before them it stayed on its homeworld.
 | A48 | Packet supply: minerals tried in order ironium, boranium, germanium, the first with a target wins; "over 700 kT" and "at least 70 resources" are amounts left after the queue; the low notes read the target's surface minerals; a planet is not its own target; "up to 7" is as many as the amount left pays for, at most 7; the speed is w. |
 | A49 | Attack packets: M sums the three minerals left; "the budget can kill" is a kill mass of at most M; the kill mass is divided by q^(distance/w²) (what a packet keeps over its flight, so a farther target needs more), in floating point with the distance in ly; the count is ⌈kill mass / 70⌉; ranges are inclusive. |
 | A50 | The report does not carry the parts of another player's starbase design, so its catch warp cannot be read: only planets with no starbase in view are attack-packet targets. |
-| A51 | Packet marks are made on the packet's destination (clean); the original's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset's two packet LEGACY BUG switches, read as off until the ruleset carries them. |
+| A51 | Retired: the scanner shot's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset switches `CybertronPacketMarkNextID` and `CybertronScannerShotOverflow` (off in elegy, on in jrc3-faithful); with them off, the mark is on the destination. |
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 
 ## Spec questions
