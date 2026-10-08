@@ -179,3 +179,21 @@ func TestBlockedQueueSkips(t *testing.T) {
 		}
 	}
 }
+
+// Step 5 at a planet that sends only leftover resources to research
+// takes its resources without the research share, as completion does:
+// with a 50% budget, Defenses ×100 of TestBlockedQueue still get m =
+// min(130, 300/5) = 60 mines, not 150/5 = 30.
+func TestBlockedQueueLeftoverOnly(t *testing.T) {
+	v := caView(t, 2430)
+	p := &v.Planets[0]
+	p.Factories, p.Mines, p.LeftoverOnly = 100, 50, true
+	def := engine.QueueItem{Kind: engine.ItemDefenses, Count: 100}
+	p.Queue = []engine.QueueItem{def}
+	a := &automation{v: v, res: &Result{}, q: &queues{v: v}, rng: top{}, budget: 50}
+	a.blockedQueue(p)
+	want := []engine.QueueItem{{Kind: engine.ItemMine, Count: 60}, def}
+	if got := a.q.get(p); !slices.Equal(got, want) {
+		t.Errorf("queue %+v, want %+v", got, want)
+	}
+}
