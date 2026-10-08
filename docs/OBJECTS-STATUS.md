@@ -36,7 +36,7 @@ below and KERNEL-STATUS.md "Space objects").
 | Mines lost, paying field | `MinesLost`, `PayingField`, `ApplyHit` | CONFIRMED (OB-010-S, OB-024, MF-4) |
 | Salvage at the stop point, none at a planet; all minerals when the whole fleet dies; empty fleet `rand(10)` | `ApplyHit` | MEASURED (OB-024, MF-14); the whole-fleet case BINARY-ONLY; the empty-fleet drop is a LEGACY BUG candidate, `Legacy.EmptyFleetSalvage` (on in the `elegy` ruleset) |
 | SD disclosure on hits and detonations | `Hit.Disclosed`, `Detonation.Disclosed` | CONFIRMED for detonations (MF-7) |
-| Detonate setting: owner only, Space Demolition only, standard fields only | `Space.SetDetonate` | BINARY-ONLY; OBJECTS.md's chosen rule (the original accepts any field, LEGACY BUG). The detonate order is not wired yet (`engine.DetonateOrder`) |
+| Detonate setting: owner only, Space Demolition only, standard fields only | `Space.SetDetonate` | BINARY-ONLY; OBJECTS.md's chosen rule (the original accepts any field, LEGACY BUG). `engine.DetonateOrder` applies it through `SpaceObjects.SetDetonate` and is rejected with its error (`TestDetonateOrderThroughEngine`) |
 | Detonation | `Space.Detonate` | CONFIRMED (OB-002-M, MF-7, MF-8); order and marking of several fields BINARY-ONLY |
 
 Tests follow the engine's naming: `TestConfirmed*` use the OB and MF

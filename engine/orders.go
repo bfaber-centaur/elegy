@@ -508,17 +508,26 @@ func (g *Game) clampToGalaxy(p Point) Point {
 	return Point{c(p.X), c(p.Y)}
 }
 
-// DetonateOrder sets a minefield's detonate setting. ORDERS.md's chosen
-// rule accepts it only on the player's own minefield of a kind that can
-// detonate. Elegy has no minefields yet, so every such order is rejected
-// with ErrNotModelled.
+// DetonateOrder sets the detonate setting of the player's own minefield
+// number Minefield (ORDERS.md "Minefield detonate-setting"). The space
+// objects decide (SpaceObjects.SetDetonate, OBJECTS.md "The detonate
+// setting"): the chosen rule accepts it only from the field's owner, only
+// for a Space Demolition player, and only on a standard field, and the
+// order is rejected with the reason they return. In a galaxy without
+// space objects there is no minefield to name (ErrNoSuchObject).
 type DetonateOrder struct {
 	Minefield int
 	On        bool
 }
 
-func (o DetonateOrder) apply(*Game, int, *Applied) error {
-	return fmt.Errorf("minefield %d: %w", o.Minefield, ErrNotModelled)
+func (o DetonateOrder) apply(g *Game, player int, _ *Applied) error {
+	if g.Objects == nil {
+		return fmt.Errorf("minefield %d: %w", o.Minefield, ErrNoSuchObject)
+	}
+	if err := g.Objects.SetDetonate(g, player, o.Minefield, o.On); err != nil {
+		return fmt.Errorf("minefield %d: %w", o.Minefield, err)
+	}
+	return nil
 }
 
 // Production-queue limits Elegy checks on a queue order.

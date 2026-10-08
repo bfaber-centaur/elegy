@@ -142,12 +142,21 @@ type KnownWormholeEnd struct {
 // (engine.DesignOrder), and the report keeps the old one until a view
 // shows the new one.
 //
-// ASSUMPTION G3: a design stays known, and stays known in full once shown
-// in full, in later years when no view shows it. A partial sighting whose
-// hull and mass match keeps the full design last shown, which may be
-// stale; a partial sighting with another hull or mass replaces it.
-// stars-elegy says what a player's file holds the year a design is
-// revealed, not whether later files keep it.
+// A design stays known in later years when no view shows it, and once
+// shown in full it stays known in full: the original's history keeps
+// every design learned and merges each year's report keeping the higher
+// level (stars-elegy SCANNING.md "Designs", MEASURED SC-037, computer
+// players' files). A partial sighting of a different design in the same
+// slot replaces a partial record (MEASURED once, SC-037).
+//
+// ASSUMPTION G3, where SC-037 leaves the rule UNRESOLVED or untested:
+//   - a partial sighting whose hull and mass match a full record keeps
+//     the full design, which may be stale; one with another hull or mass
+//     replaces it (whether a different design replaces a full record is
+//     UNRESOLVED);
+//   - a design its owner deleted stays known (UNRESOLVED);
+//   - human players' reports follow the same rule as computer players'
+//     (the client writes a human player's history; UNRESOLVED).
 type KnownDesign struct {
 	Index  int
 	Year   int

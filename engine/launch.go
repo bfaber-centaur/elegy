@@ -47,7 +47,15 @@ func (g *Game) IdealWarp(f *Fleet) int { return g.Ships(f).IdealWarp() }
 // the fleet", CONFIRMED for Long Hump 6 and Quick Jump 5 via SL-04..SL-07,
 // BINARY-ONLY for other engines; ESTIMATES.md "Fleets" uses the same
 // value): from warp 10, each design in fleet order in turn lowers it.
-func (s FleetShips) IdealWarp() int {
+func (s FleetShips) IdealWarp() int { return s.idealWarp(true) }
+
+// RawWarp is IdealWarp without the free-warp step-down (step 3 of
+// PRODUCTION-LAUNCH.md "Ideal warp of the fleet"): the `raw` value the
+// computer players cap a re-picked warp at (AI.md §11, "the same without
+// the free-warp step-down").
+func (s FleetShips) RawWarp() int { return s.idealWarp(false) }
+
+func (s FleetShips) idealWarp(stepDown bool) int {
 	w := 10
 	for _, st := range s.Stacks {
 		d := st.Design
@@ -59,7 +67,7 @@ func (s FleetShips) IdealWarp() int {
 		for w > 0 && fuel[w] >= 121 {
 			w--
 		}
-		if fuel[w] > 0 && !noFuelWarpEngines[d.Engine.Name] {
+		if stepDown && fuel[w] > 0 && !noFuelWarpEngines[d.Engine.Name] {
 			switch {
 			case w >= 5 && fuel[w-1] == 0:
 				w--
