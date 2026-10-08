@@ -12,14 +12,13 @@ Nothing here comes from the private archaeology repositories.
 
 The milestone is `GenerateTurn` running the players' orders, waypoint
 tasks, production and the space objects in KERNEL.md's turn order, with
-the MF, OB, WT and WU vectors (and GT stargate vectors once they exist
-in the copied corpus; none do yet) running through it in
+the GT, MF, OB, WT and WU vectors running through it in
 `TestParityVectors`, and every failure listed below under "Known parity
-failures" with its real reason. As of this change: OB 89 pass, 3
-random; WT 22 pass, 3 random; WU 28 pass; MF 12 pass, the rest listed
-below. The production queue can launch packets through
-`SpaceObjects.LaunchPacket`; the packet item itself belongs to the
-orders lane.
+failures" with its real reason. As of this change, in the baseline: GT
+4 pass; MF 23 pass, 2 random; OB 119 pass, 6 random; WT 23 pass, 5
+random; WU 28 pass. Packet items build and launch through
+`SpaceObjects.LaunchPacket`; the harness does not map them (vectors
+carry no packet destination).
 
 ## Tests: ground truth versus predictions
 
@@ -341,14 +340,6 @@ and TK-108-C).
   both planets' surface minerals exactly, with no mining tolerance.
   Seed 1 matches planet 20 (germanium 10) but then misses the control
   planet 22 by 1 kT. Asked the vectors owner for the 1 kT tolerance.
-- **MF-13a, MF-13c** (CONFIRMED). The lone minefield at 1400,1400,
-  with no scanner of either player near it, ends the year known to
-  nobody, not even its owner. Elegy's sight rule makes a player's own
-  minefields always known (`objects.Space.Scan`), so it marks the
-  owner. Owning a field does not make it known (stars-elegy #108,
-  SCANNING.md): the known mask gains a player only by sight, a hit or a
-  sweep. The fix is in `objects.Space.Scan` (objects lane); the two
-  cases return to the baseline with it.
 - A minefield's `radius` is not compared: SCANNING.md defines no
   per-player known radius.
 
