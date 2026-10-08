@@ -47,6 +47,7 @@ type ugVector struct {
 			Kind     string          `json:"kind"`
 			ID       int             `json:"id"`
 			Check    string          `json:"check"`
+			Sample   bool            `json:"sample"`
 			Equals   json.RawMessage `json:"equals"`
 			Observed json.RawMessage `json:"observed"`
 		} `json:"expect"`
@@ -58,6 +59,12 @@ type ugRace struct {
 	Computer *struct {
 		Race  int `json:"race"`
 		Level int `json:"level"`
+		// Drawn is the type and level a random choice drew, recovered
+		// from the recorded race (AI.md §3); absent in older vectors.
+		Drawn *struct {
+			Type  int `json:"type"`
+			Level int `json:"level"`
+		} `json:"drawn"`
 	} `json:"computer"`
 	Race struct {
 		PRT    string            `json:"prt"`
@@ -68,12 +75,16 @@ type ugRace struct {
 		Fact   map[string]int    `json:"factory"`
 		Mine   map[string]int    `json:"mine"`
 		Cost   map[string]string `json:"research_cost"`
+		Spend  json.RawMessage   `json:"leftover_spend"`
 		Stat15 int               `json:"stat_15"`
 		High   bool              `json:"techs_start_high"`
 		Less   bool              `json:"factories_cost_less"`
 	} `json:"race"`
-	Spend int `json:"leftover_spend_code"`
+	Spend  *int `json:"leftover_spend_code"`
+	Random bool `json:"random"`
 }
+
+var ugSpends = map[string]int{"surface_minerals": 0, "mineral_concentrations": 1, "mines": 2, "factories": 3, "defenses": 4}
 
 var ugPRTs = map[string]engine.PRT{"HE": engine.PRTHyperExpansion, "SS": engine.PRTSuperStealth, "WM": engine.PRTWarMonger,
 	"CA": engine.PRTClaimAdjuster, "IS": engine.PRTInnerStrength, "SD": engine.PRTSpaceDemolition, "PP": engine.PRTPacketPhysics,
@@ -82,7 +93,22 @@ var ugPRTs = map[string]engine.PRT{"HE": engine.PRTHyperExpansion, "SS": engine.
 var ugFields = []string{"energy", "weapons", "propulsion", "construction", "electronics", "biotechnology"}
 
 func (r ugRace) design(t *testing.T) races.Design {
-	d := races.Design{Spend: r.Spend, Stat15: r.Race.Stat15, ExpensiveAt3: r.Race.High}
+	d := races.Design{Stat15: r.Race.Stat15, ExpensiveAt3: r.Race.High, Random: r.Random}
+	switch {
+	case r.Spend != nil:
+		d.Spend = *r.Spend
+	case len(r.Race.Spend) > 0:
+		var name string
+		if json.Unmarshal(r.Race.Spend, &name) == nil {
+			code, ok := ugSpends[name]
+			if !ok {
+				t.Fatalf("leftover spend %q", name)
+			}
+			d.Spend = code
+		} else if err := json.Unmarshal(r.Race.Spend, &d.Spend); err != nil {
+			t.Fatalf("leftover spend %s", r.Race.Spend)
+		}
+	}
 	x := &d.Race
 	prt, ok := ugPRTs[r.Race.PRT]
 	if !ok {
@@ -110,10 +136,18 @@ func (r ugRace) design(t *testing.T) races.Design {
 			t.Fatalf("habitability %s: %v", name, r.Race.Hab[name])
 		}
 		c, lo, hi := int(v[0].(float64)), int(v[1].(float64)), int(v[2].(float64))
-		if c == 255 {
+		// 255 is the stored immune marker (RACES.md "Repairs"); a race file
+		// may hold it in one field only, which creation repairs (RW08).
+		marker := func(v int) int {
+			if v == 255 {
+				return races.ImmuneMarker
+			}
+			return v
+		}
+		if c == 255 && lo == 255 && hi == 255 {
 			x.Env[a] = engine.EnvRange{Immune: true}
 		} else {
-			x.Env[a] = engine.EnvRange{Center: c, Low: lo, High: hi}
+			x.Env[a] = engine.EnvRange{Center: marker(c), Low: marker(lo), High: marker(hi)}
 		}
 	}
 	for f, name := range ugFields {
@@ -158,9 +192,13 @@ func (v ugVector) settings(t *testing.T) Settings {
 	for _, r := range ps {
 		p := PlayerSetup{Race: r.design(t)}
 		if r.Computer != nil {
-			// Levels 1..4 are easy..expert; 0 is a random level, which
-			// the vector does not record (ugRandomLevel).
-			p.Computer, p.Level = true, Level(max(0, r.Computer.Level-1))
+			// Levels 1..4 are easy..expert; 0 is a random level, given by
+			// computer.drawn where the vector records it.
+			l := r.Computer.Level
+			if d := r.Computer.Drawn; l == 0 && d != nil {
+				l = d.Level
+			}
+			p.Computer, p.Level = true, Level(max(0, l-1))
 		}
 		s.Players = append(s.Players, p)
 	}
@@ -173,6 +211,11 @@ func loadUG(t *testing.T) []ugVector {
 	if err != nil || len(paths) == 0 {
 		t.Fatalf("no ug vectors: %v", err)
 	}
+	// The race-creation vectors (corpus "rw", RD-1..RD-7, RW08) have the
+	// same form; their human races are race files, and case -R gives
+	// each human player's race as created.
+	rw, _ := filepath.Glob(filepath.Join("..", "engine", "testdata", "vectors", "rw", "*.json"))
+	paths = append(paths, rw...)
 	var out []ugVector
 	for _, p := range paths {
 		b, err := os.ReadFile(p)
@@ -278,6 +321,34 @@ func TestUGVectors(t *testing.T) {
 	}
 	for _, v := range loadUG(t) {
 		s := v.settings(t)
+		// A Random race is generated from the stream, so its created race
+		// (case -R, samples) cannot match Elegy's. Play the recorded race
+		// in its place so the rules downstream of the race are still
+		// checked; Generate's own Random races are tested in races/.
+		created := map[int]ugRace{}
+		for _, c := range v.Cases {
+			for _, e := range c.Expect {
+				var eq struct {
+					Race *json.RawMessage `json:"race"`
+				}
+				if e.Kind == "player" && json.Unmarshal(e.Equals, &eq) == nil && eq.Race != nil {
+					var r ugRace
+					if err := json.Unmarshal([]byte(`{"race":`+string(*eq.Race)+`}`), &r); err != nil {
+						t.Fatalf("%s: %v", c.ID, err)
+					}
+					created[e.ID] = r
+				}
+			}
+		}
+		for i := range s.Players {
+			if s.Players[i].Race.Random {
+				r, ok := created[i]
+				if !ok {
+					t.Fatalf("%s: Random race of player %d not recorded", v.ID, i)
+				}
+				s.Players[i].Race = r.design(t)
+			}
+		}
 		gen := func(s Settings) []Result {
 			var out []Result
 			for seed := range uint64(ugSeeds) {
@@ -298,6 +369,16 @@ func TestUGVectors(t *testing.T) {
 		for _, c := range v.Cases {
 			for _, e := range c.Expect {
 				switch {
+				case e.Kind == "player" && created[e.ID].Race.PRT != "" && strings.HasSuffix(c.ID, "-R"):
+					if v.NewGame.Races[e.ID].Random {
+						continue // a sample: played as recorded above
+					}
+					want := created[e.ID].design(t)
+					got := res.Players[e.ID].Race
+					got.Name, got.Tampered, got.Random = "", false, false
+					if got != want {
+						t.Errorf("%s player %d race as created:\n got  %+v\n want %+v", c.ID, e.ID, got, want)
+					}
 				case e.Kind == "player":
 					var eq struct {
 						Tech    map[string]int `json:"tech"`
@@ -360,9 +441,9 @@ func TestUGVectors(t *testing.T) {
 						}
 						diffs := startDiffs(startOf(res, i), want)
 						level := ""
-						if r := v.NewGame.Races[i]; diffs != nil && r.Computer != nil && r.Computer.Level == 0 {
-							// A random level is not in the vector: try
-							// each level for this player.
+						if r := v.NewGame.Races[i]; diffs != nil && r.Computer != nil && r.Computer.Level == 0 && r.Computer.Drawn == nil {
+							// A random level the vector does not record:
+							// try each level for this player.
 							for l := Easy; l <= Expert && diffs != nil; l++ {
 								s2 := s
 								s2.Players = append([]PlayerSetup(nil), s.Players...)
