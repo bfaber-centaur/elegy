@@ -188,9 +188,9 @@ func (g *Game) MergeFleets(owner, into int, from []int) error {
 
 // loadPass is a waypoint phase's load pass (TAKEOVER.md "Where each task
 // happens", steps 2 and 5; "Other waypoint tasks"): each fleet in fleet
-// order carries out its Merge with Fleet task, and after movement its
-// transfer-fleet task (KERNEL.md "Turn order" step 6c.5). Loads are not
-// modelled.
+// order carries out its transport task's loads (Game.load), its Merge
+// with Fleet task, and after movement its transfer-fleet task (KERNEL.md
+// "Turn order" step 6c.5).
 func (g *Game) loadPass(afterMovement bool) []Event {
 	var events []Event
 	gone := map[int]bool{}
@@ -205,6 +205,8 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		}
 		f := &g.Fleets[i]
 		switch {
+		case f.Task.Kind == TaskTransport:
+			g.load(f)
 		case f.Task.Kind == TaskMerge:
 			if ev, ok := g.mergeTask(f, gone); ok {
 				gone[id] = true

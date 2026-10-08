@@ -932,6 +932,10 @@ func (l *pvLoaded) task(w pvWaypoint) (Task, string) {
 				t.Transport[c] = Transport{Action: UnloadAll}
 			case "unload_exactly":
 				t.Transport[c] = Transport{Action: UnloadExactly, Amount: o.Value}
+			case "load_all":
+				t.Transport[c] = Transport{Action: LoadAll}
+			case "load_exactly":
+				t.Transport[c] = Transport{Action: LoadExactly, Amount: o.Value}
 			default:
 				return Task{}, "transport " + o.Action
 			}

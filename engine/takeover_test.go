@@ -890,3 +890,61 @@ func TestAlternateRealityColonyGeneratesYears(t *testing.T) {
 		}
 	}
 }
+
+func TestConfirmedLoadAmounts(t *testing.T) {
+	// TAKEOVER.md "Unload and load amounts" (CONFIRMED TK-301, TK-302):
+	// load exactly 30 colonists from 100 leaves 70; 40 ironium asked with
+	// 25 on the surface loads 25; 300 asked with 500 on the surface and a
+	// 210 kT hold loads 210 and leaves 290. ASSUMPTION T4: what load
+	// exactly could not move stays as the action; load all clears.
+	l := newTKLab(t, 3)
+	medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
+	load := func(c int, a TransportAction, v int) Task {
+		t := Task{Kind: TaskTransport}
+		t.Transport[c] = Transport{Action: a, Amount: v}
+		return t
+	}
+	cases := []struct {
+		task          Task
+		surface, pop  int
+		wantHeld      int
+		wantLeft      int
+		wantRemaining int
+	}{
+		{load(CargoColonists, LoadExactly, 30), 0, 100, 30, 70, 0},
+		{load(0, LoadExactly, 40), 25, 10, 25, 0, 15},
+		{load(0, LoadExactly, 300), 500, 10, 210, 290, 90},
+		{load(0, LoadAll, 0), 500, 10, 210, 290, 0},
+	}
+	for k, c := range cases {
+		l.g.Planets, l.g.Fleets = nil, nil
+		pi := l.planet(0, 0, c.pop)
+		l.g.Planets[pi].Surface[0] = c.surface
+		fi := l.fleet(0, pi, 0, Stack{Design: medium, Count: 1})
+		l.g.Fleets[fi].Task = c.task
+		l.g.loadPass(false)
+		f, p := l.g.Fleets[0], l.g.Planets[pi]
+		held, left := f.Cargo.Minerals[0], p.Surface[0]
+		if c.task.Transport[CargoColonists].Action != TransportNone {
+			held, left = f.Cargo.Colonists, p.Population
+		}
+		remaining := 0
+		if f.Task.Kind == TaskTransport {
+			for _, tr := range f.Task.Transport {
+				remaining += tr.Amount
+			}
+		}
+		if held != c.wantHeld || left != c.wantLeft || remaining != c.wantRemaining {
+			t.Errorf("case %d: held %d, left %d, action keeps %d; want %d, %d, %d", k, held, left, remaining, c.wantHeld, c.wantLeft, c.wantRemaining)
+		}
+	}
+	// Another player's planet gives nothing, and the action waits.
+	l.g.Planets, l.g.Fleets = nil, nil
+	pi := l.planet(1, 0, 100)
+	fi := l.fleet(0, pi, 0, Stack{Design: medium, Count: 1})
+	l.g.Fleets[fi].Task = load(CargoColonists, LoadAll, 0)
+	l.g.loadPass(false)
+	if f := l.g.Fleets[0]; f.Cargo.Colonists != 0 || f.Task.Transport[CargoColonists].Action != LoadAll {
+		t.Errorf("foreign planet: %+v", f)
+	}
+}
