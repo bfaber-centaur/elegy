@@ -57,6 +57,7 @@ Test names follow the engine's convention:
 | Leftover-point spends | `players.go` | CONFIRMED |
 | Starbase designs and loadouts | `designs.go` | CONFIRMED |
 | Starting ships and part upgrades | `designs.go` | CONFIRMED |
+| Starting designs recorded in `Game.DesignSlots`: starbase slots 0/1, each new ship design the next ship slot | `designs.go` | CONFIRMED (UNIVERSE.md "Starbases", "Starting ships"; UG01..UG21); wired for the engine 2026-10-08, `TestConfirmedStartingDesignSlots` |
 | Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `legacySecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
