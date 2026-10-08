@@ -3,8 +3,8 @@ package engine
 // Race check messages (RACES.md "In a running game", CONFIRMED RD-P12;
 // MESSAGES.md 0x117 and 0x182). Elegy's wording.
 const (
-	EventRacePenalized EventKind = iota + EventFleetGiftNoRoom + 1 // Player: the player's race was found illegal and adjusted
-	EventRaceHacked                                                // Player = told, Count = the penalized player
+	EventRacePenalized EventKind = iota + EventPacketNoDriver + 1 // Player: the player's race was found illegal and adjusted
+	EventRaceHacked                                               // Player = told, Count = the penalized player
 )
 
 // RaceChecker runs the yearly race check, KERNEL.md "Turn order" step 2a
