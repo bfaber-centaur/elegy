@@ -177,10 +177,14 @@ load those designs count as created in the first year with picture 0.
 - Orders to a fleet split off in the same turn: the engine gives the new
   fleet an id the order file cannot name yet (engine request open); such
   orders go to `Result.Unsupported`.
-- Orders the engine does not accept yet: scrap, lay-mines and load tasks,
-  unloading colonists at another player's planet (freighter invasion),
-  and battle plan 4 while a player has fewer than five plans. A
+- Orders the engine does not accept yet: scrap and load tasks, and
+  unloading colonists at another player's planet (freighter invasion). A
   planner reports a scrap it cannot order in `Result.Unsupported`.
+- The lay-mines steps: the engine now has a lay-mines task, but the
+  planners do not order it yet and report the step as unsupported.
+- Battle plan 4 is ordered now that every new player starts with the
+  five plans (newgame, COMBAT.md "Starting plans"); a player with fewer
+  plans reports it as unsupported.
 - Rototill's unreachable branches (rototill.md marks them not exercised):
   remote miners (slots 7–8), slots 13–14, transports (hub freighters) and
   armed scouts. Rototill never designs those ships; the code reports them
