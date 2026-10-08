@@ -112,7 +112,7 @@ AI-10).
 ## Saved games
 
 **ELEGY CHOICE:** a saved game is Elegy's own versioned JSON document,
-`{"format": "elegy-save", "version": 4, ...}`, not any of the original's
+`{"format": "elegy-save", "version": 5, ...}`, not any of the original's
 file formats. It holds:
 
 - the engine state, including the game's ruleset (`engine.Game.Rules`:
@@ -120,6 +120,9 @@ file formats. It holds:
   `Load` validates;
 - the space objects and race designs (the engine's `Objects` and `Races`)
   and whether terraforming is on;
+- every design slot's creation year and picture
+  (`engine.DesignSlot.Created`, `Picture`; ASSUMPTION B2 for the starting
+  designs: the first year, picture 0);
 - the generator state;
 - the planet name indexes;
 - each computer player's level (`Game.ComputerLevel`), so a loaded game
@@ -216,9 +219,10 @@ player.
 `turn` loads the game for every year, so its computer players start
 each year with fresh drivers. `ai.Driver` keeps the creation year and
 picture of the designs it stores, and that state does not survive a save
-and load (its ELEGY CHOICE, until the engine's designs carry the two
-values). So a game advanced year by year with `turn` can differ from the
-same game run in one `play`. Each path on its own is deterministic.
+and load (its ELEGY CHOICE). The engine's design slots now carry both
+values and the save keeps them; what remains is for the driver to read
+them from `OwnDesign.Slot`. Until then, a game advanced year by year
+with `turn` can differ from the same game run in one `play`. Each path on its own is deterministic.
 
 **ELEGY CHOICE:** a race file is Elegy's own versioned JSON document,
 `{"format": "elegy-race", "version": 1, "race": {...}}`, holding a
@@ -238,5 +242,6 @@ must give the same hashes.
 
 ## Not done yet
 
-- Computer players' design creation years and pictures in the save (see
-  above).
+- `ai.Driver` reading its designs' creation years and pictures from
+  `OwnDesign.Slot`, which the save now keeps (save version 5), instead of
+  its own memory (see above).

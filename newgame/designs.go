@@ -311,11 +311,17 @@ func (g *generator) addDesignsAndFleets(i int, ps player, start *PlayerStart) er
 	// "Starting ships", CONFIRMED UG01..UG21). The engine finds a player's
 	// designs through Game.DesignSlots (design orders, starbase upgrades,
 	// gifts).
+	//
+	// ASSUMPTION B2: a starting design was created in the game's first
+	// year, with picture 0. stars-elegy does not give the starting
+	// designs' creation year or picture; the computer players' design
+	// ageing and starbase family rules read both (AI.md "Storing a
+	// design", "Picture").
 	for k, d := range start.StarbaseDesigns {
-		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Starbase: true, Slot: k, Design: d})
+		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Starbase: true, Slot: k, Design: d, Created: game.Year})
 	}
 	for k, d := range start.ShipDesigns {
-		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Slot: k, Design: d})
+		game.DesignSlots = append(game.DesignSlots, engine.DesignSlot{Owner: i, Slot: k, Design: d, Created: game.Year})
 	}
 	return nil
 }

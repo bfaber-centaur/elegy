@@ -224,6 +224,89 @@ func TestReportKnownDesigns(t *testing.T) {
 	}
 }
 
+// A design's creation year and picture reach the owner's report and
+// survive a save and load; the hash and Diff see them.
+func TestDesignYearAndPictureSaved(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	for _, d := range mustReport(t, g, 0).Designs {
+		if d.Slot.Created != 2400 || d.Slot.Picture != 0 {
+			t.Fatalf("starting design slot %+v: want created 2400, picture 0 (ASSUMPTION B2)", d.Slot)
+		}
+	}
+	scout := mustReport(t, g, 0).Designs[0]
+	for _, d := range mustReport(t, g, 0).Designs {
+		if !d.Slot.Starbase {
+			scout = d
+			break
+		}
+	}
+	order := engine.DesignOrder{Slot: 9, Name: "Pictured", Hull: scout.Design.Hull.Name, Picture: 2}
+	drivers := make([]Driver, len(g.State.Players))
+	drivers[0] = DriverFunc(func(Report) ([]engine.Order, error) { return []engine.Order{order}, nil })
+	y, err := g.Advance(drivers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, o := range y.Result.Orders {
+		if o.Err != nil {
+			t.Fatalf("design order rejected: %v", o.Err)
+		}
+	}
+	find := func(x *Game) OwnDesign {
+		for _, d := range mustReport(t, x, 0).Designs {
+			if !d.Slot.Starbase && d.Slot.Slot == 9 {
+				return d
+			}
+		}
+		t.Fatal("the new design is not in the report")
+		return OwnDesign{}
+	}
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range []*Game{g, loaded} {
+		if d := find(x); d.Slot.Created != 2400 || d.Slot.Picture != 2 {
+			t.Fatalf("new design slot %+v: want created 2400 (the year its order applied), picture 2", d.Slot)
+		}
+	}
+	h1, _ := g.Hash()
+	h2, _ := loaded.Hash()
+	if h1 != h2 {
+		t.Fatal("hash changed across a save and load")
+	}
+	for i, s := range loaded.State.DesignSlots {
+		if s.Owner == 0 && !s.Starbase && s.Slot == 9 {
+			slots := append([]engine.DesignSlot(nil), loaded.State.DesignSlots...)
+			slots[i].Picture = 3
+			loaded.State.DesignSlots = slots
+		}
+	}
+	if h3, _ := loaded.Hash(); h3 == h1 {
+		t.Fatal("the hash does not cover a design's picture")
+	}
+	diffs, err := Diff(g, loaded, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(diffs) != 1 || !strings.Contains(diffs[0], "Picture") {
+		t.Fatalf("Diff: %v", diffs)
+	}
+}
+
+func mustReport(t *testing.T, g *Game, p int) Report {
+	t.Helper()
+	r, err := g.Report(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r
+}
+
 func TestReportSurvivesSaveLoad(t *testing.T) {
 	g := newSmoke(t, smokeSeed)
 	drivers := smokeDrivers(3)

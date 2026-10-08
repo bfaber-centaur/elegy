@@ -165,7 +165,10 @@ type PlanetRecord struct {
 
 // OwnDesign is one of the player's designs: its slot and the design.
 // Index is the design's index in the game's design list, which fleets'
-// stacks and planets' starbases refer to.
+// stacks and planets' starbases refer to. Slot carries the design's
+// creation year and picture (engine.DesignSlot Created, Picture), which
+// a computer player's design ageing and starbase family rules read
+// (AI.md "Storing a design", "Picture").
 type OwnDesign struct {
 	Index  int
 	Slot   engine.DesignSlot
