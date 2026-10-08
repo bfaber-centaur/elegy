@@ -20,6 +20,9 @@ import (
 // Every slice is the Report's own copy; a driver may change it freely.
 type Report struct {
 	GameID uint64
+	// Rules is the game's ruleset (engine.Game.Rules). A game's rules are
+	// known to every player.
+	Rules engine.Ruleset
 	// Year is the year the orders are for: the game's current year.
 	Year   int
 	Player int
@@ -159,6 +162,7 @@ func NewReport(g engine.Game, player int, views []engine.PlayerView, events []en
 	}
 	r := Report{
 		GameID: g.ID,
+		Rules:  g.Rules,
 		Year:   g.Year,
 		Player: player,
 		Self:   deepCopy(g.Players[player]),

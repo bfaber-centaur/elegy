@@ -1,6 +1,9 @@
 package game
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -64,6 +67,7 @@ func New(rules engine.Ruleset, s newgame.Settings, seed uint64) (*Game, error) {
 		return nil, err
 	}
 	st := res.Game
+	st.ID = gameID(s, seed)
 	designs := make([]races.Design, len(res.Players))
 	computer := make([]bool, len(res.Players))
 	for i, p := range res.Players {
@@ -82,6 +86,25 @@ func New(rules engine.Ruleset, s newgame.Settings, seed uint64) (*Game, error) {
 	g.history = history(nil).record(st.Year, g.views)
 	g.wormholes = wormholeHistory(nil).record(st.Year, g.views, space(st))
 	return g, nil
+}
+
+// gameID is a new game's id, which order files carry (stars-elegy
+// ORDERS.md "Wrong game or wrong year").
+//
+// ELEGY CHOICE: the id is the first eight bytes of the SHA-256 of the
+// settings and seed, never 0, so it is reproducible and games made from
+// different settings or seeds almost never share one. The spec does not
+// say how the original picks a game id.
+func gameID(s newgame.Settings, seed uint64) uint64 {
+	b, err := json.Marshal(struct {
+		Settings newgame.Settings
+		Seed     uint64
+	}{s, seed})
+	if err != nil {
+		panic(fmt.Sprintf("game: encoding settings: %v", err))
+	}
+	sum := sha256.Sum256(b)
+	return max(1, binary.BigEndian.Uint64(sum[:8]))
 }
 
 // Report is player's report for the current year, with its planet
