@@ -42,16 +42,21 @@ unless the project decides otherwise.
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
 | Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
+| Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
 capture comparison.
 
-`TestRototillPlaysAlone` and `TestCybertronPlaysAlone` play one expert
-computer player against an idle human from a new game, for 40 and 60
-years: the computer player plans first each year on the game's random
+`TestRototillPlaysAlone`, `TestCybertronPlaysAlone` and
+`TestRobotoidPlaysAlone` play one expert computer player against an idle
+human from a new game, for 40, 60 and 60 years: the computer player plans first each year on the game's random
 stream, every order it gives is accepted, and the same seed replays to
-an identical game. They are smoke tests, not parity checks.
+an identical game. `TestAllThreeTogether` plays Robotoid, Rototill and
+Cybertron in one game for 60 years, each planning in player order on the
+one random stream with its own report and history, with the same checks.
+They are smoke tests, not parity checks. These games run inside `ai/`'s
+tests; the game loop's driver for computer players is not built yet.
 
 Cybertron stays on its homeworld in its smoke game. It scraps its
 starting Scout (Elegy reports the scrap as unsupported), and its colony
@@ -92,6 +97,24 @@ yet.
 | A26 | The colonizer test's `Random(2)` passes when it draws 0. |
 | A27 | Attack fleet production: the guard draw is made only when `GG` holds a design and fewer than 40 guard fleets exist; the third and fourth group draws are made whether or not those slots hold designs. |
 | A28 | Pass A: armed fleets count as Destroyer fleets while only group 6–9 aged out this turn, and as group fleets otherwise. |
+| A29 | "Power > 0" in the fleet classes is tested as "some beam, torpedo or bomb term > 0" (KERNEL.md "Power of a design"): capacitors and the speed factor never take a positive beam term to zero. |
+| A30 | Robotoid's "merge the slots 2–7 and 9–10" is one merge over those slots. |
+| A31 | An armada not at a planet with no other player's planet within 150 ly goes to the nearest planet ("the nearest object of interest"). |
+| A32 | An armada launched by chance loads colonists as a normal launch does; the invasion step at another player's planet is reported as unsupported (no defense-percentage estimate yet). |
+| A33 | Armada launch target: planets chosen earlier this turn are drawn in planet-id order and the first that draws 0 wins. |
+| A34 | Robotoid's colonizer step checks y > 4 first, and with no hubs the `Random(8 × hubs)` draw is not made. |
+| A35 | "Population × max growth %" uses the population in hundreds; "the planet's resources" are this year's. |
+| A36 | The universe size (colonizer test) is read from the map's extent. |
+| A37 | The colonizer test's rule on ships ever built of the colony designs (b) is skipped: Elegy does not track that count. |
+| A38 | With no own fleet here that is not too weak, Robotoid's armada production step does nothing. |
+| A39 | The D67 draw is made only when D67 holds a design. |
+| A40 | Hub balancing takes the giving hub's last assigned fleet. |
+| A41 | Hub freighters: the pickup marks (memory), small foreign colonies (values unpublished), salvage (not in the view) and the colonist rules are not built. Loads at a target are reported, since Elegy's transport task cannot load. |
+| A42 | Join-up: the `Random(20)` draw is made only when the count test says join and the fleet holds 20 or more D1415 ships. |
+| A43 | Player positions are never "close" (the view does not carry the setting). |
+| A44 | A Robotoid scout's random nearby pick that lands on the planet it orbits means no move (robotoid.md: "other than its current one"), at its ideal warp otherwise. |
+| A45 | A known wormhole end's reported stability stands for its movement class in the wormhole preference (AI.md §11), and counts as known. |
+| A46 | A wormhole order targets the point in space where the end was last seen: the engine's waypoints cannot target a wormhole end yet. |
 
 ## Spec questions
 
@@ -117,38 +140,55 @@ yet.
   switch (the exact arithmetic would need a research answer) and the
   fixed rule (INTENTIONALLY DIFFERENT, Bobby's call).
 
+## Game-loop driver
+
+`ai.Driver` implements `game.Driver` for Robotoid, Rototill and
+Cybertron. Each year it builds the player's View from the
+`game.Report` alone (universe map, planet history, known wormhole
+ends), and plays the turn on the report's random stream. The game loop
+asks the players in player order, so the computer players draw from one
+stream as AI.md §1 says. `TestDriversInGameLoop` plays an idle human and
+the three personalities for 50 years through `game.Game.Advance`: every
+order is accepted, each keeps a planet, and two runs from the same seed
+give the same state hash every year. It is a smoke test, not a parity
+check.
+
+The driver's only state is the creation year and picture of the designs
+it stored (AI.md §5, §10), which the engine's designs do not carry. It
+does not survive a save and load (`game.Driver`'s ELEGY CHOICE); after a
+load those designs count as created in the first year with picture 0.
+
 ## Inputs the planners need from outside `ai/`
 
-- The game's random stream, in player order, before the year (AI.md §1
-  "Random numbers"). The game loop's driver interface does not pass one
-  yet.
-- Each design's creation year and picture (AI.md §5, §10). The engine's
-  designs carry neither; `ai.SlotDesign` takes them from the caller and
-  `ai.NewDesign` returns them for the designs a planner stores.
-- Every planet's id and position, seen or not (rototill.md §3 scouts,
-  MEASURED AI-17; Robotoid colonizes planets it never scanned, AI.md §1).
-- The player's planet history: for each planet ever reported, the latest
-  report (AI.md §1 "What it sees", CONFIRMED AI-12; used by Rototill's
-  scouts and colonizers, AI-16, AI-17).
+- Each design's creation year and picture, in the game state, so that
+  the planners' ageing and picture rules survive a save and load.
+- Other players' PRT (the report withholds it; every other player counts
+  as not Alternate Reality).
+- The game's ruleset in the report (lane B is adding `Report.Rules`); the
+  design read passes the zero ruleset until then, which is safe because
+  the builder uses only parts the race can build.
 
 ## Not implemented yet
 
-- Hub freighter assignment (AI.md §6 steps 3–4), automation steps 1
-  (warp re-pick, AI.md §11 "Warp choice"), 4 (under attack) and 5
-  (blocked queues); the shared fleet rules of AI.md §11.
-- Robotoid's turn (production, fleets, armada parameters).
+- Automation steps 1 (warp re-pick, AI.md §11 "Warp choice"), 4 (under
+  attack) and 5 (blocked queues).
 - Cybertron's packets (§6: supply, attack, scanner shot) and its
   low-mineral notes (§4.1). The turn reports them as unsupported.
 - Orders to a fleet split off in the same turn: the engine gives the new
   fleet an id the order file cannot name yet (engine request open); such
   orders go to `Result.Unsupported`.
-- Orders the engine does not accept yet: scrap and lay-mines tasks,
-  unloading colonists at another player's planet (freighter invasion),
-  and battle plan 4 while a player has fewer than five plans. A
+- Orders the engine does not accept yet: scrap and load tasks, and
+  unloading colonists at another player's planet (freighter invasion). A
   planner reports a scrap it cannot order in `Result.Unsupported`.
+- The lay-mines steps: the engine now has a lay-mines task, but the
+  planners do not order it yet and report the step as unsupported.
+- Battle plan 4 is ordered now that every new player starts with the
+  five plans (newgame, COMBAT.md "Starting plans"); a player with fewer
+  plans reports it as unsupported.
 - Rototill's unreachable branches (rototill.md marks them not exercised):
   remote miners (slots 7–8), slots 13–14, transports (hub freighters) and
   armed scouts. Rototill never designs those ships; the code reports them
   as unsupported or leaves the fleet alone.
-- Wormholes and other players' PRT in the view (the game loop's report
-  does not carry them yet).
+- Waypoints to a wormhole end: the engine's waypoints cannot target one
+  yet, so the planners send the fleet to the point where the end was last
+  seen (A46).

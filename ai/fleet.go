@@ -112,6 +112,14 @@ func toPlanet(id int, pos engine.Point, warp int, task engine.Task) engine.Waypo
 	return engine.Waypoint{Pos: pos, Warp: warp, Target: engine.TargetPlanet, ID: id, Task: task}
 }
 
+// toWormhole is a waypoint at a wormhole end (AI.md §11 "Wormhole
+// order"). ASSUMPTION A46: the engine's waypoints cannot target a
+// wormhole end yet (an engine request is open), so the waypoint is the
+// point in space where the planner last saw the end.
+func toWormhole(w Wormhole, warp int) engine.Waypoint {
+	return engine.Waypoint{Pos: w.Pos, Warp: warp, Target: engine.TargetSpace}
+}
+
 // cutRoute cuts the route to waypoint 0 and clears its task.
 func cutRoute(f *engine.Fleet) engine.WaypointOrder {
 	f.Task, f.Waypoints = engine.Task{}, nil
