@@ -239,7 +239,7 @@ keeps the fleet and planet sightings; these functions cover the objects.
 | Rule (SCANNING.md) | Function | Status |
 |---|---|---|
 | Minefields: own; `P`, `R/4`; inside (fleets only); known within `R` | `Space.Scan` | CONFIRMED (OB-018, OB-018-C, E–G); fleets-only inside BINARY-ONLY |
-| Minefield knowledge from sight, sweeps and hits | `Space.Scan`, `Space.Sweep`, `Space.LearnHit` | sight CONFIRMED; sweeps and hits BINARY-ONLY |
+| Minefield knowledge from sight, sweeps and hits | `Space.Scan`, `Space.Sweep`, `Space.LearnHit`, `Space.Detonate` | sight CONFIRMED; sweeps and hits BINARY-ONLY |
 | Ownership does not make a field known; own fields still listed in the owner's view | `Space.Scan` | MEASURED (MF-13a, MF-13c; stars-elegy #108); with `SeeObjects` calling `Scan` and the harness comparing `known_to`, both cases pass locally |
 | Wormhole ends: within `R` only; known, `P` or `R/4`; known once seen | `Space.Scan` | CONFIRMED (OB-011-H, OB-017, OB-018 H, I, WT batch); the known band BINARY-ONLY |
 | Packets within `R`; PP sees all | `Space.Scan` | CONFIRMED (OB-018 J, K, OB-012) |
@@ -265,10 +265,13 @@ keeps the fleet and planet sightings; these functions cover the objects.
    fields' detonate setting and its packets' warp, destination and cargo.
    Nothing else is shown: not another player's packet's details, not
    salvage contents, not a Trader's warp, destination or item.
+5. **V5** A detonation that damaged at least one of a fleet's ships is a
+   hit, so the fleet's owner learns the field (`Space.Detonate`); a
+   fleet the field marked without damage learns nothing.
 
-Not covered yet: knowledge from a detonating SD field's hit, and dropping
-or keeping waypoints on objects no longer seen (SCANNING.md "Orders that
-depend on sight").
+Not covered yet in objects: dropping or keeping waypoints on objects no
+longer seen (SCANNING.md "Orders that depend on sight"), which belongs to
+the turn engine's waypoint handling.
 
 ## Turn wiring
 

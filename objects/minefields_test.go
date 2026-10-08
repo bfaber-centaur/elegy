@@ -695,3 +695,24 @@ func TestPredictionSetDetonate(t *testing.T) {
 		t.Fatalf("player 1's own field: err %v, fields %v %v", err, s.Minefields[0].Detonate, s.Minefields[2].Detonate)
 	}
 }
+
+// ASSUMPTION V5: a detonation that damages a fleet's ships teaches its
+// owner the field, as a hit does; the owner's exempt layer learns nothing.
+func TestPredictionDetonationKnowledge(t *testing.T) {
+	l := newLab(t)
+	l.fleet(1, at(3, 0), "Freighter", 5)
+	l.fleet(0, at(0, 3), "MML", 1)
+	s := &Space{Minefields: []Minefield{{Owner: 0, Kind: Standard, Pos: origin, Count: 1000, Detonate: true}}}
+	s.Detonate(l.g)
+	if m := s.Minefields[0]; !m.KnownBy(1) || m.KnownBy(0) {
+		t.Errorf("known: player 0 %v, player 1 %v; want false, true", m.KnownBy(0), m.KnownBy(1))
+	}
+	// A speed bump detonation damages nobody, so nobody learns it.
+	l = newLab(t)
+	l.fleet(1, origin, "Freighter", 5)
+	s = &Space{Minefields: []Minefield{{Owner: 0, Kind: SpeedBump, Pos: origin, Count: 1000, Detonate: true}}}
+	s.Detonate(l.g)
+	if s.Minefields[0].KnownBy(1) {
+		t.Error("a speed bump detonation taught its field")
+	}
+}
