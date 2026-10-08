@@ -129,7 +129,9 @@ checks every case's expectations:
 - CONFIRMED and LEGACY BUG cases are exact-match targets.
 - MEASURED cases are tallied apart.
 - Cases are skipped for an order, object or expectation Elegy does not
-  model yet, or when the vector marks the outcome as varying by stream.
+  model yet. An expectation tagged with one oracle stream is skipped; the
+  case's other expectations are still checked, also when the case is
+  marked as varying by stream.
 - A LEGACY BUG case whose switch is off by default is reported as
   "differs".
 - Each vector runs with 8 seed variants. The harness's random stream is

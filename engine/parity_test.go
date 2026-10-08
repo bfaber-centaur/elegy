@@ -1114,10 +1114,6 @@ func runVector(v *pvVector, k int) []pvResult {
 			res(c, "skip", why)
 			continue
 		}
-		if c.VariesByStream {
-			res(c, "skip", "random outcome")
-			continue
-		}
 		var fails, skips []string
 		checked := 0
 		for _, e := range c.Expect {

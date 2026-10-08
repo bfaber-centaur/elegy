@@ -166,6 +166,24 @@ Places where the original has no behavior to copy, and Elegy chose one.
   (hostile deaths, 1 resource; KX-001 Z3). Calling `GrowPopulation`
   directly with maximum 0 still treats the planet as fully overcrowded.
 
+## Known parity failures
+
+`TestParityVectors -v` prints every case that does not pass. These are
+the failing cases with a cause found or the note that none was looked
+for. A case that is "random" (its result changes with the seed) is not
+listed; its comparison is in the test output.
+
+- **CB-039, CB-042, CB-043, CB-044** (the token cap; CONFIRMED, CB-039
+  MEASURED). In every seed Elegy keeps alive fleets the original
+  destroyed in both oracle streams: 10, 73, 16 and 10 of them. The
+  battles have 255 tokens, and CB-039's 25 left-out fleets match the
+  original's count (35 Elegy survivors against 26), so the difference is
+  in how the battle ends, not in which fleets join. Cause not yet
+  investigated.
+- **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). In every
+  seed three fleets the original destroyed survive and one it kept is
+  gone. Cause not yet investigated.
+
 ## Open spec questions
 
 - **K2 (ASSUMPTION), random event options.** `Game.RandomEvents` and
