@@ -36,6 +36,28 @@ func TestConfirmedTraderAppearance(t *testing.T) {
 	if !ok || tr.Warp != want.Warp || tr.Pos != want.Pos || tr.Dest != want.Dest || tr.Item != want.Item {
 		t.Errorf("appearance %+v, want %+v", tr, want)
 	}
+	// Reroll and conversion (OBJECTS.md "Appearance", BINARY-ONLY): a
+	// first draw of 6, 7, 10 or 11 is replaced by a second rand(13); only
+	// that second draw converts, with rand(2) = 1.
+	for _, c := range []struct {
+		yi    int
+		draws []int
+		want  TraderItem
+	}{
+		{72, []int{7, 7, 1}, TraderItem{Kind: ItemResearch}},
+		{72, []int{7, 7, 0}, TraderItem{Kind: ItemPart, Bit: BitMultiContainedMunition}},
+		{130, []int{11, 7}, TraderItem{Kind: ItemPart, Bit: BitMultiContainedMunition}},
+		{130, []int{6, 10, 1}, TraderItem{Kind: ItemResearch}},
+		{72, []int{6, 6}, TraderItem{Kind: ItemPart, Bit: BitAntiMatterTorpedo}},
+		{72, []int{7, 12}, TraderItem{Kind: ItemShip}},
+		{200, []int{10, 10}, TraderItem{Kind: ItemPart, Bit: BitGenesisDevice}},
+	} {
+		r := append(script{0, 1, 5, 700, 1, 1, 9}, c.draws...)
+		tr, _ := (&Space{}).Appear(c.yi, 2, true, &r)
+		if tr.Item != c.want || len(r) != 0 {
+			t.Errorf("year %d, draws %v: %+v, %d draws left", c.yi, c.draws, tr.Item, len(r))
+		}
+	}
 	// r: 5 before year index 100, +1 below warp 10, −1 above.
 	for _, c := range []struct{ yi, warp, r int }{{50, 9, 6}, {50, 10, 5}, {50, 12, 4}, {150, 10, 3}, {300, 10, 2}} {
 		if got := itemChance(c.yi, c.warp); got != c.r {
@@ -62,14 +84,52 @@ func TestConfirmedTraderMovement(t *testing.T) {
 	if moves := two.MoveTraders(3, &r); !moves[0].Left || len(two.Traders) != 1 {
 		t.Errorf("arrival with another Trader: %+v", moves)
 	}
+	// A lone arrival stays with warp max(6, warp − 2) + 1 and a new
+	// destination on any edge: OB-023's Trader (tiny universe) arrived on
+	// the x = 1380 edge and got (1098, 1380). Draws: rand(25) = 1, keep
+	// rand(2) = 1, side 0 (high edge), free 1020 + 78, axis 1 (y on the
+	// edge).
 	for _, c := range []struct{ warp, after int }{{8, 7}, {6, 7}} {
-		lone := &Space{Traders: []Trader{{Pos: engine.Point{X: 2570, Y: 1500}, Dest: engine.Point{X: 2580, Y: 1500}, Warp: c.warp}}}
-		r = script{1, 1, 50}
-		moves := lone.MoveTraders(3, &r)
+		lone := &Space{Traders: []Trader{{Pos: engine.Point{X: 1370, Y: 1300}, Dest: engine.Point{X: 1380, Y: 1300}, Warp: c.warp}}}
+		r = script{1, 1, 0, 78, 1}
+		moves := lone.MoveTraders(0, &r)
 		tr := lone.Traders[0]
-		if moves[0].Left || tr.Warp != c.after || tr.Pos != (engine.Point{X: 2580, Y: 1500}) || tr.Dest.X != 1020 {
+		if moves[0].Left || tr.Warp != c.after || tr.Pos != (engine.Point{X: 1380, Y: 1300}) || tr.Dest != (engine.Point{X: 1098, Y: 1380}) || len(r) != 0 {
 			t.Errorf("lone arrival at warp %d: %+v", c.warp, tr)
 		}
+	}
+	// A warp rise draws rand(3); 0 then draws a new destination (side 1,
+	// the low edge; free 1020 + 480; axis 1, y on the edge), and the
+	// Trader moves 100 ly at the new warp: (480, −480)·100/678.8 → ±71.
+	s = &Space{Traders: []Trader{{Pos: engine.Point{X: 1020, Y: 1500}, Dest: engine.Point{X: 2580, Y: 1500}, Warp: 9}}}
+	r = script{0, 0, 1, 480, 1}
+	moves := s.MoveTraders(3, &r)
+	if tr := s.Traders[0]; !moves[0].WarpRose || !moves[0].NewDest || tr.Warp != 10 || tr.Dest != (engine.Point{X: 1500, Y: 1020}) || tr.Pos != (engine.Point{X: 1091, Y: 1429}) {
+		t.Errorf("warp rise with a new destination: %+v %+v", moves[0], tr)
+	}
+	// No new-destination draw without a rise, and none above warp 12.
+	s = &Space{Traders: []Trader{{Pos: engine.Point{X: 1020, Y: 1500}, Dest: engine.Point{X: 2580, Y: 1500}, Warp: 13}}}
+	c := &count{}
+	s.MoveTraders(3, c)
+	if c.n != 0 {
+		t.Errorf("warp 13 drew %d", c.n)
+	}
+}
+
+// The packet step (OBJECTS.md "Movement", BINARY-ONLY in detail): each
+// axis moves trunc(Δ·m/d ± 0.5); a step landing on the destination is
+// an arrival.
+func TestPredictionTraderStep(t *testing.T) {
+	// d = 5, m = 3: (3·3/5, 4·3/5) = (1.8, 2.4) → (2, 2).
+	if p, ok := StepToward(at(0, 0), at(3, 4), 3); ok || p != at(2, 2) {
+		t.Errorf("step %v %v", p, ok)
+	}
+	// Negative Δ rounds away from zero: −1.8 → −2.
+	if p, _ := StepToward(at(3, 4), at(0, 0), 3); p != at(1, 2) {
+		t.Errorf("negative step %v", p)
+	}
+	if p, ok := StepToward(at(0, 0), at(81, 0), 81); !ok || p != at(81, 0) {
+		t.Errorf("arrival %v %v", p, ok)
 	}
 }
 
@@ -101,7 +161,7 @@ func TestConfirmedTraderEncounters(t *testing.T) {
 	cargo(l, c, 5000)
 	cargo(l, d, 9000)
 	ids := []int{l.g.Fleets[a].ID, l.g.Fleets[b].ID, l.g.Fleets[c].ID, l.g.Fleets[d].ID}
-	enc := s.Encounters(l.g, TraderContext{}, &script{})
+	enc := meetFleets(s, l.g, TraderContext{}, &script{})
 	if len(enc) != 3 || !enc[0].Refused || enc[1].Reward.Kind != ItemPart || enc[2].Reward.Part != BitJumpGate {
 		t.Fatalf("encounters %+v", enc)
 	}
@@ -118,7 +178,7 @@ func TestConfirmedTraderEncounters(t *testing.T) {
 	// A second fleet of a served player is kept ("still recovering").
 	e := l.fleet(0, origin, "Tank", 1)
 	cargo(l, e, 6000)
-	if enc := s.Encounters(l.g, TraderContext{}, &script{}); len(enc) != 2 || !enc[1].Recovering {
+	if enc := meetFleets(s, l.g, TraderContext{}, &script{}); len(enc) != 2 || !enc[1].Recovering {
 		t.Errorf("served player: %+v", enc)
 	}
 
@@ -129,7 +189,7 @@ func TestConfirmedTraderEncounters(t *testing.T) {
 	for _, o := range []int{0, 0, 1} {
 		cargo(l, l.fleet(o, origin, "Tank", 1), 5000)
 	}
-	enc = s.Encounters(l.g, TraderContext{}, &script{})
+	enc = meetFleets(s, l.g, TraderContext{}, &script{})
 	if len(l.g.Fleets) != 0 || !s.TraderParts.Owns(0, BitAlienMiner) || s.TraderParts.Owns(1, BitAlienMiner) {
 		t.Errorf("two Traders: %d fleets left, parts %v, %+v", len(l.g.Fleets), s.TraderParts, enc)
 	}
@@ -143,7 +203,7 @@ func TestConfirmedTraderResearch(t *testing.T) {
 	s.TraderParts.give(0, BitJumpGate)
 	fi := l.fleet(0, origin, "Tank", 1)
 	cargo(l, fi, 5000)
-	enc := s.Encounters(l.g, TraderContext{}, &lcg{7})
+	enc := meetFleets(s, l.g, TraderContext{}, &lcg{7})
 	sum := 0
 	for _, v := range l.g.Players[0].Research.Levels {
 		sum += v
@@ -177,20 +237,20 @@ func TestConfirmedTraderMaxedResearch(t *testing.T) {
 	l.g.Players[0].Research.Levels = [engine.NumFields]int{26, 26, 26, 26, 26, 26}
 	fi := l.fleet(0, origin, "Tank", 1)
 	cargo(l, fi, 5000)
-	if enc := s.Encounters(l.g, TraderContext{}, &script{0}); !enc[0].Reward.Nothing {
+	if enc := meetFleets(s, l.g, TraderContext{}, &script{0}); !enc[0].Reward.Nothing {
 		t.Errorf("1/5 branch: %+v", enc[0].Reward)
 	}
 	s.Traders[0].Served = nil
 	fi = l.fleet(0, origin, "Tank", 1)
 	cargo(l, fi, 5000)
-	if enc := s.Encounters(l.g, TraderContext{}, &script{1, 4}); enc[0].Reward.Kind != ItemPart || enc[0].Reward.Part != BitAlienMiner {
+	if enc := meetFleets(s, l.g, TraderContext{}, &script{1, 4}); enc[0].Reward.Kind != ItemPart || enc[0].Reward.Part != BitAlienMiner {
 		t.Errorf("part branch: %+v", enc[0].Reward)
 	}
 	s.Traders[0].Served = nil
 	s.TraderParts[0] = 1<<BitShip - 1
 	fi = l.fleet(0, origin, "Tank", 1)
 	cargo(l, fi, 5000)
-	if enc := s.Encounters(l.g, TraderContext{Humans: 1}, &lcg{3}); enc[0].Reward.Kind != ItemShip || enc[0].Reward.Ships < 1 {
+	if enc := meetFleets(s, l.g, TraderContext{Humans: 1}, &lcg{3}); enc[0].Reward.Kind != ItemShip || enc[0].Reward.Ships < 1 {
 		t.Errorf("all parts owned: %+v", enc[0].Reward)
 	}
 }
@@ -208,7 +268,7 @@ func TestConfirmedTraderShipGift(t *testing.T) {
 	cargo(l, c, 5000)
 	designs := len(l.g.Designs)
 	// Lifeboat (rand(4) = 0), count 1 (rand(3) = 1).
-	enc := s.Encounters(l.g, ctx, &script{0, 1})
+	enc := meetFleets(s, l.g, ctx, &script{0, 1})
 	got := enc[0].Reward
 	if got.Kind != ItemShip || got.Ships != 1 || got.Design != designs || l.g.Designs[got.Design].Hull.Name != "Nubian" {
 		t.Fatalf("human gift %+v", got)
@@ -217,7 +277,8 @@ func TestConfirmedTraderShipGift(t *testing.T) {
 		t.Errorf("computer gift %+v, %d fleets", enc[1].Reward, len(l.g.Fleets))
 	}
 	f := l.g.Fleets[0]
-	if f.Pos != origin || f.Owner != 0 || f.Fuel != l.g.Designs[got.Design].FuelCapacity || f.ID != got.NewFleet {
+	// Fleet numbers count from 1 (as a launch, SL-02).
+	if f.Pos != origin || f.Owner != 0 || f.Number != 1 || f.Fuel != l.g.Designs[got.Design].FuelCapacity || f.ID != got.NewFleet {
 		t.Errorf("gift fleet %+v", f)
 	}
 	// The Scout and Probe fit the Mini Morph; counts add rand(count + 1).
@@ -230,15 +291,58 @@ func TestConfirmedTraderShipGift(t *testing.T) {
 	s.Traders[0].Served = nil
 	h = l.fleet(0, origin, "Tank", 1)
 	cargo(l, h, 5000)
-	if enc := traded(s.Encounters(l.g, ctx, &script{0, 0})); enc.Reward.Design != designs || enc.Reward.Ships != 2 || len(l.g.Designs) != designs+1 {
+	if enc := traded(meetFleets(s, l.g, ctx, &script{0, 0})); enc.Reward.Design != designs || enc.Reward.Ships != 2 || len(l.g.Designs) != designs+1 {
 		t.Errorf("reused design: %+v", enc.Reward)
 	}
 	// Scout, count 2, then + rand(3) = 2: 4 ships.
 	s.Traders[0].Served = nil
 	h = l.fleet(0, origin, "Tank", 1)
 	cargo(l, h, 5000)
-	if enc := traded(s.Encounters(l.g, ctx, &script{1, 0, 0, 2})); enc.Reward.Ships != 4 || l.g.Designs[enc.Reward.Design].Hull.Name != "Mini Morph" {
+	if enc := traded(meetFleets(s, l.g, ctx, &script{1, 0, 0, 2})); enc.Reward.Ships != 4 || l.g.Designs[enc.Reward.Design].Hull.Name != "Mini Morph" {
 		t.Errorf("scout gift %+v", enc.Reward)
+	}
+}
+
+// Gift matching, draw order and no room (OBJECTS.md "Encounters",
+// BINARY-ONLY): only an earlier gift design can match, by loadout, not
+// name; with no free design slot there is no ship and no count draws.
+func TestPredictionTraderGiftDesigns(t *testing.T) {
+	ctx := TraderContext{YearIndex: 50, Humans: 1}
+	lifeboat := func() engine.Design {
+		name, hull, fills := giftDesign(0)
+		d, err := engine.Components().NewDesign(name, hull, fills)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	gift := func(l *lab, s *Space, r *script) Reward {
+		s.Traders[0].Served = nil
+		cargo(l, l.fleet(0, origin, "Tank", 1), 5000)
+		return traded(meetFleets(s, l.g, ctx, r)).Reward
+	}
+	// The player's own identical design does not match.
+	l, s := traderLab(t, TraderItem{Kind: ItemShip})
+	l.g.Designs = append(l.g.Designs, lifeboat())
+	own := len(l.g.Designs) - 1
+	l.g.DesignSlots = append(l.g.DesignSlots, engine.DesignSlot{Owner: 0, Slot: 0, Design: own})
+	r := gift(l, s, &script{0, 1})
+	if r.Design == own || r.Design < 0 {
+		t.Errorf("own design matched: %+v", r)
+	}
+	// A renamed gift design still matches.
+	l.g.Designs[r.Design].Name = "Renamed"
+	if r2 := gift(l, s, &script{0, 1}); r2.Design != r.Design {
+		t.Errorf("renamed gift design not reused: %+v", r2)
+	}
+	// No free slot: only the design draws are made.
+	l, s = traderLab(t, TraderItem{Kind: ItemShip})
+	for slot := range maxShipDesigns {
+		l.g.DesignSlots = append(l.g.DesignSlots, engine.DesignSlot{Owner: 0, Slot: slot, Design: 0})
+	}
+	sc := script{1, 0, 0, 0}
+	if r := gift(l, s, &sc); !r.NoRoom || len(sc) != 2 {
+		t.Errorf("no room: %+v, %d draws left", r, len(sc))
 	}
 }
 
@@ -264,14 +368,14 @@ func TestConfirmedTraderPlanets(t *testing.T) {
 	// TP-001-A: a part the owner lacks; the price is all the surface.
 	l, s := traderLab(t, TraderItem{Kind: ItemPart, Bit: BitAlienMiner})
 	planet(l, 1, engine.Minerals{3000, 2000, 1000}, [engine.NumFields]int{10, 10, 10, 10, 10, 10})
-	if tr := s.PlanetTrades(l.g, ctx, &script{}); len(tr) != 1 || tr[0].Part != BitAlienMiner || l.g.Planets[0].Surface != (engine.Minerals{}) {
+	if tr := meetPlanets(s, l.g, ctx, &script{}); len(tr) != 1 || tr[0].Part != BitAlienMiner || l.g.Planets[0].Surface != (engine.Minerals{}) {
 		t.Errorf("TP-001-A: %+v", tr)
 	}
 	// TP-001-B: research, the lowest field six times; 5,000 kT from
 	// germanium first.
 	l, s = traderLab(t, TraderItem{Kind: ItemResearch})
 	planet(l, 1, engine.Minerals{3000, 2000, 1000}, [engine.NumFields]int{10, 10, 10, 13, 10, 10})
-	tr := s.PlanetTrades(l.g, ctx, &script{})
+	tr := meetPlanets(s, l.g, ctx, &script{})
 	if len(tr) != 1 || l.g.Players[1].Research.Levels != [engine.NumFields]int{12, 11, 11, 13, 11, 11} || l.g.Planets[0].Surface != (engine.Minerals{1000, 0, 0}) {
 		t.Errorf("TP-001-B: %+v levels %v surface %v", tr, l.g.Players[1].Research.Levels, l.g.Planets[0].Surface)
 	}
@@ -279,19 +383,46 @@ func TestConfirmedTraderPlanets(t *testing.T) {
 	l, s = traderLab(t, TraderItem{Kind: ItemPart, Bit: BitAlienMiner})
 	s.TraderParts.give(1, BitAlienMiner)
 	planet(l, 1, engine.Minerals{6000, 0, 0}, [engine.NumFields]int{10, 10, 10, 10, 10, 10})
-	if tr := s.PlanetTrades(l.g, ctx, &script{4, 7}); len(tr) != 1 || tr[0].Part != BitMultiContainedMunition {
+	if tr := meetPlanets(s, l.g, ctx, &script{4, 7}); len(tr) != 1 || tr[0].Part != BitMultiContainedMunition {
 		t.Errorf("TP-002-A: %+v", tr)
 	}
 	// TP-002-B: tech sum ≥ 150, nothing, and the Trader stays available.
 	l, s = traderLab(t, TraderItem{Kind: ItemResearch})
 	planet(l, 1, engine.Minerals{6000, 0, 0}, [engine.NumFields]int{25, 25, 25, 25, 25, 25})
-	if tr := s.PlanetTrades(l.g, ctx, &script{}); len(tr) != 0 || has(s.Traders[0].Served, 1) {
+	if tr := meetPlanets(s, l.g, ctx, &script{}); len(tr) != 0 || has(s.Traders[0].Served, 1) {
 		t.Errorf("TP-002-B: %+v", tr)
+	}
+	// A ship item is part bit 12 for planets (BINARY-ONLY).
+	l, s = traderLab(t, TraderItem{Kind: ItemShip})
+	planet(l, 1, engine.Minerals{6000, 0, 0}, [engine.NumFields]int{10, 10, 10, 10, 10, 10})
+	if tr := meetPlanets(s, l.g, ctx, &script{}); len(tr) != 1 || tr[0].Part != BitShip || !s.TraderParts.Owns(1, BitShip) {
+		t.Errorf("ship item: %+v", tr)
+	}
+	// The scan stops at the first planet more than 100 ly east in x.
+	l, s = traderLab(t, TraderItem{Kind: ItemResearch})
+	l.g.Players[1].Research.Levels = [engine.NumFields]int{10, 10, 10, 10, 10, 10}
+	l.g.Planets = []engine.Planet{
+		{ID: 1, Pos: at(101, 0), Owner: 1, HasStarbase: true, Surface: engine.Minerals{6000, 0, 0}},
+		{ID: 2, Pos: at(0, 50), Owner: 1, HasStarbase: true, Surface: engine.Minerals{6000, 0, 0}},
+	}
+	if tr := meetPlanets(s, l.g, ctx, &script{}); len(tr) != 0 {
+		t.Errorf("scan went past the 100 ly line: %+v", tr)
 	}
 	// Human players' planets never trade (TP-001-C).
 	l, s = traderLab(t, TraderItem{Kind: ItemResearch})
 	planet(l, 0, engine.Minerals{6000, 0, 0}, [engine.NumFields]int{10, 10, 10, 10, 10, 10})
-	if tr := s.PlanetTrades(l.g, ctx, &script{}); len(tr) != 0 {
+	if tr := meetPlanets(s, l.g, ctx, &script{}); len(tr) != 0 {
 		t.Errorf("human planet traded: %+v", tr)
 	}
+}
+
+// meetFleets and meetPlanets run Space.Meet and return one of its results.
+func meetFleets(s *Space, g *engine.Game, ctx TraderContext, rng engine.Rand) []Encounter {
+	enc, _ := s.Meet(g, ctx, rng)
+	return enc
+}
+
+func meetPlanets(s *Space, g *engine.Game, ctx TraderContext, rng engine.Rand) []PlanetTrade {
+	_, tr := s.Meet(g, ctx, rng)
+	return tr
 }

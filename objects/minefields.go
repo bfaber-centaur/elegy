@@ -74,6 +74,11 @@ type Space struct {
 	Traders    []Trader
 	// TraderParts is each player's Trader part word.
 	TraderParts TraderParts
+	// GiftDesigns marks the designs (indices into Game.Designs) that a
+	// Trader ship gift created; only these can match a later gift
+	// (OBJECTS.md "Encounters", matching). The turn engine drops an
+	// index when that design is deleted.
+	GiftDesigns []int
 	// OtherObjects counts the space objects of kinds this package does
 	// not hold yet (packets, salvage). Like wormhole ends and Traders,
 	// they sort after every minefield, count toward

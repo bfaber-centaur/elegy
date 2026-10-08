@@ -2,6 +2,7 @@ package objects
 
 import (
 	"math"
+	"sort"
 
 	"github.com/bfaber-centaur/elegy/engine"
 )
@@ -123,11 +124,10 @@ func itemChance(yearIndex, warp int) int {
 // from year index 40. Every player gets the appearance message. A second
 // Trader can appear while one exists.
 //
-// PLACEHOLDER T1: OBJECTS.md says the part draw is rerolled once for four
-// of the parts, three of which turn into research with 1/2 before year
-// index 120, 150 or 180, but does not say which parts or which limit
-// goes with which. Elegy makes no reroll and no conversion until the spec
-// names them (BINARY-ONLY there).
+// A first part draw of bit 6, 7, 10 or 11 is replaced by a second
+// rand(13), which stands; only that second draw can convert: bit 7 before
+// year index 120, bit 10 before 150 or bit 11 before 180 draws rand(2),
+// and 1 makes the item research (OBJECTS.md "Appearance", BINARY-ONLY).
 func (s *Space) Appear(yearIndex, size int, randomEvents bool, rng engine.Rand) (Trader, bool) {
 	if !randomEvents || yearIndex < 40 {
 		return Trader{}, false
@@ -167,6 +167,15 @@ func (s *Space) Appear(yearIndex, size int, randomEvents bool, rng engine.Rand) 
 		}
 	} else {
 		bit := rng.Intn(NumTraderBits)
+		switch bit {
+		case BitAntiMatterTorpedo, BitMultiContainedMunition, BitGenesisDevice, BitJumpGate:
+			bit = rng.Intn(NumTraderBits)
+			if limit, ok := conversionLimit[bit]; ok && yearIndex < limit && rng.Intn(2) == 1 {
+				t.Item = TraderItem{Kind: ItemResearch}
+				s.Traders = append(s.Traders, t)
+				return t, true
+			}
+		}
 		if bit == BitShip {
 			t.Item = TraderItem{Kind: ItemShip}
 		} else {
@@ -177,23 +186,36 @@ func (s *Space) Appear(yearIndex, size int, randomEvents bool, rng engine.Rand) 
 	return t, true
 }
 
+// conversionLimit is the year index before which a rerolled part turns
+// into research with 1/2 (OBJECTS.md "Appearance", BINARY-ONLY).
+var conversionLimit = map[int]int{BitMultiContainedMunition: 120, BitGenesisDevice: 150, BitJumpGate: 180}
+
 // --- Movement ---
 
-// StepToward moves pos toward dest by move ly (OBJECTS.md "Flight and
-// decay", the packet rule the Trader shares): it arrives when the
-// truncated distance is at most the move; otherwise each coordinate moves
-// by its rounded share.
-//
-// ASSUMPTION T2: the rounded share is dx·move/dist rounded half away from
-// zero, with dist the exact distance.
+// StepToward moves pos toward dest by move ly (OBJECTS.md "Movement",
+// each year's step, shared with packets; BINARY-ONLY in detail): with d
+// the exact distance, it arrives when trunc(d) ≤ move. Otherwise, when
+// d > 0.0001, each axis moves by trunc(Δ·move/d ± 0.5), the sign of Δ,
+// with move/d computed once; a step that lands on dest is an arrival.
 func StepToward(pos, dest engine.Point, move int) (engine.Point, bool) {
 	dx, dy := float64(dest.X-pos.X), float64(dest.Y-pos.Y)
-	dist := math.Hypot(dx, dy)
-	if int(dist) <= move {
+	d := math.Sqrt(dx*dx + dy*dy)
+	if int(d) <= move {
 		return dest, true
 	}
-	f := float64(move) / dist
-	return engine.Point{X: pos.X + int(math.Round(dx*f)), Y: pos.Y + int(math.Round(dy*f))}, false
+	if d <= 0.0001 {
+		return pos, false
+	}
+	f := float64(move) / d
+	share := func(delta float64) int {
+		h := -0.5
+		if delta > 0 {
+			h = 0.5
+		}
+		return int(delta*f + h)
+	}
+	p := engine.Point{X: pos.X + share(dx), Y: pos.Y + share(dy)}
+	return p, p == dest
 }
 
 // TraderMove is what one Trader did in the yearly movement.
@@ -207,30 +229,27 @@ type TraderMove struct {
 }
 
 // MoveTraders moves every Trader before fleets (OBJECTS.md "Movement",
-// BINARY-ONLY except where noted; CONFIRMED OB-023, OB-026, OB-031):
-// below warp 13, with 1/25 its warp rises by 1 and then with 1/3 it picks
-// a new destination; it moves warp² ly like a packet. On arrival it leaves
-// the galaxy if another Trader exists or with 1/2; otherwise it stays at
-// the edge, takes warp max(6, warp − 2) + 1 and a new destination, and
-// does not move further that year. Left Traders are removed.
+// BINARY-ONLY except where noted; CONFIRMED OB-023, OB-026, OB-031): at
+// warp 12 or below it draws rand(25), and 0 raises the warp by 1 and only
+// then draws rand(3), where 0 picks a new destination; it moves warp² ly
+// like a packet at the new warp. On arrival it is removed with no draw if
+// another Trader is present, else rand(2): 0 removes it, 1 keeps it at the
+// edge with warp max(6, warp − 2) + 1 and a new destination, and it does
+// not move further that year.
 //
-// ASSUMPTION T3: the new-destination draw is made only in a year the warp
-// rose (WT: the one new destination came with a rise). ASSUMPTION T4: a
-// new destination lies on the edge opposite the Trader's current edge
-// along the same axis, its free coordinate drawn as at appearance; a
-// Trader not on an edge (after a warp rise in flight) keeps its
-// destination's edge and draws a new free coordinate on it.
+// ASSUMPTION T9: "another Trader present" counts the Traders still in the
+// galaxy at that point, so one removed earlier this year does not count.
 func (s *Space) MoveTraders(size int, rng engine.Rand) []TraderMove {
 	var out []TraderMove
 	var kept []Trader
 	for i := range s.Traders {
 		t := s.Traders[i]
 		mv := TraderMove{Trader: i, From: t.Pos, WarpBefore: t.Warp, DestBefore: t.Dest}
-		if t.Warp < 13 && rng.Intn(25) == 0 {
+		if t.Warp <= 12 && rng.Intn(25) == 0 {
 			t.Warp++
 			mv.WarpRose = true
 			if rng.Intn(3) == 0 {
-				t.Dest = newDestination(t, size, rng)
+				t.Dest = newDestination(size, rng)
 				mv.NewDest = true
 			}
 		}
@@ -238,11 +257,12 @@ func (s *Space) MoveTraders(size int, rng engine.Rand) []TraderMove {
 		t.Pos = pos
 		if arrived {
 			mv.Arrived = true
-			if len(s.Traders) > 1 || rng.Intn(2) == 0 {
+			others := len(kept) + len(s.Traders) - i - 1
+			if others > 0 || rng.Intn(2) == 0 {
 				mv.Left = true
 			} else {
 				t.Warp = max(6, t.Warp-2) + 1
-				t.Dest = newDestination(t, size, rng)
+				t.Dest = newDestination(size, rng)
 				mv.NewDest = true
 			}
 		}
@@ -256,24 +276,21 @@ func (s *Space) MoveTraders(size int, rng engine.Rand) []TraderMove {
 	return out
 }
 
-func newDestination(t Trader, size int, rng engine.Rand) engine.Point {
-	lo, hi := edgeLow(), edgeHigh(size)
+// newDestination draws a Trader's new destination (OBJECTS.md "Movement",
+// new destination; CONFIRMED in part OB-023, draw order BINARY-ONLY):
+// rand(2) picks the side (0 the high edge, 1 the low), then the free
+// coordinate, then rand(2) the axis (0: x is the edge value). Any of the
+// four edges, wherever the Trader is or was heading.
+func newDestination(size int, rng engine.Rand) engine.Point {
+	edge := edgeHigh(size)
+	if rng.Intn(2) == 1 {
+		edge = edgeLow()
+	}
 	c := freeCoord(size, rng)
-	opposite := func(v int) int {
-		if v == lo {
-			return hi
-		}
-		return lo
+	if rng.Intn(2) == 0 {
+		return engine.Point{X: edge, Y: c}
 	}
-	switch {
-	case t.Pos.Y == lo || t.Pos.Y == hi:
-		return engine.Point{X: c, Y: opposite(t.Pos.Y)}
-	case t.Pos.X == lo || t.Pos.X == hi:
-		return engine.Point{X: opposite(t.Pos.X), Y: c}
-	case t.Dest.Y == lo || t.Dest.Y == hi:
-		return engine.Point{X: c, Y: t.Dest.Y}
-	}
-	return engine.Point{X: t.Dest.X, Y: c}
+	return engine.Point{X: c, Y: edge}
 }
 
 // --- Encounters ---
@@ -337,9 +354,8 @@ func lowestField(levels [engine.NumFields]int) int {
 // a uniformly random field (the lowest if that one is at 26), with 1/4
 // the lowest (first on ties); stops once the lowest is at 26. Each step
 // raises a level and leaves accumulated research unchanged.
-//
-// ASSUMPTION T5: each level draws rand(4), then rand(6) only on the 3/4
-// branch.
+// Draws per level: rand(4); 0–2 then rand(6) for the field, 3 none
+// (BINARY-ONLY).
 func researchReward(p *engine.Player, cargo int, rng engine.Rand) Reward {
 	l := min(10, 6+(cargo-minTrade)/1200)
 	t := 0
@@ -392,37 +408,17 @@ func allMaxed(p *engine.Player) bool {
 // (OBJECTS.md "Encounters", BINARY-ONLY). On by default.
 var LegacyTraderLastRedraw = true
 
-// Encounters runs the meetings after battles (OBJECTS.md "Encounters",
-// CONFIRMED OB-004, OB-023, OB-026, OB-030-T, WT-002..WT-004): each
-// Trader in order meets every fleet at exactly its position, in fleet
-// order. Cargo (minerals only) below 5,000 kT: refused. Owner already
-// served by this Trader: refused, fleet kept. Otherwise the owner is
-// marked served, the fleet is consumed (ships and cargo) and the reward
-// follows. A consumed fleet is not offered to another Trader.
-func (s *Space) Encounters(g *engine.Game, ctx TraderContext, rng engine.Rand) []Encounter {
-	var out []Encounter
+// Meet runs each Trader's meetings after battles (OBJECTS.md
+// "Encounters" and "Computer players' planets"): for each Trader in
+// order, its fleets, then computer players' planets (order BINARY-ONLY).
+// Consumed fleets are removed at the end.
+func (s *Space) Meet(g *engine.Game, ctx TraderContext, rng engine.Rand) ([]Encounter, []PlanetTrade) {
+	var enc []Encounter
+	var trades []PlanetTrade
 	consumed := map[int]bool{}
 	for ti := range s.Traders {
-		t := &s.Traders[ti]
-		for _, fi := range fleetOrder(g) {
-			f := &g.Fleets[fi]
-			if consumed[f.ID] || f.Pos != t.Pos {
-				continue
-			}
-			e := Encounter{Trader: ti, Fleet: f.ID, Owner: f.Owner}
-			cargo := f.Cargo.Minerals[engine.Ironium] + f.Cargo.Minerals[engine.Boranium] + f.Cargo.Minerals[engine.Germanium]
-			switch {
-			case cargo < minTrade:
-				e.Refused = true
-			case has(t.Served, f.Owner):
-				e.Recovering = true
-			default:
-				t.Served = mark(t.Served, f.Owner)
-				consumed[f.ID] = true
-				e.Reward = s.reward(g, ctx, t, f.Owner, f.Pos, cargo, rng)
-			}
-			out = append(out, e)
-		}
+		enc = append(enc, s.fleetMeetings(g, ctx, ti, consumed, rng)...)
+		trades = append(trades, s.planetMeetings(g, ctx, ti, rng)...)
 	}
 	if len(consumed) > 0 {
 		kept := g.Fleets[:0]
@@ -432,6 +428,38 @@ func (s *Space) Encounters(g *engine.Game, ctx TraderContext, rng engine.Rand) [
 			}
 		}
 		g.Fleets = kept
+	}
+	return enc, trades
+}
+
+// fleetMeetings is one Trader's meetings with fleets (OBJECTS.md
+// "Encounters", CONFIRMED OB-004, OB-023, OB-026, OB-030-T,
+// WT-002..WT-004): the Trader meets every fleet at exactly its position,
+// in fleet order. Cargo (minerals only) below 5,000 kT: refused. Owner
+// already served by this Trader: refused, fleet kept. Otherwise the owner
+// is marked served, the fleet is consumed (ships and cargo) and the
+// reward follows. A consumed fleet is not offered to another Trader.
+func (s *Space) fleetMeetings(g *engine.Game, ctx TraderContext, ti int, consumed map[int]bool, rng engine.Rand) []Encounter {
+	var out []Encounter
+	t := &s.Traders[ti]
+	for _, fi := range fleetOrder(g) {
+		f := &g.Fleets[fi]
+		if consumed[f.ID] || f.Pos != t.Pos {
+			continue
+		}
+		e := Encounter{Trader: ti, Fleet: f.ID, Owner: f.Owner}
+		cargo := f.Cargo.Minerals[engine.Ironium] + f.Cargo.Minerals[engine.Boranium] + f.Cargo.Minerals[engine.Germanium]
+		switch {
+		case cargo < minTrade:
+			e.Refused = true
+		case has(t.Served, f.Owner):
+			e.Recovering = true
+		default:
+			t.Served = mark(t.Served, f.Owner)
+			consumed[f.ID] = true
+			e.Reward = s.reward(g, ctx, t, f.Owner, f.Pos, cargo, rng)
+		}
+		out = append(out, e)
 	}
 	return out
 }
@@ -508,20 +536,23 @@ const (
 )
 
 // shipGift gives a player the Trader's ship (OBJECTS.md "Encounters",
-// ship; counts after year index 100 and for computer players
-// BINARY-ONLY): computer players get nothing; design Lifeboat with 1/4
-// (1/3 after year index 100), else Scout or Probe evenly; count 2 with
-// 1/3, else 1, plus rand(⌊year index/100⌋ + 1) after year index 100
-// unless the game has a single human player, capped at 5, then for the
-// Scout and Probe + rand(count + 1). A matching design the player has is
-// reused, else it goes into the first empty ship design slot; the new
-// fleet has full fuel at the trade point. No free slot or 512 fleets: no
-// ship.
+// ship; CONFIRMED WT-003 B, WT-004, OB-026; draw order, matching, counts
+// after year index 100, computer players and the new fleet BINARY-ONLY).
+// Computer players draw nothing and get nothing. Then the design:
+// rand(4) (rand(3) after year index 100), 0 the Lifeboat, else rand(2)
+// for the Scout (0) or Probe (1). A matching earlier gift design is
+// reused, else the design goes into the first empty ship design slot. No
+// slot or 512 fleets: no ship and no count draws. Then the count: 2 on
+// rand(3) = 0, else 1; after year index 100, unless the game has a single
+// human player, + rand(⌊year index/100⌋ + 1); capped at 5; then for the
+// Scout and Probe + rand(count + 1). The new fleet takes the owner's
+// lowest unused fleet number counting from 1 (as a launch, CONFIRMED
+// SL-02), battle plan 0, full fuel and no further waypoints, at the trade
+// point.
 //
-// ASSUMPTION T7: a matching design has the same name, hull and parts;
-// the draws are design kind, then the Scout/Probe coin, then the count
-// draws; the new fleet takes the owner's lowest unused fleet number and
-// battle plan 0.
+// ASSUMPTION T10: the traded fleet still holds its fleet number when the
+// gift fleet is numbered (consumed fleets are removed after the
+// meetings).
 func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engine.Point, rng engine.Rand) Reward {
 	r := Reward{Kind: ItemShip, Design: -1, NewFleet: -1}
 	if ctx.Computer != nil && ctx.Computer(owner) {
@@ -535,6 +566,27 @@ func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engin
 	if rng.Intn(lifeboat) != 0 {
 		kind = 1 + rng.Intn(2)
 	}
+	name, hull, fills := giftDesign(kind)
+	d, err := engine.Components().NewDesign(name, hull, fills)
+	if err != nil {
+		panic(err) // the gift designs are fixed and fit their hulls
+	}
+	fleets := 0
+	used := map[int]bool{}
+	for _, f := range g.Fleets {
+		if f.Owner == owner {
+			fleets++
+			used[f.Number] = true
+		}
+	}
+	di := -1
+	if fleets < maxFleets {
+		di = s.giftSlot(g, owner, d)
+	}
+	if di < 0 {
+		r.NoRoom = true
+		return r
+	}
 	n := 1
 	if rng.Intn(3) == 0 {
 		n = 2
@@ -546,25 +598,7 @@ func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engin
 	if kind != 0 {
 		n += rng.Intn(n + 1)
 	}
-	name, hull, fills := giftDesign(kind)
-	d, err := engine.Components().NewDesign(name, hull, fills)
-	if err != nil {
-		panic(err) // the gift designs are fixed and fit their hulls
-	}
-	di := s.giftSlot(g, owner, d)
-	fleets := 0
-	used := map[int]bool{}
-	for _, f := range g.Fleets {
-		if f.Owner == owner {
-			fleets++
-			used[f.Number] = true
-		}
-	}
-	if di < 0 || fleets >= maxFleets {
-		r.NoRoom = true
-		return r
-	}
-	num := 0
+	num := 1
 	for used[num] {
 		num++
 	}
@@ -581,9 +615,9 @@ func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engin
 	return r
 }
 
-// giftSlot returns the design index for a gift design: an identical
-// design in one of the owner's ship slots, else a new design in the first
-// empty ship slot, else -1.
+// giftSlot returns the design index for a gift design: a matching earlier
+// gift design still in one of the owner's ship slots (not rewritten), else
+// a new design, marked as a gift, in the first empty ship slot, else -1.
 func (s *Space) giftSlot(g *engine.Game, owner int, d engine.Design) int {
 	taken := map[int]bool{}
 	for _, ds := range g.DesignSlots {
@@ -591,7 +625,7 @@ func (s *Space) giftSlot(g *engine.Game, owner int, d engine.Design) int {
 			continue
 		}
 		taken[ds.Slot] = true
-		if ds.Design >= 0 && ds.Design < len(g.Designs) && sameDesign(g.Designs[ds.Design], d) {
+		if ds.Design >= 0 && ds.Design < len(g.Designs) && s.isGift(ds.Design) && sameLoadout(g.Designs[ds.Design], d) {
 			return ds.Design
 		}
 	}
@@ -600,18 +634,32 @@ func (s *Space) giftSlot(g *engine.Game, owner int, d engine.Design) int {
 			g.Designs = append(g.Designs, d)
 			di := len(g.Designs) - 1
 			g.DesignSlots = append(g.DesignSlots, engine.DesignSlot{Owner: owner, Slot: slot, Design: di})
+			s.GiftDesigns = append(s.GiftDesigns, di)
 			return di
 		}
 	}
 	return -1
 }
 
-func sameDesign(a, b engine.Design) bool {
-	if a.Name != b.Name || a.Hull.Name != b.Hull.Name || len(a.Slots) != len(b.Slots) {
+func (s *Space) isGift(di int) bool {
+	for _, x := range s.GiftDesigns {
+		if x == di {
+			return true
+		}
+	}
+	return false
+}
+
+// sameLoadout is the gift match (OBJECTS.md "Encounters", matching,
+// BINARY-ONLY): the same hull, number of slots and slot counts, and the
+// same part in every non-empty slot; the name is not compared.
+func sameLoadout(a, b engine.Design) bool {
+	if a.Hull.Name != b.Hull.Name || len(a.Slots) != len(b.Slots) {
 		return false
 	}
 	for i := range a.Slots {
-		if a.Slots[i].Part.Name != b.Slots[i].Part.Name || a.Slots[i].Count != b.Slots[i].Count {
+		x, y := a.Slots[i], b.Slots[i]
+		if x.Count != y.Count || (x.Count > 0 && x.Part.Name != y.Part.Name) {
 			return false
 		}
 	}
@@ -629,90 +677,98 @@ type PlanetTrade struct {
 	Price          engine.Minerals
 }
 
-// PlanetTrades runs the Trader's trades with computer players' planets
-// after the fleets (OBJECTS.md "Computer players' planets", CONFIRMED in
-// part TP-001, TP-002, O-53): only Harder and Expert computer players
-// (Standard and Easy excluded, BINARY-ONLY), a planet with a starbase
-// within 100 ly (BINARY-ONLY) whose owner this Trader has not served,
-// with at least 5,000 kT of surface minerals, 3,500 for Harder (CONFIRMED
-// O-53; the exact edge NOT RUN).
-//   - Part item: an owner lacking the part gains it; one owning it draws a
-//     random part it lacks, with up to 50 redraws (bit 12 counts and gives
-//     only the bit). Price: all the surface minerals.
-//   - Research item, or no part found: an owner whose tech sums to 150 or
+// planetMeetings is one Trader's trades with computer players' planets,
+// after its fleets (OBJECTS.md "Computer players' planets", CONFIRMED in
+// part TP-001, TP-002, O-53; order, range and ship items BINARY-ONLY).
+// Planets go in planet-number order, and the scan stops at the first
+// planet more than 100 ly east of the Trader in x. A planet trades when
+// d² ≤ 10,000, it has a starbase, its owner is a Harder or Expert
+// computer player (Standard and Easy excluded, BINARY-ONLY) this Trader
+// has not served, and its surface minerals reach 5,000 kT, 3,500 for
+// Harder (CONFIRMED O-53; the exact edge NOT RUN).
+//   - Part item, and a ship item as part bit 12: an owner lacking the bit
+//     gains it; one owning it redraws rand(13) up to 50 times for a bit it
+//     lacks (bit 12 gives only the bit). Price: all the surface minerals.
+//   - Research item, or no bit found: an owner whose tech sums to 150 or
 //     more gets nothing and stays available; otherwise the lowest field
-//     gains a level six times. Price: 5,000 kT (3,500 for Harder, CONFIRMED O-53), from
+//     gains a level six times. Price: 5,000 kT (3,500 for Harder), from
 //     germanium, then boranium, then ironium.
 //
 // The owner is marked served; no message is sent. Human players' planets
 // never trade.
-//
-// ASSUMPTION T8: planets are visited in planet order; a ship item is
-// treated as research; "within 100 ly" is d² ≤ 10,000.
-func (s *Space) PlanetTrades(g *engine.Game, ctx TraderContext, rng engine.Rand) []PlanetTrade {
+func (s *Space) planetMeetings(g *engine.Game, ctx TraderContext, ti int, rng engine.Rand) []PlanetTrade {
 	var out []PlanetTrade
 	if ctx.Computer == nil || ctx.Level == nil {
 		return out
 	}
-	for ti := range s.Traders {
-		t := &s.Traders[ti]
-		for pi := range g.Planets {
-			pl := &g.Planets[pi]
-			o := pl.Owner
-			if o < 0 || o >= len(g.Players) || !ctx.Computer(o) || has(t.Served, o) || !pl.HasStarbase || d2(pl.Pos, t.Pos) > 10000 {
-				continue
-			}
-			lv := ctx.Level(o)
-			if lv < 2 {
-				continue
-			}
-			need := 5000
-			if lv == 2 {
-				need = 3500
-			}
-			surface := pl.Surface[engine.Ironium] + pl.Surface[engine.Boranium] + pl.Surface[engine.Germanium]
-			if surface < need {
-				continue
-			}
-			tr := PlanetTrade{Trader: ti, Planet: pi, Owner: o, Part: -1}
-			if t.Item.Kind == ItemPart {
-				bit := t.Item.Bit
-				for i := 0; i < 50 && s.TraderParts.Owns(o, bit); i++ {
-					bit = rng.Intn(NumTraderBits)
-				}
-				if !s.TraderParts.Owns(o, bit) {
-					s.TraderParts.give(o, bit)
-					tr.Part = bit
-					tr.Price = pl.Surface
-					pl.Surface = engine.Minerals{}
-					t.Served = mark(t.Served, o)
-					out = append(out, tr)
-					continue
-				}
-			}
-			p := &g.Players[o]
-			sum := 0
-			for _, v := range p.Research.Levels {
-				sum += v
-			}
-			if sum >= 150 {
-				continue
-			}
-			for range 6 {
-				f := lowestField(p.Research.Levels)
-				p.Research.Levels[f]++
-				tr.Fields = append(tr.Fields, f)
-			}
-			left := need
-			for _, m := range []int{engine.Germanium, engine.Boranium, engine.Ironium} {
-				take := min(left, pl.Surface[m])
-				pl.Surface[m] -= take
-				tr.Price[m] = take
-				left -= take
-			}
-			t.Served = mark(t.Served, o)
-			out = append(out, tr)
+	t := &s.Traders[ti]
+	order := make([]int, len(g.Planets))
+	for i := range order {
+		order[i] = i
+	}
+	sort.SliceStable(order, func(i, j int) bool { return g.Planets[order[i]].ID < g.Planets[order[j]].ID })
+	for _, pi := range order {
+		pl := &g.Planets[pi]
+		if pl.Pos.X-t.Pos.X > 100 {
+			break
 		}
+		o := pl.Owner
+		if o < 0 || o >= len(g.Players) || !ctx.Computer(o) || has(t.Served, o) || !pl.HasStarbase || d2(pl.Pos, t.Pos) > 10000 {
+			continue
+		}
+		lv := ctx.Level(o)
+		if lv < 2 {
+			continue
+		}
+		need := 5000
+		if lv == 2 {
+			need = 3500
+		}
+		surface := pl.Surface[engine.Ironium] + pl.Surface[engine.Boranium] + pl.Surface[engine.Germanium]
+		if surface < need {
+			continue
+		}
+		tr := PlanetTrade{Trader: ti, Planet: pi, Owner: o, Part: -1}
+		if t.Item.Kind != ItemResearch {
+			bit := BitShip
+			if t.Item.Kind == ItemPart {
+				bit = t.Item.Bit
+			}
+			for i := 0; i < 50 && s.TraderParts.Owns(o, bit); i++ {
+				bit = rng.Intn(NumTraderBits)
+			}
+			if !s.TraderParts.Owns(o, bit) {
+				s.TraderParts.give(o, bit)
+				tr.Part = bit
+				tr.Price = pl.Surface
+				pl.Surface = engine.Minerals{}
+				t.Served = mark(t.Served, o)
+				out = append(out, tr)
+				continue
+			}
+		}
+		p := &g.Players[o]
+		sum := 0
+		for _, v := range p.Research.Levels {
+			sum += v
+		}
+		if sum >= 150 {
+			continue
+		}
+		for range 6 {
+			f := lowestField(p.Research.Levels)
+			p.Research.Levels[f]++
+			tr.Fields = append(tr.Fields, f)
+		}
+		left := need
+		for _, m := range []int{engine.Germanium, engine.Boranium, engine.Ironium} {
+			take := min(left, pl.Surface[m])
+			pl.Surface[m] -= take
+			tr.Price[m] = take
+			left -= take
+		}
+		t.Served = mark(t.Served, o)
+		out = append(out, tr)
 	}
 	return out
 }
