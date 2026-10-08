@@ -16,6 +16,7 @@ type shipSlot struct {
 	name    string
 	created int // calendar year; FirstYear (year index 0) for never
 	picture int
+	fills   []engine.SlotFill // set for a design stored this turn
 }
 
 // shipDesigns is the planner's picture of its ship design slots and the
@@ -98,7 +99,7 @@ func (s *shipDesigns) store(k int, hull string, classes []int) bool {
 	s.slots[k] = old // counts for the picture and name
 	pic := s.picture(hull)
 	name := s.name(hull)
-	s.slots[k] = shipSlot{present: true, hull: hull, name: name, created: s.year, picture: pic}
+	s.slots[k] = shipSlot{present: true, hull: hull, name: name, created: s.year, picture: pic, fills: fills}
 	s.res.Orders = append(s.res.Orders, engine.DesignOrder{Slot: k, Name: name, Hull: hull, Fills: fills})
 	s.res.Designs = append(s.res.Designs, NewDesign{Slot: k, Name: name, Picture: pic, Created: s.year})
 	return true
@@ -209,4 +210,28 @@ func (s *shipDesigns) ageGroup(slots []int, l int, alive map[int]int, obsolete m
 		}
 	}
 	return newest, min(ships, 32000)
+}
+
+// syncView brings the planner's View up to date with this turn's design
+// orders, so later steps (production, costs) see the slots as the
+// engine will once the orders apply: deleted slots are gone and stored
+// designs are present, with no design index yet (no ship has one).
+func (s *shipDesigns) syncView(v *View) {
+	var ships []Design
+	for _, d := range v.Ships {
+		if d.Slot >= 0 && d.Slot < len(s.slots) && s.slots[d.Slot].present && s.slots[d.Slot].fills == nil {
+			ships = append(ships, d)
+		}
+	}
+	for k, sl := range s.slots {
+		if !sl.present || sl.fills == nil {
+			continue
+		}
+		d, err := engine.Components().ReadDesign(sl.name, sl.hull, sl.fills, s.race, s.lvls, nil)
+		if err != nil {
+			continue
+		}
+		ships = append(ships, Design{Slot: k, Index: -1, Design: d, Created: sl.created, Picture: sl.picture})
+	}
+	v.Ships = ships
 }

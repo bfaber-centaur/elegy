@@ -32,6 +32,9 @@ type View struct {
 	// report of, this year or in its planet history, by planet id. A
 	// planet absent from Known has never been seen.
 	Known map[int]engine.PlanetReport
+	// Seen marks the planets reported this year (the rest of Known comes
+	// from the planet history).
+	Seen map[int]bool
 	// Others are other players' fleets seen this year.
 	Others []engine.FleetSighting
 	// Wormholes are the wormhole ends the player knows of.

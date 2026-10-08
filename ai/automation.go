@@ -1,6 +1,10 @@
 package ai
 
-import "github.com/bfaber-centaur/elegy/engine"
+import (
+	"slices"
+
+	"github.com/bfaber-centaur/elegy/engine"
+)
 
 // automation is AI.md §7 "Planet automation" (BINARY-ONLY) after a
 // personality's own work, for Robotoid, Rototill and Cybertron. order is
@@ -8,8 +12,8 @@ import "github.com/bfaber-centaur/elegy/engine"
 // planets the personality's own pass marked, budget the research budget
 // of this turn's research order.
 //
-// Implemented: step 2 (starbases for hubs; Cybertron's own rule is
-// separate), step 3 (starbase upgrade and defenses; the planetary scanner
+// Implemented: step 2 (starbases for hubs; Cybertron's own rule,
+// cybertron.md §4.3, instead), step 3 (starbase upgrade and defenses; the planetary scanner
 // step queues nothing in J-RC3; packet flings need a mass driver of warp
 // 10, which none of the three personalities' starbases has outside PP,
 // and Cybertron is excluded; terraforming is never run by Robotoid or
@@ -30,7 +34,9 @@ type automation struct {
 }
 
 func (a *automation) run() {
-	if a.pers != Cybertron {
+	if a.pers == Cybertron {
+		a.cybertronStarbases()
+	} else {
 		a.hubStarbases()
 	}
 	for _, id := range a.order {
@@ -86,6 +92,33 @@ func (a *automation) hubStarbases() {
 			continue
 		}
 		a.q.add(p, engine.QueueItem{Kind: engine.ItemStarbase, Slot: a.currentStation(), Count: 1}, false)
+	}
+}
+
+// cybertronStarbases is Cybertron's step 2 (cybertron.md §4.3, MEASURED
+// AI-20): every own planet in planet-id order with no starbase, value
+// above 14 and at least 50,000 colonists (after this turn's fleet pass)
+// gets, unless a starbase is already queued, ×1 of the current Space
+// Station design when every mineral concentration is above 15, else of the
+// current Orbital Fort design.
+func (a *automation) cybertronStarbases() {
+	ids := make([]int, 0, len(a.v.Planets))
+	for _, p := range a.v.Planets {
+		ids = append(ids, p.ID)
+	}
+	slices.Sort(ids)
+	for _, id := range ids {
+		p := a.v.ownPlanet(id)
+		if p.HasStarbase || engine.Habitability(a.v.Self.Race, p.Env) <= 14 || p.Population*100 < 50000 || a.starbaseQueued(p) {
+			continue
+		}
+		slot := a.currentStation()
+		for _, d := range p.Deposits {
+			if d.Concentration <= 15 {
+				slot = a.currentFort()
+			}
+		}
+		a.q.add(p, engine.QueueItem{Kind: engine.ItemStarbase, Slot: slot, Count: 1}, false)
 	}
 }
 
