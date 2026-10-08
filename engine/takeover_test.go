@@ -748,6 +748,34 @@ func TestPredictionEmptiedPlanet(t *testing.T) {
 	}
 }
 
+func TestMeasuredEmptyDefaultQueueNoQueue(t *testing.T) {
+	// WU-CAP (MEASURED): a capture by a player with no default queue left
+	// the planet without a queue, so its resources all went to research.
+	// An Alternate Reality default of three items is skipped whole, the
+	// same way (inferred: KERNEL.md says a zero-item queue does not arise
+	// in play).
+	for _, tt := range []struct {
+		prt   PRT
+		queue []QueueItem
+	}{
+		{PRTJackOfAllTrades, nil},
+		{PRTAlternateReality, []QueueItem{{Kind: ItemMine, Count: 1}, {Kind: ItemFactory, Count: 2}, {Kind: ItemDefenses, Count: 3}}},
+	} {
+		l := newTKLab(t, 3)
+		l.g.Players[0].Race.PRT = tt.prt
+		l.g.Players[0].DefaultQueue = tt.queue
+		pi := l.planet(NoOwner, 0, 0)
+		l.g.newColony(pi, 0, 25)
+		if p := l.g.Planets[pi]; p.HasQueue || len(p.Queue) != 0 {
+			t.Errorf("PRT %v: queue %v %v, want none", tt.prt, p.HasQueue, p.Queue)
+		}
+		res := 100
+		if r, _ := l.g.PlanetProduction(pi, ProductionInput{Resources: res, ResearchBudget: 15}); r != res {
+			t.Errorf("PRT %v: research %d, want all %d", tt.prt, r, res)
+		}
+	}
+}
+
 func TestPredictionMineLossClamp(t *testing.T) {
 	// #34: I = 1 on one factory, one defense and one mine. Both
 	// draws round up, so 2 installations die, and the rest (−1) takes no
@@ -797,5 +825,68 @@ func TestPredictionDeepSpaceUnload(t *testing.T) {
 	f := l.g.Fleets[0]
 	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused {
 		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal", f.Cargo, l.g.Salvage, ev)
+	}
+}
+
+func TestConfirmedAlternateRealityColonyStarbase(t *testing.T) {
+	// TAKEOVER.md "Colonization" (CONFIRMED T-26, T-33): an Alternate
+	// Reality colony gets a starbase of the owner's first starbase design,
+	// here the Space Station in slot 1 rather than the Orbital Fort in
+	// slot 3 (lowest occupied slot, ASSUMPTION T3). With no starbase
+	// design, none (UNRESOLVED: TAKEOVER.md does not say).
+	l := newTKLab(t, 3)
+	l.g.Players[0].Race.PRT = PRTAlternateReality
+	fort := l.design("Orbital Fort")
+	station := l.design("Space Station")
+	l.g.DesignSlots = append(l.g.DesignSlots,
+		DesignSlot{Owner: 0, Starbase: true, Slot: 3, Design: fort},
+		DesignSlot{Owner: 1, Starbase: true, Slot: 0, Design: fort},
+		DesignSlot{Owner: 0, Starbase: true, Slot: 1, Design: station})
+	pi := l.planet(NoOwner, 0, 0)
+	l.g.newColony(pi, 0, 25)
+	p := l.g.Planets[pi]
+	if !p.HasStarbase || p.StarbaseDesign != station || p.StarbaseHull != l.g.Designs[station].Hull.StarbaseNumber || p.StarbaseDamage != 0 {
+		t.Errorf("starbase %v design %d hull %d damage %d, want the Space Station", p.HasStarbase, p.StarbaseDesign, p.StarbaseHull, p.StarbaseDamage)
+	}
+	if col := NewColony(&p, &l.g.Players[0]); col.MaxPop == 0 {
+		t.Error("the colony's maximum population is 0")
+	}
+
+	l = newTKLab(t, 3)
+	l.g.Players[0].Race.PRT = PRTAlternateReality
+	pi = l.planet(NoOwner, 0, 0)
+	l.g.newColony(pi, 0, 25)
+	if p := l.g.Planets[pi]; p.HasStarbase || p.StarbaseHull != 0 {
+		t.Errorf("no design: starbase %v hull %d, want none", p.HasStarbase, p.StarbaseHull)
+	}
+}
+
+func TestAlternateRealityColonyGeneratesYears(t *testing.T) {
+	// The lane D audit's halt: an Alternate Reality colony ship colonizes
+	// a habitable planet, and the following years must generate under
+	// every ruleset, also the one that stops on a maximum population of 0
+	// (RULESET.md). The colony gets its starbase (CONFIRMED T-26, T-33),
+	// so its maximum population is not 0 and it keeps its population.
+	for _, rules := range Rulesets() {
+		l := newTKLab(t, 3)
+		l.g.Players[0].Race.PRT = PRTAlternateReality
+		fort := l.design("Orbital Fort")
+		l.g.DesignSlots = append(l.g.DesignSlots, DesignSlot{Owner: 0, Starbase: true, Slot: 0, Design: fort})
+		pi := l.planet(NoOwner, 0, 0)
+		fi := l.fleet(0, pi, 0, Stack{Design: l.colonyShip(), Count: 1})
+		l.g.Fleets[fi].Cargo.Colonists = 25
+		l.g.Fleets[fi].Task = colonizeTask
+		g := l.g
+		g.Rules = rules
+		for y := 1; y <= 4; y++ {
+			r, err := GenerateTurn(g, nil, &seqRand{})
+			if err != nil {
+				t.Fatalf("%s v%d year %d: %v", rules.ID, rules.Version, y, err)
+			}
+			g = r.Game
+		}
+		if p := g.Planets[pi]; p.Owner != 0 || p.Population <= 0 || !p.HasStarbase {
+			t.Errorf("%s v%d: owner %d population %d starbase %v, want a living colony with its starbase", rules.ID, rules.Version, p.Owner, p.Population, p.HasStarbase)
+		}
 	}
 }
