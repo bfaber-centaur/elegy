@@ -39,7 +39,7 @@ type testBattle struct {
 }
 
 func newTestBattle(rng Rand, designs []Design, toks ...*token) testBattle {
-	g := &Game{Players: make([]Player, 2), Designs: designs}
+	g := &Game{Rules: ElegyRules(), Players: make([]Player, 2), Designs: designs}
 	sets := attackSets{{1: true}, {0: true}}
 	b := &battle{g: g, rng: rng, loc: location{planet: -1}, sets: sets, players: []int{0, 1}, involved: 2,
 		tokens: toks, killed: map[int]bool{}, in: map[int]bool{0: true, 1: true}}
@@ -58,6 +58,7 @@ func TestConfirmedStartSquares(t *testing.T) {
 	// CB-001..CB-019: player 0 on (1,4), player 1 on (8,5).
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
 	g := &Game{
+		Rules: ElegyRules(),
 		Players: []Player{
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationFriend, RelationEnemy}},
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationEnemy, RelationFriend}},
@@ -149,6 +150,7 @@ func TestConfirmedEnergyDampener(t *testing.T) {
 	damp.Slots = append(append([]Slot(nil), d.Slots...), Slot{Part{Dampener: true}, 1})
 	designs := []Design{d, damp}
 	g := &Game{
+		Rules: ElegyRules(),
 		Players: []Player{
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEveryone}}},
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEveryone}}},
@@ -454,6 +456,7 @@ func TestConfirmedRepair(t *testing.T) {
 	sfx := testDesign(Hull{Name: "Super-Fuel Xport", FuelTransport: true, RepairBonus: 50}, 10)
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), ft, sfx}
 	g := &Game{
+		Rules:   ElegyRules(),
 		Players: make([]Player, 2),
 		Designs: d,
 		Planets: []Planet{
@@ -492,7 +495,8 @@ func combatLabGame(defender Design, attackers, defenders int) Game {
 	plan := []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Secondary: TargetAny, Attack: AttackEnemies}}
 	race := pgRace()
 	return Game{
-		Year: 2400,
+		Rules: ElegyRules(),
+		Year:  2400,
 		Players: []Player{
 			{Race: race, Plans: plan, Relations: []Relation{RelationFriend, RelationEnemy}},
 			{Race: race, Plans: plan, Relations: []Relation{RelationEnemy, RelationFriend}},
@@ -546,6 +550,7 @@ func TestConfirmedOnlyFleetsStartBattles(t *testing.T) {
 	station := testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100, Slot{tLaser, 8})
 	visitor := testDesign(tFrigate, 10)
 	g := &Game{
+		Rules: ElegyRules(),
 		Players: []Player{
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEveryone}}, Relations: []Relation{RelationFriend, RelationEnemy}},
 			{Relations: []Relation{RelationEnemy, RelationFriend}},
@@ -580,6 +585,7 @@ func TestConfirmedStarbaseJoinsWithPlan0(t *testing.T) {
 		{bare, AttackEnemies, false},
 	} {
 		g := &Game{
+			Rules: ElegyRules(),
 			Players: []Player{
 				{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: c.attack, Player: 1}}, Relations: []Relation{RelationFriend, RelationEnemy}},
 				{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationNeutral, RelationFriend}},
@@ -599,6 +605,10 @@ func TestConfirmedStarbaseIsArmedTarget(t *testing.T) {
 	// CB-011..013 S4/S5 (Q-4), LEGACY BUG: an unarmed station matches
 	// "armed" and "any", not "unarmed".
 	sb := tokenValues(testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100), Race{}, true, Cost{})
+	if sb.matches(TargetArmed) {
+		t.Errorf("without StarbaseArmedClass an unarmed station is armed")
+	}
+	sb.class = starbaseClass(sb, true)
 	if sb.matches(TargetUnarmed) || !sb.matches(TargetArmed) || !sb.matches(TargetAny) {
 		t.Errorf("unarmed station class %d", sb.class)
 	}
@@ -644,7 +654,7 @@ func TestConfirmedTokenCap(t *testing.T) {
 	// 139..14 (254 stacks); the second pass adds player 1's fleet 12.
 	// Player 0's 1..13 and player 1's 0..11 sit out.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
-	g := &Game{Players: make([]Player, 2), Designs: d}
+	g := &Game{Rules: ElegyRules(), Players: make([]Player, 2), Designs: d}
 	var fleets []int
 	for o := range 2 {
 		for id := range 140 {
@@ -678,7 +688,7 @@ func TestPredictionTokenCapStarbase(t *testing.T) {
 	// A starbase counts toward the total, not toward its owner's quota;
 	// the second pass skips a fleet that no longer fits and goes on.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
-	g := &Game{Players: make([]Player, 2), Designs: d}
+	g := &Game{Rules: ElegyRules(), Players: make([]Player, 2), Designs: d}
 	var fleets []int
 	add := func(o, id, stacks int) {
 		f := Fleet{ID: id, Owner: o}
@@ -721,13 +731,13 @@ func TestPredictionTokenCapStarbase(t *testing.T) {
 func TestPredictionLegacyPlan0Recipient(t *testing.T) {
 	// X is player 0 after a battle, else the owner of the previous
 	// location's last fleet; at the first location it has no effect.
-	if x, ok := legacyPlan0Recipient(1, locationHistory{any: true, battle: true, lastOwner: 1}); !ok || x != 0 {
+	if x, ok := legacyPlan0Recipient(1, locationHistory{any: true, battle: true, lastOwner: 1}, true); !ok || x != 0 {
 		t.Errorf("after a battle: %d %v, want 0", x, ok)
 	}
-	if x, ok := legacyPlan0Recipient(0, locationHistory{any: true, lastOwner: 1}); !ok || x != 1 {
+	if x, ok := legacyPlan0Recipient(0, locationHistory{any: true, lastOwner: 1}, true); !ok || x != 1 {
 		t.Errorf("after no battle: %d %v, want 1", x, ok)
 	}
-	if _, ok := legacyPlan0Recipient(0, locationHistory{}); ok {
+	if _, ok := legacyPlan0Recipient(0, locationHistory{}, true); ok {
 		t.Error("first location: want no recipient")
 	}
 }
@@ -740,6 +750,7 @@ func plan0Game(attack AttackWho, hauler bool) *Game {
 	station := testDesign(Hull{Name: "Space Station", Armor: 500, Initiative: 14, Starbase: true}, 100, Slot{tLaser, 8})
 	frig := testDesign(tFrigate, 10, Slot{tLaser, 1})
 	g := &Game{
+		Rules: ElegyRules(),
 		Players: []Player{
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: attack, Player: 1}}, Relations: []Relation{RelationFriend, RelationEnemy}},
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Secondary: TargetAny, Attack: AttackEnemies}}, Relations: []Relation{RelationNeutral, RelationFriend}},
@@ -1003,6 +1014,7 @@ func TestPredictionDumpCargo(t *testing.T) {
 	fr.CargoCapacity = 100
 	plan := []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies, DumpCargo: true}}
 	g := &Game{
+		Rules:   ElegyRules(),
 		Players: []Player{{Plans: plan}, {Plans: plan}},
 		Designs: []Design{fr},
 		Fleets: []Fleet{{ID: 1, Owner: 0, Fuel: 50, Cargo: Cargo{Minerals: Minerals{40, 0, 3}, Colonists: 5},
@@ -1048,6 +1060,7 @@ func TestPredictionRepairOthers(t *testing.T) {
 	// repair after fighting.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1})}
 	g := &Game{
+		Rules:   ElegyRules(),
 		Players: make([]Player, 3),
 		Designs: d,
 		Planets: []Planet{
@@ -1166,6 +1179,7 @@ func TestPredictionPlan0AbsentPlayer(t *testing.T) {
 	station := testDesign(Hull{Name: "Space Station", Armor: 500, Initiative: 14, Starbase: true}, 100, Slot{tLaser, 8})
 	frig := testDesign(tFrigate, 10, Slot{tLaser, 1})
 	g := &Game{
+		Rules: ElegyRules(),
 		Players: []Player{
 			{},
 			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 2}}},

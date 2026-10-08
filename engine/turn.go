@@ -9,15 +9,16 @@ import (
 // ErrNilRand is returned by GenerateTurn when no random source is given.
 var ErrNilRand = errors.New("engine: GenerateTurn needs a non-nil Rand")
 
-// ZeroMaxPopulationError is returned by GenerateTurn for an Alternate
-// Reality planet with population, habitability ≥ 0 and no starbase, whose
-// maximum population is 0.
+// ZeroMaxPopulationError is returned by GenerateTurn, under a ruleset with
+// Legacy.ZeroMaxPopulationStop, for an Alternate Reality planet with
+// population, habitability ≥ 0 and no starbase, whose maximum population
+// is 0.
 //
-// ELEGY DECISION, not original behavior: the original stops with an
-// integer divide by zero and generates no year (KERNEL.md "Maximum
-// population", CONFIRMED KX-001 Z1, LEGACY BUG). Elegy refuses the year
-// with this error before changing anything. To choose another rule,
-// change checkGenerable (and the population rule) only.
+// The original stops with an integer divide by zero and generates no year
+// (KERNEL.md "Maximum population", CONFIRMED KX-001 Z1, LEGACY BUG). With
+// the switch, Elegy refuses the year with this error before changing
+// anything, the closest it comes to the original. Without it (the Elegy
+// ruleset) the year is generated (crowdingPermille).
 type ZeroMaxPopulationError struct {
 	Planet int // planet id
 }
@@ -26,7 +27,7 @@ func (e *ZeroMaxPopulationError) Error() string {
 	return fmt.Sprintf("engine: planet %d has population and a maximum population of 0 (Alternate Reality without a starbase)", e.Planet)
 }
 
-// checkGenerable reports a state the year cannot be generated from. Nothing
+// checkGenerable reports a state the original cannot generate from. Nothing
 // in movement or production changes a planet's maximum population, so the
 // check runs once, before the year starts.
 func checkGenerable(g *Game) error {
@@ -224,7 +225,8 @@ type TurnResult struct {
 // rng must not be nil: the turn's random draws (mining's +1, random events, battles) come only from
 // it, and there is deliberately no hidden default generator. A nil rng
 // returns ErrNilRand. A state the original cannot generate from returns
-// a *ZeroMaxPopulationError (see checkGenerable).
+// a *ZeroMaxPopulationError (see checkGenerable) when the ruleset says to
+// stop there.
 //
 // game is not modified; the returned Game is independent of it.
 func GenerateTurn(
@@ -238,7 +240,7 @@ func GenerateTurn(
 	if err := game.Rules.Validate(); err != nil {
 		return TurnResult{}, err
 	}
-	if err := checkGenerable(&game); err != nil {
+	if err := checkGenerable(&game); game.Rules.Legacy.ZeroMaxPopulationStop && err != nil {
 		return TurnResult{}, err
 	}
 	g := game.clone()

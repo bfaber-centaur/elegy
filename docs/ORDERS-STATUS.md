@@ -15,8 +15,8 @@ and the design read are engine functions an order layer will call:
 | Merge with Fleet task: ships add per design, cargo and fuel into the target, which keeps its id | `loadPass`, `mergeTask`, `absorb` | CONFIRMED (FO-01..07) | `TestConfirmedMergeTask` |
 | A target elsewhere refuses the task and clears it | `mergeTask` | CONFIRMED (FO) | `TestConfirmedMergeTask` |
 | Where the task runs: both load passes, after the drops (before movement) and after the second research check (after movement), fleet order | `GenerateTurn`, `loadPass` | BINARY-ONLY (TAKEOVER.md) | `TestConfirmedMergeTask` |
-| Damage on a merge (`ceil(100·ΣD/n)`; one damaged stack keeps its units; two divide by all ships) | `mergeDamage` (switch `legacyMergeDilution`, on) | LEGACY BUG, CONFIRMED (FO, seven cases) | `TestConfirmedMergeDamageDilution` (both settings) |
-| No ship-count cap on the task; 32768 or more leaves no ships | `absorb` (switch `legacyMergeOverflow`, off) | LEGACY BUG, CONFIRMED (FO) | `TestConfirmedMergeTaskOverflow` (both settings) |
+| Damage on a merge (`ceil(100·ΣD/n)`; one damaged stack keeps its units; two divide by all ships) | `mergeDamage` (ruleset switch `Legacy.MergeDilution`, on in `elegy`) | LEGACY BUG, CONFIRMED (FO, seven cases) | `TestConfirmedMergeDamageDilution` (both settings) |
+| No ship-count cap on the task; 32768 or more leaves no ships | `absorb` (ruleset switch `Legacy.MergeOverflow`, off in `elegy`) | LEGACY BUG, CONFIRMED (FO) | `TestConfirmedMergeTaskOverflow` (both settings) |
 | Elegy's chosen rule: the task takes the merge order's cap | `absorb` | Elegy decision, below | `TestConfirmedMergeTaskOverflow` |
 | Merge order: co-located fleets of the owner; a stack passing 32767 becomes 32766, the rest lost, the order not refused | `MergeFleets`, `absorb` | Elegy's chosen rule, unconfirmed (ORDERS.md "Merge order": never reached by a legal order; the exchange path's 32765 is MEASURED CO-06) | `TestPredictionMergeOrder` |
 | Merge order damage: percentage over all ships, units over the damaged ships only, rounded down (no dilution) | `MergeFleets`, `mergeDamage` (`mergeOrderDamaged`) | CONFIRMED (CO-05, CO-05b, CO-05c) | `TestConfirmedMergeOrderDamage` |
@@ -25,7 +25,7 @@ and the design read are engine functions an order layer will call:
 | Design read: parts above research tech dropped; mass and capacities from the parts kept | `ReadDesign` | BINARY-ONLY | `TestPredictionDesignTechStrip` |
 | Hull not entitled: the original keeps it; Elegy's chosen rule rejects the design | `readDesign` | BINARY-ONLY, chosen rule | `TestPredictionDesignHullAndEngine` |
 | An emptied engine slot is back-filled with the basic engine (Quick Jump 5) at the slot's capacity | `readDesign` | BINARY-ONLY | `TestPredictionDesignHullAndEngine` |
-| Design read keeps parts the owner is not entitled to (Mystery Trader, race) | `readDesign` (switch `legacyKeepUnentitledParts`, off) | LEGACY BUG, CONFIRMED | `TestConfirmedDesignLegality` (both settings) |
+| Design read keeps parts the owner is not entitled to (Mystery Trader, race) | `readDesign` (ruleset switch `Legacy.KeepUnentitledParts`, off in `elegy`) | LEGACY BUG, CONFIRMED | `TestConfirmedDesignLegality` (both settings) |
 | Elegy's chosen rule: drop every part the owner is not entitled to (tech, race, Mystery Trader items) | `ReadDesign` | chosen rule (ORDERS.md "Design legality") | `TestConfirmedDesignLegality` |
 
 ## Elegy decisions
@@ -33,10 +33,10 @@ and the design read are engine functions an order layer will call:
 - **Merge overflow.** The Merge with Fleet task's overflow empties a fleet
   of ships while keeping its cargo. Elegy gives the task the merge order's
   cap instead (32767 kept, anything above becomes 32766);
-  `legacyMergeOverflow` reproduces the original.
-- **Merge damage.** The dilution is reproduced (`legacyMergeDilution` is
+  `Legacy.MergeOverflow` reproduces the original.
+- **Merge damage.** The dilution is reproduced (`Legacy.MergeDilution` is
   on); switched off, the units are divided by the damaged ships.
-- **Design read.** ORDERS.md's chosen rule; `legacyKeepUnentitledParts`
+- **Design read.** ORDERS.md's chosen rule; `Legacy.KeepUnentitledParts`
   reproduces the original's keep-behavior.
 
 ## Implementation assumptions

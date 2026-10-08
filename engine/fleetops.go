@@ -19,21 +19,6 @@ const (
 // maxExchangeStack).
 const maxStackShips = 32766
 
-// legacyMergeDilution reproduces the original's LEGACY BUG in merging
-// damaged stacks (ORDERS.md "Merge", CONFIRMED FO-01..07): when both
-// stacks of a design were damaged, the units are divided by all ships of
-// the merged stack instead of the damaged ones, which dilutes the damage.
-// Set it to false to divide by the damaged ships.
-const legacyMergeDilution = true
-
-// legacyMergeOverflow reproduces the original's LEGACY BUG in the Merge
-// with Fleet task (ORDERS.md "Merge", CONFIRMED FO): the task applies no
-// ship-count cap, a stack of 32767 is kept, and a stack pushed to 32768 or
-// beyond leaves the merged fleet with no ships, its cargo and fuel staying
-// behind. Off by default: Elegy's chosen rule holds the task to the merge
-// order's cap (absorb).
-const legacyMergeOverflow = false
-
 // mergeRule says how mergeDamage averages two damaged stacks' units.
 type mergeRule int
 
@@ -42,7 +27,7 @@ const (
 	// with Fleet task's LEGACY BUG (ORDERS.md "Merge", CONFIRMED FO-01..07).
 	mergeDilute mergeRule = iota
 	// mergeTaskDamaged divides by the damaged ships, rounding up,
-	// ceil(Σ(D·units)/ΣD): the task with legacyMergeDilution off (Elegy's
+	// ceil(Σ(D·units)/ΣD): the task with MergeDilution off (Elegy's
 	// chosen rule).
 	mergeTaskDamaged
 	// mergeOrderDamaged divides by the damaged ships, rounding down,
@@ -51,10 +36,14 @@ const (
 	mergeOrderDamaged
 )
 
-// taskMergeRule is the Merge with Fleet task's rule under
-// legacyMergeDilution.
-func taskMergeRule() mergeRule {
-	if legacyMergeDilution {
+// taskMergeRule is the Merge with Fleet task's rule. Legacy.MergeDilution
+// reproduces the original's LEGACY BUG in merging damaged stacks
+// (ORDERS.md "Merge", CONFIRMED FO-01..07): when both stacks of a design
+// were damaged, the units are divided by all ships of the merged stack
+// instead of the damaged ones, which dilutes the damage. Off, they are
+// divided by the damaged ships.
+func (g *Game) taskMergeRule() mergeRule {
+	if g.Rules.Legacy.MergeDilution {
 		return mergeDilute
 	}
 	return mergeTaskDamaged
@@ -242,17 +231,14 @@ func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}
-	g.absorb(&g.Fleets[t], f, legacyMergeOverflow, taskMergeRule())
+	// Legacy.MergeOverflow reproduces the original's LEGACY BUG in the
+	// task (ORDERS.md "Merge", CONFIRMED FO): no ship-count cap, a stack
+	// of 32767 is kept, and a stack pushed to 32768 or beyond leaves the
+	// merged fleet with no ships, its cargo and fuel staying behind. Off
+	// (the Elegy ruleset), the task is held to the merge order's cap.
+	g.absorb(&g.Fleets[t], f, g.Rules.Legacy.MergeOverflow, g.taskMergeRule())
 	return Event{}, true
 }
-
-// legacyKeepUnentitledParts reproduces the original's LEGACY BUG in
-// reading a design (ORDERS.md "Design legality (Mystery Trader parts
-// kept)", CONFIRMED): only parts above the owner's research tech are
-// dropped, so a part the owner's race or Mystery Trader items do not
-// entitle it to is kept and works. Off by default: Elegy's chosen rule
-// drops every part the owner is not entitled to.
-const legacyKeepUnentitledParts = false
 
 // basicEngine back-fills an emptied engine slot (ORDERS.md: engine item
 // 1, skipping the Hyper-Expansion-only item 0, BINARY-ONLY).
@@ -263,17 +249,22 @@ const basicEngine = "Quick Jump 5"
 // and the design's mass and capacities are those of the parts that remain
 // (BINARY-ONLY). With the chosen rule a part is kept only if the race may
 // build it at these levels and, for a Mystery Trader part, owns it
-// (traderItems, by part name); with legacyKeepUnentitledParts only the
-// tech levels are checked.
+// (traderItems, by part name).
+//
+// rules.Legacy.KeepUnentitledParts reproduces the original's LEGACY BUG
+// (ORDERS.md "Design legality (Mystery Trader parts kept)", CONFIRMED):
+// only the tech levels are checked, so a part the owner's race or Mystery
+// Trader items do not entitle it to is kept and works. Off (the Elegy
+// ruleset), every part the owner is not entitled to is dropped.
 //
 // The hull (ORDERS.md "Design legality (hull not entitled, or every part
 // stripped)", BINARY-ONLY): the original does not check it; Elegy's
 // chosen rule rejects a design on a hull the owner may not build (not
-// under legacyKeepUnentitledParts, which reproduces the original). A ship
+// under KeepUnentitledParts, which reproduces the original). A ship
 // hull whose engine slot is left empty is back-filled with the basic
 // engine, the Quick Jump 5, at the slot's capacity, as in the original.
-func (c *Catalog) ReadDesign(name, hull string, fills []SlotFill, race Race, levels [NumFields]int, traderItems map[string]bool) (Design, error) {
-	return c.readDesign(name, hull, fills, race, levels, traderItems, legacyKeepUnentitledParts)
+func (c *Catalog) ReadDesign(name, hull string, fills []SlotFill, race Race, levels [NumFields]int, traderItems map[string]bool, rules Ruleset) (Design, error) {
+	return c.readDesign(name, hull, fills, race, levels, traderItems, rules.Legacy.KeepUnentitledParts)
 }
 
 func (c *Catalog) readDesign(name, hull string, fills []SlotFill, race Race, levels [NumFields]int, traderItems map[string]bool, techOnly bool) (Design, error) {

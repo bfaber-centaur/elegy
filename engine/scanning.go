@@ -103,15 +103,6 @@ type PlayerSighting struct {
 	Hab *[3]EnvRange
 }
 
-// legacyColocation reproduces the original's LEGACY BUG that every test
-// passes at distance 0: a fleet at exactly an enemy's position sees it
-// whatever its own scanner and the target's cloak (SCANNING.md
-// "Co-location", CONFIRMED SC-002, SC-014). Set it to false to require a
-// scanner and apply cloaking at distance 0 too.
-const legacyColocation = true
-
-func coLocated(d2 int) bool { return legacyColocation && d2 == 0 }
-
 // tachyonFactor is T by Tachyon Detector count (capped at 17).
 var tachyonFactor = [18]int{100, 95, 93, 91, 90, 89, 88, 87, 86, 86, 85, 84, 84, 83, 83, 82, 82, 81}
 
@@ -350,9 +341,15 @@ func (g *Game) scanners(v int) []scanner {
 
 // seesFleet reports whether scanner s sees fleet f (SCANNING.md "Seeing
 // fleets"). orbit is whether f orbits a planet; cloak its cloak percent.
-func seesFleet(s scanner, pos Point, orbit bool, cloak int) bool {
+//
+// colocation reproduces the original's LEGACY BUG that every test passes
+// at distance 0 (Legacy.Colocation; SCANNING.md "Co-location", CONFIRMED
+// SC-002, SC-014): a fleet at exactly an enemy's position sees it
+// whatever its own scanner and the target's cloak. Without it a scanner
+// is needed and cloaking applies at distance 0 too.
+func seesFleet(s scanner, pos Point, orbit bool, cloak int, colocation bool) bool {
 	dd := d2(s.pos, pos)
-	if coLocated(dd) {
+	if colocation && dd == 0 {
 		return true
 	}
 	if dd > s.R*s.R || (orbit && dd > s.P*s.P) {
@@ -496,7 +493,7 @@ func (g *Game) view(v int, estimates map[int]int, battles []battleSeen, bombs ma
 		seen := orbit && owner == v || sdSeen[i]
 		cargo := false
 		for _, s := range scs {
-			if seesFleet(s, f.Pos, orbit, cloak) {
+			if seesFleet(s, f.Pos, orbit, cloak, g.Rules.Legacy.Colocation) {
 				seen = true
 				if s.fleet && s.cargoScan && s.pos == f.Pos {
 					cargo = true

@@ -98,9 +98,14 @@ func GrowPopulation(pop, carry, maxPop, growthRate, hab int) (newPop, newCarry i
 }
 
 // crowdingPermille is trunc(1000·P/max). A zero maximum (Alternate Reality
-// without a starbase) stops the original with a divide by zero (KERNEL.md,
-// LEGACY BUG); GenerateTurn rejects that state (ErrZeroMaxPopulation), and
-// a direct call here treats it as maximally overcrowded.
+// with population and no starbase) stops the original with a divide by
+// zero (KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1).
+// Under Legacy.ZeroMaxPopulationStop GenerateTurn refuses that state
+// (ZeroMaxPopulationError). Otherwise, INTENTIONALLY DIFFERENT (Bobby's
+// "Keep going", 2026-10-08), the permille takes its limit as the maximum
+// goes to 0, so the planet is maximally overcrowded: more than 10 units
+// lose 12% a year, the overcrowding cap (KERNEL.md "Population growth"),
+// and 10 or fewer stay as they are.
 func crowdingPermille(pop, maxPop int) int {
 	if maxPop <= 0 {
 		return 1 << 30

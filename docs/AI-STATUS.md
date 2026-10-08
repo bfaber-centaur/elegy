@@ -35,23 +35,30 @@ unless the project decides otherwise.
 | Own-planet shuffle | AI.md §2 | BINARY-ONLY | `ai/shuffle.go` | `TestShufflePlanets` |
 | AI part classes 0–44 | AI.md §5 | CONFIRMED with AI-2, AI-8, AI-19 | `ai/classes.go` | `TestPartClassNamesExist` |
 | Starbase designs: missing slots, the year-50 family switch, counts per variant, picture, name | AI.md §5 | CONFIRMED AI-2 | `ai/starbase.go` | `TestStarbase*` |
-
 | Rototill's turn: research, starbase designs, U, planet loop and colony-ship production, fleet passes 1 and 2 | rototill.md §1–§3 | MEASURED AI-14..AI-17 (branches marked not exercised there are BINARY-ONLY) | `ai/rototill.go` | `TestRototill*` |
 | Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |
 | Planet automation: starbases for hubs, starbase upgrade, defenses, mines and factories fill | AI.md §7 | BINARY-ONLY (AI-7 not run) | `ai/automation.go`, `ai/economy.go` | `TestMinesAndFactories`, `TestStarbaseUpgrade`, `TestDefenses`, `TestDesignCostMatchesEngine` |
 | Ship-design builder and store: hull and class lists, delete-then-create, picture, name; ageing | AI.md §10 | BINARY-ONLY (builder CONFIRMED through AI-8, AI-19) | `ai/designs.go` | `TestAgeGroup` |
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
+| Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
 The tests are unit tests of the rules as written; none is an oracle
 capture comparison.
 
-`TestRototillPlaysAlone` plays an expert Rototill against an idle human
-for 40 years from a new game: Rototill plans first each year on the
-game's random stream, every order it gives is accepted, and the same
-seed replays to an identical game. It is a smoke test, not a parity
-check.
+`TestRototillPlaysAlone` and `TestCybertronPlaysAlone` play one expert
+computer player against an idle human from a new game, for 40 and 60
+years: the computer player plans first each year on the game's random
+stream, every order it gives is accepted, and the same seed replays to
+an identical game. They are smoke tests, not parity checks.
+
+Cybertron stays on its homeworld in its smoke game. It scraps its
+starting Scout (Elegy reports the scrap as unsupported), and its colony
+ships take only planets it has seen. A non-penetrating planetary scanner
+reports no planets, so in its own turn it learns of planets only through
+its scanner-shot packets (cybertron.md §6), which are not implemented
+yet.
 
 ## Assumptions
 
@@ -75,6 +82,16 @@ check.
 | A16 | Cybertron's list range `a..b`: `Random(m)` indexes the lists left in increasing order, and the list tried is removed (cybertron.md §2 checked ranges as sets of outcomes, AI-19). |
 | A17 | Cybertron's warship group: when the big ships leave the target at the group's first slot, that slot gets the "first" Cruiser range (the last 9 lists); "slot g itself range 17..19" applies when the fill reaches it from above. |
 | A18 | Robotoid's step 7 writes no delete for a slot 0 that is already empty (the original repeats it every year; Elegy's engine would reject it and it changes nothing). |
+| A19 | Merging: a later pass (after more than 32 places) skips the places an earlier pass tracked. |
+| A20 | Cybertron's `GR` on equal creation years of slots 6 and 10 is group 6–9. |
+| A21 | Cybertron's threat mark reads the report's population estimate in colonists. |
+| A22 | Cybertron's own-planet shuffle is drawn after the starbase designs, as Rototill's (A11). |
+| A23 | Cybertron's weak-armada branches (stay, retreat, hard-level draws) are not built: under clean per-player state the armada parameters are 0, so no armada is ever weak. They come with the legacy switch. |
+| A24 | An armada in deep space moves with no task at warp 4. |
+| A25 | Attack target: "can reach an own starbase" is not tested (the engine's waypoint fuel estimate is not exported); with the planner's empty memory no planet is marked visited. Computer alliances are off. |
+| A26 | The colonizer test's `Random(2)` passes when it draws 0. |
+| A27 | Attack fleet production: the guard draw is made only when `GG` holds a design and fewer than 40 guard fleets exist; the third and fourth group draws are made whether or not those slots hold designs. |
+| A28 | Pass A: armed fleets count as Destroyer fleets while only group 6–9 aged out this turn, and as group fleets otherwise. |
 
 ## Spec questions
 
@@ -83,6 +100,13 @@ check.
   earlier in the turn is not excluded; rototill.md §3 says Rototill marks
   the chosen planet so later fleets skip it. `ai/` follows rototill.md.
   Sent to the research lane for a one-line clarification.
+- cybertron.md §5 pass A says armed fleets count as Destroyer fleets
+  "while only group 6–9 was aged out this turn" but not what they count
+  as otherwise (A28).
+- cybertron.md §6's scanner shot names `Random(7)` for the edge but not
+  the slide and inset draws or the edge geometry; Cybertron's
+  exploration depends on it.
+- The threat mark's population unit (A21).
 
 ## Decisions pending
 
@@ -112,9 +136,15 @@ check.
 - Hub freighter assignment (AI.md §6 steps 3–4), automation steps 1
   (warp re-pick, AI.md §11 "Warp choice"), 4 (under attack) and 5
   (blocked queues); the shared fleet rules of AI.md §11.
-- Robotoid's and Cybertron's turns: ship designs, ageing, splitting,
-  merging, production, fleets, packets.
-- Orders the engine does not accept yet: scrap and lay-mines tasks. A
+- Robotoid's turn (production, fleets, armada parameters).
+- Cybertron's packets (§6: supply, attack, scanner shot) and its
+  low-mineral notes (§4.1). The turn reports them as unsupported.
+- Orders to a fleet split off in the same turn: the engine gives the new
+  fleet an id the order file cannot name yet (engine request open); such
+  orders go to `Result.Unsupported`.
+- Orders the engine does not accept yet: scrap and lay-mines tasks,
+  unloading colonists at another player's planet (freighter invasion),
+  and battle plan 4 while a player has fewer than five plans. A
   planner reports a scrap it cannot order in `Result.Unsupported`.
 - Rototill's unreachable branches (rototill.md marks them not exercised):
   remote miners (slots 7–8), slots 13–14, transports (hub freighters) and

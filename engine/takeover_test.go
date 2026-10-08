@@ -29,6 +29,7 @@ type tkLab struct {
 
 func newTKLab(t *testing.T, energy int) *tkLab {
 	l := &tkLab{t: t}
+	l.g.Rules = ElegyRules()
 	for range 2 {
 		pl := Player{Race: tkRace(), Research: ResearchState{Current: Biotech, Next: NextSameField}}
 		pl.Relations = []Relation{RelationEnemy, RelationEnemy}
@@ -862,26 +863,30 @@ func TestConfirmedAlternateRealityColonyStarbase(t *testing.T) {
 
 func TestAlternateRealityColonyGeneratesYears(t *testing.T) {
 	// The lane D audit's halt: an Alternate Reality colony ship colonizes
-	// a habitable planet, and the following years must generate. The
-	// colony gets its starbase (CONFIRMED T-26, T-33), so its maximum
-	// population is not 0 and it keeps its population.
-	l := newTKLab(t, 3)
-	l.g.Players[0].Race.PRT = PRTAlternateReality
-	fort := l.design("Orbital Fort")
-	l.g.DesignSlots = append(l.g.DesignSlots, DesignSlot{Owner: 0, Starbase: true, Slot: 0, Design: fort})
-	pi := l.planet(NoOwner, 0, 0)
-	fi := l.fleet(0, pi, 0, Stack{Design: l.colonyShip(), Count: 1})
-	l.g.Fleets[fi].Cargo.Colonists = 25
-	l.g.Fleets[fi].Task = colonizeTask
-	g := l.g
-	for y := 1; y <= 4; y++ {
-		r, err := GenerateTurn(withRules(g), nil, &seqRand{})
-		if err != nil {
-			t.Fatalf("year %d: %v", y, err)
+	// a habitable planet, and the following years must generate under
+	// every ruleset, also the one that stops on a maximum population of 0
+	// (RULESET.md). The colony gets its starbase (CONFIRMED T-26, T-33),
+	// so its maximum population is not 0 and it keeps its population.
+	for _, rules := range Rulesets() {
+		l := newTKLab(t, 3)
+		l.g.Players[0].Race.PRT = PRTAlternateReality
+		fort := l.design("Orbital Fort")
+		l.g.DesignSlots = append(l.g.DesignSlots, DesignSlot{Owner: 0, Starbase: true, Slot: 0, Design: fort})
+		pi := l.planet(NoOwner, 0, 0)
+		fi := l.fleet(0, pi, 0, Stack{Design: l.colonyShip(), Count: 1})
+		l.g.Fleets[fi].Cargo.Colonists = 25
+		l.g.Fleets[fi].Task = colonizeTask
+		g := l.g
+		g.Rules = rules
+		for y := 1; y <= 4; y++ {
+			r, err := GenerateTurn(g, nil, &seqRand{})
+			if err != nil {
+				t.Fatalf("%s v%d year %d: %v", rules.ID, rules.Version, y, err)
+			}
+			g = r.Game
 		}
-		g = r.Game
-	}
-	if p := g.Planets[pi]; p.Owner != 0 || p.Population <= 0 || !p.HasStarbase {
-		t.Errorf("owner %d population %d starbase %v, want a living colony with its starbase", p.Owner, p.Population, p.HasStarbase)
+		if p := g.Planets[pi]; p.Owner != 0 || p.Population <= 0 || !p.HasStarbase {
+			t.Errorf("%s v%d: owner %d population %d starbase %v, want a living colony with its starbase", rules.ID, rules.Version, p.Owner, p.Population, p.HasStarbase)
+		}
 	}
 }

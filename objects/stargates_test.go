@@ -149,10 +149,8 @@ func TestConfirmedGateMixedFleet(t *testing.T) {
 		l.g.Designs = append(l.g.Designs, heavy)
 		fi := l.fleet(0, origin, "Laser DD", 1)
 		l.g.Fleets[fi].Stacks = append(l.g.Fleets[fi].Stacks, engine.Stack{Design: len(l.g.Designs) - 1, Count: 1})
-		old := LegacyGateMixedFleetLoss
-		LegacyGateMixedFleetLoss = legacy
+		l.g.Rules.Legacy.GateMixedFleetLoss = legacy
 		j := Jump(l.g, fi, at(100, 0), &script{})
-		LegacyGateMixedFleetLoss = old
 		if j.FleetLost != legacy || len(l.g.Fleets[fi].Stacks) != 1 {
 			t.Errorf("legacy %v: %+v, stacks %+v", legacy, j, l.g.Fleets[fi].Stacks)
 		}

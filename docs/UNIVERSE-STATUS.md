@@ -53,13 +53,14 @@ Test names follow the engine's convention:
 | Starting tech | `players.go` | CONFIRMED |
 | Homeworld setup, BBS, AR (spends RD-7), computer players | `players.go` | CONFIRMED |
 | Built-in computer races | `races/builtin.go`, `ComputerPlayer` | CONFIRMED (AI.md, 23 of 24; SS harder BINARY-ONLY) |
-| Shared starting minerals | `players.go` | LEGACY BUG, `legacySharedHomeworldMinerals` |
+| Shared starting minerals | `players.go` | LEGACY BUG, `Legacy.SharedHomeworldMinerals` |
 | Leftover-point spends | `players.go` | CONFIRMED |
 | Starbase designs and loadouts | `designs.go` | CONFIRMED |
 | Starting ships and part upgrades | `designs.go` | CONFIRMED |
 | Starting designs recorded in `Game.DesignSlots`: starbase slots 0/1, each new ship design the next ship slot | `designs.go` | CONFIRMED (UNIVERSE.md "Starbases", "Starting ships"; UG01..UG21); wired for the engine 2026-10-08, `TestConfirmedStartingDesignSlots` |
-| Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `legacySecondPlanetFallback` |
+| Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `Legacy.SecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
+| Starting battle plans: the same five (Default, Kill Starbase, Max-Defense, Sniper, Chicken) for every player | `players.go` `StartingPlans` | MEASURED (COMBAT.md "Starting plans", UG01..UG21), `TestMeasuredStartingPlans` |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
 | Expert +10% before the BBS factor, each truncating, then the second-planet split | `players.go` | MEASURED (UG03 player 2: 736/368; UG21 player 9: 768); not in UNIVERSE.md yet |
 | Game options carried into `engine.Game`: random events, size, public scores | `newgame.go` | used by the turn (KERNEL.md "Game options during a turn") |
@@ -99,10 +100,10 @@ All 291 player expectations (124 UG, 167 RD/RW) and all sample checks
 
 ## LEGACY BUG switches
 
-- `legacySharedHomeworldMinerals` (on): every homeworld gets one shared
+- `Legacy.SharedHomeworldMinerals` (on in the `elegy` ruleset): every homeworld gets one shared
   surface draw and planet 0's concentrations floored at 30. Off: each
   homeworld uses its own concentrations (floored at 30) and its own draw.
-- `legacySecondPlanetFallback` (on): a second planet whose 100 redraws were
+- `Legacy.SecondPlanetFallback` (on in the `elegy` ruleset): a second planet whose 100 redraws were
   all used takes the homeworld's environment. Off: it keeps the last
   redraw.
 
@@ -186,10 +187,12 @@ Unimplemented behaviour:
 11. Salvage as a space object: it stays in `engine.Game.Salvage`.
     Salvage numbering, decay and loading exist in `objects/`; the spec
     gaps on owner, merging and pickup are with the objects research lane.
-12. Not wired by the kernel yet: the terraforming production items, the
-    remote-mining task, Orbital Adjusters and `Impact.DiscloseDesign`
-    (TERRAFORM-STATUS.md "Turn wiring"); the yearly race check
-    (RACES-STATUS.md "Not wired yet").
+12. Wired by the kernel on main (2026-10-08): the terraforming
+    production items (`engine/production_terraform.go`), the
+    remote-mining task, Orbital Adjusters (`Game.Terraform`),
+    `Impact.DiscloseDesign` (`objects/engine_adapter.go`) and the yearly
+    race check (`Game.Races`). A new game leaves `Races` and `Terraform`
+    nil; `game.New` sets both (docs/GAME-LOOP.md).
 13. Generation itself, under "Not modelled" below.
 
 ## Not modelled

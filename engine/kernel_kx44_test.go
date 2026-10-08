@@ -50,7 +50,7 @@ func TestConfirmedUnderEnginedFuelWrap(t *testing.T) {
 		d := Design{Name: "Large Freighter", Hull: Hull{Name: "Large Freighter", Slots: []HullSlot{{Kinds: []PartKind{PartEngine}, Max: 2}}},
 			Mass: 134, Engines: 1, FuelCapacity: 2600}
 		d.Engine.Fuel = [11]int{0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 100}
-		g := Game{Designs: []Design{d}, Fleets: []Fleet{{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: c.fuel,
+		g := Game{Rules: ElegyRules(), Designs: []Design{d}, Fleets: []Fleet{{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: c.fuel,
 			Waypoints: []Waypoint{{Pos: Point{1000, 0}, Warp: 5}}}}}
 		moveFleets(&g)
 		if f := g.Fleets[0]; f.Pos != (Point{c.want, 0}) || f.Fuel != 0 {
@@ -99,7 +99,7 @@ func TestConfirmedRadiatingColonists(t *testing.T) {
 	// KB-4A H: radiation 15..85 (mid 50): 70 kT → 58 moving; FM-102 Z1,
 	// Z2: 100 → 82, 3 → 2 (at least 1).
 	for _, c := range []struct{ c, want int }{{70, 58}, {100, 82}, {3, 2}} {
-		g := Game{Players: []Player{{Race: pgRace()}}, Designs: []Design{{Engine: Engine{Name: "Radiating Hydro-Ram Scoop"}, Engines: 1}}}
+		g := Game{Rules: ElegyRules(), Players: []Player{{Race: pgRace()}}, Designs: []Design{{Engine: Engine{Name: "Radiating Hydro-Ram Scoop"}, Engines: 1}}}
 		f := Fleet{Stacks: []Stack{{Design: 0, Count: 1}}, Cargo: Cargo{Colonists: c.c}}
 		g.radiatingColonists(&f)
 		if f.Cargo.Colonists != c.want {
@@ -112,7 +112,7 @@ func TestConfirmedFuelGeneration(t *testing.T) {
 	// KB-4A G, X: 100 → 150 and 230 → 250 with a 250 tank (one generator).
 	gen := Part{Name: "Anti-matter Generator", FuelPerYear: 50, FuelCapacity: 200}
 	for _, c := range []struct{ fuel, want int }{{100, 150}, {230, 250}} {
-		g := Game{Designs: []Design{{FuelCapacity: 250, Slots: []Slot{{gen, 1}}}}, Fleets: []Fleet{{Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: c.fuel}}}
+		g := Game{Rules: ElegyRules(), Designs: []Design{{FuelCapacity: 250, Slots: []Slot{{gen, 1}}}}, Fleets: []Fleet{{Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: c.fuel}}}
 		g.generateFuel()
 		if g.Fleets[0].Fuel != c.want {
 			t.Errorf("%d mg: %d, want %d", c.fuel, g.Fleets[0].Fuel, c.want)

@@ -27,6 +27,7 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 		Self: r.Self, Planets: r.Planets, Fleets: r.Fleets,
 		Universe: universe,
 		Known:    map[int]engine.PlanetReport{},
+		Seen:     map[int]bool{},
 		Others:   r.View.Fleets,
 		PRT:      map[int]engine.PRT{},
 	}
@@ -35,6 +36,7 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 	}
 	for _, rep := range r.View.Planets {
 		v.Known[rep.Planet] = rep
+		v.Seen[rep.Planet] = true
 	}
 	for _, d := range r.Designs {
 		od := Design{Slot: d.Slot.Slot, Index: d.Index, Design: d.Design, Created: FirstYear}

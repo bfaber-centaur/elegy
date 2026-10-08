@@ -373,21 +373,3 @@ func withRules(g engine.Game) engine.Game {
 	g.Rules = engine.ElegyRules()
 	return g
 }
-
-// The Elegy ruleset's objects switches equal the variables the package
-// still reads.
-func TestElegyRulesMatchObjectsSwitches(t *testing.T) {
-	l := engine.ElegyRules().Legacy
-	for name, c := range map[string][2]bool{
-		"FieldLimit511":       {l.FieldLimit511, LegacyFieldLimit511},
-		"EmptyFleetSalvage":   {l.EmptyFleetSalvage, LegacyEmptyFleetSalvage},
-		"DueNorthSouthCut":    {l.DueNorthSouthCut, LegacyDueNorthSouthCut},
-		"MineSurvivorSalvage": {l.MineSurvivorSalvage, LegacyMineSurvivorSalvage},
-		"GateMixedFleetLoss":  {l.GateMixedFleetLoss, LegacyGateMixedFleetLoss},
-		"TraderLastRedraw":    {l.TraderLastRedraw, LegacyTraderLastRedraw},
-	} {
-		if c[0] != c[1] {
-			t.Errorf("ElegyRules %s = %v, objects switch %v", name, c[0], c[1])
-		}
-	}
-}

@@ -20,13 +20,6 @@ const (
 	EventNewMinerals             // to the owner; Count = the mineral (Minerals index)
 )
 
-// legacyCometAxes reproduces the original's LEGACY BUG in the comet
-// strike message (KERNEL.md "Comet strike", CONFIRMED KX-004 S2): the
-// owner's message names the axes of a shuffled order A, while the axes
-// that move are the first ones in index order. Set it to false to name
-// the axes that moved. Only the message differs.
-const legacyCometAxes = true
-
 // yearIndex is the year counted from 2400, before the year advances.
 func (g *Game) yearIndex() int { return g.Year - 2400 }
 
@@ -114,7 +107,7 @@ func (g *Game) cometStrike(rng Rand, order []int) []Event {
 	for v := range g.Players {
 		ev := Event{Kind: EventCometStrike, Player: v, Planet: p.ID, Fleet: -1, Count: e}
 		if killed && v == p.Owner {
-			ev.Axes = cometAxes(a, moved, legacyCometAxes)
+			ev.Axes = cometAxes(a, moved, g.Rules.Legacy.CometAxes)
 		}
 		events = append(events, ev)
 	}

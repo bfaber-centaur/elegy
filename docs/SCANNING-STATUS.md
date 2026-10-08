@@ -33,7 +33,7 @@ tests can supply their own.
 | Penetration for planets and orbiting fleets | `seesFleet`, `view` | CONFIRMED | `TestConfirmedPenetrationAndOrbit` |
 | Fleet cloak (mass-weighted points, cargo, table, bound) | `fleetCloak`, `cloakPercent`, `cloakBound` | CONFIRMED | `TestConfirmedFleetCloak`, `TestConfirmedPenetrationAndOrbit` |
 | Tachyon detectors (0–3 on one design) | `tachyonFactor`, `scanners` | CONFIRMED (more, or across designs, BINARY-ONLY) | `TestConfirmedTachyonDetectors` |
-| Co-location | `coLocated` (switch `legacyColocation`) | LEGACY BUG, CONFIRMED | `TestConfirmedColocation` |
+| Co-location | `seesFleet` (ruleset switch `Legacy.Colocation`) | LEGACY BUG, CONFIRMED | `TestConfirmedColocation` |
 | Enemy fleets at the viewer's planets | `view` | CONFIRMED (SC-024, SC-026) | `TestPredictionFleetsAtOwnPlanets` |
 | Orbit report levels (none / Bat / Robber Baron) | `view` | CONFIRMED | `TestConfirmedOrbitReports` |
 | Starbase cloak | `starbaseCloak`, `view` | CONFIRMED, SS +300 too (SC-030; ISB and 25,000 cap BINARY-ONLY) | `TestConfirmedStarbaseCloak`, `TestPredictionSuperStealthAndStarbaseBonus` |

@@ -170,7 +170,7 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 
 	switch {
 	case starbase:
-		t.class = starbaseClass(t)
+		t.class = starbaseClass(t, false) // the battle applies the ruleset
 	case len(t.weapons) > 0:
 		t.class = classArmed
 	case bomber:
@@ -185,14 +185,13 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 	return t
 }
 
-// legacyStarbaseArmedClass reproduces the original's LEGACY BUG that a
-// starbase is always an "armed" target, even with no weapons (COMBAT.md
-// "Starbases in battle", CONFIRMED CB-011..013 S4/S5). Set it to false to
-// make an unarmed starbase an unarmed target.
-const legacyStarbaseArmedClass = true
-
-func starbaseClass(t token) int {
-	if legacyStarbaseArmedClass || len(t.weapons) > 0 {
+// starbaseClass is a starbase token's target class. legacy reproduces the
+// original's LEGACY BUG that a starbase is always an "armed" target, even
+// with no weapons (Legacy.StarbaseArmedClass; COMBAT.md "Starbases in
+// battle", CONFIRMED CB-011..013 S4/S5). Without it an unarmed starbase is
+// an unarmed target.
+func starbaseClass(t token, legacy bool) int {
+	if legacy || len(t.weapons) > 0 {
 		return classArmed
 	}
 	return classUnarmed

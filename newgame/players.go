@@ -7,22 +7,6 @@ import (
 	"github.com/bfaber-centaur/elegy/races"
 )
 
-// legacySharedHomeworldMinerals reproduces the original's LEGACY BUG that
-// every homeworld starts with the same surface minerals (one draw per
-// game) and the concentrations of planet 0 instead of its own
-// (UNIVERSE.md "Shared starting minerals", CONFIRMED UG16–UG21). Set it to
-// false to give each homeworld its own draw and its own concentrations,
-// with the same floor of 30.
-var legacySharedHomeworldMinerals = true
-
-// legacySecondPlanetFallback reproduces the original's LEGACY BUG that a
-// second planet whose 100 environment redraws were all used takes the
-// homeworld's environment, even when the last redraw reached 10%
-// (UNIVERSE.md "Second planet", LEGACY BUG CONFIRMED UG29, UG30; a success
-// on exactly the 100th redraw is BINARY-ONLY). Set it to false to keep the
-// last redraw.
-var legacySecondPlanetFallback = true
-
 // startingTech is energy/weapons/propulsion/construction/electronics/
 // biotech by primary racial trait (UNIVERSE.md "Starting tech",
 // CONFIRMED). HE and IS start at 0 in every field.
@@ -231,7 +215,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 	planets := game.Planets
 
 	// The shared starting minerals: one draw per game from planet 0's
-	// concentrations (LEGACY BUG, see legacySharedHomeworldMinerals).
+	// concentrations (LEGACY BUG, see Legacy.SharedHomeworldMinerals).
 	ref := concentrationsOf(&planets[0])
 	shared := g.surfaceDraw(ref)
 	sharedConc := floorConcentrations(ref)
@@ -253,6 +237,7 @@ func (g *generator) setUpPlayers(hws []int) error {
 			// research and production", MEASURED).
 			ResearchBudget: 15,
 			Research:       engine.ResearchState{Levels: levels, Current: engine.Energy, Next: engine.NextSameField},
+			Plans:          StartingPlans(),
 		}
 		// Relations (MEASURED): with exactly one human player every
 		// player starts as an enemy of every other; with two or more,
@@ -299,7 +284,13 @@ func (g *generator) setUpHomeworld(hw *engine.Planet, i int, ps player, shared e
 	}
 
 	conc, surface := sharedConc, shared
-	if !legacySharedHomeworldMinerals {
+	// Legacy.SharedHomeworldMinerals reproduces the original's LEGACY BUG
+	// that every homeworld starts with the same surface minerals (one draw
+	// per game) and the concentrations of planet 0 instead of its own
+	// (UNIVERSE.md "Shared starting minerals", CONFIRMED UG16–UG21). Off,
+	// each homeworld gets its own draw and its own concentrations, with
+	// the same floor of 30.
+	if !g.s.Rules.Legacy.SharedHomeworldMinerals {
 		own := concentrationsOf(hw)
 		conc, surface = floorConcentrations(own), g.surfaceDraw(own)
 	}
@@ -384,7 +375,13 @@ func (g *generator) setUpSecondPlanet(i int) error {
 		}
 		redraws++
 	}
-	if redraws == 100 && legacySecondPlanetFallback {
+	// Legacy.SecondPlanetFallback reproduces the original's LEGACY BUG
+	// that a second planet whose 100 environment redraws were all used
+	// takes the homeworld's environment, even when the last redraw reached
+	// 10% (UNIVERSE.md "Second planet", LEGACY BUG CONFIRMED UG29, UG30; a
+	// success on exactly the 100th redraw is BINARY-ONLY). Off, the last
+	// redraw is kept.
+	if redraws == 100 && g.s.Rules.Legacy.SecondPlanetFallback {
 		sp.Env = hw.Env
 	}
 
@@ -410,4 +407,20 @@ func (g *generator) setStarbase(p *engine.Planet, d int) {
 	p.StarbaseDesign = d
 	p.StarbaseHull = des.Hull.StarbaseNumber
 	p.StarbaseDock = des.Hull.Dock != 0
+}
+
+// StartingPlans are the five battle plans every player starts with
+// (COMBAT.md "Battle plans", "Starting plans", MEASURED UG01..UG21: every
+// player of every new game, 2 to 16 players, single-human and
+// multi-human). "Default" attacks neutrals and enemies in every game
+// (COMBAT.md, MEASURED UG01..UG21 and BP-2). Starting fleets use plan 0
+// (UNIVERSE.md "Starting ships").
+func StartingPlans() []engine.BattlePlan {
+	return []engine.BattlePlan{
+		{Name: "Default", Tactic: engine.TacticMaximizeRatio, Primary: engine.TargetArmed, Secondary: engine.TargetAny, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Kill Starbase", Tactic: engine.TacticMaximizeRatio, Primary: engine.TargetStarbase, Secondary: engine.TargetArmed, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Max-Defense", Tactic: engine.TacticMaximizeNet, Primary: engine.TargetArmed, Secondary: engine.TargetBombersFreighters, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Sniper", Tactic: engine.TacticDisengageIfChallenged, Primary: engine.TargetUnarmed, Secondary: engine.TargetNone, Attack: engine.AttackNeutralsAndEnemies},
+		{Name: "Chicken", Tactic: engine.TacticDisengage, Primary: engine.TargetAny, Secondary: engine.TargetNone, Attack: engine.AttackNeutralsAndEnemies},
+	}
 }

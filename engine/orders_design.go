@@ -115,7 +115,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		}
 	}
 	pl := &g.Players[player]
-	d, err := cat.ReadDesign(o.Name, o.Hull, fitFills(cat, o.Hull, o.Fills), pl.Race, pl.Research.Levels, nil)
+	d, err := cat.ReadDesign(o.Name, o.Hull, fitFills(cat, o.Hull, o.Fills), pl.Race, pl.Research.Levels, nil, g.Rules)
 	if err != nil {
 		return err
 	}

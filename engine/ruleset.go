@@ -79,6 +79,15 @@ type Legacy struct {
 	// (ORDERS.md "Design legality (Mystery Trader parts kept)",
 	// CONFIRMED). engine/fleetops.go.
 	KeepUnentitledParts bool `json:"keep_unentitled_parts"`
+	// ZeroMaxPopulationStop: an Alternate Reality planet with population,
+	// habitability ≥ 0 and no starbase (maximum population 0) stops the
+	// year, where the original stops with an integer divide by zero
+	// (KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1):
+	// GenerateTurn returns a *ZeroMaxPopulationError and generates
+	// nothing. Off, the year is generated, and the planet's growth takes
+	// the crowding permille at its limit, the 12% overcrowding cap
+	// (INTENTIONALLY DIFFERENT). engine/turn.go.
+	ZeroMaxPopulationStop bool `json:"zero_max_population_stop"`
 
 	// objects
 
@@ -132,11 +141,24 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, version 1: the behaviour every
-// game had before rulesets existed. Three switches are off, where Elegy
-// has chosen its own rule over the original's: FieldLimit511,
-// MergeOverflow and KeepUnentitledParts.
+// ElegyRules is Elegy's default ruleset, its latest version: version 2.
+// Four switches are off, where Elegy has chosen its own rule over the
+// original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
+// ZeroMaxPopulationStop.
+//
+// Version 2 differs from version 1 only in ZeroMaxPopulationStop: an
+// Alternate Reality planet with population and no starbase no longer
+// stops the year (Bobby's decision, 2026-10-08, "Keep going").
 func ElegyRules() Ruleset {
+	r := elegyRulesV1()
+	r.Version = 2
+	r.Legacy.ZeroMaxPopulationStop = false
+	return r
+}
+
+// elegyRulesV1 is the Elegy ruleset, version 1: the behaviour every game
+// had before rulesets existed.
+func elegyRulesV1() Ruleset {
 	return Ruleset{ID: ElegyRulesID, Version: 1, Legacy: Legacy{
 		FuelWrap:                true,
 		Colocation:              true,
@@ -148,6 +170,7 @@ func ElegyRules() Ruleset {
 		MergeDilution:           true,
 		MergeOverflow:           false,
 		KeepUnentitledParts:     false,
+		ZeroMaxPopulationStop:   true,
 		FieldLimit511:           false,
 		EmptyFleetSalvage:       true,
 		DueNorthSouthCut:        true,
@@ -161,11 +184,11 @@ func ElegyRules() Ruleset {
 
 // FaithfulRules is the faithful J-RC3 ruleset, version 1: every legacy
 // switch on. It differs from ElegyRules only in FieldLimit511,
-// MergeOverflow and KeepUnentitledParts. It is only as faithful as the
-// switches go: behaviour Elegy has not modelled, or models differently
-// without a switch, is the same in both.
+// MergeOverflow, KeepUnentitledParts and ZeroMaxPopulationStop. It is only
+// as faithful as the switches go: behaviour Elegy has not modelled, or
+// models differently without a switch, is the same in both.
 func FaithfulRules() Ruleset {
-	r := ElegyRules()
+	r := elegyRulesV1()
 	r.ID, r.Version = FaithfulRulesID, 1
 	r.Legacy.MergeOverflow = true
 	r.Legacy.KeepUnentitledParts = true
@@ -178,7 +201,7 @@ func FaithfulRules() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{ElegyRules(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), ElegyRules(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).

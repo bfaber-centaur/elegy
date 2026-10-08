@@ -692,14 +692,6 @@ func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool)
 	return events
 }
 
-// legacyDropScan reproduces the original's LEGACY BUG in picking the
-// winner of several players' drops (TAKEOVER.md "Several players
-// dropping at once", CONFIRMED T-32): a scan in player order in which
-// "second" only ever holds a lower-index player's strength, so only a
-// higher-index winner is reduced. Set it to false to compare every
-// winner against its strongest rival.
-const legacyDropScan = true
-
 // dropWinner picks the winner w among the dropping players, with the
 // strengths best and second its landing is reduced by, and whether a tie
 // leaves nobody landing.
@@ -721,7 +713,7 @@ func (g *Game) dropWinner(troops, strength []int) (w, best, second int, tie bool
 			w, second, best = q, best, st
 		}
 	}
-	if legacyDropScan {
+	if g.Rules.Legacy.DropScan {
 		return w, best, second, tie
 	}
 	second, tie = 0, false
