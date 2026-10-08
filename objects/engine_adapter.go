@@ -254,6 +254,12 @@ func (s *Space) TraderItems(player int) map[string]bool {
 	return s.TraderParts.Items(player)
 }
 
+// SalvageLoad is the package's SalvageLoad.
+func (s *Space) SalvageLoad(sv engine.Salvage, k, want int) int { return SalvageLoad(sv, k, want) }
+
+// SalvageRoom is the package's SalvageRoom.
+func (s *Space) SalvageRoom(sv engine.Salvage) int { return SalvageRoom(sv) }
+
 // MeetTraders runs the Trader encounters. A computer player's level is
 // engine.Player.Level.
 func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {

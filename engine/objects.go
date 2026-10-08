@@ -81,6 +81,12 @@ type SpaceObjects interface {
 	// the owner's packet numbers, and a free object slot).
 	SalvageNumber(g *Game, owner int) (n int, ok bool)
 
+	// SalvageLoad is how much of mineral k a fleet asking for want kT
+	// gets from salvage object sv, and SalvageRoom how many kT can be
+	// unloaded into it (OBJECTS.md "Salvage", "Loading").
+	SalvageLoad(sv Salvage, k, want int) int
+	SalvageRoom(sv Salvage) int
+
 	// SetDetonate applies player's order turning detonation on or off
 	// for the player's own minefield number, or returns why it is
 	// refused (OBJECTS.md "The detonate setting"; ORDERS.md "Minefield
