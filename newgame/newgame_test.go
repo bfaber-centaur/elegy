@@ -1017,7 +1017,7 @@ func TestConfirmedWormholes(t *testing.T) {
 			}
 			for _, wh := range res.Wormholes {
 				for _, e := range wh.Ends {
-					if e.Stability < 0 || e.Stability > 2 || e.Years != 0 {
+					if e.Class < 0 || e.Class > 2 || e.Years != 0 {
 						t.Errorf("size %d: end %+v", size, e)
 					}
 					if e.Pos.X < Origin || e.Pos.X > Origin+s.Width() || e.Pos.Y < Origin || e.Pos.Y > Origin+s.Width() {
