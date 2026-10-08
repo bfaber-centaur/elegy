@@ -182,3 +182,28 @@ func TestCybertronMinelayer(t *testing.T) {
 		t.Errorf("orders %+v for a fleet already laying mines, want none", ct.res.Orders)
 	}
 }
+
+// cybertron.md §5 freighter rule at another player's planet (ASSUMPTION
+// A55): it unloads all its colonists there as an invasion and moves to
+// the pickup, here none (the homeworld has 120,000 colonists), so to the
+// nearest own starbase planet.
+func TestCybertronFreighterInvasion(t *testing.T) {
+	v := caView(t, 2450)
+	v.Known[3] = engine.PlanetReport{Planet: 3, Level: engine.ReportNormal, Owner: 1, Pos: v.Universe[2].Pos}
+	f := fleet(100, 1, v.Universe[2].Pos, 10, 1)
+	f.Cargo.Colonists = 50
+	v.Fleets = []engine.Fleet{f}
+	ct := cyberTest(t, v, top{})
+	ct.freighter(&v.Fleets[0])
+	got := ordersOf[engine.WaypointOrder](ct.res.Orders)
+	if len(got) != 1 || len(ct.res.Unsupported) != 0 {
+		t.Fatalf("orders %+v, unsupported %v; want one waypoint order", ct.res.Orders, ct.res.Unsupported)
+	}
+	o := got[0]
+	if o.Task.Kind != engine.TaskTransport || o.Task.Transport[engine.CargoColonists].Action != engine.UnloadAll {
+		t.Errorf("waypoint-0 task %+v, want unload all colonists", o.Task)
+	}
+	if len(o.Waypoints) != 1 || o.Waypoints[0].ID != 1 || o.Waypoints[0].Target != engine.TargetPlanet {
+		t.Errorf("waypoints %+v, want the homeworld", o.Waypoints)
+	}
+}
