@@ -13,8 +13,13 @@ import "fmt"
 // Created is the calendar year the design order stored the design, and
 // Picture its picture, 0..3 (AI.md "Storing a design", "Picture"; the
 // computer players' starbase family switch and design ageing read them,
-// CONFIRMED AI-2, AI-8, AI-19). A slot not made by a design order has
-// Created 0.
+// CONFIRMED AI-2, AI-8, AI-19). Created 0 means a slot not made by a
+// design order. Nothing reads the two fields yet: the computer players
+// still keep their own copy until their driver reads the game state. This
+// change leaves game.SaveVersion as it is: a save (which holds the whole
+// Game) writes the fields, and an older save loads them as 0. The game
+// package's next save version refuses older saves and gives the starting
+// slots the start year and picture 0.
 type DesignSlot struct {
 	Owner    int
 	Starbase bool
