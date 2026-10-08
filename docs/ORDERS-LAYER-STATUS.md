@@ -158,7 +158,8 @@ successor needs before it can change.
 
 ### Orders Elegy does not implement
 
-- **Mystery Trader items**: no order reaches them (the player owns none).
+- **Mystery Trader items**: a design order reads the player's owned
+  parts (`Game.Objects` `TraderItems`); battles never award one yet.
 - **The queued cross-player credit routine**: no legal order is known to
   reach it (ORDERS.md, stars-elegy #87, UNRESOLVED HYPOTHESIS).
 - **Production side, not orders**: the Alternate Reality remote-mining
