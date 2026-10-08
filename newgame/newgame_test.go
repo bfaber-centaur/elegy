@@ -3,6 +3,7 @@ package newgame
 import (
 	"errors"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -970,9 +971,8 @@ func TestConfirmedSecondPlanetRedraw(t *testing.T) {
 	if sp.Env != hw.Env {
 		t.Errorf("legacy: second planet %v, want the homeworld's %v", sp.Env, hw.Env)
 	}
-	legacySecondPlanetFallback = false
-	defer func() { legacySecondPlanetFallback = true }()
-	res = generate(t, Settings{Size: Medium, Density: Normal, Players: []PlayerSetup{ps}}, 3)
+	fixed := rulesWith(func(l *engine.Legacy) { l.SecondPlanetFallback = false })
+	res = generate(t, Settings{Rules: fixed, Size: Medium, Density: Normal, Players: []PlayerSetup{ps}}, 3)
 	sp = res.Game.Planets[res.Players[0].SecondPlanet]
 	if sp.Env == hw.Env {
 		t.Errorf("fixed: second planet took the homeworld environment")
@@ -1106,15 +1106,14 @@ func TestElegyDecisionRandUniform(t *testing.T) {
 // With the shared-minerals LEGACY BUG switched off, each homeworld has
 // its own concentrations, floored at 30.
 func TestElegyDecisionSharedMineralsSwitch(t *testing.T) {
-	legacySharedHomeworldMinerals = false
-	defer func() { legacySharedHomeworldMinerals = true }()
 	var players []PlayerSetup
 	for range 8 {
 		p := human(engine.PRTInnerStrength)
 		p.Race.Spend = int(SpendMines)
 		players = append(players, p)
 	}
-	res := generate(t, Settings{Size: Large, Density: Normal, Players: players}, 2)
+	fixed := rulesWith(func(l *engine.Legacy) { l.SharedHomeworldMinerals = false })
+	res := generate(t, Settings{Rules: fixed, Size: Large, Density: Normal, Players: players}, 2)
 	distinct := map[[3]int]bool{}
 	for _, st := range res.Players {
 		hw := res.Game.Planets[st.Homeworld]
@@ -1353,13 +1352,16 @@ func TestConfirmedStartingDesignSlots(t *testing.T) {
 	}
 }
 
-// The Elegy ruleset's newgame switches equal the variables the package
-// still reads, and a new game carries its settings' ruleset.
-func TestElegyRulesMatchNewgameSwitches(t *testing.T) {
-	l := engine.ElegyRules().Legacy
-	if l.SharedHomeworldMinerals != legacySharedHomeworldMinerals || l.SecondPlanetFallback != legacySecondPlanetFallback {
-		t.Errorf("ElegyRules %+v, newgame switches %v %v", l, legacySharedHomeworldMinerals, legacySecondPlanetFallback)
-	}
+// rulesWith is a custom ruleset: the Elegy ruleset changed by change.
+func rulesWith(change func(*engine.Legacy)) engine.Ruleset {
+	r := engine.ElegyRules()
+	r.ID = "elegy-test-variant"
+	change(&r.Legacy)
+	return r
+}
+
+// A new game carries its settings' ruleset.
+func TestGenerateCarriesRules(t *testing.T) {
 	res := generate(t, Settings{Rules: engine.FaithfulRules(), Size: Tiny, Density: Normal, Players: twoPlayers()}, 1)
 	if res.Game.Rules != engine.FaithfulRules() {
 		t.Errorf("game rules %+v", res.Game.Rules)
@@ -1407,6 +1409,55 @@ func TestMeasuredStartingPlans(t *testing.T) {
 	for _, f := range g.Fleets {
 		if f.Plan != 0 {
 			t.Errorf("fleet %d starts on plan %d", f.ID, f.Plan)
+		}
+	}
+}
+
+// Games generated at the same time under different rulesets each follow
+// their own: with SharedHomeworldMinerals (Elegy) every homeworld has
+// planet 0's concentrations; without it each has its own.
+func TestRulesetsCoexistAtCreation(t *testing.T) {
+	own := rulesWith(func(l *engine.Legacy) { l.SharedHomeworldMinerals = false })
+	rulesets := []engine.Ruleset{engine.ElegyRules(), own}
+	settings := func(r engine.Ruleset) Settings {
+		var players []PlayerSetup
+		for range 4 {
+			p := withPoints(human(engine.PRTInnerStrength), 0)
+			p.Race.Spend = int(SpendMines)
+			players = append(players, p)
+		}
+		return Settings{Rules: r, Size: Medium, Density: Normal, Players: players}
+	}
+	const runs = 20
+	got := make([]Result, runs*len(rulesets))
+	errs := make([]error, len(got))
+	var wg sync.WaitGroup
+	for k := range got {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			got[k], errs[k] = Generate(settings(rulesets[k%len(rulesets)]), NewRand(7))
+		}()
+	}
+	wg.Wait()
+	for k, res := range got {
+		r := rulesets[k%len(rulesets)]
+		if errs[k] != nil {
+			t.Fatalf("%s: %v", r.ID, errs[k])
+		}
+		if res.Game.Rules != r {
+			t.Errorf("run %d: rules %s, want %s", k, res.Game.Rules.ID, r.ID)
+		}
+		distinct := map[[engine.NumMinerals]int]bool{}
+		for _, st := range res.Players {
+			hw := res.Game.Planets[st.Homeworld]
+			distinct[concentrationsOf(&hw)] = true
+		}
+		if shared := len(distinct) == 1; shared != r.Legacy.SharedHomeworldMinerals {
+			t.Errorf("run %d (%s): %d distinct homeworld concentrations", k, r.ID, len(distinct))
+		}
+		if !reflect.DeepEqual(res, got[k%len(rulesets)]) {
+			t.Errorf("run %d (%s) differs from run %d", k, r.ID, k%len(rulesets))
 		}
 	}
 }

@@ -119,14 +119,6 @@ type GateJump struct {
 	FleetLost bool
 }
 
-// LegacyGateMixedFleetLoss reproduces the original's mixed-fleet count
-// (OBJECTS.md "Mixed fleets", LEGACY BUG, MEASURED GT-001 H2, GT-002,
-// CONFIRMED GT-003 W0–W5): designs lost entirely count twice against the
-// fleet's number of designs and designs wiped out by the rolls once; at
-// exactly 0 the whole fleet is deleted, survivors included. On by
-// default.
-var LegacyGateMixedFleetLoss = true
-
 func friendly(g *engine.Game, owner, fleetOwner int) bool {
 	return relation(g, owner, fleetOwner) == engine.RelationFriend
 }
@@ -348,7 +340,13 @@ func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 		}
 	}
 	f.Stacks = kept
-	if len(f.Stacks) == 0 || (LegacyGateMixedFleetLoss && count == 0) {
+	// Legacy.GateMixedFleetLoss reproduces the original's mixed-fleet
+	// count (OBJECTS.md "Mixed fleets", LEGACY BUG, MEASURED GT-001 H2,
+	// GT-002, CONFIRMED GT-003 W0–W5): designs lost entirely count twice
+	// against the fleet's number of designs and designs wiped out by the
+	// rolls once; at exactly 0 the whole fleet is deleted, survivors
+	// included.
+	if len(f.Stacks) == 0 || (g.Rules.Legacy.GateMixedFleetLoss && count == 0) {
 		out.FleetLost = true
 		return out
 	}

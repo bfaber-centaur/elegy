@@ -43,8 +43,8 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Movement and fuel | `movement.go` | all 224 fleets of FM-001..004 (position, fuel, waypoints, warp, orbit, events), KERNEL fuel/range/chase vectors | no free warp, more than one engine per ship, cargo ties, chaser fuel per round (R, running dry, top-up, ram scoop) |
 | Starbase refuelling | `movement.go` | FM-004 DK | |
 | AR colonists in flight | `movement.go` `arColonistLoss` | TK-117, TK-107 (stars-elegy #44) | |
-| Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, switch `legacyFuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
-| Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `legacyCometAxes` | AR owner struck, the 180 cap, the probabilities |
+| Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, ruleset switch `Legacy.FuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
+| Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `Legacy.CometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
 | Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in KERNEL.md "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
@@ -358,7 +358,7 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 **Parity failures** (not in the baseline):
 
 - WU-CAP: research accumulated after a capture (above), not diagnosed.
-- FO-03-E, FO-06-G: "differs" only because `legacyMergeOverflow` is off
+- FO-03-E, FO-06-G: "differs" only because `Legacy.MergeOverflow` is off
   by default; they pass with the LEGACY BUG switch on.
 
 **Whole corpora or case groups skipped, and why:**

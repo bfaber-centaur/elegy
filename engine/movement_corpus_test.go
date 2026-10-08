@@ -72,7 +72,7 @@ func atoi(t *testing.T, s string) int {
 
 func loadFMSpec(t *testing.T, path string) Game {
 	t.Helper()
-	g := Game{Designs: fmDesigns()}
+	g := Game{Rules: ElegyRules(), Designs: fmDesigns()}
 	for _, p := range strings.Split(fmPlanets, ";") {
 		f := strings.Fields(p)
 		g.Planets = append(g.Planets, Planet{ID: atoi(t, f[0]), Pos: Point{atoi(t, f[1]), atoi(t, f[2])}, Owner: NoOwner})

@@ -48,32 +48,37 @@ Elegy would otherwise do differently. The spec column is the rule's place
 in the stars-elegy behavioural record and its evidence; the code comment
 at the use site has the detail.
 
-Status (2026-10-08): the inventory and the type are in place, and every
-game carries its ruleset, but the switch sites still read the
-package-level constants and variables listed under "Today's source".
-Tests check that `ElegyRules()` equals those values. Moving each site to
-read `Game.Rules` and deleting the package-level values is the next step.
+Every switch is read from the game's own ruleset (`g.Rules.Legacy`, or
+the new-game settings' `Rules` during generation); no package-level
+compatibility constant or variable remains. A function that has no game
+takes the switch as a parameter from a caller that does.
 
-| Saved name | Field | `elegy` v1 | `jrc3-faithful` v1 | Today's source | Spec and evidence |
+| Saved name | Field | `elegy` v1 | `jrc3-faithful` v1 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
-| `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `legacyFuelWrap` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
-| `colocation` | `Colocation` | on | on | `engine/scanning.go` `legacyColocation` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014 |
-| `drop_scan` | `DropScan` | on | on | `engine/takeover.go` `legacyDropScan` | TAKEOVER.md "Several players dropping at once", LEGACY BUG, CONFIRMED T-32 |
-| `starbase_armed_class` | `StarbaseArmedClass` | on | on | `engine/combat_token.go` `legacyStarbaseArmedClass` | COMBAT.md "Starbases in battle", LEGACY BUG, CONFIRMED CB-011..013 S4/S5 |
-| `observer_tech_mask` | `ObserverTechMask` | on | on | `engine/combat.go` `legacyObserverTechMask` | COMBAT.md "Tech from battle", LEGACY BUG, CONFIRMED CB-031-obs, CB-037 |
-| `plan0_recipient` | `Plan0Recipient` | on | on | `engine/combat_who.go` `legacyPlan0` | COMBAT.md "LEGACY BUG: plan 0 ...", CONFIRMED CB-011..013, CB-022, CB-035 |
-| `comet_axes` | `CometAxes` | on | on | `engine/randomevents.go` `legacyCometAxes` | KERNEL.md "Comet strike", LEGACY BUG, CONFIRMED KX-004 S2 (message only) |
-| `merge_dilution` | `MergeDilution` | on | on | `engine/fleetops.go` `legacyMergeDilution` (also read by `taskMergeRule`) | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO-01..07 |
-| `merge_overflow` | `MergeOverflow` | off | on | `engine/fleetops.go` `legacyMergeOverflow` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO; parity cases FO-03-E and FO-06-G differ under `elegy` |
-| `keep_unentitled_parts` | `KeepUnentitledParts` | off | on | `engine/fleetops.go` `legacyKeepUnentitledParts` | ORDERS.md "Design legality (Mystery Trader parts kept)", LEGACY BUG, CONFIRMED |
-| `field_limit_511` | `FieldLimit511` | off | on | `objects/minefields.go` `LegacyFieldLimit511` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
-| `empty_fleet_salvage` | `EmptyFleetSalvage` | on | on | `objects/minefields.go` `LegacyEmptyFleetSalvage` | OBJECTS.md "Hits on moving fleets", LEGACY BUG candidate, MEASURED OB-024 |
-| `due_north_south_cut` | `DueNorthSouthCut` | on | on | `objects/minefields.go` `LegacyDueNorthSouthCut` | OBJECTS.md "Due-north and due-south legs", LEGACY BUG, MEASURED MF-15 |
-| `mine_survivor_salvage` | `MineSurvivorSalvage` | on | on | `objects/minefields.go` `LegacyMineSurvivorSalvage` | OBJECTS.md "Cargo when ships are destroyed", LEGACY BUG candidate, MEASURED MF-14 |
-| `gate_mixed_fleet_loss` | `GateMixedFleetLoss` | on | on | `objects/stargates.go` `LegacyGateMixedFleetLoss` | OBJECTS.md "Mixed fleets", LEGACY BUG, MEASURED GT-001 H2, GT-002, CONFIRMED GT-003 W0–W5 |
-| `trader_last_redraw` | `TraderLastRedraw` | on | on | `objects/trader.go` `LegacyTraderLastRedraw` | OBJECTS.md "Encounters", LEGACY BUG, BINARY-ONLY |
-| `shared_homeworld_minerals` | `SharedHomeworldMinerals` | on | on | `newgame/players.go` `legacySharedHomeworldMinerals` | UNIVERSE.md "Shared starting minerals", LEGACY BUG, CONFIRMED UG16–UG21 |
-| `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `legacySecondPlanetFallback` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
+| `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `Game.fuelTerm` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
+| `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014 |
+| `drop_scan` | `DropScan` | on | on | `engine/takeover.go` `Game.dropWinner` | TAKEOVER.md "Several players dropping at once", LEGACY BUG, CONFIRMED T-32 |
+| `starbase_armed_class` | `StarbaseArmedClass` | on | on | `engine/combat_battle.go`, `starbaseClass` | COMBAT.md "Starbases in battle", LEGACY BUG, CONFIRMED CB-011..013 S4/S5 |
+| `observer_tech_mask` | `ObserverTechMask` | on | on | `engine/combat.go` `battle.techAttempts` | COMBAT.md "Tech from battle", LEGACY BUG, CONFIRMED CB-031-obs, CB-037 |
+| `plan0_recipient` | `Plan0Recipient` | on | on | `engine/combat_who.go` `legacyPlan0Recipient` | COMBAT.md "LEGACY BUG: plan 0 ...", CONFIRMED CB-011..013, CB-022, CB-035 |
+| `comet_axes` | `CometAxes` | on | on | `engine/randomevents.go` `Game.cometStrike` | KERNEL.md "Comet strike", LEGACY BUG, CONFIRMED KX-004 S2 (message only) |
+| `merge_dilution` | `MergeDilution` | on | on | `engine/fleetops.go` `Game.taskMergeRule` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO-01..07 |
+| `merge_overflow` | `MergeOverflow` | off | on | `engine/fleetops.go` `Game.mergeTask` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO; parity cases FO-03-E and FO-06-G differ under `elegy` |
+| `keep_unentitled_parts` | `KeepUnentitledParts` | off | on | `engine/fleetops.go` `Catalog.ReadDesign` (takes the ruleset) | ORDERS.md "Design legality (Mystery Trader parts kept)", LEGACY BUG, CONFIRMED |
+| `field_limit_511` | `FieldLimit511` | off | on | `objects/minefields.go` `Space.Lay` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
+| `empty_fleet_salvage` | `EmptyFleetSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Hits on moving fleets", LEGACY BUG candidate, MEASURED OB-024 |
+| `due_north_south_cut` | `DueNorthSouthCut` | on | on | `objects/minefields.go` `CheckStep` | OBJECTS.md "Due-north and due-south legs", LEGACY BUG, MEASURED MF-15 |
+| `mine_survivor_salvage` | `MineSurvivorSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Cargo when ships are destroyed", LEGACY BUG candidate, MEASURED MF-14 |
+| `gate_mixed_fleet_loss` | `GateMixedFleetLoss` | on | on | `objects/stargates.go` `Jump` | OBJECTS.md "Mixed fleets", LEGACY BUG, MEASURED GT-001 H2, GT-002, CONFIRMED GT-003 W0–W5 |
+| `trader_last_redraw` | `TraderLastRedraw` | on | on | `objects/trader.go` `Space.reward` | OBJECTS.md "Encounters", LEGACY BUG, BINARY-ONLY |
+| `shared_homeworld_minerals` | `SharedHomeworldMinerals` | on | on | `newgame/players.go` `setUpHomeworld` | UNIVERSE.md "Shared starting minerals", LEGACY BUG, CONFIRMED UG16–UG21 |
+| `second_planet_fallback` | `SecondPlanetFallback` | on | on | `newgame/players.go` `setUpSecondPlanet` | UNIVERSE.md "Second planet", LEGACY BUG, CONFIRMED UG29, UG30 (success on exactly the 100th redraw BINARY-ONLY) |
+
+Not every off setting has been exercised. One known gap: with
+`colocation` off, a fleet with no scanner still sees a cloaked fleet at its
+own position, because the range test passes at distance 0, so the off
+setting does not yet do what its comment says (found while writing the
+coexistence test; the off path was never reachable before rulesets).
 
 ## Related behaviour that is not a switch yet
 

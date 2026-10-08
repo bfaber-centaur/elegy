@@ -126,13 +126,6 @@ func (b *battle) finish() {
 	}
 }
 
-// legacyObserverTechMask reproduces the original's LEGACY BUG in the
-// tech attempt of players outside the battle (COMBAT.md "Tech from
-// battle", CONFIRMED, CB-031-obs, CB-037): it tests the player's number against the
-// observer bitmask instead of the player's bit. Set it to false to test
-// the bit, as the game means to.
-const legacyObserverTechMask = true
-
 // techAttempts makes the battle's tech-from-battle attempts (COMBAT.md
 // "Tech from battle"): every player of the game is considered once, in
 // player-number order. A wiped-out participant of a two-player battle makes
@@ -189,8 +182,14 @@ func (b *battle) techAttempts(gained map[int]bool) []Event {
 		case owner == p:
 			attempt = true
 		default:
+			// Legacy.ObserverTechMask reproduces the original's LEGACY
+			// BUG in the tech attempt of players outside the battle
+			// (COMBAT.md "Tech from battle", CONFIRMED, CB-031-obs,
+			// CB-037): it tests the player's number against the observer
+			// bitmask instead of the player's bit. Off, the bit is
+			// tested, as the game means to.
 			mask := 1 << p
-			if legacyObserverTechMask {
+			if g.Rules.Legacy.ObserverTechMask {
 				mask = p
 			}
 			attempt = mask&observers != 0 && present[p]

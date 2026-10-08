@@ -175,7 +175,7 @@ func pqGame(pop int, queue []QueueItem) Game {
 		Population: pop, GrowthCarry: 80, Defenses: 10,
 		Surface: Minerals{500, 500, 500}, HasQueue: true, Queue: queue,
 	}
-	return Game{Year: 2407, Players: []Player{{Race: race}}, Planets: []Planet{p}}
+	return Game{Rules: ElegyRules(), Year: 2407, Players: []Player{{Race: race}}, Planets: []Planet{p}}
 }
 
 func TestConfirmedProductionPQ001TwoYears(t *testing.T) {

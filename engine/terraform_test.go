@@ -9,6 +9,7 @@ func caGame(env, orig [3]int, levels [NumFields]int, tt bool) Game {
 	r.PRT = PRTClaimAdjuster
 	r.LRT.TotalTerraforming = tt
 	g := Game{
+		Rules:   ElegyRules(),
 		Players: []Player{{Race: r}},
 		Planets: []Planet{{ID: 1, Owner: 0, Population: 100, Env: env, OrigEnv: orig}},
 	}

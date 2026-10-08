@@ -28,13 +28,13 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Aggressors; only fleets start battles | `whoFights` | CONFIRMED | `TestConfirmedOnlyFleetsStartBattles` |
 | Starbase joins with plan 0 | `whoFights` | CONFIRMED | `TestConfirmedStarbaseJoinsWithPlan0` |
 | Procedure: P, Q, retaliation, friends | `whoFights` | BINARY-ONLY (firing back CONFIRMED) | `TestPredictionBattleTurn` |
-| LEGACY BUG plan 0 "everyone"/named player, one-player battle; X at the first location (Elegy's chosen rule: contributes nothing) | `legacyPlan0Recipient`, `write` (switch `legacyPlan0`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022, CB-035); the first-location rule BINARY-ONLY | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient`, `TestPredictionPlan0AbsentPlayer` |
+| LEGACY BUG plan 0 "everyone"/named player, one-player battle; X at the first location (Elegy's chosen rule: contributes nothing) | `legacyPlan0Recipient`, `write` (ruleset switch `Legacy.Plan0Recipient`) | LEGACY BUG, CONFIRMED (CB-011..013, CB-022, CB-035); the first-location rule BINARY-ONLY | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionLegacyPlan0Recipient`, `TestPredictionPlan0AbsentPlayer` |
 | Token cap: 255, quota 255/n, first pass from the location's first fleet then highest to lowest, re-add pass | `capTokens` | CONFIRMED (CB-039); a starbase and a skipped re-add BINARY-ONLY | `TestConfirmedTokenCap`, `TestPredictionTokenCapStarbase` |
 | Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 1 to 6 and a rank past row n (CB-022, CB-031..CB-036) | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestConfirmedStartSquareFlatTable` |
 | Setup: dump cargo, jitter, shuffle | `setup` | BINARY-ONLY | `TestPredictionBattleTurn` |
 | Energy Dampener | `setup` | CONFIRMED | `TestConfirmedEnergyDampener` |
 | Token values | `combat_token.go` `tokenValues` | CONFIRMED (starbase jammer BINARY-ONLY) | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestPredictionStarbaseJammer` |
-| LEGACY BUG starbase is always "armed" | `starbaseClass` (switch `legacyStarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
+| LEGACY BUG starbase is always "armed" | `starbaseClass` (ruleset switch `Legacy.StarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
 | Speed code; cargo mass per ship `C·c/F` | `speedCode`, `battleMass` | CONFIRMED (designer CB-000; cargo and WM CB-038; dump CB-025) | `TestConfirmedEnergyDampener`, `TestConfirmedCargoMassPerShip` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
 | Rounds, out-of-battle check in player order (ends the battle only) | `combat_battle.go` `fight`, `checkIn` | CONFIRMED (CB-033) | `TestConfirmedPlan0OnePlayerBattle`, `TestPredictionOutPlayerStillFires` |
@@ -54,7 +54,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024) | `TestConfirmedRepair`, `TestPredictionRepairOthers` |
 | Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | CONFIRMED (CB-012, CB-021, CB-029, CB-031-n3, CB-041) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
-| LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (switch `legacyObserverTechMask`) | LEGACY BUG, CONFIRMED (CB-031-obs, CB-037) | `TestPredictionTechAttemptRules` |
+| LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (ruleset switch `Legacy.ObserverTechMask`) | LEGACY BUG, CONFIRMED (CB-031-obs, CB-037) | `TestPredictionTechAttemptRules` |
 
 ## Not tested against the oracle
 

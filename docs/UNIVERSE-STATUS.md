@@ -53,12 +53,12 @@ Test names follow the engine's convention:
 | Starting tech | `players.go` | CONFIRMED |
 | Homeworld setup, BBS, AR (spends RD-7), computer players | `players.go` | CONFIRMED |
 | Built-in computer races | `races/builtin.go`, `ComputerPlayer` | CONFIRMED (AI.md, 23 of 24; SS harder BINARY-ONLY) |
-| Shared starting minerals | `players.go` | LEGACY BUG, `legacySharedHomeworldMinerals` |
+| Shared starting minerals | `players.go` | LEGACY BUG, `Legacy.SharedHomeworldMinerals` |
 | Leftover-point spends | `players.go` | CONFIRMED |
 | Starbase designs and loadouts | `designs.go` | CONFIRMED |
 | Starting ships and part upgrades | `designs.go` | CONFIRMED |
 | Starting designs recorded in `Game.DesignSlots`: starbase slots 0/1, each new ship design the next ship slot | `designs.go` | CONFIRMED (UNIVERSE.md "Starbases", "Starting ships"; UG01..UG21); wired for the engine 2026-10-08, `TestConfirmedStartingDesignSlots` |
-| Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `legacySecondPlanetFallback` |
+| Second planet (PP, IT) | `players.go` | CONFIRMED; redraw fallback LEGACY BUG CONFIRMED (UG29, UG30), `Legacy.SecondPlanetFallback` |
 | Relations, research, queues | `players.go` | MEASURED |
 | Starting battle plans: the same five (Default, Kill Starbase, Max-Defense, Sniper, Chicken) for every player | `players.go` `StartingPlans` | MEASURED (COMBAT.md "Starting plans", UG01..UG21), `TestMeasuredStartingPlans` |
 | Wormholes | `wormholes.go` | creation and placement badness CONFIRMED |
@@ -100,10 +100,10 @@ All 291 player expectations (124 UG, 167 RD/RW) and all sample checks
 
 ## LEGACY BUG switches
 
-- `legacySharedHomeworldMinerals` (on): every homeworld gets one shared
+- `Legacy.SharedHomeworldMinerals` (on in the `elegy` ruleset): every homeworld gets one shared
   surface draw and planet 0's concentrations floored at 30. Off: each
   homeworld uses its own concentrations (floored at 30) and its own draw.
-- `legacySecondPlanetFallback` (on): a second planet whose 100 redraws were
+- `Legacy.SecondPlanetFallback` (on in the `elegy` ruleset): a second planet whose 100 redraws were
   all used takes the homeworld's environment. Off: it keeps the last
   redraw.
 
