@@ -17,8 +17,8 @@ import (
 // slots (engine.DesignSlot Created, Picture), which the game stores and
 // saves, so a planner keeps nothing between years.
 //
-// Wormholes and other players' PRT are left empty here; ViewOf adds the
-// report's wormholes. docs/AI-STATUS.md tracks these inputs.
+// Wormholes, other players' PRT and their designs are left empty here;
+// ViewOf adds the report's wormholes and fully known designs. docs/AI-STATUS.md tracks these inputs.
 func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]engine.PlanetReport) *View {
 	v := &View{
 		Year: r.Year, Player: r.Player, Level: lvl, Rules: r.Rules,
@@ -28,6 +28,7 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 		Seen:     map[int]bool{},
 		Others:   r.View.Fleets,
 		PRT:      map[int]engine.PRT{},
+		Foreign:  map[int]engine.Design{},
 	}
 	for id, rep := range history {
 		v.Known[id] = rep

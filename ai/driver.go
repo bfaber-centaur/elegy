@@ -58,7 +58,8 @@ func (d *Driver) Orders(r game.Report) ([]engine.Order, error) {
 }
 
 // ViewOf builds a planner's View from everything a game.Report carries:
-// the universe map, the planet history and the known wormhole ends.
+// the universe map, the planet history, the known wormhole ends and the
+// other players' designs known in full.
 //
 // ASSUMPTION A45: a known wormhole end's reported stability (0 Rock Solid
 // .. 6 Extremely Volatile) stands for its movement class in the wormhole
@@ -78,6 +79,11 @@ func ViewOf(r game.Report, lvl Level) *View {
 	v := NewView(r, lvl, universe, history)
 	for _, w := range r.Wormholes {
 		v.Wormholes = append(v.Wormholes, Wormhole{End: w.End, Pos: w.Pos, Known: true, Class: w.Stability})
+	}
+	for _, d := range r.KnownDesigns {
+		if d.Full && d.Design != nil {
+			v.Foreign[d.Index] = *d.Design
+		}
 	}
 	return v
 }

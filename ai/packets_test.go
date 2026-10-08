@@ -171,3 +171,50 @@ func TestPacketLegacyFromRules(t *testing.T) {
 		t.Errorf("jrc3-faithful: %+v, want both on", got)
 	}
 }
+
+// A target with a starbase in view qualifies once its design is known in
+// full: a Mass Driver 5 catcher (c = 5) at w = 8 raises the kill mass to
+// 16000·108/((64 − 25)·95) = 466, so A = 466/0.75^0.807 = 587 kT, 9
+// packets. Seen only partially, or with a catcher as fast as w, the
+// planet is no target.
+func TestAttackPacketCatcher(t *testing.T) {
+	catcher := func(t *testing.T, driver string) engine.Design {
+		t.Helper()
+		d, err := engine.Components().NewDesign("Their Fort", "Space Station", []engine.SlotFill{fill(0, driver, 1)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	for _, tc := range []struct {
+		name   string
+		driver string // "" when the design is not known in full
+		want   int    // packets; 0 for no attack
+	}{
+		{"known", "Mass Driver 5", 9},
+		{"partial", "", 0},
+		{"as fast", "Super Driver 8", 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			v := shotView(t, "Mass Driver 5", engine.Point{X: 151, Y: 208})
+			v.Known[2] = engine.PlanetReport{Planet: 2, Level: engine.ReportNormal, Owner: 1, PopEstimate: 800, Starbase: true, StarbaseDesign: 77}
+			if tc.driver != "" {
+				v.Foreign = map[int]engine.Design{77: catcher(t, tc.driver)}
+			}
+			v.Planets[0].Surface = engine.Minerals{3000, 2000, 1000}
+			v.Planets[0].Population, v.Planets[0].Factories = 3000, 200
+			ct := cyberTest(t, v, &script{t: t})
+			marked := map[int]bool{}
+			attacked := ct.attackPacket(&v.Planets[0], 0, marked)
+			n := 0
+			for _, it := range ct.q.get(&v.Planets[0]) {
+				if it.Kind >= engine.ItemIroniumPacket && it.Kind <= engine.ItemIroniumPacket+2 {
+					n += it.Count
+				}
+			}
+			if attacked != (tc.want > 0) || n != tc.want {
+				t.Errorf("attacked %v with %d packets, want %d (resources %d)", attacked, n, tc.want, v.available(&v.Planets[0], 0).Resources)
+			}
+		})
+	}
+}

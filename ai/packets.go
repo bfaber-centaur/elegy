@@ -163,9 +163,16 @@ func (t *cyberTurn) supply(p *engine.Planet, budget int, marked map[int]bool) bo
 // and R the available resources before it (§6 names the queue only for
 // M); f is computed in floating point; the range test is inclusive.
 //
-// ASSUMPTION A50: the report does not carry the parts of another
-// player's starbase design, so its catch warp cannot be read: only planets
-// with no starbase in view are targets.
+// A target's starbase counts only as the report holds it: a planet whose
+// starbase is in view must have that design known in full (View.Foreign),
+// and its catch warp c is the design's Dw + t (OBJECTS.md "Impact"); a
+// planet with no starbase in view has c = 0.
+//
+// ASSUMPTION A50: c is not halved for an Interstellar Traveler target
+// (§6 names no halving, and the view holds no PRT); a target whose catch
+// warp is at least w is skipped, since a packet no faster than its
+// catcher does no damage (OBJECTS.md "Impact") and the kill mass has no
+// positive value.
 func (t *cyberTurn) attackPacket(p *engine.Planet, budget int, marked map[int]bool) bool {
 	v := t.v
 	switch {
@@ -195,7 +202,20 @@ func (t *cyberTurn) attackPacket(p *engine.Planet, budget int, marked map[int]bo
 		if !known || o == engine.NoOwner || o == v.Player || marked[pp.ID] || v.PRT[o] == engine.PRTAlternateReality {
 			continue
 		}
-		if rep.PopEstimate <= 0 || rep.Starbase {
+		if rep.PopEstimate <= 0 {
+			continue
+		}
+		c := 0
+		if rep.Starbase {
+			sb, ok := v.Foreign[rep.StarbaseDesign]
+			if !ok {
+				continue
+			}
+			if dw, two, ok := objects.DriverWarp(sb); ok {
+				c = dw + two
+			}
+		}
+		if c >= w {
 			continue
 		}
 		dd := d2(p.Pos, pp.Pos)
@@ -204,7 +224,6 @@ func (t *cyberTurn) attackPacket(p *engine.Planet, budget int, marked map[int]bo
 			continue
 		}
 		pop := rep.PopEstimate / 400
-		c := 0 // no starbase, no catcher
 		need := 16000 * min(1000, 4*(pop+25)) / ((w*w - c*c) * (95 - rep.DefenseEstimate))
 		share := math.Pow(q, dist/float64(w*w))
 		if need > int(float64(C)*share) {

@@ -42,7 +42,7 @@ unless the project decides otherwise.
 | Robotoid's design ladder, steps 1–7, with its reproduced LEGACY BUGs | robotoid.md §2 | CONFIRMED AI-8 | `ai/robotoid_designs.go` | `TestRobotoid*` |
 | Cybertron's design steps 1–8: Frigate, Destroyers, Privateers, warship groups, guards | cybertron.md §2 | CONFIRMED AI-19 | `ai/cybertron_designs.go` | `TestCybertron*` |
 | Cybertron's turn: merges by slot, parameters, ageing, splits, threat marks, fleet passes A and B (armada targeting, Destroyer attack targets, buddy joins, colony ships, freighters, slot-0 fleets), production, its starbase rule | cybertron.md §1, §3–§5, AI.md §10, §11 | Fleets MEASURED AI-21, starbases MEASURED AI-20; the rest BINARY-ONLY | `ai/cybertron.go`, `ai/automation.go` | `TestCybertron*` |
-| Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket` |
+| Cybertron's packets: supply, attack and the scanner shot, with packet marks | cybertron.md §6 | Warps, attack counts and scanner-shot destinations (as a band) MEASURED AI-24; supply not exercised; the rest BINARY-ONLY | `ai/packets.go` | `TestScannerShot*`, `TestAttackPacket*`, `TestViewOfForeignDesigns` |
 | Robotoid's turn: merges, armada parameters, ageing, splits, threat marks, colonizer test, production, fleet passes A (transports, targets, colonizers, scouts), B (hub assignment and hub freighters) and C (obsolete fleets, armadas, join-up, attack targets) | robotoid.md §1, §3, §4; AI.md §6, §10, §11 | Fleets MEASURED AI-12, production order MEASURED AI-9; the rest BINARY-ONLY | `ai/robotoid.go`, `ai/turn.go` | `TestRobotoid*`, `TestAttackFleet`, `TestAssignHubs` |
 | A view of one player's report | AI.md §1 | CONFIRMED AI-12 (planet view) | `ai/view.go`, `ai/report.go` | `TestRototillPlaysAlone` |
 
@@ -120,7 +120,7 @@ them it stayed on its homeworld.
 | A47 | Each attack-fleet item Cybertron's production queues adds one to its kind's fleet count only when its slot holds a design and the item is queued. |
 | A48 | Packet supply: minerals tried in order ironium, boranium, germanium, the first with a target wins; "over 700 kT" and "at least 70 resources" are amounts left after the queue; the low notes read the target's surface minerals; a planet is not its own target; "up to 7" is as many as the amount left pays for, at most 7; the speed is w. |
 | A49 | Attack packets (cybertron.md §6: the budget test BINARY-ONLY, the mass sent MEASURED AI-24): M sums the three minerals left after the queue and R is the available resources before it (§6 names the queue only for M); f is computed in floating point; the range test is inclusive. |
-| A50 | The report does not carry the parts of another player's starbase design, so its catch warp cannot be read: only planets with no starbase in view are attack-packet targets. |
+| A50 | An attack-packet target's catch warp c (the Dw + t of its starbase design known in full, OBJECTS.md "Impact") is not halved for an Interstellar Traveler owner: §6 names no halving, and the view holds no PRT. A target whose c is at least w is skipped, since a packet no faster than its catcher does no damage. |
 | A51 | Retired: the scanner shot's mark on the planet one id higher and its w ≥ 14 distance overflow are the ruleset switches `CybertronPacketMarkNextID` and `CybertronScannerShotOverflow` (off in elegy, on in jrc3-faithful); with them off, the mark is on the destination. |
 | A52 | A starbase with no mass driver (w = 3) leaves the packet speed unset: an order cannot carry warp 3. |
 
@@ -164,8 +164,6 @@ test). It is a determinism check, not a parity check.
 
 - Other players' PRT (the report withholds it; every other player counts
   as not Alternate Reality).
-- The parts of another player's fully known starbase design, for the
-  attack packets' catch warp (A50).
 
 ## Not implemented yet
 
