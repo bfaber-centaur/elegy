@@ -141,3 +141,77 @@ func TestAgeGroup(t *testing.T) {
 		t.Errorf("orders %+v", ds)
 	}
 }
+
+// Every Cybertron list has one class per slot of its hull.
+func TestCybertronListsFitHulls(t *testing.T) {
+	cat := engine.Components()
+	for i, l := range cybertronLists {
+		c, ok := cat.Lookup(l.hull)
+		if !ok {
+			t.Fatalf("list %d: no hull %s", i, l.hull)
+		}
+		h, _ := c.Hull()
+		if len(l.classes) != len(h.Slots) {
+			t.Errorf("list %d has %d classes, %s has %d slots", i, len(l.classes), l.hull, len(h.Slots))
+		}
+	}
+}
+
+func ppView(year int, levels [engine.NumFields]int) *View {
+	race := engine.Race{PRT: engine.PRTPacketPhysics, LRT: engine.LRTs{ImprovedFuelEfficiency: true}} // AI.md §3: PP has IFE
+	return &View{Year: year, Self: engine.Player{Race: race, Research: engine.ResearchState{Levels: levels}}}
+}
+
+// Cybertron step 1: at expert after year index 5 a Scout in slot 0 with no
+// ships is deleted; the Frigate is then tried every year.
+func TestCybertronSlotZero(t *testing.T) {
+	var res Result
+	v := ppView(2406, [engine.NumFields]int{})
+	v.Ships = []Design{{Slot: 0, Design: engine.Design{Hull: engine.Hull{Name: "Scout"}}, Created: 2400}}
+	s := newShipDesigns(v, top{}, &res)
+	s.cybertronDesigns(Expert, 6, map[int]int{})
+	if ds := designOrders(res); len(ds) != 1 || ds[0] != (engine.DeleteDesignOrder{Slot: 0}) {
+		t.Errorf("orders %+v", ds)
+	}
+	res = Result{}
+	s = newShipDesigns(v, top{}, &res)
+	s.cybertronDesigns(Expert, 5, map[int]int{})
+	if ds := designOrders(res); len(ds) != 0 {
+		t.Errorf("year index 5: %+v", ds)
+	}
+}
+
+// A range tries its lists without repeats: Random(m) over the lists left.
+func TestCybertronRange(t *testing.T) {
+	var res Result
+	v := ppView(2431, [engine.NumFields]int{})
+	r := &script{t: t, draws: []int{4, 3, 2, 1, 0}}
+	s := newShipDesigns(v, r, &res)
+	// At tech 0 no Destroyer list can be built (class 8 needs Fuel Mizer).
+	if s.cyberRange(4, 0, 4) {
+		t.Fatal("built at tech 0")
+	}
+	if want := []int{5, 4, 3, 2, 1}; !slices.Equal(r.bounds, want) {
+		t.Errorf("draws Random%v, want Random%v", r.bounds, want)
+	}
+}
+
+// Step 2 at the 2431 tech: Destroyer list 0 is tried first (y ≤ 75).
+func TestCybertronDestroyer(t *testing.T) {
+	var res Result
+	v := ppView(2431, [engine.NumFields]int{3, 5, 2, 3, 3, 3})
+	s := newShipDesigns(v, top{}, &res)
+	s.cybertronDesigns(Expert, 31, map[int]int{})
+	var slots []int
+	for _, o := range designOrders(res) {
+		if d, ok := o.(engine.DesignOrder); ok {
+			slots = append(slots, d.Slot)
+			if d.Slot == 4 && d.Hull != "Destroyer" {
+				t.Errorf("slot 4: %+v", d)
+			}
+		}
+	}
+	if !slices.Contains(slots, 4) || !slices.Contains(slots, 14) {
+		t.Errorf("design slots %v, want 4 and 14 (AIX 2431)", slots)
+	}
+}
