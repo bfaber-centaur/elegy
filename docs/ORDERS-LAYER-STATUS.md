@@ -48,7 +48,7 @@ at the end of the replay, before any waypoint task.
 | `RepeatOrder` | own fleet; sets or clears the repeat-orders flag (the host checks no owner, LEGACY BUG) | ORDERS.md "Reaching a waypoint", "Ownership"; LIMITS.md "No owner check" | chosen rule | `TestRepeatOrder` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
-| `SplitOrder` | own fleet; a new fleet of the named ships with the source's plan, waypoints and task; cargo and fuel shared by capacity, rounded down, the remainder on the source; lowest free number (L20); repeat flag copied (L21); refused at 512 fleets | ORDERS.md "Split" | CONFIRMED (CO-01, CO-02); FC-1 | `TestConfirmedSplitSharesByCapacity`, `TestConfirmedSplitAllRemainderOnSource` |
+| `SplitOrder` | own fleet; a new fleet of the named ships with the source's plan, waypoints and task; cargo and fuel shared by capacity, rounded down, the remainder on the source; lowest free number (L20); repeat flag copied (L21); refused at 512 fleets; a NewFleet name below 0 stands for the new fleet in the file's later orders (L28) | ORDERS.md "Split" | CONFIRMED (CO-01, CO-02); FC-1 | `TestConfirmedSplitSharesByCapacity`, `TestConfirmedSplitAllRemainderOnSource`, `TestSplitNewFleetName` |
 | `MoveShipsOrder` | two own fleets at one place; ships move with their capacity share of cargo and fuel; damage combined by the merge order's rule; at most 32765 per stack, the rest lost; damaged stacks split keep their damage (L22); an emptied fleet removed (L23) | ORDERS.md "Split", "Merge" | CONFIRMED (CO-03); stack limit MEASURED (CO-06) | `TestConfirmedMoveShips`, `TestMoveShipsChecks` |
 | `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
 | `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, a sent percentage kept only against an unused old item of the same kind with exactly that percentage (chosen rule) | LIMITS.md "Production-queue replace" | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueNoNewProgress` |
@@ -89,6 +89,7 @@ and has been sent to stars-elegy as a question.
 | L25 | A design picture outside 0..3 rejects the design order. | AI.md "Picture" names four pictures per hull and no order-time check. |
 | L26 | A design edited in place takes the edit's year as its creation year, and the order's picture. | AI.md "Storing a design" covers a delete and a new design only. |
 | L27 | A wormhole-end or Mystery Trader waypoint target need not be known to the player. | As planet and fleet targets; ORDERS.md gives no knowledge check. |
+| L28 | A split may name its new fleet with a value below 0 that the file's later orders use for it; a name above 0 or used twice rejects the split, and a rejected split's name binds nothing. | ORDERS.md has no such names (the original's client knows a new fleet's number at once); computer players need one (AI.md §10). |
 
 ## Ships leaving production
 
@@ -177,7 +178,7 @@ successor needs before it can change.
 ### Labelled choices
 
 Every Elegy choice is in the tables above: L2, L4, L6, L7, L11, L14–L16,
-L18–L27 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
+L18–L28 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
 `ASSUMPTION` in the code. L1, L3, L5, L8–L10, L12 and L17 are
 settled by the specs (L13 was never used).
 

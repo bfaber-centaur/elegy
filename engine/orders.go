@@ -68,6 +68,9 @@ type Applied struct {
 	// "Manual cargo transfers to other players", CONFIRMED TK-501) at the
 	// front of its queue (TAKEOVER.md "Order inside a phase").
 	drops []drop
+	// newFleets maps the current file's new-fleet names to the fleets
+	// their splits made (SplitOrder.NewFleet).
+	newFleets map[int]int
 }
 
 // maxNameLength is the longest fleet, design or battle-plan name Elegy
@@ -132,11 +135,13 @@ func ApplyOrders(g *Game, files []PlayerOrders, replay []int) *Applied {
 		if !ok {
 			continue
 		}
+		a.newFleets = map[int]int{}
 		for k, o := range files[i].Orders {
-			err := o.apply(g, p, a)
+			err := withNewFleets(o, a.newFleets).apply(g, p, a)
 			a.Results = append(a.Results, OrderResult{Player: p, Index: k, Err: err})
 		}
 	}
+	a.newFleets = nil
 	return a
 }
 

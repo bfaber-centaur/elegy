@@ -102,3 +102,57 @@ func TestMoveShipsChecks(t *testing.T) {
 		t.Errorf("stack %d, want %d", n, maxExchangeStack)
 	}
 }
+
+func TestSplitNewFleetName(t *testing.T) {
+	// ASSUMPTION L28: a split's NewFleet name stands for the new fleet in
+	// the file's later orders: here a rename, a waypoint and a move back
+	// of its ship.
+	g := shipsGame()
+	one := []Stack{{Design: 1, Count: 1}}
+	wp := Waypoint{Pos: Point{1400, 1400}, Warp: 5}
+	errs, _ := apply(g, 0,
+		SplitOrder{Fleet: 1, Ships: one, NewFleet: -1},
+		RenameOrder{Fleet: -1, Name: "Scout"},
+		WaypointOrder{Fleet: -1, Waypoints: []Waypoint{wp}},
+		SplitOrder{Fleet: 1, Ships: one, NewFleet: -2},
+		MoveShipsOrder{Fleet: 1, With: -2, Ships: one},
+	)
+	for k, err := range errs {
+		if err != nil {
+			t.Fatalf("order %d: %v", k, err)
+		}
+	}
+	// The second new fleet, emptied by the move, is removed (L23).
+	first := g.Fleets[len(g.Fleets)-1]
+	if first.Name != "Scout" || len(first.Waypoints) != 1 || first.Waypoints[0] != wp || first.Number != 4 {
+		t.Errorf("named fleet %+v", first)
+	}
+	if g.Fleets[0].Stacks[0].Count != 3 {
+		t.Errorf("source keeps %d ships, want 3 (one split off, one split and moved back)", g.Fleets[0].Stacks[0].Count)
+	}
+
+	// A name above 0 or used twice rejects the split; a rejected split's
+	// name binds nothing; names do not outlive their file.
+	g = shipsGame()
+	errs, _ = apply(g, 0,
+		SplitOrder{Fleet: 1, Ships: one, NewFleet: 7},
+		SplitOrder{Fleet: 1, Ships: one, NewFleet: -1},
+		SplitOrder{Fleet: 1, Ships: one, NewFleet: -1},
+		SplitOrder{Fleet: 1, Ships: []Stack{{Design: 1, Count: 99}}, NewFleet: -3},
+		RenameOrder{Fleet: -3, Name: "x"},
+	)
+	for k, want := range []error{ErrOutOfRange, nil, ErrOutOfRange, nil, ErrNoSuchObject} {
+		if k == 3 {
+			if errs[k] == nil {
+				t.Errorf("order 3: an impossible split was accepted")
+			}
+			continue
+		}
+		if !errors.Is(errs[k], want) && !(want == nil && errs[k] == nil) {
+			t.Errorf("order %d: %v, want %v", k, errs[k], want)
+		}
+	}
+	if errs, _ := apply(g, 0, RenameOrder{Fleet: -1, Name: "x"}); !errors.Is(errs[0], ErrNoSuchObject) {
+		t.Errorf("a name from another file: %v", errs[0])
+	}
+}
