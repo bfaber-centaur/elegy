@@ -1461,3 +1461,35 @@ func TestRulesetsCoexistAtCreation(t *testing.T) {
 		}
 	}
 }
+
+// Every planet's original environment is its starting environment
+// (KERNEL.md "Terraforming": the never-terraformed value), and each
+// player's starting fleets are numbered from 1 in the order of
+// UNIVERSE.md "Starting ships" (CONFIRMED), which TestConfirmedStartingShips
+// checks start.Fleets follows.
+func TestConfirmedOrigEnvAndFleetNumbers(t *testing.T) {
+	var players []PlayerSetup
+	for _, prt := range allPRTs {
+		players = append(players, human(prt))
+	}
+	players = append(players, computer(engine.PRTPacketPhysics, Expert))
+	res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, 8)
+	g := res.Game
+	for _, p := range g.Planets {
+		if p.OrigEnv != p.Env {
+			t.Errorf("planet %d: original environment %v, environment %v", p.ID, p.OrigEnv, p.Env)
+		}
+	}
+	numbered := 0
+	for i, st := range res.Players {
+		for k, id := range st.Fleets {
+			if f := g.Fleets[id]; f.Owner != i || f.Number != k+1 {
+				t.Errorf("player %d starting fleet %d (id %d): owner %d number %d", i, k, id, f.Owner, f.Number)
+			}
+			numbered++
+		}
+	}
+	if numbered != len(g.Fleets) {
+		t.Errorf("%d of %d fleets are starting fleets", numbered, len(g.Fleets))
+	}
+}
