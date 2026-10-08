@@ -376,6 +376,7 @@ func TestLoadRejects(t *testing.T) {
 		"not json":      "{",
 		"format":        strings.Replace(string(b), `"elegy-save"`, `"other"`, 1),
 		"version":       strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 99`, 1),
+		"older version": strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), fmt.Sprintf(`"version": %d`, SaveVersion-1), 1),
 		"levels":        strings.Replace(string(b), `"levels": [`, `"levels": [0, `, 1),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
