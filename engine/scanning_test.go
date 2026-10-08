@@ -38,7 +38,7 @@ var (
 type scanLab struct{ g Game }
 
 func newScanLab() *scanLab {
-	l := &scanLab{g: Game{Players: make([]Player, 2)}}
+	l := &scanLab{g: Game{Rules: ElegyRules(), Players: make([]Player, 2)}}
 	for p := range l.g.Players {
 		for f := range NumFields {
 			l.g.Players[p].Research.Levels[f] = MaxTechLevel
@@ -228,13 +228,13 @@ func TestConfirmedPlanetScanners(t *testing.T) {
 		{[NumFields]int{Electronics: 6}, 220, 0},
 		{[NumFields]int{Energy: 3, Electronics: 10, Biotech: 3}, 320, 160},
 	} {
-		g := Game{Players: []Player{{Research: ResearchState{Levels: c.levels}}}, PlanetScanners: testPlanetScanners}
+		g := Game{Rules: ElegyRules(), Players: []Player{{Research: ResearchState{Levels: c.levels}}}, PlanetScanners: testPlanetScanners}
 		p := Planet{Owner: 0, HasScanner: true}
 		if R, P, ok := g.planetScan(&p); !ok || R != c.R || P != c.P {
 			t.Errorf("levels %v: %d/%d, want %d/%d", c.levels, R, P, c.R, c.P)
 		}
 	}
-	g := Game{Players: []Player{{}}, PlanetScanners: testPlanetScanners}
+	g := Game{Rules: ElegyRules(), Players: []Player{{}}, PlanetScanners: testPlanetScanners}
 	if _, _, ok := g.planetScan(&Planet{Owner: 0}); ok {
 		t.Error("a planet without a scanner scans")
 	}
@@ -470,7 +470,7 @@ func TestConfirmedAlliesDoNotShare(t *testing.T) {
 func TestPredictionPopulationEstimate(t *testing.T) {
 	// 400 × max(1, min(4090, (u + rand(u/4) − u/8)/4)), in planet id order;
 	// rand(0) still consumes a draw; AR planets 0 with no draw.
-	g := Game{Players: make([]Player, 2), Planets: []Planet{
+	g := Game{Rules: ElegyRules(), Players: make([]Player, 2), Planets: []Planet{
 		{ID: 2, Owner: 0, Population: 100},
 		{ID: 1, Owner: 0, Population: 2},
 		{ID: 3, Owner: 1, Population: 500},
@@ -500,7 +500,7 @@ func TestPredictionFleetsAtOwnPlanets(t *testing.T) {
 func TestPredictionAlternateRealityPlanetScanner(t *testing.T) {
 	// R = √(pop/10) colonists: 250,000 → 158; P = R/2 with an Ultra
 	// Station; ×1.412 and no P under NAS.
-	g := Game{Players: []Player{{Race: Race{PRT: PRTAlternateReality}}}}
+	g := Game{Rules: ElegyRules(), Players: []Player{{Race: Race{PRT: PRTAlternateReality}}}}
 	p := Planet{Owner: 0, Population: 2500}
 	if R, P, _ := g.planetScan(&p); R != 158 || P != 0 {
 		t.Errorf("AR: %d/%d", R, P)
@@ -611,7 +611,7 @@ func TestPredictionPositionReportStarbase(t *testing.T) {
 func TestPredictionDefenseEstimate(t *testing.T) {
 	// 0 without defenses; else max(1, min(15, (104 − k)/6)) with k =
 	// trunc(100·(1 − v/1000)ⁿ + 0.5) for the best allowed defense.
-	g := Game{Players: []Player{{Race: pgRace()}}, Defenses: []DefenseType{
+	g := Game{Rules: ElegyRules(), Players: []Player{{Race: pgRace()}}, Defenses: []DefenseType{
 		{Name: "SDI", Coverage: 99},
 		{Name: "Missile Battery", Coverage: 199, TechReq: [NumFields]int{Energy: 5}},
 	}}
@@ -744,7 +744,7 @@ func TestConfirmedDefenseEstimateVectors(t *testing.T) {
 	// SCANNING.md: Neutron Shields (v 38): 1, 3, 5, 10 defenses → 1, 2, 3,
 	// 6; 40 defenses with 10 operable → 6; 100 defenses with population
 	// 104,400 (42 operable) → 14.
-	g := Game{Players: []Player{{Race: pgRace()}}, Defenses: []DefenseType{{Name: "Neutron Shield", Coverage: 38}}}
+	g := Game{Rules: ElegyRules(), Players: []Player{{Race: pgRace()}}, Defenses: []DefenseType{{Name: "Neutron Shield", Coverage: 38}}}
 	for _, c := range []struct{ defenses, pop, want int }{
 		{1, 10000, 1}, {3, 10000, 2}, {5, 10000, 3}, {10, 10000, 6}, {40, 250, 6}, {100, 1044, 14},
 	} {

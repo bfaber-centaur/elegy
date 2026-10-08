@@ -82,7 +82,7 @@ func TestConfirmedVictoryFlags(t *testing.T) {
 	// (v 0, disabled but flagged), tech 22 in 4 fields (v 14, 2). Player 0
 	// (623, 5 planets, all fields 26, C 10) → 0x0ae0; player 1 (101, 4
 	// planets) → 0x0021.
-	g := Game{Year: 2425, Players: make([]Player, 2), Planets: make([]Planet, 24),
+	g := Game{Rules: ElegyRules(), Year: 2425, Players: make([]Player, 2), Planets: make([]Planet, 24),
 		Victory: Victory{TechLevel: 14, TechFields: 2, Score: 10, Resources: 9, Highest: 7}}
 	for f := range NumFields {
 		g.Players[0].Research.Levels[f] = 26
@@ -98,7 +98,7 @@ func TestConfirmedVictoryFlags(t *testing.T) {
 
 func TestPredictionDecide(t *testing.T) {
 	// A player with no planets and no ships dies; the survivor wins.
-	g := Game{Year: 2410, Players: []Player{{Race: pgRace()}, {Race: pgRace()}}, Planets: []Planet{{ID: 1, Owner: 0, Population: 100, Env: [3]int{50, 50, 50}}}}
+	g := Game{Rules: ElegyRules(), Year: 2410, Players: []Player{{Race: pgRace()}, {Race: pgRace()}}, Planets: []Planet{{ID: 1, Owner: 0, Population: 100, Env: [3]int{50, 50, 50}}}}
 	ev := g.decide(g.scores())
 	want := []Event{
 		{Kind: EventPlayerDied, Player: 0, Planet: -1, Fleet: -1, Count: 1},
@@ -119,7 +119,7 @@ func TestPredictionDecide(t *testing.T) {
 		year int
 		won  bool
 	}{{2429, false}, {2430, true}} {
-		g := Game{Year: c.year, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}},
+		g := Game{Rules: ElegyRules(), Year: c.year, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}},
 			Victory: Victory{Planets: 2, Needed: 3}} // needed capped at 1 enabled
 		g.Victory.Enabled[VictoryPlanets] = true // 30%: 1 of 2 planets → round(0.6) = 1 each
 		ev := g.decide(g.scores())
@@ -138,7 +138,7 @@ func TestConfirmedPublicScores(t *testing.T) {
 		public bool
 		want   int
 	}{{2419, true, 1}, {2420, true, 2}, {2440, false, 1}} {
-		g := Game{Year: c.year, PublicScores: c.public, Players: make([]Player, 2)}
+		g := Game{Rules: ElegyRules(), Year: c.year, PublicScores: c.public, Players: make([]Player, 2)}
 		if got := len(g.visibleScores(0, recs)); got != c.want {
 			t.Errorf("%d public %v: %d records, want %d", c.year, c.public, got, c.want)
 		}
@@ -149,7 +149,7 @@ func TestPredictionVictoryAnswers(t *testing.T) {
 	// KERNEL.md: needed 0 means nobody wins by conditions; a tie
 	// for the top score flags nobody for the lead; the record's starbase
 	// count leaves out Orbital Forts (no dock).
-	g := Game{Year: 2440, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}}}
+	g := Game{Rules: ElegyRules(), Year: 2440, Players: make([]Player, 2), Planets: []Planet{{ID: 1, Owner: 0}, {ID: 2, Owner: 1}}}
 	g.Victory.Enabled[VictoryPlanets] = true
 	if ev := g.decide(g.scores()); len(ev) != 0 || g.Decided {
 		t.Errorf("needed 0: %+v", ev)

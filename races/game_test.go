@@ -22,7 +22,7 @@ func TestMeasuredGameRaceCheckSL(t *testing.T) {
 	// 2500 (SL-starbases player expectations; KERNEL.md step 2a, MEASURED
 	// SL-12). Each player gets 0x117 and the other 0x182 (RD-P12).
 	designs := slRaces()
-	g := &engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}}
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}}
 	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
 	events := r.CheckRaces(g)
 	if c0, c1 := g.Players[0].Race.ColonistsPerResource, g.Players[1].Race.ColonistsPerResource; c0 != 2400 || c1 != 2500 {
@@ -57,7 +57,7 @@ func TestGameRaceCheckComputerAndDead(t *testing.T) {
 	// RD-P20: a computer race is not punished and no one is told.
 	// ASSUMPTION R1: a dead player is not checked.
 	designs := slRaces()
-	g := &engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 150}, {Race: designs[1].Race, Dead: true}}}
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 150}, {Race: designs[1].Race, Dead: true}}}
 	r := &GameRaces{Designs: designs, Computer: []bool{true, false}}
 	if ev := r.CheckRaces(g); len(ev) != 0 {
 		t.Errorf("events %+v", ev)
@@ -74,7 +74,7 @@ func TestCloneRacesSharesNothing(t *testing.T) {
 	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
 	before := append([]Design(nil), r.Designs...)
 	c := r.CloneRaces().(*GameRaces)
-	g := &engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}}
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}}
 	if ev := c.CheckRaces(g); len(ev) == 0 {
 		t.Fatal("the SL races were not penalized")
 	}

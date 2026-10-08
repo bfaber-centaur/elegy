@@ -11,7 +11,7 @@ import (
 // mark; otherwise max(10, ⌊m/10⌋) per non-empty mineral, not below 0, and
 // an empty object goes.
 func TestPredictionSalvageDecay(t *testing.T) {
-	g := &engine.Game{Salvage: []engine.Salvage{
+	g := &engine.Game{Rules: engine.ElegyRules(), Salvage: []engine.Salvage{
 		{Minerals: engine.Minerals{60, 20, 70}, Fresh: true},
 		{Minerals: engine.Minerals{250, 5, 0}},
 		{Minerals: engine.Minerals{8, 0, 0}},
@@ -32,7 +32,7 @@ func TestPredictionSalvageDecay(t *testing.T) {
 // takes a number from its packet pool (OBJECTS.md "Salvage", "Joining
 // existing salvage", "Owner").
 func TestPredictionMineSalvage(t *testing.T) {
-	g := &engine.Game{Salvage: []engine.Salvage{{Pos: at(5, 5), Owner: 1, Number: 3}, {Pos: at(5, 5), Owner: 0, Number: 7, Minerals: engine.Minerals{10, 0, 0}}}}
+	g := &engine.Game{Rules: engine.ElegyRules(), Salvage: []engine.Salvage{{Pos: at(5, 5), Owner: 1, Number: 3}, {Pos: at(5, 5), Owner: 0, Number: 7, Minerals: engine.Minerals{10, 0, 0}}}}
 	s := &Space{Packets: []Packet{{Owner: 2, Number: 0}}}
 	s.AddMineSalvage(g, 2, at(5, 5), engine.Minerals{5, 5, 5})
 	if j := g.Salvage[1]; j.Owner != 0 || j.Minerals != (engine.Minerals{15, 5, 5}) || !j.Fresh || j.Steps != 4 || len(g.Salvage) != 2 {
@@ -44,7 +44,7 @@ func TestPredictionMineSalvage(t *testing.T) {
 	}
 	// The 30,000 kT limit: overflow goes to a new object of the adder at
 	// the same spot, not fresh (COMBAT.md "Salvage", CB-040).
-	g = &engine.Game{}
+	g = &engine.Game{Rules: engine.ElegyRules()}
 	s = &Space{}
 	s.NewSalvage(g, 0, origin, engine.Minerals{36098, 0, 50})
 	if len(g.Salvage) != 2 || g.Salvage[0].Minerals != (engine.Minerals{30000, 0, 0}) || g.Salvage[1].Minerals != (engine.Minerals{6098, 0, 50}) ||

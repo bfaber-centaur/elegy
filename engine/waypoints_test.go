@@ -54,7 +54,7 @@ func TestConfirmedWaypointCheck(t *testing.T) {
 	// waypoint aimed at a fleet that exists takes its position, whoever
 	// owns it; one aimed at a fleet that is gone becomes a plain go-to at
 	// its last coordinates.
-	g := Game{Fleets: []Fleet{
+	g := Game{Rules: ElegyRules(), Fleets: []Fleet{
 		{ID: 1, Owner: 0, Waypoints: []Waypoint{{Pos: Point{180, 60}, Target: TargetFleet, ID: 2}, {Pos: Point{180, 70}, Target: TargetFleet, ID: 99}}},
 		{ID: 2, Owner: 1, Pos: Point{180, 85}},
 	}}
@@ -69,6 +69,7 @@ func TestPredictionEmptyTransportIsNoTask(t *testing.T) {
 	// A transport task whose unloads ran is no task (MEASURED, TK-501
 	// fleet 4).
 	g := Game{
+		Rules:   ElegyRules(),
 		Designs: []Design{{Name: "freighter", CargoCapacity: 100}},
 		Planets: []Planet{{ID: 1, Pos: Point{10, 10}, Owner: 0}},
 		Players: []Player{{}},
@@ -89,6 +90,7 @@ func routeGame() Game {
 		lh6.Fuel[w] = []int{0, 0, 20, 60, 100, 100, 105, 450, 750, 900, 1080}[w]
 	}
 	return Game{
+		Rules:   ElegyRules(),
 		Designs: []Design{{Name: "scout", Mass: 25, Engine: lh6, Engines: 1, FuelCapacity: 50}},
 		Planets: []Planet{
 			{ID: 1, Pos: Point{0, 0}, Owner: 0, HasRoute: true, RouteTo: 2},
@@ -124,6 +126,7 @@ func TestConfirmedRouteTask(t *testing.T) {
 func transferGame() Game {
 	d := Design{Name: "freighter", CargoCapacity: 100}
 	return Game{
+		Rules:       ElegyRules(),
 		Designs:     []Design{d, d},
 		DesignSlots: []DesignSlot{{Owner: 0, Slot: 0, Design: 0}, {Owner: 1, Slot: 0, Design: 1}},
 		Players:     []Player{{}, {}},

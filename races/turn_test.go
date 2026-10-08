@@ -19,7 +19,7 @@ func TestGenerateTurnLeavesInputRaces(t *testing.T) {
 	designs := slRaces()
 	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
 	before := append([]Design(nil), r.Designs...)
-	g := engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}, Races: r}
+	g := engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}, Races: r}
 	res, err := engine.GenerateTurn(withRules(g), nil, zeroRand{})
 	if err != nil {
 		t.Fatal(err)

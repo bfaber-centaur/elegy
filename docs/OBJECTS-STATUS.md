@@ -21,20 +21,20 @@ below and KERNEL-STATUS.md "Space objects").
 | Lay amounts, hull multiplier, MCM | `LayAmounts` | CONFIRMED (OB-002, OB-024) |
 | Merging, merge cap, laying order | `Space.Lay` | CONFIRMED (OB-002-G, MF-10, MF-12) |
 | SD half lay while moving | `Layer.Half` | CONFIRMED (OB-014-C) |
-| 512-field limit | `Space.Lay` | MEASURED (MF-11); the 511 case is LEGACY BUG `LegacyFieldLimit511` (off, Elegy's chosen rule) |
+| 512-field limit | `Space.Lay` | MEASURED (MF-11); the 511 case is LEGACY BUG `Legacy.FieldLimit511` (off in the `elegy` ruleset, Elegy's chosen rule) |
 | 4050-object limit | `Space.Lay` | BINARY-ONLY |
 | Sweep rating and amount | `SweepRating`, `Space.Sweep` | CONFIRMED (OB-001, OB-007, OB-008, OB-010-S); ratings agree with the table's mines-swept column |
 | Effective warp | `EffectiveWarp` | CONFIRMED (OB-010, MF-3) |
 | Stop checks along a step | `CheckStep` | CONFIRMED as rates (MF-1, MF-5, MF-6); safe-warp bonuses for SS and SD BINARY-ONLY |
 | Path cut: whole-ly foot, entry and exit | `cut` | BINARY-ONLY; east legs CONFIRMED as rates (MF-1, MF-3) |
-| Due-north and due-south legs | `LegacyDueNorthSouthCut` (on) | LEGACY BUG, MEASURED (MF-15) |
+| Due-north and due-south legs | `Legacy.DueNorthSouthCut` (on in the `elegy` ruleset) | LEGACY BUG, MEASURED (MF-15) |
 | Stretches: eight per kind, merging, draw order, stop offset | `addStretch`, `CheckStep` | BINARY-ONLY; stop offsets MEASURED (OB-010-S, MF-15) |
 | Stop point | `StopPoint` | BINARY-ONLY; exact on east legs |
 | Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M); damage on existing damage BINARY-ONLY |
 | Cargo and fuel lost with destroyed ships | `ApplyHit`, `Space.Detonate` | MEASURED (MF-14); detonation BINARY-ONLY |
-| Survivors' minerals dropped as salvage | `LegacyMineSurvivorSalvage` (on) | LEGACY BUG candidate, MEASURED (MF-14) |
+| Survivors' minerals dropped as salvage | `Legacy.MineSurvivorSalvage` (on in the `elegy` ruleset) | LEGACY BUG candidate, MEASURED (MF-14) |
 | Mines lost, paying field | `MinesLost`, `PayingField`, `ApplyHit` | CONFIRMED (OB-010-S, OB-024, MF-4) |
-| Salvage at the stop point, none at a planet; all minerals when the whole fleet dies; empty fleet `rand(10)` | `ApplyHit` | MEASURED (OB-024, MF-14); the whole-fleet case BINARY-ONLY; the empty-fleet drop is a LEGACY BUG candidate, `LegacyEmptyFleetSalvage` (on) |
+| Salvage at the stop point, none at a planet; all minerals when the whole fleet dies; empty fleet `rand(10)` | `ApplyHit` | MEASURED (OB-024, MF-14); the whole-fleet case BINARY-ONLY; the empty-fleet drop is a LEGACY BUG candidate, `Legacy.EmptyFleetSalvage` (on in the `elegy` ruleset) |
 | SD disclosure on hits and detonations | `Hit.Disclosed`, `Detonation.Disclosed` | CONFIRMED for detonations (MF-7) |
 | Detonation | `Space.Detonate` | CONFIRMED (OB-002-M, MF-7, MF-8); order and marking of several fields BINARY-ONLY |
 
@@ -52,14 +52,14 @@ MEASURED, the rest BINARY-ONLY):
 - Equally near own fields: the first in object order (lower number).
 - A new field takes the lowest number unused across all three kinds.
 - The path cut uses a whole-ly foot of the perpendicular; due-north and
-  due-south legs are a LEGACY BUG behind `LegacyDueNorthSouthCut`.
+  due-south legs are a LEGACY BUG behind `Legacy.DueNorthSouthCut`.
 - Stretches: at most eight per kind, merged when overlapping, touching or
   ending 1 ly before another; equal entries go standard, heavy, speed
   bump; draws `k = 0..b − a − 1`, the stop `a + k` ly from the start.
 - Damage on existing damage counts `⌊pct·n/100⌋` damaged ships and
   stores `max(1, ⌊avg·500/A⌋)` units.
 - Destroyed ships' cargo and fuel shares are lost, and the survivors'
-  minerals become salvage behind `LegacyMineSurvivorSalvage`.
+  minerals become salvage behind `Legacy.MineSurvivorSalvage`.
 - Detonating fields go in object order, and the first containing field
   marks the fleet.
 
@@ -113,7 +113,7 @@ longer assumptions; both answers are BINARY-ONLY:
 | Part reward; parts owned per player | `TraderParts`, `TraderParts.Items` | CONFIRMED (WT-003 A) |
 | Research reward: L from cargo and tech sum, field choice | `researchReward` | CONFIRMED (WT-002 A, B); field odds MEASURED; draws BINARY-ONLY |
 | Every field at 26: nothing with 1/5, else a part or a ship | `Space.Meet` | CONFIRMED (WT-004 C) |
-| 25th redraw finds an unowned part but gives a ship | `LegacyTraderLastRedraw` (on) | LEGACY BUG, BINARY-ONLY |
+| 25th redraw finds an unowned part but gives a ship | `Legacy.TraderLastRedraw` (on in the `elegy` ruleset) | LEGACY BUG, BINARY-ONLY |
 | Ship gifts: designs, first empty design slot | `shipGift`, `giftDesign` | CONFIRMED (WT-003 B, WT-004, OB-026) |
 | Gift draw order, matching (earlier gifts only, name not compared), counts, new fleet | `shipGift`, `giftSlot` | BINARY-ONLY; fleet number from 1 as a launch (SL-02) |
 | Computer players' planets: after each Trader's fleets, planet-number order, scan stop, d² ≤ 10,000, ship item as bit 12 | `Space.Meet` | CONFIRMED in part (TP-001, TP-002); Harder 3,500 kT CONFIRMED (O-53); order, range and ship items BINARY-ONLY |
@@ -186,7 +186,7 @@ Still open:
 | Range and mass refusals at 5× | `Jump` | CONFIRMED (GT-001) |
 | Danger | `GateDanger` | CONFIRMED (GT-001 N1–N6) |
 | Losses, damage; IT destroys no ships | `Jump` | CONFIRMED (OB-021, OB-022) |
-| Mixed-fleet count | `LegacyGateMixedFleetLoss` (on) | LEGACY BUG, MEASURED (GT-001 H2, GT-002), CONFIRMED (GT-003 W0–W5) |
+| Mixed-fleet count | `Legacy.GateMixedFleetLoss` (on in the `elegy` ruleset) | LEGACY BUG, MEASURED (GT-001 H2, GT-002), CONFIRMED (GT-003 W0–W5) |
 
 ### Assumptions (spec gaps)
 

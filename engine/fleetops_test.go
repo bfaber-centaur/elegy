@@ -8,6 +8,7 @@ import (
 // opsGame has two designs and no fleets.
 func opsGame() *Game {
 	return &Game{
+		Rules:   ElegyRules(),
 		Players: make([]Player, 2),
 		Designs: []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Armor: 20, CargoCapacity: 100}, 20)},
 	}
@@ -48,7 +49,7 @@ func TestConfirmedMergeTaskOverflow(t *testing.T) {
 		for _, overflow := range []bool{true, false} {
 			dst := Fleet{Stacks: []Stack{{Design: 0, Count: 32000}}, Fuel: 10, Cargo: Cargo{Minerals: Minerals{5, 0, 0}}}
 			src := Fleet{Stacks: []Stack{{Design: 0, Count: tt.add}}, Fuel: 20, Cargo: Cargo{Colonists: 7}}
-			(&Game{}).absorb(&dst, &src, overflow, mergeDilute)
+			(&Game{Rules: ElegyRules()}).absorb(&dst, &src, overflow, mergeDilute)
 			want := tt.chosen
 			if overflow {
 				want = tt.legacy
@@ -240,7 +241,7 @@ func TestPredictionDesignHullAndEngine(t *testing.T) {
 func TestPredictionMergeStackOrder(t *testing.T) {
 	// Stacks stay in design-slot order (design index) after a merge.
 	dst := Fleet{Stacks: []Stack{{Design: 0, Count: 1}, {Design: 3, Count: 1}}}
-	(&Game{}).absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, mergeDilute)
+	(&Game{Rules: ElegyRules()}).absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, mergeDilute)
 	var got []int
 	for _, s := range dst.Stacks {
 		got = append(got, s.Design)

@@ -403,11 +403,6 @@ func allMaxed(p *engine.Player) bool {
 	return true
 }
 
-// LegacyTraderLastRedraw reproduces the original's LEGACY BUG that a
-// player whose 25th part redraw found an unowned part gets a ship instead
-// (OBJECTS.md "Encounters", BINARY-ONLY). On by default.
-var LegacyTraderLastRedraw = true
-
 // Meet runs each Trader's meetings after battles (OBJECTS.md
 // "Encounters" and "Computer players' planets"): for each Trader in
 // order, its fleets, then computer players' planets (order BINARY-ONLY).
@@ -502,7 +497,10 @@ func (s *Space) reward(g *engine.Game, ctx TraderContext, t *Trader, owner int, 
 		bit = rng.Intn(NumTraderBits)
 		redraws++
 	}
-	if bit == BitShip || s.TraderParts.Owns(owner, bit) || (redraws == 25 && LegacyTraderLastRedraw) {
+	// Legacy.TraderLastRedraw reproduces the original's LEGACY BUG that a
+	// player whose 25th part redraw found an unowned part gets a ship
+	// instead (OBJECTS.md "Encounters", BINARY-ONLY).
+	if bit == BitShip || s.TraderParts.Owns(owner, bit) || (redraws == 25 && g.Rules.Legacy.TraderLastRedraw) {
 		return s.shipGift(g, ctx, owner, pos, rng)
 	}
 	s.TraderParts.give(owner, bit)

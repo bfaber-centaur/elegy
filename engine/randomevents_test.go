@@ -14,7 +14,7 @@ func eventGame(yearIndex, owner, pop int) Game {
 	for m := range NumMinerals {
 		p.Deposits[m].Concentration = 112
 	}
-	return Game{Year: 2400 + yearIndex, RandomEvents: true, Players: make([]Player, 2), Planets: []Planet{p}}
+	return Game{Rules: ElegyRules(), Year: 2400 + yearIndex, RandomEvents: true, Players: make([]Player, 2), Planets: []Planet{p}}
 }
 
 func TestConfirmedCometStrike(t *testing.T) {

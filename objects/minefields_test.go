@@ -16,7 +16,7 @@ type lab struct {
 
 func newLab(t *testing.T) *lab {
 	t.Helper()
-	g := &engine.Game{Players: []engine.Player{
+	g := &engine.Game{Rules: engine.ElegyRules(), Players: []engine.Player{
 		{Race: engine.Race{PRT: engine.PRTJackOfAllTrades}, Relations: []engine.Relation{engine.RelationFriend, engine.RelationEnemy},
 			Plans: []engine.BattlePlan{{Attack: engine.AttackEnemies}}},
 		{Race: engine.Race{PRT: engine.PRTJackOfAllTrades}, Relations: []engine.Relation{engine.RelationEnemy, engine.RelationFriend},
@@ -225,8 +225,7 @@ func TestConfirmedFieldLimit(t *testing.T) {
 		t.Errorf("merge at the limit: %+v", r)
 	}
 	// LEGACY BUG: with another object sorting after, 511 is the limit.
-	LegacyFieldLimit511 = true
-	defer func() { LegacyFieldLimit511 = false }()
+	l.g.Rules = engine.FaithfulRules()
 	s = Space{Minefields: fields(511), OtherObjects: 1}
 	if r := s.Lay(l.g, []Layer{{Fleet: fi}}); r[0].Field != -1 {
 		t.Errorf("MF-13b: %+v", r)
@@ -495,8 +494,7 @@ func TestPredictionHitSalvage(t *testing.T) {
 	if h.Salvage != (engine.Minerals{3, 4, 5}) {
 		t.Errorf("empty fleet salvage %v", h.Salvage)
 	}
-	LegacyEmptyFleetSalvage = false
-	defer func() { LegacyEmptyFleetSalvage = true }()
+	l.g.Rules.Legacy.EmptyFleetSalvage = false
 	fi = l.fleet(0, at(5, 5), "Laser DD", 1)
 	l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 100, Units: 499}
 	if h := ApplyHit(l.g, s, fi, Standard, &script{3, 4, 5}); h.Salvage != (engine.Minerals{}) {
@@ -574,14 +572,12 @@ func TestConfirmedPathCut(t *testing.T) {
 		{p(0, 0), p(0, 100), p(0, 50), 100, 100, 0, 0, false},   // due north from outside: never cut
 		{p(0, 90), p(0, 200), p(0, 0), 100, 10000, 0, 43, true}, // MF-15: inside, south, 43 ly
 	} {
-		a, b, ok := cut(k.from, k.to, k.l, k.centre, k.n)
+		a, b, ok := cut(k.from, k.to, k.l, k.centre, k.n, true)
 		if a != k.a || b != k.b || ok != k.ok {
 			t.Errorf("case %d: %d..%d %v, want %d..%d %v", i, a, b, ok, k.a, k.b, k.ok)
 		}
 	}
-	LegacyDueNorthSouthCut = false
-	a, b, ok := cut(p(0, 0), p(0, 100), 100, p(0, 50), 100)
-	LegacyDueNorthSouthCut = true
+	a, b, ok := cut(p(0, 0), p(0, 100), 100, p(0, 50), 100, false)
 	if a != 40 || b != 60 || !ok {
 		t.Errorf("exact foot: %d..%d %v", a, b, ok)
 	}
@@ -619,13 +615,12 @@ func TestPredictionStretches(t *testing.T) {
 // dropped as salvage, leaving 24 kT of colonists aboard.
 func TestConfirmedMineCargoMF14(t *testing.T) {
 	for _, legacy := range []bool{true, false} {
-		g := &engine.Game{Designs: []engine.Design{{CargoCapacity: 70, FuelCapacity: 100}, {CargoCapacity: 250, FuelCapacity: 400}}}
+		g := &engine.Game{Rules: engine.ElegyRules(), Designs: []engine.Design{{CargoCapacity: 70, FuelCapacity: 100}, {CargoCapacity: 250, FuelCapacity: 400}}}
 		g.Fleets = []engine.Fleet{{Pos: origin, Stacks: []engine.Stack{{Design: 1, Count: 1}},
 			Cargo: engine.Cargo{Minerals: engine.Minerals{100, 100, 100}, Colonists: 50}, Fuel: 800}}
 		f := &g.Fleets[0]
-		LegacyMineSurvivorSalvage = legacy
+		g.Rules.Legacy.MineSurvivorSalvage = legacy
 		got := mineCargo(g, f, []DesignHit{{Design: 0, Ships: 4, Destroyed: true}}, 530, 800, true, &count{})
-		LegacyMineSurvivorSalvage = true
 		want, aboard := engine.Minerals{47, 47, 48}, engine.Minerals{}
 		if !legacy {
 			want, aboard = engine.Minerals{}, engine.Minerals{47, 47, 48}
@@ -635,7 +630,7 @@ func TestConfirmedMineCargoMF14(t *testing.T) {
 		}
 	}
 	// At a planet's exact position no salvage forms; the minerals stay.
-	g := &engine.Game{Designs: []engine.Design{{CargoCapacity: 70}, {CargoCapacity: 250}}, Planets: []engine.Planet{{Pos: origin}}}
+	g := &engine.Game{Rules: engine.ElegyRules(), Designs: []engine.Design{{CargoCapacity: 70}, {CargoCapacity: 250}}, Planets: []engine.Planet{{Pos: origin}}}
 	g.Fleets = []engine.Fleet{{Pos: origin, Stacks: []engine.Stack{{Design: 1, Count: 1}}, Cargo: engine.Cargo{Minerals: engine.Minerals{100, 100, 100}, Colonists: 50}}}
 	if got := mineCargo(g, &g.Fleets[0], []DesignHit{{Design: 0, Ships: 4, Destroyed: true}}, 530, 0, true, &count{}); got != (engine.Minerals{}) || g.Fleets[0].Cargo.Minerals != (engine.Minerals{47, 47, 48}) {
 		t.Errorf("at a planet: %v, %+v", got, g.Fleets[0].Cargo)

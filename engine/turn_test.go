@@ -44,7 +44,7 @@ func pgHomeworld() Game {
 	pl.Research.Levels[Energy] = 2
 	pl.Research.Levels[Electronics] = 5
 	pl.Research.Accumulated[Energy] = 65
-	return Game{Year: 2407, Players: []Player{pl}, Planets: []Planet{p}}
+	return Game{Rules: ElegyRules(), Year: 2407, Players: []Player{pl}, Planets: []Planet{p}}
 }
 
 // Ground truth end to end: population and carry every year 2408–2436,
