@@ -19,15 +19,19 @@ func TestConfirmedMergeDamageDilution(t *testing.T) {
 	// all 20 ships).
 	a := Stack{Count: 10, Damage: Damage{Pct: 50, Units: 100}}
 	b := Stack{Count: 10, Damage: Damage{Pct: 20, Units: 200}}
-	if got := mergeDamage(a, b, true); got != (Damage{Pct: 35, Units: 45}) {
+	if got := mergeDamage(a, b, mergeDilute); got != (Damage{Pct: 35, Units: 45}) {
 		t.Errorf("legacy dilution: %+v, want 35%% 45 units", got)
 	}
 	// Switched off: divided by the 7 damaged ships, ceil(900/7) = 129.
-	if got := mergeDamage(a, b, false); got != (Damage{Pct: 35, Units: 129}) {
+	if got := mergeDamage(a, b, mergeTaskDamaged); got != (Damage{Pct: 35, Units: 129}) {
 		t.Errorf("no dilution: %+v, want 35%% 129 units", got)
 	}
+	// The merge order's rule (CO-05c): floor(900/7) = 128.
+	if got := mergeDamage(a, b, mergeOrderDamaged); got != (Damage{Pct: 35, Units: 128}) {
+		t.Errorf("merge order: %+v, want 35%% 128 units", got)
+	}
 	// One damaged stack keeps its units: D = 5 of 20 ships, 25%.
-	if got := mergeDamage(a, Stack{Count: 10}, true); got != (Damage{Pct: 25, Units: 100}) {
+	if got := mergeDamage(a, Stack{Count: 10}, mergeDilute); got != (Damage{Pct: 25, Units: 100}) {
 		t.Errorf("one damaged: %+v, want 25%% 100 units", got)
 	}
 }
@@ -44,7 +48,7 @@ func TestConfirmedMergeTaskOverflow(t *testing.T) {
 		for _, overflow := range []bool{true, false} {
 			dst := Fleet{Stacks: []Stack{{Design: 0, Count: 32000}}, Fuel: 10, Cargo: Cargo{Minerals: Minerals{5, 0, 0}}}
 			src := Fleet{Stacks: []Stack{{Design: 0, Count: tt.add}}, Fuel: 20, Cargo: Cargo{Colonists: 7}}
-			(&Game{}).absorb(&dst, &src, overflow, true)
+			(&Game{}).absorb(&dst, &src, overflow, mergeDilute)
 			want := tt.chosen
 			if overflow {
 				want = tt.legacy
@@ -127,10 +131,11 @@ func TestPredictionMergeOrder(t *testing.T) {
 	}
 }
 
-func TestPredictionMergeOrderDamage(t *testing.T) {
-	// ORDERS.md "Merge order": the percentage spreads over all ships as on
-	// the task path, but the units are averaged over the damaged ships: the
-	// task's example gives 35% and ceil(900/7) = 129 units, not 45.
+func TestConfirmedMergeOrderDamage(t *testing.T) {
+	// ORDERS.md "Merge order" (CONFIRMED CO-05c): the percentage spreads
+	// over all ships as on the task path, but the units are averaged over
+	// the damaged ships, rounded down: 35% and floor(900/7) = 128 units,
+	// not the task's 45.
 	g := opsGame()
 	g.Fleets = []Fleet{
 		{ID: 1, Owner: 0, Stacks: []Stack{{Design: 0, Count: 10, Damage: Damage{Pct: 50, Units: 100}}}},
@@ -139,8 +144,8 @@ func TestPredictionMergeOrderDamage(t *testing.T) {
 	if err := g.MergeFleets(0, 1, []int{2}); err != nil {
 		t.Fatal(err)
 	}
-	if got := g.Fleets[0].Stacks[0].Damage; got != (Damage{Pct: 35, Units: 129}) {
-		t.Errorf("damage %+v, want 35%% 129 units", got)
+	if got := g.Fleets[0].Stacks[0].Damage; got != (Damage{Pct: 35, Units: 128}) {
+		t.Errorf("damage %+v, want 35%% 128 units", got)
 	}
 }
 
@@ -235,7 +240,7 @@ func TestPredictionDesignHullAndEngine(t *testing.T) {
 func TestPredictionMergeStackOrder(t *testing.T) {
 	// Stacks stay in design-slot order (design index) after a merge.
 	dst := Fleet{Stacks: []Stack{{Design: 0, Count: 1}, {Design: 3, Count: 1}}}
-	(&Game{}).absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, true)
+	(&Game{}).absorb(&dst, &Fleet{Stacks: []Stack{{Design: 4, Count: 1}, {Design: 1, Count: 2}}}, false, mergeDilute)
 	var got []int
 	for _, s := range dst.Stacks {
 		got = append(got, s.Design)
