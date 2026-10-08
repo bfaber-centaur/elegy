@@ -44,7 +44,7 @@ at the end of the replay, before any waypoint task.
 | `CargoOrder`, preconditions | fleet at the target or refused; no jettison; planet fuel dropped, the rest moves; any fleet with free hold carries colonists | ORDERS.md "Elegy implementation Q3", "Q4" | chosen rules | `TestCargoChecks` |
 | `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited in place as the order applies, no message; relations do not matter | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestGiftCreditedInPlace` |
 | `CargoOrder`, another player's fleet | giving only; colonists rejected (no legal client writes them, TK-408, TK-414); credited in place as the order applies; what does not fit is lost and the giver told; no relation check; a later merge or design delete disposes of the gift as of the fleet's own cargo | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | MEASURED (TK-406, TK-407, TK-409); over-full gift CONFIRMED; colonists chosen rule | `TestPredictionCargoToForeignFleet`, `TestGiftReceiverRemovedEarlier`, `TestGiftToFleetMergedAway`, `TestMeasuredGiftLostWithDeletedDesign` |
-| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position; a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (the stargate hop, GT-004) accepted, the gate checked at the jump; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13); OBJECTS.md "Stargates", "Waypoint upkeep and the remaining tasks", "Transfer fleet"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks` |
+| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position; a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (the stargate hop, GT-004) accepted, the gate checked at the jump; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18); remote-mining and lay-mines tasks accepted, refused when they run, a lay-mines duration below one year other than indefinitely rejected (L24) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13); OBJECTS.md "Stargates", "Laying", "Waypoint upkeep and the remaining tasks", "Transfer fleet"; KERNEL.md "Remote mining"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks`, `TestWaypointOrderMiningAndLayingTasks` |
 | `RepeatOrder` | own fleet; sets or clears the repeat-orders flag (the host checks no owner, LEGACY BUG) | ORDERS.md "Reaching a waypoint", "Ownership"; LIMITS.md "No owner check" | chosen rule | `TestRepeatOrder` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
@@ -85,6 +85,7 @@ and has been sent to stars-elegy as a question.
 | L21 | A split's new fleet copies the source's repeat-orders flag and has no name. | ORDERS.md "Split" names the plan and waypoint list only. |
 | L22 | Ships moved out of a damaged stack keep its damage percentage and units, as do those left. | ORDERS.md does not say which ships of a stack are damaged. |
 | L23 | A ship move takes ships out of the order's fleet first, then out of the other; a fleet left with no ships is removed. | As merged fleets are (ORDERS.md "Merge"). |
+| L24 | A lay-mines task whose duration is neither indefinitely nor at least one year rejects the waypoint order. | OBJECTS.md "Duration" names the three durations and no order-time check. |
 
 ## Ships leaving production
 
@@ -152,12 +153,6 @@ successor needs before it can change.
 
 ### Orders Elegy does not implement
 
-- **Lay-mines and remote-mining waypoint tasks.** The kernel models both
-  (`TaskLayMines`, `TaskRemoteMine`), but `validTask` still refuses a
-  waypoint order carrying either with `ErrNotModelled` (L6). Accepting
-  them needs whatever order-time checks OBJECTS.md "Laying" and KERNEL.md
-  "Remote mining" give (or a labelled choice where they give none), plus
-  the duration in `Task.Years`.
 - **Minefield detonate** (`DetonateOrder`): always `ErrNotModelled`.
   ORDERS.md's rule (own minefield of a kind that can detonate) can be
   applied once a minefield is reachable through `Game.Objects`.
@@ -179,7 +174,7 @@ successor needs before it can change.
 ### Labelled choices
 
 Every Elegy choice is in the tables above: L2, L4, L6, L7, L11, L14–L16,
-L18–L23 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
+L18–L24 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
 `ASSUMPTION` in the code. L1, L3, L5, L8–L10, L12 and L17 are
 settled by the specs (L13 was never used).
 
