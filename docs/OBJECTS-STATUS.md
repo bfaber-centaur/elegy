@@ -1,7 +1,7 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `e0b7d1b`) and its Mystery Trader appearance
+(as of stars-elegy `main` at `c0bee4b`) and its Mystery Trader appearance
 in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
@@ -201,10 +201,14 @@ OBJECTS.md now answers P1–P4 (BINARY-ONLY):
 
 Still open:
 
-1. **P5** A player's packets and salvage share one 0..511 number pool,
-   and only higher players' packets and salvage, wormholes and the Trader
-   block 511. Elegy's salvage has no owner or number yet, so it takes no
-   packet number and blocks nothing.
+1. **P5** OBJECTS.md "Numbering" (BINARY-ONLY): a player's packets and
+   salvage share one 0..511 number pool, and only higher players'
+   packets and salvage, wormholes and the Trader block 511. Elegy's
+   salvage has no owner or number yet, so it takes no packet number and
+   blocks nothing.
+2. **P6** OBJECTS.md "The settings" leaves a destination that names no
+   planet undefined and asks Elegy for a rule: Elegy treats it as no
+   destination (`Launch.NoDriver`).
 
 ### What the turn engine needs to call (packets)
 
@@ -270,7 +274,7 @@ Still open:
 ## Visibility
 
 Who sees which space object comes from stars-elegy `docs/SCANNING.md`,
-"Space objects" (as of stars-elegy `main` at `55078ed`). The turn engine
+"Space objects" (as of stars-elegy `main` at `c0bee4b`). The turn engine
 keeps the fleet and planet sightings; these functions cover the objects.
 
 | Rule (SCANNING.md) | Function | Status |

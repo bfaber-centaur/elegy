@@ -114,6 +114,9 @@ func PacketItem(race engine.Race, mixed bool) (launch, spend int) {
 // PacketOrder is a planet's packet destination (a planet ID, or -1) and
 // packet-speed setting (0 when unset). The engine's Planet has neither
 // yet; production supplies them.
+//
+// ASSUMPTION P6 (Elegy's chosen rule, which OBJECTS.md "The settings"
+// asks for): a destination naming no planet counts as no destination.
 type PacketOrder struct {
 	Dest  int
 	Speed int
@@ -156,10 +159,11 @@ type Launch struct {
 //
 // ASSUMPTION P5: Elegy's salvage (engine.Game.Salvage, counted in
 // OtherObjects) has no owner or number yet, so it takes no packet number
-// and blocks no 511.
+// and blocks no 511 (OBJECTS.md "Numbering" gives the rule for owned
+// salvage).
 func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int) Launch {
 	p := &g.Planets[pi]
-	if !p.HasStarbase || o.Dest < 0 || p.Owner < 0 {
+	if !p.HasStarbase || o.Dest < 0 || p.Owner < 0 || planetByID(g, o.Dest) < 0 {
 		return Launch{NoDriver: true, Packet: -1}
 	}
 	dw, t, ok := DriverWarp(g.Designs[p.StarbaseDesign])
