@@ -88,6 +88,7 @@
     },
     "research_percent": 0,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "1": "enemy"
     },
@@ -169,6 +170,7 @@
     },
     "research_percent": 0,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {
      "0": "enemy"
     },
@@ -1322,11 +1324,13 @@
      "equals": [
       {
        "id": 4,
-       "count": 2
+       "count": 2,
+       "kind": 1
       },
       {
        "id": 5,
-       "count": 1
+       "count": 1,
+       "kind": 1
       }
      ]
     },

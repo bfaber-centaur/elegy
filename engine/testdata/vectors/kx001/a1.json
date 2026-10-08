@@ -14,8 +14,15 @@
  "initial_state": {
   "year": 2407,
   "game": {
-   "name": "PG001",
+   "name": "A Barefoot JayWalk",
    "size": "tiny",
+   "bounds": [
+    1000,
+    1000,
+    1400,
+    1400
+   ],
+   "density": "normal",
    "players": 1,
    "slower_tech": false,
    "random_events": false,
@@ -81,6 +88,7 @@
     },
     "research_percent": 0,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -986,20 +994,24 @@
       {
        "id": 11,
        "count": 1,
-       "percent": 78
+       "percent": 78,
+       "kind": 1
       },
       {
        "id": 3,
-       "count": 1
+       "count": 1,
+       "kind": 1
       },
       {
        "id": 7,
        "count": 3,
-       "percent": 24
+       "percent": 24,
+       "kind": 1
       },
       {
        "id": 8,
-       "count": 2
+       "count": 2,
+       "kind": 1
       }
      ],
      "year": 1

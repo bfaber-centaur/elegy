@@ -2,63 +2,68 @@
 # "random k" after an id: the case passes with k of the 8 seed variants.
 BP-1
 BP-L
-CB-001 random 7
-CB-002 random 3
-CB-003 random 1
-CB-004 random 3
-CB-005 random 3
-CB-006 random 7
-CB-007 random 7
-CB-008 random 3
-CB-011 random 7
-CB-012 random 7
-CB-013 random 7
-CB-014 random 7
-CB-015 random 5
-CB-016 random 7
-CB-017 random 7
-CB-018-control random 7
+CB-001
+CB-002
+CB-003
+CB-004
+CB-005
+CB-006
+CB-007
+CB-008
+CB-011
+CB-012
+CB-013
+CB-014
+CB-015
+CB-016
+CB-017
+CB-018-control
 CB-018
 CB-019-t3
 CB-019-t4
 CB-020-t5
 CB-021
-CB-022-enemies random 7
-CB-022-everyone random 7
-CB-022-nolone random 7
-CB-022 random 7
-CB-023-control random 7
-CB-023 random 7
+CB-022-enemies
+CB-022-everyone
+CB-022-nolone
+CB-022
+CB-023-control
+CB-023
 CB-024
-CB-025 random 7
-CB-026 random 7
-CB-027 random 7
-CB-028 random 7
+CB-025
+CB-026
+CB-027
+CB-028
 CB-029
-CB-030 random 7
+CB-030
 CB-031-n3
 CB-031-obs
 CB-033
-CB-035-lone random 2
-CB-035-move random 2
-CB-035-p0lone random 2
-CB-035-prev3 random 2
-CB-035-prevbattle random 1
-CB-035 random 2
-CB-037-deep random 2
-CB-037-owner random 2
-CB-037 random 2
-CB-038-wm random 7
-CB-038 random 7
-CB-040 random 7
+CB-035-lone
+CB-035-move
+CB-035-p0lone
+CB-035-prev3
+CB-035-prevbattle
+CB-035
+CB-036
+CB-037-deep
+CB-037-owner
+CB-037
+CB-038-wm
+CB-038
+CB-039
+CB-040
 CB-041-joat
 CB-041-sf
-CB-041 random 7
-CB-045 random 7
+CB-041
+CB-042
+CB-043
+CB-044
+CB-045
 CB-046-bio
 CB-046-morph
 CB-046
-CB-047-ctl random 7
+CB-047-ctl
 CB-047
 CB-048-ctl
 CB-048

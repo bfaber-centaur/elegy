@@ -82,6 +82,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -155,6 +156,7 @@
     },
     "research_percent": 15,
     "research_field": "energy",
+    "research_next_field": "same",
     "relations": {},
     "mystery_trader_items": [],
     "race": {
@@ -1105,7 +1107,7 @@
  "cases": [
   {
    "id": "CO-06-16767",
-   "rule": "ORDERS \"Fleet operations\"",
+   "rule": "ORDERS \"Merge\"",
    "setup": "move 15999 of 16767 ships into a 16000-ship fleet",
    "tag": "MEASURED",
    "prediction_held": false,
@@ -1311,7 +1313,7 @@
  ],
  "source": {
   "experiment": "experiments/fc",
-  "spec_rules": "docs/ORDERS.md \"Fleet operations\"",
+  "spec_rules": "docs/ORDERS.md \"Merge\"",
   "parity": "experiments/fc/README.md \"CO-01..06\"",
   "raw_evidence": "stars-oracle-apparatus evidence/co/co06-16767/run (private)"
  }

@@ -201,6 +201,9 @@ type pvExpect struct {
 	Tolerance json.RawMessage `json:"tolerance"`
 	// Subject names an object_gone or view expectation's object.
 	Subject json.RawMessage `json:"subject"`
+	// Sample marks one stream's random outcome (README.md "sample"):
+	// a match counts, a mismatch is skipped as a sample.
+	Sample bool `json:"sample"`
 }
 
 // pvSpace loads a vector's space objects and checks the expectations
@@ -690,6 +693,13 @@ func (l *pvLoaded) queueEquals(g *Game, e pvExpect) string {
 	}
 	for i := range g.Planets {
 		if g.Planets[i].ID == l.planet[*e.Planet] {
+			for _, p0 := range l.g.Planets {
+				if p0.ID == g.Planets[i].ID && p0.Owner != g.Planets[i].Owner {
+					// A new owner's planet takes that player's default
+					// queue, which the vectors do not carry.
+					return "skip: player default queue settings"
+				}
+			}
 			got := g.Planets[i].Queue
 			if len(got) == 0 && len(want) == 0 || reflect.DeepEqual(got, want) {
 				return ""
@@ -1366,6 +1376,8 @@ func runVector(v *pvVector, k int) []pvResult {
 			switch {
 			case strings.HasPrefix(msg, "skip: "):
 				skips = append(skips, strings.TrimPrefix(msg, "skip: "))
+			case msg != "" && e.Sample:
+				skips = append(skips, "sample: one stream's random outcome")
 			case msg != "":
 				checked++
 				fails = append(fails, fmt.Sprintf("y%d %s: %s", e.Year, e.Kind, msg))

@@ -4,8 +4,8 @@ The J-RC3 peaceful turn and ordinary fleet movement are implemented in
 `engine/` from the public specification in `bfaber-centaur/stars-elegy`:
 `docs/KERNEL.md`, `docs/PARITY.md` (including KX-001 to KX-004) and the public FM-001..004
 movement corpus (`experiments/fm00N`), as of stars-elegy `main` at `63635f0` (which includes KX-001 to KX-005, the
-OT runs and the turn order and random draw order), and the parity vectors
-copied from that commit.
+OT runs and the turn order and random draw order). The parity vectors
+are copied from stars-elegy `main` at `f7e6aef` (stars-elegy #105).
 Nothing here comes from the private archaeology repositories.
 
 ## End-to-end parity milestone
@@ -278,18 +278,16 @@ the failing cases with a cause found or the note that none was looked
 for. A case that is "random" (its result changes with the seed) is not
 listed; its comparison is in the test output.
 
-- **CB-039, CB-042, CB-043, CB-044** (the token cap; CONFIRMED, CB-039
-  MEASURED). Not diagnostic. Each vector lists, without a stream tag,
-  every fleet the original destroyed in both of its two oracle streams
-  (224, 193, 174 and 224 fleets). That is two samples of a battle whose
-  outcome depends on its draws, not a fixed result. In the reference
-  seed Elegy keeps 10, 73, 16 and 10 of them alive, and other fleets
-  die instead. Elegy's battles run like the recorded ones: CB-039's
-  kills per round in three seeds (72, 53, 37, 28 … from round 2) track
-  the oracle's stream 20000 (73, 54, 39, 27 …), and the battle ends when
-  one side is gone, after round 8 to 11 against the oracle's 8. COMBAT.md
-  specifies how the battle ends; the gap is in the vectors (stars-elegy
-  #96 marks battle draws as samples in single-stream vectors only).
+The harness treats an expectation marked `sample: true` (vectors
+README.md: one stream's random outcome) as one sample: a match counts
+as a check, a mismatch is skipped as "sample", never failed. That made
+the battle cases CB-036, CB-039 and CB-042 to CB-044 pass on what is
+deterministic (battle token lists, everything away from the battles),
+and every CB case that was "random" now passes in every seed. A
+production queue on a planet that changed owner is skipped: it takes
+the new owner's default queue, which the vectors do not carry (TK-108-A
+and TK-108-C).
+
 - **SL-starbases** (CONFIRMED). Not modelled: the turn-time race check
   (RACES.md "In a running game"). In the original the check degraded the
   race, so planet 15's replacement starbase reached only 88% in year 1
@@ -298,13 +296,6 @@ listed; its comparison is in the test output.
   follow. With the degraded race values loaded, Elegy matches the vector
   exactly. The fleet check did not run until the harness compared the
   orbit field.
-- **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). Not
-  diagnostic, for the same reason as CB-039: its untagged fleet results
-  are the two streams' common outcome. Which fleets survive changes with
-  the seed (seeds 3, 5 and 7 match every fleet). The rest of the failure
-  is surface minerals 1 kT off, from mining's random remainder;
-  stars-elegy #96 adds the 1 kT tolerance.
-
 - **MF-02, MF-03h, MF-03s, MF-04, MF-04b, MF-04d, MF-05b, MF-09h,
   MF-09s** (CONFIRMED and MEASURED). Not diagnostic. Where a fleet stops
   in a minefield is decided by the hit draws (OBJECTS.md "Hits on
