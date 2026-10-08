@@ -23,7 +23,7 @@ func TestIdealWarpPerEngine(t *testing.T) {
 			t.Fatal(err)
 		}
 		g := &Game{Rules: ElegyRules(), Designs: []Design{d}}
-		if got := g.idealWarp(&Fleet{Stacks: []Stack{{Design: 0, Count: 1}}}); got != w {
+		if got := g.IdealWarp(&Fleet{Stacks: []Stack{{Design: 0, Count: 1}}}); got != w {
 			t.Errorf("%s: warp %d, want %d", engine, got, w)
 		}
 	}

@@ -43,7 +43,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Movement and fuel | `movement.go` | all 224 fleets of FM-001..004 (position, fuel, waypoints, warp, orbit, events), KERNEL fuel/range/chase vectors | no free warp, more than one engine per ship, cargo ties, chaser fuel per round (R, running dry, top-up, ram scoop) |
 | Starbase refuelling | `movement.go` | FM-004 DK | |
 | AR colonists in flight | `movement.go` `arColonistLoss` | TK-117, TK-107 (stars-elegy #44) | |
-| Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, ruleset switch `Legacy.FuelWrap`) | `movement.go` `engineFactor`, `fuelTerm` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
+| Under-engined designs: f = 99999 and the 32-bit fuel-term wrap (LEGACY BUG, ruleset switch `Legacy.FuelWrap`) | `movement.go` `engineFactor`, `fuelTermWrap` | FM-105: 200, 50, 500 mg → 7, 1, 19 ly, 0 mg | the float form does not wrap |
 | Random events: comet strike (sizes, kills, minerals, environment, queue cut), climate change, new minerals, option off | `randomevents.go` | KX-004 vectors (S2, S3, S5, E0), replayed in KERNEL.md's draw order; comet message axes LEGACY BUG behind `Legacy.CometAxes` | AR owner struck, the 180 cap, the probabilities |
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
@@ -406,9 +406,13 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
 - RD-1..RD-7 and RW08 (the `rw` vectors): new games built from race
   files, which `newgame/vectors_test.go` checks (elegy #42); this harness has no
   players for them and skips them ("player not in the state", samples).
-- `client_estimate` (159) and `sample` mismatches (155): client-side
+- `client_estimate` readings other than a fleet's "Est. range" and
+  "Est. fuel usage", and `sample` mismatches (155): those client
   estimates are not modelled, and one stream's random outcome is never a
-  failure (above).
+  failure (above). The two fleet estimates are compared
+  (`Game.EstRange`, `Game.EstFuelUsage`; ESTIMATES.md, CONFIRMED ES-001):
+  ES-001's 23 ranges and 21 fuel readings and ES-002's 18 fuel readings
+  all pass.
 - `view` of `other_players` (96), `player` (56) and `design` (4), and
   the view fields `population_estimate`, `defense_estimate`, `heading`,
   `mass_shown` and `environment_visible`: not compared yet.
