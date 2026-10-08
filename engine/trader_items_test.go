@@ -88,15 +88,19 @@ func TestConfirmedTechAttemptTraderItem(t *testing.T) {
 	// Gate 60 (passes); k 5 (no chance); k 1 (owned); k 0, rand(100) 3
 	// (not below 3); k 9, rand(100) 1 (below 2): bit 9.
 	rng := &recordBounds{r: &seqRand{draws: []int{60, 5, 1, 0, 3, 9, 1}}}
-	ev := techAttempt(g, rng, 0, [NumFields]int{}, chance, map[int]bool{})
+	gained := map[int]bool{}
+	ev := techAttempt(g, rng, 0, [NumFields]int{}, chance, gained)
 	if want := []int{100, 13, 13, 13, 100, 13, 100}; !reflect.DeepEqual(rng.bounds, want) {
 		t.Errorf("draws %v, want %v", rng.bounds, want)
 	}
 	if len(ev) != 1 || ev[0].Kind != EventTraderPartFound || ev[0].Count != 9 || !obj.owned[[2]int{0, 9}] {
 		t.Errorf("events %+v, owned %v; want Enigma Pulsar (bit 9)", ev, obj.owned)
 	}
-	// A gain marks the player: a second attempt this turn draws nothing.
-	gained := map[int]bool{0: true}
+	// A gain marks the player (step 5): a second attempt this turn, with
+	// the same marks, draws nothing.
+	if !gained[0] {
+		t.Errorf("gained %v: the gain did not mark player 0", gained)
+	}
 	rng = &recordBounds{r: &seqRand{}}
 	if ev := techAttempt(g, rng, 0, [NumFields]int{}, chance, gained); ev != nil || len(rng.bounds) != 0 {
 		t.Errorf("second attempt: %+v, draws %v", ev, rng.bounds)
