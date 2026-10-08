@@ -46,23 +46,38 @@ KERNEL.md gives every rule a status. Test names follow it:
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
 file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); the
-before-movement takeover tasks (unloads, colonize, drops, the
-research level-up check, loads and merges); fleet movement (ordinary fleets in fleet order, owner
-then fleet number, then fleet chasers in rounds, then waypoint
-settlement), Radiating Hydro-Ram Scoop losses and fuel generation;
+waypoint check (step 1a.3); the before-movement waypoint tasks (unloads,
+colonize, route, drops, the research level-up check, loads and merges);
+fleet movement (ordinary fleets in fleet order, owner then fleet number,
+then fleet chasers in rounds, then waypoint settlement, where reached
+waypoints are dropped or, with repeat orders, rotated), Radiating Hydro-Ram Scoop losses and fuel generation;
 mining for every planet in id order (population before growth); per
 planet in id order: resources, research tax, production queue (caps use
 the grown population); population growth for every planet; research
 level-ups; random events (when `Game.RandomEvents` is on); starbase
-refuelling; battles, bombing and the after-movement takeover tasks
-(COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; the Claim Adjuster
-year-end step; year + 1; scores, victory flags and deciding the game
+refuelling; battles, bombing and the after-movement waypoint tasks
+(unloads, colonize, route, drops, the research check, merges and fleet
+transfers; COMBAT-STATUS.md, TAKEOVER-STATUS.md); repair; the Claim
+Adjuster year-end step; the end-of-year waypoint check (step 7a.2); year
++ 1; scores, victory flags and deciding the game
 (`TurnResult.Scores`, each view's visible records). Its random draws
 follow KERNEL.md "Random draws" for the same steps.
 
-Not modelled yet: following fleets and the waypoint check after the
-orders (step 1a.3), waypoint tasks other than unloads and
-colonize and merge (load, scrap, transfer; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
+Waypoint upkeep (`waypoints.go`, ORDERS.md "Waypoint upkeep and the
+remaining tasks"): reaching a waypoint with and without repeat orders,
+the two fallbacks and patrol waypoints never repeating; the waypoint
+check (a waypoint aimed at a fleet takes its position, and one aimed at
+a fleet that is gone becomes a plain go-to); the route task; the
+transfer-fleet task with its refusals. A transport task whose unloads
+have all run becomes no task (MEASURED: TK-501 fleet 4, WP-1-explore).
+The orders layer does not accept the patrol and transfer-fleet tasks or
+the repeat flag in an order yet; `validTask` in `orders.go` belongs to
+that lane.
+
+Not modelled yet: following fleets (step 1a.3; Elegy does not keep
+waypoint 0's target), the patrol task (its turn step is not published),
+the stargate choice of the route task, waypoint tasks other than unloads,
+colonize, merge, route and transfer (load, scrap; ORDERS-STATUS.md), space objects and the Mystery Trader, mine
 sweeping,
 terraforming other than the Claim Adjuster's year-end step (production
 items, Orbital Adjusters), remote mining, Super Stealth research stealing, the
@@ -166,6 +181,21 @@ Places where the original has no behavior to copy, and Elegy chose one.
   (hostile deaths, 1 resource; KX-001 Z3). Calling `GrowPopulation`
   directly with maximum 0 still treats the planet as fully overcrowded.
 
+Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
+
+- **W1 (ASSUMPTION).** When several transfer-fleet refusals apply, the
+  first in ORDERS.md's order is reported: recipient absent, recipient
+  treats the giver as an enemy, colonists aboard, no design slot or fleet
+  room.
+- **W2 (ASSUMPTION).** A recipient's "matching" design slot is one holding
+  the same `Game.Designs` entry. A copy never is, so in practice every
+  design of a gift takes a free slot (CONFIRMED that a differing existing
+  design is not matched).
+- **W3 (ASSUMPTION).** A gifted fleet has no name and repeat orders off.
+- **W4 (ASSUMPTION).** The route task runs only for a fleet with no
+  further waypoint, so a fleet already routed is not routed again before
+  it leaves.
+
 ## Known parity failures
 
 `TestParityVectors -v` prints every case that does not pass. These are
@@ -180,6 +210,17 @@ listed; its comparison is in the test output.
   original's count (35 Elegy survivors against 26), so the difference is
   in how the battle ends, not in which fleets join. Cause not yet
   investigated.
+- **WU-A fleet 13** (MEASURED). A waypoint aimed at another player's
+  fleet that still exists takes the fleet's position, but the original
+  also shows its target as plain space. ORDERS.md does not say the
+  target is cleared; asked upstream.
+- **WU-ROUTE** (MEASURED). After moving part-way, the original's waypoint
+  0 still holds the route task; Elegy drops a fleet's task when it
+  leaves. Asked upstream whether every task stays with waypoint 0 in
+  transit.
+- **WU-B2, FO-04-E** (MEASURED, CONFIRMED). The gifted fleet's design is
+  expected in the recipient's slot 6; the harness does not load the
+  players' design slots yet, so the copy takes slot 0.
 - **CB-036** (CONFIRMED, start squares for 4 and 6 tokens). In every
   seed three fleets the original destroyed survive and one it kept is
   gone. Cause not yet investigated.

@@ -52,8 +52,8 @@ above.
 - order files and their acceptance, per-order clamps other than the
   design read, and conflicts between players;
 - loads (direct or by task), cargo transfers between the player's own
-  fleets, the "transfer fleet" task, cargo given to other players'
-  fleets, and splits;
+  fleets, cargo given to other players' fleets, and splits (the
+  transfer-fleet task is now `waypoints.go`, KERNEL-STATUS.md);
 - Mystery Trader items: `ReadDesign` takes the owned items by part name,
   and no game state holds them yet. Designs in `Game` still have no
   owner, so the design read is not applied to them.

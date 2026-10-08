@@ -63,6 +63,8 @@ type Task struct {
 	Kind      TaskKind
 	Transport [NumCargo]Transport // for TaskTransport
 	Fleet     int                 // target fleet id, for TaskMerge
+	Range     int                 // patrol range in ly, for TaskPatrol
+	Player    int                 // recipient, for TaskTransferFleet
 }
 
 // planetOrder is the planet indices in planet-id order.
@@ -375,6 +377,8 @@ func (g *Game) unloadPhase(owned []bool) (queue []drop, events []Event) {
 			} else {
 				events = append(events, ev)
 			}
+		case TaskRoute:
+			events = append(events, g.routeTask(f)...)
 		}
 	}
 	g.removeFleets(consumed)
@@ -401,6 +405,10 @@ func (g *Game) removeFleets(ids map[int]bool) {
 // with no relation check. On the owner's own planet colonists join the
 // population at once, with no cap; colonists for any other planet follow
 // "Unloading colonists on another player's planet".
+//
+// A transport task left with no action is no task (MEASURED: TK-501
+// fleet 4 and WP-1-explore show waypoint 0's task as none after their
+// unloads ran).
 //
 // In deep space minerals are destroyed, with no salvage, and colonists
 // are refused (BINARY-ONLY).
@@ -453,6 +461,9 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		case c == CargoColonists:
 			events = append(events, g.dropColonists(f, pi, amount, owned, queue)...)
 		}
+	}
+	if f.Task.Transport == ([NumCargo]Transport{}) {
+		f.Task = Task{}
 	}
 	return events
 }

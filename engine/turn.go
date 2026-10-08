@@ -220,6 +220,8 @@ func GenerateTurn(
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
+	// The waypoint check after the orders (step 1a.3).
+	g.waypointCheck()
 
 	// Waypoint tasks before movement (TAKEOVER.md "Where each task
 	// happens", step 2): unloads and colonize, then the drops. Colonists
@@ -238,7 +240,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
-	events = append(events, g.loadPass()...)
+	events = append(events, g.loadPass(false)...)
 
 	start := map[int]Point{}
 	for _, f := range g.Fleets {
@@ -350,7 +352,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
-	events = append(events, g.loadPass()...)
+	events = append(events, g.loadPass(true)...)
 	moved := map[int]bool{}
 	for _, f := range g.Fleets {
 		// A fleet launched this year counts as moved (PRODUCTION-LAUNCH.md,
@@ -363,6 +365,8 @@ func GenerateTurn(
 	// Claim Adjuster drift and year-end terraforming (KERNEL.md "Turn
 	// order" step 7.3), with the levels reached this year.
 	events = append(events, g.claimAdjusterYearEnd(rng)...)
+	// The end-of-year waypoint check (step 7a.2).
+	g.waypointCheck()
 
 	g.Year++
 	scores := g.scores()

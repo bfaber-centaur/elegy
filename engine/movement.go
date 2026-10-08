@@ -112,6 +112,9 @@ type Fleet struct {
 	// zero when the fleet did not move this year.
 	Heading     Point
 	HeadingWarp int
+	// Repeat is the fleet's repeat-orders flag (ORDERS.md "Reaching a
+	// waypoint").
+	Repeat bool
 }
 
 // fleetDesign is one design group inside a fleet, with its share of cargo.
@@ -332,10 +335,22 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 	return Event{Kind: kind, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: count}
 }
 
-// arrive completes a fleet's current waypoint.
+// arrive completes a fleet's current waypoint (ORDERS.md "Reaching a
+// waypoint", CONFIRMED by the WU batch): the reached waypoint becomes the
+// fleet's location and its task the fleet's task. With repeat orders off
+// it is dropped from the list. With repeat orders on a copy goes to the
+// end of the list, unless the list's last waypoint is already at its
+// position: so a single forward leg collapses to the reached waypoint and
+// the fleet ends idle, and coincident last waypoints do not grow the list
+// (CONFIRMED, WU-FALLBACK). A patrol waypoint never repeats (MEASURED,
+// WU wuPNR). A fleet left with no waypoint is idle and its owner told.
 func (g *Game) arrive(f *Fleet) []Event {
-	f.Task = f.Waypoints[0].Task
+	reached := f.Waypoints[0]
+	f.Task = reached.Task
 	f.Waypoints = f.Waypoints[1:]
+	if n := len(f.Waypoints); f.Repeat && reached.Task.Kind != TaskPatrol && n > 0 && f.Waypoints[n-1].Pos != reached.Pos {
+		f.Waypoints = append(f.Waypoints[:n:n], reached)
+	}
 	if len(f.Waypoints) == 0 {
 		f.Waypoints = nil
 		return []Event{g.fleetEvent(f, EventFleetArrived, 0)}
@@ -391,7 +406,7 @@ func (g *Game) generateFuel() {
 
 // EventColonistsKilledByEngine: Count = kT of colonists a Radiating
 // Hydro-Ram Scoop fleet lost.
-const EventColonistsKilledByEngine EventKind = EventGameLost + 1
+const EventColonistsKilledByEngine EventKind = EventStarbaseBuilt + 1
 
 // radiatingColonists is KERNEL.md's Radiating Hydro-Ram Scoop rule
 // (CONFIRMED for mid 50, KB-4A H, FM-102 Z1, Z2; the exemptions

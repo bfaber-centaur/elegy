@@ -4,8 +4,8 @@ BP-1
 BP-L
 CB-001 random 7
 CB-002 random 3
-CB-003 random 2
-CB-004 random 5
+CB-003 random 1
+CB-004 random 3
 CB-005 random 3
 CB-006 random 7
 CB-007 random 7
@@ -53,7 +53,7 @@ CB-038 random 7
 CB-040 random 7
 CB-041-joat
 CB-041-sf
-CB-041
+CB-041 random 7
 CB-045 random 7
 CB-046-bio
 CB-046-morph
@@ -244,7 +244,6 @@ TK-121-B
 TK-201
 TK-501
 TK-502
-WU-A
 WU-B1
 WU-CP1
 WU-CP2
@@ -258,7 +257,6 @@ WU-LP2
 WU-LP3
 WU-LP4
 WU-RNG20
-WU-ROUTE
 WU-SW40
 WU-SW50
 WU-SW55

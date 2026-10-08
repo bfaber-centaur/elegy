@@ -72,7 +72,7 @@ func TestConfirmedMergeTask(t *testing.T) {
 			Cargo: Cargo{Minerals: Minerals{0, 30, 0}}, Task: Task{Kind: TaskMerge, Fleet: 1}},
 		{ID: 3, Owner: 0, Pos: Point{205, 10}, Stacks: []Stack{{Design: 1, Count: 1}}, Task: Task{Kind: TaskMerge, Fleet: 1}},
 	}
-	events := g.loadPass()
+	events := g.loadPass(false)
 	if len(g.Fleets) != 2 || g.Fleets[0].ID != 1 {
 		t.Fatalf("fleets %+v, want fleets 1 and 3", g.Fleets)
 	}
@@ -96,7 +96,7 @@ func TestPredictionMergeTaskForeignTarget(t *testing.T) {
 		{ID: 1, Owner: 1, Stacks: []Stack{{Design: 0, Count: 2}}},
 		{ID: 2, Owner: 0, Stacks: []Stack{{Design: 0, Count: 3}}, Task: Task{Kind: TaskMerge, Fleet: 1}},
 	}
-	g.loadPass()
+	g.loadPass(false)
 	if len(g.Fleets) != 2 || g.Fleets[0].Stacks[0].Count != 2 || g.Fleets[1].Task.Kind != TaskNone {
 		t.Errorf("fleets %+v", g.Fleets)
 	}
