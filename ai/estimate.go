@@ -29,9 +29,10 @@ type estimate struct {
 // completion is the year (1 is the coming year) in which the head of
 // queue q finishes, by ESTIMATES.md "Production completion" (CONFIRMED,
 // ES-001): mining without the random extra kT, the year's resources less
-// the research budget, the queue walk with mines and factories installed
-// at once and no installation cap, then population growth. It is 100 when
-// the head does not finish in 99 years.
+// the research budget (unless the planet sends only leftover resources to
+// research), the queue walk with mines and factories installed at once and
+// no installation cap, then population growth. It is 100 when the head
+// does not finish in 99 years.
 //
 // ASSUMPTION A62: the walk stops at the head, so the items behind it are
 // left out (they matter only after a year in which an automatic head was
@@ -65,7 +66,10 @@ func (e *estimate) year(budget int) {
 		e.p.Surface[m] += gain
 	}
 	r := e.col.Resources(e.p.Population, e.p.Factories)
-	e.r = r - r*budget/100
+	e.r = r
+	if !e.p.LeftoverOnly {
+		e.r -= r * budget / 100
+	}
 	e.stopped = false
 	e.walk()
 	g := race.GrowthRate
