@@ -48,6 +48,8 @@ at the end of the replay, before any waypoint task.
 | `RepeatOrder` | own fleet; sets or clears the repeat-orders flag (the host checks no owner, LEGACY BUG) | ORDERS.md "Reaching a waypoint", "Ownership"; LIMITS.md "No owner check" | chosen rule | `TestRepeatOrder` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
+| `SplitOrder` | own fleet; a new fleet of the named ships with the source's plan, waypoints and task; cargo and fuel shared by capacity, rounded down, the remainder on the source; lowest free number (L20); repeat flag copied (L21); refused at 512 fleets | ORDERS.md "Split" | CONFIRMED (CO-01, CO-02); FC-1 | `TestConfirmedSplitSharesByCapacity`, `TestConfirmedSplitAllRemainderOnSource` |
+| `MoveShipsOrder` | two own fleets at one place; ships move with their capacity share of cargo and fuel; damage combined by the merge order's rule; at most 32765 per stack, the rest lost; damaged stacks split keep their damage (L22); an emptied fleet removed (L23) | ORDERS.md "Split", "Merge" | CONFIRMED (CO-03); stack limit MEASURED (CO-06) | `TestConfirmedMoveShips`, `TestMoveShipsChecks` |
 | `DetonateOrder` | rejected: Elegy has no minefields yet | ORDERS.md "Minefield detonate-setting" | not modelled | `TestDetonateNotModelled` |
 | `QueueOrder` | own planet; empty list removes the queue; otherwise replaced as sent, a sent percentage kept only against an unused old item of the same kind with exactly that percentage (chosen rule) | LIMITS.md "Production-queue replace" | CONFIRMED (LQ-1..LQ-6); chosen rule | `TestConfirmedQueueReplace`, `TestPredictionQueueNoNewProgress` |
 | `PlanetSettingsOrder` | own planet; leftover-only, route destination, packet destination (unchecked) and packet speed (0 or 4..19, L19) | LIMITS.md "Setting orders"; OBJECTS.md "The settings" | BINARY-ONLY; chosen rule | `TestPredictionSettingOrders`, `TestPacketSettingsOrder` |
@@ -79,6 +81,10 @@ and has been sent to stars-elegy as a question.
 | L17 | (settled: ORDERS.md "Cross-owner cargo", a recipient whose orders replay after the giver's can use the gift the same year, BINARY-ONLY) | |
 | L18 | A patrol task with a negative range rejects the waypoint order. | ORDERS.md gives no check on the patrol range. |
 | L19 | A packet speed other than 0 (unset) or 4..19 refuses the planet-settings order. | OBJECTS.md "The settings": the stored field holds warps 4..19. |
+| L20 | A split's new fleet takes its owner's lowest unused fleet number; a player at 512 fleets cannot split. | ORDERS.md "Split" does not say; CO-02 and FC-1 agree with the new-ship rule. |
+| L21 | A split's new fleet copies the source's repeat-orders flag and has no name. | ORDERS.md "Split" names the plan and waypoint list only. |
+| L22 | Ships moved out of a damaged stack keep its damage percentage and units, as do those left. | ORDERS.md does not say which ships of a stack are damaged. |
+| L23 | A ship move takes ships out of the order's fleet first, then out of the other; a fleet left with no ships is removed. | As merged fleets are (ORDERS.md "Merge"). |
 
 ## Ships leaving production
 
@@ -139,7 +145,7 @@ queue.
 
 ## Not modelled
 
-- splits, and cargo to deep space;
+- cargo to deep space (jettison: refused, ORDERS.md "Deep-space jettison");
 - the binary's separate queued cross-player credit routine, which no
   legal order is known to reach (ORDERS.md, stars-elegy #87:
   UNRESOLVED);
