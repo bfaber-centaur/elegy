@@ -248,10 +248,8 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 // its order is replayed is rejected by the order, and nothing is debited
 // (ORDERS.md "Missing endpoint", BINARY-ONLY for a same-turn removal).
 //
-// ASSUMPTION L17: each gift is credited as its own order applies, so a
-// later order in the replay, the receiver's owner's included, sees it.
-// ORDERS.md does not establish whether the host orders all debits before
-// all credits across transfer records.
+// A receiver whose orders replay after the giver's can use the gift the
+// same year (ORDERS.md "Cross-owner cargo", BINARY-ONLY).
 //
 // Not modelled: the binary's separate queued cross-player credit routine,
 // which no legal order is known to reach (ORDERS.md "A separate queued

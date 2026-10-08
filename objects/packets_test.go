@@ -69,28 +69,44 @@ func TestConfirmedPacketDecay(t *testing.T) {
 		name  string
 		kt, k int
 		pp    bool
-		share float64
+		pct   int
 		want  int
 	}{
-		{"OB-028 class 2 launch year", 100, 2, false, 0.5, 88},
-		{"OB-028 class 3 launch year", 100, 3, false, 0.5, 75},
-		{"OB-028 IT class 1 launch year", 100, 1, false, 0.5, 90},
-		{"OB-028-G 70% of the launch flight", 500, 3, false, 0.35, 413},
-		{"OB-023 PP class 1", 1000, 1, true, 1, 950},
-		{"OB-023 PP class 2", 1000, 2, true, 1, 880},
-		{"OB-023 PP class 3", 1000, 3, true, 1, 750},
-		{"OB-023 minimum", 50, 1, false, 1, 40},
-		{"OB-023 PP minimum", 50, 1, true, 1, 45},
-		{"OB-003-C 5% of a year", 100, 1, false, 0.05, 90},
-		{"class 0", 100, 0, false, 1, 100},
-		{"minimum capped", 4, 1, false, 1, 0},
+		{"OB-028 class 2 launch year", 100, 2, false, 50, 88},
+		{"OB-028 class 3 launch year", 100, 3, false, 50, 75},
+		{"OB-028 IT class 1 launch year", 100, 1, false, 50, 90},
+		{"OB-028-G 70% of the launch flight", 500, 3, false, 35, 413},
+		{"OB-023 PP class 1", 1000, 1, true, 100, 950},
+		{"OB-023 PP class 2", 1000, 2, true, 100, 880},
+		{"OB-023 PP class 3", 1000, 3, true, 100, 750},
+		{"OB-023 minimum", 50, 1, false, 100, 40},
+		{"OB-023 PP minimum", 50, 1, true, 100, 45},
+		{"OB-003-C 5% of a year", 100, 1, false, 5, 90},
+		{"class 0", 100, 0, false, 100, 100},
+		{"minimum capped", 4, 1, false, 100, 0},
 	} {
-		if got := Decay(one(c.kt), c.k, c.pp, c.share)[0]; got != c.want {
+		if got := Decay(one(c.kt), c.k, c.pp, c.pct)[0]; got != c.want {
 			t.Errorf("%s: %d, want %d", c.name, got, c.want)
 		}
 	}
-	if got := Decay(engine.Minerals{0, 100, 0}, 2, false, 1); got[0] != 0 || got[1] != 75 {
+	if got := Decay(engine.Minerals{0, 100, 0}, 2, false, 100); got[0] != 0 || got[1] != 75 {
 		t.Errorf("empty mineral decayed: %v", got)
+	}
+	// Arrival share (BINARY-ONLY): round(trunc(d)·100/m), halved rounding
+	// down on the launch year; OB-028-G flew 70% of its launch flight:
+	// p = 35, 500 kT class 3 loses 87.
+	for _, c := range []struct {
+		d      float64
+		m      int
+		launch bool
+		p      int
+	}{{28.9, 40, true, 35}, {60.5, 81, false, 74}, {4.99, 81, false, 5}, {81, 81, false, 100}, {0.4, 81, false, 0}} {
+		if got := arrivalPct(c.d, c.m, c.launch); got != c.p {
+			t.Errorf("d %v, move %d, launch %v: %d%%, want %d", c.d, c.m, c.launch, got, c.p)
+		}
+	}
+	if got := 500 - Decay(one(500), 3, false, arrivalPct(28.9, 40, true))[0]; got != 87 {
+		t.Errorf("OB-028-G loss %d, want 87", got)
 	}
 }
 
@@ -204,6 +220,37 @@ func TestConfirmedPacketFlight(t *testing.T) {
 	ims := s.MovePackets(l.g, ImpactContext{}, &script{})
 	if len(ims) != 1 || len(s.Packets) != 0 || ims[0].Added[0] != 15 || l.g.Planets[1].Surface[0] != 15 {
 		t.Errorf("arrival: %+v", ims)
+	}
+	// The merge test (BINARY-ONLY): Σ⌈m/10⌉ of the earlier packet below
+	// 1,630, so 16,290 kT merges and 16,291 does not; a merged mineral
+	// above 32,767 becomes 32,760.
+	for _, c := range []struct {
+		kt    int
+		merge bool
+	}{{16290, true}, {16291, false}} {
+		ms := &Space{Packets: []Packet{{Pos: origin, Target: 2, Warp: 9, Class: 2, New: true, Cargo: engine.Minerals{c.kt, 0, 0}}}}
+		if r := ms.Launch(l.g, 0, o, engine.Ironium, 1); r.Merged != c.merge {
+			t.Errorf("%d kT: merged %v", c.kt, r.Merged)
+		}
+	}
+	ms := &Space{Packets: []Packet{{Pos: origin, Target: 2, Warp: 9, Class: 2, New: true, Cargo: engine.Minerals{0, 0, 16000}}}}
+	if r := ms.Launch(l.g, 0, o, Mixed, 500); !r.Merged || ms.Packets[0].Cargo != (engine.Minerals{20000, 20000, 32760}) {
+		t.Errorf("merge cap: %+v", ms.Packets[0].Cargo)
+	}
+	// Numbers 0..510; 511 only with nothing sorting after the owner's
+	// packets; with no number left the item is built but no packet
+	// appears.
+	full := &Space{}
+	for n := range 511 {
+		full.Packets = append(full.Packets, Packet{Owner: 0, Number: n, From: 9})
+	}
+	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); r.NoRoom || full.Packets[r.Packet].Number != 511 {
+		t.Errorf("511 with nothing after: %+v", r)
+	}
+	full.Packets = full.Packets[:511]
+	full.Traders = []Trader{{}}
+	if r := full.Launch(l.g, 0, o, engine.Ironium, 1); !r.NoRoom || r.Spend[0] != 110 || len(full.Packets) != 511 {
+		t.Errorf("no room: %+v", r)
 	}
 	// No driver or no destination: nothing launched (OB-028-F).
 	l.g.Planets[0].StarbaseDesign = station(t, l, "", "")

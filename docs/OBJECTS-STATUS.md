@@ -1,7 +1,7 @@
 # Space objects: implementation status
 
 `objects/` implements the space objects of stars-elegy `docs/OBJECTS.md`
-(as of stars-elegy `main` at `2a4e48e`) and its Mystery Trader appearance
+(as of stars-elegy `main` at `1a630e6`) and its Mystery Trader appearance
 in `KERNEL.md`, with the part statistics of
 `COMPONENTS.md` (the component table the engine embeds). Nothing here
 comes from the private archaeology repositories.
@@ -185,15 +185,24 @@ count toward the object limit.
 
 ### Assumptions (spec gaps)
 
-1. **P1** An Interstellar Traveler's mixed item spends 48 kT of each
-   mineral (120% of 40, as for a single mineral).
-2. **P2** The 16,300 kT merge limit is tested on the earlier packet's
-   total before the new cargo is added.
-3. **P3** A new packet takes its owner's lowest unused packet number,
-   from 0.
-4. **P4** A decay loss is ⌊m · rate · share / 100⌋ in floating point,
-   with share = distance flown / the year's move (halved on the launch
-   year).
+OBJECTS.md now answers P1–P4 (BINARY-ONLY):
+- An IT mixed item spends 48 kT of each mineral.
+- New cargo joins any packet of the same owner lying exactly at the
+  planet with the same warp, destination and class, whatever its
+  minerals. The merge test is Σ⌈m/10⌉ < 1,630 on that packet before the
+  add.
+  A merged mineral above 32,767 becomes 32,760.
+- Packet numbers run 0..510, and 511 is used only when nothing sorts after
+  the owner's packets. With no number or object slot left, the item is
+  built but no packet appears (`Launch.NoRoom`).
+- Decay is integer: `min(m, max(floor, ⌊m·r·p/10000⌋))`, with arrival
+  `p = round(trunc(d)·100/move)`, halved on the launch year. A packet
+  with nothing left is removed.
+
+Still open:
+
+1. **P5** Objects this package does not hold (`OtherObjects`, salvage)
+   count as sorting after the owner's packets for the 511 rule.
 
 ### What the turn engine needs to call (packets)
 
@@ -208,3 +217,41 @@ count toward the object limit.
 - Step 5: `Space.FlyLaunched`, before battles and bombing.
 - For every `Impact` with `Emptied`, empty the planet as after bombing.
 - Packet visibility belongs to scanning.
+
+## Stargates
+
+| Rule | Function | Status |
+|---|---|---|
+| What makes a gate; limits from the component table | `StarbaseGate`, `PlanetGate` | CONFIRMED (GT-004) |
+| Source and destination gates, one-sided friendship, Jump Gates | `Jump` | CONFIRMED (GT-001 A–E, M) |
+| Refusal order | `Jump`, `GateRefusal` | CONFIRMED (GT-001 F3, GT-003 R1–R6); the destination planet check BINARY-ONLY in its place |
+| Cargo unloaded before the checks; foreign colonists | `Jump` | LEGACY BUG MEASURED (OB-021); CONFIRMED (GT-001 F, F2) |
+| Range and mass refusals at 5× | `Jump` | CONFIRMED (GT-001) |
+| Danger | `GateDanger` | CONFIRMED (GT-001 N1–N6) |
+| Losses, damage; IT destroys no ships | `Jump` | CONFIRMED (OB-021, OB-022) |
+| Mixed-fleet count | `LegacyGateMixedFleetLoss` (on) | LEGACY BUG, MEASURED (GT-001 H2, GT-002), CONFIRMED (GT-003 W0–W5) |
+
+### Assumptions (spec gaps)
+
+1. **G1** Designs are checked and rolled in order of first appearance in
+   the fleet's stacks, ship by ship.
+2. **G2** Survivors' new damage is averaged as (old damage of every ship
+   of the design, destroyed ones included, + survivors × new) /
+   survivors, stored as pct 100.
+3. **G3** Fuel scales with the fleet's fuel capacity, rounded half up
+   (OB-021: 100 → 67); cargo kept aboard (IT, Jump Gates) stays whole.
+
+### What the turn engine needs to call (stargates)
+
+- Fleet movement: a fleet whose next waypoint has warp `GateWarp` (11)
+  calls `Jump` instead of moving. On `GateOK` the fleet is at the
+  destination: consume the waypoint, mark it moved, give it no heading
+  or warp for others' scans, skip its repair this year, never apply
+  Cheap Engines failure, and make other players' chasers stop at its
+  departure point (the owner's own follow it).
+- `FleetLost`: delete the fleet with the "fleet lost" message.
+- A refusal: one message to the owner for `Refused`; the fleet keeps its
+  waypoints and counts as stationary. An unload (`Unloaded`) also
+  messages the source planet's owner.
+- Orders: accept waypoint warp 11 (now refused as not modelled), and let
+  routing pick it when both ends are gated and the jump is safe.
