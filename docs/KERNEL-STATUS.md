@@ -319,6 +319,27 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   further waypoint, so a fleet already routed is not routed again before
   it leaves.
 
+## Year invariants
+
+`engine.CheckYear(prev, result)` checks one generated year's structural
+invariants (engine/invariants.go): ids, owners and indexes; planets
+unmoved, and an unowned planet without population, defenses, starbase or
+queue; fleets with ships, unique numbers, and fuel and cargo within their
+tanks and holds; at most 512 fleets a player; research levels in 0..26
+that never fall; and each player's view holding exactly their own planets
+at the own-planet level, with every report and sighting naming a real
+object at its real position. The doc comment gives each check its
+stars-elegy citation or its label (ELEGY CHOICE for the data-model checks,
+with what each protects; ASSUMPTION for levels never falling). An owned
+planet with 0 colonists is allowed: a load after movement can take every
+colonist, and the planet is lost only at the next year's growth
+(TAKEOVER.md "Unload and load amounts", CONFIRMED TK-201 G). Mass
+conservation is not checked: mining, production, scrapping and battles
+all change it. `TestCheckYearReports` checks that each kind of corruption
+is reported with its own problem, and `TestCheckYearAllowsOwnedEmptyPlanet`
+the allowed empty planet. Long multi-seed runs that call it every year
+belong to the game loop.
+
 ## Known parity failures
 
 `TestParityVectors -v` prints every case that does not pass. These are
