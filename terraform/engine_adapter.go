@@ -2,9 +2,10 @@ package terraform
 
 import "github.com/bfaber-centaur/elegy/engine"
 
-// Rules is the engine.Terraformer GenerateTurn calls: remote mining at
-// step 6c.2 and the Orbital Adjusters at step 7.4 (KERNEL.md "Turn
-// order"). It keeps no state.
+// Rules is the engine.Terraformer: production's terraform items (step 4),
+// remote mining at step 6c.2 and the Orbital Adjusters at step 7.4
+// (KERNEL.md "Turn order"; docs/TERRAFORM-STATUS.md, "Turn wiring"). It
+// keeps no state.
 type Rules struct{}
 
 var _ engine.Terraformer = Rules{}
@@ -42,4 +43,27 @@ func (Rules) Adjust(g *engine.Game) []engine.Event {
 		}
 	}
 	return out
+}
+
+// Reach is Reach.
+func (Rules) Reach(race engine.Race, levels [engine.NumFields]int) [3]int {
+	return Reach(race, levels)
+}
+
+// Capacity is Capacity.
+func (Rules) Capacity(p engine.Planet, race engine.Race, reach [3]int) int {
+	return Capacity(p, race, reach)
+}
+
+// Improve is Improve.
+func (Rules) Improve(p *engine.Planet, race engine.Race, reach [3]int) int {
+	return Improve(p, race, reach)
+}
+
+// UnitCost is UnitCost.
+func (Rules) UnitCost(race engine.Race) int { return UnitCost(race) }
+
+// AutoUnits is AutoUnits.
+func (Rules) AutoUnits(count, capacity int, minOnly bool, popChange, hab int) int {
+	return AutoUnits(count, capacity, minOnly, popChange, hab)
 }

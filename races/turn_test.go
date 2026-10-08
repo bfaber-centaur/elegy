@@ -1,0 +1,33 @@
+package races
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/bfaber-centaur/elegy/engine"
+)
+
+// zeroRand always draws 0.
+type zeroRand struct{}
+
+func (zeroRand) Intn(int) int { return 0 }
+
+// GenerateTurn runs the race check on its copy of the game: the input
+// game's checker keeps its designs, tampered flags included
+// (engine.RaceCloner).
+func TestGenerateTurnLeavesInputRaces(t *testing.T) {
+	designs := slRaces()
+	r := &GameRaces{Designs: designs, Computer: []bool{false, false}}
+	before := append([]Design(nil), r.Designs...)
+	g := engine.Game{Players: []engine.Player{{Race: designs[0].Race, ResearchBudget: 15}, {Race: designs[1].Race, ResearchBudget: 15}}, Races: r}
+	res, err := engine.GenerateTurn(g, nil, engine.Jrc3(), zeroRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(r.Designs, before) {
+		t.Errorf("input checker changed: %+v", r.Designs)
+	}
+	if out := res.Game.Races.(*GameRaces); !out.Designs[0].Tampered || !out.Designs[1].Tampered {
+		t.Errorf("result checker %+v, want both races tampered", out.Designs)
+	}
+}

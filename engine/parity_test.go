@@ -713,7 +713,8 @@ func loadVector(v *pvVector) (*pvLoaded, error) {
 // vector's planet carries no packet destination or speed, which they need.
 var pvItemKinds = map[int]ItemKind{
 	0: ItemAutoMines, 1: ItemAutoFactories, 2: ItemAutoDefenses, 3: ItemAutoAlchemy,
-	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy,
+	4: ItemAutoMinTerraform, 5: ItemAutoMaxTerraform,
+	7: ItemFactory, 8: ItemMine, 9: ItemDefenses, 11: ItemMineralAlchemy, 12: ItemTerraform,
 }
 
 // queueEquals checks a planet's production queue (FORMAT.md

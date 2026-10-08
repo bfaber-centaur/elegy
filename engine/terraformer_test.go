@@ -20,6 +20,13 @@ func (s *stubTerraform) RemoteMine(g *Game, fi int, _ Rand) (Minerals, bool) {
 	return Minerals{}, true
 }
 
+// The production methods: no reach, no capacity, nothing built.
+func (*stubTerraform) Reach(Race, [NumFields]int) [3]int      { return [3]int{} }
+func (*stubTerraform) Capacity(Planet, Race, [3]int) int      { return 0 }
+func (*stubTerraform) Improve(*Planet, Race, [3]int) int      { return -1 }
+func (*stubTerraform) UnitCost(Race) int                      { return 100 }
+func (*stubTerraform) AutoUnits(int, int, bool, int, int) int { return 0 }
+
 func (s *stubTerraform) Adjust(g *Game) []Event {
 	s.adjust++
 	return []Event{{Kind: EventPlanetImproved, Player: 0, Planet: g.Planets[0].ID, Fleet: -1}}
