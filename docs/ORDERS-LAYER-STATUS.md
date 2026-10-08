@@ -44,7 +44,7 @@ at the end of the replay, before any waypoint task.
 | `CargoOrder`, preconditions | fleet at the target or refused; no jettison; planet fuel dropped, the rest moves; any fleet with free hold carries colonists | ORDERS.md "Elegy implementation Q3", "Q4" | chosen rules | `TestCargoChecks` |
 | `CargoOrder`, another owner's planet | giving only; colonists are a drop (another player's planet without a starbase) or lost (unowned, or a starbase); minerals credited in place as the order applies, no message; relations do not matter | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | CONFIRMED (TK-501, TK-502), minerals MEASURED (TK-405, TK-412) | `TestConfirmedManualTransfersToOthers`, `TestGiftCreditedInPlace` |
 | `CargoOrder`, another player's fleet | giving only; colonists rejected (no legal client writes them, TK-408, TK-414); credited in place as the order applies; what does not fit is lost and the giver told; no relation check; a later merge or design delete disposes of the gift as of the fleet's own cargo | ORDERS.md "Cross-owner cargo"; TAKEOVER.md "Manual cargo transfers to other players" | MEASURED (TK-406, TK-407, TK-409); over-full gift CONFIRMED; colonists chosen rule | `TestPredictionCargoToForeignFleet`, `TestGiftReceiverRemovedEarlier`, `TestGiftToFleetMergedAway`, `TestMeasuredGiftLostWithDeletedDesign` |
-| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet and fleet targets take their position; a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (the stargate hop, GT-004) accepted, the gate checked at the jump; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18); remote-mining and lay-mines tasks accepted, refused when they run, a lay-mines duration below one year other than indefinitely rejected (L24) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13); OBJECTS.md "Stargates", "Laying", "Waypoint upkeep and the remaining tasks", "Transfer fleet"; KERNEL.md "Remote mining"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks`, `TestWaypointOrderMiningAndLayingTasks` |
+| `WaypointOrder` | own fleet; coordinates clamped to the galaxy box; planet, fleet, wormhole-end and Trader targets take their position (L27); a warp outside 0..11, a missing target or a negative transport amount rejected; warp 11 (the stargate hop, GT-004) accepted, the gate checked at the jump; route, patrol and transfer-fleet tasks accepted, a transfer to any player (refused when the task runs), a negative patrol range rejected (L18); remote-mining and lay-mines tasks accepted, refused when they run, a lay-mines duration below one year other than indefinitely rejected (L24) | ORDERS.md "Waypoint coordinates", "Waypoint warp, target and transport" (Q13); OBJECTS.md "Stargates", "Laying", "Waypoint upkeep and the remaining tasks", "Transfer fleet"; KERNEL.md "Remote mining"; UNIVERSE.md | BINARY-ONLY; chosen rule | `TestPredictionWaypointClamp`, `TestWaypointOrderUpkeepTasks`, `TestWaypointOrderMiningAndLayingTasks`, `TestWaypointOrderObjectTargets` |
 | `RepeatOrder` | own fleet; sets or clears the repeat-orders flag (the host checks no owner, LEGACY BUG) | ORDERS.md "Reaching a waypoint", "Ownership"; LIMITS.md "No owner check" | chosen rule | `TestRepeatOrder` |
 | `RenameOrder` | own fleet | ORDERS.md "Ownership" | chosen rule | `TestRenameOrder` |
 | `MergeOrder` | `Game.MergeFleets` | ORDERS.md "Merge" | see ORDERS-STATUS.md | (kernel lane) |
@@ -88,6 +88,7 @@ and has been sent to stars-elegy as a question.
 | L24 | A lay-mines task whose duration is neither indefinitely nor at least one year rejects the waypoint order. | OBJECTS.md "Duration" names the three durations and no order-time check. |
 | L25 | A design picture outside 0..3 rejects the design order. | AI.md "Picture" names four pictures per hull and no order-time check. |
 | L26 | A design edited in place takes the edit's year as its creation year, and the order's picture. | AI.md "Storing a design" covers a delete and a new design only. |
+| L27 | A wormhole-end or Mystery Trader waypoint target need not be known to the player. | As planet and fleet targets; ORDERS.md gives no knowledge check. |
 
 ## Ships leaving production
 
@@ -176,7 +177,7 @@ successor needs before it can change.
 ### Labelled choices
 
 Every Elegy choice is in the tables above: L2, L4, L6, L7, L11, L14–L16,
-L18–L26 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
+L18–L27 (orders), P1–P4, P6, P7 (production), W6 (routing). Each is an
 `ASSUMPTION` in the code. L1, L3, L5, L8–L10, L12 and L17 are
 settled by the specs (L13 was never used).
 

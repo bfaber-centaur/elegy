@@ -380,6 +380,14 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 // 1000 .. 1000 + W). A planet or fleet target takes that object's
 // position.
 //
+// A wormhole end or Mystery Trader target takes the object's position,
+// as the waypoint check gives it (ORDERS.md "Waypoint upkeep"; OBJECTS.md
+// "Travel": only a waypoint aimed at the end itself goes through), and
+// one that does not exist is rejected like a missing planet or fleet.
+//
+// ASSUMPTION L27: a wormhole or Trader target need not be known to the
+// player, as a planet or fleet target need not be.
+//
 // A warp outside 0..11, a target planet or fleet that does not exist,
 // and a negative transport amount reject the order (ORDERS.md "Waypoint
 // warp, target and transport", chosen rule). Warp 11 is
@@ -441,6 +449,15 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 				return fmt.Errorf("waypoint %d fleet %d: %w", k, wp.ID, ErrNoSuchObject)
 			}
 			wp.Pos = g.Fleets[t].Pos
+		case TargetWormhole, TargetTrader:
+			pos, ok := Point{}, false
+			if g.Objects != nil {
+				pos, ok = g.Objects.ObjectPos(wp.Target, wp.ID)
+			}
+			if !ok {
+				return fmt.Errorf("waypoint %d object %d: %w", k, wp.ID, ErrNoSuchObject)
+			}
+			wp.Pos = pos
 		case TargetSpace:
 			wp.Pos = g.clampToGalaxy(wp.Pos)
 		default:
