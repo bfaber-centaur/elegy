@@ -317,6 +317,42 @@ func TestPredictionWaypointClamp(t *testing.T) {
 	}
 }
 
+func TestWaypointOrderUpkeepTasks(t *testing.T) {
+	// ORDERS.md "Waypoint upkeep and the remaining tasks": route, patrol
+	// and transfer-fleet tasks are accepted; a transfer naming an absent
+	// player is accepted and refused when the task runs ("Transfer
+	// fleet"). ASSUMPTION L18: a negative patrol range is rejected.
+	g := ordersGame()
+	patrol := Task{Kind: TaskPatrol, Range: 50}
+	gift := Task{Kind: TaskTransferFleet, Player: 7}
+	errs, _ := apply(g, 0,
+		WaypointOrder{Fleet: 1, Task: patrol, Waypoints: []Waypoint{{Pos: Point{1100, 1100}, Task: Task{Kind: TaskRoute}}}},
+		WaypointOrder{Fleet: 2, Waypoints: []Waypoint{{Pos: Point{1100, 1100}}, {Pos: Point{1200, 1200}, Warp: 5, Task: gift}}},
+		WaypointOrder{Fleet: 2, Task: Task{Kind: TaskPatrol, Range: -1}},
+	)
+	if errs[0] != nil || errs[1] != nil || !errors.Is(errs[2], ErrOutOfRange) {
+		t.Fatalf("errors %v", errs)
+	}
+	if g.Fleets[0].Task != patrol || g.Fleets[1].Waypoints[1].Task != gift {
+		t.Errorf("tasks %+v and %+v", g.Fleets[0].Task, g.Fleets[1].Waypoints[1].Task)
+	}
+}
+
+func TestRepeatOrder(t *testing.T) {
+	// ORDERS.md "Reaching a waypoint": the repeat-orders flag; ownership
+	// checked (ORDERS.md "Ownership", chosen rule, against LIMITS.md's
+	// LEGACY BUG of no owner check).
+	g := ordersGame()
+	errs, _ := apply(g, 0, RepeatOrder{Fleet: 1, On: true}, RepeatOrder{Fleet: 3, On: true})
+	if errs[0] != nil || !errors.Is(errs[1], ErrNotYours) || !g.Fleets[0].Repeat || g.Fleets[2].Repeat {
+		t.Errorf("errors %v, repeat %v %v", errs, g.Fleets[0].Repeat, g.Fleets[2].Repeat)
+	}
+	apply(g, 0, RepeatOrder{Fleet: 1})
+	if g.Fleets[0].Repeat {
+		t.Error("repeat not cleared")
+	}
+}
+
 func TestRenameOrder(t *testing.T) {
 	g := ordersGame()
 	errs, _ := apply(g, 0, RenameOrder{Fleet: 1, Name: "Armada"}, RenameOrder{Fleet: 2, Name: "this name is far longer than thirty-one"})
@@ -408,8 +444,8 @@ func TestConfirmedManualTransfersToOthers(t *testing.T) {
 
 func TestGiftCreditedInPlace(t *testing.T) {
 	// ORDERS.md "Cross-owner cargo": the gift is credited in place as its
-	// order applies. ASSUMPTION L17: a later replay sees it, so player 1,
-	// replaying after player 0, can unload what it was just given.
+	// order applies, so player 1, replaying after player 0, can unload
+	// what it was just given the same year (BINARY-ONLY).
 	g := ordersGame()
 	g.Fleets[0].Pos = g.Fleets[2].Pos
 	files := []PlayerOrders{

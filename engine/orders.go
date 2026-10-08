@@ -341,6 +341,24 @@ func (o RenameOrder) apply(g *Game, player int, _ *Applied) error {
 	return nil
 }
 
+// RepeatOrder sets a fleet's repeat-orders flag (ORDERS.md "Reaching a
+// waypoint"). The host sets it on the named fleet whoever owns it
+// (LIMITS.md "No owner check", LEGACY BUG); Elegy checks that the fleet
+// is the player's (ORDERS.md "Ownership", chosen rule).
+type RepeatOrder struct {
+	Fleet int
+	On    bool
+}
+
+func (o RepeatOrder) apply(g *Game, player int, _ *Applied) error {
+	i, err := g.ownFleet(player, o.Fleet)
+	if err != nil {
+		return err
+	}
+	g.Fleets[i].Repeat = o.On
+	return nil
+}
+
 // MergeOrder is the direct merge order (ORDERS.md "Merge"), carried out by
 // Game.MergeFleets, which checks ownership and co-location.
 type MergeOrder struct {
@@ -368,7 +386,18 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 // the stargate hop, which Elegy does not model yet, so it is rejected as
 // not modelled.
 //
+// Tasks: route, patrol and transfer fleet are accepted as well as
+// colonize, merge and transport (ORDERS.md "Waypoint upkeep and the
+// remaining tasks"). A transfer-fleet task is accepted whoever it names:
+// the host refuses an absent, eliminated, hostile or colonist-carrying
+// transfer when the task runs (ORDERS.md "Transfer fleet"), and so does
+// Game.transferFleet.
+//
 // ASSUMPTION L6: a task Elegy does not model rejects the order.
+//
+// ASSUMPTION L18: a patrol task with a negative range rejects the order,
+// as a negative transport amount does (ORDERS.md "Waypoint warp, target
+// and transport"); ORDERS.md gives no range check.
 type WaypointOrder struct {
 	Fleet     int
 	Task      Task
@@ -422,7 +451,11 @@ func (o WaypointOrder) apply(g *Game, player int, _ *Applied) error {
 
 func validTask(t Task) error {
 	switch t.Kind {
-	case TaskNone, TaskColonize, TaskMerge:
+	case TaskNone, TaskColonize, TaskMerge, TaskRoute, TaskTransferFleet:
+	case TaskPatrol:
+		if t.Range < 0 {
+			return fmt.Errorf("patrol range %d: %w", t.Range, ErrOutOfRange)
+		}
 	case TaskTransport:
 		for _, tr := range t.Transport {
 			if tr.Action < TransportNone || tr.Action > UnloadExactly || tr.Amount < 0 {
