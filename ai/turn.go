@@ -204,12 +204,13 @@ func (t *turn) freeNumber() int {
 	return n
 }
 
-// notes is the threat marks (cybertron.md §4.1, robotoid.md §1): every planet owned by another player gets
-// min(6, population estimate/250 + 1), plus 1 with a starbase.
+// notes is the threat marks (cybertron.md §4.1, robotoid.md §1): every
+// planet owned by another player gets min(6, e/250 + 1), plus 1 with a
+// starbase, where e is the report's population estimate in units of 400
+// colonists (cybertron.md §4.1; a planet with no estimate counts as 0).
 //
-// ASSUMPTION A21: the estimate is in colonists, as the player's report
-// holds it. The low-mineral notes are used only by packets (§6), which
-// are not implemented.
+// ASSUMPTION A21: robotoid.md §1 does not name the unit; Robotoid uses
+// Cybertron's. The low-mineral notes are kept by Cybertron's packets.
 func (t *turn) notes() {
 	v := t.v
 	for _, pp := range v.Universe {
@@ -218,7 +219,7 @@ func (t *turn) notes() {
 			continue
 		}
 		r := v.Known[pp.ID]
-		m := min(6, r.PopEstimate/250+1)
+		m := min(6, r.PopEstimate/400/250+1)
 		if r.Starbase {
 			m++
 		}

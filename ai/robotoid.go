@@ -142,9 +142,9 @@ func (t *robotoidTurn) current(k int) int {
 //
 // ASSUMPTION A36: the view does not carry the size; it is read from the
 // map's extent (400 ly per size step from tiny's 400).
-func (t *robotoidTurn) universeSize() int {
+func universeSize(v *View) int {
 	hi := 0
-	for _, p := range t.v.Universe {
+	for _, p := range v.Universe {
 		hi = max(hi, p.Pos.X-1000, p.Pos.Y-1000)
 	}
 	return min(4, max(0, (hi-1)/400))
@@ -174,7 +174,7 @@ func (t *robotoidTurn) colonizerTest() bool {
 		return false
 	}
 	c := t.colonyFleets()
-	if c > 20*t.universeSize()+10 {
+	if c > 20*universeSize(t.v)+10 {
 		return false
 	}
 	e := 0
