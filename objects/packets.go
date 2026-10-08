@@ -149,8 +149,14 @@ type Launch struct {
 // the owner's packets (BINARY-ONLY). Packets stay in object order (owner,
 // then number).
 //
-// ASSUMPTION P5: the space objects this package does not hold
-// (OtherObjects, salvage) count as sorting after the owner's packets.
+// A player's packets and salvage share one number pool; higher players'
+// packets and salvage, wormholes and the Trader sort after them and so
+// block 511; minefields and lower players' objects never do
+// (BINARY-ONLY).
+//
+// ASSUMPTION P5: Elegy's salvage (engine.Game.Salvage, counted in
+// OtherObjects) has no owner or number yet, so it takes no packet number
+// and blocks no 511.
 func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int) Launch {
 	p := &g.Planets[pi]
 	if !p.HasStarbase || o.Dest < 0 || p.Owner < 0 {
@@ -185,7 +191,7 @@ func (s *Space) Launch(g *engine.Game, pi int, o PacketOrder, mineral, count int
 		}
 	}
 	used := map[int]bool{}
-	later := s.OtherObjects > 0 || len(s.Wormholes) > 0 || len(s.Traders) > 0
+	later := len(s.Wormholes) > 0 || len(s.Traders) > 0
 	for _, q := range s.Packets {
 		if q.Owner == p.Owner {
 			used[q.Number] = true

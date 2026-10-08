@@ -201,8 +201,10 @@ OBJECTS.md now answers P1–P4 (BINARY-ONLY):
 
 Still open:
 
-1. **P5** Objects this package does not hold (`OtherObjects`, salvage)
-   count as sorting after the owner's packets for the 511 rule.
+1. **P5** A player's packets and salvage share one 0..511 number pool,
+   and only higher players' packets and salvage, wormholes and the Trader
+   block 511. Elegy's salvage has no owner or number yet, so it takes no
+   packet number and blocks nothing.
 
 ### What the turn engine needs to call (packets)
 
