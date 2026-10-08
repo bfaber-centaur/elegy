@@ -454,13 +454,13 @@ func GenerateTurn(
 		}
 	}, nil)
 	events = append(events, ev...)
-	// The layers are taken after the unload pass, which removes the
-	// fleets that colonized or scrapped, so MineLayer's fleet indexes
-	// stay valid through LayMines and endLayYear. In KERNEL.md "Turn
-	// order" step 6c.2 each fleet runs one task, and a colonize or scrap
-	// task is not mine laying. ASSUMPTION O15: a Space Demolition fleet
-	// consumed in that pass, whose next waypoint is "lay mines", lays
-	// nothing.
+	// The layers are taken after unloadTasks, which removes the fleets
+	// that colonized (scrap does not run after movement), so MineLayer's
+	// fleet indexes stay valid through LayMines and endLayYear. In
+	// KERNEL.md "Turn order" step 6c.2 each fleet runs one task, and a
+	// colonize task is not mine laying. ASSUMPTION O15: a Space
+	// Demolition fleet that colonized in that pass, whose next waypoint
+	// is "lay mines", lays nothing.
 	if g.Objects != nil {
 		layers = g.layers(moved)
 	}
