@@ -264,8 +264,9 @@ func (s *splitSpy) Orders(r game.Report) ([]engine.Order, error) {
 // gives the new fleets orders the same turn, naming them by the split's
 // NewFleet (engine ASSUMPTION L28). Whether a game reaches a fleet to
 // split depends on its trajectory, so the test builds one: after 81 years
-// an idle Robotoid fleet of one slot outside the split groups gets a ship
-// of a slot in a group (0, 1 or 11–13), which the split moves out. Over the
+// an idle Robotoid fleet of one slot outside the split groups, moved into
+// deep space, gets a ship of a slot in a group (0, 1 or 11–13), which the
+// split moves out. Over the
 // next 5 years Robotoid splits and names a new fleet, and the game
 // accepts every such order.
 func TestDriversOrderSplitFleets(t *testing.T) {
@@ -296,11 +297,12 @@ func TestDriversOrderSplitFleets(t *testing.T) {
 	}
 }
 
-// plantMixedFleet adds to the first of player's idle fleets (no
-// waypoints) whose ships are all of one slot outside the split groups a
-// ship of the first design the player has in a group slot (0, 1, 11, 12,
-// 13). The new fleet the split makes is idle too, so the personality's
-// fleet passes give it orders.
+// plantMixedFleet takes the first of player's idle fleets (no waypoints,
+// no task) whose ships are all of one slot outside the split groups,
+// moves it 1 ly into deep space, where no other own fleet can merge with
+// it, and adds a ship of the first design the player has in a group slot
+// (0, 1, 11, 12, 13). The new fleet the split makes is idle too, so the
+// personality's fleet passes give it orders.
 func plantMixedFleet(t *testing.T, g *game.Game, player int) {
 	t.Helper()
 	r, err := g.Report(player)
@@ -321,7 +323,15 @@ func plantMixedFleet(t *testing.T, g *game.Game, player int) {
 	}
 	for i := range g.State.Fleets {
 		f := &g.State.Fleets[i]
-		if f.Owner != player || len(f.Waypoints) > 0 || len(f.Stacks) != 1 || slices.Contains(grouped, v.shipSlot(f.Stacks[0].Design)) || v.shipSlot(f.Stacks[0].Design) < 0 {
+		if f.Owner != player || len(f.Waypoints) > 0 || f.Task.Kind != engine.TaskNone || len(f.Stacks) != 1 || slices.Contains(grouped, v.shipSlot(f.Stacks[0].Design)) || v.shipSlot(f.Stacks[0].Design) < 0 {
+			continue
+		}
+		// Moved 1 ly off into deep space, where no other own fleet can
+		// merge with it.
+		f.Pos.X++
+		if slices.ContainsFunc(g.State.Fleets, func(o engine.Fleet) bool { return o.ID != f.ID && o.Pos == f.Pos }) ||
+			slices.ContainsFunc(g.State.Planets, func(p engine.Planet) bool { return p.Pos == f.Pos }) {
+			f.Pos.X--
 			continue
 		}
 		f.Stacks = append(f.Stacks, engine.Stack{Design: add, Count: 1})

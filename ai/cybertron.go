@@ -28,9 +28,8 @@ import (
 // original's inherited values, which kept AIX's armadas at home (AI-18),
 // would come only from a legacy ruleset switch, which is not implemented.
 //
-// Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
-// automation steps 4 and 5; docs/AI-STATUS.md lists them. Steps the
-// engine cannot order (invasion) go to Result.Unsupported.
+// Not yet run: automation steps 4 and 5; docs/AI-STATUS.md lists them.
+// Steps the engine cannot order (invasion) go to Result.Unsupported.
 func PlayCybertron(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -66,7 +65,7 @@ func PlayCybertron(v *View, rng engine.Rand) Result {
 	for _, id := range order {
 		t.produce(v.ownPlanet(id), budget)
 	}
-	auto := &automation{v: v, pers: Cybertron, rng: rng, q: t.q, order: order, budget: budget}
+	auto := &automation{v: v, res: &res, pers: Cybertron, rng: rng, q: t.q, order: order, budget: budget}
 	auto.run()
 	t.packets(order, budget, packetLegacyOf(v.Rules))
 	res.Orders = append(res.Orders, t.q.flush()...)

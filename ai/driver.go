@@ -83,6 +83,7 @@ func ViewOf(r game.Report, lvl Level) *View {
 	for _, w := range r.Wormholes {
 		v.Wormholes = append(v.Wormholes, Wormhole{End: w.End, Pos: w.Pos, Known: true, Class: w.Stability})
 	}
+	v.Minefields = r.Objects.Minefields
 	for _, d := range r.KnownDesigns {
 		if d.Full && d.Design != nil {
 			v.Foreign[d.Index] = *d.Design
