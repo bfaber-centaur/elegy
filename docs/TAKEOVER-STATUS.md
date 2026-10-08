@@ -49,6 +49,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
+| New Alternate Reality colony: a starbase of the owner's first starbase design (lowest starbase slot); with no starbase design, none (UNRESOLVED, the spec is silent) | `newColony`, `firstStarbaseDesign` | CONFIRMED (T-26, T-33) | `TestConfirmedAlternateRealityColonyStarbase`, `TestAlternateRealityColonyGeneratesYears` |
 | Starvation and AR starbase loss empty the planet | `GenerateTurn`, combat `finish` | as Capture | `TestPredictionEmptiedPlanet` |
 
 ## Implementation assumptions
@@ -75,9 +76,6 @@ Elegy has none of these yet:
 - colonists given by manual cargo transfers in the orders, which would
   start the before-movement drop queue;
 - ancient artifacts (no random events);
-- the starbase an Alternate Reality colony gets from its owner's first
-  starbase design (Elegy's designs have no owner), so a new AR colony has
-  no starbase and the next year is refused (`ZeroMaxPopulationError`);
 - the design check at generation that drops parts above the owner's tech
   (Elegy's designs have no owner, so every part is kept and used; the
   design read for an owner is `Catalog.ReadDesign`, ORDERS-STATUS.md);

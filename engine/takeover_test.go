@@ -798,3 +798,62 @@ func TestPredictionDeepSpaceUnload(t *testing.T) {
 		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal", f.Cargo, l.g.Salvage, ev)
 	}
 }
+
+func TestConfirmedAlternateRealityColonyStarbase(t *testing.T) {
+	// TAKEOVER.md "Colonization" (CONFIRMED T-26, T-33): an Alternate
+	// Reality colony gets a starbase of the owner's first starbase design,
+	// here the Space Station in slot 1 rather than the Orbital Fort in
+	// slot 3. With no starbase design, none (UNRESOLVED: TAKEOVER.md does
+	// not say).
+	l := newTKLab(t, 3)
+	l.g.Players[0].Race.PRT = PRTAlternateReality
+	fort := l.design("Orbital Fort")
+	station := l.design("Space Station")
+	l.g.DesignSlots = append(l.g.DesignSlots,
+		DesignSlot{Owner: 0, Starbase: true, Slot: 3, Design: fort},
+		DesignSlot{Owner: 1, Starbase: true, Slot: 0, Design: fort},
+		DesignSlot{Owner: 0, Starbase: true, Slot: 1, Design: station})
+	pi := l.planet(NoOwner, 0, 0)
+	l.g.newColony(pi, 0, 25)
+	p := l.g.Planets[pi]
+	if !p.HasStarbase || p.StarbaseDesign != station || p.StarbaseHull != l.g.Designs[station].Hull.StarbaseNumber || p.StarbaseDamage != 0 {
+		t.Errorf("starbase %v design %d hull %d damage %d, want the Space Station", p.HasStarbase, p.StarbaseDesign, p.StarbaseHull, p.StarbaseDamage)
+	}
+	if col := NewColony(&p, &l.g.Players[0]); col.MaxPop == 0 {
+		t.Error("the colony's maximum population is 0")
+	}
+
+	l = newTKLab(t, 3)
+	l.g.Players[0].Race.PRT = PRTAlternateReality
+	pi = l.planet(NoOwner, 0, 0)
+	l.g.newColony(pi, 0, 25)
+	if p := l.g.Planets[pi]; p.HasStarbase || p.StarbaseHull != 0 {
+		t.Errorf("no design: starbase %v hull %d, want none", p.HasStarbase, p.StarbaseHull)
+	}
+}
+
+func TestAlternateRealityColonyGeneratesYears(t *testing.T) {
+	// The lane D audit's halt: an Alternate Reality colony ship colonizes
+	// a habitable planet, and the following years must generate. The
+	// colony gets its starbase (CONFIRMED T-26, T-33), so its maximum
+	// population is not 0 and it keeps its population.
+	l := newTKLab(t, 3)
+	l.g.Players[0].Race.PRT = PRTAlternateReality
+	fort := l.design("Orbital Fort")
+	l.g.DesignSlots = append(l.g.DesignSlots, DesignSlot{Owner: 0, Starbase: true, Slot: 0, Design: fort})
+	pi := l.planet(NoOwner, 0, 0)
+	fi := l.fleet(0, pi, 0, Stack{Design: l.colonyShip(), Count: 1})
+	l.g.Fleets[fi].Cargo.Colonists = 25
+	l.g.Fleets[fi].Task = colonizeTask
+	g := l.g
+	for y := 1; y <= 4; y++ {
+		r, err := GenerateTurn(withRules(g), nil, &seqRand{})
+		if err != nil {
+			t.Fatalf("year %d: %v", y, err)
+		}
+		g = r.Game
+	}
+	if p := g.Planets[pi]; p.Owner != 0 || p.Population <= 0 || !p.HasStarbase {
+		t.Errorf("owner %d population %d starbase %v, want a living colony with its starbase", p.Owner, p.Population, p.HasStarbase)
+	}
+}

@@ -321,10 +321,14 @@ func (g *Game) emptyPlanet(pi int) Event {
 // newColony gives an empty planet to player with pop units (TAKEOVER.md
 // "Colonization"): the owner's default production queue, less the first
 // three items for Alternate Reality and the fifth and sixth for Claim
-// Adjuster, and the owner's default leftover setting (BINARY-ONLY).
+// Adjuster, and the owner's default leftover setting (BINARY-ONLY). An
+// Alternate Reality colony gets a starbase of the owner's first starbase
+// design (CONFIRMED T-26, T-33), the one in the lowest starbase slot.
 //
-// Not modelled: the starbase of the owner's first starbase design an
-// Alternate Reality colony gets (Elegy's designs have no owner yet).
+// UNRESOLVED: TAKEOVER.md does not say what a colony gets when its
+// Alternate Reality owner has no starbase design; Elegy gives none, as
+// before. Such a colony has a maximum population of 0
+// (ZeroMaxPopulationError).
 func (g *Game) newColony(pi, player, pop int) Event {
 	p := &g.Planets[pi]
 	pl := &g.Players[player]
@@ -339,7 +343,26 @@ func (g *Game) newColony(pi, player, pop int) Event {
 		p.Queue = append(p.Queue, it)
 	}
 	p.LeftoverOnly = pl.DefaultLeftoverOnly
+	if pl.Race.PRT == PRTAlternateReality {
+		if d, ok := g.firstStarbaseDesign(player); ok {
+			p.HasStarbase, p.StarbaseDesign, p.StarbaseDamage = true, d, 0
+			p.StarbaseHull = g.Designs[d].Hull.StarbaseNumber
+			p.StarbaseDock = g.Designs[d].Hull.Dock != 0
+		}
+	}
 	return Event{Kind: EventColonized, Player: player, Planet: p.ID, Fleet: -1, Count: pop}
+}
+
+// firstStarbaseDesign is player's starbase design in the lowest starbase
+// slot (Game.DesignSlots).
+func (g *Game) firstStarbaseDesign(player int) (int, bool) {
+	best, design := -1, 0
+	for _, ds := range g.DesignSlots {
+		if ds.Owner == player && ds.Starbase && (best < 0 || ds.Slot < best) {
+			best, design = ds.Slot, ds.Design
+		}
+	}
+	return design, best >= 0
 }
 
 // drop is colonists queued to land on a planet (planet index).
