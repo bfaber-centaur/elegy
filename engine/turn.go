@@ -136,8 +136,8 @@ type Player struct {
 	// Level is a computer player's level: 0 Easy, 1 Standard, 2 Harder,
 	// 3 Expert. The engine reads it only for computer players, and only
 	// for Mystery Trader planet trades (OBJECTS.md "Computer players'
-	// planets": Harder and Expert trade, CONFIRMED O-53). Nothing sets it
-	// yet, so every computer player counts as Easy.
+	// planets": Harder and Expert trade, CONFIRMED O-53). A new game sets
+	// it from the player's setup (newgame.PlayerSetup.Level).
 	Level int
 }
 

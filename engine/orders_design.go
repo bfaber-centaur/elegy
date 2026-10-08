@@ -19,8 +19,7 @@ import "fmt"
 // Built is how many ships of the slot's design were ever built
 // (stars-elegy ai/turindrone.md: a design's "built" count; robotoid.md
 // §3 reads it). Production counts every ship it completes. A save holds
-// the whole Game, so it writes Built; an older save of the same version
-// loads it as 0.
+// the whole Game, so it keeps Built.
 //
 // ASSUMPTION L29: an edit in place starts Built again at 0, as a new
 // design does; ships lost at the fleet limit still count; a starbase slot
