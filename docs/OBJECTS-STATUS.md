@@ -233,13 +233,22 @@ Still open:
 
 ### Assumptions (spec gaps)
 
-1. **G1** Designs are checked and rolled in order of first appearance in
-   the fleet's stacks, ship by ship.
-2. **G2** Survivors' new damage is averaged as (old damage of every ship
-   of the design, destroyed ones included, + survivors × new) /
-   survivors, stored as pct 100.
-3. **G3** Fuel scales with the fleet's fuel capacity, rounded half up
-   (OB-021: 100 → 67); cargo kept aboard (IT, Jump Gates) stays whole.
+OBJECTS.md now answers G1–G3 (BINARY-ONLY; fits OB-021, GT-001):
+- Designs go in design-number order, with every pct worked out first.
+- A design at 0% makes no draws; one at 100% is removed.
+- Each ship draws its loss roll, and a destroyed ship draws `rand(500) < u`
+  while damaged ships remain.
+- Old damage counts only the `D` damaged ships, and `D` more ships go when
+  `Nw + Dm ≥ A`.
+- Lost ships take `⌊fuel·L/T⌋` of the fuel, and the same share of any cargo
+  still aboard.
+
+Still open:
+
+1. **G4** When the extra destruction would take more ships than are left
+   (`D > s`, which corrupts the original's record), every ship of the
+   design is destroyed. A design's ships are taken as one stack with its
+   first stack's damage.
 
 ### What the turn engine needs to call (stargates)
 
