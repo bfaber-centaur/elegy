@@ -37,51 +37,80 @@ func TestHistoryKeepsLatestAndLostColonies(t *testing.T) {
 	}
 }
 
-func TestReportUniverseAndWormholes(t *testing.T) {
+func TestReportUniverse(t *testing.T) {
 	g := newSmoke(t, smokeSeed)
-	sp := g.State.Objects.(*objects.Space)
-	if len(sp.Wormholes) == 0 {
-		t.Fatal("the smoke seed made no wormholes; pick a seed that does")
-	}
-	// Player 0 knows end 0 of wormhole 0 and where it leads, and sees the
-	// other end this year; player 1 knows nothing.
-	e := &sp.Wormholes[0].Ends[0]
-	e.MarkKnown(0)
-	e.DestKnown = []bool{true}
-	g.views[0].Objects.Wormholes = append(g.views[0].Objects.Wormholes, objects.WormholeEndID(0, 1))
-	r0, err := g.Report(0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	r1, err := g.Report(1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(r0.Universe) != len(g.State.Planets) || len(r1.Universe) != len(g.State.Planets) {
-		t.Fatalf("universe has %d/%d planets, game %d", len(r0.Universe), len(r1.Universe), len(g.State.Planets))
-	}
-	for i, u := range r0.Universe {
-		p := g.State.Planets[i]
-		if u.ID != p.ID || u.Pos != p.Pos || u.NameIndex != g.nameIndex[i] {
-			t.Fatalf("universe planet %d = %+v, game %d at %v name %d", i, u, p.ID, p.Pos, g.nameIndex[i])
+	for p := range g.State.Players {
+		r, err := g.Report(p)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
-	found := false
-	for _, k := range r0.Wormholes {
-		if k.End == 0 {
-			found = true
-			if k.Pos != e.Pos || k.Stability != objects.JumpChance(*e) || k.Destination == nil || *k.Destination != sp.Wormholes[0].Ends[1].Pos {
-				t.Errorf("known end %+v", k)
+		if len(r.Universe) != len(g.State.Planets) {
+			t.Fatalf("player %d: universe has %d planets, game %d", p, len(r.Universe), len(g.State.Planets))
+		}
+		for i, u := range r.Universe {
+			pl := g.State.Planets[i]
+			if u.ID != pl.ID || u.Pos != pl.Pos || u.NameIndex != g.nameIndex[i] {
+				t.Fatalf("universe planet %d = %+v, game %d at %v name %d", i, u, pl.ID, pl.Pos, g.nameIndex[i])
 			}
 		}
 	}
-	if !found {
-		t.Error("player 0 does not see the end it knows")
+}
+
+// TestReportWormholesLastSeen: a known end the player does not see this
+// year keeps the position and stability it had when last seen (ASSUMPTION
+// G2), even after it moved and aged; a forgotten end leaves the report;
+// another player sees nothing.
+func TestReportWormholesLastSeen(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	sp := space(g.State)
+	if sp == nil || len(sp.Wormholes) == 0 {
+		t.Fatal("the smoke seed made no wormholes; pick a seed that does")
 	}
-	for _, k := range r1.Wormholes {
-		if k.End == 0 {
-			t.Error("player 1 sees an end only player 0 knows")
+	e := &sp.Wormholes[0].Ends[0]
+	partner := sp.Wormholes[0].Ends[1].Pos
+	// 2400: player 0 sees end 0 and its partner, and knows where it leads.
+	e.MarkKnown(0)
+	e.DestKnown = []bool{true}
+	g.views[0].Objects.Wormholes = []int{objects.WormholeEndID(0, 0), objects.WormholeEndID(0, 1)}
+	g.wormholes = wormholeHistory(nil).record(2400, g.views, sp)
+	seenPos, seenStab := e.Pos, objects.JumpChance(*e)
+
+	end0 := func(r Report) *KnownWormholeEnd {
+		for i := range r.Wormholes {
+			if r.Wormholes[i].End == 0 {
+				return &r.Wormholes[i]
+			}
 		}
+		return nil
+	}
+	r, _ := g.Report(0)
+	k := end0(r)
+	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Destination == nil || *k.Destination != partner {
+		t.Fatalf("seen end: %+v", k)
+	}
+
+	// 2401: the end jiggled and aged, out of the player's sight.
+	g.State.Year = 2401
+	e.Pos.X += 7
+	e.Years += 40
+	g.views[0].Objects.Wormholes = nil
+	g.wormholes = g.wormholes.clone().record(2401, g.views, sp)
+	if objects.JumpChance(*e) == seenStab {
+		t.Fatal("test setup: aging did not change the stability")
+	}
+	r, _ = g.Report(0)
+	k = end0(r)
+	if k == nil || k.Year != 2400 || k.Pos != seenPos || k.Stability != seenStab || k.Destination != nil {
+		t.Fatalf("unseen end: %+v; want the 2400 sighting at %v, stability %d, no destination", k, seenPos, seenStab)
+	}
+	if r1, _ := g.Report(1); end0(r1) != nil {
+		t.Error("player 1 sees an end only player 0 knows")
+	}
+
+	// A jump makes everyone forget the end.
+	e.Known = nil
+	if r, _ = g.Report(0); end0(r) != nil {
+		t.Error("a forgotten end is still reported")
 	}
 }
 

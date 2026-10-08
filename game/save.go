@@ -53,6 +53,8 @@ type savedYear struct {
 	Results []savedResult       `json:"results"`
 	// History is each player's planet history, in planet id order.
 	History [][]PlanetRecord `json:"history"`
+	// Wormholes is each player's wormhole sightings, in end order.
+	Wormholes [][]wormholeRecord `json:"wormholes"`
 }
 
 type savedResult struct {
@@ -98,6 +100,7 @@ func (g *Game) document() (saveFile, error) {
 	}
 	for p := range st.Players {
 		f.Last.History = append(f.Last.History, g.history.list(p))
+		f.Last.Wormholes = append(f.Last.Wormholes, g.wormholes.list(p))
 	}
 	st.Objects, st.Races, st.Terraform = nil, nil, nil
 	f.Game = st
@@ -189,6 +192,16 @@ func Load(r io.Reader) (*Game, error) {
 		g.history[p] = map[int]PlanetRecord{}
 		for _, r := range recs {
 			g.history[p][r.Report.Planet] = r
+		}
+	}
+	if len(f.Last.Wormholes) != len(st.Players) {
+		return nil, fmt.Errorf("%w: wormhole sightings for %d of %d players", ErrSave, len(f.Last.Wormholes), len(st.Players))
+	}
+	g.wormholes = make(wormholeHistory, len(f.Last.Wormholes))
+	for p, recs := range f.Last.Wormholes {
+		g.wormholes[p] = map[int]wormholeRecord{}
+		for _, r := range recs {
+			g.wormholes[p][r.End] = r
 		}
 	}
 	for _, s := range f.Last.Results {

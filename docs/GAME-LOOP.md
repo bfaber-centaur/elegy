@@ -64,7 +64,7 @@ Computer opponents, scripted players and front ends all implement
 | `Events`, `Orders` | the previous year's messages to the player, and the outcome of each of its orders | engine `TurnResult` |
 | `History` | for every planet ever reported to the player, the latest report and the year it describes; lost colonies stay recorded as the player's own | AI.md §1 "What it sees" (CONFIRMED AI-12); ASSUMPTION G1 below |
 | `Universe` | every planet's id, position and name index, seen or not | AI.md §1 (CONFIRMED AI-12: colonizers flown to never-scanned planets); ai/rototill.md §3 (MEASURED AI-17: scouts to the nearest never-seen planet) |
-| `Wormholes` | each wormhole end the player knows: position, the stability its report names and, when known, its destination | OBJECTS.md "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004) |
+| `Wormholes` | each wormhole end the player still knows, as last seen: the year, position and the stability its report named then; its destination when the player knows it and sees the other end this year | OBJECTS.md "Jiggle", "Stability" (BINARY-ONLY), "Destination knowledge" (CONFIRMED WT-001, WT-004); SCANNING.md (a known end beyond normal range is not seen); ASSUMPTION G2 below |
 | `Rand` | the game's stream, during `Advance` only | AI.md §1 "Random numbers" |
 
 Not in the report:
@@ -78,6 +78,11 @@ Not in the report:
 **ASSUMPTION G1:** a newer planet report replaces the whole history
 record, whatever its level. stars-elegy does not say how the original
 merges a lower-level report into its history.
+
+**ASSUMPTION G2:** a known wormhole end the player did not see this
+year is reported with its last-seen position and stability, until a jump
+makes the player forget it. stars-elegy gives no rule for how the
+original displays such an end.
 
 **ELEGY CHOICE:** a driver's own state between years belongs to the
 driver, not the game. A saved game holds the game, its stream and the
@@ -98,7 +103,7 @@ file formats. It holds:
 - the generator state;
 - the planet name indexes;
 - what the last year told each player (views, events, order outcomes,
-  planet histories).
+  planet histories, wormhole sightings).
 
 An order outcome keeps its message and which engine error it wraps, so
 `errors.Is` gives the same answer after a load.

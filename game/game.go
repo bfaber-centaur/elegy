@@ -31,8 +31,10 @@ type Game struct {
 	views   []engine.PlayerView
 	events  []engine.Event
 	results []engine.OrderResult
-	// Every player's planet history (Report.History).
-	history history
+	// Every player's planet history (Report.History) and wormhole
+	// sightings (Report.Wormholes).
+	history   history
+	wormholes wormholeHistory
 	// nameIndex is each planet's name index, by planet index
 	// (newgame.Result.NameIndex).
 	nameIndex []int
@@ -73,6 +75,7 @@ func New(s newgame.Settings, seed uint64) (*Game, error) {
 	g := &Game{State: st, Seed: seed, rng: rng, nameIndex: res.NameIndex}
 	g.views = engine.Views(st, engine.PopulationEstimates(st, rng))
 	g.history = history(nil).record(st.Year, g.views)
+	g.wormholes = wormholeHistory(nil).record(st.Year, g.views, space(st))
 	return g, nil
 }
 
@@ -96,20 +99,25 @@ func (g *Game) Report(player int) (Report, error) {
 		for _, id := range r.View.Objects.Wormholes {
 			seen[id] = true
 		}
-		for wi, w := range sp.Wormholes {
-			for ei, e := range w.Ends {
-				if !e.KnownBy(player) {
-					continue
-				}
-				k := KnownWormholeEnd{End: objects.WormholeEndID(wi, ei), Pos: e.Pos, Stability: objects.JumpChance(e)}
-				if d, ok := sp.Destination(wi, ei, player, seen[objects.WormholeEndID(wi, 1-ei)]); ok {
-					k.Destination = &d
-				}
-				r.Wormholes = append(r.Wormholes, k)
+		for _, w := range g.wormholes.list(player) {
+			wi, ei := w.End/2, w.End%2
+			if wi >= len(sp.Wormholes) || !sp.Wormholes[wi].Ends[ei].KnownBy(player) {
+				continue
 			}
+			k := KnownWormholeEnd{End: w.End, Year: w.Year, Pos: w.Pos, Stability: w.Stability}
+			if d, ok := sp.Destination(wi, ei, player, seen[objects.WormholeEndID(wi, 1-ei)]); ok {
+				k.Destination = &d
+			}
+			r.Wormholes = append(r.Wormholes, k)
 		}
 	}
 	return r, nil
+}
+
+// space is the game's space objects, or nil.
+func space(g engine.Game) *objects.Space {
+	sp, _ := g.Objects.(*objects.Space)
+	return sp
 }
 
 // Year is what generating one year did.
@@ -211,6 +219,7 @@ func (g *Game) Advance(drivers []Driver) (Year, error) {
 	g.views, g.events = res.Views, res.Events
 	g.results = normalizeResults(res.Orders)
 	g.history = g.history.clone().record(res.Game.Year, res.Views)
+	g.wormholes = g.wormholes.clone().record(res.Game.Year, res.Views, space(res.Game))
 	return Year{Orders: files, Result: res}, nil
 }
 

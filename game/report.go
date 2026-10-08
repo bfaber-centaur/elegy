@@ -85,15 +85,27 @@ type UniversePlanet struct {
 	NameIndex int
 }
 
-// KnownWormholeEnd is a wormhole end a player knows. End is the end's
-// object id (2 × wormhole + end, objects.WormholeEndID). Stability is
-// the jump chance the wormhole report names, 0 Rock Solid .. 6 Extremely
+// KnownWormholeEnd is a wormhole end a player knows, as the player last
+// saw it. End is the end's object id (2 × wormhole + end,
+// objects.WormholeEndID). Year is the year of that sighting (the game
+// year whose start it shows), Pos where the end was then and Stability
+// the jump chance its report named then, 0 Rock Solid .. 6 Extremely
 // Volatile (OBJECTS.md "Stability", BINARY-ONLY); the end's own class is
-// not shown. Destination is where the end leads, set only when the
-// player knows it and sees the other end this year (OBJECTS.md
-// "Destination knowledge", objects.Space.Destination).
+// not shown. Ends jiggle and their stability changes with age (OBJECTS.md
+// "Jiggle"), and a player learns where an end is only by seeing it
+// (SCANNING.md: a known end beyond normal range is not seen), so an end
+// not seen this year keeps its last-seen values. Destination is where the
+// end leads, set only when the player knows it and sees the other end
+// this year (OBJECTS.md "Destination knowledge",
+// objects.Space.Destination).
+//
+// ASSUMPTION G2: the report lists an end while the player still knows it
+// (a jump makes everyone forget it, OBJECTS.md "Wormholes"), with its
+// last-seen position and stability. stars-elegy gives no rule for how the
+// original displays a known end it did not see this year.
 type KnownWormholeEnd struct {
 	End         int
+	Year        int
 	Pos         engine.Point
 	Stability   int
 	Destination *engine.Point `json:",omitempty"`
