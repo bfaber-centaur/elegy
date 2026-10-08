@@ -589,7 +589,11 @@ func (pr *production) launch(slot, n int) {
 		return
 	}
 	d, _ := pr.designOf(QueueItem{Kind: ItemShip, Slot: slot})
-	ev, _ := pr.g.Launch(pr.pi, d, n)
+	g := pr.g
+	if i := g.designSlot(pr.planet.Owner, false, slot); i >= 0 {
+		g.DesignSlots[i].Built += n
+	}
+	ev, _ := g.Launch(pr.pi, d, n)
 	pr.events = append(pr.events, ev...)
 }
 

@@ -65,6 +65,10 @@ func TestConfirmedProductionOneFleetPerItem(t *testing.T) {
 	if built != 3 {
 		t.Errorf("events %+v, want three ships-built", ev)
 	}
+	// Each slot counts the ships ever built of its design (DesignSlot.Built).
+	if a, b := g.DesignSlots[0].Built, g.DesignSlots[1].Built; a != 3 || b != 1 {
+		t.Errorf("built counts %d and %d, want 3 and 1", a, b)
+	}
 }
 
 func TestProductionShipPartial(t *testing.T) {

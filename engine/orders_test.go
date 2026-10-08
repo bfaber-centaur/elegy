@@ -796,10 +796,16 @@ func TestDesignOrderCreatedAndPicture(t *testing.T) {
 		t.Errorf("starbase slot 1: created %d picture %d, want 2410 and 3", s.Created, s.Picture)
 	}
 	g.Year = 2415
+	for i := range g.DesignSlots {
+		if !g.DesignSlots[i].Starbase && g.DesignSlots[i].Slot == 3 {
+			g.DesignSlots[i].Built = 7
+		}
+	}
 	if errs, _ := apply(g, 0, DesignOrder{Slot: 3, Name: "S2", Hull: "Scout", Fills: scout, Picture: 1}); errs[0] != nil {
 		t.Fatal(errs[0])
 	}
-	if s := slot(false, 3); s.Created != 2415 || s.Picture != 1 {
-		t.Errorf("edited slot 3: created %d picture %d, want 2415 and 1", s.Created, s.Picture)
+	// ASSUMPTION L29: the edit also starts the built count again.
+	if s := slot(false, 3); s.Created != 2415 || s.Picture != 1 || s.Built != 0 {
+		t.Errorf("edited slot 3: created %d picture %d built %d, want 2415, 1 and 0", s.Created, s.Picture, s.Built)
 	}
 }
