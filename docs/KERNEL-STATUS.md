@@ -85,6 +85,9 @@ check (a waypoint aimed at a fleet takes its position, and one aimed at
 a fleet that is gone becomes a plain go-to); the route task; the
 transfer-fleet task with its refusals. A transport task whose unloads
 have all run becomes no task (MEASURED: TK-501 fleet 4, WP-1-explore).
+A fleet whose transport task is still current after the load pass (an
+unmet load) does not move (KERNEL.md "Other movement rules", CONFIRMED
+KB-4A T1; FO-01-I).
 The orders layer does not accept the patrol and transfer-fleet tasks or
 the repeat flag in an order yet; `validTask` in `orders.go` belongs to
 that lane.
@@ -469,8 +472,8 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
 - `battle` and `battle_actions` expectations (18, CS-003-C): battle
   records are compared only through their effects.
 - Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
-  transport fuel and the fill, wait, set-amount and set-waypoint actions
-  ("load all" and "load exactly" are loaded), `design` and
+  transport fuel and the set-amount and set-waypoint actions ("load
+  all", "load exactly", "fill to" and "wait for" are loaded), `design` and
   `design_delete` orders.
 - Production queues with unmapped planetary items: 10 (unused), 13
   (the Genesis Device) and the scanners 18–27. Packets launched from such

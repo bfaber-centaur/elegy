@@ -48,6 +48,8 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Timing (in orbit before growth, arriving after; bombing before arrivals) | `GenerateTurn` | CONFIRMED (TK-001..003) | `TestConfirmedTakeoverTiming` |
 | Colonize is tried once: any failure clears the task and keeps the cargo | `colonize` | CONFIRMED (TK-113, #37) | `TestConfirmedColonizeTriedOnce` |
 | Load all and load exactly at the owner's own planet, in the load passes; load exactly keeps its shortfall, load all clears (ASSUMPTION T4) | `load`, `loadPass` | CONFIRMED (TK-301, TK-302, TK-201 G; FO-01-A..D and K vectors); MEASURED (WP-1 vector) | `TestConfirmedLoadAmounts` |
+| Fill to and wait for v%: up to v% of the fleet's cargo capacity; fill clears after its load, wait keeps the task until met (ASSUMPTION T8, T9); also from salvage (T5) | `Transport.loadWant`, `Transport.loaded`, `load`, `loadSalvage` | CONFIRMED (TAKEOVER.md "Unload and load amounts"; FO-01-F, I, J vectors) | `TestFillAndWaitFor`, `TestFillAndWaitForFromSalvage`, `TestValidPercentTransport` |
+| A fleet whose transport task is still current after the load pass (an unmet load) does not move; this includes a load exactly shortfall, under KERNEL.md's general rule (KB-4A T1 is a held "wait for" and T2 a satisfied unload that moved; no vector holds a load exactly shortfall directly), and the waiting loads of T4 and T6 (ASSUMPTION T10) | `moving` | CONFIRMED (KERNEL.md "Other movement rules", KB-4A T1, T2; FO-01-I vector) | `TestTransportTaskHoldsFleet` |
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
@@ -67,6 +69,9 @@ established Stars! behavior; each is marked `ASSUMPTION Tn` in the code.
 | T5 | Away from a planet, a transport task loads from and unloads into the first salvage object (object order) at the fleet's position; with no space objects there is none. | OBJECTS.md "Salvage", "Loading" names a fleet at the salvage's position; the original acts on the waypoint's target, which Elegy's task does not record. |
 | T6 | A colonist load action at salvage waits, as a load away from the owner's planet does (T4). | OBJECTS.md says colonists cannot be loaded from salvage, not what becomes of the action. |
 | T7 | Minerals unloaded into salvage beyond its room stay aboard (the action clears); colonists unloaded there are refused, as in deep space. | OBJECTS.md says an unload is accepted only up to the stored size, not where the rest goes, and says nothing of colonists. |
+| T8 | A "fill to" or "wait for" v% target is ⌊v·capacity/100⌋ of that cargo type, counting only that type's cargo aboard, not the whole hold. | TAKEOVER.md says "up to v% of capacity"; FO-01 loaded into empty holds, where per-type and whole-hold targets agree, and its 50% of 210 is exact. |
+| T9 | "Wait for" is met when the fleet holds at least its target of that type; then it clears like any satisfied load. | TAKEOVER.md says the fleet "waits until met" without defining met; FO-01-I (100% with 100 of 210 available) stayed unmet. |
+| T10 | A load that waits under T4 (at a planet the fleet's owner does not own) or T6 (colonists at salvage) keeps the task current, so the fleet holds its place until it gets new orders. | A consequence of T4 and T6 under KERNEL.md's rule that a current transport task does not move; no measurement covers these waits. |
 
 The scan for several drops starts at the first dropping player, so a lone
 attacker of strength 0 (Alternate Reality colonists, `k = 0`) lands; the
@@ -75,8 +80,9 @@ spec does not give the scan's start value. The code says so at
 
 ## Not modelled
 
-- the load actions "fill to", "wait for", "set amount to" and "set
-  waypoint to". "Load all", "load exactly", fleet transfers, remote
+- the actions "set amount to" and "set waypoint to", and every fuel
+  action of a transport task. "Load all", "load exactly", "fill to",
+  "wait for", fleet transfers, remote
   mining, mine laying, cargo given to other players' fleets and colonists
   dropped by a manual cargo order are implemented (KERNEL-STATUS.md,
   ORDERS-LAYER-STATUS.md);
