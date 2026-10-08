@@ -34,6 +34,7 @@ unless the project decides otherwise.
 | Research budget, field and next field; when the order is written | AI.md §4 | CONFIRMED AI-1 | `ai/research.go` | `TestResearch*` |
 | Own-planet shuffle | AI.md §2 | BINARY-ONLY | `ai/shuffle.go` | `TestShufflePlanets` |
 | AI part classes 0–44 | AI.md §5 | CONFIRMED with AI-2, AI-8, AI-19 | `ai/classes.go` | `TestPartClassNamesExist` |
+| Owned Mystery Trader parts and hulls count as buildable once tech meets their requirements, in ship and starbase designs | AI.md §5 "Mystery Trader items" | BINARY-ONLY | `ai/classes.go` `classPart`, `ai/designs.go`, `ai/starbase.go` (from `game.Report.TraderItems`) | `TestClassPartTrader`, `TestShipDesignTraderPart`, `TestStarbaseTraderPart`, `TestViewOfTraderItems` |
 | Starbase designs: missing slots, the year-50 family switch, counts per variant, picture, name | AI.md §5 | CONFIRMED AI-2 | `ai/starbase.go` | `TestStarbase*` |
 | Rototill's turn: research, starbase designs, U, planet loop and colony-ship production, fleet passes 1 and 2 | rototill.md §1–§3 | MEASURED AI-14..AI-17 (branches marked not exercised there are BINARY-ONLY) | `ai/rototill.go` | `TestRototill*` |
 | Hubs: starbase planets and rich developed planets, from year index 20 | AI.md §6 | BINARY-ONLY | `ai/hubs.go` | `TestHubs` |

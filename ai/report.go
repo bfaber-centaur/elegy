@@ -23,12 +23,13 @@ func NewView(r game.Report, lvl Level, universe []PlanetPos, history map[int]eng
 	v := &View{
 		Year: r.Year, Player: r.Player, Level: lvl, Rules: r.Rules,
 		Self: r.Self, Planets: r.Planets, Fleets: r.Fleets,
-		Universe: universe,
-		Known:    map[int]engine.PlanetReport{},
-		Seen:     map[int]bool{},
-		Others:   r.View.Fleets,
-		PRT:      map[int]engine.PRT{},
-		Foreign:  map[int]engine.Design{},
+		Universe:    universe,
+		Known:       map[int]engine.PlanetReport{},
+		Seen:        map[int]bool{},
+		Others:      r.View.Fleets,
+		PRT:         map[int]engine.PRT{},
+		Foreign:     map[int]engine.Design{},
+		TraderItems: r.TraderItems,
 	}
 	for id, rep := range history {
 		v.Known[id] = rep

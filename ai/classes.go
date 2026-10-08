@@ -57,15 +57,17 @@ var partClasses = [45][]string{
 
 // classPart is the first part of class k the race can build now (AI.md
 // §5: "the first part in the class's list that the race can build now";
-// COMPONENTS.md "Who can build what"). The computer players own no
-// Mystery Trader parts in Elegy. ok is false when none can be built.
-func classPart(cat *engine.Catalog, k int, race engine.Race, levels [engine.NumFields]int) (engine.Component, bool) {
+// COMPONENTS.md "Who can build what"). A Mystery Trader part counts when
+// the player owns it (owned, by name) and its tech requirements are met
+// (AI.md §5 "Mystery Trader items", BINARY-ONLY). ok is false when none
+// can be built.
+func classPart(cat *engine.Catalog, k int, race engine.Race, levels [engine.NumFields]int, owned map[string]bool) (engine.Component, bool) {
 	for _, name := range partClasses[k] {
 		comp, found := cat.Lookup(name)
 		if !found {
 			continue
 		}
-		if ok, err := comp.Buildable(race, levels, false); ok && err == nil {
+		if ok, err := comp.Buildable(race, levels, owned[name]); ok && err == nil {
 			return comp, true
 		}
 	}
