@@ -334,11 +334,11 @@ production queue on a planet that changed owner is skipped: it takes
 the new owner's default queue, which the vectors do not carry (TK-108-A
 and TK-108-C).
 
-- **WU-CAP** (MEASURED). Year 1 energy `research_accumulated` is 35
-  in Elegy and 64 in the original; everything else matches. Not
-  diagnosed. A colonist drop captures an undefended planet here, so
-  research credited by the capture is one candidate (inferred, not
-  checked against the spec).
+- **WU-CAP** passes. A colony whose owner's default queue (after the
+  Alternate Reality and Claim Adjuster skips) is empty gets no queue, so
+  all its resources go to research; Elegy gave it an empty queue, which
+  contributes nothing (KERNEL.md "Production"). MEASURED in WU-CAP only
+  (29 resources, message 0x03f).
 - A minefield's `radius` is not compared: SCANNING.md defines no
   per-player known radius.
 
@@ -357,7 +357,6 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
 
 **Parity failures** (not in the baseline):
 
-- WU-CAP: research accumulated after a capture (above), not diagnosed.
 - FO-03-E, FO-06-G: "differs" only because `legacyMergeOverflow` is off
   by default; they pass with the LEGACY BUG switch on.
 

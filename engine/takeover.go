@@ -342,6 +342,11 @@ func (g *Game) newColony(pi, player, pop int) Event {
 		}
 		p.Queue = append(p.Queue, it)
 	}
+	// An empty default leaves the colony with no queue, so it sends all
+	// its resources to research (MEASURED WU-CAP: a capture by a player
+	// with no default queue added the planet's 29 resources and got
+	// message 0x03f; KERNEL.md: a zero-item queue does not arise in play).
+	p.HasQueue = len(p.Queue) > 0
 	p.LeftoverOnly = pl.DefaultLeftoverOnly
 	if pl.Race.PRT == PRTAlternateReality {
 		if d, ok := g.firstStarbaseDesign(player); ok {

@@ -747,6 +747,34 @@ func TestPredictionEmptiedPlanet(t *testing.T) {
 	}
 }
 
+func TestMeasuredEmptyDefaultQueueNoQueue(t *testing.T) {
+	// WU-CAP (MEASURED): a capture by a player with no default queue left
+	// the planet without a queue, so its resources all went to research.
+	// An Alternate Reality default of three items is skipped whole, the
+	// same way (inferred: KERNEL.md says a zero-item queue does not arise
+	// in play).
+	for _, tt := range []struct {
+		prt   PRT
+		queue []QueueItem
+	}{
+		{PRTJackOfAllTrades, nil},
+		{PRTAlternateReality, []QueueItem{{Kind: ItemMine, Count: 1}, {Kind: ItemFactory, Count: 2}, {Kind: ItemDefenses, Count: 3}}},
+	} {
+		l := newTKLab(t, 3)
+		l.g.Players[0].Race.PRT = tt.prt
+		l.g.Players[0].DefaultQueue = tt.queue
+		pi := l.planet(NoOwner, 0, 0)
+		l.g.newColony(pi, 0, 25)
+		if p := l.g.Planets[pi]; p.HasQueue || len(p.Queue) != 0 {
+			t.Errorf("PRT %v: queue %v %v, want none", tt.prt, p.HasQueue, p.Queue)
+		}
+		res := 100
+		if r, _ := l.g.PlanetProduction(pi, ProductionInput{Resources: res, ResearchBudget: 15}); r != res {
+			t.Errorf("PRT %v: research %d, want all %d", tt.prt, r, res)
+		}
+	}
+}
+
 func TestPredictionMineLossClamp(t *testing.T) {
 	// #34: I = 1 on one factory, one defense and one mine. Both
 	// draws round up, so 2 installations die, and the rest (−1) takes no

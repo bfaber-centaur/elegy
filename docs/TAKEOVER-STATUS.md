@@ -49,6 +49,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
+| New colony with an empty default queue: no queue, all resources to research | `newColony` | MEASURED (WU-CAP) | `TestMeasuredEmptyDefaultQueueNoQueue` |
 | New Alternate Reality colony: a starbase of the owner's first starbase design (lowest starbase slot); with no starbase design, none (UNRESOLVED, the spec is silent) | `newColony`, `firstStarbaseDesign` | CONFIRMED (T-26, T-33) | `TestConfirmedAlternateRealityColonyStarbase`, `TestAlternateRealityColonyGeneratesYears` |
 | Starvation and AR starbase loss empty the planet | `GenerateTurn`, combat `finish` | as Capture | `TestPredictionEmptiedPlanet` |
 
