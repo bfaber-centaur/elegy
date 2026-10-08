@@ -75,18 +75,18 @@ What the tests show today:
 - `TestSmokeDeterministic` and `TestSmokeSaveLoadContinues`: the same seed gives the same state hash every year, and a game saved and loaded mid-way continues to the same hashes.
 - `TestRulesetsCoexist`: two games with different rulesets in one process.
 - `TestReportHoldsOnlyOwnObjects`: a report holds only the player's own objects in full.
-- `Game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
-- `elegy play` runs any number of years with idle players and prints a hash per year.
+- `game.Check` after every year, plus typed `DriverError`, `TurnError` and `InvariantError`. `game.Diff` names the first differing JSON paths when two runs diverge.
+- `cmd/elegy` `TestCLIComputerPlayers`: `elegy play -ai ...` plays a human against Robotoid, Rototill and Cybertron, alone and together, for 40 years, with no rejected orders and the same output on a second run.
+- `engine` `TestConfirmedAlternateRealityColonyStarbase` and `TestAlternateRealityColonyGeneratesYears`: a new Alternate Reality colony gets its owner's first starbase design and the game keeps generating years.
 
 Known gaps that a long game can reach:
 
-- An Alternate Reality colony gets no starbase (TAKEOVER-STATUS.md "Not modelled"). Under `elegy` its year continues. Under `jrc3-faithful` the `zero_max_population_stop` setting stops it, as the original does (RULESET.md).
 - Waypoint tasks that load cargo or scrap ships are not modelled, and a minefield detonate order is refused (`engine/orders.go` `validTask`, `DetonateOrder`).
-- Races and computer players cannot be chosen from the command line yet (GAME-LOOP.md "Not done yet").
+- An Alternate Reality colony whose owner has no starbase design gets none (TAKEOVER-STATUS.md, UNRESOLVED).
 
 ### After that: games against the computer opponents
 
-Robotoid, Rototill and Cybertron play first one at a time, then together. They already play 40- and 60-year smoke games in `ai/`'s tests (AI-STATUS.md). Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
+Robotoid, Rototill and Cybertron play first one at a time, then together. The command line already plays them (`elegy play -ai robotoid,rototill,cybertron`, GAME-LOOP.md "Command line"), and they play 40- and 60-year smoke games in the tests. Their turns are still partial: AI-STATUS.md "Not implemented yet" lists the missing steps. Turindrone, Automitron and Macinti are reference behavior only. The roster changes only by project decision.
 
 ## Front ends
 
@@ -110,7 +110,7 @@ Test names carry their evidence: `TestConfirmed*` is ground truth from oracle ob
 
 The stars-elegy parity vectors are copied into `engine/testdata/vectors` and run by `TestParityVectors` (`engine/parity_test.go`) under the `elegy` ruleset. Each vector's start becomes an Elegy game; the harness generates the run's years and checks every case's expectations. Each vector runs with 8 seed variants, because the harness's random stream is not the original's. A case gets one result:
 
-- **pass:** every compared expectation matches with every seed. CONFIRMED and LEGACY BUG cases are exact-match targets. MEASURED passes are counted in their own column, because one observation backs them.
+- **pass:** every compared expectation matches with every seed. CONFIRMED and LEGACY BUG cases are exact-match targets. MEASURED passes are counted in their own column: the value is the original's, but the prediction made in advance missed or the outcome is random (vectors README "Tags").
 - **sample-only:** every compared expectation is a sample (one stream's random outcome) and matched. It is evidence of the rule, not of an exact value.
 - **random:** the result changes with the seed. It is reported with how many seeds pass and the reference seed's comparison. A case like this matches only by chance.
 - **differs:** a LEGACY BUG case whose setting is off in `elegy`.
