@@ -653,3 +653,45 @@ func TestPredictionMineDamageRounding(t *testing.T) {
 		t.Errorf("damage %+v", got)
 	}
 }
+
+// The detonate setting's chosen rule (OBJECTS.md "The detonate setting",
+// BINARY-ONLY): only the owner, only Space Demolition, only standard
+// fields; both on and off.
+func TestPredictionSetDetonate(t *testing.T) {
+	l := newLab(t)
+	g := l.g
+	g.Players[0].Race.PRT = engine.PRTSpaceDemolition
+	s := &Space{Minefields: []Minefield{
+		{Owner: 0, Number: 0, Kind: Standard, Count: 1000},
+		{Owner: 0, Number: 1, Kind: Heavy, Count: 1000},
+		{Owner: 1, Number: 0, Kind: Standard, Count: 1000},
+	}}
+	cases := []struct {
+		player, number int
+		on             bool
+		want           error
+	}{
+		{0, 0, true, nil},
+		{0, 1, true, ErrNotStandardMine},
+		{0, 2, true, ErrNoField},
+		{1, 0, true, ErrNotDemolition},
+		{0, 0, false, nil},
+	}
+	for _, c := range cases {
+		if err := s.SetDetonate(g, c.player, c.number, c.on); err != c.want {
+			t.Fatalf("SetDetonate(%d, %d, %v) = %v, want %v", c.player, c.number, c.on, err, c.want)
+		}
+		if c.want == nil && s.Minefields[0].Detonate != c.on {
+			t.Fatalf("SetDetonate(%d, %d, %v) left Detonate %v", c.player, c.number, c.on, s.Minefields[0].Detonate)
+		}
+	}
+	if s.Minefields[1].Detonate || s.Minefields[2].Detonate {
+		t.Fatal("a refused setting changed a field")
+	}
+	// The number names the player's own field: player 1's order reaches its
+	// field 0, not player 0's.
+	g.Players[1].Race.PRT = engine.PRTSpaceDemolition
+	if err := s.SetDetonate(g, 1, 0, true); err != nil || !s.Minefields[2].Detonate || s.Minefields[0].Detonate {
+		t.Fatalf("player 1's own field: err %v, fields %v %v", err, s.Minefields[0].Detonate, s.Minefields[2].Detonate)
+	}
+}
