@@ -155,6 +155,20 @@ it stored (AI.md §5, §10), which the engine's designs do not carry. It
 does not survive a save and load (`game.Driver`'s ELEGY CHOICE); after a
 load those designs count as created in the first year with picture 0.
 
+**Open issue ([#70](https://github.com/bfaber-centaur/elegy/issues/70)):
+save and reload.** The smoke tests show deterministic uninterrupted
+games only. A game with computer players that is saved mid-way and
+reloaded into fresh drivers does not continue identically. In a local
+run of the equivalence test that will land with the fix
+(`TestDriversSaveReload`: 50 years, saved after 2425), the state differed
+from 2426 on, under both `elegy` and `jrc3-faithful`, while the same
+game reloaded with the same drivers matched every year. The driver's design metadata
+is the only cause found, and the report cannot rebuild it. The
+proposed fix puts both values on the engine's stored design and in the
+save. Until #70 is closed, nothing here claims save/reload determinism
+for computer players. Owner: this lane (ai/), with the engine and save
+changes routed to their lanes.
+
 ## Inputs the planners need from outside `ai/`
 
 - Each design's creation year and picture, in the game state, so that
