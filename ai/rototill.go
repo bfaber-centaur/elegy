@@ -15,11 +15,12 @@ import (
 //  1. research (AI.md §4) and starbase designs (AI.md §5); Rototill never
 //     makes, deletes, ages, splits or merges ship designs (AI-14);
 //  2. U, the planet loop and production (§2);
-//  3. fleet passes 1 and 2 (§3).
+//  3. fleet passes 1 and 2 (§3);
+//  4. planet automation and the queue fill (AI.md §7), with the turn's
+//     shuffled planet order (AI.md §2) and hubs (AI.md §6).
 //
-// Not yet run: hubs (AI.md §6, used only by transports, which Rototill
-// never has), planet automation and the queue fill (AI.md §7), and the
-// warp re-pick (AI.md §11 "Warp choice"); docs/AI-STATUS.md lists them.
+// Not yet run: the warp re-pick (AI.md §11 "Warp choice") and
+// automation steps 4 and 5; docs/AI-STATUS.md lists them.
 func PlayRototill(v *View, rng engine.Rand) Result {
 	var res Result
 	v.fleetOrder()
@@ -47,11 +48,21 @@ func PlayRototill(v *View, rng engine.Rand) Result {
 	res.Orders = append(res.Orders, orders...)
 	res.Designs = append(res.Designs, made...)
 
-	t := &rototillTurn{v: v, rng: rng, res: &res, y: y, alive: v.alive(), taken: map[int]bool{}}
+	var own []int
+	for _, p := range v.Planets {
+		own = append(own, p.ID)
+	}
+	order := ShufflePlanets(own, rng)
+	hubs := v.hubs(Rototill, order)
+
+	t := &rototillTurn{v: v, rng: rng, res: &res, y: y, alive: v.alive(), taken: map[int]bool{}, q: &queues{v: v}}
 	t.planets()
 	t.pass1()
 	t.pass2()
-	t.flushQueues()
+	auto := &automation{v: v, pers: Rototill, rng: rng, q: t.q, order: order, hubs: hubs,
+		marked: t.flagged, budget: ResearchBudget(Rototill, y, v.Self.Research.Levels)}
+	auto.run()
+	res.Orders = append(res.Orders, t.q.flush()...)
 	return res
 }
 
@@ -70,8 +81,8 @@ type rototillTurn struct {
 	flagged map[int]bool
 	// taken are planets an own fleet targets, and planets chosen this
 	// turn (rototill.md §3).
-	taken  map[int]bool
-	queues map[int][]engine.QueueItem
+	taken map[int]bool
+	q     *queues
 }
 
 // planets is rototill.md §2 (MEASURED, AI-15): U, then every planet in
@@ -121,7 +132,7 @@ func (t *rototillTurn) planets() {
 			// colony ship a year.
 			queued = true
 			if n := t.alive[1]; n == 0 || n+1 < u {
-				t.appendItem(p, engine.QueueItem{Kind: engine.ItemShip, Slot: 1, Count: 1})
+				t.q.add(p, engine.QueueItem{Kind: engine.ItemShip, Slot: 1, Count: 1}, false)
 			}
 		}
 	}
@@ -131,64 +142,12 @@ func (t *rototillTurn) planets() {
 // than starbase slot 0 in the queue (LEGACY BUG reproduced: a queued ship
 // does not count).
 func (t *rototillTurn) starbaseQueued(p *engine.Planet) bool {
-	for _, it := range t.queue(p) {
+	for _, it := range t.q.get(p) {
 		if it.Kind == engine.ItemStarbase && it.Slot != 0 {
 			return true
 		}
 	}
 	return false
-}
-
-func (t *rototillTurn) queue(p *engine.Planet) []engine.QueueItem {
-	if q, ok := t.queues[p.ID]; ok {
-		return q
-	}
-	return p.Queue
-}
-
-// appendItem adds an item through the shared queueing rule (AI.md §10
-// "Queueing items"): not when the planet cannot build it or the queue
-// already has more than 200 items.
-func (t *rototillTurn) appendItem(p *engine.Planet, it engine.QueueItem) {
-	q := t.queue(p)
-	if len(q) > 200 || !t.canBuild(p, it) {
-		return
-	}
-	if t.queues == nil {
-		t.queues = map[int][]engine.QueueItem{}
-	}
-	t.queues[p.ID] = append(slices.Clone(q), it)
-}
-
-// canBuild is the production list's test for a ship item: the design
-// exists and the planet's starbase docks its hull (PRODUCTION-LAUNCH.md
-// "Can the planet build it").
-func (t *rototillTurn) canBuild(p *engine.Planet, it engine.QueueItem) bool {
-	if it.Kind != engine.ItemShip {
-		return true
-	}
-	d, ok := t.v.ship(it.Slot)
-	if !ok || !p.HasStarbase {
-		return false
-	}
-	sb, ok := t.v.design(p.StarbaseDesign)
-	if !ok {
-		return false
-	}
-	return sb.Hull.Dock == engine.DockUnlimited || (sb.Hull.Dock > 0 && d.Design.Hull.Mass <= sb.Hull.Dock)
-}
-
-// flushQueues writes one queue order per changed planet, in planet-id
-// order.
-func (t *rototillTurn) flushQueues() {
-	ids := make([]int, 0, len(t.queues))
-	for id := range t.queues {
-		ids = append(ids, id)
-	}
-	slices.Sort(ids)
-	for _, id := range ids {
-		t.res.Orders = append(t.res.Orders, engine.QueueOrder{Planet: id, Queue: t.queues[id]})
-	}
 }
 
 // pass1 is rototill.md §3 pass 1 for own fleets: transports and fleets
