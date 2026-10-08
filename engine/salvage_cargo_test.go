@@ -28,7 +28,10 @@ func salvageLab(t *testing.T, sv Salvage, task Task) *tkLab {
 
 // Loading from salvage (OBJECTS.md "Salvage", "Loading"; ASSUMPTION T5,
 // T6): the usual amounts capped by what it holds, whoever owns it;
-// minerals in order from the space left; a colonist load waits.
+// minerals in order from the space left; the loads then settle as at a
+// planet (KERNEL.md "Which loads are unmet"): the short load exactly
+// ends, and colonists, of which salvage holds none, are a load all that
+// wants nothing.
 func TestLoadFromSalvage(t *testing.T) {
 	task := Task{Kind: TaskTransport}
 	task.Transport[0] = Transport{Action: LoadAll}
@@ -39,13 +42,12 @@ func TestLoadFromSalvage(t *testing.T) {
 	l.g.loadPass(false)
 	f, sv := l.g.Fleets[0], l.g.Salvage[0]
 	// Ironium: all 120 (the hold has 210). Boranium: 150 asked, 90 of
-	// space left, so 90 and 60 still to load. Germanium: no space left.
+	// space left, so 90. Germanium: no space left.
 	if f.Cargo.Minerals != (Minerals{120, 90, 0}) || sv.Minerals != (Minerals{0, 410, 40}) {
 		t.Errorf("fleet %v, salvage %v; want [120 90 0] and [0 410 40]", f.Cargo.Minerals, sv.Minerals)
 	}
-	want := [NumCargo]Transport{1: {Action: LoadExactly, Amount: 60}, CargoColonists: {Action: LoadAll}}
-	if f.Task.Kind != TaskTransport || f.Task.Transport != want {
-		t.Errorf("task %+v, want %+v", f.Task, want)
+	if f.Task.Kind != TaskNone {
+		t.Errorf("task %+v, want none", f.Task)
 	}
 }
 

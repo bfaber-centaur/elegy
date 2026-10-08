@@ -895,8 +895,9 @@ func TestConfirmedLoadAmounts(t *testing.T) {
 	// TAKEOVER.md "Unload and load amounts" (CONFIRMED TK-301, TK-302):
 	// load exactly 30 colonists from 100 leaves 70; 40 ironium asked with
 	// 25 on the surface loads 25; 300 asked with 500 on the surface and a
-	// 210 kT hold loads 210 and leaves 290. ASSUMPTION T4: what load
-	// exactly could not move stays as the action; load all clears.
+	// 210 kT hold loads 210 and leaves 290. A short load exactly ends,
+	// as load all does (KERNEL.md "Which loads are unmet", MEASURED
+	// TK-302: its task ended).
 	l := newTKLab(t, 3)
 	medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
 	load := func(c int, a TransportAction, v int) Task {
@@ -912,8 +913,8 @@ func TestConfirmedLoadAmounts(t *testing.T) {
 		wantRemaining int
 	}{
 		{load(CargoColonists, LoadExactly, 30), 0, 100, 30, 70, 0},
-		{load(0, LoadExactly, 40), 25, 10, 25, 0, 15},
-		{load(0, LoadExactly, 300), 500, 10, 210, 290, 90},
+		{load(0, LoadExactly, 40), 25, 10, 25, 0, 0},
+		{load(0, LoadExactly, 300), 500, 10, 210, 290, 0},
 		{load(0, LoadAll, 0), 500, 10, 210, 290, 0},
 	}
 	for k, c := range cases {

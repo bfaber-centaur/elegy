@@ -87,7 +87,10 @@ transfer-fleet task with its refusals. A transport task whose unloads
 have all run becomes no task (MEASURED: TK-501 fleet 4, WP-1-explore).
 A fleet whose transport task is still current after the load pass (an
 unmet load) does not move (KERNEL.md "Other movement rules", CONFIRMED
-KB-4A T1; FO-01-I).
+KB-4A T1; FO-01-I). A short "load exactly" or "fill to" is satisfied
+(MEASURED TK-302, FO-01-J), and a load from a target that is not a
+source holds the fleet one year before the pass after movement cancels
+it (BINARY-ONLY; TAKEOVER-STATUS.md).
 The orders layer does not accept the patrol and transfer-fleet tasks or
 the repeat flag in an order yet; `validTask` in `orders.go` belongs to
 that lane.

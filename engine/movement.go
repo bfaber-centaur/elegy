@@ -461,9 +461,10 @@ func (g *Game) radiatingColonists(f *Fleet) []Event {
 // is "lay mines" or "transport" holds its place (KERNEL.md "Other
 // movement rules", CONFIRMED OB-014-D, OB-019; KB-4A T1, FO-01 I): a
 // transport task is still current only while a load action is unmet,
-// since the load pass before movement clears satisfied ones. ASSUMPTION
-// T10: that includes the loads T4 and T6 leave waiting, so such a fleet
-// holds until it gets new orders.
+// since the load pass before movement clears satisfied ones (KERNEL.md
+// "Which loads are unmet", "Loads with no usable source"). A load from a
+// target that is not a source holds it one year: the pass after movement
+// cancels it (noSource).
 func moving(f *Fleet) bool {
 	return len(f.Waypoints) > 0 && f.Waypoints[0].Warp > 0 && f.Task.Kind != TaskLayMines && f.Task.Kind != TaskTransport
 }
