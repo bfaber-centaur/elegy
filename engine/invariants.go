@@ -44,7 +44,8 @@ func (e *InvariantError) Error() string {
 //   - Mines, factories, defenses and surface minerals are not negative.
 //     ELEGY CHOICE: counts and amounts, protecting arithmetic on them.
 //   - Environment and original environment are each 1..99 (LIMITS.md
-//     "Environment", BINARY-ONLY; KERNEL.md clamps every change to 1..99).
+//     "Environment", BINARY-ONLY; KERNEL.md "Comet strike" and "Planetary
+//     climate change" clamp their shifts to 1..99).
 //
 // Fleets:
 //   - A fleet's owner is a player and fleet ids are unique. ELEGY CHOICE:
