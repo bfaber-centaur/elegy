@@ -383,8 +383,8 @@ func (o MergeOrder) apply(g *Game, player int, _ *Applied) error {
 // A warp outside 0..11, a target planet or fleet that does not exist,
 // and a negative transport amount reject the order (ORDERS.md "Waypoint
 // warp, target and transport", chosen rule). Warp 11 is
-// the stargate hop, which Elegy does not model yet, so it is rejected as
-// not modelled.
+// the stargate hop (CONFIRMED GT-004); the gate is checked when the jump
+// runs (OBJECTS.md "Stargates").
 //
 // Tasks: route, patrol and transfer fleet are accepted as well as
 // colonize, merge and transport (ORDERS.md "Waypoint upkeep and the
