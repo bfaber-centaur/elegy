@@ -209,9 +209,11 @@ func TestPredictionOwnershipEveryOrder(t *testing.T) {
 	}
 }
 
-func TestDetonateNotModelled(t *testing.T) {
+// Without space objects there is no minefield for a detonate order to
+// name; the space objects' own refusals are tested in package objects.
+func TestDetonateWithoutObjects(t *testing.T) {
 	g := ordersGame()
-	if errs, _ := apply(g, 0, DetonateOrder{Minefield: 1}); !errors.Is(errs[0], ErrNotModelled) {
+	if errs, _ := apply(g, 0, DetonateOrder{Minefield: 1}); !errors.Is(errs[0], ErrNoSuchObject) {
 		t.Errorf("detonate: %v", errs[0])
 	}
 }
