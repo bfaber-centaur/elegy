@@ -25,7 +25,8 @@ included, not just the ID.
 
 | ID | Version | Settings |
 |---|---|---|
-| `elegy` | 1 | `engine.ElegyRules()`: the behaviour Elegy had before rulesets existed. Every switch on except `merge_overflow`, `keep_unentitled_parts` and `field_limit_511`, where Elegy has chosen its own rule. |
+| `elegy` | 2 | `engine.ElegyRules()`, the default: version 1 with `zero_max_population_stop` off, so an Alternate Reality planet with population and no starbase no longer stops the year (Bobby's "Keep going", 2026-10-08). |
+| `elegy` | 1 | The behaviour Elegy had before rulesets existed. Every switch on except `merge_overflow`, `keep_unentitled_parts` and `field_limit_511`, where Elegy has chosen its own rule. Kept for games saved under it. |
 | `jrc3-faithful` | 1 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. |
 
 A built-in ruleset's settings never change once released. A change is a
@@ -53,7 +54,7 @@ the new-game settings' `Rules` during generation); no package-level
 compatibility constant or variable remains. A function that has no game
 takes the switch as a parameter from a caller that does.
 
-| Saved name | Field | `elegy` v1 | `jrc3-faithful` v1 | Read in | Spec and evidence |
+| Saved name | Field | `elegy` v2 | `jrc3-faithful` v1 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/movement.go` `Game.fuelTerm` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
 | `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014 |
@@ -65,6 +66,7 @@ takes the switch as a parameter from a caller that does.
 | `merge_dilution` | `MergeDilution` | on | on | `engine/fleetops.go` `Game.taskMergeRule` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO-01..07 |
 | `merge_overflow` | `MergeOverflow` | off | on | `engine/fleetops.go` `Game.mergeTask` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO; parity cases FO-03-E and FO-06-G differ under `elegy` |
 | `keep_unentitled_parts` | `KeepUnentitledParts` | off | on | `engine/fleetops.go` `Catalog.ReadDesign` (takes the ruleset) | ORDERS.md "Design legality (Mystery Trader parts kept)", LEGACY BUG, CONFIRMED |
+| `zero_max_population_stop` | `ZeroMaxPopulationStop` | off (on in v1) | on | `engine/turn.go` `GenerateTurn` (`checkGenerable`) | KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1; see below |
 | `field_limit_511` | `FieldLimit511` | off | on | `objects/minefields.go` `Space.Lay` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
 | `empty_fleet_salvage` | `EmptyFleetSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Hits on moving fleets", LEGACY BUG candidate, MEASURED OB-024 |
 | `due_north_south_cut` | `DueNorthSouthCut` | on | on | `objects/minefields.go` `CheckStep` | OBJECTS.md "Due-north and due-south legs", LEGACY BUG, MEASURED MF-15 |
@@ -80,14 +82,31 @@ own position, because the range test passes at distance 0, so the off
 setting does not yet do what its comment says (found while writing the
 coexistence test; the off path was never reachable before rulesets).
 
+## Alternate Reality with maximum population 0
+
+An Alternate Reality planet with population, habitability ≥ 0 and no
+starbase has maximum population 0. The original divides by it in
+population growth and stops with an integer divide by zero, writing no
+file (KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1).
+There is no original behaviour to copy, so each setting is a choice:
+
+- `zero_max_population_stop` on (`jrc3-faithful`, `elegy` v1): the
+  closest Elegy comes to the original's stop. `GenerateTurn` returns a
+  `*engine.ZeroMaxPopulationError` naming the planet and changes nothing.
+- Off (`elegy` v2), INTENTIONALLY DIFFERENT: the year is generated with
+  every rule as KERNEL.md states it, and the one division takes its limit
+  as the maximum goes to 0. The crowding permille is unbounded, so a
+  planet with more than 10 units is overcrowded at the cap,
+  `g = 4·(−300)`, and loses 12% a year (KERNEL.md "Population growth");
+  10 units or fewer are within 10 of the maximum and stay as they are.
+  Other rules see the maximum of 0 as they would any maximum (for
+  example, effective population above the maximum).
+
+A hostile planet (habitability < 0) in the same state takes the hostile
+death rule and generates normally under every ruleset (CONFIRMED, KX-001
+Z3).
+
 ## Related behaviour that is not a switch yet
 
-- **AR planet with population, habitability ≥ 0 and no starbase.** The
-  original stops generation with an integer divide by zero (KERNEL.md
-  "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1). Today `GenerateTurn` refuses such a game
-  (`*engine.ZeroMaxPopulationError`) under every ruleset. It will become a
-  switch: the faithful setting keeps the stop, and Elegy's ruleset keeps
-  generating with the closest behaviour the public spec supports,
-  INTENTIONALLY DIFFERENT (Bobby's decision, 2026-10-08).
 - **`legacy_ai_state_leak`** (AI-STATUS.md, `ai/doc.go`) is named but not
   implemented: Elegy's computer players never leak state between AIs.

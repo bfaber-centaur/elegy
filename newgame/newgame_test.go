@@ -1368,6 +1368,51 @@ func TestGenerateCarriesRules(t *testing.T) {
 	}
 }
 
+// Starting battle plans (COMBAT.md "Starting plans", MEASURED
+// UG01..UG21): every player starts with the same five plans, numbered
+// 0..4, and every starting fleet uses plan 0.
+func TestMeasuredStartingPlans(t *testing.T) {
+	var players []PlayerSetup
+	for _, prt := range allPRTs {
+		players = append(players, human(prt))
+	}
+	res := generate(t, Settings{Size: Medium, Density: Normal, Players: players}, 8)
+	g := res.Game
+	type row struct {
+		name               string
+		tactic             engine.Tactic
+		primary, secondary engine.TargetType
+	}
+	want := []row{
+		{"Default", 4, 3, 1},
+		{"Kill Starbase", 4, 2, 3},
+		{"Max-Defense", 3, 3, 4},
+		{"Sniper", 1, 5, 0},
+		{"Chicken", 0, 1, 0},
+	}
+	for i, pl := range g.Players {
+		if len(pl.Plans) != len(want) {
+			t.Fatalf("player %d has %d plans", i, len(pl.Plans))
+		}
+		for k, w := range want {
+			p := pl.Plans[k]
+			if p.Name != w.name || p.Tactic != w.tactic || p.Primary != w.primary || p.Secondary != w.secondary ||
+				p.Attack != engine.AttackNeutralsAndEnemies || p.DumpCargo {
+				t.Errorf("player %d plan %d = %+v, want %+v attacking neutrals and enemies", i, k, p, w)
+			}
+		}
+	}
+	g.Players[0].Plans[0].Name = "changed"
+	if g.Players[1].Plans[0].Name != "Default" {
+		t.Error("players share one plan list")
+	}
+	for _, f := range g.Fleets {
+		if f.Plan != 0 {
+			t.Errorf("fleet %d starts on plan %d", f.ID, f.Plan)
+		}
+	}
+}
+
 // Games generated at the same time under different rulesets each follow
 // their own: with SharedHomeworldMinerals (Elegy) every homeworld has
 // planet 0's concentrations; without it each has its own.

@@ -77,7 +77,8 @@ Elegy has none of these yet:
 - ancient artifacts (no random events);
 - the starbase an Alternate Reality colony gets from its owner's first
   starbase design (Elegy's designs have no owner), so a new AR colony has
-  no starbase and the next year is refused (`ZeroMaxPopulationError`);
+  no starbase, and the next year follows the ruleset's
+  `Legacy.ZeroMaxPopulationStop` (RULESET.md);
 - the design check at generation that drops parts above the owner's tech
   (Elegy's designs have no owner, so every part is kept and used; the
   design read for an owner is `Catalog.ReadDesign`, ORDERS-STATUS.md);
