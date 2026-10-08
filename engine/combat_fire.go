@@ -450,33 +450,47 @@ func (b *battle) addSalvage(add Minerals, owner int) {
 	for m := range NumMinerals {
 		add[m] += b.salvage[last][m]
 	}
-	b.salvage[last] = Minerals{}
+	pieces := splitSalvage(add)
+	b.salvage[last] = pieces[0]
+	for _, p := range pieces[1:] {
+		b.salvage = append(b.salvage, p)
+		b.salvageOf = append(b.salvageOf, salvageMeta{owner: owner})
+	}
+}
+
+// splitSalvage puts m into a fresh salvage object and its overflow
+// objects (COMBAT.md "Salvage", the overflow CONFIRMED CB-040): ironium,
+// boranium, germanium, each using ⌈kT/10⌉ steps; a mineral that does not
+// fit fills the object to exactly 3000 steps with 10 × the free steps, and
+// the rest of it and the minerals not yet added go, in a new pass, into
+// the next object. The first piece is the object itself.
+func splitSalvage(m Minerals) []Minerals {
+	pieces := []Minerals{{}}
 	for {
-		obj := &b.salvage[len(b.salvage)-1]
+		obj := &pieces[len(pieces)-1]
 		used := 0
 		full := false
-		for m := range NumMinerals {
-			a := add[m]
+		for k := range NumMinerals {
+			a := m[k]
 			if a == 0 {
 				continue
 			}
 			if steps := (a + 9) / 10; used+steps <= salvageSteps {
-				obj[m] += a
+				obj[k] += a
 				used += steps
-				add[m] = 0
+				m[k] = 0
 				continue
 			}
 			fit := 10 * (salvageSteps - used)
-			obj[m] += fit
-			add[m] -= fit
+			obj[k] += fit
+			m[k] -= fit
 			full = true
 			break
 		}
 		if !full {
-			return
+			return pieces
 		}
-		b.salvage = append(b.salvage, Minerals{})
-		b.salvageOf = append(b.salvageOf, salvageMeta{owner: owner})
+		pieces = append(pieces, Minerals{})
 	}
 }
 

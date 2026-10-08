@@ -55,8 +55,13 @@ type scrapYear map[int]int
 // planet owner's Ultimate Recycling (KERNEL.md "Production" says "a planet
 // with Ultimate Recycling"; KB-2A had one player in both roles).
 //
-// Not modelled: the 30,000 kT limit on one salvage object (OBJECTS.md
-// "Salvage") for a scrap in deep space.
+// In deep space the salvage is a new object under the 30,000 kT limit
+// (OBJECTS.md "Salvage": "Scrapping in deep space always makes a new
+// object", and every addition goes in under the limit; COMBAT.md
+// "Salvage" gives the 10 kT steps, the overflow CONFIRMED CB-040): what
+// does not fit goes into further objects of the fleet's owner at the same
+// spot, which are not marked fresh ("An overflow object made by the
+// 30,000 kT limit is not marked").
 func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) []Event {
 	f := &g.Fleets[fi]
 	owner := g.Players[f.Owner]
@@ -104,7 +109,9 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 	}
 	if pi < 0 {
 		if left != (Minerals{}) {
-			g.newSalvage(f.Owner, f.Pos, left, true)
+			for i, m := range splitSalvage(left) {
+				g.newSalvage(f.Owner, f.Pos, m, i == 0)
+			}
 		}
 		return events
 	}

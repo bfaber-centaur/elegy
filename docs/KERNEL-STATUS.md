@@ -146,8 +146,11 @@ KERNEL.md "Turn order" puts them:
 Salvage (OBJECTS.md "Salvage") lives in `Game.Salvage`. A battle's
 deep-space salvage object belongs to the owner of its first addition
 and is marked fresh; an overflow object belongs to the owner of the
-addition that overflowed and is not marked; each new object takes its
-number from `SpaceObjects.SalvageNumber`. A mine hit's salvage joins the
+addition that overflowed and is not marked. A deep-space scrap makes a
+new object of the fleet's owner, marked fresh, and its overflow goes into
+further unmarked objects of the same owner (`splitSalvage`, the same
+30,000 kT rule; OBJECTS.md "Salvage", COMBAT.md "Salvage", CB-040). Each
+new object takes its number from `SpaceObjects.SalvageNumber`. A mine hit's salvage joins the
 first object at the stop point (`objects.Space.AddMineSalvage`), and
 salvage decays at step 3a before packets. A fleet stopped by a
 minefield lands at OBJECTS.md's stop point (`objects.StopPoint`).
