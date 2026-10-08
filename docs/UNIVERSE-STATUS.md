@@ -133,7 +133,9 @@ Marked `PLACEHOLDER` in the code:
    original game data; `PlanetName` and "Computer N" are placeholders.
 
 Computer players get their built-in race from `ComputerPlayer(type,
-level)` (AI.md "Built-in races"). One point is open:
+level)` (AI.md "Built-in races"), and `Generate` marks them as computer
+players in the engine state (`engine.Player.Computer`), which the
+engine's rules about computer players read. One point is open:
 
 - **ASSUMPTION B1**: AI.md does not list a built-in race's leftover spend
   (UNIVERSE.md shows computer players with the minerals and the
