@@ -211,8 +211,7 @@ Choices where OBJECTS.md is silent:
 - **S5 (ASSUMPTION).** The starbase cloak bound for an IT gate report
   uses the gate's range as P; an unlimited gate shows every starbase.
 
-Not modelled yet: following fleets (step 1a.3; Elegy does not keep
-waypoint 0's target), waypoint
+Not modelled yet: waypoint
 tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
 by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
