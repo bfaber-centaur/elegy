@@ -173,6 +173,35 @@ func TestConfirmedPacketImpact(t *testing.T) {
 	}
 }
 
+// A Packet Physics launcher's uncaught packet terraforms before its
+// damage, the catcher's design becomes known (OBJECTS.md "Impact" step 4;
+// axes CONFIRMED OB-029-T1..T3, draws BINARY-ONLY).
+func TestPredictionPPImpactTerraform(t *testing.T) {
+	l := impactLab(t, 1000)
+	pp := &l.g.Players[0]
+	pp.Race.PRT = engine.PRTPacketPhysics
+	for a := range pp.Race.Env {
+		pp.Race.Env[a] = engine.EnvRange{Center: 50, Low: 15, High: 85}
+	}
+	pp.Research.Levels[engine.Propulsion], pp.Research.Levels[engine.Biotech] = 1, 1 // Gravity ±3
+	p := &l.g.Planets[0]
+	p.Env, p.OrigEnv = [3]int{60, 60, 60}, [3]int{60, 60, 60}
+	p.HasStarbase, p.StarbaseDesign = true, station(t, l, "Mass Driver 7", "")
+	// q = 490 leaves 510 kT uncaught: six chunks, the first two succeed
+	// (no permanent draw hits), then the damage draws.
+	rng := script{0, 9, 0, 9, 199, 199, 199, 199}
+	im := hit(l.g, ImpactContext{}, Packet{Owner: 0, Warp: 10, Cargo: engine.Minerals{1000, 0, 0}}, 0, &rng)
+	if im.Terraform.Successes != [3]int{2, 0, 0} || p.Env != [3]int{58, 60, 60} || !im.DiscloseDesign || im.Killed != 318 || len(rng) != 0 {
+		t.Errorf("PP impact: %+v env %v draws left %v", im, p.Env, rng)
+	}
+	// Another launcher's packet draws nothing for terraforming.
+	l = impactLab(t, 1000)
+	c := &count{}
+	if im := hit(l.g, ImpactContext{}, Packet{Owner: 0, Warp: 10, Cargo: engine.Minerals{1000, 0, 0}}, 0, c); im.Terraform.Changed() || im.DiscloseDesign || c.n != 0 {
+		t.Errorf("JOAT launcher: %+v, %d draws", im, c.n)
+	}
+}
+
 // Defense loss with a small dmg (OBJECTS.md "Impact" step 7): Dk is 0,
 // then 1 when rand(20) < dmg.
 func TestPredictionPacketDefenses(t *testing.T) {
