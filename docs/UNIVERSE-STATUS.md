@@ -78,11 +78,24 @@ engine's parity harness has no new-game path):
   - homeworld and second-planet population and installations, and fleet
     counts;
   - the stored victory conditions.
-- A computer player with level 0 has a random level the vector does not
-  record; the test tries each level for that player. Every such player in
-  UG05, UG10 and UG15 matches expert.
+- A computer player with level 0 uses the level in `computer.drawn` when
+  the vector records it. Vectors without it get a fallback: the test runs
+  that player at easy and, only if its start differs, tries each level.
+  Levels below expert give the same start, so the fallback cannot tell
+  easy, standard and harder apart. Seven players in UG05, UG10 and UG15
+  match only at expert.
 
 All 124 player expectations and all 214 sample checks pass.
+
+The same test also reads the RD/RW race-creation vectors
+(`engine/testdata/vectors/rw`, stars-elegy #111) when they are in the
+corpus. Each player's race as created (case `-R`) is compared exactly
+with `Generate`'s. A raw 255 is read as the stored immune marker in each
+field, so a file holding it in the low alone is repaired at creation
+(RACES.md "Repairs", RW08). A Random race takes the race the vector
+records. Against #111's files, every race-as-created check and every
+sample passes. This was checked locally, since the kernel's vector sync
+has not brought them into `main` yet.
 
 ## LEGACY BUG switches
 
@@ -128,6 +141,59 @@ level)` (AI.md "Built-in races"). One point is open:
 
 Human races are scored, repaired or replaced and Random races generated
 by `races/` (see [RACES-STATUS.md](RACES-STATUS.md)).
+
+## Open items (lane handoff, 2026-10-08)
+
+The new-game generation lane (`newgame/`, `races/`, `objects/` except
+`engine_adapter.go`, `terraform/`) is closed. Each item below says where
+it lives and what would settle it.
+
+Waiting on the vector corpus:
+
+1. **RD/RW vectors**: not in `main` until the kernel's sync brings
+   stars-elegy #111; the test then runs them with no code change.
+2. **Drawn computer levels**: `computer.drawn {type, level}` is coming
+   to the UG vectors. Once it is in the corpus, UG05, UG10 and UG15 use
+   it and the per-level fallback stops running for them. `Generate`
+   never draws a random computer type or level: the caller passes a
+   type 1–6 and a level (`ComputerPlayer`). The test uses the vector's
+   recorded race and its drawn level.
+
+Spec gaps to send to stars-elegy (Elegy follows the vectors):
+
+3. Expert +10% before the BBS factor (MEASURED UG03, UG21): not in
+   UNIVERSE.md.
+4. Stored victory conditions, a disabled condition stored as 0 (MEASURED
+   UG01-E..UG30-E): not in UNIVERSE.md or KERNEL.md.
+5. **ASSUMPTION B1**: built-in race leftover spend (here and
+   RACES-STATUS.md).
+6. **PLACEHOLDER** relations with no human player, planet names and
+   computer-player names (above).
+
+Labelled Elegy choices and assumptions in the lane's other packages
+(each documented where it lives):
+
+7. Generation: every `ELEGY CHOICE` above.
+8. Objects ([OBJECTS-STATUS.md](OBJECTS-STATUS.md)): minefields O6, O9,
+   O10; packets P6 (a destination naming no planet is no destination);
+   stargates G4 (`D > s` destroys every ship of the design); salvage S1;
+   visibility V1–V3. P5 is answered.
+9. Terraforming ([TERRAFORM-STATUS.md](TERRAFORM-STATUS.md)): T1–T3, R1.
+   P1–P3 are answered.
+10. Spec question still open: OBJECTS.md's hostile-adjuster example
+    "137 against 67" fits radiation (67), not temperature, for a 50
+    (15–85) habitat. The `terraform/` tests assert all three scores.
+
+Unimplemented behaviour:
+
+11. Salvage as a space object: it stays in `engine.Game.Salvage`.
+    Salvage numbering, decay and loading exist in `objects/`; the spec
+    gaps on owner, merging and pickup are with the objects research lane.
+12. Not wired by the kernel yet: the terraforming production items, the
+    remote-mining task, Orbital Adjusters and `Impact.DiscloseDesign`
+    (TERRAFORM-STATUS.md "Turn wiring"); the yearly race check
+    (RACES-STATUS.md "Not wired yet").
+13. Generation itself, under "Not modelled" below.
 
 ## Not modelled
 
