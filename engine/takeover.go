@@ -556,7 +556,7 @@ func (t *Transport) percentTarget(capacity int) int {
 // actions when they load, so they persist until satisfied (held ≥ v, or
 // avail ≤ v), like "load exactly" ("load actions persist until
 // satisfied"); TAKEOVER.md does not say. Their unload direction is
-// unload's and clears there.
+// unload's and clears there, as does an action with nothing to move.
 func (t *Transport) loaded(amount, capacity, held, avail int) {
 	switch t.Action {
 	case LoadExactly:
@@ -618,8 +618,11 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		case UnloadExactly:
 			amount = min(t.Amount, have)
 		case SetAmount, SetWaypoint:
-			if amount = t.unloadWant(have, g.targetHolds(f, c)); amount <= 0 {
-				continue // a load, or nothing to move: the load pass's
+			// A load is the load pass's; with nothing to move the
+			// action is satisfied and clears here, wherever the fleet
+			// is (ASSUMPTION T11).
+			if amount = t.unloadWant(have, g.targetHolds(f, c)); amount < 0 {
+				continue
 			}
 		default:
 			continue

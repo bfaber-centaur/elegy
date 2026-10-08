@@ -134,3 +134,52 @@ func TestSetAmountAndWaypointFromSalvage(t *testing.T) {
 		t.Errorf("task %+v, want %+v", f.Task, want)
 	}
 }
+
+// A set action with nothing to move is satisfied and clears in the unload
+// phase wherever the fleet is, so it moves on (ASSUMPTION T11), even
+// where the load pass loads nothing: another player's planet (T4) or
+// deep space. A real load at another player's planet still waits and
+// holds the fleet (T10). The freighter heads 30 ly away at warp 6.
+func TestSetActionNothingToMove(t *testing.T) {
+	for _, tt := range []struct {
+		name  string
+		where string // "own", "enemy" or "deep"
+		tr    Transport
+		held  int
+		move  bool
+	}{
+		{"own planet, set amount 50 with 50", "own", Transport{SetAmount, 50}, 50, true},
+		{"enemy planet, set amount 50 with 50", "enemy", Transport{SetAmount, 50}, 50, true},
+		{"deep space, set amount 50 with 50", "deep", Transport{SetAmount, 50}, 50, true},
+		{"deep space, set waypoint 50, empty", "deep", Transport{SetWaypoint, 50}, 0, true},
+		{"enemy planet, set waypoint 0, empty: a load", "enemy", Transport{SetWaypoint, 0}, 0, false},
+	} {
+		l := newTKLab(t, 3)
+		medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
+		owner := 0
+		if tt.where == "enemy" {
+			owner = 1
+		}
+		pi := l.planet(owner, 0, 100)
+		dst := l.planet(0, 30, 100)
+		l.g.Planets[pi].Surface[Ironium] = 50
+		fi := l.fleet(0, pi, 0, Stack{Design: medium, Count: 1})
+		f := &l.g.Fleets[fi]
+		if tt.where == "deep" {
+			f.Pos = Point{0, 40}
+		}
+		start := f.Pos
+		f.Fuel = 500
+		f.Cargo.Minerals[Ironium] = tt.held
+		f.Task = Task{Kind: TaskTransport}
+		f.Task.Transport[Ironium] = tt.tr
+		f.Waypoints = []Waypoint{{Pos: l.g.Planets[dst].Pos, Warp: 6, Target: TargetPlanet, ID: l.g.Planets[dst].ID}}
+		g := l.turn(&seqRand{}).Game
+		if moved := g.Fleets[0].Pos != start; moved != tt.move {
+			t.Errorf("%s: at %v, moved %v, want %v (task %+v)", tt.name, g.Fleets[0].Pos, moved, tt.move, g.Fleets[0].Task)
+		}
+		if cleared := g.Fleets[0].Task.Kind == TaskNone; cleared != tt.move {
+			t.Errorf("%s: task %+v, want cleared %v", tt.name, g.Fleets[0].Task, tt.move)
+		}
+	}
+}
