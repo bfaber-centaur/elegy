@@ -192,6 +192,44 @@ func TestReportObjects(t *testing.T) {
 	}
 }
 
+// A report shows the player's own Mystery Trader parts by name (the part
+// word's bits, stars-elegy OBJECTS.md "Encounters") and never another
+// player's, and a save and load keeps them (the word is in the saved
+// space objects).
+func TestReportTraderItems(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	sp := space(g.State)
+	if sp == nil {
+		t.Fatal("the game has no space objects")
+	}
+	// Player 0: bits 0 and 11; player 1: bit 4; player 2: none.
+	sp.TraderParts = objects.TraderParts{1 | 1<<11, 1 << 4}
+	want := []map[string]bool{
+		{"Multi Cargo Pod": true, "Jump Gate": true},
+		{"Alien Miner": true},
+		{},
+	}
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range []*Game{g, loaded} {
+		for p := range want {
+			r, err := x.Report(p)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(r.TraderItems, want[p]) {
+				t.Errorf("player %d's Trader items = %v, want %v", p, r.TraderItems, want[p])
+			}
+		}
+	}
+}
+
 // Another player's design is reported with hull and mass when seen
 // partially, with all its parts once seen in full, and stays known in
 // later years out of sight (MEASURED SC-037, computer players' files),
