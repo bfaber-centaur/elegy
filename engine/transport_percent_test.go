@@ -94,7 +94,7 @@ func TestValidPercentTransport(t *testing.T) {
 		{Transport{WaitFor, 101}, false},
 		{Transport{WaitFor, -1}, false},
 		{Transport{LoadExactly, 500}, true},
-		{Transport{WaitFor + 1, 0}, false},
+		{Transport{SetWaypoint + 1, 0}, false},
 	} {
 		task := Task{Kind: TaskTransport}
 		task.Transport[Ironium] = tt.tr

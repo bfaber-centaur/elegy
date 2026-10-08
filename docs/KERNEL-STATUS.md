@@ -447,8 +447,7 @@ list; `TestParityVectors -v` prints the current counts as "expectations
 skipped in checked cases"): other oracle random streams 4222, `message`
 754 (Elegy's events are its own), `score_record` 319, samples that did
 not match 318, player default queue settings 103, `battle` 54 and
-`battle_actions` 42, planet `starbase` 22, transport `set_amount_to` 5
-and `fuel` 5, computer players' planned orders 19, Super Stealth
+`battle_actions` 42, planet `starbase` 22, transport `fuel` 6, computer players' planned orders 19, Super Stealth
 research stealing 13, `battle_plan` 13, wormhole objects 10,
 `no_battle` 9, player `research_field` 6, original environment null 5,
 `mystery_trader_items` 5, and 1 to 4 each for planet `concentrations`,
@@ -472,8 +471,7 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
 - `battle` and `battle_actions` expectations (18, CS-003-C): battle
   records are compared only through their effects.
 - Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
-  transport fuel and the set-amount and set-waypoint actions ("load
-  all", "load exactly", "fill to" and "wait for" are loaded), `design` and
+  transport fuel (every other action is loaded), `design` and
   `design_delete` orders.
 - Production queues with unmapped planetary items: 10 (unused), 13
   (the Genesis Device) and the scanners 18–27. Packets launched from such
