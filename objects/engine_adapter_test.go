@@ -490,14 +490,16 @@ func TestMeetTradersComputerLevel(t *testing.T) {
 
 // A design order reads the player's Trader parts (ORDERS.md "Design
 // legality"; OBJECTS.md "Encounters"): under the Elegy rules a Multi Cargo
-// Pod is kept when the player owns it and dropped when it does not.
+// Pod is kept when the player owns it and dropped when it does not. Under
+// jrc3-faithful (KeepUnentitledParts, the LEGACY BUG, CONFIRMED) it is
+// kept either way.
 func TestDesignOrderTraderParts(t *testing.T) {
-	cargo := func(owns bool) int {
+	cargo := func(rules engine.Ruleset, owns bool) int {
 		s := &Space{}
 		if owns {
 			s.TraderParts.give(0, BitMultiCargoPod)
 		}
-		g := &engine.Game{Rules: engine.ElegyRules(), Year: 2410, Objects: s, Players: []engine.Player{{
+		g := &engine.Game{Rules: rules, Year: 2410, Objects: s, Players: []engine.Player{{
 			Race:     engine.Race{PRT: engine.PRTJackOfAllTrades},
 			Research: engine.ResearchState{Levels: [engine.NumFields]int{11, 11, 11, 11, 11, 11}},
 		}}}
@@ -510,7 +512,12 @@ func TestDesignOrderTraderParts(t *testing.T) {
 		}
 		return g.Designs[g.DesignSlots[0].Design].CargoCapacity
 	}
-	if with, without := cargo(true), cargo(false); with-without != 250 {
-		t.Errorf("cargo %d with the pod owned, %d without; want 250 more", with, without)
+	with, without := cargo(engine.ElegyRules(), true), cargo(engine.ElegyRules(), false)
+	if with-without != 250 {
+		t.Errorf("elegy: cargo %d with the pod owned, %d without; want 250 more", with, without)
+	}
+	faithful := engine.FaithfulRules()
+	if owned, unowned := cargo(faithful, true), cargo(faithful, false); owned != with || unowned != with {
+		t.Errorf("jrc3-faithful: cargo %d owned, %d unowned; want both %d (the pod kept)", owned, unowned, with)
 	}
 }
