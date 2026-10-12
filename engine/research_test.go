@@ -376,3 +376,118 @@ func TestSuperStealthResearchSwitchYear(t *testing.T) {
 		t.Errorf("R %d: stolen %+v, want %+v", research, stolen, want)
 	}
 }
+
+// TestResearchStoredLevelUpOrder checks that stored research with
+// nothing added levels in field order (BINARY-ONLY, stars-elegy 2f214f5;
+// lane F's GR-ORDER cases):
+// with propulsion current, weapons 2 for 330 comes first, and then
+// construction 2 costs 340.
+func TestResearchStoredLevelUpOrder(t *testing.T) {
+	race := pgRace()
+	race.LRT.GeneralizedResearch = true
+	s := ResearchState{Current: Propulsion, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 20, 1, 1, 1}
+	s.Accumulated[Weapons] = 330
+	s.Accumulated[Construction] = 330
+	s = AddResearch(s, race, 0, false)
+	if s.Levels != [NumFields]int{1, 2, 20, 1, 1, 1} || s.Accumulated[Weapons] != 0 || s.Accumulated[Construction] != 330 {
+		t.Errorf("levels %v, accumulated %v; want weapons 2, construction 1 with 330", s.Levels, s.Accumulated)
+	}
+}
+
+// TestResearchShareLevelUpOrder checks that this year's shares are added
+// and checked from the field after the current one, wrapping round
+// (BINARY-ONLY, stars-elegy 2f214f5; lane F's GR-ORDER cases): with
+// propulsion current, a share
+// of 330 in each other field buys construction 2, and the later fields
+// stay 10 short of the raised cost of 340.
+func TestResearchShareLevelUpOrder(t *testing.T) {
+	race := pgRace()
+	race.LRT.GeneralizedResearch = true
+	s := ResearchState{Current: Propulsion, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 20, 1, 1, 1}
+	// (3·2194 + 19)/20 = 330; propulsion's 1,097 is far from level 21.
+	s = AddResearch(s, race, 2194, false)
+	if s.Levels != [NumFields]int{1, 1, 20, 2, 1, 1} {
+		t.Errorf("levels %v, want construction 2 only", s.Levels)
+	}
+	if want := [NumFields]int{330, 330, 1097, 0, 330, 330}; s.Accumulated != want {
+		t.Errorf("accumulated %v, want %v", s.Accumulated, want)
+	}
+}
+
+// TestResearchPassesWrapRound checks the pass that follows under
+// Generalized Research (BINARY-ONLY, stars-elegy 2f214f5; the RG-001 2433
+// pattern): with electronics current, electronics 11, then biotech 2 for
+// 240, then energy 2 for 250 in the second pass. Energy holds 10 + 240,
+// enough for level 2 at the first pass's cost of 230, but its share
+// arrives only after its turn in that pass.
+func TestResearchPassesWrapRound(t *testing.T) {
+	race := pgRace()
+	race.LRT.GeneralizedResearch = true
+	s := ResearchState{Current: Electronics, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 1, 1, 10, 1}
+	// cost(11) = 6100 + 150 = 6250; the current share is 797.
+	s.Accumulated[Electronics] = 6250 - 797
+	s.Accumulated[Energy] = 10
+	// (3·1594 + 19)/20 = 240.
+	s = AddResearch(s, race, 1594, false)
+	if s.Levels != [NumFields]int{2, 1, 1, 1, 11, 2} {
+		t.Errorf("levels %v, want energy 2, electronics 11, biotech 2", s.Levels)
+	}
+	if want := [NumFields]int{0, 240, 240, 240, 0, 0}; s.Accumulated != want {
+		t.Errorf("accumulated %v, want %v", s.Accumulated, want)
+	}
+}
+
+// TestResearchPassAfterSharesOnly checks that a level-up outside the
+// current field also brings another pass: electronics stays at 10, biotech
+// 2 costs 230, and energy's 250 buys level 2 for 240 in the second pass.
+func TestResearchPassAfterSharesOnly(t *testing.T) {
+	race := pgRace()
+	race.LRT.GeneralizedResearch = true
+	s := ResearchState{Current: Electronics, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 1, 1, 10, 1}
+	s.Accumulated[Energy] = 10
+	s = AddResearch(s, race, 1594, false)
+	if s.Levels != [NumFields]int{2, 1, 1, 1, 10, 2} || s.Accumulated[Energy] != 10 || s.Accumulated[Biotech] != 10 {
+		t.Errorf("levels %v, accumulated %v; want energy 2 with 10, biotech 2 with 10", s.Levels, s.Accumulated)
+	}
+}
+
+// TestResearchPassesWithoutGR checks the same passes for a player without
+// Generalized Research: weapons, before the current field, levels first
+// with its stored 140, which raises propulsion's cost to 150, so this
+// year's 140 stays stored (BINARY-ONLY, stars-elegy 397ebfc: players
+// without Generalized Research go through the same passes).
+func TestResearchPassesWithoutGR(t *testing.T) {
+	race := pgRace()
+	s := ResearchState{Current: Propulsion, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 1, 1, 1, 1}
+	s.Accumulated[Weapons] = 140 // level 2 at a level sum of 6
+	s = AddResearch(s, race, 140, false)
+	if s.Levels != [NumFields]int{1, 2, 1, 1, 1, 1} || s.Accumulated[Weapons] != 0 || s.Accumulated[Propulsion] != 140 {
+		t.Errorf("levels %v, accumulated %v; want weapons 2, propulsion 1 with 140", s.Levels, s.Accumulated)
+	}
+}
+
+// TestResearchSecondPassAlways checks that the second pass follows even
+// when nothing levelled in the first (BINARY-ONLY, stars-elegy 397ebfc):
+// with electronics current, the four fields before it each receive a
+// share of 320 after their turn in the first pass, and energy, first in
+// field order, levels in the second at its cost of 320. The other three
+// stay 10 short of 330.
+func TestResearchSecondPassAlways(t *testing.T) {
+	race := pgRace()
+	race.LRT.GeneralizedResearch = true
+	s := ResearchState{Current: Electronics, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 1, 1, 10, 10}
+	// (3·2127 + 19)/20 = 320; electronics' 1,064 is far from level 11.
+	s = AddResearch(s, race, 2127, false)
+	if s.Levels != [NumFields]int{2, 1, 1, 1, 10, 10} {
+		t.Errorf("levels %v, want energy 2 only", s.Levels)
+	}
+	if want := [NumFields]int{0, 320, 320, 320, 1064, 320}; s.Accumulated != want {
+		t.Errorf("accumulated %v, want %v", s.Accumulated, want)
+	}
+}
