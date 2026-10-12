@@ -12,10 +12,11 @@ import (
 // done or refused, tells it then, after the refusal (a). Each row's label
 // is its evidence: RM-4 messages (MEASURED, stars-elegy 9c1e2bc) for
 // remote mining, TK-201 H for colonize; DOCUMENTED rows follow the 0x04e
-// row's wording and were not oracle-run as such. ASSUMPTION: a transport
-// task with every action empty ends in the unload pass after movement,
-// and is told then rather than at arrival. The fleet arrives 10 ly east of its
-// waypoint's planet and keeps any task that does not end.
+// row's wording and were not oracle-run as such. A transport task with
+// every action empty ends in the transport pass after movement and is told
+// then, not at arrival (CONFIRMED by prediction, ET-1 and ET-1b,
+// stars-elegy b1cf7f7). The fleet arrives 10 ly east of its waypoint's
+// planet and keeps any task that does not end.
 func TestFinishedOrdersAtLastWaypoint(t *testing.T) {
 	home := pgHomeworld().Planets[0]
 	free := Point{home.Pos.X + 30, home.Pos.Y}
@@ -43,7 +44,7 @@ func TestFinishedOrdersAtLastWaypoint(t *testing.T) {
 		{"patrol (DOCUMENTED)", false, deep, Task{Kind: TaskPatrol, Range: 50}, true, nil, false},
 		{"transport still waiting (DOCUMENTED)", false, home.Pos, waitLoad, true, []EventKind{EventLoadWaiting}, false},
 		{"transport done: told when it ends (DOCUMENTED)", false, home.Pos, unload, false, []EventKind{EventFleetArrived}, false},
-		{"empty transport: told when it ends (ASSUMPTION)", false, free, Task{Kind: TaskTransport}, false, []EventKind{EventFleetArrived}, false},
+		{"empty transport: told when it ends (CONFIRMED ET-1)", false, free, Task{Kind: TaskTransport}, false, []EventKind{EventFleetArrived}, false},
 		{"transport done, a waypoint still ahead: not told (DOCUMENTED)", false, home.Pos, unload, false, nil, true},
 		{"colonize refused in deep space, then told (CONFIRMED TK-201 H)", false, deep, Task{Kind: TaskColonize}, false, []EventKind{EventColonizeFailed, EventFleetArrived}, false},
 		{"no task is told at arrival (CONFIRMED)", false, free, Task{}, true, []EventKind{EventFleetArrived}, false},
