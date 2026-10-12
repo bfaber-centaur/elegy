@@ -273,6 +273,11 @@ type pvExpect struct {
 	// Screen and Field name a client_estimate expectation's reading.
 	Screen string `json:"screen"`
 	Field  string `json:"field"`
+	// Player, MessageID and Present are a message expectation's
+	// (README.md "message").
+	Player    *int  `json:"player"`
+	MessageID *int  `json:"message_id"`
+	Present   *bool `json:"present"`
 }
 
 // pvMaps maps vector ids to Elegy's: EndID a wormhole end id to its
@@ -483,6 +488,8 @@ type pvLoaded struct {
 	endID map[int]int
 	// views is each generated year's player views, by year.
 	views [][]engine.PlayerView
+	// events is each generated year's events, by year.
+	events [][]engine.Event
 	// rejected lists the vector's orders Elegy refused, by year.
 	rejected []string
 }
@@ -1258,6 +1265,8 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		return l.playerEquals(g, *e.ID, eq, l.playerUnsure(g, *e.ID))
 	case "design":
 		return l.designEquals(g, *e.Owner, *e.Slot, eq)
+	case "message":
+		return l.messageCheck(g, e)
 	}
 	return "skip: expectation " + e.Kind
 }
@@ -2030,6 +2039,7 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 	// Generate year by year, keeping each year's game.
 	games = []engine.Game{l.g}
 	l.views = [][]engine.PlayerView{nil}
+	l.events = [][]engine.Event{nil}
 	g := l.g
 	for y := 1; y <= v.Years; y++ {
 		files, why := l.orders(v.Orders, y, &g)
@@ -2061,6 +2071,7 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		g = r.Game
 		games = append(games, g)
 		l.views = append(l.views, r.Views)
+		l.events = append(l.events, r.Events)
 	}
 	return l, games, nil, ""
 }

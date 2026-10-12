@@ -134,8 +134,9 @@ waypoints aimed at another player's fleet (W5, #167).
 
 **P2 (blocks substantial gameplay coverage):**
 
-- Messages are not compared (867 expectations): Elegy's events have no
-  mapping to MESSAGES.md kinds.
+- Messages: the harness compares the ids it can map from Elegy's events,
+  and the ids Elegy sends no event for (PARITY-STATUS.md "Messages
+  compared"). Other ids are skipped until they are mapped.
 - Fields the harness still skips: default queue settings (58), then
   `score_record` (422), are lane B's next. The null fields (`defenses`
   103, `planetary_scanner` 2, `population` 1) are skipped too.
