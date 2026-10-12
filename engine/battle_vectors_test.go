@@ -1,7 +1,9 @@
 package engine_test
 
 import (
+	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -29,13 +31,30 @@ func battleStarts(t *testing.T, path string) []engine.BattleStart {
 		return []engine.BattleStart{{}, {Skip: s.Skip}}
 	}
 	out := []engine.BattleStart{{}}
+	// drawn counts the draws of the years generated so far: a year's
+	// battles that follow a draw of an earlier year start from a game
+	// those draws shaped (BattleStart.Downstream).
+	drawn := &countRand{}
 	turn := func(g engine.Game, orders []engine.PlayerOrders, rng engine.Rand) (engine.TurnResult, error) {
-		return engine.GenerateTurnAtBattles(g, orders, rng, func(g engine.Game, costLevels [][engine.NumFields]int) {
-			out = append(out, engine.BattleStart{Game: g, CostLevels: costLevels, Fleets: s.FleetsIn(&g), Planets: s.Planets})
+		before := drawn.n
+		drawn.rng = rng
+		return engine.GenerateTurnAtBattles(g, orders, drawn, func(g engine.Game, costLevels [][engine.NumFields]int) {
+			out = append(out, engine.BattleStart{Game: g, CostLevels: costLevels, Fleets: s.FleetsIn(&g), Planets: s.Planets, Downstream: before})
 		})
 	}
 	vectors.Generate(v, 0, turn)
 	return out
+}
+
+// countRand passes draws to rng and counts them.
+type countRand struct {
+	rng engine.Rand
+	n   int
+}
+
+func (c *countRand) Intn(n int) int {
+	c.n++
+	return c.rng.Intn(n)
 }
 
 func TestBattleRecords(t *testing.T) {
@@ -61,4 +80,77 @@ func TestBattleRecordHarness(t *testing.T) {
 // walk (COMBAT.md "Disengaging").
 func TestRG001StarbaseDamageKept(t *testing.T) {
 	engine.CheckStarbaseDamageKept(t, battleStarts(t, "rg/rg001-y6.json")[1])
+}
+
+// A chained run's years after Elegy's own draws start downstream of them:
+// RG-001 draws in its first year, so its later years' battles are
+// samples; CB-010's single year and each per-year restart are not.
+func TestBattleStartDownstream(t *testing.T) {
+	chain := battleStarts(t, "rg/rg001.json")
+	if len(chain) < 3 || chain[1].Downstream != 0 || chain[2].Downstream == 0 {
+		t.Errorf("RG-001 chain: %d years, downstream draws %d (year 1), want 0 then more", len(chain)-1, chain[1].Downstream)
+	}
+	for i := 2; i < len(chain); i++ {
+		if chain[i].Downstream <= chain[i-1].Downstream {
+			t.Errorf("RG-001 year %d: %d draws before it, year %d: %d", i, chain[i].Downstream, i-1, chain[i-1].Downstream)
+		}
+	}
+	for _, p := range []string{"cb/cb010.json", "rg/rg001-y6.json"} {
+		if s := battleStarts(t, p); s[1].Downstream != 0 {
+			t.Errorf("%s year 1: %d draws before it, want 0", p, s[1].Downstream)
+		}
+	}
+}
+
+// recordTB keeps CheckBattleRecords' errors and log lines.
+type recordTB struct {
+	testing.TB
+	errs, logs []string
+}
+
+func (r *recordTB) Errorf(format string, args ...any) {
+	r.errs = append(r.errs, fmt.Sprintf(format, args...))
+}
+
+func (r *recordTB) Logf(format string, args ...any) {
+	r.logs = append(r.logs, fmt.Sprintf(format, args...))
+}
+
+// A sample that misses is logged, not failed: with every fleet removed
+// from Elegy's battle-phase game of RG-001's last chained year, each of
+// that year's battles misses as a sample, and the same game taken as a
+// start with no earlier draws fails each of them instead.
+func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
+	const path = "rg/rg001.json"
+	chain := battleStarts(t, path)
+	last := len(chain) - 1
+	marker := fmt.Sprintf(" y%d: ", last)
+	run := func(downstream int) (failed, missed int) {
+		starts := append([]engine.BattleStart(nil), chain...)
+		starts[last].Game.Fleets = nil
+		starts[last].Downstream = downstream
+		r := &recordTB{TB: t}
+		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts})
+		for _, e := range r.errs {
+			if strings.Contains(e, marker) {
+				failed++
+			}
+		}
+		for _, l := range r.logs {
+			if strings.Contains(l, marker) && strings.Contains(l, "missed") {
+				missed++
+			}
+		}
+		return failed, missed
+	}
+	if chain[last].Downstream == 0 {
+		t.Fatalf("RG-001 year %d follows no draws", last)
+	}
+	failed, missed := run(chain[last].Downstream)
+	if failed != 0 || missed == 0 {
+		t.Errorf("as a sample: %d failures, %d misses, want 0 and some", failed, missed)
+	}
+	if f, m := run(0); f != missed || m != 0 {
+		t.Errorf("with no earlier draws: %d failures, %d misses, want %d and 0", f, m, missed)
+	}
 }

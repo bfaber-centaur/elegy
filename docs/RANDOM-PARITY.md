@@ -170,7 +170,21 @@ Any other draw during firing still stops the replay; none was reached.
 | cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 | 4456/4456 | 6360 |
 | cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 | 4252/4252 | 25 |
 | cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 | 149/149 | 61 |
-| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 | 254/254 | 16 |
+| rg | 16 (7 samples) | 9 | 15 | 16/16 | 25/25 | 78 | 195/195 | 8 |
+
+**Samples.** A record of a year that follows Elegy's own draws in the
+vector's earlier years (a chained run past its first random year) starts
+from fleets and states those draws shaped, not from the record's. It is
+a sample: compared in full, tallied only as matched or missed in its own
+column, never in the other tallies and never a failure. A match does not
+show parity and a miss does not show a defect; the per-year restarts
+compare those years from the record. The rg row's 7 samples are the records of
+RG-001's chained run after its first year, all matched at the current
+reference seed. The
+seed derivation's fix (lane B) changes the chain, and two of them,
+2434 (1658,1174) and 2435 (1319,1460), then miss: they had matched only
+because the old seed's chain happened to reproduce those fleets and
+states.
 
 **Moves.** The replay also checks each recorded move before applying it:
 the recorded square must be one Elegy's `step` can choose with some
