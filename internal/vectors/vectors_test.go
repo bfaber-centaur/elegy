@@ -653,7 +653,7 @@ func TestVictoryConditions(t *testing.T) {
 		{"planets_owned_percent", 15, false, "victory condition planets_owned_percent"},
 		{"minimum_years", 25, false, "victory condition minimum_years"},
 		{"score", 11000, true, "victory condition score without enabled"},
-		{"tech_fields", -1, false, "victory condition tech_fields"},
+		{"conditions_needed", -1, false, "victory condition conditions_needed"},
 	} {
 		_, err := load("kx004/s1.json", func(v *Vector) {
 			m := maps.Clone(v.InitialState.Game.Victory)
