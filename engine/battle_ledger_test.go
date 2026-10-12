@@ -16,7 +16,9 @@ import (
 // case and year | battle record (x,y) | detail". TestBattleRecords fails
 // on a line the ledger lacks and on a ledger line no longer produced.
 // A strict record's class is written by hand with its owner; a sample's
-// is "sample".
+// is "sample", and a restart record a seed change alone makes match
+// (CheckBattleRecords' random column) is "random-driven" with its count
+// of matching variants, so a change in that count fails too.
 
 const rg002BattleLedger = "testdata/vectors/rg/rg002-ledger.txt"
 
@@ -27,12 +29,18 @@ var rg002BattleWhere = regexp.MustCompile(`^rg/(rg002[^ ]*)\.json (\S+) "([^"]*)
 // rg002Pointer matches a printed pointer, which differs between runs.
 var rg002Pointer = regexp.MustCompile(`0x[0-9a-f]+`)
 
+// rg002RandomDraws matches a random record's count of the year's draws,
+// which moves with any change to them, keeping the count of matching
+// variants.
+var rg002RandomDraws = regexp.MustCompile(`^random \(after \d+ draws in the year; (\d+ of \d+ other variants match)\): `)
+
 // rg002SampleDraws matches a sample's count of earlier draws, which
 // moves with any change to earlier years' draws.
 var rg002SampleDraws = regexp.MustCompile(`^sample \(after \d+ draws of earlier years\) missed: `)
 
 // ledgerTB takes CheckBattleRecords' RG-002 failures and sample misses
-// as ledger lines, by key, with "" or "sample" as the class, and passes
+// as ledger lines, by key, with "", "sample" or "random-driven" (lane D's
+// in-year rule, with its count of matching variants) as the class, and passes
 // everything else to the test.
 type ledgerTB struct {
 	testing.TB
@@ -45,6 +53,13 @@ func (l *ledgerTB) take(msg, class string) bool {
 		return false
 	}
 	detail := rg002Pointer.ReplaceAllString(m[7], "0x?")
+	if class == "random-driven" {
+		m := rg002RandomDraws.FindStringSubmatch(detail)
+		if m == nil {
+			return false
+		}
+		detail = "random, " + m[1] + ": " + strings.TrimPrefix(detail, m[0])
+	}
 	if class == "sample" {
 		d, ok := strings.CutPrefix(detail, rg002SampleDraws.FindString(detail))
 		if !ok || d == detail {
@@ -71,8 +86,11 @@ func (l *ledgerTB) Errorf(format string, args ...any) {
 func (l *ledgerTB) Logf(format string, args ...any) {
 	l.TB.Helper()
 	msg := fmt.Sprintf(format, args...)
-	if strings.Contains(msg, ": sample (after ") {
+	switch {
+	case strings.Contains(msg, ": sample (after "):
 		l.take(msg, "sample")
+	case strings.Contains(msg, ": random (after "):
+		l.take(msg, "random-driven")
 	}
 	l.TB.Logf("%s", msg)
 }
@@ -80,7 +98,7 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 // rg002BattleHand reports whether class is a hand class with its owner
 // ("incorrect mechanic [lane A]"), as internal/vectors rg002HandClass.
 func rg002BattleHand(class string) bool {
-	for _, h := range []string{"missing mechanic", "incorrect mechanic", "state-import error", "random-driven"} {
+	for _, h := range []string{"missing mechanic", "incorrect mechanic", "state-import error"} {
 		if rest, ok := strings.CutPrefix(class, h+" ["); ok && strings.HasSuffix(rest, "]") && len(rest) > 1 {
 			return true
 		}
@@ -117,8 +135,8 @@ func checkBattleLedger(t testing.TB, got, ledger map[string]string) {
 		switch {
 		case !ok:
 			t.Errorf("new RG-002 battle ledger line: %s | %s", got[k], k)
-		case got[k] == "sample" && class != "sample":
-			t.Errorf("RG-002 battle ledger line is a sample, was %s: %s", class, k)
+		case got[k] != "" && class != got[k]:
+			t.Errorf("RG-002 battle ledger line is %s, was %s: %s", got[k], class, k)
 		case got[k] == "" && !rg002BattleHand(class):
 			t.Errorf("RG-002 battle ledger line needs a hand class with its owner, has %q: %s", class, k)
 		}
@@ -187,6 +205,7 @@ func TestCheckBattleLedger(t *testing.T) {
 		{"gone", map[string]string{"rg002-y2 | C y1 | battle record (1,2) | tokens: x": ""}, 1},
 		{"sample held strict", map[string]string{"rg002-y2 | C y1 | battle record (1,2) | tokens: x": "sample", "rg002 | C y2 | battle record (3,4) | sample missed: y": "sample"}, 1},
 		{"strict held as sample", map[string]string{"rg002-y2 | C y1 | battle record (1,2) | tokens: x": "", "rg002 | C y2 | battle record (3,4) | sample missed: y": ""}, 1},
+		{"random held strict", map[string]string{"rg002-y2 | C y1 | battle record (1,2) | tokens: x": "random-driven", "rg002 | C y2 | battle record (3,4) | sample missed: y": "sample"}, 1},
 	} {
 		r := &recordTB{TB: t}
 		if checkBattleLedger(r, c.got, ledger); len(r.errs) != c.errors {
@@ -198,9 +217,11 @@ func TestCheckBattleLedger(t *testing.T) {
 	l.Errorf("%s", `rg/rg002-y2.json C "" (1,2) y1: tokens: Elegy {Planet:0xc000123}`)
 	l.Logf("%s", `rg/rg002.json C "" (3,4) y2: sample (after 99 draws of earlier years) missed: y`)
 	l.Errorf("%s", `rg/rg001.json C "" (1,2) y1: tokens: x`)
+	l.Logf("%s", `rg/rg002-y3.json C "" (5,6) y1: random (after 12 draws in the year; 2 of 7 other variants match): tokens: z`)
 	want := map[string]string{
-		"rg002-y2 | C y1 | battle record (1,2) | tokens: Elegy {Planet:0x?}": "",
-		"rg002 | C y2 | battle record (3,4) | sample missed: y":              "sample",
+		"rg002-y2 | C y1 | battle record (1,2) | tokens: Elegy {Planet:0x?}":                     "",
+		"rg002 | C y2 | battle record (3,4) | sample missed: y":                                  "sample",
+		"rg002-y3 | C y1 | battle record (5,6) | random, 2 of 7 other variants match: tokens: z": "random-driven",
 	}
 	if fmt.Sprint(l.lines) != fmt.Sprint(want) || len(r.errs) != 1 {
 		t.Errorf("taken %q, passed on %q; want %q and the rg001 failure", l.lines, r.errs, want)

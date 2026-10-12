@@ -22,29 +22,28 @@ These classes are computed:
 - **sample**: one of two things.
   - An expectation the vector marks as one stream's random outcome.
   - Anything in the chained run after its first year. Those years follow Elegy's own draws (docs/RANDOM-PARITY.md "Samples"), and that includes the chained run's later order refusals and battle records.
-- **random-driven**: a field whose result differs between Elegy's 8 seed variants, so Elegy's draws decide it. The line says how many variants match.
+- **random-driven**: a field whose result differs between Elegy's 8 seed variants, so Elegy's draws decide it. The line says how many variants match. For a restart's battle record, it is lane D's in-year rule: Elegy drew in that year before its battles, and at least one other seed variant fights the recorded battle. The line keeps the count of matching variants, so a change in that count fails too.
 - **not compared**: an expectation or field the harness does not compare, with the reason.
 
 These are classified by hand, with an owner. They cover a field that differs the same way on all 8 variants, an order Elegy refuses, and a strict battle record that fails:
 - **missing mechanic**;
 - **incorrect mechanic**;
 - **state-import error**;
-- **unsupported order**;
-- **random-driven**: used by hand for a strict battle record that follows a random-driven field.
+- **unsupported order**.
 
 ## Counts
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| incorrect mechanic | 41 | 9 | 1 |
+| incorrect mechanic | 41 | 9 | 2 |
 | missing mechanic | 3 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
-| random-driven | 63 | 0 | 1 (hand) |
+| random-driven | 63 | 0 | 0 |
 | not compared | 457 | 0 | 0 |
 | sample | 1746 | 62 | 18 |
 
-No order fails to load. Of the restarts' orders, Elegy refuses 9. All 9 are the same mechanic (below). The chained run refuses 62 orders, all samples, from years 3–6.
+No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both. Of the restarts' orders, Elegy refuses 9. All 9 are the same mechanic (below). The chained run refuses 62 orders, all samples, from years 3–6.
 
 ## Deterministic lines, by owner
 
@@ -61,7 +60,7 @@ No order fails to load. Of the restarts' orders, Elegy refuses 9. All 9 are the 
 - **Lines that follow from it (inferred):**
   - Y2 fleet 1/57: position and waypoint 1.
   - Y4 fleet 1/12: no waypoint after waypoint 0.
-  - The Y2 battle at (1367,1327), which Elegy does not fight.
+  - The Y2 battle at (1367,1327) and the Y5 battle at (1335,1320), which Elegy does not fight. Under lane D's rule, no other seed variant fights either one, so both are deterministic.
 
 ### Lane A: retarget of a removed target fleet (missing mechanic)
 
@@ -99,4 +98,3 @@ The 176 `battle` and `battle_actions` expectations are compared record by record
 
 - **Restarts:** 55 field lines. They are mostly mining and surface minerals, minefield decay, production percentages, and fleets whose movement rides on random merges, battles and target picks. The breakdown is Y1 8, Y3 9, Y4 15 and Y5 23.
 - **Chained year 1:** 8 more field lines.
-- **The Y5 battle at (1335,1320).** Elegy does not fight it on the reference seed because fleets 2/18 and 2/20 end elsewhere, and their positions match on 5 of 8 variants. Lane D is reviewing this record's class.

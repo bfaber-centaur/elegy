@@ -51,7 +51,7 @@ const (
 var rg002Vectors = []string{"rg002", "rg002-y1", "rg002-y2", "rg002-y3", "rg002-y4", "rg002-y5", "rg002-y6"}
 
 // rg002Hand lists the hand classes; any other class is computed.
-var rg002Hand = []string{"missing mechanic", "incorrect mechanic", "state-import error", "unsupported order", "random-driven"}
+var rg002Hand = []string{"missing mechanic", "incorrect mechanic", "state-import error", "unsupported order"}
 
 // ledgerLine is one ledger line: its class and the rest, its key.
 type ledgerLine struct {
@@ -366,6 +366,13 @@ const rg002LedgerHeader = `# RG-002 discrepancy ledger: every difference of the 
 # "battle" lines, engine TestBattleRecords; see rg002_ledger_test.go for
 # the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
+#
+# Order coverage (lane F, at stars-elegy fe0ccc5): the 42 order files hold
+# 1867 order records and the vectors carry 1867 orders, none dropped, so a
+# refused order here is Elegy's gap, never the decoder's. Known vector
+# omissions, both UNRESOLVED in meaning and constant across RG-002: the
+# lay-mines task's second word (6 orders, all "indefinitely") and the high
+# nibble of the waypoint target type (0x31 and 0x51, 23 orders).
 `
 
 // TestCheckLedger pins what TestRG002Ledger fails on: a new line, a line
@@ -397,7 +404,7 @@ func TestCheckLedger(t *testing.T) {
 		}
 	}
 	for class, want := range map[string]bool{
-		"incorrect mechanic [lane A]": true, "missing mechanic [economy]": true, "random-driven [lane D]": true,
+		"incorrect mechanic [lane A]": true, "missing mechanic [economy]": true, "random-driven [lane D]": false,
 		"incorrect mechanic []": false, "incorrect mechanic": false, "sample": false, "lucky guess [lane A]": false,
 	} {
 		if rg002HandClass(class) != want {

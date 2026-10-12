@@ -5,6 +5,13 @@
 # "battle" lines, engine TestBattleRecords; see rg002_ledger_test.go for
 # the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
+#
+# Order coverage (lane F, at stars-elegy fe0ccc5): the 42 order files hold
+# 1867 order records and the vectors carry 1867 orders, none dropped, so a
+# refused order here is Elegy's gap, never the decoder's. Known vector
+# omissions, both UNRESOLVED in meaning and constant across RG-002: the
+# lay-mines task's second word (6 orders, all "indefinitely") and the high
+# nibble of the waypoint target type (0x31 and 0x51, 23 orders).
 sample | rg002 | RG-002-2463 y1 #10 | fleet owner=1 id=8 | fleet gone
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #126 | fleet owner=6 id=12 | fuel = 1120, want 1400
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #126 | fleet owner=6 id=12 | ships = map[43:4], want map[43:5]
@@ -2405,4 +2412,4 @@ sample | rg002 | RG-002-2468 y6 | battle record (1296,1356) | sample missed: tok
 sample | rg002 | RG-002-2468 y6 | battle record (1569,1096) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg002 | RG-002-2468 y6 | battle record (1633,1380) | sample missed: tokens: Elegy has no battle here
 incorrect mechanic [lane A] | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1367,1327) | tokens: Elegy has no battle here
-random-driven [lane D] | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1335,1320) | tokens: Elegy has no battle here
+incorrect mechanic [lane A] | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1335,1320) | tokens: Elegy has no battle here
