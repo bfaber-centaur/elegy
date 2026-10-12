@@ -591,7 +591,7 @@ const (
 // ASSUMPTION P3: a design item naming an empty slot, or a slot outside
 // the player's slots, refuses the queue order.
 // DefaultQueueOrder replaces the player's default queue settings, which a
-// new colony or a captured planet takes (stars-elegy ORDERS.md "The
+// new colony or a captured planet takes (stars-elegy f2f9794, ORDERS.md "The
 // player's default queue": the order file's record is copied over the
 // stored setting whole, BINARY-ONLY). It holds planetary items only, at
 // most maxDefaultQueueItems.

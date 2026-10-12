@@ -762,3 +762,35 @@ func TestOrderCargoSalvage(t *testing.T) {
 		t.Errorf("salvage without an owner: %q", why)
 	}
 }
+
+// TestOrderDefaultQueue: the default-queue record loads as a
+// DefaultQueueOrder (stars-elegy ORDERS.md "The player's default queue").
+func TestOrderDefaultQueue(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := l.g
+	files, why := l.orders(testBlock(t,
+		`{"kind": "default_queue", "items": [], "leftover_to_research": false}`,
+		`{"kind": "default_queue", "items": [{"kind": 1, "id": 1, "count": 10}], "leftover_to_research": true}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	want := []engine.Order{
+		engine.DefaultQueueOrder{},
+		engine.DefaultQueueOrder{Queue: []engine.QueueItem{{Kind: engine.ItemAutoFactories, Count: 10}}, LeftoverOnly: true},
+	}
+	if !reflect.DeepEqual(files[0].Orders, want) {
+		t.Errorf("orders = %+v, want %+v", files[0].Orders, want)
+	}
+	_, why = l.orders(testBlock(t, `{"kind": "default_queue", "items": [{"kind": 2, "id": 0, "count": 1}]}`), 1, &g)
+	if why != "order default queue with a design item" {
+		t.Errorf("design item: %q", why)
+	}
+}

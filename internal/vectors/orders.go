@@ -129,6 +129,15 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 					return nil, "order " + why
 				}
 				order = engine.QueueOrder{Planet: l.planet[o.Planet], Queue: items}
+			case "default_queue":
+				// The order file's default-queue record, copied over the
+				// player's setting whole (stars-elegy ORDERS.md "The
+				// player's default queue", f2f9794).
+				items, why := pvDefaultQueue(o.Items)
+				if why != "" {
+					return nil, "order " + why
+				}
+				order = engine.DefaultQueueOrder{Queue: items, LeftoverOnly: o.LeftoverToResearch}
 			case "battle_plan":
 				order = engine.BattlePlanOrder{Index: o.Slot, Plan: pvPlan(o.Name, o.Tactic, o.Primary, o.Secondary, o.AttackWho, o.DumpCargo)}
 			case "battle_plan_delete":
