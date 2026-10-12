@@ -115,6 +115,11 @@ type pvPlayer struct {
 	MysteryTraderItems  []string          `json:"mystery_trader_items"`
 	Race                pvRace            `json:"race"`
 	Homeworld           *int              `json:"homeworld"`
+	// DefaultQueue and DefaultLeftoverToResearch are the player's
+	// default queue settings, which a planet it newly owns takes; both
+	// absent when the vector's builder did not read them.
+	DefaultQueue              *[]json.RawMessage `json:"default_queue"`
+	DefaultLeftoverToResearch *bool              `json:"default_leftover_to_research"`
 }
 
 // pvRace is a vector race (FORMAT.md "race").
@@ -464,6 +469,9 @@ type pvLoaded struct {
 	// queued marks the players with a production queue the harness does
 	// not load.
 	queued map[int]bool
+	// defaults marks the players whose default queue settings the
+	// vector carries.
+	defaults map[int]bool
 	// ordered marks the players the vector gives orders for.
 	ordered map[int]bool
 	// endID maps a vector wormhole end id to its waypoint target ID
@@ -515,7 +523,7 @@ func pvElegyFleetID(owner, id int) int { return owner*100000 + id + 1 }
 func loadVector(v *Vector) (*pvLoaded, error) {
 	s := v.InitialState
 	cat := engine.Components()
-	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]engine.Point{}, queued: map[int]bool{}, ordered: map[int]bool{}}
+	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]engine.Point{}, queued: map[int]bool{}, defaults: map[int]bool{}, ordered: map[int]bool{}}
 	for _, b := range v.Orders {
 		l.ordered[b.Player] = true
 	}
@@ -552,6 +560,17 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 			return nil, err
 		}
 		pl.Race = race
+		if (p.DefaultQueue == nil) != (p.DefaultLeftoverToResearch == nil) {
+			return nil, fmt.Errorf("player %d: default_queue and default_leftover_to_research go together", p.ID)
+		}
+		// A default queue holding an item Elegy does not build is left
+		// unloaded, and what a newly owned planet takes stays skipped.
+		if p.DefaultQueue != nil {
+			if items, why := pvQueue(*p.DefaultQueue); why == "" {
+				pl.DefaultQueue, pl.DefaultLeftoverOnly = items, *p.DefaultLeftoverToResearch
+				l.defaults[p.ID] = true
+			}
+		}
 		for name, lv := range p.Tech {
 			pl.Research.Levels[pvFields()[name]] = lv
 		}
@@ -885,9 +904,9 @@ func (l *pvLoaded) queueEquals(g *engine.Game, e pvExpect) string {
 	for i := range g.Planets {
 		if g.Planets[i].ID == l.planet[*e.Planet] {
 			for _, p0 := range l.g.Planets {
-				if p0.ID == g.Planets[i].ID && p0.Owner != g.Planets[i].Owner {
+				if p0.ID == g.Planets[i].ID && p0.Owner != g.Planets[i].Owner && !l.defaults[g.Planets[i].Owner] {
 					// A new owner's planet takes that player's default
-					// queue, which the vectors do not carry.
+					// queue, which this vector does not carry.
 					return "skip: player default queue settings"
 				}
 			}
@@ -1628,9 +1647,23 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 				errs = append(errs, pvMismatch(k, got, *want))
 			}
 		case "leftover_to_research":
-			// A captured planet takes its new owner's default setting,
-			// which the vectors do not carry.
-			skipped("player default queue settings")
+			// A newly owned planet takes its new owner's default setting,
+			// which not every vector carries.
+			changed := true
+			for _, p0 := range l.g.Planets {
+				if p0.ID == p.ID {
+					changed = p0.Owner != p.Owner
+				}
+			}
+			var want bool
+			switch {
+			case changed && !l.defaults[p.Owner]:
+				skipped("player default queue settings")
+			case json.Unmarshal(raw, &want) != nil:
+				skipped("leftover_to_research " + string(raw))
+			case p.LeftoverOnly != want:
+				errs = append(errs, pvMismatch(k, p.LeftoverOnly, want))
+			}
 		default:
 			skipped("planet field " + k)
 		}
