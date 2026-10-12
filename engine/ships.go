@@ -257,7 +257,7 @@ type Slot struct {
 // techReq is the highest requirement of the hull and every part.
 func (d Design) techReq() [NumFields]int {
 	r := d.Hull.TechReq
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		for f := range NumFields {
 			r[f] = max(r[f], s.Part.TechReq[f])
 		}
@@ -266,7 +266,7 @@ func (d Design) techReq() [NumFields]int {
 }
 
 func (d Design) armed() bool {
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		if s.Count > 0 && s.Part.weapon() {
 			return true
 		}

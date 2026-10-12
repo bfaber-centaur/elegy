@@ -40,7 +40,7 @@ const (
 // best driver. ok is false without a mass driver.
 func DriverWarp(d engine.Design) (dw, t int, ok bool) {
 	slots := 0
-	for _, sl := range d.Slots {
+	for _, sl := range d.Parts() {
 		if sl.Count <= 0 || sl.Part.Kind != engine.PartMassDriver {
 			continue
 		}

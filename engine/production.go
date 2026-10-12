@@ -566,7 +566,7 @@ func (pr *production) packetDest() (int, bool) {
 	if !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) || !p.HasPacketDest || g.planetIndex(p.PacketDest) < 0 {
 		return -1, false
 	}
-	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+	for _, sl := range g.Designs[p.StarbaseDesign].Parts() {
 		if sl.Count > 0 && sl.Part.Kind == PartMassDriver {
 			return p.PacketDest, true
 		}

@@ -135,7 +135,7 @@ func root4(x int) int {
 // and whether it has any scanner (SCANNING.md "Ship designs").
 func (g *Game) designScan(d Design, owner int) (R, P int, any bool) {
 	sumR, sumP := 0, 0
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		if s.Count <= 0 || !s.Part.Scanner {
 			continue
 		}
@@ -161,7 +161,7 @@ func (g *Game) designScan(d Design, owner int) (R, P int, any bool) {
 
 func tachyons(d Design) int {
 	n := 0
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		if s.Part.Tachyon {
 			n += s.Count
 		}
@@ -245,7 +245,7 @@ func cloakPercent(u int) int {
 
 func designCloakPoints(d Design) int {
 	n := 0
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		n += s.Part.CloakPoints * s.Count
 	}
 	return n
@@ -316,7 +316,7 @@ func (g *Game) scanners(v int) []scanner {
 			s.R, s.P = max(s.R, R), max(s.P, P)
 			s.anyScanner = s.anyScanner || any
 			s.tachyon = min(s.tachyon, tachyonFactor[tachyons(d)])
-			for _, sl := range d.Slots {
+			for _, sl := range d.Parts() {
 				if sl.Count > 0 && sl.Part.CargoScan {
 					s.cargoScan = true
 				}
@@ -741,7 +741,7 @@ func (g *Game) gateRange(p *Planet) (int, bool) {
 	if p.Owner == NoOwner || !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) {
 		return 0, false
 	}
-	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+	for _, sl := range g.Designs[p.StarbaseDesign].Parts() {
 		if sl.Count <= 0 || sl.Part.Kind != PartStargate {
 			continue
 		}

@@ -38,7 +38,9 @@ type Design struct {
 
 	// Hull and Slots carry the hull's and parts' values and base costs.
 	// Engines count in Slots as PartEngine parts for cost; Engine and
-	// Engines give their fuel table and number for movement.
+	// Engines give their fuel table and number for movement. A part in a
+	// hull slot that does not take its kind stays in Slots for the year
+	// that reads the design; Parts leaves it out (catalog.go).
 	Hull  Hull
 	Slots []Slot
 	// SlotPos is the hull slot each entry of Slots fills, when the design
@@ -414,7 +416,7 @@ func (g *Game) generateFuel() {
 			if d.Hull.FuelTransport {
 				add += 200 * s.Count
 			}
-			for _, sl := range d.Slots {
+			for _, sl := range d.Parts() {
 				add += sl.Part.FuelPerYear * sl.Count * s.Count
 			}
 		}
