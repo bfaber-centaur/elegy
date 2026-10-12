@@ -102,3 +102,22 @@ func TestConfirmedSlowerTech(t *testing.T) {
 		t.Errorf("stored energy %d, weapons %d; want 499 and 150", s.Accumulated[Energy], s.Accumulated[Weapons])
 	}
 }
+
+// TestResearchSameFieldAtLevel26 checks KERNEL.md "Allocation": a current
+// field reaching level 26 under "same field" moves research, with the
+// leftover, to the lowest field that year, and the stored choice stays
+// "same field" (CONFIRMED, KX-005 R3: energy 25 → 26, weapons current
+// with 15 stored).
+func TestResearchSameFieldAtLevel26(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextSameField}
+	s.Levels = [NumFields]int{25, 3, 3, 3, 3, 3}
+	s.Accumulated[Energy] = 85080
+	// cost(26) = 84700 + 10·(25+15) = 85100; 85080 + 35 leaves 15.
+	s = AddResearch(s, pgRace(), 35, false)
+	if s.Levels[Energy] != MaxTechLevel || s.Current != Weapons || s.Next != NextSameField {
+		t.Errorf("energy level %d, current %d, next %d; want 26, weapons, same field", s.Levels[Energy], s.Current, s.Next)
+	}
+	if s.Accumulated != [NumFields]int{0, 15, 0, 0, 0, 0} {
+		t.Errorf("accumulated %v, want 15 in weapons", s.Accumulated)
+	}
+}

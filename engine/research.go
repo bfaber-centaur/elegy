@@ -143,9 +143,22 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	// moves to the new field, which is checked for level-ups the same
 	// year, and may switch again. An explicit next field is used once and
 	// then resets to "same field"; "lowest field" stays set.
-	for gained && s.Next != NextSameField {
+	//
+	// A current field that reaches level 26 under "same field" switches
+	// as if "lowest field" were chosen, for the rest of the year, while
+	// the stored choice stays "same field" (KERNEL.md "Allocation",
+	// CONFIRMED KX-005 R3, KB-2A). The level-10 cap of a capped player is
+	// not treated so: KERNEL.md gives only level 26.
+	lowest := false
+	for gained {
+		if s.Next == NextSameField && !lowest {
+			if s.Levels[s.Current] < MaxTechLevel {
+				break
+			}
+			lowest = true
+		}
 		next := s.Next
-		if next == NextLowestField {
+		if lowest || next == NextLowestField {
 			next = 0
 			for f := range NumFields {
 				if s.Levels[f] < s.Levels[next] {
