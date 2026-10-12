@@ -260,21 +260,21 @@ func (b *battle) torpedoes(fi int, w weaponSlot) {
 			hits = ceilDiv(n*H, N)
 		}
 		misses := n - hits
-		var h BattleHit
 		// Misses do misses·d/8 to shields only, when that is above 0 and
-		// the target has shields left (COMBAT.md "Torpedoes and missiles"
-		// step 3).
+		// the target has shields left, in a record of their own before the
+		// hit record (COMBAT.md "Torpedoes and missiles" step 3, CONFIRMED
+		// CB-049). The hit record carries the salvo's hit and miss counts.
 		if dm := misses * d / 8; dm > 0 && S > 0 {
 			mh, _ := b.damage(e, dm, 0, true, -1)
-			h.Shield += mh.Shield
+			b.record(fi, ti, BattleHit{Shield: mh.Shield})
 		}
 		// Hits: h = hits·d/2, truncated once, to shields and again to
 		// armor (step 4, CONFIRMED, CS-003-C2). Every target the salvo
 		// reaches gets a hit record, even with 0 hits (BINARY-ONLY).
+		var h BattleHit
 		if hits > 0 {
 			hh, _ := b.damage(e, hits*d/2, hits*d/2, false, n)
-			h.Shield += hh.Shield
-			h.Armor, h.Kills = hh.Armor, hh.Kills
+			h.Shield, h.Armor, h.Kills = hh.Shield, hh.Armor, hh.Kills
 		}
 		h.Hits, h.Misses = hits, misses
 		b.record(fi, ti, h)

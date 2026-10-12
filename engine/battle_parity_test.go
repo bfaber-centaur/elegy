@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -30,9 +31,12 @@ import (
 //     moved it to (movement's outcome), then Elegy fires. Each hit is
 //     compared in order: firer, target, kills, shield damage and the
 //     target's damage afterwards. A difference fails the test; the
-//     battle's comparison ends there, since later hits depend on it. It
-//     also ends, without failing, at a round where Elegy would draw (a
-//     torpedo salvo of at most 200 that can miss).
+//     battle's comparison ends there, since later hits depend on it.
+//   - torpedo rolls: the only draws while firing. Their outcomes are taken
+//     from the record too (pvAnswer, compareBattle). Hits recorded after
+//     an answered roll are tallied apart as conditioned: they test the
+//     mechanics given those outcomes, not random parity. Any other draw
+//     ends the battle's comparison without failing.
 //
 // The `flags` of a hit are not compared: Elegy does not model them.
 // Movement itself is not compared: it depends on the jitter draws.
@@ -112,12 +116,16 @@ type BattleStart struct {
 type pvBattleOutcome struct {
 	tokens string // "" when the token lists match, else the first difference
 	// hits compared and matched, in record order, before the battle
-	// stopped.
-	compared, matched int
-	total             int    // hits in the record
-	stop              string // why the replay stopped early, if it did
-	draws             bool   // stopped at a round where Elegy would draw
-	built             bool   // a token's fleet is not in Elegy's game
+	// stopped: compared and matched before any answered torpedo draw,
+	// conditioned and condMatched after one. The conditioned hits are not
+	// random parity: they rest on draw outcomes taken from the record.
+	compared, matched        int
+	conditioned, condMatched int
+	total                    int    // hits in the record
+	stop                     string // why the replay stopped early, if it did
+	draws                    bool   // stopped at a round where Elegy would draw
+	salvos                   int    // torpedo salvos answered from the record
+	built                    bool   // a token's fleet is not in Elegy's game
 }
 
 // loadBattleRecords reads every battle record in the vectors.
@@ -180,11 +188,54 @@ func loadBattleRecords(t *testing.T) map[string][]pvRecordedBattle {
 	return out
 }
 
-// pvDrawFlag is a Rand for the hit replay: any draw marks the round as
-// needing the original's draws.
-type pvDrawFlag struct{ drew *bool }
+// pvAnswer is the Rand of the hit replay. During firing the only
+// rand(100) draws are torpedo accuracy rolls, one per torpedo, made
+// together for each target a salvo reaches; a hit record always follows,
+// so a new hit record or round starts the next group. pvAnswer answers
+// group k's draws from script[k]: that many hits first, misses after.
+// Past the script it answers misses, counts the group's draws (size) and,
+// when the group is over, stops the replay with pvSalvo. Any other draw
+// marks the round as needing the original's draws.
+type pvAnswer struct {
+	b      *battle
+	script []int
+	drew   bool
+	// check compares the hits recorded so far, before each group draws.
+	check func()
+	// group is the index of the current group, -1 before the first; used
+	// counts its draws; at is len(b.hits) and the round when it began.
+	group, used, at, round int
+	// first is the index in b.hits of the first hit recorded after an
+	// answered draw, -1 while there is none.
+	first int
+}
 
-func (r pvDrawFlag) Intn(int) int { *r.drew = true; return 0 }
+func (r *pvAnswer) Intn(n int) int {
+	if n != 100 {
+		r.drew = true
+		return 0
+	}
+	if r.group < 0 || len(r.b.hits) != r.at || r.b.round != r.round {
+		r.over()
+		r.check()
+		r.group, r.used, r.at, r.round = r.group+1, 0, len(r.b.hits), r.b.round
+		if r.first < 0 {
+			r.first = r.at
+		}
+	}
+	r.used++
+	if r.group < len(r.script) && r.used <= r.script[r.group] {
+		return 0
+	}
+	return 99
+}
+
+// over stops the replay when the group past the script has drawn.
+func (r *pvAnswer) over() {
+	if r.group >= len(r.script) {
+		panic(pvSalvo{r.used})
+	}
+}
 
 // pvNoDraws answers every setup draw with 0, which keeps the token order
 // the setup made (the record's order is applied afterwards).
@@ -291,17 +342,38 @@ func (l *BattleStart) matchTokens(b *battle, rec []pvBattleToken) string {
 	return ""
 }
 
+// pvSalvo stops a replay at a torpedo group the script has no answer
+// for, with its n draws (a panic value inside replayHits).
+type pvSalvo struct{ n int }
+
+// pvMismatch stops a replay at a hit that differs from the record (a
+// panic value inside replayHits).
+type pvMismatch struct{ why string }
+
 // replayHits fires b round by round with the record's moves and compares
-// the hits.
-func replayHits(b *battle, actions []pvBattleAction, out *pvBattleOutcome) {
+// the hits. script answers the torpedo groups' draws, in order, with each
+// group's number of hits (pvAnswer); need is the group after the
+// script's last, when the replay reaches it.
+func replayHits(b *battle, actions []pvBattleAction, script []int, out *pvBattleOutcome) (need *pvSalvo) {
 	byRound := map[int][]pvBattleAction{}
 	last := 0
 	for _, a := range actions {
 		byRound[a.Round] = append(byRound[a.Round], a)
 		last = max(last, a.Round)
 	}
-	drew := false
-	b.rng = pvDrawFlag{&drew}
+	ans := &pvAnswer{b: b, script: script, group: -1, first: -1}
+	b.rng = ans
+	defer func() {
+		switch x := recover().(type) {
+		case nil:
+		case pvSalvo:
+			need = &x
+		case pvMismatch:
+			out.stop = x.why
+		default:
+			panic(x)
+		}
+	}()
 	for r := 0; r <= last; r++ {
 		b.round = r
 		if r > 0 {
@@ -318,7 +390,7 @@ func replayHits(b *battle, actions []pvBattleAction, out *pvBattleOutcome) {
 			}
 			if a.Token < 0 || a.Token >= len(b.tokens) {
 				out.stop = fmt.Sprintf("round %d: token %d out of range", r, a.Token)
-				return
+				return nil
 			}
 			t := b.tokens[a.Token]
 			if a.To == nil {
@@ -333,7 +405,7 @@ func replayHits(b *battle, actions []pvBattleAction, out *pvBattleOutcome) {
 			if a.To != nil {
 				if t := b.tokens[a.Token]; t.x != a.To[0] || t.y != a.To[1] {
 					out.stop = fmt.Sprintf("round %d: token %d fires from %v, but its move left it on (%d,%d)", r, a.Token, *a.To, t.x, t.y)
-					return
+					return nil
 				}
 			}
 			for _, h := range a.Hits {
@@ -342,43 +414,91 @@ func replayHits(b *battle, actions []pvBattleAction, out *pvBattleOutcome) {
 			}
 		}
 		n := len(b.hits)
-		b.fire()
-		got := b.hits[n:]
-		if drew {
-			out.draws = true
-			out.stop = fmt.Sprintf("round %d: Elegy draws (torpedo rolls)", r)
-			return
+		// compare checks the round's hits so far against the record; the
+		// round may not be over (whole false) when a group is about to
+		// draw. A hit recorded after an answered draw is tallied as
+		// conditioned: it depends on outcomes taken from the record.
+		compared := 0
+		compare := func(whole bool) string {
+			got := b.hits[n:]
+			for i := compared; i < max(len(got), len(rec)); i++ {
+				if i >= len(got) {
+					if !whole {
+						return ""
+					}
+					return fmt.Sprintf("round %d hit %d: record has token %d hitting %d, Elegy has no further hit", r, i, firer[i], rec[i].Token)
+				}
+				h := got[i]
+				if i >= len(rec) {
+					return fmt.Sprintf("round %d hit %d: Elegy has token %d hitting %d, the record has no further hit", r, i, h.Firer, h.Target)
+				}
+				cond := ans.first >= 0 && n+i >= ans.first
+				compared++
+				if cond {
+					out.conditioned++
+				} else {
+					out.compared++
+				}
+				w := rec[i]
+				gotHit := fmt.Sprintf("token %d hits %d: kills %d, shield %d, damage %v", h.Firer, h.Target, h.Kills, h.Shield, pvRecordDamage(h.After))
+				wantHit := fmt.Sprintf("token %d hits %d: kills %d, shield %d, damage %v", firer[i], w.Token, w.Kills, w.ShieldDamage, w.ArmorDamage)
+				if gotHit != wantHit {
+					after := ""
+					if cond {
+						after = " (after an answered draw)"
+					}
+					return fmt.Sprintf("round %d hit %d%s: Elegy %s; record %s", r, i, after, gotHit, wantHit)
+				}
+				if cond {
+					out.condMatched++
+				} else {
+					out.matched++
+				}
+			}
+			return ""
 		}
-		for i := range max(len(got), len(rec)) {
-			if i >= len(got) {
-				out.stop = fmt.Sprintf("round %d hit %d: record has token %d hitting %d, Elegy has no further hit", r, i, firer[i], rec[i].Token)
-				return
+		ans.check = func() {
+			if why := compare(false); why != "" {
+				panic(pvMismatch{why})
 			}
-			h := got[i]
-			if i >= len(rec) {
-				out.stop = fmt.Sprintf("round %d hit %d: Elegy has token %d hitting %d, the record has no further hit", r, i, h.Firer, h.Target)
-				return
-			}
-			out.compared++
-			w := rec[i]
-			gotHit := fmt.Sprintf("token %d hits %d: kills %d, shield %d, damage %v", h.Firer, h.Target, h.Kills, h.Shield, pvRecordDamage(h.After))
-			wantHit := fmt.Sprintf("token %d hits %d: kills %d, shield %d, damage %v", firer[i], w.Token, w.Kills, w.ShieldDamage, w.ArmorDamage)
-			if gotHit != wantHit {
-				out.stop = fmt.Sprintf("round %d hit %d: Elegy %s; record %s", r, i, gotHit, wantHit)
-				return
-			}
-			out.matched++
+		}
+		b.fire()
+		if ans.drew {
+			out.draws = true
+			out.stop = fmt.Sprintf("round %d: Elegy draws", r)
+			return nil
+		}
+		// A group past the script that drew this round ends with it.
+		if ans.group >= 0 && ans.round == r {
+			ans.over()
+		}
+		if why := compare(true); why != "" {
+			out.stop = why
+			return nil
 		}
 	}
+	return nil
 }
 
-// compareBattle runs the comparison for one recorded battle.
+// pvSalvoBudget bounds the replays one battle's search may run.
+const pvSalvoBudget = 20000
+
+// compareBattle runs the comparison for one recorded battle. A torpedo
+// group's draws are answered from the record: the search finds numbers of
+// hits, one per group, with which every hit matches the record. Two
+// numbers can give the same records for a group (a stack destroyed
+// either way) and differ later, in what is left for the next target, so
+// the search goes back. salvos counts the groups answered.
+//
+// The hits recorded after the first answered group are tallied apart
+// (conditioned, condMatched): they show that some outcome of the draws
+// reproduces the record, the mechanics given those outcomes, not that
+// Elegy's draws would.
 func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	var out pvBattleOutcome
 	for _, a := range r.actions {
 		out.total += len(a.Hits)
 	}
-	g := withRules(l.Game.clone()) // the battle changes fleets and planets
 	for _, rt := range r.tokens {
 		if rt.Kind == "ships" && rt.Fleet != nil {
 			if _, ok := l.Fleets[[2]int{rt.Owner, *rt.Fleet}]; !ok {
@@ -388,19 +508,64 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 			}
 		}
 	}
-	b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
-	if !ok {
-		out.tokens = "Elegy has no battle here"
-		return out
+	build := func() (*battle, string) {
+		g := withRules(l.Game.clone()) // the battle changes fleets and planets
+		b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
+		if !ok {
+			return nil, "Elegy has no battle here"
+		}
+		return b, l.matchTokens(b, r.tokens)
 	}
-	if why := l.matchTokens(b, r.tokens); why != "" {
+	b, why := build()
+	if why != "" {
 		out.tokens = why
 		return out
 	}
-	if r.hasActions {
-		replayHits(b, r.actions, &out)
+	if !r.hasActions {
+		return out
 	}
-	return out
+	// A depth-first search: level k is group k's number of hits, tried
+	// fewest first. A level is pushed when the replay passes every
+	// earlier group and reaches group k; a mismatch tries the deepest
+	// level's next number, going back a level when it has none left.
+	type level struct{ hits, size int }
+	var stack []level
+	var deepest pvBattleOutcome
+	for runs := 0; ; runs++ {
+		if runs >= pvSalvoBudget {
+			deepest.stop = fmt.Sprintf("salvo %d: search budget spent: %s", deepest.salvos, deepest.stop)
+			return deepest
+		}
+		script := make([]int, len(stack))
+		for i, v := range stack {
+			script[i] = v.hits
+		}
+		b, _ = build()
+		try := out
+		try.salvos = len(script)
+		need := replayHits(b, r.actions, script, &try)
+		if need == nil && (try.stop == "" || try.draws) {
+			return try
+		}
+		if need != nil {
+			stack = append(stack, level{0, need.n})
+			continue
+		}
+		if runs == 0 || len(script) > deepest.salvos ||
+			len(script) == deepest.salvos && try.compared+try.conditioned > deepest.compared+deepest.conditioned {
+			deepest = try
+		}
+		for len(stack) > 0 && stack[len(stack)-1].hits == stack[len(stack)-1].size {
+			stack = stack[:len(stack)-1]
+		}
+		if len(stack) == 0 {
+			if deepest.salvos > 0 {
+				deepest.stop = fmt.Sprintf("salvo %d: no numbers of hits fit the record: %s", deepest.salvos-1, deepest.stop)
+			}
+			return deepest
+		}
+		stack[len(stack)-1].hits++
+	}
 }
 
 // BattleRecordVectors lists the vectors holding battle records, by path
@@ -418,9 +583,10 @@ func BattleRecordVectors(t *testing.T) []string {
 // given the record's token order and moves (see the top of this file).
 // starts holds, by vector path ("cb/cb010.json"), each generated year's
 // battle-phase game, indexed by year (index 0 is unused). Any difference
-// in a token list or a compared hit fails. A round that needs the
-// original's draws ends that battle's comparison without failing: that is
-// the random level (docs/RANDOM-PARITY.md). A record of a year Elegy did
+// in a token list or a compared or conditioned hit fails. Torpedo rolls
+// are answered from the record; a round with any other draw ends that
+// battle's comparison without failing: that is the random level
+// (docs/RANDOM-PARITY.md). A record of a year Elegy did
 // not generate is counted, not compared; CheckBattleRecords returns that
 // count by corpus ("rg"). TestBattleRecords (battle_vectors_test.go) runs
 // it: the vector loader, package vectors, imports engine.
@@ -428,7 +594,8 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 	records := loadBattleRecords(t)
 	type tally struct {
 		records, tokens, built, ungen, full, draws int
-		compared, matched, total                   int
+		compared, matched, total, salvos           int
+		conditioned, condMatched                   int
 	}
 	per := map[string]*tally{}
 	var names []string
@@ -472,6 +639,9 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 			c.tokens++
 			c.compared += o.compared
 			c.matched += o.matched
+			c.salvos += o.salvos
+			c.conditioned += o.conditioned
+			c.condMatched += o.condMatched
 			switch {
 			case o.draws:
 				c.draws++
@@ -489,11 +659,15 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 	sort.Strings(corpora)
 	// missing: a recorded fleet is not in Elegy's game; not generated: the
 	// record's year was not generated
-	t.Logf("%-5s %8s %8s %8s %8s %8s %8s  %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "hits matched/compared of recorded")
+	// salvos: torpedo groups whose draws were answered from the record;
+	// conditioned: hits after an answered draw, which rest on outcomes
+	// taken from the record (not random parity)
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d %8d  %d/%d of %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.matched, c.compared, c.total)
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
+			fmt.Sprintf("%d/%d", c.matched, c.compared), fmt.Sprintf("%d/%d", c.condMatched, c.conditioned), c.total)
 		all.compared += c.compared
 	}
 	if all.compared == 0 {
@@ -549,12 +723,15 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	if n != 7 {
 		t.Errorf("RG-001 has %d battle records after its first year, want 7", n)
 	}
-	drawn := false
+	// CS-003-C's torpedo battles replay to the end, their salvos answered
+	// from the record.
+	answered := false
 	for _, x := range records["cs/cs003c.json"] {
-		drawn = drawn || compareBattle(&lb, x).draws
+		o := compareBattle(&lb, x)
+		answered = answered || o.salvos > 0 && o.stop == "" && o.conditioned > 0 && o.matched+o.condMatched == o.total
 	}
-	if !drawn {
-		t.Error("no CS-003-C torpedo battle stopped at its draws")
+	if !answered {
+		t.Error("no CS-003-C torpedo battle replayed whole with its salvos answered")
 	}
 }
 
@@ -597,4 +774,22 @@ func TestSetupBattleCostLevels(t *testing.T) {
 		}
 	}
 	t.Fatal("no starbase token")
+}
+
+func TestReplayAnswerRand(t *testing.T) {
+	// pvAnswer answers a group's rand(100) rolls with its scripted hits
+	// first, then misses, and flags any other draw.
+	b := &battle{}
+	r := &pvAnswer{b: b, script: []int{2}, group: -1, first: -1, check: func() {}}
+	var got []int
+	for range 3 {
+		got = append(got, r.Intn(100))
+	}
+	if !slices.Equal(got, []int{0, 0, 99}) || r.drew {
+		t.Errorf("rolls %v, drew %v; want [0 0 99] and no other draw", got, r.drew)
+	}
+	r.Intn(10)
+	if !r.drew {
+		t.Error("a rand(10) was not flagged")
+	}
 }
