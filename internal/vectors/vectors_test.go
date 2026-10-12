@@ -2,6 +2,7 @@ package vectors
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -124,5 +125,39 @@ func TestOrdersWaypointNoFleet(t *testing.T) {
 	}}}
 	if _, why := l.orders(blocks, 1, &l.g); why != "order waypoint_change: no fleet" {
 		t.Errorf("skip reason %q, want %q", why, "order waypoint_change: no fleet")
+	}
+}
+
+// TestFieldsYearNotGenerated checks an expectation for a year the run
+// did not reach: reported when the engine stopped generation, skipped
+// with the reason when the vector's orders did.
+func TestFieldsYearNotGenerated(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run := pvRun{}
+	l, games, _, stop := generate(v, run)
+	if stop != "" {
+		t.Fatal(stop)
+	}
+	c := v.Cases[0]
+	n := 0
+	for _, e := range c.Expect {
+		if e.Year != 1 || !run.checks(e) {
+			continue
+		}
+		n++
+		fs := l.fields(run, c, e, games[:1], errors.New("stopped"), "")
+		if len(fs) != 1 || fs[0].Status != "differ" || fs[0].Why != "year 1 not generated: stopped" {
+			t.Errorf("%s year 1, the engine stopped after year 0: %+v", e.Kind, fs)
+		}
+		fs = l.fields(run, c, e, games[:1], nil, "order x")
+		if len(fs) != 1 || fs[0].Status != "skip" || fs[0].Why != "order x" {
+			t.Errorf("%s year 1, an order stopped after year 0: %+v", e.Kind, fs)
+		}
+	}
+	if n == 0 {
+		t.Fatal("no year-1 expectation to check")
 	}
 }

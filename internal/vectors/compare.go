@@ -66,9 +66,6 @@ func Compare(v *Vector, variant int) Comparison {
 func (l *pvLoaded) fields(run pvRun, c pvCase, e pvExpect, games []engine.Game, genErr error, stop string) []Field {
 	base := Field{Case: c.ID, Year: e.Year, Kind: e.Kind, Subject: subject(e), Sample: run.sample(e)}
 	one := func(f Field, msg string) Field {
-		// A field's own result; a skip reason riding along after a
-		// mismatch (pvAlsoSkipped) belongs to another field.
-		msg, _, _ = strings.Cut(msg, pvAlsoSkipped)
 		switch {
 		case strings.HasPrefix(msg, "skip: "):
 			f.Status, f.Why = "skip", strings.TrimPrefix(msg, "skip: ")
