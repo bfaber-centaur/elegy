@@ -771,13 +771,14 @@ func noFuelAtWarp4(d engine.Design) bool {
 }
 
 // designArmor is a design's armor per ship. rs (the owner has
-// Regenerating Shields) halves each armor part's armor, as in battle; a
-// shield part's armor counts whole (stars-elegy COMBAT.md "Token values").
+// Regenerating Shields) halves each armor slot's armor, truncated once per
+// slot, as in battle; a shield part's armor counts whole (stars-elegy
+// COMBAT.md "Armor"; engine tokenValues).
 func designArmor(d engine.Design, rs bool) int {
 	a := d.Hull.Armor
 	for _, s := range d.Slots {
 		if rs && s.Part.Kind == engine.PartArmor {
-			a += s.Count * (s.Part.Armor / 2)
+			a += s.Count * s.Part.Armor / 2
 		} else {
 			a += s.Count * s.Part.Armor
 		}
@@ -823,9 +824,9 @@ func regeneratingShields(g *engine.Game, player int) bool {
 // max(1, ⌊avg·500/A⌋) units.
 //
 // For a Regenerating Shields owner, shields and armor are the battle's:
-// shields × 7/5 and each armor part's armor halved (MEASURED, CB-056, 23
+// shields × 7/5 and each armor slot's armor halved (MEASURED, CB-056, 23
 // fleets: 280 where the plain sums give 197; OBJECTS.md at stars-elegy
-// b0ca924).
+// b0ca924; once per slot, designArmor).
 //
 // ASSUMPTION O6: a design's ships are the fleet's stacks of that design,
 // in order of first appearance, with the first stack's stored damage; the

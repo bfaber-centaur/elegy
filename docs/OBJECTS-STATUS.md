@@ -198,6 +198,11 @@ OBJECTS.md now answers G1–G3 (BINARY-ONLY; fits OB-021, GT-001):
   while damaged ships remain.
 - Old damage counts only the `D` damaged ships, and `D` more ships go when
   `Nw + Dm ≥ A`.
+- A Regenerating Shields owner's ships take gate damage on the halved
+  armor, as in battle and mine damage: the halving (once per armor slot)
+  is in the design's armor (stars-elegy #164, 41e7a1c, COMBAT.md "Armor",
+  BINARY-ONLY; this replaces ASSUMPTION G5, plain armor)
+  (`TestBinaryGateDamageRegeneratingShieldsHalvedArmor`).
 - Lost ships take `⌊fuel·L/T⌋` of the fuel, and the same share of any cargo
   still aboard.
 
@@ -207,10 +212,6 @@ Still open:
    (`D > s`, which corrupts the original's record), every ship of the
    design is destroyed. A design's ships are taken as one stack with its
    first stack's damage.
-2. **G5** A Regenerating Shields owner's ships take gate damage on the
-   plain armor. Mine damage uses the battle's halved armor parts (MEASURED,
-   CB-056), but RS at a gate is unobserved
-   (`TestAssumptionGateDamageRegeneratingShieldsPlainArmor`).
 
 
 ## Salvage

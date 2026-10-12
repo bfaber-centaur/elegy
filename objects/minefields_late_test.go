@@ -121,19 +121,32 @@ func TestPredictionMineDamageRegeneratingShieldsCroby(t *testing.T) {
 	}
 }
 
-// With Regenerating Shields each armor part's armor is halved and
-// truncated per part, as the battle token does (COMBAT.md "Token
-// values"; the per-part truncation BINARY-ONLY): three Fielded Kelarium
-// (175 each) add 3 × 87, not ⌊3 × 175/2⌋ = 262.
-func TestPredictionRegeneratingShieldsArmorPerPart(t *testing.T) {
-	d, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
+// With Regenerating Shields each armor slot's armor is halved and
+// truncated once per slot, as the battle token does (stars-elegy
+// COMBAT.md "Armor", BINARY-ONLY): three Fielded Kelarium (175 each) in
+// one slot add ⌊525/2⌋ = 262, not 3 × 87 = 261 (per part); one Organic
+// Armor (175) in each of a Destroyer's two armor slots adds 87 + 87 =
+// 174, not ⌊350/2⌋ = 175 (the parts' total halved once).
+func TestBinaryRegeneratingShieldsArmorPerSlot(t *testing.T) {
+	bb, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
 		{Slot: 0, Part: "Trans-Galactic Drive", Count: 4},
 		{Slot: 8, Part: "Fielded Kelarium", Count: 3},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if a, plain := designArmor(d, true), designArmor(d, false); a != 2000+261 || plain != 2000+525 {
-		t.Errorf("armor RS %d plain %d, want 2261 2525", a, plain)
+	if a, plain := designArmor(bb, true), designArmor(bb, false); a != 2000+262 || plain != 2000+525 {
+		t.Errorf("Battleship armor RS %d plain %d, want 2262 2525", a, plain)
+	}
+	dd, err := engine.Components().NewDesign("DD", "Destroyer", []engine.SlotFill{
+		{Slot: 0, Part: "Trans-Galactic Drive", Count: 1},
+		{Slot: 3, Part: "Organic Armor", Count: 1},
+		{Slot: 4, Part: "Organic Armor", Count: 1},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a, plain := designArmor(dd, true), designArmor(dd, false); a != 200+174 || plain != 200+350 {
+		t.Errorf("Destroyer armor RS %d plain %d, want 374 550", a, plain)
 	}
 }

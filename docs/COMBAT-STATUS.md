@@ -33,7 +33,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 1 to 6 and a rank past row n (CB-022, CB-031..CB-036) | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestConfirmedStartSquareFlatTable` |
 | Setup: dump cargo, jitter, shuffle | `setup` | BINARY-ONLY | `TestPredictionBattleTurn` |
 | Energy Dampener | `setup` | CONFIRMED | `TestConfirmedEnergyDampener` |
-| Token values | `combat_token.go` `tokenValues` | CONFIRMED (CB-056, stars-elegy b0ca924: the starbase jammer's quarter after the 95 cap, the 255% capacitor cap, initiative 63 and computer 99 with sixteen Battle Nexus, RS counting Croby Sharmor's armor whole); the Langston Shell under RS not observed; the other late parts BINARY-ONLY | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestPredictionStarbaseJammer`, `TestPredictionLateShipTokenValues`, `TestPredictionDeathStarTokenValues` |
+| Token values | `combat_token.go` `tokenValues` | CONFIRMED (CB-056, stars-elegy b0ca924: the starbase jammer's quarter after the 95 cap, the 255% capacitor cap, initiative 63 and computer 99 with sixteen Battle Nexus, RS counting Croby Sharmor's armor whole); RS halving each armor slot's armor, truncated once per slot: BINARY-ONLY (stars-elegy #164, 41e7a1c, COMBAT.md "Armor"), MEASURED for one slot (RG-002-Y6, one stream: 625, not 624 per part); the Langston Shell under RS not observed; the other late parts BINARY-ONLY | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestMeasuredRG002RegeneratingShieldsArmor`, `TestPredictionStarbaseJammer`, `TestPredictionLateShipTokenValues`, `TestPredictionDeathStarTokenValues` |
 | LEGACY BUG starbase is always "armed" | `starbaseClass` (ruleset switch `Legacy.StarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
 | Speed code; cargo mass per ship `C·c/F` | `speedCode`, `battleMass` | CONFIRMED (designer CB-000; cargo and WM CB-038; dump CB-025) | `TestConfirmedEnergyDampener`, `TestConfirmedCargoMassPerShip` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
@@ -163,9 +163,25 @@ record (PARITY.md "Round 10", COMBAT.md, OBJECTS.md at b0ca924).
 Also observed: the Nexus Star token had initiative 63 and computer 99
 (CONFIRMED), as `TestPredictionDeathStarTokenValues` gives for sixteen
 Battle Nexus. The weapon initiative, the Death Star's reach and its 1500
-armor were not measured and stay predictions. A Regenerating Shields
-owner at a stargate is not observed: `objects/stargates.go` keeps the
-plain armor (ASSUMPTION G5, OBJECTS-STATUS.md).
+armor were not measured and stay predictions.
+
+### RS armor per slot (RG-002, stars-elegy #164, 41e7a1c)
+
+The halving under Regenerating Shields truncates once per armor slot:
+`(count × part armor) / 2` per slot (stars-elegy COMBAT.md "Armor",
+BINARY-ONLY). RG-002-Y6's battle at (1241,1313) measured it for one slot
+(one stream): an RS Rogue with 2 Organic Armor in one slot took damage
+whose recorded units (21 32 43 64 85 96 117) fit armor 625 only, where
+Elegy's per-part halving (87 + 87) gave 624 and 42 for 43. Elegy #181
+had labelled per-part truncation BINARY-ONLY in a test comment; that
+label misread the public COMBAT.md sentence "each armor part counts
+half" and had no private-side source. Per slot against the parts' total
+halved once is BINARY-ONLY until an oracle design with an armor part in
+each of two slots runs (174 against 175).
+
+The halving is in the design's armor, so mine damage and stargate damage
+use it too: the stargate's plain armor under RS (ASSUMPTION G5) is
+replaced (BINARY-ONLY, OBJECTS-STATUS.md).
 
 ### Settled by current COMBAT.md
 

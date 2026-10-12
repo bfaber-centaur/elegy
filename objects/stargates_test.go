@@ -1,7 +1,6 @@
 package objects
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -204,13 +203,13 @@ func TestPredictionGateLosses(t *testing.T) {
 	}
 }
 
-// ASSUMPTION G5 (unobserved): a Regenerating Shields owner's ships take
-// stargate damage on the plain armor, not the battle's halved armor parts
-// as in mine damage (CB-056 measured RS only for mines). Four Tanks
-// (Destroyer, 2 Superlatanium: armor 3200; halved, 1700) jump an
-// overloaded gate with the same draws for an RS owner and for one without
-// RS: the results are the same.
-func TestAssumptionGateDamageRegeneratingShieldsPlainArmor(t *testing.T) {
+// A Regenerating Shields owner's ships take stargate damage on the halved
+// armor, as in battle and mine damage: the halving is in the design's
+// armor (stars-elegy COMBAT.md "Armor", BINARY-ONLY; this replaces
+// ASSUMPTION G5, plain armor). Four Tanks (Destroyer, 2 Superlatanium:
+// armor 3200; halved per slot, 200 + 3000/2 = 1700) jump an overloaded
+// gate with the same draws for an owner without RS and for an RS owner.
+func TestBinaryGateDamageRegeneratingShieldsHalvedArmor(t *testing.T) {
 	jump := func(rs bool) (GateJump, engine.Stack) {
 		l := gateLab(t, "Stargate 100/250", 380)
 		l.g.Players[0].Race.LRT.RegeneratingShields = rs
@@ -225,13 +224,15 @@ func TestAssumptionGateDamageRegeneratingShieldsPlainArmor(t *testing.T) {
 		t.Fatalf("the jump must damage without destroying: %+v", j)
 	}
 	// 19%: the first ship is destroyed (3 < 6) and rand(500) = 50 < 100
-	// lowers D from 2 to 1. Nw = 19·3200/100 = 608, Dm = 100·3200/500 =
-	// 640; avg = ⌊(608·3 + 640)/3⌋ = 821, u = 821·500/3200 = 128. Halved
-	// armor would give Nw 323 (u is 128 either way).
-	if j.Designs[0].Damage != 608 || st != (engine.Stack{Design: st.Design, Count: 3, Damage: engine.Damage{Pct: 100, Units: 128}}) {
+	// lowers D from 2 to 1. Plain armor: Nw = 19·3200/100 = 608, Dm =
+	// 100·3200/500 = 640; avg = ⌊(608·3 + 640)/3⌋ = 821, u = 821·500/3200
+	// = 128. RS: Nw = 19·1700/100 = 323, Dm = 340; avg = ⌊(323·3 +
+	// 340)/3⌋ = 436, u = 436·500/1700 = 128.
+	want := engine.Stack{Design: st.Design, Count: 3, Damage: engine.Damage{Pct: 100, Units: 128}}
+	if j.Designs[0].Damage != 608 || st != want {
 		t.Errorf("plain armor: %+v %+v, want damage 608 and 3 ships at 128/500", j, st)
 	}
-	if !reflect.DeepEqual(j, jrs) || st != strs {
-		t.Errorf("RS owner: %+v %+v, want the plain-armor result %+v %+v", jrs, strs, j, st)
+	if jrs.Designs[0].Damage != 323 || strs != want {
+		t.Errorf("RS owner: %+v %+v, want damage 323 and 3 ships at 128/500", jrs, strs)
 	}
 }
