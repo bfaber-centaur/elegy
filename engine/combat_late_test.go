@@ -242,7 +242,7 @@ func TestPredictionCB056RegeneratingShieldsCroby(t *testing.T) {
 	// CB-056 Q3 (ASSUMPTION A13): a Regenerating Shields race's Battleship
 	// with 8 Croby Sharmor and 2 Tritanium. Elegy: armor 2000 + 8·65 (whole,
 	// a shield part) + 2·50/2 = 2570; shields 8·60·7/5 = 672. If the
-	// original halves the Croby Sharmor's armor too: 2310.
+	// original halves the Croby Sharmor's armor too (65 → 32 each): 2306.
 	d := lateDesign(t, "Battleship",
 		SlotFill{Slot: 0, Part: "Trans-Galactic Drive", Count: 4},
 		SlotFill{Slot: 2, Part: "Croby Sharmor", Count: 8},
