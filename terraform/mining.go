@@ -36,10 +36,9 @@ func MiningRate(g *engine.Game, f *engine.Fleet) int {
 // CanRemoteMine reports whether fleet f's robots mine the planet at index
 // pi (KERNEL.md "Remote mining", CONFIRMED T-35, KB-1B): an unowned
 // planet, or an Alternate Reality planet mined by its owner's own fleet.
-// Miners at any other owned planet mine nothing.
-//
-// ASSUMPTION R1: another player's miners at an Alternate Reality planet
-// (BINARY-ONLY) mine nothing, as at any other owned planet.
+// Miners at any other owned planet mine nothing, including another
+// player's miners at an Alternate Reality planet (BINARY-ONLY). The
+// refusal messages are the turn engine's (engine.remoteMineTask).
 func CanRemoteMine(g *engine.Game, f *engine.Fleet, pi int) bool {
 	p := &g.Planets[pi]
 	if p.Owner == engine.NoOwner || p.Owner < 0 {

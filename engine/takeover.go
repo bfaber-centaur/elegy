@@ -420,7 +420,7 @@ func (g *Game) unloadPhase(owned []bool) (queue []drop, events []Event) {
 // runs fleet i's, in its place in fleet order, or is nil before movement.
 // scrap scraps fleet i before movement (TAKEOVER.md "Other waypoint
 // tasks": scrap is before movement only) and is nil after it.
-func (g *Game) unloadTasks(owned []bool, mine func(i int), scrap func(i int) []Event) (queue []drop, events []Event) {
+func (g *Game) unloadTasks(owned []bool, mine func(i int) []Event, scrap func(i int) []Event) (queue []drop, events []Event) {
 	consumed := map[int]bool{}
 	for _, i := range g.fleetOrder() {
 		f := &g.Fleets[i]
@@ -437,7 +437,7 @@ func (g *Game) unloadTasks(owned []bool, mine func(i int), scrap func(i int) []E
 			events = append(events, g.routeTask(f)...)
 		case TaskRemoteMine:
 			if mine != nil {
-				mine(i)
+				events = append(events, mine(i)...)
 			}
 		case TaskScrap:
 			if scrap != nil {

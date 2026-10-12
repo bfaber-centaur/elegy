@@ -512,10 +512,11 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	}
 	// Remote mining by a fleet that did not move this year, in its place
 	// in fleet order (KERNEL.md "Remote mining", CONFIRMED T-35, KB-1B).
-	queue, ev = g.unloadTasks(owned, func(i int) {
+	queue, ev = g.unloadTasks(owned, func(i int) []Event {
 		if g.Terraform != nil && !moved[g.Fleets[i].ID] {
-			g.Terraform.RemoteMine(&g, i, rng)
+			return g.remoteMineTask(i, rng)
 		}
+		return nil
 	}, nil)
 	events = append(events, ev...)
 	// The layers are taken after unloadTasks, which removes the fleets
