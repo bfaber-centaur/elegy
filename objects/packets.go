@@ -35,40 +35,8 @@ const (
 )
 
 // DriverWarp is a starbase design's driver warp Dw and the two-driver
-// bonus t (OBJECTS.md "Launch", CONFIRMED OB-028-C, D): Dw is the best
-// mass driver's rating; t is 1 when two different slots each hold that
-// best driver. ok is false without a mass driver.
-func DriverWarp(d engine.Design) (dw, t int, ok bool) {
-	slots := 0
-	for _, sl := range d.Parts() {
-		if sl.Count <= 0 || sl.Part.Kind != engine.PartMassDriver {
-			continue
-		}
-		w := driverRating(sl.Part.Name)
-		switch {
-		case w > dw:
-			dw, slots = w, 1
-		case w == dw:
-			slots++
-		}
-	}
-	if dw == 0 {
-		return 0, 0, false
-	}
-	if slots >= 2 {
-		t = 1
-	}
-	return dw, t, true
-}
-
-func driverRating(name string) int {
-	c, ok := engine.Components().Lookup(name)
-	if !ok {
-		return 0
-	}
-	w, _ := c.Stats["warp"].(float64)
-	return int(w)
-}
+// bonus t (engine.DriverWarp); ok is false without a mass driver.
+func DriverWarp(d engine.Design) (dw, t int, ok bool) { return engine.DriverWarp(d) }
 
 // PacketWarp is a launch's packet warp W (OBJECTS.md "Launch", CONFIRMED
 // OB-028-B, C, D): the planet's packet-speed setting, or Dw + t when the
