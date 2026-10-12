@@ -463,4 +463,14 @@ func TestPredictionTargetChoiceCostCap(t *testing.T) {
 	if got := choose(11111); got != 2 {
 		t.Errorf("11111 ships at cost 9 and 10: chose %d, want 2 (10^7 above 9999900)", got)
 	}
+	// The cap's value, with mixed toughness: 10000 ships of armor 60 at
+	// cost 10 (100000, capped: 10^7·100/600001 = 1666) against 11111 of
+	// armor 45 at cost 9 (9999900·100/499996 = 1999): the second wins.
+	// A cap of 2×10^7 would give the first 3333.
+	d = []Design{d[0], testDesign(Hull{Armor: 60}, 10), nine}
+	f := tok(d, 0, 0, 1)
+	tb := newTestBattle(panicRand{}, d, f, tok(d, 1, 1, 10000), tok(d, 2, 1, 11111))
+	if got := tb.choose(f, f.weapons[0]); got != 2 {
+		t.Errorf("capped armor 600000 against uncapped armor 499995: chose %d, want 2", got)
+	}
 }
