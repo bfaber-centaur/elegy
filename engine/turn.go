@@ -146,6 +146,11 @@ type Player struct {
 	// planets": Harder and Expert trade, CONFIRMED O-53). A new game sets
 	// it from the player's setup (newgame.PlayerSetup.Level).
 	Level int
+	// HasHomeworld and Homeworld are the player's record of its homeworld,
+	// a planet ID. Only new-game creation writes it; each year the
+	// homeworld marks are set again from these records (remarkHomeworlds).
+	HasHomeworld bool
+	Homeworld    int
 }
 
 type Planet struct {
@@ -341,6 +346,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		}
 	}
 	g.generateFuel()
+	g.remarkHomeworlds() // step 3.6
 	// Detonations and decay (step 3a).
 	if g.Objects != nil {
 		g.dropShiplessFleets()

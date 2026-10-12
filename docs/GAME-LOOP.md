@@ -172,10 +172,13 @@ The encoding is canonical: a game encodes to the same bytes every time,
 and a loaded game saves back byte for byte. `Hash` is the SHA-256 of
 those bytes. `Load` refuses an unknown format, another version, unknown
 fields, a state that fails `Check` and a level out of range (0..3 for a
-computer player, 0 for a human). Version 7 put the level in the engine
-state; a version 6 save is refused because it would load every computer
-player as Easy, and because its design slots' `Built` counts may predate
-the field.
+computer player, 0 for a human). Version 8 added each player's record of
+its homeworld (`engine.Player.HasHomeworld`, `Homeworld`), which re-marks
+the homeworld every year; a version 7 save is refused because it would
+load with no records, and every homeworld would lose its mark after the
+first year. Version 7 put the level in the engine state; a version 6
+save is refused because it would load every computer player as Easy, and
+because its design slots' `Built` counts may predate the field.
 
 ## The smoke test
 

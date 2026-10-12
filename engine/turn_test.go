@@ -41,7 +41,7 @@ func pgHomeworld() Game {
 	for m := range NumMinerals {
 		p.Deposits[m] = Deposit{Concentration: start.conc[m], Fraction: start.frac[m]}
 	}
-	pl := Player{Race: pgRace(), Research: ResearchState{Current: Energy, Next: NextSameField}}
+	pl := Player{Race: pgRace(), Research: ResearchState{Current: Energy, Next: NextSameField}, HasHomeworld: true, Homeworld: 7}
 	pl.Research.Levels[Energy] = 2
 	pl.Research.Levels[Electronics] = 5
 	pl.Research.Accumulated[Energy] = 65
