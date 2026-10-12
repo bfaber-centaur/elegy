@@ -355,3 +355,49 @@ func TestQueueOfNewOwner(t *testing.T) {
 	e.Equals = json.RawMessage(`[{"kind": 1, "id": 0, "count": 5}]`)
 	pvWant(t, "defaults loaded, match", l.queueEquals(g, e), "", "")
 }
+
+func TestScoreRecord(t *testing.T) {
+	players := []engine.Player{{}, {}}
+	rec := engine.ScoreRecord{Player: 1, Score: 120, Resources: 30, Planets: 4, Starbases: 1, Unarmed: 32001,
+		Escorts: 3, Capital: 0, TechSum: 20, Rank: 2, Flags: 1 | 0x20 | 0x40<<engine.VictoryTech}
+	l := pvLoaded{g: engine.Game{Players: players}, queued: map[int]bool{}, ordered: map[int]bool{},
+		views: [][]engine.PlayerView{nil, {{Player: 0, Scores: []engine.ScoreRecord{rec}}, {Player: 1}}}}
+	g := &engine.Game{Players: players}
+	id, seen := 1, 0
+	e := pvExpect{Year: 1, Kind: "player", ID: &id, SeenBy: &seen}
+	const want = `{"rank": 2, "score": 120, "resources": 30, "planets": 4, "starbases": 1, "unarmed_ships": 16192,
+		"escort_ships": 3, "capital_ships": 0, "tech_level_sum": 20, "victory_conditions_met": ["tech_level"]}`
+	check := func(name, raw, mismatch, skip string) {
+		t.Helper()
+		pvWant(t, name, l.scoreRecordCheck(g, e, json.RawMessage(raw)), mismatch, skip)
+	}
+	check("match", want, "", "")
+	check("score", strings.Replace(want, `"score": 120`, `"score": 121`, 1), "score_record.score = 120, want 121", "")
+	check("tech sum", strings.Replace(want, `"tech_level_sum": 20`, `"tech_level_sum": 21`, 1), "score_record.tech_level_sum = 20, want 21", "")
+	check("unpacked count", strings.Replace(want, `16192`, `32001`, 1), "score_record.unarmed_ships = 16192, want 32001", "")
+	check("rank", strings.Replace(want, `"rank": 2`, `"rank": 1`, 1), "score_record.rank = 2, want 1", "")
+	check("victory", strings.Replace(want, `["tech_level"]`, `["tech_level", "score"]`, 1),
+		"score_record.victory_conditions_met = [tech_level], want [score tech_level]", "")
+	// Only the seen_by player's scores count.
+	seen = 1
+	check("not seen", want, "score_record: not among player 1's scores", "")
+	seen = 0
+	// Another living player's unsure research skips rank and victory only.
+	l.queued[0] = true
+	check("other unsure", strings.Replace(want, `"rank": 2`, `"rank": 1`, 1), "", "score_record rank and victory: player 0's production queue")
+	check("other unsure, score", strings.Replace(want, `"score": 120`, `"score": 121`, 1), "score_record.score = 120, want 121", "score_record rank and victory: player 0's production queue")
+	// A dead player's research does not count.
+	players[0].Dead = true
+	check("dead unsure", strings.Replace(want, `"rank": 2`, `"rank": 1`, 1), "score_record.rank = 2, want 1", "")
+	players[0].Dead = false
+	l.queued[0], l.queued[1] = false, true
+	check("own unsure", strings.Replace(want, `"score": 120`, `"score": 121`, 1), "", "score_record: production queue")
+}
+
+func TestPackCount(t *testing.T) {
+	for n, w := range map[int]int{0: 0, 8191: 8191, 8192: 10240, 16000: 12192, 16383: 12287, 32766: 16383, 32768: 18432, 33000: 18446} {
+		if got := pvPackCount(n); got != w {
+			t.Errorf("pvPackCount(%d) = %d, want %d", n, got, w)
+		}
+	}
+}

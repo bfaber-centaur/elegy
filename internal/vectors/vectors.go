@@ -266,6 +266,8 @@ type pvExpect struct {
 	Sample bool `json:"sample"`
 	// Viewer is a view expectation's viewing player.
 	Viewer *int `json:"viewer"`
+	// SeenBy names the player whose file held a score_record.
+	SeenBy *int `json:"seen_by"`
 	// Screen and Field name a client_estimate expectation's reading.
 	Screen string `json:"screen"`
 	Field  string `json:"field"`
@@ -1216,11 +1218,122 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		if *e.ID >= len(g.Players) {
 			return "skip: player not in the state"
 		}
+		if _, ok := eq["score_record"]; ok && len(eq) == 1 {
+			return l.scoreRecordCheck(g, e, eq["score_record"])
+		}
 		return l.playerEquals(g, *e.ID, eq, l.playerUnsure(g, *e.ID))
 	case "design":
 		return l.designEquals(g, *e.Owner, *e.Slot, eq)
 	}
 	return "skip: expectation " + e.Kind
+}
+
+// pvVictory names the victory conditions in flag order (ScoreRecord.Flags:
+// 0x40 << c; stars-elegy tools/vectors/build_kx.py CONDITIONS).
+func pvVictory() []string {
+	return []string{"planets_owned_percent", "tech_level", "score", "lead_over_second_percent",
+		"resources_thousands", "capital_ships", "highest_score_after_years"}
+}
+
+// scoreRecordCheck checks a player's score record as the seen_by player's
+// file held it (vectors/README.md "player"): the record must be one that
+// player sees this year (Views[seen_by].Scores). A record resting on what
+// the harness cannot reproduce for its own player is skipped; rank and the
+// victory conditions, which compare every player's scores, are skipped
+// when any living player's are unsure.
+func (l *pvLoaded) scoreRecordCheck(g *engine.Game, e pvExpect, raw json.RawMessage) string {
+	id := *e.ID
+	var want struct {
+		Rank      int      `json:"rank"`
+		Score     int      `json:"score"`
+		Resources int      `json:"resources"`
+		Planets   int      `json:"planets"`
+		Starbases int      `json:"starbases"`
+		Unarmed   int      `json:"unarmed_ships"`
+		Escorts   int      `json:"escort_ships"`
+		Capital   int      `json:"capital_ships"`
+		TechSum   int      `json:"tech_level_sum"`
+		Victory   []string `json:"victory_conditions_met"`
+	}
+	if err := json.Unmarshal(raw, &want); err != nil {
+		return "skip: score_record " + err.Error()
+	}
+	if why := pvSorted(l.playerUnsure(g, id)); len(why) > 0 {
+		return "skip: score_record: " + why[0]
+	}
+	if e.SeenBy == nil || e.Year >= len(l.views) || *e.SeenBy >= len(l.views[e.Year]) {
+		return "skip: score_record without its viewer"
+	}
+	var rec *engine.ScoreRecord
+	for i, r := range l.views[e.Year][*e.SeenBy].Scores {
+		if r.Player == id {
+			rec = &l.views[e.Year][*e.SeenBy].Scores[i]
+		}
+	}
+	if rec == nil {
+		return fmt.Sprintf("score_record: not among player %d's scores", *e.SeenBy)
+	}
+	var errs []string
+	for _, c := range []struct {
+		name      string
+		got, want int
+	}{
+		{"score", rec.Score, want.Score}, {"resources", rec.Resources, want.Resources},
+		{"planets", rec.Planets, want.Planets}, {"starbases", rec.Starbases, want.Starbases},
+		{"unarmed_ships", pvPackCount(rec.Unarmed), want.Unarmed},
+		{"escort_ships", pvPackCount(rec.Escorts), want.Escorts},
+		{"capital_ships", pvPackCount(rec.Capital), want.Capital}, {"tech_level_sum", rec.TechSum, want.TechSum},
+	} {
+		if c.got != c.want {
+			errs = append(errs, pvMismatch("score_record."+c.name, c.got, c.want))
+		}
+	}
+	skip := ""
+	for j := range g.Players {
+		if why := pvSorted(l.playerUnsure(g, j)); !g.Players[j].Dead && len(why) > 0 {
+			skip = fmt.Sprintf("score_record rank and victory: player %d's %s", j, why[0])
+			break
+		}
+	}
+	if skip == "" {
+		if rec.Rank != want.Rank {
+			errs = append(errs, pvMismatch("score_record.rank", rec.Rank, want.Rank))
+		}
+		var met []string
+		for c, name := range pvVictory() {
+			if rec.Flags&(0x40<<c) != 0 {
+				met = append(met, name)
+			}
+		}
+		w := append([]string(nil), want.Victory...)
+		sort.Strings(met)
+		sort.Strings(w)
+		if !slices.Equal(met, w) {
+			errs = append(errs, pvMismatch("score_record.victory_conditions_met", met, w))
+		}
+	}
+	return pvResult(errs, skip)
+}
+
+// pvPackCount is a ship count as the score record stores it (stars-elegy
+// 56ebfcf, BINARY-ONLY): from 8192 up the count is divided by 4, truncating,
+// once per step of the exponent, and the word is exp·8192 + rest.
+func pvPackCount(n int) int {
+	exp := 0
+	for n >= 8192 {
+		n /= 4
+		exp++
+	}
+	return exp*8192 + n
+}
+
+// pvSorted lists a reason map's reasons by key, for a stable first one.
+func pvSorted(m map[string]string) []string {
+	var out []string
+	for _, k := range pvKeys(m) {
+		out = append(out, m[k])
+	}
+	return out
 }
 
 // playerUnsure names the fields of player id that rest on what the
