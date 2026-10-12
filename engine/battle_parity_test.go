@@ -19,9 +19,11 @@ import (
 // "Random draws in a battle") cannot be replayed without the original's
 // generator, so this test takes them from the record instead:
 //
-//   - tokens: Elegy builds the battle at the record's location from the
-//     vector's starting state, then its tokens are matched to the
-//     record's by owner, fleet or planet, and design. Their values are
+//   - tokens: Elegy generates the vector's years with its orders, and
+//     builds the battle at the record's location from the game as its
+//     year's battle phase found it (after movement and production). Its
+//     tokens are matched to the record's by owner, fleet or planet, and
+//     design. Their values are
 //     compared, and Elegy's tokens are put in the record's order (the
 //     shuffle's outcome).
 //   - hits: round by round, every token is put on the square the record
@@ -94,13 +96,16 @@ type pvRecordedBattle struct {
 	hasActions             bool
 }
 
-// BattleStart is a vector's starting state for this test, with how the
-// vector's fleet and planet ids map to Elegy's.
+// BattleStart is the game a vector's year's battles start from: the game
+// as Elegy's battle phase found it that year (GenerateTurnAtBattles), with
+// the tech levels the year's design costs use and how the vector's fleet
+// and planet ids map to Elegy's.
 type BattleStart struct {
-	Game    Game
-	Fleets  map[[2]int]int // (owner, vector fleet id) → Elegy fleet ID
-	Planets map[int]int    // vector planet id → Elegy planet ID
-	Skip    string         // why every case of the vector is skipped, if one is
+	Game       Game
+	CostLevels [][NumFields]int
+	Fleets     map[[2]int]int // (owner, vector fleet id) → Elegy fleet ID
+	Planets    map[int]int    // vector planet id → Elegy planet ID
+	Skip       string         // why every case of the vector is skipped, if one is
 }
 
 // pvBattleOutcome is what the comparison found for one recorded battle.
@@ -112,10 +117,7 @@ type pvBattleOutcome struct {
 	total             int    // hits in the record
 	stop              string // why the replay stopped early, if it did
 	draws             bool   // stopped at a round where Elegy would draw
-	built             bool   // a token's fleet was built this year: not compared
-	// the battle is in a year after the vector's first: the vector's
-	// start is not that year's start, so it is not compared
-	later bool
+	built             bool   // a token's fleet is not in Elegy's game
 }
 
 // loadBattleRecords reads every battle record in the vectors.
@@ -190,10 +192,10 @@ type pvNoDraws struct{}
 
 func (pvNoDraws) Intn(int) int { return 0 }
 
-// setupBattle builds Elegy's battle at (x, y) from the starting game, as
-// battles() does, without fighting it. ok is false when no battle happens
-// there.
-func setupBattle(g *Game, x, y int) (*battle, bool) {
+// setupBattle builds Elegy's battle at (x, y) from the game at the battle
+// phase, as battles() does, without fighting it. ok is false when no
+// battle happens there.
+func setupBattle(g *Game, costLevels [][NumFields]int, x, y int) (*battle, bool) {
 	var prev locationHistory
 	for _, loc := range g.locations() {
 		sets, inv, n := g.whoFights(loc, prev)
@@ -204,7 +206,7 @@ func setupBattle(g *Game, x, y int) (*battle, bool) {
 		if inv == nil {
 			return nil, false
 		}
-		b := &battle{g: g, rng: pvNoDraws{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+		b := &battle{g: g, rng: pvNoDraws{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}, costLevels: costLevels}
 		b.setup(map[int]bool{})
 		return b, true
 	}
@@ -376,28 +378,19 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	for _, a := range r.actions {
 		out.total += len(a.Hits)
 	}
-	if r.year > 1 {
-		// A chained vector (RG-001) records battles in later years;
-		// comparing them needs the generated start of that year, which
-		// this test does not build yet.
-		out.later = true
-		return out
-	}
 	g := withRules(l.Game.clone()) // the battle changes fleets and planets
 	for _, rt := range r.tokens {
 		if rt.Kind == "ships" && rt.Fleet != nil {
 			if _, ok := l.Fleets[[2]int{rt.Owner, *rt.Fleet}]; !ok {
-				// Production comes before battles (COMBAT.md
-				// "Starbases"), so a fleet built this year fights; this
-				// test starts from the year's start.
+				// The record names a fleet Elegy's game does not have.
 				out.built = true
 				return out
 			}
 		}
 	}
-	b, ok := setupBattle(&g, r.x, r.y)
+	b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
 	if !ok {
-		out.tokens = "Elegy has no battle here at the start of the year"
+		out.tokens = "Elegy has no battle here"
 		return out
 	}
 	if why := l.matchTokens(b, r.tokens); why != "" {
@@ -422,18 +415,19 @@ func BattleRecordVectors(t *testing.T) []string {
 }
 
 // CheckBattleRecords compares Elegy's battles with every recorded battle,
-// given the record's token order and moves (see the top of this file),
-// from each vector's start in starts, by path. Any difference in a token
-// list or a compared hit fails. A round that needs the original's draws
-// ends that battle's comparison without failing: that is the random level
-// (docs/RANDOM-PARITY.md). TestBattleRecords (battle_vectors_test.go)
-// runs it: the vector loader, package vectors, imports engine. It returns
-// how many records were in a year after their vector's first, by corpus
-// ("rg"): those are counted, not compared.
-func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) map[string]int {
+// given the record's token order and moves (see the top of this file).
+// starts holds, by vector path ("cb/cb010.json"), each generated year's
+// battle-phase game, indexed by year (index 0 is unused). Any difference
+// in a token list or a compared hit fails. A round that needs the
+// original's draws ends that battle's comparison without failing: that is
+// the random level (docs/RANDOM-PARITY.md). A record of a year Elegy did
+// not generate is counted, not compared; CheckBattleRecords returns that
+// count by corpus ("rg"). TestBattleRecords (battle_vectors_test.go) runs
+// it: the vector loader, package vectors, imports engine.
+func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[string]int {
 	records := loadBattleRecords(t)
 	type tally struct {
-		records, tokens, built, later, full, draws int
+		records, tokens, built, ungen, full, draws int
 		compared, matched, total                   int
 	}
 	per := map[string]*tally{}
@@ -448,31 +442,28 @@ func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) map[string]
 			per[corpus] = &tally{}
 		}
 		c := per[corpus]
-		l, ok := starts[name]
-		var err error
-		switch {
-		case !ok:
-			err = fmt.Errorf("no start")
-		case l.Skip != "":
-			err = fmt.Errorf("%s", l.Skip)
-		}
 		for _, r := range records[name] {
-			where := fmt.Sprintf("%s %s %q (%d,%d)", name, r.caseID, r.stream, r.x, r.y)
+			where := fmt.Sprintf("%s %s %q (%d,%d) y%d", name, r.caseID, r.stream, r.x, r.y, r.year)
 			c.records++
 			for _, a := range r.actions {
 				c.total += len(a.Hits)
 			}
-			if err != nil {
-				t.Errorf("%s: load: %v", where, err)
+			years := starts[name]
+			if r.year < 1 || r.year >= len(years) {
+				c.ungen++
+				continue
+			}
+			l := years[r.year]
+			if l.Skip != "" {
+				t.Errorf("%s: %s", where, l.Skip)
 				continue
 			}
 			o := compareBattle(&l, r)
 			switch {
-			case o.later:
-				c.later++
-				continue
 			case o.built:
+				// The battle-phase game has every fleet that fights.
 				c.built++
+				t.Errorf("%s: tokens: a recorded fleet is not in Elegy's game", where)
 				continue
 			case o.tokens != "":
 				t.Errorf("%s: tokens: %s", where, o.tokens)
@@ -496,22 +487,23 @@ func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) map[string]
 		corpora = append(corpora, c)
 	}
 	sort.Strings(corpora)
-	// later: in a year after the vector's first (needs a generated start)
-	t.Logf("%-5s %8s %8s %8s %8s %8s %8s  %s", "", "records", "tokens", "built", "later", "replayed", "draws", "hits matched/compared of recorded")
+	// missing: a recorded fleet is not in Elegy's game; not generated: the
+	// record's year was not generated
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s  %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "hits matched/compared of recorded")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d %8d  %d/%d of %d", name, c.records, c.tokens, c.built, c.later, c.full, c.draws, c.matched, c.compared, c.total)
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d  %d/%d of %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.matched, c.compared, c.total)
 		all.compared += c.compared
 	}
 	if all.compared == 0 {
 		t.Error("no hit was compared")
 	}
-	later := map[string]int{}
+	ungen := map[string]int{}
 	for name, c := range per {
-		later[name] = c.later
+		ungen[name] = c.ungen
 	}
-	return later
+	return ungen
 }
 
 // CheckBattleRecordHarness checks that the comparison notices a
@@ -547,14 +539,6 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if o := compareBattle(&l, kills); o.stop == "" || o.draws {
 		t.Errorf("a changed kill count was not noticed: %+v", o)
-	}
-	later := r
-	later.year = 2
-	if o := compareBattle(&l, later); !o.later || o.tokens != "" || o.compared != 0 {
-		t.Errorf("a record in the vector's second year was compared against its start: %+v", o)
-	}
-	if o := compareBattle(&l, r); o.later {
-		t.Error("a first-year record was counted as a later year")
 	}
 	n := 0
 	for _, x := range records["rg/rg001.json"] {

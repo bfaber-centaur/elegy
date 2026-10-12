@@ -1635,7 +1635,11 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		}
 		gy := g
 		gy.Rules = engine.ElegyRules()
-		r, err := engine.GenerateTurn(gy, files, run.rand(y))
+		turn := engine.GenerateTurn
+		if run.turn != nil {
+			turn = run.turn
+		}
+		r, err := turn(gy, files, run.rand(y))
 		if err != nil {
 			return l, games, err, ""
 		}

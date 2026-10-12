@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -183,5 +184,44 @@ func TestPredictionRaceCheckInTurn(t *testing.T) {
 	plain, _ := GenerateTurn(withRules(before), nil, highRand{})
 	if r.Game.Planets[0].Population >= plain.Game.Planets[0].Population {
 		t.Errorf("population %d with the checked race, %d without; want less growth", r.Game.Planets[0].Population, plain.Game.Planets[0].Population)
+	}
+}
+
+func TestGenerateTurnAtBattlesObserves(t *testing.T) {
+	// The battle-phase observer sees a clone of the game before the
+	// battles, with the start-of-year tech levels, and changes nothing.
+	ship, err := Components().NewDesign("colony", "Mini-Colony Ship", []SlotFill{{Slot: 0, Part: "Settler's Delight", Count: 1}, {Slot: 1, Part: "Colonization Module", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	game := combatLabGame(ship, 6, 1)
+	game.Designs[1] = ship
+	game.Players[1].Research.Levels = [NumFields]int{3, 6, 6, 6, 5, 4}
+	game.Players[1].Research.Accumulated[Energy] = 1 << 20
+	want, err := GenerateTurn(game, nil, rand.New(rand.NewSource(1)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	calls := 0
+	got, err := GenerateTurnAtBattles(game, nil, rand.New(rand.NewSource(1)), func(g Game, costLevels [][NumFields]int) {
+		calls++
+		if len(g.Fleets) != 2 {
+			t.Errorf("battle phase: %d fleets, want both before the battle", len(g.Fleets))
+		}
+		if costLevels[1][Energy] != 3 {
+			t.Errorf("battle phase: cost levels %v, want the start of the year's", costLevels[1])
+		}
+		// The snapshot is the observer's own.
+		g.Fleets[0].Stacks[0].Count = 1
+		costLevels[1][Energy] = 26
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls != 1 {
+		t.Errorf("%d calls, want 1", calls)
+	}
+	if len(want.Game.Fleets) != 1 || len(want.Game.Salvage) != 1 || !reflect.DeepEqual(got, want) {
+		t.Errorf("observed turn differs from GenerateTurn's (fleets %d, want 1 after the battle)", len(want.Game.Fleets))
 	}
 }
