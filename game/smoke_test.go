@@ -380,6 +380,7 @@ func TestLoadRejects(t *testing.T) {
 		"older version": strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), fmt.Sprintf(`"version": %d`, SaveVersion-1), 1),
 		"version 6":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 6`, 1),
 		"version 7":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 7`, 1),
+		"version 8":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 8`, 1),
 		"human level":   regexp.MustCompile(`("Computer": false,\s*"Level": )0`).ReplaceAllString(string(b), "${1}2"),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {

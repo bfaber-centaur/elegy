@@ -763,6 +763,34 @@ func TestOrderCargoSalvage(t *testing.T) {
 	}
 }
 
+// TestLoadArtifacts loads RG-001-Y6's start-state artifacts (vectors/
+// README.md "artifact", stars-elegy 7c06f47): planet 123, colonized by
+// player 1 in 2435, holds one; planet 114, found in 2434, does not.
+func TestLoadArtifacts(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/rg/rg001-y6.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := 0
+	for _, p := range l.g.Planets {
+		if p.Artifact {
+			n++
+		}
+		if want := p.ID == l.planet[123]; p.ID == l.planet[123] || p.ID == l.planet[114] {
+			if p.Artifact != want {
+				t.Errorf("planet %d artifact %v, want %v", p.ID, p.Artifact, want)
+			}
+		}
+	}
+	if n != 9 {
+		t.Errorf("%d artifacts, want 9", n)
+	}
+}
+
 // TestOrderDefaultQueue: the default-queue record loads as a
 // DefaultQueueOrder (stars-elegy ORDERS.md "The player's default queue").
 func TestOrderDefaultQueue(t *testing.T) {

@@ -99,6 +99,13 @@ type Legacy struct {
 	// LEGACY BUG; the behaviour BINARY-ONLY, MEASURED RG-001 planets 50
 	// and 87). Off, the planet keeps its carry. engine/population.go.
 	BareRecordDrop bool `json:"bare_record_drop"`
+	// ArtifactFullSlowerTech: an ancient artifact's research points are
+	// stored in full under slower tech (stars-elegy 7c06f47 TAKEOVER.md
+	// "Ancient artifacts", MEASURED TK-304; LEGACY BUG in the binary
+	// reading, where the halving is computed and never used). Off, half
+	// the points are stored, rounded up as slower tech stores stolen
+	// research (ELEGY CHOICE; no built-in uses it). engine/artifact.go.
+	ArtifactFullSlowerTech bool `json:"artifact_full_slower_tech"`
 
 	// objects
 
@@ -174,14 +181,23 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, its latest version: version 4.
+// ElegyRules is Elegy's default ruleset, its latest version: version 5.
 // Four switches are off, where Elegy has chosen its own rule over the
 // original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
 // ZeroMaxPopulationStop. So are the two Cybertron switches, which version
 // 2 predates.
 //
-// Version 4 adds BareRecordDrop, on; version 3 predates it.
+// Version 5 adds ArtifactFullSlowerTech, on; version 4 predates it.
 func ElegyRules() Ruleset {
+	r := elegyRulesV4()
+	r.Version = 5
+	r.Legacy.ArtifactFullSlowerTech = true
+	return r
+}
+
+// elegyRulesV4 is the Elegy ruleset, version 4: version 3 with
+// BareRecordDrop on.
+func elegyRulesV4() Ruleset {
 	r := elegyRulesV3()
 	r.Version = 4
 	r.Legacy.BareRecordDrop = true
@@ -235,14 +251,23 @@ func elegyRulesV1() Ruleset {
 }
 
 // FaithfulRules is the faithful J-RC3 ruleset, its latest version:
-// version 4, every legacy switch on. It differs from ElegyRules only in
+// version 5, every legacy switch on. It differs from ElegyRules only in
 // FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
 // and the two Cybertron switches. It is only as faithful as the switches
 // go: behaviour Elegy has not modelled, or models differently without a
 // switch, is the same in both.
 //
-// Version 4 adds BareRecordDrop, on; version 3 predates it.
+// Version 5 adds ArtifactFullSlowerTech, on; version 4 predates it.
 func FaithfulRules() Ruleset {
+	r := faithfulRulesV4()
+	r.Version = 5
+	r.Legacy.ArtifactFullSlowerTech = true
+	return r
+}
+
+// faithfulRulesV4 is the faithful ruleset, version 4: version 3 with
+// BareRecordDrop on.
+func faithfulRulesV4() Ruleset {
 	r := faithfulRulesV3()
 	r.Version = 4
 	r.Legacy.BareRecordDrop = true
@@ -284,7 +309,7 @@ func faithfulRulesV1() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), elegyRulesV4(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), faithfulRulesV4(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).
