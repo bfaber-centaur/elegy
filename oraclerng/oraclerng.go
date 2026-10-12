@@ -62,8 +62,10 @@ func Cycles(label string) (int, bool) {
 	return n, true
 }
 
-// ticks maps a fixed DOSBox cycles value to the startup tick it gave, as
-// identified by replaying the oracle's random outcomes. Source: stars-elegy
+// ticks returns the map from a fixed DOSBox cycles value to the startup
+// tick it gave, as identified by replaying the oracle's random outcomes.
+// It is a function so that the package keeps no mutable state. Source:
+// stars-elegy
 // docs/ORACLE.md "Pinned battle RNG", "Which stream a cycles value reaches"
 // at d4eafd9 (KX-004 random events and TK-307 scrap-tech replays),
 // MEASURED. Each tick is trunc(k·54.925) for a small integer k. Only the
@@ -74,41 +76,43 @@ func Cycles(label string) (int, bool) {
 // table pools runs from different starts (KX-004, TK-307), and no cycles
 // value was measured on two starts with different results, but no value
 // was measured on both either.
-var ticks = map[int]int{
-	// KX-004.
-	35000: 109, 45000: 109,
-	11500: 329,
-	10500: 384, 9800: 384,
-	6000: 659,
-	5200: 768,
-	3700: 1098,
-	2260: 1812, 2190: 1812,
-	1985: 2032, 1955: 2032,
-	1750: 2306, 1710: 2306,
-	1490: 2691,
-	1210: 3295,
-	1190: 3405, 1170: 3405, 1160: 3405,
-	1165: 3460, 1155: 3460,
-	1135: 3570, 1130: 3570, 1090: 3570,
-	930: 4284,
-	890: 4613,
-	880: 4503,
-	// TK-307.
-	30000: 109, 50000: 109,
-	20000: 164,
-	17000: 219,
-	15000: 274,
-	12000: 329,
-	10000: 384,
-	8800:  439,
-	7100:  604, 6500: 604,
-	5500: 714,
-	4300: 933,
+func ticks() map[int]int {
+	return map[int]int{
+		// KX-004.
+		35000: 109, 45000: 109,
+		11500: 329,
+		10500: 384, 9800: 384,
+		6000: 659,
+		5200: 768,
+		3700: 1098,
+		2260: 1812, 2190: 1812,
+		1985: 2032, 1955: 2032,
+		1750: 2306, 1710: 2306,
+		1490: 2691,
+		1210: 3295,
+		1190: 3405, 1170: 3405, 1160: 3405,
+		1165: 3460, 1155: 3460,
+		1135: 3570, 1130: 3570, 1090: 3570,
+		930: 4284,
+		890: 4613,
+		880: 4503,
+		// TK-307.
+		30000: 109, 50000: 109,
+		20000: 164,
+		17000: 219,
+		15000: 274,
+		12000: 329,
+		10000: 384,
+		8800:  439,
+		7100:  604, 6500: 604,
+		5500: 714,
+		4300: 933,
+	}
 }
 
 // Tick returns the startup tick a cycles value is known to give.
 func Tick(cycles int) (int, bool) {
-	t, ok := ticks[cycles]
+	t, ok := ticks()[cycles]
 	return t, ok
 }
 

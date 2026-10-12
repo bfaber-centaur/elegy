@@ -134,11 +134,12 @@ func pvRandom(e pvExpect) bool {
 	return e.Sample || e.Kind == "sample" || e.Stream != ""
 }
 
-// pvOriginal starts the original's generator for replaying oracle
-// streams. It is nil: stars-elegy has not published the generator or its
-// seeding as a rule (KERNEL.md "Conventions" at d4eafd9 gives only
-// rand(n)), and the clean room implements it only from that text.
-var pvOriginal oraclerng.Seeder
+// pvOriginal returns the seeder that starts the original's generator for
+// replaying oracle streams. It returns nil: stars-elegy has not
+// published the generator or its seeding as a rule (KERNEL.md
+// "Conventions" at d4eafd9 gives only rand(n)), and the clean room
+// implements it only from that text.
+func pvOriginal() oraclerng.Seeder { return nil }
 
 // pvStreamLabels returns the stream labels v's expectations use.
 func pvStreamLabels(v *pvVector) []string {
@@ -220,8 +221,17 @@ func pvStartSource(v *pvVector, stream string) string {
 	return src
 }
 
-// pvStartRank orders pvStartSource's answers, best first.
-var pvStartRank = map[string]int{"": 0, "table": 1, "vector": 2}
+// pvStartRank ranks pvStartSource's answers: a recorded start ("vector")
+// beats a tick from the ORACLE.md table, which beats none.
+func pvStartRank(source string) int {
+	switch source {
+	case "vector":
+		return 2
+	case "table":
+		return 1
+	}
+	return 0
+}
 
 // TestRandomStreams reports, per corpus, how far Elegy matches the
 // original's random outcomes, in three separate categories:
@@ -286,10 +296,10 @@ func TestRandomStreams(t *testing.T) {
 		}
 		for _, s := range streams {
 			source[s] = pvStartSource(v, s)
-			if pvStartRank[source[s]] > pvStartRank[source[""]] {
+			if pvStartRank(source[s]) > pvStartRank(source[""]) {
 				source[""] = source[s]
 			}
-			replay, _ := pvReplay(v, s, pvOriginal)
+			replay, _ := pvReplay(v, s, pvOriginal())
 			if replay == nil {
 				continue
 			}

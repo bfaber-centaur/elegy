@@ -15,11 +15,12 @@ Lane D of [SPRINT.md](SPRINT.md). Numbers are from `go test -run
 - A single-stream vector records nothing about its stream: no cycles value,
   no tick, no generator state.
 - No vector records a startup tick or a generator state.
-- stars-elegy `docs/ORACLE.md` "Pinned battle RNG" (d4eafd9) maps 42
-  cycles values to startup ticks (MEASURED by replaying KX-004 events and
-  TK-307 scrap-tech draws). `oraclerng` holds that table. That a cycles
-  value gives the same tick for every start is an ASSUMPTION: the table
-  pools runs from different starts.
+- stars-elegy `docs/ORACLE.md` "Pinned battle RNG" (d4eafd9) maps cycles
+  values to startup ticks (MEASURED by replaying KX-004 events and
+  TK-307 scrap-tech draws). `oraclerng` holds 39 of them: the values the
+  table lists, keeping only the two ends of its range "1985–1955 → 2032".
+  That a cycles value gives the same tick for every start is an
+  ASSUMPTION: the table pools runs from different starts.
 
 ## Elegy's generator against the specification
 

@@ -33,7 +33,7 @@ func TestCycles(t *testing.T) {
 // "Which stream a cycles value reaches"), and k is close to 70000/cycles
 // above cycles 1200, where the mapping is monotonic.
 func TestTicksAreWholeTimerPeriods(t *testing.T) {
-	for cycles, tick := range ticks {
+	for cycles, tick := range ticks() {
 		k := int(math.Round(float64(tick) / 54.925))
 		if int(float64(k)*54.925) != tick {
 			t.Errorf("cycles %d: tick %d is not trunc(k·54.925)", cycles, tick)
