@@ -11,6 +11,8 @@
 //	elegy hash -game game.json
 //	elegy play -seed 1 -players 3 -years 40                 (idle players; prints each year's hash)
 //	elegy play -players 1 -ai robotoid,rototill,cybertron -years 40
+//	elegy vector engine/testdata/vectors/pq/c01.json      (a parity vector, field by field)
+//	elegy vector -json -variant 3 rg001.json
 package main
 
 import (
@@ -26,6 +28,7 @@ import (
 	"github.com/bfaber-centaur/elegy/ai"
 	"github.com/bfaber-centaur/elegy/engine"
 	"github.com/bfaber-centaur/elegy/game"
+	"github.com/bfaber-centaur/elegy/internal/vectors"
 	"github.com/bfaber-centaur/elegy/newgame"
 	"github.com/bfaber-centaur/elegy/races"
 )
@@ -37,7 +40,7 @@ func main() {
 	}
 }
 
-const usage = "usage: elegy new|race|report|orders|turn|hash|play [flags]; elegy <command> -h for flags"
+const usage = "usage: elegy new|race|report|orders|turn|hash|play|vector [flags]; elegy <command> -h for flags"
 
 func run(args []string, out io.Writer) error {
 	if len(args) == 0 {
@@ -59,6 +62,8 @@ func run(args []string, out io.Writer) error {
 		return cmdHash(args, out)
 	case "play":
 		return cmdPlay(args, out)
+	case "vector":
+		return cmdVector(args, out)
 	}
 	return fmt.Errorf("unknown command %q; %s", cmd, usage)
 }
@@ -503,4 +508,76 @@ func writeGame(path string, g *game.Game) error {
 		return err
 	}
 	return os.Rename(tmp, path)
+}
+
+// cmdVector runs a stars-elegy parity vector (package vectors): it loads
+// the vector's start, generates its years with its orders and prints
+// each case's result, then every compared field with its result and
+// every skip with its reason. -json prints the same as one JSON document.
+// Random outcomes use Elegy's own seeding (the harness's seed variants),
+// not the original's, so they match only by chance.
+func cmdVector(args []string, out io.Writer) error {
+	fs := flag.NewFlagSet("vector", flag.ContinueOnError)
+	asJSON := fs.Bool("json", false, "print one JSON document")
+	variant := fs.Int("variant", 0, fmt.Sprintf("seed variant of the harness's stream, 0 to %d", vectors.Seeds-1))
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return errors.New("vector: one vector file")
+	}
+	v, err := vectors.ReadFile(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	c := vectors.Compare(v, *variant)
+	if *asJSON {
+		enc := json.NewEncoder(out)
+		enc.SetIndent("", "  ")
+		return enc.Encode(c)
+	}
+	fmt.Fprintf(out, "vector %s: %d years, seed variant %d\n", c.ID, c.Years, c.Variant)
+	cases := map[string]int{}
+	for _, r := range c.Cases {
+		cases[r.Status]++
+		line := fmt.Sprintf("case %s %s", r.ID, r.Status)
+		if r.Tag != "" {
+			line += " [" + r.Tag + "]"
+		}
+		if r.Why != "" {
+			line += ": " + r.Why
+		}
+		fmt.Fprintln(out, line)
+	}
+	fields := map[string]int{}
+	for _, f := range c.Fields {
+		fields[f.Status]++
+		name := f.Kind
+		if f.Subject != "" {
+			name += " (" + f.Subject + ")"
+		}
+		if f.Field != "" {
+			name += " " + f.Field
+		}
+		line := fmt.Sprintf("%s y%d %s: %s", f.Case, f.Year, name, f.Status)
+		if f.Sample && f.Status != "sample" {
+			line += " (sample)"
+		}
+		if f.Why != "" {
+			line += ": " + f.Why
+		}
+		fmt.Fprintln(out, line)
+	}
+	fmt.Fprintf(out, "cases: %s\n", counts(cases, "pass", "sample-only", "fail", "differs", "skip"))
+	fmt.Fprintf(out, "fields: %s\n", counts(fields, "pass", "differ", "sample", "skip"))
+	return nil
+}
+
+// counts prints a tally in the order given.
+func counts(m map[string]int, order ...string) string {
+	var parts []string
+	for _, k := range order {
+		parts = append(parts, fmt.Sprintf("%s %d", k, m[k]))
+	}
+	return strings.Join(parts, ", ")
 }

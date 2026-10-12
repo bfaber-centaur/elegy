@@ -3,13 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
 	"github.com/bfaber-centaur/elegy/game"
+	"github.com/bfaber-centaur/elegy/internal/vectors"
 	"github.com/bfaber-centaur/elegy/newgame"
 	"github.com/bfaber-centaur/elegy/races"
 )
@@ -207,5 +210,86 @@ func TestCLIErrors(t *testing.T) {
 		if err := run(args, &bytes.Buffer{}); err == nil {
 			t.Errorf("elegy %v: no error", args)
 		}
+	}
+}
+
+// TestCLIVector runs a parity vector through the command line: the text
+// prints the case's result and every field, the JSON carries the same
+// comparison as package vectors.
+func TestCLIVector(t *testing.T) {
+	path := filepath.Join("..", "..", "engine", "testdata", "vectors", "pq", "c01.json")
+	text := cli(t, "vector", path)
+	for _, want := range []string{
+		"vector PQ-001-C01: 2 years, seed variant 0\n",
+		"case PQ-001-C01 pass [CONFIRMED]\n",
+		"PQ-001-C01 y2 planet (id 7) mines: pass\n",
+		"PQ-001-C01 y1 message: skip: expectation message\n",
+		"cases: pass 1, sample-only 0, fail 0, differs 0, skip 0\n",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("vector output lacks %q:\n%s", want, text)
+		}
+	}
+	var got vectors.Comparison
+	if err := json.Unmarshal([]byte(cli(t, "vector", "-json", "-variant", "2", path)), &got); err != nil {
+		t.Fatal(err)
+	}
+	v, err := vectors.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := vectors.Compare(v, 2)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("vector -json =\n%+v\nwant\n%+v", got, want)
+	}
+	if err := run([]string{"vector"}, &bytes.Buffer{}); err == nil {
+		t.Error("vector with no file: no error")
+	}
+	if err := run([]string{"vector", path, path}, &bytes.Buffer{}); err == nil {
+		t.Error("vector with two files: no error")
+	}
+}
+
+// TestCLIVectorSkipped checks that a vector the harness skips whole (here
+// an order kind it cannot convert) still lists every expectation, as a
+// skip with the reason, in text and JSON.
+func TestCLIVectorSkipped(t *testing.T) {
+	src, err := os.ReadFile(filepath.Join("..", "..", "engine", "testdata", "vectors", "pq", "c01.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc map[string]any
+	if err := json.Unmarshal(src, &doc); err != nil {
+		t.Fatal(err)
+	}
+	doc["orders"] = []any{map[string]any{"year": 1, "player": 0, "orders": []any{map[string]any{"kind": "no_such_kind"}}}}
+	b, _ := json.Marshal(doc)
+	path := filepath.Join(t.TempDir(), "c01.json")
+	if err := os.WriteFile(path, b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	v, err := vectors.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := len(v.Cases[0].Expect)
+	var got vectors.Comparison
+	if err := json.Unmarshal([]byte(cli(t, "vector", "-json", path)), &got); err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Fields) != n {
+		t.Fatalf("%d fields, want one per expectation (%d)", len(got.Fields), n)
+	}
+	for _, f := range got.Fields {
+		if f.Status != "skip" || f.Why != "order no_such_kind" {
+			t.Errorf("field %+v: want a skip for the order", f)
+		}
+	}
+	text := cli(t, "vector", path)
+	if c := strings.Count(text, ": skip: order no_such_kind\n"); c != n {
+		t.Errorf("text lists %d skipped fields, want %d:\n%s", c, n, text)
+	}
+	if !strings.Contains(text, fmt.Sprintf("fields: pass 0, differ 0, sample 0, skip %d\n", n)) {
+		t.Errorf("text totals:\n%s", text)
 	}
 }

@@ -235,7 +235,22 @@ go run ./cmd/elegy turn -game game.json orders0.json                # players wi
 go run ./cmd/elegy report -game game.json -player 0                 # the player's Report as JSON
 go run ./cmd/elegy hash -game game.json
 go run ./cmd/elegy play -seed 1 -players 1 -ai robotoid,rototill,cybertron -years 40
+go run ./cmd/elegy vector engine/testdata/vectors/pq/c01.json      # a parity vector, field by field
+go run ./cmd/elegy vector -json -variant 3 rg001.json              # the same as one JSON document
 ```
+
+`vector` runs one stars-elegy parity vector with package
+`internal/vectors`, as `TestParityVectors` does: the vector's start, its
+years generated with its orders, then each case's result (pass,
+sample-only, fail, differs, skip, with the reason) and every compared
+field. A fleet, planet or player expectation is compared one field at a
+time; any other expectation is one row. A field is `pass`, `differ`,
+`sample` (a sample that missed, which the harness skips) or `skip` with
+its reason. The case result is the harness's: a field can differ inside
+a case that passes when another field of the same expectation could not
+be compared. Random outcomes come from the harness's own stream
+(`-variant` picks one of its seed variants), not the original's, so
+they match only by chance.
 
 Players:
 
