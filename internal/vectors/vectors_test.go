@@ -576,8 +576,17 @@ func TestMisslottedPartDropped(t *testing.T) {
 // -v and never a failure, as lane D's chained battle records are
 // (docs/RANDOM-PARITY.md).
 func TestRGNoRejectedOrders(t *testing.T) {
+	names := []string{"rg001", "rg001-y1", "rg001-y2", "rg001-y3", "rg001-y4", "rg001-y5", "rg001-y6"}
+	if checked := checkRGRejections(t, names); checked != len(names)*Seeds {
+		t.Errorf("checked %d runs, want every variant of the %d vectors (%d)", checked, len(names), len(names)*Seeds)
+	}
+}
+
+// checkRGRejections runs checkRejected on every seed variant of the named
+// rg vectors and returns how many runs it checked.
+func checkRGRejections(t testing.TB, names []string) int {
 	checked := 0
-	for _, name := range []string{"rg001", "rg001-y1", "rg001-y2", "rg001-y3", "rg001-y4", "rg001-y5", "rg001-y6"} {
+	for _, name := range names {
 		v, err := ReadFile("../../engine/testdata/vectors/rg/" + name + ".json")
 		if err != nil {
 			t.Fatal(err)
@@ -587,8 +596,16 @@ func TestRGNoRejectedOrders(t *testing.T) {
 			checked++
 		}
 	}
-	if checked != 7*Seeds {
-		t.Errorf("checked %d runs, want every variant of the 7 vectors (%d)", checked, 7*Seeds)
+	return checked
+}
+
+// TestCheckRGRejections checks that checkRGRejections fails on a strict
+// refusal on any variant: RG-002 Y1 refuses one order on variants 1 and
+// 6 (the RG-002 ledger's variant-only incorrect mechanic).
+func TestCheckRGRejections(t *testing.T) {
+	e := &errorCounter{TB: t}
+	if checked := checkRGRejections(e, []string{"rg002-y1"}); checked != Seeds || e.errors != 2 {
+		t.Errorf("checkRGRejections(rg002-y1): %d runs, %d errors; want %d runs, 2 errors", checked, e.errors, Seeds)
 	}
 }
 
