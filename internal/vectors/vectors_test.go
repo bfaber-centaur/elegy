@@ -822,3 +822,83 @@ func TestOrderDefaultQueue(t *testing.T) {
 		t.Errorf("design item: %q", why)
 	}
 }
+
+// TestOrderFollow: a waypoint-0 change aimed at another fleet loads as a
+// FollowOrder, and a later waypoint order for the fleet starts from that
+// one waypoint (stars-elegy ORDERS.md "Waypoint 0 aimed at a fleet"); a
+// waypoint-0 change aimed at a planet still changes only the task.
+func TestOrderFollow(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := l.g
+	files, why := l.orders(testBlock(t,
+		`{"kind": "waypoint_add", "fleet": 0, "index": 1, "waypoint": {"x": 0, "y": 0, "warp": 5, "target": {"kind": "planet", "id": 2}, "task": {"kind": "none"}}}`,
+		`{"kind": "waypoint_change", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "colonize"}}}`,
+		`{"kind": "waypoint_add", "fleet": 0, "index": 1, "waypoint": {"x": 0, "y": 0, "warp": 5, "target": {"kind": "planet", "id": 1}, "task": {"kind": "none"}}}`,
+		`{"kind": "waypoint_change", "fleet": 2, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "planet", "id": 1}, "task": {"kind": "colonize"}}}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	f0 := l.fleetIn(&g, 0, 0)
+	want := engine.FollowOrder{Fleet: f0, Leader: pvElegyFleetID(0, 1), Task: engine.Task{Kind: engine.TaskColonize}}
+	if len(files[0].Orders) != 4 || !reflect.DeepEqual(files[0].Orders[1], want) {
+		t.Fatalf("orders = %+v, want %+v second", files[0].Orders, want)
+	}
+	if w := files[0].Orders[2].(engine.WaypointOrder); len(w.Waypoints) != 1 || w.Waypoints[0].ID != l.planet[1] {
+		t.Errorf("waypoint after the follow = %+v, want one waypoint at planet 1", w.Waypoints)
+	}
+	if w := files[0].Orders[2].(engine.WaypointOrder); w.Task.Kind != engine.TaskColonize {
+		t.Errorf("waypoint after the follow: task %+v, want the follow's colonize", w.Task)
+	}
+	if w := files[0].Orders[3].(engine.WaypointOrder); w.Task.Kind != engine.TaskColonize {
+		t.Errorf("waypoint 0 at a planet: %+v, want only the task changed", w)
+	}
+	g = l.g
+	files, why = l.orders(testBlock(t,
+		`{"kind": "waypoint_change", "fleet": 0, "index": 1, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	if _, ok := files[0].Orders[0].(engine.WaypointOrder); !ok {
+		t.Errorf("waypoint 1 aimed at a fleet = %+v, want a waypoint order, not a follow", files[0].Orders[0])
+	}
+	for _, c := range []struct{ order, why string }{
+		{`{"kind": "waypoint_add", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_add before the fleet's position"},
+		{`{"kind": "waypoint_change", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 12, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_change warp 12"},
+	} {
+		g = l.g
+		if _, why := l.orders(testBlock(t, c.order), 1, &g); why != c.why {
+			t.Errorf("%s: %q, want %q", c.order, why, c.why)
+		}
+	}
+}
+
+// TestWaypointPacketObject: a packet_object waypoint target names the
+// object by owner and number (vectors/README.md "fleets").
+func TestWaypointPacketObject(t *testing.T) {
+	l := &pvLoaded{}
+	var w pvWaypoint
+	if err := json.Unmarshal([]byte(`{"x": 10, "y": 20, "warp": 6, "target": {"kind": "packet_object", "owner": 3, "id": 7}}`), &w); err != nil {
+		t.Fatal(err)
+	}
+	wp, why := l.waypoint(0, w)
+	if want := (engine.Waypoint{Pos: engine.Point{X: 10, Y: 20}, Warp: 6, Target: engine.TargetPacketObject, Owner: 3, ID: 7}); why != "" || wp != want {
+		t.Errorf("waypoint = %+v %q, want %+v", wp, why, want)
+	}
+	w.Target.Owner = nil
+	if _, why := l.waypoint(0, w); why != "packet_object target without an owner and id" {
+		t.Errorf("without an owner: %q", why)
+	}
+	w.Target.Owner, w.Target.ID = w.Target.ID, nil
+	if _, why := l.waypoint(0, w); why != "packet_object target without an owner and id" {
+		t.Errorf("without an id: %q", why)
+	}
+}
