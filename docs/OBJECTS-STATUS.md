@@ -178,24 +178,25 @@ Still open:
 
 ### GAP-001 predictions (P, A)
 
-Pushed before lane F runs GAP-001 (`/mnt/project-files/cases/gap-001.md`
+Predictions pushed in 0aa44f5, before lane F ran GAP-001 (`/mnt/project-files/cases/gap-001.md`
 sub-cases P and A). Player 0 is an Interstellar Traveler; each launcher
 is a Mass Driver 7 starbase at packet speed 7 with 5000 kT of each
 mineral. Resources are population / 1000 (20 or 37), which the case
 checks before the run; a different count changes the unit numbers. Specs:
 KERNEL.md "Production", "Item costs", "Packet items"; OBJECTS.md
-"Launch"; MESSAGES.md 0x03e, 0x129 (stars-elegy 8addf9e).
+"Launch"; MESSAGES.md 0x03e, 0x129 (stars-elegy 8addf9e). Results:
+stars-elegy 0d63a84 (`experiments/gap001`): every row matched.
 
-| Sub-case | Setup | Elegy predicts | Refuted by | Test |
-|---|---|---|---|---|
-| P1 | Mixed ×1, 20 resources | one 40/40/40 packet, warp 7 class 1; 48 kT of each and 10 resources spent (BINARY-ONLY); queue emptied, 0x03e | 44 kT spent; 5 resources | `TestPredictionGAP001PacketCosts` |
-| P2 | Ironium ×20, 37 resources | 3 units: one 300 kT packet; ×17 at 79% left (max(trunc(8·100/10)−1, trunc(7·100/10))); 360 + 94 kT spent, 4546 left | 70% (plain 7/10); 7 units and 40% (5 resources a unit) | `TestPredictionGAP001PacketCosts` |
-| P3 | Mixed ×20, 37 resources | 120/120/120; ×17 at 79%; 144 + 37 kT of each spent, 4819 left | 70%; a 5-resource cost | `TestPredictionGAP001PacketCosts` |
-| A1 | Auto ×3, 20 resources | 80/80/80 (2 units); hidden Mixed ×1 at 9% (0 resources, 4 kT of each) at the front, Auto ×3 behind; no 0x03e. With ≥30 resources: 120/120/120, Auto ×3 kept, 0x03e | no partial when 0 resources are left (ASSUMPTION) | `TestPredictionGAP001AutoAndDriverless` |
-| A2 | Auto ×20, 37 resources | 120/120/120; hidden Mixed ×1 at 79% at the front, Auto ×20 behind, queue stopped, no 0x03e (BINARY-ONLY) | no hidden item, or the auto item consumed | `TestPredictionGAP001AutoAndDriverless` |
-| A3 | No driver: Ironium ×2, Mixed ×1 | 0x129 for each item (ironium, then mixed), then 0x03e; queue empty, minerals unchanged, no packet (MEASURED OB-028-F for one item) | one 0x129 for the queue; the second item kept | `TestPredictionGAP001AutoAndDriverless` |
-| A4 | No driver: Auto ×5 alone | nothing built or spent, no 0x129, Auto ×5 stays, 0x03e sent | no 0x03e (MESSAGES.md infers it, unobserved) | `TestPredictionGAP001AutoAndDriverless` |
-| A5 | Driver, no destination: Auto ×5 alone | as A4 | as A4 | `TestPredictionGAP001AutoAndDriverless` |
+| Sub-case | Setup | Elegy predicted | Refuted by | Result | Test |
+|---|---|---|---|---|---|
+| P1 | Mixed ×1, 20 resources | one 40/40/40 packet, warp 7 class 1; 48 kT of each and 10 resources spent (BINARY-ONLY); queue emptied, 0x03e | 44 kT spent; 5 resources | CONFIRMED by prediction | `TestPredictionGAP001PacketCosts` |
+| P2 | Ironium ×20, 37 resources | 3 units: one 300 kT packet; ×17 at 79% left (max(trunc(8·100/10)−1, trunc(7·100/10))); 360 + 94 kT spent, 4546 left | 70% (plain 7/10); 7 units and 40% (5 resources a unit) | CONFIRMED by prediction | `TestPredictionGAP001PacketCosts` |
+| P3 | Mixed ×20, 37 resources | 120/120/120; ×17 at 79%; 144 + 37 kT of each spent, 4819 left | 70%; a 5-resource cost | CONFIRMED by prediction | `TestPredictionGAP001PacketCosts` |
+| A1 | Auto ×3, 20 resources | 80/80/80 (2 units); hidden Mixed ×1 at 9% (0 resources, 4 kT of each) at the front, Auto ×3 behind; no 0x03e. With ≥30 resources: 120/120/120, Auto ×3 kept, 0x03e | no partial when 0 resources are left (ASSUMPTION) | 20 resources CONFIRMED by prediction; the ≥30 variant NOT RUN | `TestPredictionGAP001AutoAndDriverless` |
+| A2 | Auto ×20, 37 resources | 120/120/120; hidden Mixed ×1 at 79% at the front, Auto ×20 behind, queue stopped, no 0x03e (BINARY-ONLY) | no hidden item, or the auto item consumed | CONFIRMED by prediction | `TestPredictionGAP001AutoAndDriverless` |
+| A3 | No driver: Ironium ×2, Mixed ×1 | 0x129 for each item (ironium, then mixed), then 0x03e; queue empty, minerals unchanged, no packet (MEASURED OB-028-F for one item) | one 0x129 for the queue; the second item kept | CONFIRMED by prediction | `TestPredictionGAP001AutoAndDriverless` |
+| A4 | No driver: Auto ×5 alone | nothing built or spent, no 0x129, Auto ×5 stays, 0x03e sent | no 0x03e (MESSAGES.md infers it, unobserved) | CONFIRMED by prediction | `TestPredictionGAP001AutoAndDriverless` |
+| A5 | Driver, no destination: Auto ×5 alone | as A4 | as A4 | CONFIRMED by prediction | `TestPredictionGAP001AutoAndDriverless` |
 
 ## Stargates
 

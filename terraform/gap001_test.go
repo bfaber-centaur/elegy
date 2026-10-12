@@ -33,20 +33,21 @@ func gap001W(t *testing.T, starbase bool) (*lab, int) {
 	return l, pi
 }
 
-// GAP-001 W1 and W2 (KERNEL.md "Terraforming", Orbital Adjusters, stars-elegy
-// 8addf9e): three hostile clicks on an unprotected planet, none at a planet
-// with a starbase.
+// GAP-001 W1 and W2 (KERNEL.md "Terraforming", Orbital Adjusters): three
+// hostile clicks on an unprotected planet, none at a planet with a
+// starbase. Predicted at stars-elegy 8addf9e (0aa44f5); the run matched
+// except W1's fleet 1/4 message, fixed to the run (stars-elegy 0d63a84).
 func TestPredictionGAP001Worsen(t *testing.T) {
 	if r := Reach(engine.Race{PRT: engine.PRTClaimAdjuster}, levels(3, 3, 10, 3, 3, 6)); r != [3]int{11, 3, 3} {
 		t.Fatalf("reach %v, want 11/3/3", r)
 	}
 	// W1: every click goes to gravity (toward 71, the farther end of
 	// 60 ± 11 from the centre 50); the original environment is unchanged.
-	// Messages: a pair (fleet owner, planet owner) per fleet whose clicks
-	// changed player 0's habitability. Fleet 1/1's two clicks take it from
-	// 72% to 70%; fleet 1/4's click (62 → 63) leaves it at 70%, so Elegy
-	// sends that fleet nothing (ASSUMPTION: KERNEL.md gives the fleet
-	// owner a message per planet changed and does not say per fleet).
+	// Messages go per fleet. Fleet 1/1's two clicks take player 0's
+	// habitability from 72% to 70%: "degraded" to both players. Fleet
+	// 1/4's click (62 → 63) leaves it at 70%: "cannot degrade any
+	// further" to player 1 only (CONFIRMED GAP-001 W1; the prediction of
+	// no message for fleet 1/4 was REFUTED).
 	l, pi := gap001W(t, false)
 	ev := Rules{}.Adjust(l.g)
 	p := l.g.Planets[pi]
@@ -68,7 +69,8 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 		got = append(got, msg{int(e.Kind), e.Player, n, e.Count})
 	}
 	deg := int(engine.EventPlanetDegraded)
-	want := []msg{{deg, 1, 1, 70}, {deg, 0, 1, 70}}
+	not := int(engine.EventPlanetNotDegraded)
+	want := []msg{{deg, 1, 1, 70}, {deg, 0, 1, 70}, {not, 1, 4, 70}}
 	if len(got) != len(want) {
 		t.Fatalf("W1: messages %+v, want %+v", got, want)
 	}
@@ -76,6 +78,17 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 		if got[i] != want[i] {
 			t.Errorf("W1: message %d %+v, want %+v", i, got[i], want[i])
 		}
+	}
+	// Not GAP-001: the same fleet 1/4 as a friend, at 63/60/60, improves
+	// gravity to 62 and leaves 70%. "Cannot degrade any further" is the
+	// hostile message; Elegy sends a friendly fleet nothing (0x12d is not
+	// modelled).
+	l, pi = gap001W(t, false)
+	l.g.Players[1].Relations[0] = engine.RelationFriend
+	l.g.Planets[pi].Env = [3]int{63, 60, 60}
+	l.g.Fleets = l.g.Fleets[:1]
+	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{62, 60, 60} {
+		t.Errorf("friendly: env %v, messages %+v", l.g.Planets[pi].Env, ev)
 	}
 	// W2: a starbase blocks every hostile click; no message.
 	l, pi = gap001W(t, true)

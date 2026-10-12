@@ -228,7 +228,8 @@ tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
 by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
-0x12d, 0x15b) and the duplicate-serial penalty. Super Stealth research
+0x12d, and 0x15b for a fleet that made no click; a hostile fleet whose
+clicks left the habitability unchanged gets 0x15b, GAP-001 W1) and the duplicate-serial penalty. Super Stealth research
 stealing is modelled (#146, `research.go` `stealResearch`). Terraforming production items are
 built (#41, `production_terraform.go`; TERRAFORM-STATUS.md), and a fleet
 whose transport task is still current does not move (#123, above).

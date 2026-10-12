@@ -41,9 +41,9 @@ type Adjustment struct {
 	Hostile bool
 	// Axes are the axes moved, one per click made.
 	Axes []int
-	// HabChanged: the planet owner's habitability changed. The fleet
-	// owner is told about every changed planet, the planet owner only
-	// when this is set (the turn engine sends the messages).
+	// HabChanged: the planet owner's habitability changed. The planet
+	// owner is told only when this is set (Rules.Adjust sends the
+	// messages).
 	HabChanged bool
 }
 
@@ -60,7 +60,7 @@ type Adjustment struct {
 //   - Otherwise: nothing if the planet has a starbase; else each click
 //     worsens it (Worsen).
 //
-// Only planets that changed are returned.
+// Only fleets that made at least one click are returned.
 //
 // ASSUMPTION T3: fleets act one at a time in fleet order (owner, then
 // number), each on the state the previous left.
