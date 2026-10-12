@@ -33,8 +33,8 @@ const pvBaseline = "testdata/vectors/baseline.txt"
 
 func TestParityVectors(t *testing.T) {
 	var all []vectors.Result
-	// Expectations skipped inside checked cases, by reason, from the
-	// reference seed.
+	// Skipped expectations, by reason, from the reference seed: those of
+	// wholly skipped cases too.
 	partial := map[string]int{}
 	vs, err := vectors.ReadDir(filepath.Join("testdata", "vectors"))
 	if err != nil {
@@ -94,7 +94,7 @@ func TestParityVectors(t *testing.T) {
 		}
 	}
 	for _, why := range slices.Sorted(maps.Keys(partial)) {
-		t.Logf("expectations skipped in checked cases: %4d %s", partial[why], why)
+		t.Logf("expectations skipped: %4d %s", partial[why], why)
 	}
 
 	if os.Getenv("PARITY_BASELINE") == "write" {

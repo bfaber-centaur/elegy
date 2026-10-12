@@ -409,7 +409,8 @@ type pvLoaded struct {
 	// in its orders; a case about such a fleet is skipped.
 	unsupported map[[2]int]string
 	start       map[[2]int]engine.Point // each fleet's starting position
-	// global is a reason every case of the vector is skipped, if any.
+	// global is a reason every expectation of the vector is skipped, if
+	// any.
 	global string
 	// queued marks the players with a production queue the harness does
 	// not load.
@@ -981,8 +982,8 @@ type Result struct {
 	Passes int    `json:"passes,omitempty"` // seed variants the case passes with
 	// RefStatus is, for a random case, the reference seed's status.
 	RefStatus string `json:"ref_status,omitempty"`
-	// Skipped is the reasons of the expectations skipped inside a case
-	// that was otherwise checked, one per expectation.
+	// Skipped is the reasons of the case's skipped expectations, one per
+	// expectation, whether or not the case compared any other.
 	Skipped []string `json:"skipped,omitempty"`
 }
 
@@ -1147,19 +1148,46 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		if *e.ID >= len(g.Players) {
 			return "skip: player not in the state"
 		}
-		if l.queued[*e.ID] {
-			return "skip: production queue"
-		}
-		if g.Players[*e.ID].Race.PRT == engine.PRTSuperStealth && len(g.Players) > 1 {
-			if _, ok := eq["research_accumulated"]; ok {
-				return "skip: Super Stealth research stealing"
-			}
-		}
-		return l.playerEquals(g, *e.ID, eq)
+		return l.playerEquals(g, *e.ID, eq, l.playerUnsure(g, *e.ID))
 	case "design":
 		return l.designEquals(g, *e.Owner, *e.Slot, eq)
 	}
 	return "skip: expectation " + e.Kind
+}
+
+// playerUnsure names the fields of player id that rest on what the
+// harness cannot reproduce, with the reason for each; they are skipped
+// one by one, so the player's other fields are still compared.
+func (l *pvLoaded) playerUnsure(g *engine.Game, id int) map[string]string {
+	unsure := map[string]string{}
+	research := func(why string) {
+		for _, k := range []string{"tech", "research_accumulated", "research_field"} {
+			if unsure[k] == "" {
+				unsure[k] = why
+			}
+		}
+	}
+	if l.queued[id] {
+		// A queue the harness cannot load changes the resources
+		// spent on research.
+		research("production queue")
+	}
+	if l.planned(id) {
+		// A computer player's research settings follow its planned
+		// orders, as its fleets and queues do.
+		research(pvPlannedWhy)
+	}
+	if g.Players[id].Race.PRT == engine.PRTSuperStealth && len(g.Players) > 1 {
+		// Elegy does not steal research yet (KERNEL.md "Super Stealth",
+		// stars-elegy fda4173); stolen research is stored, and can
+		// raise a level.
+		for _, k := range []string{"tech", "research_accumulated"} {
+			if unsure[k] == "" {
+				unsure[k] = "Super Stealth research stealing"
+			}
+		}
+	}
+	return unsure
 }
 
 // pvPlannedWhy is the reason a computer player's fleets, planets and
@@ -1220,13 +1248,34 @@ func pvKeys2(m map[[2]int]string) [][2]int {
 	return keys
 }
 
+// pvAlsoSkipped separates a check's mismatches from the reason one of its
+// fields could not be compared (pvResult).
+const pvAlsoSkipped = "\nalso skipped: "
+
+// pvResult is a check's result from its mismatches and the reason the
+// first field it could not compare was skipped ("" for none). A mismatch
+// is always reported, whatever else the expectation holds; the skip
+// reason rides along after pvAlsoSkipped so the tally still counts it.
+// With no mismatch the result is the skip.
+func pvResult(errs []string, skip string) string {
+	switch {
+	case len(errs) == 0 && skip == "":
+		return ""
+	case len(errs) == 0:
+		return "skip: " + skip
+	case skip == "":
+		return strings.Join(errs, "; ")
+	}
+	return strings.Join(errs, "; ") + pvAlsoSkipped + skip
+}
+
 func pvMismatch(field string, got, want any) string {
 	return fmt.Sprintf("%s = %v, want %v", field, got, want)
 }
 
 // fleetEquals compares a fleet with an expectation's fields. A field the
 // harness cannot compare makes the check a skip only when every field it
-// did compare matched; a mismatch is always reported.
+// did compare matched; a mismatch is always reported (pvResult).
 func (l *pvLoaded) fleetEquals(g *engine.Game, f *engine.Fleet, eq map[string]json.RawMessage) string {
 	var errs []string
 	skip := ""
@@ -1338,13 +1387,12 @@ func (l *pvLoaded) fleetEquals(g *engine.Game, f *engine.Fleet, eq map[string]js
 		case "waypoints":
 			var want []pvWaypoint
 			json.Unmarshal(raw, &want)
-			msg := l.waypointsEqual(f, want)
-			if strings.HasPrefix(msg, "skip: ") {
-				skip = msg
-				continue
-			}
+			msg, why := l.waypointsEqual(f, want)
 			if msg != "" {
 				errs = append(errs, msg)
+			}
+			if skip == "" {
+				skip = why
 			}
 		case "first_waypoint_task":
 			var want string
@@ -1354,31 +1402,35 @@ func (l *pvLoaded) fleetEquals(g *engine.Game, f *engine.Fleet, eq map[string]js
 				errs = append(errs, pvMismatch(k, got, want))
 			}
 		default:
-			skip = "skip: fleet field " + k
+			if skip == "" {
+				skip = "fleet field " + k
+			}
 		}
 	}
-	if len(errs) == 0 {
-		return skip
-	}
-	return strings.Join(errs, "; ")
+	return pvResult(errs, skip)
 }
 
 // waypointsEqual compares a fleet's waypoint list with the vector's, where
 // waypoint 0 is the fleet's own location. Elegy keeps only waypoint 0's
-// task (Fleet.Task), so its warp and target are not compared.
-func (l *pvLoaded) waypointsEqual(f *engine.Fleet, want []pvWaypoint) string {
+// task (Fleet.Task), so its warp and target are not compared. It returns
+// the mismatches and the reason the first waypoint it could not compare
+// was skipped; the other waypoints are still compared.
+func (l *pvLoaded) waypointsEqual(f *engine.Fleet, want []pvWaypoint) (mismatch, skip string) {
 	if len(want) == 0 {
-		return "skip: no waypoint 0"
+		return "", "no waypoint 0"
 	}
 	var errs []string
+	skipped := func(why string) {
+		if skip == "" {
+			skip = "waypoint " + why
+		}
+	}
 	if p := (engine.Point{X: want[0].X, Y: want[0].Y}); p != f.Pos {
 		errs = append(errs, pvMismatch("waypoints[0] position", f.Pos, p))
 	}
-	task, why := l.task(want[0])
-	if why != "" {
-		return "skip: waypoint " + why
-	}
-	if !reflect.DeepEqual(f.Task, task) {
+	if task, why := l.task(want[0]); why != "" {
+		skipped(why)
+	} else if !reflect.DeepEqual(f.Task, task) {
 		errs = append(errs, pvMismatch("waypoints[0] task", f.Task, task))
 	}
 	if len(f.Waypoints) != len(want)-1 {
@@ -1386,27 +1438,41 @@ func (l *pvLoaded) waypointsEqual(f *engine.Fleet, want []pvWaypoint) string {
 		for i, wp := range f.Waypoints {
 			got[i] = wp.Pos
 		}
-		return strings.Join(append(errs, fmt.Sprintf("%d waypoints after waypoint 0 %v, want %d", len(f.Waypoints), got, len(want)-1)), "; ")
+		return strings.Join(append(errs, fmt.Sprintf("%d waypoints after waypoint 0 %v, want %d", len(f.Waypoints), got, len(want)-1)), "; "), skip
 	}
 	for i, w := range want[1:] {
 		wp, why := l.waypoint(f.Owner, w)
-		if why != "" {
-			return "skip: waypoint " + why
+		if why == "" {
+			wp.Task, why = l.task(w)
 		}
-		if wp.Task, why = l.task(w); why != "" {
-			return "skip: waypoint " + why
+		if why != "" {
+			skipped(why)
+			continue
 		}
 		if got := f.Waypoints[i]; !reflect.DeepEqual(got, wp) {
 			errs = append(errs, pvMismatch(fmt.Sprintf("waypoints[%d]", i+1), got, wp))
 		}
 	}
-	return strings.Join(errs, "; ")
+	return strings.Join(errs, "; "), skip
 }
 
 func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]json.RawMessage, tol map[string]int) string {
 	var errs []string
+	skip := ""
+	skipped := func(why string) {
+		if skip == "" {
+			skip = why
+		}
+	}
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
+		if string(raw) == "null" && k != "environment" && k != "original_environment" {
+			// The vectors write null for a value the original's file
+			// does not hold, such as an unowned planet's population
+			// and growth carry: it is not a 0 to compare.
+			skipped("planet field " + k + " null")
+			continue
+		}
 		switch k {
 		case "owner":
 			var want int
@@ -1442,8 +1508,15 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			if k == "original_environment" {
 				got = p.OrigEnv
 			}
-			if want == nil {
-				return "skip: original environment null"
+			switch {
+			case want == nil && k == "original_environment":
+				// The game stores no separate original values when
+				// they equal the current ones (TAKEOVER.md "Capture",
+				// CONFIRMED TK-116), and the vectors write null.
+				want = &p.Env
+			case want == nil:
+				skipped("environment null")
+				continue
 			}
 			if got != *want {
 				errs = append(errs, pvMismatch(k, got, *want))
@@ -1451,17 +1524,29 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 		case "leftover_to_research":
 			// A captured planet takes its new owner's default setting,
 			// which the vectors do not carry.
-			return "skip: player default queue settings"
+			skipped("player default queue settings")
 		default:
-			return "skip: planet field " + k
+			skipped("planet field " + k)
 		}
 	}
-	return strings.Join(errs, "; ")
+	return pvResult(errs, skip)
 }
 
-func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMessage) string {
+// playerEquals compares a player with an expectation's fields; a field
+// named in unsure is skipped with its reason.
+func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMessage, unsure map[string]string) string {
 	var errs []string
+	skip := ""
+	skipped := func(why string) {
+		if skip == "" {
+			skip = why
+		}
+	}
 	for _, k := range pvKeys(eq) {
+		if why := unsure[k]; why != "" {
+			skipped(why)
+			continue
+		}
 		switch k {
 		case "tech", "research_accumulated":
 			var want map[string]int
@@ -1478,21 +1563,25 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 		case "race":
 			var q pvRace
 			if err := json.Unmarshal(eq[k], &q); err != nil {
-				return "skip: race: " + err.Error()
+				skipped("race: " + err.Error())
+				continue
 			}
 			want, err := q.race()
 			if err != nil {
-				return "skip: race: " + err.Error()
+				skipped("race: " + err.Error())
+				continue
 			}
 			if got := g.Players[id].Race; got != want {
 				errs = append(errs, pvMismatch("race", fmt.Sprintf("%+v", got), fmt.Sprintf("%+v", want)))
 			}
 			if g.Races == nil {
-				return "skip: race settings without a race check"
+				skipped("race settings without a race check")
+				continue
 			}
 			st, ok := pvRaceSettingsOf(g.Races, id)
 			if !ok {
-				return "skip: race settings without a race check"
+				skipped("race settings without a race check")
+				continue
 			}
 			spend := pvLeftoverSpend()[q.LeftoverSpend]
 			if st.Spend != spend || st.Stat15 != q.Stat15 || st.ExpensiveAt3 != q.TechsStartHigh {
@@ -1500,10 +1589,10 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 					fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", spend, q.Stat15, q.TechsStartHigh)))
 			}
 		default:
-			return "skip: player field " + k
+			skipped("player field " + k)
 		}
 	}
-	return strings.Join(errs, "; ")
+	return pvResult(errs, skip)
 }
 
 // designEquals checks a design after the design read (Catalog.ReadDesign)
@@ -1540,52 +1629,43 @@ func runVectorWith(v *Vector, run pvRun) []Result {
 	res := func(c pvCase, status, why string) {
 		out = append(out, Result{ID: c.ID, Corpus: v.corpus, Tag: c.Tag, Status: status, Why: why})
 	}
-	l, err := loadVector(v)
-	if err != nil {
-		for _, c := range v.Cases {
-			res(c, "skip", "load: "+err.Error())
-		}
-		return out
-	}
-	if l.global != "" {
-		for _, c := range v.Cases {
-			res(c, "skip", l.global)
-		}
-		return out
-	}
-	// Generate year by year, keeping each year's game.
-	games := []engine.Game{l.g}
-	l.views = [][]engine.PlayerView{nil}
-	g := l.g
+	// stop is why the years from len(games) on were not generated: the
+	// vector could not be loaded, or the orders of a year could not be
+	// applied. Each expectation of those years is skipped with it, one by
+	// one, so the years before it are still compared.
+	var stop string
+	var games []engine.Game
 	var genErr error
-	for y := 1; y <= v.Years; y++ {
-		files, why := l.orders(v.Orders, y, &g)
-		if why != "" {
-			for _, c := range v.Cases {
-				res(c, "skip", why)
+	l, err := loadVector(v)
+	switch {
+	case err != nil:
+		stop = "load: " + err.Error()
+	case l.global != "":
+		stop = l.global
+	default:
+		// Generate year by year, keeping each year's game.
+		games = []engine.Game{l.g}
+		l.views = [][]engine.PlayerView{nil}
+		g := l.g
+		for y := 1; y <= v.Years; y++ {
+			files, why := l.orders(v.Orders, y, &g)
+			if why != "" {
+				stop = why
+				break
 			}
-			return out
+			gy := g
+			gy.Rules = engine.ElegyRules()
+			r, err := engine.GenerateTurn(gy, files, run.rand(y))
+			if err != nil {
+				genErr = err
+				break
+			}
+			g = r.Game
+			games = append(games, g)
+			l.views = append(l.views, r.Views)
 		}
-		gy := g
-		gy.Rules = engine.ElegyRules()
-		r, err := engine.GenerateTurn(gy, files, run.rand(y))
-		if err != nil {
-			genErr = err
-			break
-		}
-		g = r.Game
-		games = append(games, g)
-		l.views = append(l.views, r.Views)
 	}
 	for _, c := range v.Cases {
-		if l.global != "" {
-			res(c, "skip", l.global)
-			continue
-		}
-		if why := pvNotModelled()[c.ID]; why != "" {
-			res(c, "skip", why)
-			continue
-		}
 		var fails, skips []string
 		// checked counts the compared expectations; exact, those of them
 		// that are not samples.
@@ -1596,12 +1676,20 @@ func runVectorWith(v *Vector, run pvRun) []Result {
 				run.observe1(c, i, "skip: stream "+e.Stream)
 				continue
 			}
+			if e.Year >= len(games) && stop != "" {
+				skips = append(skips, stop)
+				run.observe1(c, i, "skip: "+stop)
+				continue
+			}
 			if e.Year >= len(games) {
 				fails = append(fails, fmt.Sprintf("year %d not generated: %v", e.Year, genErr))
 				run.observe1(c, i, "year not generated")
 				continue
 			}
-			msg := l.pvCheck(&games[e.Year], e)
+			msg, also, _ := strings.Cut(l.pvCheck(&games[e.Year], e), pvAlsoSkipped)
+			if also != "" {
+				skips = append(skips, also)
+			}
 			run.observe1(c, i, msg)
 			switch {
 			case strings.HasPrefix(msg, "skip: "):
@@ -1633,9 +1721,9 @@ func runVectorWith(v *Vector, run pvRun) []Result {
 		default:
 			res(c, "pass", "")
 		}
-		if checked > 0 {
-			out[len(out)-1].Skipped = skips
-		}
+		// Every skipped expectation is tallied, a wholly skipped case's
+		// too, so the census names each reason a case was not compared.
+		out[len(out)-1].Skipped = skips
 	}
 	return out
 }
@@ -1761,22 +1849,7 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 	default:
 		return "skip: view of a " + sub.Kind
 	}
-	for _, k := range pvKeys(eq) {
-		w := eq[k]
-		gv, ok := got[k]
-		if !ok {
-			return "skip: view field " + k
-		}
-		var want any
-		json.Unmarshal(w, &want)
-		gb, _ := json.Marshal(gv)
-		var gn any
-		json.Unmarshal(gb, &gn)
-		if fmt.Sprint(gn) != fmt.Sprint(want) {
-			return pvMismatch(sub.Kind+" "+k, gv, want)
-		}
-	}
-	return ""
+	return pvCompare(sub.Kind, got, eq, 0, nil)
 }
 
 // pvLegacyOff names the LEGACY BUG cases whose switch is off by default,
@@ -1785,15 +1858,6 @@ func pvLegacyOff() map[string]string {
 	return map[string]string{
 		"FO-03-E": "Legacy.MergeOverflow off",
 		"FO-06-G": "Legacy.MergeOverflow off",
-	}
-}
-
-// pvNotModelled skips cases that need state the vector does not carry or
-// a rule Elegy does not model yet.
-func pvNotModelled() map[string]string {
-	return map[string]string{
-		"KX-002-R3": "the next research field choice is not in the vector",
-		"KX-002-R4": "the next research field choice is not in the vector",
 	}
 }
 
