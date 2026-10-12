@@ -33,7 +33,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Start squares (flat table, rank in P, n = size of Q) | `startSquare` | CONFIRMED for n = 1 to 6 and a rank past row n (CB-022, CB-031..CB-036) | `TestConfirmedStartSquares`, `TestConfirmedPlan0OnePlayerBattle`, `TestConfirmedStartSquareFlatTable` |
 | Setup: dump cargo, jitter, shuffle | `setup` | BINARY-ONLY | `TestPredictionBattleTurn` |
 | Energy Dampener | `setup` | CONFIRMED | `TestConfirmedEnergyDampener` |
-| Token values | `combat_token.go` `tokenValues` | CONFIRMED (starbase jammer BINARY-ONLY; the late parts and caps below BINARY-ONLY; RS on a shield part's armor ASSUMPTION A13) | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestPredictionStarbaseJammer`, `TestPredictionLateShipTokenValues`, `TestPredictionDeathStarTokenValues` |
+| Token values | `combat_token.go` `tokenValues` | CONFIRMED (CB-056, stars-elegy b0ca924: the starbase jammer's quarter after the 95 cap, the 255% capacitor cap, initiative 63 and computer 99 with sixteen Battle Nexus, RS counting Croby Sharmor's armor whole); the Langston Shell under RS not observed; the other late parts BINARY-ONLY | `TestConfirmedTokenValues`, `TestConfirmedRegeneratingShields`, `TestPredictionStarbaseJammer`, `TestPredictionLateShipTokenValues`, `TestPredictionDeathStarTokenValues` |
 | LEGACY BUG starbase is always "armed" | `starbaseClass` (ruleset switch `Legacy.StarbaseArmedClass`) | LEGACY BUG, CONFIRMED | `TestConfirmedStarbaseIsArmedTarget` |
 | Speed code; cargo mass per ship `C·c/F` | `speedCode`, `battleMass` | CONFIRMED (designer CB-000; cargo and WM CB-038; dump CB-025) | `TestConfirmedEnergyDampener`, `TestConfirmedCargoMassPerShip` |
 | Moves per round | `movesInRound` | CONFIRMED | `TestConfirmedMovesPerRound` |
@@ -44,14 +44,14 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Firing order, target choice; live-player check before each token | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED; the check BINARY-ONLY | `TestConfirmedTargetChoice`, `TestPredictionOutPlayerStillFires` |
 | Design cost (COMPONENTS.md owner cost: miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | CONFIRMED (CS-001) | `TestPredictionDesignCost` |
 | Beams, dropoff (none at range 0, CB-026), carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
-| Gatling (each target's own deflector), sappers | `gatling`, `damage` | CONFIRMED; a gatling shot past a starbase ASSUMPTION A12 | `TestConfirmedGatlingHitsEveryTarget`, `TestGatlingDeflectorPerTarget`, `TestConfirmedSapperShieldsOnly` |
+| Gatling (each target's own deflector), sappers | `gatling`, `damage` | CONFIRMED; a gatling shot goes on past a starbase (CONFIRMED in one stream only, CB-056, stars-elegy b0ca924) | `TestConfirmedGatlingHitsEveryTarget`, `TestGatlingDeflectorPerTarget`, `TestConfirmedSapperShieldsOnly` |
 | Torpedoes and missiles; `h = hits·d/2` once; misses' shield damage in its own record before the hit record; a hit record for every reached target, even 0 hits | `hitChance`, `torpedoes` | CONFIRMED (CS-003-C2 for the rounding, CB-049 for the miss record); the 0-hit record BINARY-ONLY | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestConfirmedTorpedoHitRounding`, `TestPredictionTorpedoHitsPerTarget`, `TestPredictionTorpedoZeroHitRecord` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
-| Starbase damage; no damage left over after a hit on a starbase; kept through the year | `starbaseDamage`, `finish`, `repair` | CONFIRMED in part (Space Station steps CB-011..015; the stop CB-052); the Death Star's 1500 armor BINARY-ONLY; a 500th step ASSUMPTION A11 | `TestConfirmedStarbaseDamageSteps`, `TestPredictionDeathStarDamageSteps`, `TestConfirmedBeamStopsAtStarbase`, `TestRG001StarbaseDamageKept` |
+| Starbase damage; no damage left over after a hit on a starbase; kept through the year | `starbaseDamage`, `finish`, `repair` | CONFIRMED in part (Space Station steps CB-011..015; the stop CB-052); the Death Star's 1500 armor BINARY-ONLY; a 500th step, destroyed only at total ≥ armor, MEASURED (CB-056, 2 streams, stars-elegy b0ca924) | `TestConfirmedStarbaseDamageSteps`, `TestPredictionDeathStarDamageSteps`, `TestConfirmedBeamStopsAtStarbase`, `TestRG001StarbaseDamageKept` |
 | Starbase loss: the queue's ship items and non-automatic packet items removed, a starbase item restarts at 0%, planetary items kept (shared with the starbase design delete); AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `starbase_loss.go` `loseStarbase`, `emptyPlanet` | CONFIRMED (ship and planetary items CB-047, AR CB-041); packet items and the starbase restart BINARY-ONLY (PARITY.md "Queued ships after deleting the starbase design", stars-elegy ee47fff) | parity CB-047, `TestConfirmedBattleLossStripsQueue`, `TestPredictionAlternateRealityStarbaseLoss` |
 | Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each; overflow CB-040; fuel share CB-023); cargo share, empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestConfirmedSalvageOverflow`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
 | Dump cargo (full amount; first salvage addition in deep space) | `setup` | CONFIRMED (CB-025) | `TestPredictionDumpCargo` |
-| Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024); the Ultra Station's and Death Star's docks BINARY-ONLY | `TestConfirmedRepair`, `TestPredictionRepairOthers`, `TestPredictionRepairLargeDocks`, `TestRG001StarbaseDamageKept` |
+| Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024; the Ultra Station's and Death Star's docks, fleets −100 and the starbase −50: CB-056, stars-elegy b0ca924) | `TestConfirmedRepair`, `TestPredictionRepairOthers`, `TestPredictionRepairLargeDocks`, `TestRG001StarbaseDamageKept` |
 | Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | Who attempts: participants (location, `n = 2` survivors, AR starbase), players outside the battle | `techAttempts` | CONFIRMED (CB-012, CB-021, CB-029, CB-031-n3, CB-041) | `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
 | LEGACY BUG observer tech attempt (player number AND observer mask; a planet owner without a starbase is in the mask even as a participant) | `techAttempts` (ruleset switch `Legacy.ObserverTechMask`) | LEGACY BUG, CONFIRMED (CB-031-obs, CB-037) | `TestPredictionTechAttemptRules` |
@@ -84,16 +84,11 @@ in the code with `ASSUMPTION An` or `PLACEHOLDER An`. An ASSUMPTION is a
 reading of unclear text. A PLACEHOLDER stands in for a value or rule the
 spec says is unknown.
 
-Open (each also an oracle question under "Late-game coverage"):
-
-- **A11** (`starbaseDamage`): at 499 units, a hit of less than one unit
-  that leaves the total below the armor would need a 500th step. Elegy
-  destroys the starbase.
-- **A12** (`gatling`): a starbase among a gatling shot's targets does not
-  end the shot; the targets after it are hit too.
-- **A13** (`tokenValues`): Regenerating Shields halves the armor parts'
-  armor; a shield part's armor (Croby Sharmor, Langston Shell) counts
-  whole.
+Resolved by CB-056 (stars-elegy b0ca924; see "CB-056 results" below):
+A11 was refuted (a starbase at 499 goes to 500 and only a total of at
+least its armor destroys it, MEASURED, now the rule in `starbaseDamage`);
+A12 held in one stream only and A13 held for Croby Sharmor (the Langston
+Shell is not observed), both CONFIRMED.
 
 A6 (plan-0 X at the first location of a turn) is now
 COMBAT.md's chosen rule for Elegy (#38), so it is cited above rather than
@@ -126,7 +121,8 @@ combat function; the tests added for this pass (rows above, and
 `TestPredictionMineDamageLateFleets` in `objects`) pin the late values of
 each rule from COMBAT.md and OBJECTS.md.
 
-Oracle questions for a late-game run (RG-002 or a CB case):
+Oracle questions for a late-game run (RG-002 or a CB case); CB-056
+answered all seven (below):
 
 1. A starbase at 499/500 takes a hit of less than one unit of its armor
    and stays below its armor in total: is it destroyed, or left at 499
@@ -147,22 +143,29 @@ Oracle questions for a late-game run (RG-002 or a CB case):
    armor parts halved, as in battle? Elegy uses the plain sums;
    OBJECTS.md does not say.
 
-### CB-056 predictions
+### CB-056 results
 
-Pushed before lane F runs CB-056 (Q1–Q3, Q7, Q4's caps, Q5, Q6). Each is
-Elegy's current result, pinned by the named test; the alternative
-reading is what would refute it.
+Predictions pushed before the run (elegy 6bc9046); CB-056 ran on two
+pinned streams per start. Results and labels from the stars-elegy
+record (PARITY.md "Round 10", COMBAT.md, OBJECTS.md at b0ca924).
 
-| Q | Setup | Elegy predicts | Refuted by | Test |
-|---|---|---|---|---|
-| 1 | A Death Star (1500 armor, no shields) at 499/500 takes 1 damage | destroyed (A11) | left at 499/500 | `TestPredictionDeathStarDamageSteps` |
-| 2 | A Gatling Neutrino Cannon stack (3 ships, 2 per slot, one Flux Capacitor) with an enemy ship, an enemy starbase, then two more ships in token order, all in range | every target hit, 576 / 576 / 518 / 466 by deflector (A12) | no hit recorded after the starbase's | `TestGatlingDeflectorPerTarget` |
-| 3 | A Regenerating Shields Battleship with 8 Croby Sharmor and 2 Tritanium | armor 2570, shields 672 (A13) | armor 2306 (each Croby Sharmor's 65 halved to 32) | `TestPredictionCB056RegeneratingShieldsCroby` |
-| 4a | A Death Star with five Jammer 50s | jammer 72 (cap, then a quarter off) | 73 (a quarter off, then the cap) | `TestPredictionDeathStarTokenValues` |
-| 4b | A Death Star with six Flux Capacitors | capacitor 255% | 298% (no cap) | `TestPredictionDeathStarTokenValues` |
-| 5 | A damaged fleet that did not fight or move, at its owner's Ultra Station or Death Star planet | units −100 a year (−200 for Inner Strength); the starbase −50 | −40 (no dock) or −25 | `TestPredictionRepairLargeDocks` |
-| 6 | Five Battleships (4 Trans-Galactic Drives, 1 Mole-skin, 2 Superlatanium) stopped in a heavy field | 197/500 (4 Fuel Scoops instead: 237) | 47 (no engine factor), 100 (shields absorb D/2) | `TestPredictionMineDamageLateFleets` |
-| 7 | The same fleet, owner with Regenerating Shields | 197/500 (plain sums) | 280 (battle-style RS) | `TestPredictionMineDamageRegeneratingShields` |
+| Q | Setup | Elegy predicted | Original | Status now | Test |
+|---|---|---|---|---|---|
+| 1 | A starbase at 499/500 takes a hit worth less than one unit of its armor | destroyed (A11) | 500/500, not destroyed; the next hit destroyed it (2 streams) | prediction REFUTED; fixed, MEASURED: a 500th step, destroyed only at total ≥ armor | `TestPredictionDeathStarDamageSteps` |
+| 2 | A Gatling Neutrino Cannon stack (3 ships, 2 per slot, one Flux Capacitor) whose targets include an enemy starbase and ships with 0, 1 and 2 Beam Deflectors | every target hit, the ships 576 / 518 / 466 by deflector (A12) | the starbase (token 0), then three ships: 466, 576, 518 for deflectors 81, 100, 90 | CONFIRMED in one stream only (in the other the ships were never in range) | `TestGatlingDeflectorPerTarget` |
+| 3 | A Regenerating Shields Battleship with 8 Croby Sharmor and 2 Tritanium | armor 2570, shields 672 (A13) | shields 672; armor within 2546–2581 (2 streams) | CONFIRMED; the Langston Shell not observed | `TestConfirmedCB056RegeneratingShieldsCroby` |
+| 4a | A Death Star with five Jammer 50s | jammer 72 | 72 (2 streams) | CONFIRMED | `TestPredictionDeathStarTokenValues` |
+| 4b | A Death Star with six Flux Capacitors | capacitor 255% | 255% (2 streams) | CONFIRMED | `TestPredictionDeathStarTokenValues` |
+| 5 | A damaged fleet at its owner's Ultra Station or Death Star planet | fleets −100, the starbase −50 | 400 → 300, 300 → 250 (2 streams) | CONFIRMED | `TestPredictionRepairLargeDocks` |
+| 6 | Five Battleships (4 Trans-Galactic Drives, 1 Mole-skin, 2 Superlatanium) in a heavy field; the scoop, BB+Tank and Tank+BB variants | 197, 237, 157/15, 62/37 | as predicted (66 fleets, 2 streams) | CONFIRMED | `TestConfirmedMineDamageLateFleets` |
+| 7 | The same fleet, owner with Regenerating Shields | 197 (plain sums) | 280 (23 fleets) | prediction REFUTED; fixed, MEASURED: shields × 7/5 and armor parts halved, as in battle | `TestMeasuredMineDamageRegeneratingShields`; `TestPredictionMineDamageRegeneratingShieldsCroby` (a shield part's armor whole in mines, 258) |
+
+Also observed: the Nexus Star token had initiative 63 and computer 99
+(CONFIRMED), as `TestPredictionDeathStarTokenValues` gives for sixteen
+Battle Nexus. The weapon initiative, the Death Star's reach and its 1500
+armor were not measured and stay predictions. A Regenerating Shields
+owner at a stargate is not observed: `objects/stargates.go` keeps the
+plain armor (ASSUMPTION G5, OBJECTS-STATUS.md).
 
 ### Settled by current COMBAT.md
 

@@ -30,7 +30,7 @@ below and KERNEL-STATUS.md "Space objects").
 | Due-north and due-south legs | `Legacy.DueNorthSouthCut` (on in the `elegy` ruleset) | LEGACY BUG, MEASURED (MF-15) |
 | Stretches: eight per kind, merging, draw order, stop offset | `addStretch`, `CheckStep` | BINARY-ONLY; stop offsets MEASURED (OB-010-S, MF-15) |
 | Stop point | `StopPoint` | BINARY-ONLY; exact on east legs |
-| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M); damage on existing damage BINARY-ONLY |
+| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M; engines and shields on late fleets CB-056, 66 fleets); a Regenerating Shields owner's battle shields and armor MEASURED (CB-056, 23 fleets; stars-elegy b0ca924); damage on existing damage BINARY-ONLY |
 | Cargo and fuel lost with destroyed ships | `ApplyHit`, `Space.Detonate` | MEASURED (MF-14); detonation BINARY-ONLY |
 | Survivors' minerals dropped as salvage | `Legacy.MineSurvivorSalvage` (on in the `elegy` ruleset) | LEGACY BUG candidate, MEASURED (MF-14) |
 | Mines lost, paying field | `MinesLost`, `PayingField`, `ApplyHit` | CONFIRMED (OB-010-S, OB-024, MF-4) |
@@ -207,6 +207,10 @@ Still open:
    (`D > s`, which corrupts the original's record), every ship of the
    design is destroyed. A design's ships are taken as one stack with its
    first stack's damage.
+2. **G5** A Regenerating Shields owner's ships take gate damage on the
+   plain armor. Mine damage uses the battle's halved armor parts (MEASURED,
+   CB-056), but RS at a gate is unobserved
+   (`TestAssumptionGateDamageRegeneratingShieldsPlainArmor`).
 
 
 ## Salvage
