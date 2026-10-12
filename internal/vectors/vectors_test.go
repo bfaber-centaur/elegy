@@ -405,3 +405,69 @@ func TestCompareRejectedPlayer(t *testing.T) {
 		t.Errorf("rejected %q, want player 0's rename first", c.Rejected)
 	}
 }
+
+// TestPlanetHomeworld: a state planet's homeworld flag is loaded, and a
+// planet expectation's homeworld is compared (vectors README "planets").
+func TestPlanetHomeworld(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/tk2/tk120.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := v.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var homes []engine.Point
+	for _, p := range s.Game.Planets {
+		if p.Homeworld {
+			homes = append(homes, p.Pos)
+		}
+	}
+	if want := []engine.Point{{X: 1169, Y: 1145}, {X: 1306, Y: 1060}}; !reflect.DeepEqual(homes, want) {
+		t.Errorf("TK-120 homeworlds at %v, want %v", homes, want)
+	}
+	var l pvLoaded
+	p := engine.Planet{Owner: 0}
+	pvWant(t, "homeworld differs", l.planetEquals(nil, &p, pvEq(t, `{"homeworld": true}`), nil), "homeworld = false, want true", "")
+	p.Homeworld = true
+	pvWant(t, "homeworld equal", l.planetEquals(nil, &p, pvEq(t, `{"homeworld": true}`), nil), "", "")
+}
+
+// TestConcentrationFractions: a planet's stored depletion fractions load
+// into its deposits (vectors README "planets", KERNEL.md "Mining").
+func TestConcentrationFractions(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range l.g.Planets {
+		var got [3]int
+		for m := range got {
+			got[m] = p.Deposits[m].Fraction
+		}
+		want := [3]int{}
+		if p.ID == l.planet[7] {
+			want = [3]int{242, 86, 157}
+		}
+		if got != want {
+			t.Errorf("planet %d fractions %v, want %v", p.ID, got, want)
+		}
+	}
+	// A stored 0 is a full 256, which Deposit.Fraction also writes as 0.
+	for i := range v.InitialState.Planets {
+		if v.InitialState.Planets[i].ID == 7 {
+			v.InitialState.Planets[i].ConcFractions = []int{0, 128, 255}
+		}
+	}
+	if l, err = loadVector(v); err != nil {
+		t.Fatal(err)
+	}
+	d := l.g.Planets[l.planet[7]-1].Deposits
+	if got := [3]int{d[0].Fraction, d[1].Fraction, d[2].Fraction}; got != [3]int{0, 128, 255} {
+		t.Errorf("fractions [0 128 255] loaded as %v", got)
+	}
+}

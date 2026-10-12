@@ -349,6 +349,7 @@
     "x": 1169,
     "y": 1145,
     "owner": 1,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -509,6 +510,7 @@
     "x": 1306,
     "y": 1060,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -3590,7 +3592,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -4468,7 +4471,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5322,7 +5326,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     }
    ],
    "verdict": "MF-09s-A OBSERVED (MF-9): per stopped fleet, dmg units/500 at 100%: Tank: 78; Scoop Tank (TG Fuel Scoop): 93; Mizer Tank (Fuel Mizer, not a ram scoop): 93; Shield Tank (500 shields): 39; Tank + Cloak Tank (2 ships): 62/15"
