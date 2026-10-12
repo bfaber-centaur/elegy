@@ -109,7 +109,7 @@ Test names carry their evidence: `TestConfirmed*` is ground truth from oracle ob
 
 ### Parity vectors
 
-The stars-elegy parity vectors are copied into `engine/testdata/vectors` and run by `TestParityVectors` (`engine/parity_test.go`) under the `elegy` ruleset. Each vector's start becomes an Elegy game; the harness generates the run's years and checks every case's expectations. Each vector runs with 8 seed variants, because the harness's random stream is not the original's. A case gets one result:
+The stars-elegy parity vectors are copied into `engine/testdata/vectors` and run by `TestParityVectors` (`engine/parity_test.go`) under the `elegy` ruleset. The loader and the comparisons are package `internal/vectors`, which other code can import. Each vector's start becomes an Elegy game; the harness generates the run's years and checks every case's expectations. Each vector runs with 8 seed variants, because the harness's random stream is not the original's. A case gets one result:
 
 - **pass:** every compared expectation matches with every seed. CONFIRMED and LEGACY BUG cases are exact-match targets. MEASURED passes are counted in their own column: the value is the original's, but the prediction made in advance missed or the outcome is random (vectors README "Tags").
 - **sample-only:** every compared expectation is a sample (one stream's random outcome) and matched. It is evidence of the rule, not of an exact value.

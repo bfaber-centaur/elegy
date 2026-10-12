@@ -3,7 +3,7 @@
 How far Elegy matches the original's random outcomes in the parity vectors,
 and what the harness needs to replay the original's random stream.
 Lane D of [SPRINT.md](SPRINT.md). Numbers are from `go test -run
-'TestRandomStreams$' -v ./engine` on the vectors in `engine/testdata/vectors`
+'TestRandomStreams$' -v ./internal/vectors` on the vectors in `engine/testdata/vectors`
 (stars-elegy d4eafd9).
 
 ## What the vectors record about the stream
@@ -40,7 +40,8 @@ measured.
 
 ## The seam
 
-`engine/streams_test.go` (test code, next to `parity_test.go`):
+`internal/vectors/streams.go`, in the vector loader package (its tests,
+`TestRandomStreams` among them, are `internal/vectors/streams_test.go`):
 
 - `pvRun` says how `runVectorWith` generates a vector: Elegy's seed variant,
   which stream's expectations to check, and `replay`, a random source per
@@ -51,7 +52,7 @@ measured.
   cycles value, else nothing recorded.
 - `pvReplay(v, stream, seeder)` returns the per-year sources, or why there
   are none ("no start recorded", "no generator").
-- `pvOriginal` is the `oraclerng.Seeder` for the original's generator. It
+- `pvOriginal` (test code) is the `oraclerng.Seeder` for the original's generator. It
   is nil until stars-elegy publishes the generator; the clean room
   implements it only from that text. Setting it turns on exact replay in
   `TestRandomStreams`, which then fails on any replayed mismatch.
