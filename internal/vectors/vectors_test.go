@@ -195,6 +195,7 @@ func TestOrdersWaypointsCumulative(t *testing.T) {
 		wp("waypoint_add", 1, 3), // before 1
 		wp("waypoint_change", 3, 4),
 		`{"kind": "waypoint_delete", "fleet": 0, "index": 1}`,
+		wp("waypoint_change", 2, 5), // on the route the delete left
 	), 1, &l.g)
 	if why != "" {
 		t.Fatal(why)
@@ -208,7 +209,7 @@ func TestOrdersWaypointsCumulative(t *testing.T) {
 		got = append(got, ids)
 	}
 	p := l.planet
-	want := [][]int{{p[1]}, {p[1], p[2]}, {p[3], p[1], p[2]}, {p[3], p[1], p[4]}, {p[1], p[4]}}
+	want := [][]int{{p[1]}, {p[1], p[2]}, {p[3], p[1], p[2]}, {p[3], p[1], p[4]}, {p[1], p[4]}, {p[1], p[5]}}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("waypoint ids after each order = %v, want %v", got, want)
 	}
@@ -264,9 +265,11 @@ func TestOrdersConversions(t *testing.T) {
 	}
 	files, why := l.orders(testBlock(t,
 		`{"kind": "design", "starbase": false, "slot": 12, "hull": "Scout", "slots": [{"count": 1, "part": "Quick Jump 5"}, null, {"count": 2, "part": "Fuel Tank"}]}`,
+		`{"kind": "design", "starbase": true, "slot": 3, "hull": "Orbital Fort", "slots": []}`,
 		`{"kind": "design_delete", "starbase": true, "slot": 1}`,
 		`{"kind": "planet_settings", "planet": 2, "leftover_to_research": true, "packet_destination": 3, "packet_warp": 8, "route_to": -1}`,
 		`{"kind": "planet_settings", "planet": 2, "leftover_to_research": false, "packet_destination": -1, "packet_warp": 4, "route_to": 1}`,
+		`{"kind": "planet_settings", "planet": 2, "leftover_to_research": false, "packet_destination": 0, "packet_warp": 5, "route_to": 0}`,
 	), 1, &l.g)
 	if why != "" {
 		t.Fatal(why)
@@ -274,11 +277,131 @@ func TestOrdersConversions(t *testing.T) {
 	p := l.planet
 	want := []engine.Order{
 		engine.DesignOrder{Slot: 12, Name: "p0 d12", Hull: "Scout", Fills: []engine.SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}, {Slot: 2, Part: "Fuel Tank", Count: 2}}},
+		engine.DesignOrder{Starbase: true, Slot: 3, Name: "p0 d3", Hull: "Orbital Fort"},
 		engine.DeleteDesignOrder{Starbase: true, Slot: 1},
 		engine.PlanetSettingsOrder{Planet: p[2], LeftoverOnly: true, HasPacketDest: true, PacketDest: p[3], PacketSpeed: 8},
 		engine.PlanetSettingsOrder{Planet: p[2], HasRoute: true, RouteTo: p[1], PacketSpeed: 4},
+		// Planet 0 is a planet: only -1 is none.
+		engine.PlanetSettingsOrder{Planet: p[2], HasRoute: true, RouteTo: p[0], HasPacketDest: true, PacketDest: p[0], PacketSpeed: 5},
 	}
 	if !reflect.DeepEqual(files[0].Orders, want) {
 		t.Errorf("orders = %+v\nwant %+v", files[0].Orders, want)
+	}
+}
+
+// TestOrdersWaypointRefusals checks the waypoint orders the harness
+// refuses (a waypoint added before the fleet's position, a delete of the
+// position or past the end) and a delete for a fleet Elegy does not have,
+// which goes to the engine to refuse.
+func TestOrdersWaypointRefusals(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []struct{ order, why string }{
+		{`{"kind": "waypoint_add", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 5, "target": {"kind": "planet", "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_add before the fleet's position"},
+		{`{"kind": "waypoint_delete", "fleet": 0, "index": 0}`, "order waypoint_delete index"},
+		{`{"kind": "waypoint_delete", "fleet": 0, "index": 1}`, "order waypoint_delete index"},
+	} {
+		if _, why := l.orders(testBlock(t, c.order), 1, &l.g); why != c.why {
+			t.Errorf("%s: why %q, want %q", c.order, why, c.why)
+		}
+	}
+	files, why := l.orders(testBlock(t, `{"kind": "waypoint_delete", "fleet": 40, "index": 1}`), 1, &l.g)
+	if why != "" || !reflect.DeepEqual(files[0].Orders, []engine.Order{engine.WaypointOrder{}}) {
+		t.Errorf("delete for a missing fleet: %+v, %q; want an order for fleet 0", files, why)
+	}
+}
+
+// TestOrdersWaypointTasks checks that a waypoint order keeps the fleet's
+// own task and gives the waypoint its task.
+func TestOrdersWaypointTasks(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := l.g
+	g.Fleets = append([]engine.Fleet(nil), l.g.Fleets...)
+	i := fleetIndex(&g, l.fleetIn(&g, 0, 0))
+	g.Fleets[i].Task = engine.Task{Kind: engine.TaskColonize}
+	files, why := l.orders(testBlock(t,
+		`{"kind": "waypoint_add", "fleet": 0, "index": 1, "waypoint": {"x": 0, "y": 0, "warp": 5, "target": {"kind": "planet", "id": 1}, "task": {"kind": "route"}}}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	w := files[0].Orders[0].(engine.WaypointOrder)
+	if w.Task.Kind != engine.TaskColonize || len(w.Waypoints) != 1 || w.Waypoints[0].Task.Kind != engine.TaskRoute {
+		t.Errorf("order %+v: want the fleet's colonize task and a route waypoint", w)
+	}
+}
+
+// TestOrdersRunMade checks that orders find a fleet and a design made
+// during the run: the order's own fleet, merge, cargo and move_ships
+// partners, and move_ships designs.
+func TestOrdersRunMade(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := l.g
+	// Vector fleet 40 (number 41) and design slot 5, both made in the run.
+	g.Fleets = append(append([]engine.Fleet(nil), l.g.Fleets...), engine.Fleet{ID: 99, Owner: 0, Number: 41})
+	g.Designs = append(append([]engine.Design(nil), l.g.Designs...), engine.Design{Name: "made"})
+	made := len(g.Designs) - 1
+	g.DesignSlots = append(append([]engine.DesignSlot(nil), l.g.DesignSlots...), engine.DesignSlot{Owner: 0, Slot: 5, Design: made})
+	zero := l.fleetIn(&g, 0, 0)
+	files, why := l.orders(testBlock(t,
+		`{"kind": "rename", "fleet": 40, "name": "x"}`,
+		`{"kind": "merge", "fleet": 0, "fleets": [40]}`,
+		`{"kind": "cargo", "fleet": 0, "with": {"kind": "fleet", "id": 40}, "amounts": {"ironium": 1}}`,
+		`{"kind": "move_ships", "fleet": 0, "with": {"kind": "fleet", "id": 40}, "ships": [{"design": 5, "count": 1}]}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	c := engine.CargoOrder{Fleet: zero, Target: engine.TargetFleet, ID: 99}
+	c.Amounts[pvCargo()["ironium"]] = 1
+	want := []engine.Order{
+		engine.RenameOrder{Fleet: 99, Name: "x"},
+		engine.MergeOrder{Into: zero, From: []int{99}},
+		c,
+		engine.MoveShipsOrder{Fleet: zero, With: 99, Ships: []engine.Stack{{Design: made, Count: 1}}},
+	}
+	if !reflect.DeepEqual(files[0].Orders, want) {
+		t.Errorf("orders = %+v\nwant %+v", files[0].Orders, want)
+	}
+	f := engine.Fleet{Owner: 0, Stacks: []engine.Stack{{Design: made, Count: 1, Damage: engine.Damage{Pct: 50, Units: 10}}}}
+	if msg := l.fleetEquals(&g, &f, pvEq(t, `{"damage": [{"design": 5, "units": 10, "percent_of_ships": 50}]}`)); msg != "" {
+		t.Errorf("damage on a design made in the run: %s", msg)
+	}
+}
+
+// TestCompareRejectedPlayer checks that a refused order is named by its
+// own player's file when two players give orders.
+func TestCompareRejectedPlayer(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/kx004/s1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	v.Orders = []pvOrderBlock{
+		{Year: 1, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "rename", "fleet": 40, "name": "x"}`)}},
+		{Year: 1, Player: 1, Orders: []json.RawMessage{json.RawMessage(`{"kind": "battle_plan_delete", "slot": 3}`)}},
+	}
+	c := Compare(v, 0)
+	if len(c.Rejected) == 0 || !strings.HasPrefix(c.Rejected[0], "year 1 player 0 order 0 (RenameOrder): ") {
+		t.Errorf("rejected %q, want player 0's rename first", c.Rejected)
 	}
 }

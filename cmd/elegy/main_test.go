@@ -293,3 +293,27 @@ func TestCLIVectorSkipped(t *testing.T) {
 		t.Errorf("text totals:\n%s", text)
 	}
 }
+
+func TestCLIVectorRejected(t *testing.T) {
+	src, err := os.ReadFile(filepath.Join("..", "..", "engine", "testdata", "vectors", "pq", "c01.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc map[string]any
+	if err := json.Unmarshal(src, &doc); err != nil {
+		t.Fatal(err)
+	}
+	doc["orders"] = []any{map[string]any{"year": 1, "player": 0, "orders": []any{map[string]any{"kind": "rename", "fleet": 40, "name": "x"}}}}
+	b, _ := json.Marshal(doc)
+	path := filepath.Join(t.TempDir(), "c01.json")
+	if err := os.WriteFile(path, b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	text := cli(t, "vector", path)
+	if !strings.Contains(text, "\nrejected order: year 1 player 0 order 0 (RenameOrder): ") || !strings.HasSuffix(text, "\nrejected orders: 1\n") {
+		t.Errorf("text lists no rejected order:\n%s", text)
+	}
+	if strings.Contains(cli(t, "vector", filepath.Join("..", "..", "engine", "testdata", "vectors", "pq", "c01.json")), "rejected") {
+		t.Error("a vector without refused orders lists rejected orders")
+	}
+}
