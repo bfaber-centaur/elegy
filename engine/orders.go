@@ -412,6 +412,17 @@ func (o MergeOrder) apply(g *Game, player int, a *Applied) error {
 // ASSUMPTION L27: a wormhole or Trader target need not be known to the
 // player, as a planet or fleet target need not be.
 //
+// A mineral packet or salvage target (TargetPacketObject, named by its
+// owner and number) takes the object's position the same way. Its owner
+// must be a player and its number not negative.
+//
+// ASSUMPTION W9: a packet or salvage object that does not exist does not
+// reject the order. The waypoint keeps the order's coordinates, and the
+// waypoint check right after the orders makes it a plain go-to there, as
+// a waypoint aimed at a fleet id that did not exist came back (ORDERS.md
+// "Target gone", CONFIRMED for a fleet target). Wormhole and Trader
+// targets are rejected instead, an older choice this does not change.
+//
 // A warp outside 0..11, a target planet or fleet that does not exist,
 // and a negative transport amount reject the order (ORDERS.md "Waypoint
 // warp, target and transport", chosen rule). Warp 11 is
@@ -454,6 +465,9 @@ func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 	}
 	wps := make([]Waypoint, len(o.Waypoints))
 	for k, wp := range o.Waypoints {
+		if wp.Target != TargetPacketObject {
+			wp.Owner = 0
+		}
 		if wp.Warp < 0 || wp.Warp > 11 {
 			return fmt.Errorf("waypoint %d warp %d: %w", k, wp.Warp, ErrOutOfRange)
 		}
@@ -492,6 +506,17 @@ func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 				return fmt.Errorf("waypoint %d object %d: %w", k, wp.ID, ErrNoSuchObject)
 			}
 			wp.Pos = pos
+		case TargetPacketObject:
+			if wp.Owner < 0 || wp.Owner >= len(g.Players) || wp.ID < 0 {
+				return fmt.Errorf("waypoint %d packet %d of player %d: %w", k, wp.ID, wp.Owner, ErrOutOfRange)
+			}
+			if pos, ok := g.packetObjectPos(wp.Owner, wp.ID); ok {
+				wp.Pos = pos
+			} else {
+				// ASSUMPTION W9: kept at the order's coordinates; the
+				// waypoint check after the orders makes it a plain go-to.
+				wp.Pos = g.clampToGalaxy(wp.Pos)
+			}
 		case TargetSpace:
 			wp.Pos = g.clampToGalaxy(wp.Pos)
 		default:

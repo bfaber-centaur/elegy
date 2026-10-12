@@ -53,6 +53,16 @@ func (s *Space) ObjectPos(kind engine.TargetKind, id int) (engine.Point, bool) {
 	return engine.Point{}, false
 }
 
+// PacketPos is where owner's packet number is now.
+func (s *Space) PacketPos(owner, number int) (engine.Point, bool) {
+	for _, p := range s.Packets {
+		if p.Owner == owner && p.Number == number {
+			return p.Pos, true
+		}
+	}
+	return engine.Point{}, false
+}
+
 func width(g *engine.Game) int { return (g.Size + 1) * 400 }
 
 func impactContext(g *engine.Game) ImpactContext {

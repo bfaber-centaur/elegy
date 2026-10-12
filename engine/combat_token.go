@@ -147,9 +147,9 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 			}
 		}
 		shield += p.Shield * s.Count
-		// RS halves the armor parts' armor. ASSUMPTION A13: a shield
-		// part's armor (Croby Sharmor, Langston Shell) counts whole;
-		// COMBAT.md names "each armor part" only.
+		// RS halves the armor parts' armor; a shield part's armor counts
+		// whole (CONFIRMED for Croby Sharmor, CB-056, stars-elegy b0ca924;
+		// the Langston Shell is not observed).
 		if rs && p.Kind == PartArmor {
 			armor += p.Armor / 2 * s.Count
 		} else {
@@ -175,7 +175,7 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 	if jammed {
 		t.jammer = min(95, 100-(jam+50)/100)
 		if starbase {
-			t.jammer -= t.jammer / 4 // BINARY-ONLY
+			t.jammer -= t.jammer / 4 // after the 95 cap (CONFIRMED, CB-056)
 		}
 	}
 	t.capacitor = capac / 10

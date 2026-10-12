@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -200,5 +201,37 @@ func TestPredictionGateLosses(t *testing.T) {
 	loseShare(&cg, 1, 2)
 	if cg != (engine.Cargo{Minerals: engine.Minerals{4, 4, 2}}) {
 		t.Errorf("cargo share: %+v", cg)
+	}
+}
+
+// ASSUMPTION G5 (unobserved): a Regenerating Shields owner's ships take
+// stargate damage on the plain armor, not the battle's halved armor parts
+// as in mine damage (CB-056 measured RS only for mines). Four Tanks
+// (Destroyer, 2 Superlatanium: armor 3200; halved, 1700) jump an
+// overloaded gate with the same draws for an RS owner and for one without
+// RS: the results are the same.
+func TestAssumptionGateDamageRegeneratingShieldsPlainArmor(t *testing.T) {
+	jump := func(rs bool) (GateJump, engine.Stack) {
+		l := gateLab(t, "Stargate 100/250", 380)
+		l.g.Players[0].Race.LRT.RegeneratingShields = rs
+		fi := l.fleet(0, origin, "Tank", 4)
+		l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 50, Units: 100}
+		j := Jump(l.g, fi, at(380, 0), &script{3, 50, 50, 50, 50})
+		return j, l.g.Fleets[fi].Stacks[0]
+	}
+	j, st := jump(false)
+	jrs, strs := jump(true)
+	if j.Designs[0].Pct <= 0 || j.Designs[0].Pct >= 100 {
+		t.Fatalf("the jump must damage without destroying: %+v", j)
+	}
+	// 19%: the first ship is destroyed (3 < 6) and rand(500) = 50 < 100
+	// lowers D from 2 to 1. Nw = 19·3200/100 = 608, Dm = 100·3200/500 =
+	// 640; avg = ⌊(608·3 + 640)/3⌋ = 821, u = 821·500/3200 = 128. Halved
+	// armor would give Nw 323 (u is 128 either way).
+	if j.Designs[0].Damage != 608 || st != (engine.Stack{Design: st.Design, Count: 3, Damage: engine.Damage{Pct: 100, Units: 128}}) {
+		t.Errorf("plain armor: %+v %+v, want damage 608 and 3 ships at 128/500", j, st)
+	}
+	if !reflect.DeepEqual(j, jrs) || st != strs {
+		t.Errorf("RS owner: %+v %+v, want the plain-armor result %+v %+v", jrs, strs, j, st)
 	}
 }
