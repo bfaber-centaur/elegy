@@ -532,13 +532,15 @@ research stealing 13, `battle_plan` 13, wormhole objects 10,
   records are compared only through their effects.
 - Orders and tasks Elegy does not load: fleet-to-fleet transport (15),
   transport fuel (every other action is loaded), `design` and
-  `design_delete` orders.
+  `design_delete` orders. An order the harness cannot apply stops the
+  vector's years there; each later expectation is skipped with it, and
+  the earlier years are still compared.
 - Production queues with unmapped planetary items: 10 (unused), 13
   (the Genesis Device) and the scanners 18–27. Packets launched from such
   a queue are skipped too ("a packet from a production queue").
-- Stream cycles beyond the harness's seeds, "original environment null",
-  "design read needs the order layer's design source", and KX-002-R3/R4
-  (the next research field choice is not in the vector).
+- Stream cycles beyond the harness's seeds and "design read needs the
+  order layer's design source". No case is skipped as a whole: every
+  skip is per expectation or per field, with its own reason.
 
 **Sample-only and random cases:** a case listed as `random k` in the
 baseline passes with k of 8 seeds; it is evidence of the rule, never of

@@ -140,10 +140,12 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m pvMaps) (engine.S
 }
 
 // pvCompare checks each field in eq against got (both as JSON values);
-// fields in skip are left unchecked, and the result is a skip naming them
-// only when every checked field matched.
+// fields in skip, and fields got lacks, are left unchecked, and the
+// result is a skip naming the first of them only when every checked field
+// matched (pvResult).
 func pvCompare(what string, got map[string]any, eq map[string]json.RawMessage, tol int, skip map[string]string) string {
-	var why string
+	var errs []string
+	why := ""
 	keys := make([]string, 0, len(eq))
 	for k := range eq {
 		keys = append(keys, k)
@@ -158,7 +160,10 @@ func pvCompare(what string, got map[string]any, eq map[string]json.RawMessage, t
 		}
 		v, ok := got[k]
 		if !ok {
-			return "skip: " + what + " field " + k
+			if why == "" {
+				why = what + " field " + k
+			}
+			continue
 		}
 		var want any
 		json.Unmarshal(eq[k], &want)
@@ -171,13 +176,10 @@ func pvCompare(what string, got map[string]any, eq map[string]json.RawMessage, t
 			}
 		}
 		if fmt.Sprint(g) != fmt.Sprint(want) {
-			return what + ": " + pvMismatch(k, v, want)
+			errs = append(errs, what+": "+pvMismatch(k, v, want))
 		}
 	}
-	if why != "" {
-		return "skip: " + why
-	}
-	return ""
+	return pvResult(errs, why)
 }
 
 func pvMinefield(s *objects.Space, owner, id int) *objects.Minefield {
