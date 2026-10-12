@@ -32,7 +32,7 @@ These are classified by hand, with an owner. They cover a field that misses on a
 - **incorrect mechanic**;
 - **state-import error**;
 - **unsupported order**;
-- **unresolved randomness**, for a field that misses on all 8 variants by an amount that varies between them, when its owner argues it is draw-driven all the same. The class carries the owner and a one-line reason (`unresolved randomness [lane D]: reason`), and the test refuses it on a line whose value is the same on every variant. No line has it yet.
+- **unresolved randomness**, for a field that misses on all 8 variants by an amount that varies between them, when its owner argues it is draw-driven all the same. The class carries the owner and a one-line reason (`unresolved randomness [lane D]: reason`), and the test refuses it on a line whose value is the same on every variant. Two lines have it: the variant-only refusal below.
 
 A field that misses on all 8 variants by a varying amount says so in its detail: "(0/8 variants match, values vary)". Its value depends on Elegy's draws, but no draw gets it right, so it is a mechanic difference until its owner shows otherwise.
 
@@ -44,7 +44,7 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | missing mechanic | 0 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
-| unresolved randomness | 0 | 0 | 0 |
+| unresolved randomness | 0 | 2 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 456 | 0 | 0 |
 | sample | 976 | 43 | 16 |
@@ -55,7 +55,8 @@ The reference run of RG-002 has no deterministic discrepancy left. Every field, 
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
-- **Restarts:** Elegy refuses none of the orders, and none of the 44 battle records fails.
+- **Restarts:** on the reference seed Elegy refuses none of the orders, and none of the 44 battle records fails.
+- **Refusals on other variants:** the ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There is one, in Y1 and in the chained run's year 1. Player 2's order 10 is a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refuse it. ORDERS.md "A fleet target merged away during order replay" covers only waypoints at index 1 or later, so both lines are `unresolved randomness [lane A]`.
 - **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
 
 ## Effect of #189 and #190
