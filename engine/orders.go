@@ -571,30 +571,12 @@ const (
 	maxItemCount  = 1023
 )
 
-// QueueOrder replaces a planet's whole production queue (LIMITS.md
-// "Production-queue replace", CONFIRMED LQ-1..LQ-6): the
-// planet must be the sender's; an empty list removes the queue; otherwise
-// the new list replaces the old in the order given, counts as sent. Elegy's
-// chosen rule: taking items in queue order, a new item sent
-// with a nonzero percentage keeps it only if the old queue has an item not
-// yet matched of the same kind with exactly that percentage, which is then
-// used up; otherwise it starts at 0. It gives the original's result for
-// every queue a legal client sends and never creates progress.
-//
-// A ship or starbase item names one of the sender's design slots, matched
-// like any item by its id (the slot) and kind (LIMITS.md "Production-queue
-// replace"). A ship item the client could not queue, at a planet whose
-// starbase has no dock or a dock too small for the hull, is refused
-// (PRODUCTION-LAUNCH.md "Can the planet build it", Elegy's chosen rule;
-// DockAllows).
-//
-// ASSUMPTION P3: a design item naming an empty slot, or a slot outside
-// the player's slots, refuses the queue order.
 // DefaultQueueOrder replaces the player's default queue settings, which a
 // new colony or a captured planet takes (stars-elegy f2f9794, ORDERS.md "The
 // player's default queue": the order file's record is copied over the
 // stored setting whole, BINARY-ONLY). It holds planetary items only, at
-// most maxDefaultQueueItems.
+// most maxDefaultQueueItems; the item checks are Elegy's chosen rule, as for
+// QueueOrder.
 type DefaultQueueOrder struct {
 	Queue        []QueueItem
 	LeftoverOnly bool
@@ -619,6 +601,25 @@ func (o DefaultQueueOrder) apply(g *Game, player int, _ *Applied) error {
 	return nil
 }
 
+// QueueOrder replaces a planet's whole production queue (LIMITS.md
+// "Production-queue replace", CONFIRMED LQ-1..LQ-6): the
+// planet must be the sender's; an empty list removes the queue; otherwise
+// the new list replaces the old in the order given, counts as sent. Elegy's
+// chosen rule: taking items in queue order, a new item sent
+// with a nonzero percentage keeps it only if the old queue has an item not
+// yet matched of the same kind with exactly that percentage, which is then
+// used up; otherwise it starts at 0. It gives the original's result for
+// every queue a legal client sends and never creates progress.
+//
+// A ship or starbase item names one of the sender's design slots, matched
+// like any item by its id (the slot) and kind (LIMITS.md "Production-queue
+// replace"). A ship item the client could not queue, at a planet whose
+// starbase has no dock or a dock too small for the hull, is refused
+// (PRODUCTION-LAUNCH.md "Can the planet build it", Elegy's chosen rule;
+// DockAllows).
+//
+// ASSUMPTION P3: a design item naming an empty slot, or a slot outside
+// the player's slots, refuses the queue order.
 type QueueOrder struct {
 	Planet int
 	Queue  []QueueItem
