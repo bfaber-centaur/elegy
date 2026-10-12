@@ -440,10 +440,13 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		}
 	}
 
+	spent := make([][NumFields]int, len(g.Players))
 	for i := range g.Players {
 		pl := &g.Players[i]
+		spent[i] = researchSpent(pl.Research, pl.Race, research[i])
 		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 	}
+	events = append(events, g.stealResearch(spent)...)
 	// Research level-ups, then random events (KERNEL.md "Turn order"
 	// steps 4b and 4c), then starbase refuelling (step 5.2).
 	events = append(events, g.randomEvents(rng)...)

@@ -224,3 +224,85 @@ func LevelUpCheck(s ResearchState, race Race, slowerTech bool) ResearchState {
 	}
 	return s
 }
+
+// researchSpent is how much of a year's research resources go into each
+// field before any level-up: all of it to the current field, or under
+// Generalized Research half (rounded up) to the current field and 15%
+// (rounded up) to each other field (KERNEL.md "Allocation"). A field at
+// its maximum level still counts what is directed into it, though
+// AddResearch loses it (ASSUMPTION: KERNEL.md "Super Stealth" counts
+// "every player's research in that field" and does not say whether lost
+// research counts).
+func researchSpent(s ResearchState, race Race, resources int) [NumFields]int {
+	var spent [NumFields]int
+	if !race.LRT.GeneralizedResearch {
+		spent[s.Current] = resources
+		return spent
+	}
+	for f := range NumFields {
+		if f == s.Current {
+			spent[f] = (resources + 1) / 2
+		} else {
+			spent[f] = (3*resources + 19) / 20
+		}
+	}
+	return spent
+}
+
+// EventResearchStolen: a Super Stealth Player gained Count research in
+// field Item (a field index, not an item kind) from what every player
+// spent there this year.
+const EventResearchStolen EventKind = EventWarp10FleetLost + 1
+
+// stealResearch is KERNEL.md "Allocation", Super Stealth (stars-elegy
+// fda4173, CONFIRMED KX-003 S3L): after every player's research, each
+// Super Stealth player gains, per field, s = trunc(trunc(spent/players)/2)
+// when s > 1, where spent is every player's research in that field this
+// year, its own included, and players the players still in the game;
+// one message per field. Under slower tech ceil(s/2) is stored
+// (CONFIRMED, KB-2B). Generalized Research shares count in full. After
+// every player's normal level-ups, the fields the stolen research levels
+// up are checked in field order, energy first (BINARY-ONLY, KERNEL.md in
+// stars-elegy 2f214f5).
+func (g *Game) stealResearch(spent [][NumFields]int) []Event {
+	players := 0
+	var total [NumFields]int
+	for i, pl := range g.Players {
+		if pl.Dead {
+			continue
+		}
+		players++
+		for f := range NumFields {
+			total[f] += spent[i][f]
+		}
+	}
+	// No research is stolen unless more than one player is still in the
+	// game (BINARY-ONLY, stars-elegy 2f214f5; MEASURED: the one-player
+	// Super Stealth PG, KX-001 and KX-002 games kept their own research
+	// unchanged, where KERNEL.md's formula would give them half of it
+	// again).
+	if players < 2 {
+		return nil
+	}
+	var events []Event
+	for i := range g.Players {
+		pl := &g.Players[i]
+		if pl.Dead || pl.Race.PRT != PRTSuperStealth {
+			continue
+		}
+		for f := range NumFields {
+			s := total[f] / players / 2
+			if s <= 1 {
+				continue
+			}
+			stored := s
+			if g.SlowerTech {
+				stored = (s + 1) / 2
+			}
+			pl.Research.Accumulated[f] += stored
+			events = append(events, Event{Kind: EventResearchStolen, Player: i, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: s})
+		}
+		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+	}
+	return events
+}
