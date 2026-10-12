@@ -522,3 +522,19 @@ func TestMisslottedPartDropped(t *testing.T) {
 		t.Errorf("after the year: %d parts, want the engine only", n)
 	}
 }
+
+// TestRGNoRejectedOrders checks that the engine accepts every order of
+// RG-001, chained and restarted: an order Elegy refuses there means a
+// state that has drifted from the original's (before #147, player 6's
+// fleet 0 in 2433 and 2435) or an order kind the loader converts wrongly.
+func TestRGNoRejectedOrders(t *testing.T) {
+	for _, name := range []string{"rg001", "rg001-y1", "rg001-y2", "rg001-y3", "rg001-y4", "rg001-y5", "rg001-y6"} {
+		v, err := ReadFile("../../engine/testdata/vectors/rg/" + name + ".json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if c := Compare(v, 0); len(c.Rejected) != 0 {
+			t.Errorf("%s: rejected %q", name, c.Rejected)
+		}
+	}
+}
