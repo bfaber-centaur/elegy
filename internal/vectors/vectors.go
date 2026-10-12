@@ -982,8 +982,8 @@ type Result struct {
 	Passes int    `json:"passes,omitempty"` // seed variants the case passes with
 	// RefStatus is, for a random case, the reference seed's status.
 	RefStatus string `json:"ref_status,omitempty"`
-	// Skipped is the reasons of the expectations skipped inside a case
-	// that was otherwise checked, one per expectation.
+	// Skipped is the reasons of the case's skipped expectations, one per
+	// expectation, whether or not the case compared any other.
 	Skipped []string `json:"skipped,omitempty"`
 }
 
@@ -1721,9 +1721,9 @@ func runVectorWith(v *Vector, run pvRun) []Result {
 		default:
 			res(c, "pass", "")
 		}
-		if checked > 0 {
-			out[len(out)-1].Skipped = skips
-		}
+		// Every skipped expectation is tallied, a wholly skipped case's
+		// too, so the census names each reason a case was not compared.
+		out[len(out)-1].Skipped = skips
 	}
 	return out
 }

@@ -107,6 +107,14 @@ func TestFleetMismatchBesideSkip(t *testing.T) {
 	if m, s := pvSplit(msg); !strings.HasPrefix(m, "waypoints[2] = ") || s != "waypoint task bogus" {
 		t.Errorf("later waypoint: %q", msg)
 	}
+	// A waypoint the harness cannot read is not compared at all: its
+	// position differs from the fleet's, and nothing is reported.
+	msg = l.fleetEquals(nil, &f, pvEq(t, `{"waypoints": [{"x": 5, "y": 6, "task": {"kind": "none"}}, {"x": 8, "y": 8, "target": {"kind": "space"}, "task": {"kind": "bogus"}}, {"x": 1, "y": 1, "target": {"kind": "space"}, "task": {"kind": "none"}}]}`))
+	pvWant(t, "unread waypoint", msg, "", "waypoint task bogus")
+	// Waypoints that all match do not clear an earlier field's skip.
+	f.Waypoints = nil
+	msg = l.fleetEquals(nil, &f, pvEq(t, `{"aaa": 1, "waypoints": [{"x": 5, "y": 6, "task": {"kind": "none"}}]}`))
+	pvWant(t, "skip before waypoints", msg, "", "fleet field aaa")
 }
 
 func TestCompareMismatchBesideSkip(t *testing.T) {
@@ -115,6 +123,29 @@ func TestCompareMismatchBesideSkip(t *testing.T) {
 	pvWant(t, "missing field", msg, "thing: b = 1, want 2; thing: c = 2, want 3", "thing field a")
 	msg = pvCompare("thing", got, pvEq(t, `{"a": 1, "c": 3}`), 0, map[string]string{"a": "no a"})
 	pvWant(t, "skipped field", msg, "thing: c = 2, want 3", "no a")
+	// The first field skipped names the skip, whichever way each was.
+	msg = pvCompare("thing", got, pvEq(t, `{"a": 1, "b": 1, "x": 1}`), 0, map[string]string{"b": "no b", "x": "no x"})
+	pvWant(t, "missing then skipped", msg, "", "thing field a")
+	msg = pvCompare("thing", map[string]any{}, pvEq(t, `{"a": 1, "b": 1}`), 0, map[string]string{"a": "no a"})
+	pvWant(t, "skipped then missing", msg, "", "no a")
+	msg = pvCompare("thing", map[string]any{}, pvEq(t, `{"a": 1, "b": 1}`), 0, nil)
+	pvWant(t, "two missing", msg, "", "thing field a")
+	msg = pvCompare("thing", map[string]any{}, pvEq(t, `{"a": 1, "b": 1}`), 0, map[string]string{"a": "no a", "b": "no b"})
+	pvWant(t, "two skipped", msg, "", "no a")
+}
+
+// TestViewExact checks that a view is compared exactly: a fleet seen
+// without its cargo is level 3, and a 4 expected is a mismatch.
+func TestViewExact(t *testing.T) {
+	f := engine.Fleet{ID: 7, Owner: 1}
+	viewer := 0
+	l := pvLoaded{views: [][]engine.PlayerView{nil, {{Player: 0, Fleets: []engine.FleetSighting{{Fleet: 7, Owner: 1}}}}}}
+	e := pvExpect{Year: 1, Kind: "view", Viewer: &viewer, Subject: json.RawMessage(`{"kind": "fleet", "owner": 1, "id": 7}`)}
+	fleet := func(owner, id int) *engine.Fleet { return &f }
+	msg := l.viewCheck(nil, e, pvEq(t, `{"level": 4}`), fleet)
+	pvWant(t, "level", msg, "fleet: level = 3, want 4", "")
+	msg = l.viewCheck(nil, e, pvEq(t, `{"level": 3, "known": true}`), fleet)
+	pvWant(t, "match", msg, "", "")
 }
 
 // TestRunReportsMismatchBesideSkip runs PQ-001-C01 with a field the
@@ -146,7 +177,8 @@ func TestPlayerUnsure(t *testing.T) {
 	g := &engine.Game{Players: []engine.Player{{}, {Computer: true}, {Computer: true}, {}, {}}}
 	g.Players[3].Race.PRT = engine.PRTSuperStealth
 	g.Players[4].Race.PRT = engine.PRTSuperStealth
-	l := pvLoaded{g: *g, queued: map[int]bool{0: true, 4: true}, ordered: map[int]bool{2: true}}
+	g.Players = append(g.Players, engine.Player{Computer: true})
+	l := pvLoaded{g: *g, queued: map[int]bool{0: true, 4: true, 5: true}, ordered: map[int]bool{2: true}}
 	research := []string{"tech", "research_accumulated", "research_field"}
 	for _, c := range []struct {
 		id   int
@@ -158,6 +190,7 @@ func TestPlayerUnsure(t *testing.T) {
 		{3, map[string]string{"tech": "Super Stealth research stealing", "research_accumulated": "Super Stealth research stealing"}},
 		// The first reason found is kept.
 		{4, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue"}},
+		{5, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue"}},
 	} {
 		got := l.playerUnsure(g, c.id)
 		if len(got) != len(c.want) {
@@ -197,5 +230,25 @@ func TestRunComparesYearsBeforeUnappliedOrders(t *testing.T) {
 	r = Run(v, 0)[0]
 	if r.Status != "fail" || !strings.Contains(r.Why, "y1 planet: mines = ") {
 		t.Errorf("status %s, why %q; want a fail on year-1 mines", r.Status, r.Why)
+	}
+}
+
+// TestRunTalliesWhollySkippedCase gives PQ-001-C01 a year-1 order the
+// harness cannot apply, so no expectation is compared: the case is a
+// skip, and each of its expectations is still tallied with its reason.
+func TestRunTalliesWhollySkippedCase(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	v.Orders = append(v.Orders, pvOrderBlock{Year: 1, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "design_delete", "slot": 0}`)}})
+	r := Run(v, 0)[0]
+	if r.Status != "skip" || len(r.Skipped) != len(v.Cases[0].Expect) {
+		t.Fatalf("status %s, skipped %q; want a skip tallying all %d expectations", r.Status, r.Skipped, len(v.Cases[0].Expect))
+	}
+	for _, why := range r.Skipped {
+		if why != "order design_delete" && !strings.HasPrefix(why, "stream ") {
+			t.Errorf("skipped %q", why)
+		}
 	}
 }
