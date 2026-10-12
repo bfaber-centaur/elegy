@@ -612,6 +612,61 @@ func combatLabGame(defender Design, attackers, defenders int) Game {
 	}
 }
 
+func TestMeasuredSalvageCostAtYearStartTech(t *testing.T) {
+	// RG-001 2434 (stars-elegy COMBAT.md "Design cost", #141): a year's
+	// design costs use the tech from before its research. The defender's
+	// owner gains energy levels this year (the step 2.4 check), and its
+	// Mini-Colony Ship, destroyed in deep space, leaves a quarter less
+	// than a third of the start-of-year cost. With Bleeding Edge
+	// Technology the salvage takes the cost after research (BINARY-ONLY).
+	cat := Components()
+	ship, err := cat.NewDesign("colony", "Mini-Colony Ship", []SlotFill{{Slot: 0, Part: "Settler's Delight", Count: 1}, {Slot: 1, Part: "Colonization Module", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Start energy 3 is RG-001's case; a BET race needs energy 1 for the
+	// level-up to change the cost.
+	for _, bet := range []bool{false, true} {
+		old := [NumFields]int{3, 6, 6, 6, 5, 4}
+		if bet {
+			old[Energy] = 1
+		}
+		game := combatLabGame(ship, 6, 1)
+		game.Designs[1] = ship
+		game.Players[1].Research.Levels = old
+		game.Players[1].Research.Accumulated[Energy] = 1 << 20
+		game.Players[1].Race.LRT.BleedingEdgeTech = bet
+		res, err := GenerateTurn(withRules(game), nil, rand.New(rand.NewSource(1)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		now := res.Game.Players[1].Research.Levels
+		race := res.Game.Players[1].Race
+		before, after := designCost(ship, race, old), designCost(ship, race, now)
+		if before.Minerals == after.Minerals {
+			t.Fatalf("BET %v: cost %v is the same at energy %d and %d: not a test", bet, before.Minerals, old[Energy], now[Energy])
+		}
+		at := before.Minerals
+		if bet {
+			at = after.Minerals
+		}
+		var want Minerals
+		for m := range NumMinerals {
+			want[m] = at[m]/3 - at[m]/3/4
+		}
+		if len(res.Game.Salvage) != 1 || res.Game.Salvage[0].Minerals != want {
+			t.Errorf("BET %v: salvage %+v, want %v", bet, res.Game.Salvage, want)
+		}
+		// Target choice keeps the start-of-year cost, BET or not
+		// (BINARY-ONLY).
+		g := res.Game
+		b := battle{g: &g, costLevels: [][NumFields]int{g.Players[0].Research.Levels, old}}
+		if cost, _ := b.tokenCost(1, ship); cost != before {
+			t.Errorf("BET %v: token cost %+v, want the start-of-year %+v", bet, cost, before)
+		}
+	}
+}
+
 func TestConfirmedTechFromBattleSameTurn(t *testing.T) {
 	// CB-018 (Q-11): weapons 3, research 0%. Destroying frigates that need
 	// weapons 4 raised weapons to 4 in the same turn for some random

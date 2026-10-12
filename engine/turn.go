@@ -251,6 +251,12 @@ func GenerateTurn(
 	}
 	g := game.clone()
 	var events []Event
+	// The year's design costs use the tech from before its research
+	// (battle.costLevels).
+	costLevels := make([][NumFields]int, len(g.Players))
+	for i, p := range g.Players {
+		costLevels[i] = p.Research.Levels
+	}
 
 	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
 	// whose draws are the first of the year, then each player's file in
@@ -426,7 +432,7 @@ func GenerateTurn(
 	// research gained in a battle levels up the same turn, CB-018,
 	// CB-021).
 	owned := g.phaseStart()
-	fights := battles(&g, rng, gained)
+	fights := battles(&g, rng, gained, costLevels)
 	events = append(events, fights.events...)
 	bombs := g.bombChecks()
 	events = append(events, bombing(&g, rng)...)

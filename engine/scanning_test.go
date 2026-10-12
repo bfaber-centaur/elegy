@@ -756,7 +756,7 @@ func TestPredictionBattleRecords(t *testing.T) {
 	// board, destroyed ones included, for the views.
 	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
 	g := combatLabGame(prey, 6, 3)
-	res := battles(&g, rand.New(rand.NewSource(3)), map[int]bool{})
+	res := battles(&g, rand.New(rand.NewSource(3)), map[int]bool{}, nil)
 	if len(res.seen) != 1 {
 		t.Fatalf("seen %+v", res.seen)
 	}
