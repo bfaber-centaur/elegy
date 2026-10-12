@@ -57,6 +57,23 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
 
+### GAP-001 predictions (S, G, T)
+
+These are pushed before lane F runs GAP-001 (project case `gap-001.md`, setup validated 2026-10-12). Lane A predicts S, G and T. Economy predicts W, P and A. Player 0 is IT with NRSE, CE, OBRM, LSP and BET, at tech 26. Player 1 (CA) treats player 0 as neutral. Each line is Elegy's current result in `engine/gap001_test.go`.
+
+| Sub-case | Setup | Elegy predicts | Refuted by | Test |
+|---|---|---|---|---|
+| C | The Hauler (Small Freighter, Long Hump 6, Rhino Scanner) for player 0 | 6 resources, 4/0/5 kT (BET's 80% off on every component) | another cost, which moves every S number | `TestPredictionGAP001HaulerCost` |
+| S1 | Two Haulers with 50/20/10 kT scrap at planet 21 (player 0, Orbital Fort, empty surface) | surface 56/20/18 (4C/5 of 8/0/10, plus the cargo); a scrap message; no tech gained (tech 26) | 54/20/16 or any other sum; a tech gain | `TestPredictionGAP001Scrap` |
+| S2 | The same at planet 18 (no starbase) | surface 52/20/13 (C/3 plus the cargo); a scrap message; no tech attempt | another sum | `TestPredictionGAP001Scrap` |
+| T1 | Player 0's empty Hauler in deep space, transfer to player 1 | player 1's, file number 3 (lowest unused after 0, 1, 2, 4), same place, 200 mg, no waypoints; given and received messages | refused, or another number | `TestPredictionGAP001Gifts` |
+| T2 | The same with 10 colonists | refused (colonists aboard); stays player 0's fleet 21 | given | `TestPredictionGAP001Gifts` |
+| T3 | The same with 30 kT of ironium | given with its cargo, file number 5 | given empty, or the cargo left behind or refused | `TestPredictionGAP001Gifts` |
+| G1 | Genesis Device at 99%, planet 7, 60 resources | completes: 1% is 50 of its 5,000 resources (no minerals, no miniaturization); 0x11b to every player (BINARY-ONLY) | still in the queue | `TestPredictionGAP001Genesis` (cost and arithmetic only) |
+| G2 | Genesis Device from 0%, planet 13, 37 resources | 0%, nothing spent (1% needs 50) | 1% or more, or resources spent | `TestPredictionGAP001Genesis` |
+
+Not predicted: what the rebirth does to planet 7, meaning its environment, original environment, concentrations, minerals, installations and population, and which of these are random. No spec describes it, and Elegy has no Genesis Device queue item. G's run will be the first description of it.
+
 ## Turn order implemented
 
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
