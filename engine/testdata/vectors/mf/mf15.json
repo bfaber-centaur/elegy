@@ -3042,7 +3042,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-15-A HELD (MF-15): none stopped: on a leg with no east-west component the path is cut at the start point, which lies outside the field | MF-15-B HELD (MF-15): checked from the start for trunc(sqrt(10000 - 8100)) = 43 ly whatever the direction: stops up to 42 ly out, about 73% stopped | MF-15-C OBSERVED (MF-15): stopped at the heavy rate (about 90% each)"

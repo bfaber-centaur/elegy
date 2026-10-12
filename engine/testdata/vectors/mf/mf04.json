@@ -2219,7 +2219,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-04-A HELD (MF-4): every stop is paid by F1 (smallest d^2 - count): F1 -100 per stop; F2 only decays (400 -> 390)"

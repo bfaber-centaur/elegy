@@ -3014,7 +3014,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-03h-A HELD (MF-3): none stopped | MF-03h-B HELD (MF-3): rate interval contains 10"

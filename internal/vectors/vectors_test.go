@@ -715,6 +715,13 @@ func TestDefaultQueue(t *testing.T) {
 	}); err != nil || l.defaults[0] || l.g.Players[0].DefaultQueue != nil || l.g.Players[0].DefaultLeftoverOnly {
 		t.Errorf("unbuilt item: %v, defaults %v, player %+v", err, l.defaults, l.g.Players[0].DefaultQueue)
 	}
+	// A design item has no place in a default queue (vectors/README.md
+	// "players": planetary items only).
+	if l, err = load(func(p *pvPlayer) {
+		p.DefaultQueue, p.DefaultLeftoverToResearch = raw(`{"kind": 2, "id": 0, "count": 1}`), &yes
+	}); err != nil || l.defaults[0] || l.g.Players[0].DefaultQueue != nil {
+		t.Errorf("design item: %v, defaults %v, player %+v", err, l.defaults, l.g.Players[0].DefaultQueue)
+	}
 	for _, edit := range []func(*pvPlayer){
 		func(p *pvPlayer) { p.DefaultQueue = raw() },
 		func(p *pvPlayer) { p.DefaultLeftoverToResearch = &yes },
@@ -722,5 +729,36 @@ func TestDefaultQueue(t *testing.T) {
 		if _, err := load(edit); err == nil || !strings.Contains(err.Error(), "go together") {
 			t.Errorf("one of the pair: %v", err)
 		}
+	}
+}
+
+// TestOrderCargoSalvage: a cargo order's salvage partner is named by its
+// owner and number (vectors/README.md "cargo").
+func TestOrderCargoSalvage(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := l.g
+	files, why := l.orders(testBlock(t,
+		`{"kind": "cargo", "fleet": 0, "with": {"kind": "salvage", "owner": 2, "id": 1}, "amounts": {"ironium": 30}}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	c := engine.CargoOrder{Fleet: l.fleetIn(&g, 0, 0), Target: engine.TargetSalvage, ID: 1, Owner: 2}
+	c.Amounts[pvCargo()["ironium"]] = 30
+	if !reflect.DeepEqual(files[0].Orders, []engine.Order{c}) {
+		t.Errorf("orders = %+v, want %+v", files[0].Orders, c)
+	}
+	_, why = l.orders(testBlock(t,
+		`{"kind": "cargo", "fleet": 0, "with": {"kind": "salvage", "id": 1}, "amounts": {"ironium": 30}}`,
+	), 1, &g)
+	if why != "order cargo with salvage without an owner" {
+		t.Errorf("salvage without an owner: %q", why)
 	}
 }

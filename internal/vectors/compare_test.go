@@ -401,3 +401,14 @@ func TestPackCount(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultQueueExpectation(t *testing.T) {
+	var l pvLoaded
+	g := &engine.Game{Players: []engine.Player{{DefaultQueue: []engine.QueueItem{{Kind: engine.ItemAutoMines, Count: 5}}, DefaultLeftoverOnly: true}}}
+	pvWant(t, "match", l.playerEquals(g, 0, pvEq(t, `{"default_queue": [{"kind": 1, "id": 0, "count": 5}], "default_leftover_to_research": true}`), nil), "", "")
+	pvWant(t, "queue", l.playerEquals(g, 0, pvEq(t, `{"default_queue": []}`), nil), "default_queue = [{4 5 0 0}], want []", "")
+	pvWant(t, "leftover", l.playerEquals(g, 0, pvEq(t, `{"default_leftover_to_research": false}`), nil), "default_leftover_to_research = true, want false", "")
+	pvWant(t, "design item", l.playerEquals(g, 0, pvEq(t, `{"default_queue": [{"kind": 2, "id": 0, "count": 1}]}`), nil), "", "default queue with a design item")
+	g.Players[0].DefaultQueue = nil
+	pvWant(t, "empty", l.playerEquals(g, 0, pvEq(t, `{"default_queue": []}`), nil), "", "")
+}

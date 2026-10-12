@@ -117,8 +117,8 @@ type pvPlayer struct {
 	Homeworld           *int              `json:"homeworld"`
 	// DefaultQueue and DefaultLeftoverToResearch are the player's
 	// default queue settings, which a planet it newly owns takes; both
-	// absent when the vector's builder did not read them (proposed
-	// fields, not yet in the stars-elegy README).
+	// absent when the vector's builder did not read them (vectors/README.md
+	// "players").
 	DefaultQueue              *[]json.RawMessage `json:"default_queue"`
 	DefaultLeftoverToResearch *bool              `json:"default_leftover_to_research"`
 }
@@ -569,7 +569,7 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 		// A default queue holding an item Elegy does not build is left
 		// unloaded, and what a newly owned planet takes stays skipped.
 		if p.DefaultQueue != nil {
-			if items, why := pvQueue(*p.DefaultQueue); why == "" {
+			if items, why := pvDefaultQueue(*p.DefaultQueue); why == "" {
 				pl.DefaultQueue, pl.DefaultLeftoverOnly = items, *p.DefaultLeftoverToResearch
 				l.defaults[p.ID] = true
 			}
@@ -955,6 +955,22 @@ func pvQueue(raw []json.RawMessage) ([]engine.QueueItem, string) {
 			return nil, fmt.Sprintf("production queue: planetary item %d", it.ID)
 		}
 		items = append(items, engine.QueueItem{Kind: k, Count: it.Count, Percent: it.Percent})
+	}
+	return items, ""
+}
+
+// pvDefaultQueue converts a player's default queue, which holds
+// planetary items only (vectors/README.md "players"), or names what it
+// cannot load.
+func pvDefaultQueue(raw []json.RawMessage) ([]engine.QueueItem, string) {
+	items, why := pvQueue(raw)
+	if why != "" {
+		return nil, "default " + why
+	}
+	for _, it := range items {
+		if it.Kind == engine.ItemShip || it.Kind == engine.ItemStarbase {
+			return nil, "default queue with a design item"
+		}
 	}
 	return items, ""
 }
@@ -1837,6 +1853,29 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 			}
 			if got := g.Players[id].Research.Next; got != f {
 				errs = append(errs, pvMismatch(k, got, f))
+			}
+		case "default_queue":
+			var raw []json.RawMessage
+			if err := json.Unmarshal(eq[k], &raw); err != nil {
+				skipped("default_queue " + err.Error())
+				continue
+			}
+			want, why := pvDefaultQueue(raw)
+			if why != "" {
+				skipped(why)
+				continue
+			}
+			if got := g.Players[id].DefaultQueue; !reflect.DeepEqual(got, want) {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
+		case "default_leftover_to_research":
+			var want bool
+			if err := json.Unmarshal(eq[k], &want); err != nil {
+				skipped("default_leftover_to_research " + string(eq[k]))
+				continue
+			}
+			if got := g.Players[id].DefaultLeftoverOnly; got != want {
+				errs = append(errs, pvMismatch(k, got, want))
 			}
 		case "race":
 			var q pvRace

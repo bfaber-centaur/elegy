@@ -3594,7 +3594,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-09h-A OBSERVED (MF-9): per stopped fleet, dmg units/500 at 100%: Tank: 312; Scoop Tank (TG Fuel Scoop): 390; Mizer Tank (Fuel Mizer, not a ram scoop): 390; Shield Tank (500 shields): 234; Tank + Cloak Tank (2 ships): 234/78"

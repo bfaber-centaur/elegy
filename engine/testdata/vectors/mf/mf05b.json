@@ -3061,7 +3061,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-05b-A HELD (MF-5): stops at the MF-1 rate (interval contains 30 per mille)"
