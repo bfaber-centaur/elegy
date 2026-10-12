@@ -1089,7 +1089,7 @@ sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | ships = map[14:1], w
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | waypoints[0] position = {1311 1324}, want {1299 1325}
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | x = 1311, want 1299
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | y = 1324, want 1325
-unresolved randomness [lane A]: waypoint-0 follow of a fleet merged away earlier in the replay; spec gap, see ORDERS.md | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
+incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy #170 ORDERS 'Waypoint 0, following', BINARY-ONLY) | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 sample | rg002 | year 2 | order | year 2 player 1 order 35 (FollowOrder): follow: fleet 300005: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 39 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 42 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
@@ -1186,7 +1186,7 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #76 | fleet owner=2 id=14 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #82 | fleet owner=3 id=4 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #84 | fleet_gone owner=3 id=7 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #9 | fleet owner=1 id=7 | cargo.germanium = 0, want 1
-unresolved randomness [lane A]: waypoint-0 follow of a fleet merged away earlier in the replay; spec gap, see ORDERS.md | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
+incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy #170 ORDERS 'Waypoint 0, following', BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.boranium = 68, want 69 (6/8 variants match)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.ironium = 182, want 181 (6/8 variants match)
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #133 | design owner=1 slot=3 | design read needs the order layer's design source

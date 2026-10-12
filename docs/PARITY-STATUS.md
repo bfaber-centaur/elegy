@@ -17,11 +17,12 @@ Bobby's five requirements, in order:
    - On the reference seed (variant 0), the six restarts and the chained run's first year refuse none.
    - The ledger also lists any order refused on another variant but not on the reference one, outside the chained run's samples, with the variants that refuse it. `TestRGNoRejectedOrders` checks every variant of RG-001, which refuses nothing on any of them.
    - The chained run refuses 43 orders in years 2–6. All 43 are samples: those years follow Elegy's own draws (RANDOM-PARITY.md "Samples").
-   - **One refusal on other variants: unresolved randomness [lane A], 2 ledger lines.** In Y1, and in the chained run's year 1, variants 1 and 6 refuse player 2's order 10. That order is a waypoint-0 change aimed at player 6's fleet 10, which player 6's order 1 (`move_ships`) empties. When the year's player shuffle replays player 6 first, the target is gone and Elegy refuses the order ("no such object"). The reference seed replays player 2 first.
-     - stars-elegy ORDERS.md "A fleet target merged away during order replay" says such a waypoint is never rejected, but it covers waypoints at index 1 or later. Waypoint 0, the follow path, is not covered, so the original's behavior here is UNRESOLVED.
-     - It is classed `unresolved randomness [lane A]: waypoint-0 follow of a fleet merged away earlier in the replay; spec gap, see ORDERS.md`, one line each for Y1 and the chained run. Lane G is asking how the original orders the replay across players and what it does here.
+   - **One refusal on other variants: incorrect mechanic [lane A], 2 ledger lines.** In Y1, and in the chained run's year 1, variants 1 and 6 refuse player 2's order 10. That order is a waypoint-0 change aimed at player 6's fleet 10, which player 6's order 1 (`move_ships`) empties. When the year's player shuffle replays player 6 first, the target is gone and Elegy refuses the order ("no such object"). The reference seed replays player 2 first.
+     - stars-elegy #170 (BINARY-ONLY, in review) says the original never rejects a waypoint-0 follow whose target was merged away: a waypoint edit checks only the ordering fleet and the index. The stale id is resolved later, by the start-of-year waypoint check or by the removal-time retarget. So Elegy's refusal is the bug. #170 also says the player shuffle itself matches the original: the year's first draws, Fisher-Yates.
+     - It is classed `incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy #170 ORDERS 'Waypoint 0, following', BINARY-ONLY)`, one line each for Y1 and the chained run.
 3. **Exact deterministic field diffs: MEASURED, none.**
-   - The reference run (seed variant 0) has no field, order or battle record line of a deterministic class (missing mechanic, incorrect mechanic, state-import error, unsupported order). The only hand lines are the 2 refusals above.
+   - The reference run (seed variant 0) has no field, order or battle record line of a deterministic class (missing mechanic, incorrect mechanic, state-import error, unsupported order).
+   - Across all variants, the only hand lines are the 2 incorrect-mechanic refusal lines above: orders, not fields.
    - `TestRG002Ledger` and `TestBattleRecords` fail on any new line and on any ledger line no longer produced.
    - Before #189 and #190 there were 78 such lines. RG002-REPORT.md "Effect of #189 and #190" lists them.
 4. **Random results classified: yes.**
@@ -36,10 +37,10 @@ Bobby's five requirements, in order:
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
 | missing mechanic | 0 | 0 | 0 |
-| incorrect mechanic | 0 | 0 | 0 |
+| incorrect mechanic | 0 | 2 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
-| unresolved randomness | 0 | 2 | 0 |
+| unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 456 | 0 | 0 |
 | sample | 976 | 43 | 16 |
@@ -56,7 +57,7 @@ The 272 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
 ### The run on `e1798ac`
 
 - `go test ./... -count=1` passes in every package: ai, cmd/elegy, engine, game, internal/vectors, newgame, objects, oraclerng, races, regress and terraform.
-- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 456, random-driven 30, sample 1019 (976 fields and 43 orders; the 16 battle samples are `TestBattleRecords`') and unresolved randomness 2. `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
+- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 456, random-driven 30, sample 1019 (976 fields and 43 orders; the 16 battle samples are `TestBattleRecords`') and incorrect mechanic 2. `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
 - **Battle records.** No strict RG-002 record fails: the restarts' 44 and the chained run's 8 in its first year. Of the chained run's 36 later records, all samples, 20 match.
 - **The long-game matrix**, separate from the RG-002 variants: `go test ./regress -run '^TestLongGames$' -count=1 -v -args -seeds=1,2,3,4,5,6,7,8 -years=150 -save-at=77 -size=2`. That is 8 seeds × 2 rulesets × 4 opponent sets = 64 games of 150 years on a medium map. Each game is replayed and reloaded after 77 years. Result: 64 of 64 games played 150 of 150 years with no failure, in 201 s.
 - **The RG-002 8-seed matrix** (`go test -run TestParityVectors -v ./engine`, case level: a case passes on a seed when every compared expectation matches):

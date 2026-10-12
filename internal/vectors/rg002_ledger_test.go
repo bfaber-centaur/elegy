@@ -323,10 +323,16 @@ func readLedger(t *testing.T, path string) map[string]string {
 }
 
 // rg002HandClass reports whether class is a hand class with an owner in
-// brackets ("incorrect mechanic [lane A]").
+// brackets ("incorrect mechanic [lane A]"), optionally followed by a
+// note ("incorrect mechanic [lane A]: note").
 func rg002HandClass(class string) bool {
 	for _, h := range rg002Hand {
-		if rest, ok := strings.CutPrefix(class, h+" ["); ok && strings.HasSuffix(rest, "]") && len(rest) > 1 {
+		rest, ok := strings.CutPrefix(class, h+" [")
+		if !ok {
+			continue
+		}
+		owner, note, ok := strings.Cut(rest, "]")
+		if ok && owner != "" && (note == "" || strings.HasPrefix(note, ": ") && strings.TrimSpace(note[2:]) != "") {
 			return true
 		}
 	}
@@ -501,7 +507,9 @@ func TestCheckLedger(t *testing.T) {
 	for class, want := range map[string]bool{
 		"incorrect mechanic [lane A]": true, "missing mechanic [economy]": true, "random-driven [lane D]": false,
 		"incorrect mechanic []": false, "incorrect mechanic": false, "sample": false, "lucky guess [lane A]": false,
-		"unresolved randomness [lane D]: mining draws": false,
+		"unresolved randomness [lane D]: mining draws": false, "incorrect mechanic [lane A]: refused": true,
+		"incorrect mechanic [lane A]:  ": false, "incorrect mechanic [lane A] refused": false, "incorrect mechanic [lane A]:": false,
+		"incorrect mechanic []: refused": false,
 	} {
 		if rg002HandClass(class) != want {
 			t.Errorf("rg002HandClass(%q) = %v, want %v", class, !want, want)

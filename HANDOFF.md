@@ -13,7 +13,8 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 ## What we know
 
 - **MEASURED on `e1798ac`.**
-  - There is no deterministic discrepancy left: missing mechanic, incorrect mechanic, state-import error and unsupported order are all 0. Unresolved randomness has 2 order lines: one refusal seen only on variants 1 and 6 (below).
+  - On the reference seed there is no deterministic discrepancy left: missing mechanic, incorrect mechanic, state-import error, unsupported order and unresolved randomness are all 0.
+  - Across the other seed variants there is one incorrect mechanic, an order refused only on variants 1 and 6 (below). It makes 2 ledger lines.
   - The restarts refuse no order, and no strict battle record fails.
   - 30 field lines are random-driven: each matches on some seed variant, not on the reference one.
   - Everything in the chained run after its first year is a sample: 976 fields, 43 refused orders and 16 missed battle records.
@@ -29,7 +30,7 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 
 - Those comparator gaps. Until they are closed, "no deterministic discrepancy" covers only what is compared.
 - Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby). Until then the restarts' random-driven lines and the chained years stay unresolved.
-- A variant-only order refusal. In RG-002 Y1, variants 1 and 6 refuse player 2's waypoint-0 change aimed at a fleet that player 6's `move_ships` empties earlier in the replay. ORDERS.md covers the merged-away target only for index 1 or later, so the original's behavior for waypoint 0 is UNRESOLVED. Owner: lane A. It is in the ledger as unresolved randomness (PARITY-STATUS.md, point 2).
+- A variant-only order refusal. In RG-002 Y1, variants 1 and 6 refuse player 2's waypoint-0 change aimed at a fleet that player 6's `move_ships` empties earlier in the replay. stars-elegy #170 (BINARY-ONLY) says the original never rejects a waypoint-0 follow whose target was merged away, so Elegy's refusal is the bug. Owner: lane A. It is 2 incorrect-mechanic ledger lines (PARITY-STATUS.md, point 2).
 - stars-elegy #169 (ET-2): a transport loading from another player's packet is UNRESOLVED; the own-packet case is MEASURED. Owner: lane A.
 - RG-002 has 6 years. Milestone 2 asks for 10.
 
