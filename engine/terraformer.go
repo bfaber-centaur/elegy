@@ -24,7 +24,7 @@ const (
 // Orbital Adjuster clicks on Planet but left the planet owner's
 // habitability (Count) unchanged; the fleet owner (Player) alone is told
 // (MESSAGES.md 0x15b, CONFIRMED GAP-001 W1, stars-elegy 0d63a84).
-const EventPlanetNotDegraded EventKind = EventArtifactFound + 1
+const EventPlanetNotDegraded EventKind = EventTransportNoHold + 1
 
 // Terraformer is the terraforming, remote-mining and Orbital Adjuster
 // rules, which the terraform package implements (it imports this package,
