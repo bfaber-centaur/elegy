@@ -1064,7 +1064,7 @@ SL-limit-b300-ctl
 SL-limit-b300
 SL-routes
 SL-starbases-ctl random 7
-SL-starbases
+SL-starbases random 7
 TK-101-A
 TK-102-A
 TK-103-A

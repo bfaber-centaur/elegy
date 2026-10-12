@@ -24,9 +24,10 @@ const (
 //
 //   - not orbiting a planet: 0x077 (BINARY-ONLY);
 //   - no mining robots: 0x075 (CONFIRMED, CS-003);
-//   - an owned planet it may not mine: 0x076 (CONFIRMED, TK-111), except
-//     that an Alternate Reality fleet is skipped silently and keeps its
-//     task (BINARY-ONLY).
+//   - an owned planet: 0x076 (CONFIRMED, TK-111), except that an
+//     Alternate Reality fleet is skipped silently and keeps its task
+//     (BINARY-ONLY). At its own planet it mined in mineOwnAR, or not at
+//     all (a further waypoint), and is not mined again here.
 //
 // The checks run in that order and the first that fails decides, and the
 // silently skipped Alternate Reality fleet keeps its task (BINARY-ONLY,
@@ -53,13 +54,38 @@ func (g *Game) remoteMineTask(i int, rng Rand) []Event {
 		return refuse(EventRemoteMineNoModules)
 	}
 	p := &g.Planets[pi]
-	ownAR := p.Owner == f.Owner && g.Players[f.Owner].Race.PRT == PRTAlternateReality
-	if p.Owner >= 0 && !ownAR {
+	if p.Owner >= 0 {
 		if g.Players[f.Owner].Race.PRT == PRTAlternateReality {
-			return nil
+			return nil // its own planet was mined in mineOwnAR
 		}
 		return refuse(EventRemoteMineInhabited)
 	}
 	g.Terraform.RemoteMine(g, i, rng)
 	return nil
+}
+
+// mineOwnAR mines Alternate Reality planet pi with its owner's own remote
+// miners, in the year's mining step right after the planet's own mines
+// and before any production (KERNEL.md "Turn order" step 4.1 and "Remote
+// mining", stars-elegy 8a3b9b5). The timing is MEASURED (RG-002 Y1, Y4
+// restarts); the rest is BINARY-ONLY:
+//
+//   - a fleet mines when it has the planet's owner, orbits the planet
+//     now (after movement, so one that arrived this year counts), has
+//     the remote-mining task and has no further waypoint;
+//   - each fleet is its own step (Terraformer.RemoteMine, with the
+//     homeworld floor of 30), in fleet order, with its draws there;
+//   - a fleet mined here keeps its task, and step 6c mines it no more
+//     (remoteMineTask).
+func (g *Game) mineOwnAR(pi int, rng Rand) {
+	if g.Terraform == nil {
+		return
+	}
+	p := &g.Planets[pi]
+	for _, i := range g.fleetOrder() {
+		f := &g.Fleets[i]
+		if f.Owner == p.Owner && f.Pos == p.Pos && f.Task.Kind == TaskRemoteMine && len(f.Waypoints) == 0 {
+			g.Terraform.RemoteMine(g, i, rng)
+		}
+	}
 }

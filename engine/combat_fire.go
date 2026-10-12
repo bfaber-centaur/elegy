@@ -274,7 +274,7 @@ func (b *battle) torpedoes(fi int, w weaponSlot) {
 		}
 		// Hits: h = hits·d/2, truncated once, to shields and again to
 		// armor (step 4, CONFIRMED, CS-003-C2). Every target the salvo
-		// reaches gets a hit record, even with 0 hits (BINARY-ONLY).
+		// reaches gets a hit record, even with 0 hits (CONFIRMED, CB-058).
 		var h BattleHit
 		if hits > 0 {
 			hh, _ := b.damage(e, hits*d/2, hits*d/2, false, n)
@@ -514,7 +514,7 @@ func splitSalvage(m Minerals) []Minerals {
 
 // cargoShare removes the destroyed ships' share of their fleet's cargo
 // and fuel and returns the cargo's minerals (COMBAT.md "Salvage",
-// the cargo share BINARY-ONLY; the fuel share CONFIRMED, CB-023). The
+// the cargo share CONFIRMED, CB-058; the fuel share CONFIRMED, CB-023). The
 // shares of colonists and fuel are destroyed. Each kill
 // event takes its share from what the fleet holds at that moment.
 // e.ships already excludes the kills.

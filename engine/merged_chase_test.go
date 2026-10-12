@@ -128,3 +128,43 @@ func (b *recordBounds) Intn(n int) int {
 	b.bounds = append(b.bounds, n)
 	return b.r.Intn(n)
 }
+
+// A move-ships order that empties a fleet removes it as a merge does
+// (ASSUMPTION L23), and a later file's waypoint aimed at it is accepted
+// and retargeted the same way (ORDERS.md "Targets that moved, died or
+// were captured"; RG-002 Y1, Y2 and Y5, where Elegy refused the order).
+// Chasing player first, the removal retargets to the fleet that took the
+// ships, with no draws.
+func TestMovedShipsChase(t *testing.T) {
+	for _, chaserFirst := range []bool{false, true} {
+		g, files := mergedChaseGame()
+		files[0].Orders = []Order{MoveShipsOrder{Fleet: 1, With: 2, Ships: []Stack{{Design: 0, Count: -1}}}}
+		order := []int{0, 1}
+		if chaserFirst {
+			order = []int{1, 0}
+		}
+		a := ApplyOrders(g, files, order)
+		for _, r := range a.Results {
+			if r.Err != nil {
+				t.Fatalf("chaser first %v: player %d order %d: %v", chaserFirst, r.Player, r.Index, r.Err)
+			}
+		}
+		if g.fleetIndex(1) >= 0 {
+			t.Fatalf("chaser first %v: fleet 1 not removed", chaserFirst)
+		}
+		rng := &recordRand{}
+		g.chaseMerged(a.merged, rng)
+		g.waypointCheck()
+		wp := g.Fleets[g.fleetIndex(3)].Waypoints[0]
+		if wp.Target != TargetFleet || wp.ID != 2 || wp.Pos != (Point{1100, 1100}) {
+			t.Errorf("chaser first %v: waypoint %+v, want fleet 2", chaserFirst, wp)
+		}
+		want := []int{1}
+		if chaserFirst {
+			want = nil
+		}
+		if !reflect.DeepEqual(rng.bounds, want) {
+			t.Errorf("chaser first %v: draws %v, want %v", chaserFirst, rng.bounds, want)
+		}
+	}
+}

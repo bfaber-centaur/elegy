@@ -173,7 +173,7 @@ type MoveShipsOrder struct {
 	Ships []Stack // Design and Count; Damage is ignored
 }
 
-func (o MoveShipsOrder) apply(g *Game, player int, _ *Applied) error {
+func (o MoveShipsOrder) apply(g *Game, player int, ap *Applied) error {
 	a, err := g.ownFleet(player, o.Fleet)
 	if err != nil {
 		return err
@@ -212,6 +212,9 @@ func (o MoveShipsOrder) apply(g *Game, player int, _ *Applied) error {
 			empty[id] = true // ASSUMPTION L23
 		}
 	}
+	// A later file's waypoint may still name an emptied fleet, as a
+	// merged one (Applied.merged).
+	ap.noteRemoved(player, empty)
 	g.removeFleets(empty)
 	return nil
 }

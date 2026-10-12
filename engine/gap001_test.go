@@ -5,11 +5,12 @@ import (
 	"testing"
 )
 
-// GAP-001 predictions for sub-cases S (scrap at a starbase), G (Genesis
-// Device) and T (fleet gifts), pushed before lane F runs the case
-// (project file cases/gap-001.md, setup validated 2026-10-12). Each test
-// is Elegy's current result on the case's start; KERNEL-STATUS.md "GAP-001
-// predictions" lists what would refute each one.
+// GAP-001 sub-cases S (scrap at a starbase), G (Genesis Device) and T
+// (fleet gifts). The predictions were pushed in d2df970 before lane F ran
+// the case; the run (stars-elegy PARITY.md "GAP-001", 0d63a84) matched
+// C's minerals, S1, S2, T1, T2, T3 and G1, and refuted G2: Elegy did not
+// miniaturize the Genesis Device. KERNEL-STATUS.md "GAP-001 results" has
+// each row.
 
 // gap001Race is player 0's race: Interstellar Traveler with No Ram Scoop
 // Engines, Cheap Engines, Only Basic Remote Mining, Low Starting
@@ -73,9 +74,10 @@ func gap001Game(t *testing.T) Game {
 	return g
 }
 
-func TestPredictionGAP001HaulerCost(t *testing.T) {
+func TestConfirmedGAP001HaulerCost(t *testing.T) {
 	// C, the Hauler's cost for player 0 (COMPONENTS.md "Cost for an
-	// owner"): at tech 26 with Bleeding Edge Technology every component is
+	// owner"; the minerals CONFIRMED by GAP-001, the resources not
+	// observable there and still a prediction): at tech 26 with Bleeding Edge Technology every component is
 	// 80% off, halves rounded up, at least 1. Hull 20/12/0/17 → 4/2/0/3,
 	// Long Hump 6 6/5/0/1 → 1/1/0/1, Rhino Scanner 3/3/0/2 → 1/1/0/1.
 	// Cheap Engines changes no cost here.
@@ -86,12 +88,12 @@ func TestPredictionGAP001HaulerCost(t *testing.T) {
 	}
 }
 
-func TestPredictionGAP001Scrap(t *testing.T) {
+func TestConfirmedGAP001Scrap(t *testing.T) {
 	// S1, planet 21 with a starbase: two Haulers, C = 4/0/5 each, so the
 	// fleet's 8/0/10 gives 4C/5 = 6/0/8 plus the 50/20/10 cargo. S2, planet
 	// 18 without one: C/3 = 2/0/3 plus the cargo (TAKEOVER.md "Other
 	// waypoint tasks", CONFIRMED T-34). Player 0 is at tech 26, so the tech
-	// attempt at the starbase gains nothing.
+	// attempt at the starbase gains nothing. CONFIRMED by GAP-001 S1, S2.
 	g := gap001Game(t)
 	r, err := GenerateTurn(g, nil, &seqRand{})
 	if err != nil {
@@ -120,13 +122,13 @@ func TestPredictionGAP001Scrap(t *testing.T) {
 	}
 }
 
-func TestPredictionGAP001Gifts(t *testing.T) {
+func TestConfirmedGAP001Gifts(t *testing.T) {
 	// T1: the empty Hauler becomes player 1's, at the same place with its
 	// 200 mg and no waypoints, numbered with player 1's lowest unused
 	// number: file number 3 (CONFIRMED rule, WU-B2). T2: 10 colonists
 	// aboard, refused; it stays player 0's (CONFIRMED). T3: 30 kT of
 	// ironium aboard: Elegy gives the fleet with its cargo, as file number
-	// 5 (not measured before).
+	// 5. CONFIRMED by GAP-001 T1–T3.
 	g := gap001Game(t)
 	r, err := GenerateTurn(g, nil, &seqRand{})
 	if err != nil {
@@ -164,27 +166,31 @@ func TestPredictionGAP001Gifts(t *testing.T) {
 	}
 }
 
-func TestPredictionGAP001Genesis(t *testing.T) {
-	// G: the Genesis Device item costs 5,000 resources and no minerals for
-	// player 0 (COMPONENTS.md "Cost for an owner": planetary items skip
-	// miniaturization). Elegy does not model the item; this pins the cost
-	// and the queue arithmetic its prediction uses (KERNEL.md
-	// "Production", PQ-001). G1: 99% done leaves trunc(5000·1/100) = 50
-	// to pay, and 60 resources complete it. G2: 37 resources from 0%
-	// reach 0% (1% needs 50) and spend nothing.
+func TestMeasuredGAP001Genesis(t *testing.T) {
+	// G: the Genesis Device's base cost is 5,000 resources, miniaturized
+	// like a ship part (COMPONENTS.md "Cost for an owner"): player 0 has
+	// BET and m = 26 − 20 = 6, so d = 30% and 3,500 (the CS-001 readout for
+	// BET at tech 26). GAP-001 G2–G4 bound it to 3,445–3,567 (MEASURED).
+	// The queue arithmetic is KERNEL.md "Production" (PQ-001). G1: 99% done
+	// leaves 3500 − trunc(3500·99/100) = 35 to pay, so 60 resources
+	// complete it (CONFIRMED). G2–G4: 37, 500 and 999 resources from 0%
+	// reach 1%, 14% and 28% (MEASURED). d2df970 predicted 5,000 and 0% for
+	// G2; that was refuted.
 	c, ok := Components().Lookup("Genesis Device")
 	if !ok {
 		t.Fatal("no Genesis Device")
 	}
 	g := gap001Game(t)
 	cost := c.OwnerCost(g.Players[0].Race, g.Players[0].Research.Levels)
-	if cost != (Cost{Resources: 5000}) {
-		t.Fatalf("cost %+v, want 5000 resources", cost)
+	if cost != (Cost{Resources: 3500}) {
+		t.Fatalf("cost %+v, want 3500 resources", cost)
 	}
-	if left := cost.Resources - spent(cost, 99).Resources; left != 50 {
-		t.Errorf("G1: %d to pay at 99%%, want 50", left)
+	if left := cost.Resources - spent(cost, 99).Resources; left != 35 {
+		t.Errorf("G1: %d to pay at 99%%, want 35", left)
 	}
-	if p := largestPercent(cost.Resources, 37); p != 0 {
-		t.Errorf("G2: %d%%, want 0%%", p)
+	for _, c := range []struct{ avail, pct int }{{37, 1}, {500, 14}, {999, 28}} {
+		if p := largestPercent(cost.Resources, c.avail); p != c.pct {
+			t.Errorf("%d resources from 0%%: %d%%, want %d%%", c.avail, p, c.pct)
+		}
 	}
 }
