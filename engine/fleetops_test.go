@@ -282,3 +282,16 @@ func TestConfirmedMergeWithItself(t *testing.T) {
 		t.Errorf("0x04e x%d refused %v at %v task %+v; want once at (1210,1200), no task", n, refused, f.Pos, f.Task)
 	}
 }
+
+func TestWithFinished(t *testing.T) {
+	// MESSAGES.md 0x04e (a): only the earlier 0x04e of a fleet that gets
+	// another is removed; its other messages, and other fleets' 0x04e,
+	// stay.
+	ev := func(k EventKind, id int) Event { return Event{Kind: k, Player: 0, Planet: -1, Fleet: id} }
+	events := []Event{ev(EventOutOfFuel, 1), ev(EventFleetArrived, 1), ev(EventFleetArrived, 2)}
+	got := withFinished(events, []Event{ev(EventFleetArrived, 1)})
+	want := []Event{ev(EventOutOfFuel, 1), ev(EventFleetArrived, 2), ev(EventFleetArrived, 1)}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}

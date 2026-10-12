@@ -287,7 +287,7 @@ func GenerateTurn(
 		pl := &g.Players[i]
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
 	}
-	events = withFinished(events, g.loadPass(false))
+	events = append(events, g.loadPass(false)...)
 
 	// The race check (KERNEL.md "Turn order" step 2a).
 	if g.Races != nil {
