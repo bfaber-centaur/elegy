@@ -949,3 +949,53 @@ func TestConfirmedLoadAmounts(t *testing.T) {
 		t.Errorf("foreign planet: %+v", f)
 	}
 }
+
+func TestConfirmedLoadedEmptyPlanetLost(t *testing.T) {
+	// TAKEOVER.md "Unload and load amounts" (CONFIRMED TK-201 G) and
+	// MESSAGES.md 0x040 (CONFIRMED mg/mg002), stars-elegy d4eafd9: a load
+	// all that takes every colonist leaves the planet owned with no
+	// population until this year's growth, where it is lost like any
+	// other empty planet: unowned, defenses 0, no scanner or queue
+	// (TAKEOVER.md "Capture"). Mines and factories stay. A planet with
+	// colonists left is kept.
+	l := newTKLab(t, 3)
+	medium := l.design("Medium Freighter", SlotFill{0, "Quick Jump 5", 1})
+	emptied := l.planet(0, 0, 50)
+	kept := l.planet(0, 100, 60)
+	l.planet(NoOwner, 200, 0)
+	for _, pi := range []int{emptied, kept} {
+		p := &l.g.Planets[pi]
+		p.Defenses, p.HasScanner, p.Mines, p.Factories = 10, true, 5, 6
+	}
+	task := Task{Kind: TaskTransport}
+	task.Transport[CargoColonists] = Transport{Action: LoadAll}
+	fi := l.fleet(0, emptied, 0, Stack{Design: medium, Count: 1})
+	l.g.Fleets[fi].Task = task
+	g := withRules(l.g)
+	r, err := GenerateTurn(g, nil, &seqRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := r.Game.Planets[emptied]
+	if p.Owner != NoOwner || p.Population != 0 || p.Defenses != 0 || p.HasScanner || p.Mines != 5 || p.Factories != 6 {
+		t.Errorf("emptied planet %+v; want unowned, defenses 0, no scanner, mines and factories kept", p)
+	}
+	if f := r.Game.Fleets[0]; f.Cargo.Colonists != 50 {
+		t.Errorf("fleet holds %d colonists, want 50", f.Cargo.Colonists)
+	}
+	n := 0
+	for _, e := range r.Events {
+		if e.Kind == EventPlanetEmptied {
+			n++
+			if e.Planet != emptied || e.Player != 0 {
+				t.Errorf("planet-lost message %+v, want only planet %d's, to player 0", e, emptied)
+			}
+		}
+	}
+	if n != 1 {
+		t.Errorf("%d planet-lost messages, want 1", n)
+	}
+	if p := r.Game.Planets[kept]; p.Owner != 0 || p.Defenses != 10 {
+		t.Errorf("planet with colonists %+v; want kept", p)
+	}
+}
