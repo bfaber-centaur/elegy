@@ -154,6 +154,7 @@ type pvPlanet struct {
 	Y              int   `json:"y"`
 	Owner          int   `json:"owner"`
 	Homeworld      bool  `json:"homeworld"` // the planet record's homeworld flag
+	Artifact       bool  `json:"artifact"`  // an ancient artifact (start states only)
 	Concentrations []int `json:"concentrations"`
 	// each concentration's depletion fraction as the planet record
 	// stores it (vectors README "planets"; absent: all 0)
@@ -714,7 +715,7 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 
 	for _, p := range s.Planets {
 		l.planet[p.ID] = p.ID + 1
-		pl := engine.Planet{ID: p.ID + 1, Pos: engine.Point{X: p.X, Y: p.Y}, Owner: p.Owner, Homeworld: p.Homeworld, StarbaseDesign: -1}
+		pl := engine.Planet{ID: p.ID + 1, Pos: engine.Point{X: p.X, Y: p.Y}, Owner: p.Owner, Homeworld: p.Homeworld, Artifact: p.Artifact, StarbaseDesign: -1}
 		if p.Owner < 0 {
 			pl.Owner = engine.NoOwner
 		}

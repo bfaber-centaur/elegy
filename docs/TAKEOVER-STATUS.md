@@ -55,6 +55,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | A "set amount to" waiting at a source because the target holds less than it needs is told so after movement each year (`EventLoadWaiting`, 0x121; 0x122 for colonists) | `settled` | BINARY-ONLY (KERNEL.md "Which loads are unmet"; MESSAGES.md 0x121, 0x122) | `TestSetAmountWaitingMessage` |
 | Capture: what a planet keeps | `emptyPlanet` | CONFIRMED (T-21, T-26, T-27; CA environment TK-116) | `TestConfirmedGroundCombat`, `TestPredictionEmptiedPlanet` |
 | Capture tech attempt (old owner's levels, shared "gained" mark) | `resolveDrops`, `techAttempt` | BINARY-ONLY (#34) | `TestPredictionCaptureTech` |
+| Ancient artifacts: found by the planet's owner after a drop resolution (colony, capture, a defender that held) with random events on; field `rand(6)`, then `100 + rand(301)` points, scaled by colonists/1000 below 1,000; not halved by slower tech; the flag cleared; 0x05e (stars-elegy 7c06f47) | `artifact.go` `findArtifact`, `Planet.Artifact` | CONFIRMED (TK-303, TK-304, TK-306); amounts MEASURED; draw order and random events off BINARY-ONLY; ASSUMPTION A1 (scaling truncates) | `artifact_test.go` |
 | New colony: default queue (AR, CA skips), default leftover setting | `newColony` | BINARY-ONLY | `TestPredictionEmptiedPlanet` |
 | New colony with an empty default queue: no queue, all resources to research | `newColony` | MEASURED (WU-CAP) | `TestMeasuredEmptyDefaultQueueNoQueue` |
 | Scrap: before movement only; 4C/5, C/3, 9C/10, 9C/20 by starbase and the planet owner's Ultimate Recycling, C/3 as fresh salvage in deep space, the overflow past 30,000 kT in further objects (CONFIRMED CB-040, OBJECTS.md "Salvage"), which belong to the fleet's owner and are not marked fresh (BINARY-ONLY, OBJECTS.md "Salvage", "Owner" and "Decay", and its open-questions list, item 7, at stars-elegy c3aab85); cargo minerals on top; colonists to the owner's own planet; the planet owner's tech attempt at a starbase, with the scrapped ships' Trader part counts as chances (MEASURED TK-305; ASSUMPTION K11: once per ship, capped at 25); the Ultimate Recycling production bonus (ASSUMPTION K9: the planet owner's trait) | `scrap`, `recycledResources` | CONFIRMED (T-34, TK-203, KB-2A) | `TestConfirmedScrapMinerals`, `TestConfirmedScrapRecycledResources`, `TestScrapOnlyBeforeMovement`, `TestScrapTraderChance`, `TestScrapSalvageOverflow`, `TestSplitSalvage`, TK-111-S1..S10, M1..M4, TK-203 vectors |
@@ -94,7 +95,6 @@ spec does not give the scan's start value. The code says so at
   mining, mine laying, cargo given to other players' fleets and colonists
   dropped by a manual cargo order are implemented (KERNEL-STATUS.md,
   ORDERS-LAYER-STATUS.md);
-- ancient artifacts;
 - the design check at generation that drops parts above the owner's tech:
   designs have owners through `Game.DesignSlots`, but `Catalog.ReadDesign`
   runs only when a design order (ORDERS-STATUS.md) or a computer player

@@ -316,8 +316,7 @@ func (g *Game) bombPlanet(pi, bomber int, pass bombPass, rng Rand) []Event {
 // stay; owner, population, defenses, scanner, queue, starbase and the
 // leftover setting go. A Claim Adjuster owner's planet returns to its
 // original environment (CONFIRMED, TK-116).
-//
-// Not modelled: ancient artifacts (Elegy has no random events).
+// An ancient artifact stays (artifact.go).
 func (g *Game) emptyPlanet(pi int) Event {
 	p := &g.Planets[pi]
 	old := p.Owner
@@ -995,7 +994,8 @@ func groundStrength(r Race) int {
 // (TAKEOVER.md "Ground combat", CONFIRMED T-21..T-25, and "Several
 // players dropping at once", LEGACY BUG, CONFIRMED T-32). A capture of
 // an owned planet gives the winner one tech attempt against the old
-// owner's levels (TAKEOVER.md "Capture", BINARY-ONLY).
+// owner's levels (TAKEOVER.md "Capture", BINARY-ONLY). A planet owned
+// afterwards gives up its ancient artifact (findArtifact).
 func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool) []Event {
 	p := &g.Planets[pi]
 	s, _ := g.survival(p)
@@ -1027,7 +1027,7 @@ func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool)
 		if D > sum {
 			p.Population -= p.Population * sum / D
 			repelled(-1)
-			return events
+			return append(events, g.findArtifact(pi, rng)...)
 		}
 		// A tie goes to the attackers.
 		captured, oldLevels = true, g.Players[p.Owner].Research.Levels
@@ -1051,7 +1051,7 @@ func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool)
 	if captured {
 		events = append(events, techAttempt(g, rng, w, oldLevels, traderChances{}, gained)...)
 	}
-	return events
+	return append(events, g.findArtifact(pi, rng)...)
 }
 
 // dropWinner picks the winner w among the dropping players, with the

@@ -301,6 +301,19 @@ func TestConfirmedOptions(t *testing.T) {
 			}
 		}
 	}
+	// The engine planets carry the artifacts (engine.Planet.Artifact).
+	found := 0
+	for i, p := range res.Game.Planets {
+		if p.Artifact != res.Artifact[i] {
+			t.Fatalf("planet %d: engine artifact %v, result %v", i, p.Artifact, res.Artifact[i])
+		}
+		if p.Artifact {
+			found++
+		}
+	}
+	if found == 0 {
+		t.Fatal("random events on: no artifact placed")
+	}
 	res = generate(t, Settings{Size: Huge, Density: Normal, NoRandomEvents: true, Players: twoPlayers()}, 3)
 	for i, a := range res.Artifact {
 		if a {

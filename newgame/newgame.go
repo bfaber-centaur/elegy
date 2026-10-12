@@ -296,6 +296,7 @@ func (g *generator) run() (Result, error) {
 	for i := range g.res.Game.Planets {
 		p := &g.res.Game.Planets[i]
 		p.OrigEnv = p.Env
+		p.Artifact = g.res.Artifact[i]
 	}
 	g.makeWormholes()
 	// The game carries its space objects into the turn (engine.Game.Objects);
