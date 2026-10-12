@@ -484,5 +484,6 @@ func (g *Game) cancelPacketTransport(f *Fleet, reached Waypoint) []Event {
 		return nil
 	}
 	f.Task = Task{}
-	return []Event{g.fleetEvent(f, EventTransportNoHold, 0)}
+	// At the last waypoint 0x04e (a) follows the refusal (BINARY-ONLY).
+	return append([]Event{g.fleetEvent(f, EventTransportNoHold, 0)}, g.taskEnded(f)...)
 }
