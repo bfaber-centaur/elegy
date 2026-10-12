@@ -371,8 +371,8 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 // WU wuPNR). A fleet left with no waypoint is idle and its owner told
 // (MESSAGES.md 0x04e (b)), unless its task is transport, colonize, remote
 // mining, scrap, lay mines or patrol: a transport or colonize task tells
-// its owner when it ends (taskEnded). Remote mining is CONFIRMED (RM-4,
-// stars-elegy #167 at f2650a7).
+// its owner when it ends (taskEnded). Remote mining is MEASURED (RM-4
+// messages, stars-elegy 9c1e2bc).
 func (g *Game) arrive(f *Fleet) []Event {
 	reached := f.Waypoints[0]
 	f.Task = reached.Task

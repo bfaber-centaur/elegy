@@ -10,9 +10,11 @@ import (
 // is transport, colonize, remote mining, scrap, lay mines or patrol. A
 // transport or colonize task that then ends in the year's waypoint tasks,
 // done or refused, tells it then, after the refusal (a). Each row's label
-// is its evidence: RM-4 (stars-elegy #167 at f2650a7) for remote mining,
-// TK-201 H for colonize; DOCUMENTED rows follow the 0x04e row's wording
-// and were not oracle-run as such. The fleet arrives 10 ly east of its
+// is its evidence: RM-4 messages (MEASURED, stars-elegy 9c1e2bc) for
+// remote mining, TK-201 H for colonize; DOCUMENTED rows follow the 0x04e
+// row's wording and were not oracle-run as such. ASSUMPTION: a transport
+// task with every action empty ends in the unload pass after movement,
+// and is told then rather than at arrival. The fleet arrives 10 ly east of its
 // waypoint's planet and keeps any task that does not end.
 func TestFinishedOrdersAtLastWaypoint(t *testing.T) {
 	home := pgHomeworld().Planets[0]
@@ -31,8 +33,8 @@ func TestFinishedOrdersAtLastWaypoint(t *testing.T) {
 		want []EventKind // its finished-orders message and the refusal before it
 		more bool        // a further waypoint follows, 30 ly on
 	}{
-		{"remote mining, AR at its own planet (CONFIRMED RM-4 A)", true, home.Pos, Task{Kind: TaskRemoteMine}, true, nil, false},
-		{"remote mining, AR at an unowned planet (CONFIRMED RM-4 U)", true, free, Task{Kind: TaskRemoteMine}, true, nil, false},
+		{"remote mining, AR at its own planet (MEASURED RM-4 A)", true, home.Pos, Task{Kind: TaskRemoteMine}, true, nil, false},
+		{"remote mining, AR at an unowned planet (MEASURED RM-4 U)", true, free, Task{Kind: TaskRemoteMine}, true, nil, false},
 		{"remote mining, not AR, unowned planet (DOCUMENTED)", false, free, Task{Kind: TaskRemoteMine}, true, nil, false},
 		{"remote mining, not AR, own planet (DOCUMENTED)", false, home.Pos, Task{Kind: TaskRemoteMine}, true, nil, false},
 		{"remote mining, deep space (DOCUMENTED)", false, deep, Task{Kind: TaskRemoteMine}, true, nil, false},
@@ -41,6 +43,7 @@ func TestFinishedOrdersAtLastWaypoint(t *testing.T) {
 		{"patrol (DOCUMENTED)", false, deep, Task{Kind: TaskPatrol, Range: 50}, true, nil, false},
 		{"transport still waiting (DOCUMENTED)", false, home.Pos, waitLoad, true, []EventKind{EventLoadWaiting}, false},
 		{"transport done: told when it ends (DOCUMENTED)", false, home.Pos, unload, false, []EventKind{EventFleetArrived}, false},
+		{"empty transport: told when it ends (ASSUMPTION)", false, free, Task{Kind: TaskTransport}, false, []EventKind{EventFleetArrived}, false},
 		{"transport done, a waypoint still ahead: not told (DOCUMENTED)", false, home.Pos, unload, false, nil, true},
 		{"colonize refused in deep space, then told (CONFIRMED TK-201 H)", false, deep, Task{Kind: TaskColonize}, false, []EventKind{EventColonizeFailed, EventFleetArrived}, false},
 		{"no task is told at arrival (CONFIRMED)", false, free, Task{}, true, []EventKind{EventFleetArrived}, false},
