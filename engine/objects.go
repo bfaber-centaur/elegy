@@ -21,6 +21,9 @@ type SpaceObjects interface {
 	// when the object is gone (KERNEL.md "Turn order" 1a.3, the waypoint
 	// check).
 	ObjectPos(kind TargetKind, id int) (pos Point, ok bool)
+	// PacketPos is where owner's mineral packet number is now; ok is false
+	// when there is none (TargetPacketObject).
+	PacketPos(owner, number int) (pos Point, ok bool)
 
 	// MoveObjects is step 3.2: the Traders move, then the packets in
 	// flight move and may hit. Waypoints aimed at a Trader that left

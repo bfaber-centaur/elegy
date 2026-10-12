@@ -108,7 +108,17 @@ at another player's fleet, friend or enemy, keeps it while its owner
 sees it; one out of sight becomes a plain position at the fleet's actual
 position (0x02a), or its planet when at one (0x029), and one whose
 target is gone a plain position at its last coordinates (0x028)
-(`fileRetarget`; W5 below). At the end of the turn, a patrol fleet
+(`fileRetarget`; W5 below). A waypoint aimed at a mineral packet or
+salvage object (`TargetPacketObject`, named by the object's owner and
+number) follows a packet's move before fleets move, and one whose object
+is gone becomes a plain position at its last coordinates with no message;
+a new object that takes the freed number is followed instead. While the
+object exists the target is kept as the files are written, seen or not
+(`waypointCheck`; ORDERS.md "Salvage and mineral packet targets",
+stars-elegy f2f9794, BINARY-ONLY; the keeping also MEASURED in RG-002).
+Not modelled: a transport task on a waypoint aimed at a packet is
+cancelled with 0x11e there; Elegy runs the task at the position as for
+any reached waypoint. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and
@@ -354,6 +364,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   draws as ORDERS.md says, but its battle-plan preference and weight are
   not modelled, because ORDERS.md defines neither. The research lane may
   pin them.
+- **W9 (ASSUMPTION).** A waypoint order aimed at a packet or salvage
+  object that does not exist is accepted with the order's coordinates,
+  and the waypoint check after the orders makes it a plain position
+  there, as a waypoint aimed at a fleet id that did not exist came back
+  (ORDERS.md "Target gone", CONFIRMED for a fleet). Wormhole and Trader
+  targets that do not exist still reject the order. One branch in
+  `WaypointOrder.apply`.
 - **Following fleets** (`follow.go`; ORDERS.md "Waypoint 0 aimed at a
   fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138,
   stars-elegy d4eafd9). Only a `FollowOrder` starts a follow, and it lasts

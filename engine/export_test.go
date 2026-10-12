@@ -12,3 +12,7 @@ func withRules(g Game) Game {
 func GenerateTurnAtBattles(game Game, orders []PlayerOrders, rng Rand, at func(g Game, costLevels [][NumFields]int)) (TurnResult, error) {
 	return generateTurn(game, orders, rng, turnOptions{beforeBattles: at})
 }
+
+// WaypointCheckForTest runs the waypoint check (KERNEL.md "Turn order"
+// step 1a.3).
+func (g *Game) WaypointCheckForTest() { g.waypointCheck() }
