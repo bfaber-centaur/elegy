@@ -1,7 +1,7 @@
 # Engine completion sprint
 
 The live coordination record for the sprint that started on 2026-10-12.
-Lanes update it as work merges. It records claims with their evidence;
+The coordinator updates it as work merges. It records claims with their evidence;
 the status documents (`docs/*-STATUS.md`) stay the authority on what each
 subsystem implements.
 
@@ -64,7 +64,7 @@ outcomes need the harness to draw from the original's generator (P1-2).
 ## Critical path
 
 RG-001 oracle run → RG-001 vector → loader and command → first diff →
-fixes in lanes B–E. Lane A triages the diffs. The original generator for
+fixes through lane A, which triages the diffs. The original generator for
 the harness (P1-2) gates milestone 2, not milestone 1.
 
 ## Gaps
@@ -105,23 +105,23 @@ ORDERS-STATUS.md "Not modelled" still lists loads.
 
 ## Lanes
 
-Owners are filled in when the coordinator confirms them. A lane changes
-only the files it owns. `engine/turn.go` and the shared state types
-(`Game`, `Planet`, `Fleet`, `Player`) change only through lane A, and a
-change to saved state bumps the save version.
+A lane changes only the files it owns. `engine/turn.go` and the shared
+state types (`Game`, `Planet`, `Fleet`, `Player`) change only through
+lane A, and a change to saved state bumps the save version. Engine files
+of lanes without a thread go through lane A.
 
-| Lane | Scope | Files | Owner |
+| Lane | Scope | Files | Owner (thread) |
 |---|---|---|---|
-| A Integration | turn order, waypoints, orders replay, #130, diff triage | `engine/turn.go`, `waypoints.go`, `orders.go`, `fleetops.go`, `invariants.go`, `ruleset.go`, `catalog.go`, `game/`, `regress/` | TBD |
-| B Economy | population, mining, production, research, terraforming | `engine/population.go`, `economy.go`, `mining.go`, `production*.go`, `research.go`, `habitability.go`, `randomevents.go`, `terraform*.go`, `terraform/`, `races/` | TBD |
-| C Fleets | movement, cargo, launch, takeover, space objects | `engine/movement.go`, `fleetships.go`, `launch.go`, `orders_cargo.go`, `orders_ships.go`, `orders_design.go`, `takeover.go`, `scrap.go`, `objects/` | TBD |
-| D Combat | battles, the harness random source | `engine/combat*.go`, `battleplan.go`, `ships.go`, new harness random source | TBD |
-| E Output | views, messages, scores, reports | `engine/scanning.go`, `scores.go`, new `engine/messages.go`, `game/report.go`, `game/history.go` | TBD |
-| F Oracle diff | RG corpus, loader, command, vector sync | `engine/*parity*_test.go`, `engine/testdata/vectors/`, new `parity/`, new `cmd/elegy/vector.go` | TBD |
-| G Research | questions other lanes raise; public answers only | none in elegy | TBD |
+| A Integration, fleets and orders | turn order, waypoints, orders replay, movement, cargo, takeover, #130, diff triage | `engine/turn.go`, `waypoints.go`, `orders*.go`, `fleetops.go`, `fleetships.go`, `movement.go`, `launch.go`, `takeover.go`, `scrap.go`, `invariants.go`, `ruleset.go`, `catalog.go`, `objects/` | Engine integration and parity |
+| Loader and command | importable vector loader, `elegy vector`, game loop | new `parity/`, `engine/*parity*_test.go`, `cmd/elegy/`, `game/`, `newgame/`, `regress/` | Game loop and save/load |
+| B Economy | population, mining, production, research, terraforming | `engine/population.go`, `economy.go`, `mining.go`, `production*.go`, `research.go`, `habitability.go`, `randomevents.go`, `terraform*.go`, `terraform/`, `races/` | none yet; through lane A |
+| D Combat and random stream | battles, the original's generator in the harness | `engine/combat*.go`, `battleplan.go`, `ships.go`, new harness random source | Original random numbers in the parity harness |
+| E Output | views, messages, scores, reports | `engine/scanning.go`, `scores.go`, new `engine/messages.go`, `game/report.go`, `game/history.go` | none yet; through lane A |
+| F Oracle recording | RG corpus, differential cases, vector sync | stars-elegy `vectors/`, `tools/vectors/`; `engine/testdata/vectors/` | Record a representative game from the original |
+| G Research | private-repo questions; public answers only (now: the original's generator as a public rule) | none in elegy | AI spec answers and errata |
 
-`ai/` and `newgame/` are frozen this sprint except for fixes to a
-long-game failure.
+`ai/` is frozen this sprint ("Computer opponents" is idle) except for
+fixes to a long-game failure. The coordinator keeps this file current.
 
 ## Blockers
 
@@ -140,8 +140,8 @@ None yet.
 ## Next actions
 
 1. Lane F: run RG-001 in the oracle and build its vector.
-2. Lane F: move the loader out of test code and add `elegy vector`.
+2. Game loop lane: move the loader out of test code and add `elegy vector`.
 3. Lane A: finish #130.
 4. Lane G, then D: publish the original generator as a public rule so
    the harness can replay oracle streams.
-5. Lane E: map events to MESSAGES.md kinds and compare messages.
+5. Lane A (for E): map events to MESSAGES.md kinds and compare messages.
