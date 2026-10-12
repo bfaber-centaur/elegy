@@ -196,12 +196,16 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	// pass the current field receives this year's research when its turn
 	// comes, and under Generalized Research every other field receives
 	// its share at the same moment, so the fields before the current one
-	// see their shares only in the next pass. Passes repeat while
-	// anything levels (BINARY-ONLY, stars-elegy 2f214f5; with nothing
-	// added the first affordable field in field order levels, with
-	// shares arriving the field after the current one comes first,
-	// wrapping round: lane F's GR-ORDER cases and RG-001 2433, where
-	// electronics, then biotech, then energy levelled).
+	// see their shares only in the second pass, which always follows
+	// (BINARY-ONLY, stars-elegy 397ebfc, for players with and without
+	// Generalized Research; with nothing added the first affordable field
+	// in field order levels, with shares arriving the field after the
+	// current one comes first, wrapping round: lane F's GR-ORDER cases and
+	// RG-001 2433, where electronics, then biotech, then energy
+	// levelled). KERNEL.md repeats a pass after that only when a level in
+	// the current field applies the next-field choice; Elegy repeats
+	// after any level-up (ELEGY CHOICE: the outcome is the same, since a
+	// level only raises costs, so the extra pass levels nothing).
 	added := false
 	for changed := true; changed; {
 		changed = false
@@ -215,6 +219,7 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 					add(g, shares[g])
 				}
 				added = true
+				changed = true // the second pass
 			}
 			if step(f) {
 				changed = true
