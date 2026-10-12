@@ -340,8 +340,9 @@ Not wired yet:
 - **Packet manual loads:** transport tasks and manual cargo orders
   (`CargoOrder` with `TargetSalvage`, messages 0x0db and 0x0dc as
   `EventSalvageEmptiedFirst`) load from and give to salvage through
-  `SalvageLoad` and `SalvageRoom`; a manual load from a mineral packet is
-  not modelled.
+  `SalvageLoad` and `SalvageRoom`; transport tasks also load from a
+  mineral packet (`PacketCargo`, TAKEOVER-STATUS.md); a manual load from a
+  mineral packet is not modelled.
 - **Computer players' planet trades:** the adapter passes
   `engine.Player.Level` to `Space.Meet`; `newgame` sets it from each
   computer player's level, and the save (version 7) keeps it.

@@ -89,6 +89,11 @@ type SpaceObjects interface {
 	// unloaded into it (OBJECTS.md "Salvage", "Loading").
 	SalvageLoad(sv Salvage, k, want int) int
 	SalvageRoom(sv Salvage) int
+	// PacketCargo is the cargo of owner's mineral packet number, for a
+	// transport task to load from, and where the packet is; nil when
+	// there is no such packet (ORDERS.md "Salvage and mineral packet
+	// targets", "Arrival").
+	PacketCargo(owner, number int) (*Minerals, Point)
 
 	// SetDetonate applies player's order turning detonation on or off
 	// for the player's own minefield number, or returns why it is

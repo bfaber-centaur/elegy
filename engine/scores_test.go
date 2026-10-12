@@ -229,6 +229,14 @@ func TestMeasuredLeadNeedsSecondPlayer(t *testing.T) {
 	if got := lead(Game{Rules: ElegyRules(), Players: []Player{{}, {}, {Dead: true}}}, 0, 0, 0); got[0] || got[1] || got[2] {
 		t.Errorf("lead flags %v for a living tie at 0, want none", got)
 	}
+	// The margin is inclusive (KERNEL.md "Victory conditions", the lead
+	// CONFIRMED S1): at 20%, 60 leads 50 (50·120/100 = 60), 59 does not.
+	if got := lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 60, 50); !got[0] || got[1] {
+		t.Errorf("lead flags %v at exactly the margin, 60 over 50, want only the 60", got)
+	}
+	if got := lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 59, 50); got[0] || got[1] {
+		t.Errorf("lead flags %v one short of the margin, 59 over 50, want none", got)
+	}
 }
 
 // The highest-score condition still counts every rank-1 player, dead or
