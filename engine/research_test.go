@@ -171,3 +171,51 @@ func TestResearchSameFieldAtCapLevel10(t *testing.T) {
 		t.Errorf("energy level %d, current %d, next %d; want 10, energy, same field", s.Levels[Energy], s.Current, s.Next)
 	}
 }
+
+// TestResearchExplicitFieldOneLevel checks that an explicit next field
+// takes the current field one level before switching (inferred from
+// KERNEL.md "Allocation"; see AddResearch): energy 1 for 50, then weapons
+// 1 for 60 with 40 left, not energy 2 for 50 + 90.
+func TestResearchExplicitFieldOneLevel(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: Weapons}
+	s = AddResearch(s, pgRace(), 150, false)
+	if s.Levels != [NumFields]int{1, 1, 0, 0, 0, 0} || s.Current != Weapons || s.Next != NextSameField || s.Accumulated != [NumFields]int{0, 40, 0, 0, 0, 0} {
+		t.Errorf("levels %v, current %d, next %d, accumulated %v; want energy 1, weapons 1, weapons current with 40, same field", s.Levels, s.Current, s.Next, s.Accumulated)
+	}
+}
+
+// TestResearchStoredLowestOneLevel checks that a stored "lowest field"
+// takes one level at a time (inferred, as above): energy 1 for 90, weapons
+// 1 for 100, then back to energy with 30, not energy 2 for 90 + 130.
+func TestResearchStoredLowestOneLevel(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextLowestField}
+	s.Levels = [NumFields]int{0, 0, 1, 1, 1, 1}
+	s = AddResearch(s, pgRace(), 220, false)
+	if s.Levels != [NumFields]int{1, 1, 1, 1, 1, 1} || s.Current != Energy || s.Next != NextLowestField || s.Accumulated != [NumFields]int{30, 0, 0, 0, 0, 0} {
+		t.Errorf("levels %v, current %d, next %d, accumulated %v; want all 1, energy current with 30, lowest field", s.Levels, s.Current, s.Next, s.Accumulated)
+	}
+}
+
+// TestResearchLowestPicksCurrentAgain checks that when "lowest field"
+// picks the current field again, it keeps its leftover and steps again:
+// energy 1 for 100, energy is still lowest, energy 2 for 140.
+func TestResearchLowestPicksCurrentAgain(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextLowestField}
+	s.Levels = [NumFields]int{0, 1, 1, 1, 1, 1}
+	s = AddResearch(s, pgRace(), 245, false)
+	if s.Levels != [NumFields]int{2, 1, 1, 1, 1, 1} || s.Current != Weapons || s.Accumulated != [NumFields]int{0, 5, 0, 0, 0, 0} {
+		t.Errorf("levels %v, current %d, accumulated %v; want energy 2, weapons current with 5", s.Levels, s.Current, s.Accumulated)
+	}
+}
+
+// TestResearchSlowerTechWhileSwitching checks the doubled cost while a
+// stored "lowest field" switches: energy 1 for 180, weapons 1 for 200,
+// back to energy with 11, stored at half scale as 6.
+func TestResearchSlowerTechWhileSwitching(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextLowestField}
+	s.Levels = [NumFields]int{0, 0, 1, 1, 1, 1}
+	s = AddResearch(s, pgRace(), 391, true)
+	if s.Levels != [NumFields]int{1, 1, 1, 1, 1, 1} || s.Current != Energy || s.Accumulated != [NumFields]int{6, 0, 0, 0, 0, 0} {
+		t.Errorf("levels %v, current %d, accumulated %v; want all 1, energy current with 6", s.Levels, s.Current, s.Accumulated)
+	}
+}

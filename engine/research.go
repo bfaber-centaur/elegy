@@ -118,31 +118,9 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		add(s.Current, resources)
 	}
 
-	levelUp := func(field int) bool {
-		gained := false
-		for s.Levels[field] < s.maxLevel() {
-			cost := ResearchLevelCost(s.Levels[field]+1, s.levelSum(), race.ResearchCosts[field], slowerTech)
-			if s.Accumulated[field] < cost {
-				break
-			}
-			s.Accumulated[field] -= cost
-			s.Levels[field]++
-			gained = true
-		}
-		return gained
-	}
-
-	// While the year's choice switches fields ("lowest field", an
-	// explicit field, or the level-26 switch below), the current field
-	// takes one level at a time and the choice is made again after each
-	// (KERNEL.md "Allocation": "when a level is gained ... the leftover
-	// moves to the new field"; CONFIRMED KB-2A P0, weapons 0 → 1 then
-	// propulsion 0 → 1, not weapons 2).
-	lowest := false
-	step := func(field int) bool {
-		if !lowest && s.Next == NextSameField {
-			return levelUp(field)
-		}
+	// levelOnce raises field by one level when its accumulation covers
+	// the cost.
+	levelOnce := func(field int) bool {
 		if s.Levels[field] >= s.maxLevel() {
 			return false
 		}
@@ -153,6 +131,28 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		s.Accumulated[field] -= cost
 		s.Levels[field]++
 		return true
+	}
+	levelUp := func(field int) bool {
+		gained := false
+		for levelOnce(field) {
+			gained = true
+		}
+		return gained
+	}
+
+	// While the year's choice switches fields ("lowest field", an
+	// explicit field, or the level-26 switch below), the current field
+	// takes one level at a time and the choice is made again after each.
+	// CONFIRMED only for the level-26 switch (KB-2A P0: weapons 0 → 1 then
+	// propulsion 0 → 1, not weapons 2). For a stored "lowest field" and an
+	// explicit field it is inferred from KERNEL.md "Allocation": "when a
+	// level is gained ... the leftover moves to the new field".
+	lowest := false
+	step := func(field int) bool {
+		if !lowest && s.Next == NextSameField {
+			return levelUp(field)
+		}
+		return levelOnce(field)
 	}
 
 	gained := step(s.Current)
