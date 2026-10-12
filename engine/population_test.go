@@ -123,10 +123,11 @@ func TestOvercrowdingFloor(t *testing.T) {
 }
 
 // TestBareRecordDropped checks the year's file round trip for unowned
-// planets (stars-elegy 9a355fe TAKEOVER.md "Capture: what a planet
-// keeps", BINARY-ONLY): with no mines, factories, defenses or scanner the
-// carry and the leftover setting are lost; any one of them keeps the
-// record and the carry.
+// planets under Legacy.BareRecordDrop (stars-elegy 9a355fe TAKEOVER.md
+// "Capture: what a planet keeps", LEGACY BUG, the behaviour BINARY-ONLY):
+// with no mines, factories, defenses or scanner the carry and the
+// leftover setting are lost; any one of them keeps the record and the
+// carry, and so does the switch off.
 func TestBareRecordDropped(t *testing.T) {
 	for _, c := range []struct {
 		name      string
@@ -149,9 +150,23 @@ func TestBareRecordDropped(t *testing.T) {
 			t.Errorf("%s: carry %d, leftover %v; want %d, %v", c.name, got.GrowthCarry, got.LeftoverOnly, c.wantCarry, c.wantCarry != 0)
 		}
 	}
-	// An owned planet keeps its record.
+	// With the switch off the bare planet keeps both.
 	l := newTKLab(t, 3)
-	pi := l.planet(1, 0, 1000)
+	pi := l.planet(NoOwner, 0, 0)
+	l.g.Planets[pi].GrowthCarry, l.g.Planets[pi].LeftoverOnly = 37, true
+	off := ElegyRules()
+	off.ID, off.Legacy.BareRecordDrop = "bare-record-off", false
+	l.g.Rules = off
+	r, err := GenerateTurn(l.g, nil, &seqRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Game.Planets[pi]; got.GrowthCarry != 37 || !got.LeftoverOnly {
+		t.Errorf("switch off: carry %d, leftover %v; want 37, true", got.GrowthCarry, got.LeftoverOnly)
+	}
+	// An owned planet keeps its record.
+	l = newTKLab(t, 3)
+	pi = l.planet(1, 0, 1000)
 	l.g.Planets[pi].GrowthCarry = 37
 	if got := l.turn(&seqRand{}).Game.Planets[pi]; got.GrowthCarry == 0 {
 		t.Errorf("owned bare planet: carry 0, want the year's growth from 37")

@@ -178,15 +178,18 @@ func TestRulesetsCoexist(t *testing.T) {
 // A ruleset saved before a switch existed decodes it as off. Each
 // built-in version that predates a switch has it off, so its old saves
 // still validate: here jrc3-faithful v1 and elegy v2 without the two
-// Cybertron switches, and both v2s without the AI wormhole switch.
+// Cybertron switches, both v2s without the AI wormhole switch, and every
+// version before v4 without the bare-record switch.
 func TestRulesetSavedBeforeSwitch(t *testing.T) {
 	for _, c := range []struct {
 		r    Ruleset
 		keys []string
 	}{
-		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap"}},
-		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap"}},
-		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap"}},
+		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop"}},
+		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop"}},
+		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap", "bare_record_drop"}},
+		{elegyRulesV3(), []string{"bare_record_drop"}},
+		{faithfulRulesV3(), []string{"bare_record_drop"}},
 	} {
 		r := c.r
 		b, err := json.Marshal(r)
@@ -219,7 +222,7 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 	if v2 != faithfulRulesV1() {
 		t.Errorf("jrc3-faithful v2 differs from v1 beyond the Cybertron switches")
 	}
-	for _, c := range []struct{ v3, v2 Ruleset }{{ElegyRules(), elegyRulesV2()}, {FaithfulRules(), faithfulRulesV2()}} {
+	for _, c := range []struct{ v3, v2 Ruleset }{{elegyRulesV3(), elegyRulesV2()}, {faithfulRulesV3(), faithfulRulesV2()}} {
 		if !c.v3.Legacy.AIWormholeDistanceWrap || c.v2.Legacy.AIWormholeDistanceWrap {
 			t.Errorf("%s: ai_wormhole_distance_wrap is %v in v3 and %v in v2, want on and off",
 				c.v3.ID, c.v3.Legacy.AIWormholeDistanceWrap, c.v2.Legacy.AIWormholeDistanceWrap)
@@ -229,6 +232,14 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 		v3.Legacy.AIWormholeDistanceWrap = false
 		if c.v3.Version != 3 || v3 != c.v2 {
 			t.Errorf("%s v%d differs from v2 beyond ai_wormhole_distance_wrap", c.v3.ID, c.v3.Version)
+		}
+	}
+	for _, c := range []struct{ v4, v3 Ruleset }{{ElegyRules(), elegyRulesV3()}, {FaithfulRules(), faithfulRulesV3()}} {
+		v4 := c.v4
+		v4.Version = 3
+		v4.Legacy.BareRecordDrop = false
+		if c.v4.Version != 4 || !c.v4.Legacy.BareRecordDrop || c.v3.Legacy.BareRecordDrop || v4 != c.v3 {
+			t.Errorf("%s v%d differs from v3 beyond bare_record_drop, on in v4 only", c.v4.ID, c.v4.Version)
 		}
 	}
 }

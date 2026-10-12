@@ -95,7 +95,7 @@ func TestPreferWormhole(t *testing.T) {
 func TestPreferWormholeBuiltins(t *testing.T) {
 	for _, r := range engine.Rulesets() {
 		v := &View{Rules: r, Wormholes: []Wormhole{{End: 1, Pos: engine.Point{X: 1182, Y: 1000}}}}
-		cur := r == engine.ElegyRules() || r == engine.FaithfulRules()
+		cur := r.Legacy.AIWormholeDistanceWrap
 		var draws []int
 		if cur {
 			draws = []int{89}

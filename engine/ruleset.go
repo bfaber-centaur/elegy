@@ -91,6 +91,14 @@ type Legacy struct {
 	// the crowding permille at its limit, the 12% overcrowding cap
 	// (INTENTIONALLY DIFFERENT). engine/turn.go.
 	ZeroMaxPopulationStop bool `json:"zero_max_population_stop"`
+	// BareRecordDrop: an unowned planet with no mines, factories,
+	// defenses or scanner loses its growth carry and its "only leftover
+	// to research" setting when the year's files are written, because the
+	// original writes such a planet without its installations record
+	// (stars-elegy 9a355fe TAKEOVER.md "Capture: what a planet keeps",
+	// LEGACY BUG; the behaviour BINARY-ONLY, MEASURED RG-001 planets 50
+	// and 87). Off, the planet keeps its carry. engine/population.go.
+	BareRecordDrop bool `json:"bare_record_drop"`
 
 	// objects
 
@@ -166,14 +174,23 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, its latest version: version 3.
+// ElegyRules is Elegy's default ruleset, its latest version: version 4.
 // Four switches are off, where Elegy has chosen its own rule over the
 // original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
 // ZeroMaxPopulationStop. So are the two Cybertron switches, which version
 // 2 predates.
 //
-// Version 3 adds AIWormholeDistanceWrap, on; version 2 predates it.
+// Version 4 adds BareRecordDrop, on; version 3 predates it.
 func ElegyRules() Ruleset {
+	r := elegyRulesV3()
+	r.Version = 4
+	r.Legacy.BareRecordDrop = true
+	return r
+}
+
+// elegyRulesV3 is the Elegy ruleset, version 3: version 2 with
+// AIWormholeDistanceWrap on.
+func elegyRulesV3() Ruleset {
 	r := elegyRulesV2()
 	r.Version = 3
 	r.Legacy.AIWormholeDistanceWrap = true
@@ -218,14 +235,23 @@ func elegyRulesV1() Ruleset {
 }
 
 // FaithfulRules is the faithful J-RC3 ruleset, its latest version:
-// version 3, every legacy switch on. It differs from ElegyRules only in
+// version 4, every legacy switch on. It differs from ElegyRules only in
 // FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
 // and the two Cybertron switches. It is only as faithful as the switches
 // go: behaviour Elegy has not modelled, or models differently without a
 // switch, is the same in both.
 //
-// Version 3 adds AIWormholeDistanceWrap, on; version 2 predates it.
+// Version 4 adds BareRecordDrop, on; version 3 predates it.
 func FaithfulRules() Ruleset {
+	r := faithfulRulesV3()
+	r.Version = 4
+	r.Legacy.BareRecordDrop = true
+	return r
+}
+
+// faithfulRulesV3 is the faithful ruleset, version 3: version 2 with
+// AIWormholeDistanceWrap on.
+func faithfulRulesV3() Ruleset {
 	r := faithfulRulesV2()
 	r.Version = 3
 	r.Legacy.AIWormholeDistanceWrap = true
@@ -258,7 +284,7 @@ func faithfulRulesV1() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), elegyRulesV2(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).
