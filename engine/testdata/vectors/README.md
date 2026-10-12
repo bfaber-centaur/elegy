@@ -26,7 +26,7 @@ vectors/<corpus>/<run>.json      one oracle run
 | `sc` | SC-001..034 | 680 | scanning: what each player's file shows of fleets, planets, designs and player blocks | `docs/SCANNING.md` |
 | `kx001`, `kx002` | KX-001, KX-002 cases | 38 | planet economy: production, Auto Alchemy, growth, research, mining (one year from an edited PG001 file) | `docs/KERNEL.md` |
 | `kx003` | KX-003 r1, r2, r3, r3l | 4 | score records, victory flags, slower tech, Claim Adjuster | `docs/KERNEL.md` |
-| `kx004` | KX-004 S1..S10 | 10 | random events and Mystery Trader appearance, 3 to 61 streams each | `docs/KERNEL.md` "Random events" |
+| `kx004` | KX-004 S1..S11 | 11 | random events and Mystery Trader appearance, 3 to 61 streams each; S11: comets on planets whose original environment differs from the current one | `docs/KERNEL.md` "Random events" |
 | `kx005` | KX-005 R1..R3, T0..T2 | 6 | research (Generalized Research under slower tech, GR-fed level-ups, part announcements, level 26) and terraforming (ties, Auto Min/Max, Claim Adjuster cost and drift, Orbital Adjusters); T0 in 15 streams | `docs/KERNEL.md` "Research", "Terraforming" |
 | `mf` | MF-01..15 | 25 | minefields: hits, sweeping, decay, detonation, speed bumps, laying at the 511-object limit, salvage after a partial loss, due-north and due-south legs | `docs/OBJECTS.md` "Minefields" |
 | `gt` | GT-001..004 | 4 | stargates: limits, danger and loss rolls, friends, refusal order, what makes a gate (MEASURED, one pinned year each) | `docs/OBJECTS.md` "Stargates" |
@@ -105,7 +105,12 @@ file, so nothing in it is a default you have to guess.
   record carries the homeworld flag (absent otherwise), mineral concentrations,
   `concentration_fractions` (each concentration's depletion fraction in
   1/256 of a point, ironium, boranium, germanium, 0–255, as the planet record
-  stores them; absent when all three are 0), environment
+  stores them; absent when all three are 0), `artifact: true` for a
+  planet holding an ancient artifact as the host reads it (the file flag
+  on a record without installations, the installations bit on one with
+  them; PARITY "Round 4 (TK-301 to TK-306)"; absent otherwise; start states only,
+  never in expectations; the research gift's field and points are random
+  draws, so outcomes that depend on them are samples), environment
   (gravity, temperature, radiation as stored values), original environment,
   surface minerals (ironium, boranium, germanium), population **in hundreds**,
   mines, factories, defenses, planetary scanner, starbase (design slot and
@@ -137,7 +142,11 @@ file, so nothing in it is a default you have to guess.
 - `objects`: wormhole ends (partner, stability class, years since the last
   jump, players who know it, players who know where it leads), Mystery
   Traders (destination, warp, players met), mineral packets, salvage
-  (`kind: "salvage"`: owner, number, position, minerals), minefields.
+  (`kind: "salvage"`: owner, number, position, minerals, and `fresh`, the
+  stored skip-decay mark: bit 14 of the record's destination/warp word,
+  true or false on every salvage record; OBJECTS.md "Salvage", "The
+  mark is saved in the game file"),
+  minefields.
   Packets and salvage are one kind of object in the game's files; one whose
   stored packet warp is 0 (warp 4) is salvage whatever its destination
   (BINARY-ONLY: Objects decomp reading). Changed or new salvage after a year
