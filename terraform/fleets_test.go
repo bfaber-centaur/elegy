@@ -132,7 +132,7 @@ func TestConfirmedRemoteMine(t *testing.T) {
 }
 
 // An Alternate Reality planet is mined by its owner's own miners, and
-// only theirs (CONFIRMED KB-1B; another player's miners ASSUMPTION R1).
+// only theirs (CONFIRMED KB-1B; another player's miners BINARY-ONLY).
 func TestConfirmedRemoteMineAR(t *testing.T) {
 	l := newLab(t)
 	l.g.Players[0].Race.PRT = engine.PRTAlternateReality

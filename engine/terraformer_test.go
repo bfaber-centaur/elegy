@@ -66,7 +66,8 @@ func TestPredictionTerraformInTurn(t *testing.T) {
 		{ID: 2, Number: 2, Owner: 0, Pos: pos, Fuel: 50, Stacks: []Stack{{Design: 0, Count: 1}}, Task: mine,
 			Waypoints: []Waypoint{{Pos: Point{pos.X + 20, pos.Y}, Warp: 5, Task: mine}}},
 	}
-	stub := &stubTerraform{}
+	g.Planets[0].Owner = NoOwner // a planet the fleets may mine
+	stub := &stubTerraform{rate: 1}
 	g.Terraform = stub
 	r, err := GenerateTurn(withRules(g), nil, highRand{})
 	if err != nil {

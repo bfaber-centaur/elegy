@@ -43,7 +43,7 @@ func MineYear(d Deposit, mines, eff int, homeworld bool, rng Rand) (gain int, ou
 // depletionConcentration is the stored concentration clamped for the
 // depletion computation. It is re-evaluated on every repetition, as the
 // concentration drops inside one year (KERNEL.md "Mining", CONFIRMED by
-// KX-002 N2; the clamp to 10 below 5 is BINARY-ONLY).
+// KX-002 N2; the clamp to 10 below 5 by KB-1A).
 func depletionConcentration(conc int) int {
 	switch {
 	case conc > 100:
