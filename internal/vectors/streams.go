@@ -109,7 +109,21 @@ func (r pvRun) rand(y int) engine.Rand {
 	if r.replay != nil {
 		return r.replay(y)
 	}
-	return rand.New(rand.NewSource(int64(y) + int64(r.seed)<<32))
+	return rand.New(rand.NewSource(pvSeed(y, r.seed)))
+}
+
+// pvSeed is the math/rand seed of year y under seed variant k: a
+// splitmix64 hash of (y, k). math/rand keeps only the seed modulo
+// 2^31-1, so the plain y + k<<32 used before folded to y + 2k and year
+// y's variant k drew year y+2's variant k-1 stream (docs/RANDOM-PARITY.md
+// "The seam"); hashing spreads the pairs over the whole range
+// (TestSeedsDistinct).
+func pvSeed(y, k int) int64 {
+	z := uint64(y)<<32 | uint64(uint32(k))
+	z += 0x9e3779b97f4a7c15
+	z = (z ^ z>>30) * 0xbf58476d1ce4e5b9
+	z = (z ^ z>>27) * 0x94d049bb133111eb
+	return int64((z ^ z>>31) >> 1)
 }
 
 // checks reports whether the run compares e.

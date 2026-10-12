@@ -47,6 +47,16 @@ measured.
   which stream's expectations to check, and `replay`, a random source per
   year. `runVector(v, k)` is `runVectorWith(v, pvRun{seed: k})`, unchanged
   behaviour.
+- Without replay, year y of seed variant k draws from `pvSeed(y, k)`, a
+  splitmix64 hash of the pair (ELEGY CHOICE). Before it, the seed was
+  `y + k<<32`, which `math/rand` reduces modulo 2^31−1 to `y + 2k`: year
+  y's variant k drew the same stream as year y+2's variant k−1, so a
+  chained run's variants shared year-streams (80 of the ordered pairs over
+  years 1..6) and were not independent samples. `TestSeedsDistinct` checks
+  that no two (year, variant) pairs reach the same effective seed, and
+  `TestSeedVariantsIndependent` (skipped under `-short`) checks the
+  variants' streams for correlation at shallow and deep draws. The change
+  moved tallies only where an outcome depends on Elegy's draws.
 - `pvStart(v, stream, year)` returns where that year's stream started: the
   vector's `random_start` entry, else the ORACLE.md tick for the stream's
   cycles value, else nothing recorded.
