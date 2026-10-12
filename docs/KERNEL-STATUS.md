@@ -49,6 +49,7 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Score terms, ship classes, rank, flag word | `scores.go` | KX-003 S1 terms (planets, tech, ships, resources), Omega/Cherry class boundaries, flags 0x0ae0 / 0x0021 | capacitors, sappers, speed adjustment; score, resources and highest-score flags |
 | Deciding the game, public scores | `scores.go` `decide`, `visibleScores` | public scores from year index 20 (KX-004 E0, E1) | deaths, survivor, winners after the minimum years; decided game and dead players' records |
 | Improved Fuel Efficiency factor; fuel generators and fuel transports; Radiating Hydro-Ram Scoop colonist losses; refuelling at a friend's docked starbase | `movement.go` `fleetFactor`, `generateFuel`, `radiatingColonists`, `refuelFleets` | parity vectors FM-101..103 (`TestParityVectors`); KB-4A E, F1–F5, G, H, X and CS-003-W as cited in KERNEL.md "Other movement rules" | the RHRS immune and ≥ 170 exemptions |
+| Cheap Engines stall and warp-10 ship losses: one rand(10) per Cheap Engines fleet at warp 7–10 (0 stops it, 0x0f2), then one per unrated ship at warp 10 (0 loses it, 0x0df/0x0e0/0x0e1), each fleet's draws before the next fleet's (KERNEL.md "Other movement rules" and "Random draws" item 3, stars-elegy fda4173) | `movement.go` `stalls`, `warp10Losses` | KX-006 replays (OB-024, FM-101 F, FM-102) as scripted-draw tests (`movedraws_test.go`); OB-024-C's lost-before-moving runs (30000, 40000, 60000 cycles) with every draw 0; fuel share FM round 2 | stall with a warp-10 stack, several unrated designs (design-slot order), chasers draw in the first pass only: BINARY-ONLY; ASSUMPTION M1 (a stalled fleet has no AR colonist loss) and M2 (the lost ships' cargo share is destroyed) |
 | Claim Adjuster year-end step: original-value drift, then every axis to its limit with the reach just researched; terraform reach per axis | `terraform.go` `claimAdjusterYearEnd`, `terraformReach` | KX-003 S3/S3L; capture examples for TK-108, TK-118..121 (KERNEL.md "Terraforming"); parity vectors TK-108-A, TK-118-A, TK-119-A now match | the drift's draw sequence, CONFIRMED by KX-005 replays but tested here only with scripted draws |
 | Fuel cannot be unloaded onto a planet | `takeover.go` (no fuel action) | FM-101..105 | |
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
@@ -216,10 +217,8 @@ tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
 by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
-0x12d, 0x15b), Super Stealth research stealing, the duplicate-serial penalty,
-and the
-BINARY-ONLY movement rules for IFE, Cheap Engines, warp-10 losses and
-Radiating Hydro-Ram colonist deaths. Terraforming production items are
+0x12d, 0x15b), Super Stealth research stealing and the duplicate-serial
+penalty. Terraforming production items are
 built (#41, `production_terraform.go`; TERRAFORM-STATUS.md), and a fleet
 whose transport task is still current does not move (#123, above).
 
