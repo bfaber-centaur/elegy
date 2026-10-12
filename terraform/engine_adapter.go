@@ -19,24 +19,32 @@ func (Rules) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Mineral
 }
 
 // Adjust runs Adjust and turns each change into its messages (MESSAGES.md
-// 0x12c and 0x15a) when the planet owner's value changed: the fleet
-// owner is told, and the planet owner too when it is someone else. Count
-// is the planet owner's habitability after.
+// 0x12c, 0x15a and 0x15b). Messages go per fleet; Count is the planet
+// owner's habitability after.
 //
-// Not modelled: the messages for a fleet that left the value unchanged
-// (0x12d, 0x15b).
+//   - The clicks changed the planet owner's habitability: the fleet owner
+//     is told, and the planet owner too when it is someone else.
+//   - A hostile fleet's clicks left it unchanged, even with an axis moved:
+//     the fleet owner alone gets "cannot degrade any further" (CONFIRMED,
+//     GAP-001 W1; KERNEL.md "Terraforming", stars-elegy 0d63a84).
+//
+// Not modelled: 0x12d for a friendly fleet that left the value unchanged,
+// and the messages for a fleet that made no click at all.
 func (Rules) Adjust(g *engine.Game) []engine.Event {
 	var out []engine.Event
 	for _, a := range Adjust(g) {
+		f, p := &g.Fleets[a.Fleet], &g.Planets[a.Planet]
+		hab := engine.Habitability(g.Players[p.Owner].Race, p.Env)
 		if !a.HabChanged {
+			if a.Hostile {
+				out = append(out, engine.Event{Kind: engine.EventPlanetNotDegraded, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})
+			}
 			continue
 		}
-		f, p := &g.Fleets[a.Fleet], &g.Planets[a.Planet]
 		kind := engine.EventPlanetImproved
 		if a.Hostile {
 			kind = engine.EventPlanetDegraded
 		}
-		hab := engine.Habitability(g.Players[p.Owner].Race, p.Env)
 		out = append(out, engine.Event{Kind: kind, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})
 		if p.Owner != f.Owner {
 			out = append(out, engine.Event{Kind: kind, Player: p.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})

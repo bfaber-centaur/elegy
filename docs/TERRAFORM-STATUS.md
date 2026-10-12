@@ -32,6 +32,27 @@ sites, all owned by the kernel lane, are under "Turn wiring" below.
 `Reach` and `Limit` restate the engine's unexported `terraformReach` and
 `terraformLimit` from the same spec text; the kernel may switch to these.
 
+### GAP-001 predictions (W)
+
+Predictions pushed in 0aa44f5, before lane F ran GAP-001 sub-case W
+(`/mnt/project-files/cases/gap-001.md`). Player 1 is a Claim Adjuster,
+neutral to player 0, at propulsion 10 and biotechnology 6. ASSUMPTION:
+its other fields are at 3, the base's starting levels as in the OB
+vectors, so its reach is gravity ±11, temperature ±3, radiation ±3. With
+temperature and radiation at ±15 instead, W1 ends at 60/63/60. Player 0's
+habitat is 50 (15–85) on every axis. Spec: KERNEL.md "Terraforming",
+Orbital Adjusters (stars-elegy 8addf9e). Results: stars-elegy 0d63a84
+(`experiments/gap001`, PARITY.md "Coverage gaps after RG-002").
+
+| Sub-case | Setup | Elegy predicted | Refuted by | Result | Test |
+|---|---|---|---|---|---|
+| W1 | Planet 15, 60/60/60, no starbase; fleet 1/1 (2 adjusters), then 1/4 (1) | 63/60/60 (every click to gravity, toward 71); original 60/60/60. Messages: one to player 1 and one to player 0 for fleet 1/1 (habitability 72% → 70%); none for fleet 1/4, whose click leaves 70% (ASSUMPTION: per fleet, only on a habitability change) | 62/60/60 (one click per fleet); a message for fleet 1/4 or one per planet; the original moved | environment and fleet 1/1's messages CONFIRMED by prediction; fleet 1/4's message REFUTED (it got 0x15b, "cannot degrade any further", at 70%), then fixed: `EventPlanetNotDegraded` to the fleet owner only | `TestPredictionGAP001Worsen` |
+| W2 | Planet 19, same, with a starbase; fleet 1/2 (2 adjusters) | 60/60/60, no message (CONFIRMED KX-005) | any change | CONFIRMED by prediction | `TestPredictionGAP001Worsen` |
+
+The control fleet 1/0 at player 1's homeworld is not predicted as a
+value: it improves one click toward player 1's centre if the homeworld
+has room, and changes nothing otherwise.
+
 ## PP packet terraforming
 
 | Rule (OBJECTS.md "Impact") | Function | Status |
