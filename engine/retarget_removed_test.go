@@ -88,6 +88,19 @@ func TestBinaryOnlyRemovedTargetRetargets(t *testing.T) {
 	if wp := g.Fleets[g.fleetIndex(6)].Waypoints[1]; wp.Pos != (Point{1250, 1250}) {
 		t.Errorf("fleet 6's waypoint %+v, want at fleet 9", wp)
 	}
+
+	// With two of the owner's fleets there, the first in fleet order is
+	// taken: fleet 8 (number 4), though fleet 9 (number 5) comes first in
+	// the list.
+	g = removedGame()
+	g.Fleets = append(g.Fleets,
+		Fleet{ID: 9, Number: 5, Owner: 0, Pos: Point{1200, 1200}, Stacks: []Stack{{Design: 0, Count: 1}}},
+		Fleet{ID: 8, Number: 4, Owner: 0, Pos: Point{1200, 1200}, Stacks: []Stack{{Design: 0, Count: 1}}},
+	)
+	g.removeFleets(map[int]bool{2: true})
+	if wp := g.Fleets[g.fleetIndex(6)].Waypoints[1]; wp.Target != TargetFleet || wp.ID != 8 {
+		t.Errorf("fleet 6's waypoint %+v, want fleet 8, first in fleet order", wp)
+	}
 }
 
 // ASSUMPTION W7: a merge order retargets to the fleet joined, even when
