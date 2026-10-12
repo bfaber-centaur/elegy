@@ -97,3 +97,27 @@ func TestPredictionHyperExpansionDoublesGrowth(t *testing.T) {
 		t.Errorf("growth rate = %d, want 20", got)
 	}
 }
+
+// TestOvercrowdingFloor checks the −300 floor of the overcrowded branch
+// (stars-elegy 397ebfc KERNEL.md "Population growth": g = 4·max(−300,
+// trunc(c/−10) + 99), deaths at most 12% a year), which no oracle case
+// has reached; it needs P at about 4 times max. The branch is CONFIRMED
+// above the floor (KX-002 G1); the floor itself is BINARY-ONLY.
+func TestOvercrowdingFloor(t *testing.T) {
+	for _, c := range []struct {
+		pop, maxPop, wantPop int
+	}{
+		// c = 3980: trunc(−398) + 99 = −299, just above the floor;
+		// g = −1196, t = −476008: 39800 − 4760, carry −8 → 35039, 92.
+		{39800, 10000, 35039},
+		// c = 4000: −400 + 99 = −301, floored to −300; g = −1200,
+		// 40000 − 4800 (without the floor: −1204, 35184).
+		{40000, 10000, 35200},
+		// c = 5000: floored; 12% die.
+		{50000, 10000, 44000},
+	} {
+		if got, _ := GrowPopulation(c.pop, 0, c.maxPop, 10, 100); got != c.wantPop {
+			t.Errorf("P %d, max %d: population %d, want %d", c.pop, c.maxPop, got, c.wantPop)
+		}
+	}
+}
