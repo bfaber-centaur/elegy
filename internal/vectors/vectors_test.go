@@ -473,6 +473,46 @@ func TestConcentrationFractions(t *testing.T) {
 	}
 }
 
+// TestLoadMalformedStarbase: a state's starbase record without a design
+// is no starbase only as design null with damage -1; any other, or a
+// starbase at a planet nobody owns, refuses the state rather than
+// loading a planet without a starbase.
+func TestLoadMalformedStarbase(t *testing.T) {
+	design := 0
+	for _, c := range []struct {
+		name    string
+		planet  int
+		design  *int
+		damage  int
+		refused bool
+	}{
+		{"none as written", 7, nil, -1, false},
+		{"no design", 7, nil, 0, true},
+		{"unowned planet", 0, &design, 0, true},
+	} {
+		v, err := ReadFile(testVector)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i := range v.InitialState.Planets {
+			if p := &v.InitialState.Planets[i]; p.ID == c.planet {
+				p.Starbase = &struct {
+					Design *int `json:"design"`
+					Damage int  `json:"damage"`
+				}{c.design, c.damage}
+			}
+		}
+		l, err := loadVector(v)
+		if refused := err != nil; refused != c.refused {
+			t.Errorf("%s: load error %v, want refused %v", c.name, err, c.refused)
+			continue
+		}
+		if !c.refused && l.g.Planets[l.planet[c.planet]-1].HasStarbase {
+			t.Errorf("%s: planet %d has a starbase", c.name, c.planet)
+		}
+	}
+}
+
 // TestLoadHomeworldRecord loads WU-RSG2's players' homeworld records
 // (vectors/README.md "homeworld", stars-elegy ac792b0): player 1's names
 // planet 8, which starts without the flag, and an absent field leaves no
