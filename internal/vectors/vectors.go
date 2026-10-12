@@ -117,7 +117,8 @@ type pvPlayer struct {
 	Homeworld           *int              `json:"homeworld"`
 	// DefaultQueue and DefaultLeftoverToResearch are the player's
 	// default queue settings, which a planet it newly owns takes; both
-	// absent when the vector's builder did not read them.
+	// absent when the vector's builder did not read them (proposed
+	// fields, not yet in the stars-elegy README).
 	DefaultQueue              *[]json.RawMessage `json:"default_queue"`
 	DefaultLeftoverToResearch *bool              `json:"default_leftover_to_research"`
 }
