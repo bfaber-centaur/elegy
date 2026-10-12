@@ -109,3 +109,26 @@ func TestRemoteMiningRefusalBeforeLastWaypoint(t *testing.T) {
 		t.Errorf("events %v, want only the refusal", kinds)
 	}
 }
+
+// KERNEL.md "Remote mining": the checks run only for a fleet that did not
+// move this year. A fleet that moved, here from an owned planet to deep
+// space, keeps its task and gets no refusal.
+func TestRemoteMiningMovedFleetNotChecked(t *testing.T) {
+	home := pgHomeworld().Planets[0]
+	g, stub := remoteMineGame(t, 0, home.Pos, 0)
+	deep := Point{home.Pos.X + 15, home.Pos.Y + 15}
+	g.Fleets[0].Waypoints = []Waypoint{{Pos: deep, Warp: 5, Task: Task{Kind: TaskRemoteMine}}}
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := r.Game.Fleets[slices.IndexFunc(r.Game.Fleets, func(f Fleet) bool { return f.ID == 1 })]
+	if f.Pos == home.Pos || f.Task.Kind != TaskRemoteMine || len(stub.mined) != 0 {
+		t.Errorf("pos %v task %v mined %v; want moved, task kept, nothing mined", f.Pos, f.Task.Kind, stub.mined)
+	}
+	for _, e := range r.Events {
+		if e.Kind >= EventRemoteMineNoModules && e.Kind <= EventRemoteMineDeepSpace {
+			t.Errorf("refusal %+v for a fleet that moved", e)
+		}
+	}
+}
