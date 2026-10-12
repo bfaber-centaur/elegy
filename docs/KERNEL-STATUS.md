@@ -395,6 +395,19 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   (ORDERS.md "Target gone", CONFIRMED for a fleet). Wormhole and Trader
   targets that do not exist still reject the order. One branch in
   `WaypointOrder.apply`.
+- **W10 (ASSUMPTION).** Removing a fleet for any reason (merged,
+  scrapped, colonized, given away, emptied, taken by a Mystery Trader, or
+  destroyed in battle or by a space object) retargets every waypoint that
+  names it to a fleet of the removed fleet's owner standing at its
+  position, else to the planet there; with neither the waypoint keeps the
+  stale id and the "target gone" rule applies (`retargetRemoved`;
+  ORDERS.md "Targets that moved, died or were captured", BINARY-ONLY).
+  MEASURED in RG-002 Y3 and Y4 (lane B's triage, 8 of 8 seeds): waypoints
+  chasing a fleet removed at planet 79, and one destroyed in battle at
+  planet 51, came back aimed at the planet. In Y4 two of the chasing
+  player's own fleets stood at planet 51, so only the removed fleet's
+  owner's fleets are candidates (the assumption). Which of several is
+  taken is not pinned; Elegy takes the first in fleet order.
 - **Following fleets** (`follow.go`; ORDERS.md "Waypoint 0 aimed at a
   fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138,
   stars-elegy d4eafd9). Only a `FollowOrder` starts a follow, and it lasts

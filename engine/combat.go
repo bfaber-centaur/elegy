@@ -277,8 +277,9 @@ func techAttempt(g *Game, rng Rand, p int, seen [NumFields]int, chance traderCha
 
 // removeEmptyFleets drops destroyed stacks and fleets.
 func removeEmptyFleets(g *Game) {
-	fleets := g.Fleets[:0]
-	for _, f := range g.Fleets {
+	gone := map[int]bool{}
+	for i := range g.Fleets {
+		f := &g.Fleets[i]
 		stacks := f.Stacks[:0]
 		for _, s := range f.Stacks {
 			if s.Count > 0 {
@@ -286,11 +287,11 @@ func removeEmptyFleets(g *Game) {
 			}
 		}
 		f.Stacks = stacks
-		if len(f.Stacks) > 0 {
-			fleets = append(fleets, f)
+		if len(f.Stacks) == 0 {
+			gone[f.ID] = true
 		}
 	}
-	g.Fleets = fleets
+	g.removeFleets(gone)
 }
 
 // repair repairs fleets and starbases that did not fight (COMBAT.md

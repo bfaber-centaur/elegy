@@ -415,15 +415,7 @@ func (s *Space) Meet(g *engine.Game, ctx TraderContext, rng engine.Rand) ([]Enco
 		enc = append(enc, s.fleetMeetings(g, ctx, ti, consumed, rng)...)
 		trades = append(trades, s.planetMeetings(g, ctx, ti, rng)...)
 	}
-	if len(consumed) > 0 {
-		kept := g.Fleets[:0]
-		for _, f := range g.Fleets {
-			if !consumed[f.ID] {
-				kept = append(kept, f)
-			}
-		}
-		g.Fleets = kept
-	}
+	g.RemoveFleets(consumed)
 	return enc, trades
 }
 

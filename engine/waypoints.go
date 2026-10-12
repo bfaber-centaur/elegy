@@ -125,6 +125,61 @@ func (g *Game) chaseMerged(merged map[int]int, rng Rand) {
 	}
 }
 
+// retargetRemoved retargets the waypoints that name a fleet in ids, which
+// is about to be removed (merged, scrapped, colonized, given away, emptied,
+// or destroyed in battle or by a space object), to what stands exactly at
+// that fleet's position: a fleet of the same owner that stays (the first
+// in fleet order), else the planet there (ORDERS.md "Targets that moved,
+// died or were captured", "A fleet target merged away during order
+// replay": "Removing a fleet retargets every waypoint that names it, any
+// player's ... else the planet there, else deep space", BINARY-ONLY). The
+// waypoint takes that position. No draws.
+//
+// MEASURED in RG-002 (lane B's triage, 8 of 8 seeds): a fleet removed
+// at planet 79 (Y3) and one destroyed in battle at planet 51 (Y4) left
+// the waypoints chasing them aimed at the planet.
+//
+// ASSUMPTION W10: only the removed fleet's owner's fleets are candidates.
+// In Y4 two of the chasing player's own fleets stood at planet 51 and the
+// planet was taken. The spec's "the replaying player's own fleets
+// preferred" is the merge case, where that player owns the removed fleet.
+//
+// With nothing there the waypoint keeps the removed fleet's id, so the
+// "target gone" rule makes it deep space at its last position, with 0x028
+// when the files are written (MEASURED WF-04: a target scrapped in deep
+// space). Deep space is the spec's third case either way.
+func (g *Game) retargetRemoved(ids map[int]bool) {
+	order := g.fleetOrder()
+	for _, i := range order {
+		if ids[g.Fleets[i].ID] {
+			continue
+		}
+		for j := range g.Fleets[i].Waypoints {
+			wp := &g.Fleets[i].Waypoints[j]
+			if wp.Target != TargetFleet || !ids[wp.ID] {
+				continue
+			}
+			gone := &g.Fleets[g.fleetIndex(wp.ID)]
+			retarget := func(kind TargetKind, id int) {
+				wp.Pos, wp.Target, wp.ID = gone.Pos, kind, id
+			}
+			fi := -1
+			for _, c := range order {
+				cf := &g.Fleets[c]
+				if c != i && !ids[cf.ID] && cf.Owner == gone.Owner && cf.Pos == gone.Pos {
+					fi = c
+					break
+				}
+			}
+			if fi >= 0 {
+				retarget(TargetFleet, g.Fleets[fi].ID)
+			} else if pi := g.planetAt(gone.Pos); pi >= 0 {
+				retarget(TargetPlanet, g.Planets[pi].ID)
+			}
+		}
+	}
+}
+
 // Route and transfer-fleet messages. Elegy's wording.
 const (
 	EventFleetGiven       EventKind = iota + EventOriginalDrift + 1 // Player = giver, Fleet = the new fleet, Count = recipient
