@@ -675,6 +675,63 @@ func TestMeasuredSalvageCostAtYearStartTech(t *testing.T) {
 	}
 }
 
+func TestStarbaseTokenCostAtYearStartTech(t *testing.T) {
+	// stars-elegy COMBAT.md "Design cost" (#141): target choice uses the
+	// design cost at the tech from before this year's research
+	// (BINARY-ONLY), for a starbase too, whose owner gained levels this
+	// year. Its BET exception is salvage only, and a starbase leaves none.
+	station, err := Components().NewDesign("Station", "Space Station", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := [NumFields]int{3, 3, 3, 3, 3, 3}
+	for _, bet := range []bool{false, true} {
+		g := &Game{
+			Rules: ElegyRules(),
+			Players: []Player{
+				{},
+				{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 2}}},
+				{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 1}}},
+			},
+			Designs: []Design{station, testDesign(tFrigate, 10, Slot{tLaser, 1})},
+			Planets: []Planet{{ID: 1, Pos: Point{5, 5}, Owner: 1, HasStarbase: true, StarbaseDesign: 0}},
+			Fleets:  []Fleet{{ID: 1, Owner: 2, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}}},
+		}
+		g.Players[1].Research.Levels = [NumFields]int{8, 8, 8, 8, 8, 8}
+		g.Players[1].Race.LRT.BleedingEdgeTech = bet
+		race := g.Players[1].Race
+		before, after := designCost(station, race, old), designCost(station, race, g.Players[1].Research.Levels)
+		if before == after {
+			t.Fatalf("BET %v: cost %+v the same at both levels: not a test", bet, before)
+		}
+		var b *battle
+		var prev locationHistory
+		for _, loc := range g.locations() {
+			sets, inv, n := g.whoFights(loc, prev)
+			prev = locationHistory{any: true, battle: inv != nil, lastOwner: g.Fleets[loc.fleets[len(loc.fleets)-1]].Owner}
+			if inv != nil {
+				b = &battle{g: g, rng: rand.New(rand.NewSource(1)), loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}, costLevels: [][NumFields]int{{}, old, {}}}
+			}
+		}
+		if b == nil {
+			t.Fatal("no battle")
+		}
+		b.setup(map[int]bool{})
+		found := false
+		for _, tk := range b.tokens {
+			if tk.starbase {
+				found = true
+				if want := before.Resources + before.Minerals[Boranium]; tk.cost != want {
+					t.Errorf("BET %v: starbase token cost %d, want %d from the start-of-year tech", bet, tk.cost, want)
+				}
+			}
+		}
+		if !found {
+			t.Fatal("no starbase token")
+		}
+	}
+}
+
 func TestConfirmedTechFromBattleSameTurn(t *testing.T) {
 	// CB-018 (Q-11): weapons 3, research 0%. Destroying frigates that need
 	// weapons 4 raised weapons to 4 in the same turn for some random
