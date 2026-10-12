@@ -147,6 +147,23 @@ Oracle questions for a late-game run (RG-002 or a CB case):
    armor parts halved, as in battle? Elegy uses the plain sums;
    OBJECTS.md does not say.
 
+### CB-056 predictions
+
+Pushed before lane F runs CB-056 (Q1–Q3, Q7, Q4's caps, Q5, Q6). Each is
+Elegy's current result, pinned by the named test; the alternative
+reading is what would refute it.
+
+| Q | Setup | Elegy predicts | Refuted by | Test |
+|---|---|---|---|---|
+| 1 | A Death Star (1500 armor, no shields) at 499/500 takes 1 damage | destroyed (A11) | left at 499/500 | `TestPredictionDeathStarDamageSteps` |
+| 2 | A Gatling Neutrino Cannon stack (3 ships, 2 per slot, one Flux Capacitor) with an enemy ship, an enemy starbase, then two more ships in token order, all in range | every target hit, 576 / 576 / 518 / 466 by deflector (A12) | no hit recorded after the starbase's | `TestGatlingDeflectorPerTarget` |
+| 3 | A Regenerating Shields Battleship with 8 Croby Sharmor and 2 Tritanium | armor 2570, shields 672 (A13) | armor 2310 (the Croby Sharmor's armor halved) | `TestPredictionCB056RegeneratingShieldsCroby` |
+| 4a | A Death Star with five Jammer 50s | jammer 72 (cap, then a quarter off) | 73 (a quarter off, then the cap) | `TestPredictionDeathStarTokenValues` |
+| 4b | A Death Star with six Flux Capacitors | capacitor 255% | 298% (no cap) | `TestPredictionDeathStarTokenValues` |
+| 5 | A damaged fleet that did not fight or move, at its owner's Ultra Station or Death Star planet | units −100 a year (−200 for Inner Strength); the starbase −50 | −40 (no dock) or −25 | `TestPredictionRepairLargeDocks` |
+| 6 | Five Battleships (4 Trans-Galactic Drives, 1 Mole-skin, 2 Superlatanium) stopped in a heavy field | 197/500 (4 Fuel Scoops instead: 237) | 47 (no engine factor), 100 (shields absorb D/2) | `TestPredictionMineDamageLateFleets` |
+| 7 | The same fleet, owner with Regenerating Shields | 197/500 (plain sums) | 280 (battle-style RS) | `TestPredictionMineDamageRegeneratingShields` |
+
 ### Settled by current COMBAT.md
 
 Earlier versions of this file listed these as open choices. The current

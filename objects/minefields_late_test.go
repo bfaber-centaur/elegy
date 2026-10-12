@@ -66,3 +66,28 @@ func TestPredictionMineDamageLateFleets(t *testing.T) {
 		}
 	}
 }
+
+// CB-056 Q7: mine damage on a Regenerating Shields race uses the design's
+// plain shield and armor sums (Elegy's reading; OBJECTS.md does not say).
+// Five Battleships (armor 5000, shield 25) in a heavy field take 197/500,
+// as without RS. A battle-style reading (shields ×7/5 = 35, armor parts
+// halved: 2000 + 1500 = 3500) would give (10000 − 175)/5 = 1965 → 280.
+func TestPredictionMineDamageRegeneratingShields(t *testing.T) {
+	l := newLab(t)
+	l.g.Players[0].Race.LRT.RegeneratingShields = true
+	d, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
+		{Slot: 0, Part: "Trans-Galactic Drive", Count: 4},
+		{Slot: 2, Part: "Mole-skin Shield", Count: 1},
+		{Slot: 8, Part: "Superlatanium", Count: 2},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l.designs["BB"] = len(l.g.Designs)
+	l.g.Designs = append(l.g.Designs, d)
+	fi := l.fleet(0, origin, "BB", 5)
+	MineDamage(l.g, &l.g.Fleets[fi], Heavy, nil)
+	if got := l.g.Fleets[fi].Stacks[0].Damage; got != (engine.Damage{Pct: 100, Units: 197}) {
+		t.Errorf("RS Battleships: %+v, want 100%% at 197/500", got)
+	}
+}
