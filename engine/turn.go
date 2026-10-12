@@ -320,6 +320,7 @@ func GenerateTurn(
 		events = append(events, g.Objects.DecayObjects(&g)...)
 		g.dropShiplessFleets()
 	}
+	events = append(events, g.breedInTransit(rng)...) // step 3b
 
 	research := make([]int, len(g.Players))
 
