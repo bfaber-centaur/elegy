@@ -121,3 +121,53 @@ func TestResearchSameFieldAtLevel26(t *testing.T) {
 		t.Errorf("accumulated %v, want 15 in weapons", s.Accumulated)
 	}
 }
+
+// TestResearchSameFieldAtLevel26RestOfYear checks that after the level-26
+// switch the year goes on as if "lowest field" were chosen (KERNEL.md
+// "Allocation", CONFIRMED KB-2A P0: research 1,135; energy 26, weapons
+// 0 → 1, propulsion 0 → 1, then back to weapons with 185 stored, the
+// choice still "same field"; keeping "same field" would have given
+// weapons 2 with 155). The other levels are not in the spec: the costs
+// fix their sum at 15 (weapons 1 costs 50 + 10·41 = 460, propulsion 1
+// costs 470, 1,115 − 930 = 185), and propulsion leading back to weapons
+// needs each of them at 1 or more, so 5 each here.
+func TestResearchSameFieldAtLevel26RestOfYear(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextSameField}
+	s.Levels = [NumFields]int{25, 0, 0, 5, 5, 5}
+	// cost(26) = 84700 + 10·(25+15) = 85100, leaving 1,115.
+	s.Accumulated[Energy] = 85100 + 1115 - 1135
+	s = AddResearch(s, pgRace(), 1135, false)
+	if s.Levels != [NumFields]int{26, 1, 1, 5, 5, 5} {
+		t.Errorf("levels %v, want energy 26, weapons 1, propulsion 1", s.Levels)
+	}
+	if s.Current != Weapons || s.Next != NextSameField || s.Accumulated != [NumFields]int{0, 185, 0, 0, 0, 0} {
+		t.Errorf("current %d, next %d, accumulated %v; want weapons, same field, 185 in weapons", s.Current, s.Next, s.Accumulated)
+	}
+}
+
+// TestResearchSameFieldBelowLevel26 checks that a level other than 26
+// keeps "same field" in place: energy 24 → 25 stays current.
+func TestResearchSameFieldBelowLevel26(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextSameField}
+	s.Levels = [NumFields]int{24, 3, 3, 3, 3, 3}
+	// cost(25) = 77990 + 10·(24+15) = 78380.
+	s.Accumulated[Energy] = 78380
+	s = AddResearch(s, pgRace(), 10, false)
+	if s.Levels[Energy] != 25 || s.Current != Energy || s.Accumulated[Energy] != 10 {
+		t.Errorf("energy level %d, current %d, accumulated %v; want 25, energy, 10 in energy", s.Levels[Energy], s.Current, s.Accumulated)
+	}
+}
+
+// TestResearchSameFieldAtCapLevel10 pins an ASSUMPTION (KERNEL.md gives
+// the switch only at level 26; the level-10 cap is BINARY-ONLY): a capped
+// player's field reaching 10 under "same field" stays current.
+func TestResearchSameFieldAtCapLevel10(t *testing.T) {
+	s := ResearchState{Current: Energy, Next: NextSameField, MaxLevel: 10}
+	s.Levels = [NumFields]int{9, 3, 3, 3, 3, 3}
+	// cost(10) = 3770 + 10·(9+15) = 4010.
+	s.Accumulated[Energy] = 4010
+	s = AddResearch(s, pgRace(), 15, false)
+	if s.Levels[Energy] != 10 || s.Current != Energy || s.Next != NextSameField {
+		t.Errorf("energy level %d, current %d, next %d; want 10, energy, same field", s.Levels[Energy], s.Current, s.Next)
+	}
+}

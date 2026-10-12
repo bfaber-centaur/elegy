@@ -132,7 +132,30 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		return gained
 	}
 
-	gained := levelUp(s.Current)
+	// While the year's choice switches fields ("lowest field", an
+	// explicit field, or the level-26 switch below), the current field
+	// takes one level at a time and the choice is made again after each
+	// (KERNEL.md "Allocation": "when a level is gained ... the leftover
+	// moves to the new field"; CONFIRMED KB-2A P0, weapons 0 → 1 then
+	// propulsion 0 → 1, not weapons 2).
+	lowest := false
+	step := func(field int) bool {
+		if !lowest && s.Next == NextSameField {
+			return levelUp(field)
+		}
+		if s.Levels[field] >= s.maxLevel() {
+			return false
+		}
+		cost := ResearchLevelCost(s.Levels[field]+1, s.levelSum(), race.ResearchCosts[field], slowerTech)
+		if s.Accumulated[field] < cost {
+			return false
+		}
+		s.Accumulated[field] -= cost
+		s.Levels[field]++
+		return true
+	}
+
+	gained := step(s.Current)
 	for f := range NumFields {
 		if f != s.Current {
 			levelUp(f)
@@ -147,9 +170,9 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	// A current field that reaches level 26 under "same field" switches
 	// as if "lowest field" were chosen, for the rest of the year, while
 	// the stored choice stays "same field" (KERNEL.md "Allocation",
-	// CONFIRMED KX-005 R3, KB-2A). The level-10 cap of a capped player is
-	// not treated so: KERNEL.md gives only level 26.
-	lowest := false
+	// CONFIRMED KX-005 R3, KB-2A). ASSUMPTION: a field reaching the
+	// level-10 cap of a capped player does not switch; KERNEL.md gives
+	// only level 26, and the level-10 cap itself is BINARY-ONLY.
 	for gained {
 		if s.Next == NextSameField && !lowest {
 			if s.Levels[s.Current] < MaxTechLevel {
@@ -168,13 +191,12 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		} else {
 			s.Next = NextSameField
 		}
-		if next == s.Current {
-			break
+		if next != s.Current {
+			s.Accumulated[next] += s.Accumulated[s.Current]
+			s.Accumulated[s.Current] = 0
+			s.Current = next
 		}
-		s.Accumulated[next] += s.Accumulated[s.Current]
-		s.Accumulated[s.Current] = 0
-		s.Current = next
-		gained = levelUp(s.Current)
+		gained = step(s.Current)
 	}
 	if slowerTech {
 		for f := range NumFields {
