@@ -124,3 +124,24 @@ func hostileDeaths(pop, carry, hab int) (int, int) {
 	}
 	return max(0, pop-q), carry
 }
+
+// dropBareRecords is the year's file round trip for unowned planets,
+// under Legacy.BareRecordDrop (stars-elegy 9a355fe TAKEOVER.md "Capture:
+// what a planet keeps", LEGACY BUG; the behaviour BINARY-ONLY, MEASURED
+// in RG-001 planets 50 and 87): an unowned planet
+// with no mines, factories, defenses or scanner is written without its
+// installations record, so it loses the growth carry and the "only
+// leftover to research" setting the record holds. Until then the planet
+// keeps its carry in memory: a planet emptied and recolonized before the
+// year's growth grows from the old carry (no run has observed that case).
+func (g *Game) dropBareRecords() {
+	if !g.Rules.Legacy.BareRecordDrop {
+		return
+	}
+	for i := range g.Planets {
+		p := &g.Planets[i]
+		if p.Owner == NoOwner && p.Mines == 0 && p.Factories == 0 && p.Defenses == 0 && !p.HasScanner {
+			p.GrowthCarry, p.LeftoverOnly = 0, false
+		}
+	}
+}
