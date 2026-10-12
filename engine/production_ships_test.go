@@ -234,13 +234,27 @@ func TestStarbaseWithoutDriverDropsPacketItems(t *testing.T) {
 	// was none clears the packet destination and speed and silently removes
 	// the queued mineral packet items; Auto Mineral Packets and other items
 	// stay. With a driver on the new starbase, the destination and the
-	// items are kept and the speed becomes the driver's, 5. A starbase
-	// the owner lacks the tech for is not built and changes nothing.
+	// items are kept and the speed becomes the driver's, 5. A driverless
+	// starbase replacing one with a driver changes neither the settings nor
+	// the items. A starbase the owner lacks the tech for is not built and
+	// changes nothing.
 	for _, tt := range []struct {
-		name           string
-		driver, noTech bool
-	}{{"no driver", false, false}, {"Mass Driver 5", true, false}, {"not built", false, true}} {
+		name                      string
+		driver, noTech, oldDriver bool
+	}{
+		{"no driver", false, false, false},
+		{"Mass Driver 5", true, false, false},
+		{"not built", false, true, false},
+		{"driver before, none now", false, false, true},
+	} {
 		g := shipyard(t)
+		if tt.oldDriver {
+			d, err := Components().NewDesign("Station", "Space Station", []SlotFill{{Slot: 0, Part: "Mass Driver 5", Count: 1}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.Designs[2] = d // the planets' starbase, starbase slot 2
+		}
 		if tt.noTech {
 			g.Players[0].Research.Levels = [NumFields]int{}
 			d, err := Components().NewDesign("Fort", "Orbital Fort", []SlotFill{{Slot: 1, Part: "Gatling Gun", Count: 1}})
@@ -284,7 +298,13 @@ func TestStarbaseWithoutDriverDropsPacketItems(t *testing.T) {
 		}
 		wantKinds := []ItemKind{ItemAutoPackets, ItemMine}
 		wantDest, wantSpeed := false, 0
-		if tt.driver {
+		switch {
+		case tt.oldDriver:
+			// The settings and items stay; production then stops at the
+			// Ironium item, which a planet without objects cannot launch.
+			wantKinds = []ItemKind{ItemIroniumPacket, ItemAutoPackets, ItemMixedPacket, ItemMine}
+			wantDest, wantSpeed = true, 6
+		case tt.driver:
 			wantKinds = []ItemKind{ItemIroniumPacket, ItemAutoPackets, ItemMixedPacket, ItemMine}
 			wantDest, wantSpeed = true, 5
 		}
