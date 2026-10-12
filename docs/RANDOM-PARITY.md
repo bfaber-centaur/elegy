@@ -155,12 +155,37 @@ The hits are tallied in two kinds:
 
 Any other draw during firing still stops the replay; none was reached.
 
-| Corpus | Records | Replayed whole | Groups answered | Compared matched | Conditioned matched | Hits recorded |
-|---|---|---|---|---|---|---|
-| cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 |
-| cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 |
-| cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 |
-| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 |
+| Corpus | Records | Replayed whole | Groups answered | Compared matched | Conditioned matched | Hits recorded | Moves allowed | Moves unchecked |
+|---|---|---|---|---|---|---|---|---|
+| cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 | 4456/4456 | 6360 |
+| cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 | 4252/4252 | 25 |
+| cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 | 149/149 | 61 |
+| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 | 254/254 | 16 |
+
+**Moves.** The replay also checks each recorded move before applying it:
+the recorded square must be one Elegy's `step` can choose with some
+outcome of its tie draws (`pvCheckMove`). This checks the movement rule
+without the original's draws. A tactic-0 token has a record for every
+move, a stay included (CB-034); another token that stays has none. So
+when a token moves, its own moves left and whether each enemy has made
+its move of that phase are open up to such silent stays, and the check
+tries every combination that fits the record. A move is unchecked when
+its square scores would draw (a one-torpedo estimate) or when more than
+8 enemies are open (CB-042 and CB-044, with 255 tokens, are most of the
+unchecked moves).
+
+The check found one movement difference, now fixed: a tactic-0 token
+did not count itself among its own player's tokens on its own square, so
+its own square scored −1 instead of +1 and, out of every enemy's reach,
+it stayed put for good (stars-elegy COMBAT.md "Square score",
+"Disengaging", CONFIRMED CB-032). Before the fix 162 records had a move
+Elegy's rule did not allow (1,013 of 9,111 checked moves); after it,
+none. This was what RG-001-Y6 showed at the vector's planets 54 and 55
+in 2435: the original's fleeing Privateer walked up to each Orbital Fort
+and fired on it (360 and 180 units), while Elegy's stayed out of reach.
+With the record's moves every hit replays and the Forts keep that damage
+through the year (`TestRG001StarbaseDamageKept`); Elegy's own walk is now
+random, as the original's is.
 
 Answering the rolls turned up one mechanics difference, now fixed: on a
 shielded target the misses' shield damage is a hit record of its own,

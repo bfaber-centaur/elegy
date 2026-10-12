@@ -147,6 +147,9 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 			}
 		}
 		shield += p.Shield * s.Count
+		// RS halves the armor parts' armor. ASSUMPTION A13: a shield
+		// part's armor (Croby Sharmor, Langston Shell) counts whole;
+		// COMBAT.md names "each armor part" only.
 		if rs && p.Kind == PartArmor {
 			armor += p.Armor / 2 * s.Count
 		} else {

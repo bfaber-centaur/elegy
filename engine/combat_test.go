@@ -206,6 +206,34 @@ func TestConfirmedDisengageLeavesOnEighthMove(t *testing.T) {
 	}
 }
 
+func TestConfirmedDisengageOwnSquare(t *testing.T) {
+	// COMBAT.md "Square score", "Disengaging" (CONFIRMED, CB-032: a lone
+	// Runner changed square on all 8 moves in 6 streams): tactic 0 adds 2
+	// per token of its own player on the square, itself included, and
+	// subtracts 1 for its current square. Out of every enemy's reach its
+	// own square scores 1 and each neighbour 0, so it never stays. The
+	// battle records' moves check the same rule (CheckBattleRecords).
+	d := []Design{testDesign(tFrigate, 10)}
+	runner := tok(d, 0, 0, 1)
+	runner.tactic, runner.counter = TacticDisengage, 7
+	runner.x, runner.y = 4, 4
+	enemy := tok(d, 0, 1, 1)
+	enemy.x, enemy.y = 8, 5
+	tb := newTestBattle(&seqRand{}, d, runner, enemy)
+	runner.moves = 1
+	if own, next := tb.score(runner, 4, 4), tb.score(runner, 3, 4); own != 1 || next != 0 {
+		t.Fatalf("scores: own square %d, neighbour %d; want 1 and 0", own, next)
+	}
+	for move := 1; move <= 7; move++ {
+		x, y := runner.x, runner.y
+		runner.moves = 1
+		tb.step(runner)
+		if runner.x == x && runner.y == y {
+			t.Fatalf("move %d: stayed on (%d,%d)", move, x, y)
+		}
+	}
+}
+
 func TestConfirmedHitChance(t *testing.T) {
 	// CB-001: Beta Torpedo (45%) with no computer, BSC, BSC vs Jammer 20,
 	// BSC vs Jammer 50.

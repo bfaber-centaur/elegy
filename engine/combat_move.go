@@ -260,9 +260,14 @@ func (b *battle) score(t *token, qx, qy int) int {
 		take += bestTake
 	}
 	s := tacticScore(t.tactic, give, take)
+	// Tactic 0: +2 per token of its own player on q, the token itself
+	// included, and −1 for its current square. Its own square therefore
+	// scores +1 against a neighbour with the same take (COMBAT.md "Square
+	// score", "Disengaging"; CB-032: a lone Runner changed square on all
+	// 8 moves).
 	if t.tactic == TacticDisengage {
 		for _, o := range b.tokens {
-			if o != t && o.live() && o.player == t.player && o.x == qx && o.y == qy {
+			if o.live() && o.player == t.player && o.x == qx && o.y == qy {
 				s += 2
 			}
 		}

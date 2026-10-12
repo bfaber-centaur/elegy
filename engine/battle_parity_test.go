@@ -126,6 +126,11 @@ type pvBattleOutcome struct {
 	draws                    bool   // stopped at a round where Elegy would draw
 	salvos                   int    // torpedo salvos answered from the record
 	built                    bool   // a token's fleet is not in Elegy's game
+	// moves checked (pvCheckMove), those on a square Elegy's rule allows,
+	// those not checked because Elegy's square scores would draw, and the
+	// first move Elegy's rule does not allow.
+	moves, movesMatched, movesUnchecked int
+	moveStop                            string
 }
 
 // loadBattleRecords reads every battle record in the vectors.
@@ -379,6 +384,12 @@ func replayHits(b *battle, actions []pvBattleAction, script []int, out *pvBattle
 		if r > 0 {
 			b.regenerate()
 		}
+		rd := pvRound{total: map[*token]int{}, done: map[*token]int{}}
+		for _, t := range b.tokens {
+			if t.live() && !t.starbase {
+				rd.total[t] = movesInRound(t.speed, r)
+			}
+		}
 		// The round's moves come first, one action per square moved; the
 		// firing actions follow, each with its hits. In every record a
 		// round's actions without hits all come before those with hits.
@@ -393,6 +404,20 @@ func replayHits(b *battle, actions []pvBattleAction, script []int, out *pvBattle
 				return nil
 			}
 			t := b.tokens[a.Token]
+			if t.live() && !t.starbase {
+				out.moves++
+				switch why := pvCheckMove(b, t, a.To, rd); why {
+				case "":
+					out.movesMatched++
+				case pvUnchecked:
+					out.movesUnchecked++
+				default:
+					if out.moveStop == "" {
+						out.moveStop = fmt.Sprintf("round %d token %d: %s", r, a.Token, why)
+					}
+				}
+				rd.done[t]++
+			}
 			if a.To == nil {
 				t.left = true
 			} else {
@@ -478,6 +503,212 @@ func replayHits(b *battle, actions []pvBattleAction, script []int, out *pvBattle
 		}
 	}
 	return nil
+}
+
+// pvUnchecked is pvCheckMove's answer for a move it cannot check: the
+// square scores would draw (a one-torpedo estimate, COMBAT.md "Damage
+// estimate").
+const pvUnchecked = "unchecked"
+
+// pvProbe is the Rand of a move check: it notes any draw.
+type pvProbe struct{ drew bool }
+
+func (p *pvProbe) Intn(int) int { p.drew = true; return 0 }
+
+// pvRound is a round's moves so far in a replay: each token's moves this
+// round (movesInRound) and its move actions applied so far.
+type pvRound struct{ total, done map[*token]int }
+
+// pvCheckMove checks one recorded move of token t (to is nil when it
+// leaves the board) against Elegy's movement rule, before the move is
+// applied: the record's square must be one that step can choose with
+// some outcome of its tie draws (COMBAT.md "Choosing a square"). It keeps
+// a disengaging token's counter as step does. It returns "" when the move
+// is allowed, pvUnchecked, or why not.
+//
+// The moves left matter (reach, the radius and each enemy's "at least as
+// many moves left"). A tactic-0 token has an action for every move, a
+// stay included (CB-034); another token that stays has none in the
+// records. So the phase of t's move (its moves left, a) and whether
+// another token has already made its phase-a move are known only up to
+// such silent stays: every consistent combination is tried, and the move
+// is allowed when one of them allows it.
+func pvCheckMove(b *battle, t *token, to *[2]int, rd pvRound) string {
+	if t.tactic == TacticDisengage {
+		if t.counter == 0 {
+			if to == nil {
+				return ""
+			}
+			return fmt.Sprintf("Elegy leaves the board; the record moves to %v", *to)
+		}
+		t.counter--
+	}
+	if to == nil {
+		return fmt.Sprintf("the record leaves the board from (%d,%d); Elegy does not", t.x, t.y)
+	}
+	saved := b.rng
+	probe := &pvProbe{}
+	b.rng = probe
+	moves := map[*token]int{}
+	for _, e := range b.tokens {
+		moves[e] = e.moves
+	}
+	defer func() {
+		b.rng = saved
+		for e, m := range moves {
+			e.moves = m
+		}
+	}()
+	hi := rd.total[t] - rd.done[t]
+	lo := 1
+	if t.tactic == TacticDisengage {
+		lo = hi
+	}
+	allowed := map[[2]int]bool{}
+	tried := false
+phases:
+	for a := lo; a <= hi; a++ {
+		var unknown []*token
+		for _, e := range b.tokens {
+			if e == t || !e.live() || e.starbase {
+				e.moves = 0
+				continue
+			}
+			m, done := rd.total[e], rd.done[e]
+			if m < a {
+				// Its moves all come in later phases.
+				if done > 0 {
+					continue phases
+				}
+				e.moves = m
+				continue
+			}
+			// By its phase-a move it has made m−a+1 moves.
+			switch {
+			case done > m-a+1:
+				continue phases
+			case done == m-a+1:
+				e.moves = a - 1
+			case e.tactic == TacticDisengage && done == m-a:
+				e.moves = a
+			case e.tactic == TacticDisengage:
+				continue phases
+			case !b.attacks(t.player, e.player):
+				// t's radius and scores read only the tokens it attacks.
+				e.moves = a
+			default:
+				unknown = append(unknown, e)
+			}
+		}
+		if len(unknown) > 8 {
+			return pvUnchecked
+		}
+		for mask := 0; mask < 1<<len(unknown); mask++ {
+			for i, e := range unknown {
+				e.moves = a
+				if mask>>i&1 == 1 {
+					e.moves = a - 1
+				}
+			}
+			t.moves = a
+			tried = true
+			for q := range pvMoveSquares(b, t) {
+				allowed[q] = true
+			}
+		}
+	}
+	if probe.drew {
+		return pvUnchecked
+	}
+	if !tried {
+		return fmt.Sprintf("no order of the round's moves fits the record's %d moves of %d", rd.done[t]+1, rd.total[t])
+	}
+	if !allowed[*to] {
+		var sq [][2]int
+		for q := range allowed {
+			sq = append(sq, q)
+		}
+		sort.Slice(sq, func(i, j int) bool { return sq[i][0] < sq[j][0] || sq[i][0] == sq[j][0] && sq[i][1] < sq[j][1] })
+		return fmt.Sprintf("the record moves from (%d,%d) to %v; Elegy's rule allows %v", t.x, t.y, *to, sq)
+	}
+	return ""
+}
+
+// pvMoveSquares is every square step can move t to, over all outcomes of
+// its tie draws.
+func pvMoveSquares(b *battle, t *token) map[[2]int]bool {
+	radius, goal, hasGoal := b.radius(t)
+	var picks [][2]int
+	if hasGoal {
+		picks = [][2]int{goal}
+	} else {
+		best, bestDist := 0, 0
+		for x := range boardSize {
+			for y := range boardSize {
+				d := dist(t.x, t.y, x, y)
+				if d > radius {
+					continue
+				}
+				s := b.score(t, x, y)
+				switch {
+				case len(picks) == 0 || s < best || s == best && d < bestDist:
+					picks, best, bestDist = [][2]int{{x, y}}, s, d
+				case s == best && d == bestDist:
+					picks = append(picks, [2]int{x, y})
+				}
+			}
+		}
+	}
+	out := map[[2]int]bool{}
+	add := func(x, y int) {
+		if x < 0 || y < 0 || x >= boardSize || y >= boardSize {
+			x, y = t.x, t.y // a step off the board stays
+		}
+		out[[2]int{x, y}] = true
+	}
+	for _, p := range picks {
+		dx, dy := p[0]-t.x, p[1]-t.y
+		if max(abs(dx), abs(dy)) <= 1 {
+			add(p[0], p[1])
+			continue
+		}
+		sx, sy := sign(dx), sign(dy)
+		switch {
+		case abs(dx) == abs(dy):
+			add(t.x+sx, t.y+sy)
+		case dx == 0 || dy == 0:
+			cand := [3][2]int{{t.x + sx, t.y - 1}, {t.x + sx, t.y}, {t.x + sx, t.y + 1}}
+			if dx == 0 {
+				cand = [3][2]int{{t.x - 1, t.y + sy}, {t.x, t.y + sy}, {t.x + 1, t.y + sy}}
+			}
+			var scores [3]int
+			low := 0
+			for i, c := range cand {
+				scores[i] = b.score(t, c[0], c[1])
+				if i == 0 || scores[i] < low {
+					low = scores[i]
+				}
+			}
+			for i, c := range cand {
+				if scores[i] == low {
+					add(c[0], c[1])
+				}
+			}
+		default:
+			straight := [2]int{t.x + sx, t.y}
+			if abs(dy) >= abs(dx) {
+				straight = [2]int{t.x, t.y + sy}
+			}
+			sd, ss := b.score(t, t.x+sx, t.y+sy), b.score(t, straight[0], straight[1])
+			if sd <= ss {
+				add(t.x+sx, t.y+sy)
+			}
+			if ss <= sd {
+				add(straight[0], straight[1])
+			}
+		}
+	}
+	return out
 }
 
 // pvSalvoBudget bounds the replays one battle's search may run.
@@ -600,6 +831,7 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 		records, tokens, built, ungen, full, draws int
 		compared, matched, total, salvos           int
 		conditioned, condMatched                   int
+		moves, movesMatched, movesUnchecked        int
 	}
 	per := map[string]*tally{}
 	var names []string
@@ -646,6 +878,12 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 			c.salvos += o.salvos
 			c.conditioned += o.conditioned
 			c.condMatched += o.condMatched
+			c.moves += o.moves
+			c.movesMatched += o.movesMatched
+			c.movesUnchecked += o.movesUnchecked
+			if o.moveStop != "" {
+				t.Errorf("%s: moves: %s", where, o.moveStop)
+			}
 			switch {
 			case o.draws:
 				c.draws++
@@ -666,16 +904,24 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 	// salvos: torpedo groups whose draws were answered from the record;
 	// conditioned: hits after an answered draw, which rest on outcomes
 	// taken from the record (not random parity)
-	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded")
+	// moves: recorded moves on a square Elegy's rule allows / moves
+	// checked; unchecked: moves whose square scores would draw, or with
+	// too many tokens whose silent stays leave the moves left open
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %8s  %-13s %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded", "moves", "unchecked")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
-			fmt.Sprintf("%d/%d", c.matched, c.compared), fmt.Sprintf("%d/%d", c.condMatched, c.conditioned), c.total)
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %8d  %-13s %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
+			fmt.Sprintf("%d/%d", c.matched, c.compared), fmt.Sprintf("%d/%d", c.condMatched, c.conditioned), c.total,
+			fmt.Sprintf("%d/%d", c.movesMatched, c.moves-c.movesUnchecked), c.movesUnchecked)
 		all.compared += c.compared
+		all.movesMatched += c.movesMatched
 	}
 	if all.compared == 0 {
 		t.Error("no hit was compared")
+	}
+	if all.movesMatched == 0 {
+		t.Error("no move was checked")
 	}
 	ungen := map[string]int{}
 	for name, c := range per {
@@ -698,6 +944,23 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if o := compareBattle(&l, r); o.tokens != "" || o.stop != "" || o.compared == 0 || o.compared != o.total || o.conditioned != 0 {
 		t.Fatalf("CB-010 at 1060: %+v, want every hit replayed", o)
+	}
+	if o := compareBattle(&l, r); o.moves == 0 || o.movesMatched != o.moves-o.movesUnchecked || o.moveStop != "" {
+		t.Fatalf("CB-010 at 1060: moves %+v, want every move checked and allowed", o)
+	}
+	// A recorded move two squares long is not one Elegy's rule allows.
+	jump := r
+	jump.actions = append([]pvBattleAction(nil), r.actions...)
+	for i, a := range jump.actions {
+		if len(a.Hits) == 0 && a.To != nil {
+			far := [2]int{(a.To[0] + 5) % boardSize, (a.To[1] + 5) % boardSize}
+			a.To = &far
+			jump.actions[i] = a
+			break
+		}
+	}
+	if o := compareBattle(&l, jump); !strings.Contains(o.moveStop, "Elegy's rule allows") {
+		t.Errorf("a changed recorded move was not noticed: %+v", o)
 	}
 	mass := r
 	mass.tokens = append([]pvBattleToken(nil), r.tokens...)
@@ -827,5 +1090,54 @@ func TestReplayAnswerRand(t *testing.T) {
 	r.Intn(10)
 	if !r.drew {
 		t.Error("a rand(10) was not flagged")
+	}
+}
+
+// CheckStarbaseDamageKept replays RG-001's two 2435 battles at player 6's
+// Orbital Forts (planets 54 and 55 of the vector) with the record's moves
+// and checks that the Forts keep their battle damage through the year's
+// repair: a starbase that fought gets none (COMBAT.md "Repair", CONFIRMED
+// CB-017). The original ended the year with 360 and 180 (the vector's
+// planet samples). l is RG-001-Y6's start (rg/rg001-y6.json, year 1).
+func CheckStarbaseDamageKept(t *testing.T, l BattleStart) {
+	want := map[int]int{1460: 360, 1308: 180}
+	n := 0
+	for _, r := range loadBattleRecords(t)["rg/rg001-y6.json"] {
+		if _, ok := want[r.y]; !ok || r.x != 1319 || r.year != 1 {
+			continue
+		}
+		n++
+		b, why := l.buildBattle(r)
+		if why != "" {
+			t.Fatalf("(%d,%d): %s", r.x, r.y, why)
+		}
+		var o pvBattleOutcome
+		total := 0
+		for _, a := range r.actions {
+			total += len(a.Hits)
+		}
+		if need := replayHits(b, r.actions, nil, &o); need != nil || o.stop != "" || o.matched != total || total == 0 {
+			t.Fatalf("(%d,%d): replay %+v of %d hits", r.x, r.y, o, total)
+		}
+		pi := -1
+		for _, tk := range b.tokens {
+			if tk.starbase {
+				pi = tk.planet
+			}
+		}
+		b.finish()
+		g := b.g
+		repair(g, nil, battleResult{bases: map[int]bool{pi: true}})
+		if got := g.Planets[pi].StarbaseDamage; got != want[r.y] {
+			t.Errorf("(%d,%d): starbase damage %d after the year's repair, want %d", r.x, r.y, got, want[r.y])
+		}
+		// Without the mark, the year's repair would take 50 off.
+		repair(g, nil, battleResult{})
+		if got := g.Planets[pi].StarbaseDamage; got != want[r.y]-50 {
+			t.Errorf("(%d,%d): starbase damage %d after a repair with no battle, want %d", r.x, r.y, got, want[r.y]-50)
+		}
+	}
+	if n != 2 {
+		t.Fatalf("%d RG-001 2435 Orbital Fort battles, want 2", n)
 	}
 }
