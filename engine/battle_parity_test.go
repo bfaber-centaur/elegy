@@ -557,3 +557,44 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		t.Error("no CS-003-C torpedo battle stopped at its draws")
 	}
 }
+
+func TestSetupBattleCostLevels(t *testing.T) {
+	// The harness builds battles with the year's cost levels: a token's
+	// cost is the design's at those levels, not at the owner's current
+	// ones (COMBAT.md "Design cost", #141).
+	station, err := Components().NewDesign("Station", "Space Station", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := Game{
+		Rules: ElegyRules(),
+		Players: []Player{
+			{},
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 2}}},
+			{Plans: []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackPlayer, Player: 1}}},
+		},
+		Designs: []Design{station, testDesign(tFrigate, 10, Slot{tLaser, 1})},
+		Planets: []Planet{{ID: 1, Pos: Point{5, 5}, Owner: 1, HasStarbase: true, StarbaseDesign: 0}},
+		Fleets:  []Fleet{{ID: 1, Owner: 2, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}}},
+	}
+	g.Players[1].Research.Levels = [NumFields]int{8, 8, 8, 8, 8, 8}
+	costLevels := [][NumFields]int{{}, {3, 3, 3, 3, 3, 3}, {}}
+	race := g.Players[1].Race
+	at, now := designCost(station, race, costLevels[1]), designCost(station, race, g.Players[1].Research.Levels)
+	if at == now {
+		t.Fatalf("cost %+v the same at both levels: not a test", at)
+	}
+	b, ok := setupBattle(&g, costLevels, 5, 5)
+	if !ok {
+		t.Fatal("no battle")
+	}
+	for _, tk := range b.tokens {
+		if tk.starbase {
+			if want := at.Resources + at.Minerals[Boranium]; tk.cost != want {
+				t.Errorf("starbase token cost %d, want %d at the cost levels (%d at the current ones)", tk.cost, want, now.Resources+now.Minerals[Boranium])
+			}
+			return
+		}
+	}
+	t.Fatal("no starbase token")
+}
