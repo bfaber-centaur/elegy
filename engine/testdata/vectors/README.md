@@ -219,6 +219,7 @@ an order belong to the submitting player unless a field says otherwise.
 |---|---|
 | `production_queue` | `planet`, `items` (`{id, count, percent, kind}` as in `production_queues`): the planet's whole new queue |
 | `planet_settings` | `planet`, `leftover_to_research`, `route_to`, `packet_destination`, `packet_warp`: the planet's whole settings (`-1`: no route, no packet destination; `packet_warp` as in `initial_state`) |
+| `default_queue` | `items` (`{id, count, kind}`, planetary items, kind 1), `leftover_to_research`: the player's whole new default queue and default leftover setting (`players[].default_queue`). The original client adds this record by itself to a human player's file whenever its own default template differs from the player's stored default; with no template saved it carries no items and leftover off (`ORDERS.md` "The player's default queue"). RG-002 year 1 has one |
 | `research` | `percent`, `field`, `next_field` (a field, `same`, `lowest`, or the stored number) |
 | `battle_plan` | `slot`, `name`, `tactic`, `primary`, `secondary`, `attack_who`, `dump_cargo`: add the plan at `slot` or change it |
 | `battle_plan_delete` | `slot` |
@@ -299,7 +300,7 @@ unconstrained by that case.
 | `design_gone`, `starbase_design_gone` | design `owner`/`slot` no longer exists | |
 | `battle_plan` | plan `owner`/`slot` | `name`, `tactic`, `primary`, `secondary`, `attack_who`, `dump_cargo` |
 | `battle_plan_gone` | plan `owner`/`slot` no longer exists | |
-| `player` | player `id` | `tech`, `research_accumulated`, `research_percent`, `research_field`, `relations`, `counts`, `default_queue`, `default_leftover_to_research`, `mystery_trader_items`, `ship_design_count`, `score_record` (score, resources, planets, starbases, unarmed/escort/capital ship counts, tech level sum, rank, `victory_conditions_met`; `seen_by` names the player whose file held it; the record counts the player's ships at the end of the year, so it is a sample whenever one of that player's fleets is) |
+| `player` | player `id` | `tech`, `research_accumulated`, `research_percent`, `research_field`, `relations`, `counts`, `default_queue`, `default_leftover_to_research`, `mystery_trader_items`, `ship_design_count`, `score_record` (score, resources, planets, starbases, unarmed/escort/capital ship counts, tech level sum, rank, `victory_conditions_met`; `seen_by` names the player whose file held it; the record counts the player's ships at the end of the year, so it is a sample whenever one of that player's fleets is; stars-elegy 56ebfcf) |
 | `wormhole` | wormhole end `id` | `known_to`, `destination_known_to` |
 | `trader` | Mystery Trader `id` | `x`, `y`, `warp`, `destination`, `met` |
 | `packet` | packet `owner`/`id` | `x`, `y` (within `tolerance` ly) |

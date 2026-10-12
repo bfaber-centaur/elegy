@@ -770,20 +770,38 @@ func noFuelAtWarp4(d engine.Design) bool {
 	return d.Engines > 0 && d.Engine.Fuel[4] == 0
 }
 
-func designArmor(d engine.Design) int {
+// designArmor is a design's armor per ship. rs (the owner has
+// Regenerating Shields) halves each armor slot's armor, truncated once per
+// slot, as in battle; a shield part's armor counts whole (stars-elegy
+// COMBAT.md "Armor"; engine tokenValues).
+func designArmor(d engine.Design, rs bool) int {
 	a := d.Hull.Armor
 	for _, s := range d.Slots {
-		a += s.Count * s.Part.Armor
+		if rs && s.Part.Kind == engine.PartArmor {
+			a += s.Count * s.Part.Armor / 2
+		} else {
+			a += s.Count * s.Part.Armor
+		}
 	}
 	return a
 }
 
-func designShield(d engine.Design) int {
+// designShield is a design's shields per ship, × 7/5 when rs (the owner
+// has Regenerating Shields), as in battle.
+func designShield(d engine.Design, rs bool) int {
 	sh := 0
 	for _, s := range d.Parts() {
 		sh += s.Count * s.Part.Shield
 	}
+	if rs {
+		sh = sh * 7 / 5
+	}
 	return sh
+}
+
+// regeneratingShields reports whether player has Regenerating Shields.
+func regeneratingShields(g *engine.Game, player int) bool {
+	return player >= 0 && player < len(g.Players) && g.Players[player].Race.LRT.RegeneratingShields
 }
 
 // MineDamage applies a standard or heavy hit to fleet f (OBJECTS.md "Hits
@@ -804,6 +822,11 @@ func designShield(d engine.Design) int {
 // total = X + D − min(⌊D/2⌋, shield·n); avg = ⌊total/n⌋. The design is
 // destroyed when avg > A; otherwise every ship is damaged (100%) with
 // max(1, ⌊avg·500/A⌋) units.
+//
+// For a Regenerating Shields owner, shields and armor are the battle's:
+// shields × 7/5 and each armor slot's armor halved (MEASURED, CB-056, 23
+// fleets: 280 where the plain sums give 197; OBJECTS.md at stars-elegy
+// b0ca924; once per slot, designArmor).
 //
 // ASSUMPTION O6: a design's ships are the fleet's stacks of that design,
 // in order of first appearance, with the first stack's stored damage; the
@@ -849,6 +872,7 @@ func MineDamage(g *engine.Game, f *engine.Fleet, k MineKind, exempt func(design 
 	if ships < 5 && ships*per < least {
 		shortfall = least - ships*per
 	}
+	rs := regeneratingShields(g, f.Owner)
 	var out []DesignHit
 	for i, gr := range groups {
 		d := g.Designs[gr.design]
@@ -857,9 +881,9 @@ func MineDamage(g *engine.Game, f *engine.Fleet, k MineKind, exempt func(design 
 			raw += shortfall
 		}
 		raw *= max(1, d.Engines)
-		absorbed := min(raw/2, gr.ships*designShield(d))
+		absorbed := min(raw/2, gr.ships*designShield(d, rs))
 		hit := DesignHit{Design: gr.design, Ships: gr.ships, Damage: raw, Absorbed: absorbed}
-		armor := designArmor(d)
+		armor := designArmor(d, rs)
 		old := firstDamage(f, gr.design)
 		existing := old.Pct * gr.ships / 100 * armor * old.Units / 500
 		avg := (existing + raw - absorbed) / gr.ships

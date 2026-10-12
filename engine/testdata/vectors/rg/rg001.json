@@ -31644,7 +31644,8 @@
       }
      },
      "seen_by": 6,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ]
   },
@@ -38473,7 +38474,8 @@
       }
      },
      "seen_by": 1,
-     "year": 2
+     "year": 2,
+     "sample": true
     },
     {
      "kind": "player",
@@ -45697,7 +45699,8 @@
       }
      },
      "seen_by": 1,
-     "year": 3
+     "year": 3,
+     "sample": true
     },
     {
      "kind": "player",
@@ -60306,7 +60309,8 @@
       }
      },
      "seen_by": 1,
-     "year": 5
+     "year": 5,
+     "sample": true
     },
     {
      "kind": "player",
@@ -60387,7 +60391,8 @@
       }
      },
      "seen_by": 5,
-     "year": 5
+     "year": 5,
+     "sample": true
     },
     {
      "kind": "message",

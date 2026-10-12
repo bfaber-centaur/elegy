@@ -1002,6 +1002,14 @@ func (l *pvLoaded) waypoint(owner int, w pvWaypoint) (engine.Waypoint, string) {
 		wp.Target, wp.ID = engine.TargetWormhole, id
 	case "trader":
 		wp.Target, wp.ID = engine.TargetTrader, *w.Target.ID
+	case "packet_object":
+		// A packet or salvage named by its owner and number as in objects
+		// (vectors/README.md "fleets").
+		if w.Target.Owner == nil || w.Target.ID == nil {
+			why = "packet_object target without an owner and id"
+			break
+		}
+		wp.Target, wp.Owner, wp.ID = engine.TargetPacketObject, *w.Target.Owner, *w.Target.ID
 	default:
 		why = "target " + w.Target.Kind
 	}

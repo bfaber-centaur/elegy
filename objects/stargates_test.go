@@ -202,3 +202,37 @@ func TestPredictionGateLosses(t *testing.T) {
 		t.Errorf("cargo share: %+v", cg)
 	}
 }
+
+// A Regenerating Shields owner's ships take stargate damage on the halved
+// armor, as in battle and mine damage: the halving is in the design's
+// armor (stars-elegy COMBAT.md "Armor", BINARY-ONLY; this replaces
+// ASSUMPTION G5, plain armor). Four Tanks (Destroyer, 2 Superlatanium:
+// armor 3200; halved per slot, 200 + 3000/2 = 1700) jump an overloaded
+// gate with the same draws for an owner without RS and for an RS owner.
+func TestBinaryGateDamageRegeneratingShieldsHalvedArmor(t *testing.T) {
+	jump := func(rs bool) (GateJump, engine.Stack) {
+		l := gateLab(t, "Stargate 100/250", 380)
+		l.g.Players[0].Race.LRT.RegeneratingShields = rs
+		fi := l.fleet(0, origin, "Tank", 4)
+		l.g.Fleets[fi].Stacks[0].Damage = engine.Damage{Pct: 50, Units: 100}
+		j := Jump(l.g, fi, at(380, 0), &script{3, 50, 50, 50, 50})
+		return j, l.g.Fleets[fi].Stacks[0]
+	}
+	j, st := jump(false)
+	jrs, strs := jump(true)
+	if j.Designs[0].Pct <= 0 || j.Designs[0].Pct >= 100 {
+		t.Fatalf("the jump must damage without destroying: %+v", j)
+	}
+	// 19%: the first ship is destroyed (3 < 6) and rand(500) = 50 < 100
+	// lowers D from 2 to 1. Plain armor: Nw = 19·3200/100 = 608, Dm =
+	// 100·3200/500 = 640; avg = ⌊(608·3 + 640)/3⌋ = 821, u = 821·500/3200
+	// = 128. RS: Nw = 19·1700/100 = 323, Dm = 340; avg = ⌊(323·3 +
+	// 340)/3⌋ = 436, u = 436·500/1700 = 128.
+	want := engine.Stack{Design: st.Design, Count: 3, Damage: engine.Damage{Pct: 100, Units: 128}}
+	if j.Designs[0].Damage != 608 || st != want {
+		t.Errorf("plain armor: %+v %+v, want damage 608 and 3 ships at 128/500", j, st)
+	}
+	if jrs.Designs[0].Damage != 323 || strs != want {
+		t.Errorf("RS owner: %+v %+v, want damage 323 and 3 ships at 128/500", jrs, strs)
+	}
+}

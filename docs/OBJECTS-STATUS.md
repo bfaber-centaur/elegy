@@ -30,7 +30,7 @@ below and KERNEL-STATUS.md "Space objects").
 | Due-north and due-south legs | `Legacy.DueNorthSouthCut` (on in the `elegy` ruleset) | LEGACY BUG, MEASURED (MF-15) |
 | Stretches: eight per kind, merging, draw order, stop offset | `addStretch`, `CheckStep` | BINARY-ONLY; stop offsets MEASURED (OB-010-S, MF-15) |
 | Stop point | `StopPoint` | BINARY-ONLY; exact on east legs |
-| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M); damage on existing damage BINARY-ONLY |
+| Hit damage | `MineDamage` | CONFIRMED (MF-9, MF-8, OB-010-S, OB-002-M; engines and shields on late fleets CB-056, 66 fleets); a Regenerating Shields owner's battle shields and armor MEASURED (CB-056, 23 fleets; stars-elegy b0ca924); damage on existing damage BINARY-ONLY |
 | Cargo and fuel lost with destroyed ships | `ApplyHit`, `Space.Detonate` | MEASURED (MF-14); detonation BINARY-ONLY |
 | Survivors' minerals dropped as salvage | `Legacy.MineSurvivorSalvage` (on in the `elegy` ruleset) | LEGACY BUG candidate, MEASURED (MF-14) |
 | Mines lost, paying field | `MinesLost`, `PayingField`, `ApplyHit` | CONFIRMED (OB-010-S, OB-024, MF-4) |
@@ -220,6 +220,11 @@ OBJECTS.md now answers G1–G3 (BINARY-ONLY; fits OB-021, GT-001):
   while damaged ships remain.
 - Old damage counts only the `D` damaged ships, and `D` more ships go when
   `Nw + Dm ≥ A`.
+- A Regenerating Shields owner's ships take gate damage on the halved
+  armor, as in battle and mine damage: the halving (once per armor slot)
+  is in the design's armor (stars-elegy #164, 41e7a1c, COMBAT.md "Armor",
+  BINARY-ONLY; this replaces ASSUMPTION G5, plain armor)
+  (`TestBinaryGateDamageRegeneratingShieldsHalvedArmor`).
 - Lost ships take `⌊fuel·L/T⌋` of the fuel, and the same share of any cargo
   still aboard.
 

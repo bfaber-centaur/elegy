@@ -88,8 +88,11 @@ type Waypoint struct {
 	Pos    Point
 	Warp   int
 	Target TargetKind
-	ID     int  // planet or fleet id for TargetPlanet / TargetFleet
-	Task   Task // the task the fleet takes up on arriving
+	ID     int // planet or fleet id for TargetPlanet / TargetFleet
+	// Owner is the object's owner for TargetPacketObject, whose ID is the
+	// object's number; 0 for every other target.
+	Owner int
+	Task  Task // the task the fleet takes up on arriving
 }
 
 type Fleet struct {
@@ -904,6 +907,7 @@ func (g *Game) settleWaypoints(order []int) []Event {
 		if len(f.Waypoints) > 0 && g.destination(f.Waypoints[0]) == f.Pos {
 			reached := f.Waypoints[0]
 			events = append(events, g.arrive(f)...)
+			events = append(events, g.cancelPacketTransport(f, reached)...)
 			if reached.Target == TargetWormhole && g.Objects != nil {
 				events = append(events, g.transit(i, reached.ID)...)
 			}

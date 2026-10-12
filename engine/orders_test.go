@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -807,5 +808,49 @@ func TestDesignOrderCreatedAndPicture(t *testing.T) {
 	// ASSUMPTION L29: the edit also starts the built count again.
 	if s := slot(false, 3); s.Created != 2415 || s.Picture != 1 || s.Built != 0 {
 		t.Errorf("edited slot 3: created %d picture %d built %d, want 2415, 1 and 0", s.Created, s.Picture, s.Built)
+	}
+}
+
+func TestDefaultQueueOrder(t *testing.T) {
+	g := ordersGame()
+	g.Players[0].DefaultQueue = []QueueItem{{Kind: ItemAutoMines, Count: 5}}
+	g.Players[0].DefaultLeftoverOnly = true
+	apply := func(o DefaultQueueOrder) error {
+		t.Helper()
+		a := ApplyOrders(g, []PlayerOrders{{Player: 0, GameID: 77, Year: 2410, Orders: []Order{o}}}, []int{0})
+		if len(a.Results) == 0 {
+			return nil
+		}
+		return a.Results[0].Err
+	}
+	// An empty record replaces the setting whole (ORDERS.md "The player's
+	// default queue", MEASURED RG-002 year 1).
+	if err := apply(DefaultQueueOrder{}); err != nil || g.Players[0].DefaultQueue != nil || g.Players[0].DefaultLeftoverOnly {
+		t.Errorf("empty record: %v, default %+v leftover %v", err, g.Players[0].DefaultQueue, g.Players[0].DefaultLeftoverOnly)
+	}
+	q := []QueueItem{{Kind: ItemAutoFactories, Count: 10}, {Kind: ItemAutoMaxTerraform, Count: 3}}
+	if err := apply(DefaultQueueOrder{Queue: q, LeftoverOnly: true}); err != nil || !reflect.DeepEqual(g.Players[0].DefaultQueue, q) || !g.Players[0].DefaultLeftoverOnly {
+		t.Errorf("record: %v, default %+v leftover %v", err, g.Players[0].DefaultQueue, g.Players[0].DefaultLeftoverOnly)
+	}
+	q[0].Count = 99
+	if g.Players[0].DefaultQueue[0].Count != 10 {
+		t.Errorf("the default queue shares the order's items")
+	}
+	for name, o := range map[string]DefaultQueueOrder{
+		"design item": {Queue: []QueueItem{{Kind: ItemShip, Count: 1}}},
+		"13 items":    {Queue: slices.Repeat([]QueueItem{{Kind: ItemAutoMines, Count: 1}}, 13)},
+		"count 0":     {Queue: []QueueItem{{Kind: ItemAutoMines}}},
+		"count 1024":  {Queue: []QueueItem{{Kind: ItemAutoMines, Count: maxItemCount + 1}}},
+		"percent 101": {Queue: []QueueItem{{Kind: ItemAutoMines, Count: 1, Percent: 101}}},
+		"percent -1":  {Queue: []QueueItem{{Kind: ItemAutoMines, Count: 1, Percent: -1}}},
+		"kind below":  {Queue: []QueueItem{{Kind: ItemMine - 1, Count: 1}}},
+		"kind above":  {Queue: []QueueItem{{Kind: ItemAutoMaxTerraform + 1, Count: 1}}},
+	} {
+		if err := apply(o); !errors.Is(err, ErrOutOfRange) {
+			t.Errorf("%s: %v, want refused", name, err)
+		}
+	}
+	if len(g.Players[0].DefaultQueue) != 2 {
+		t.Errorf("a refused record changed the default queue: %+v", g.Players[0].DefaultQueue)
 	}
 }

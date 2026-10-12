@@ -331,3 +331,32 @@ func TestMeasuredWFRetargetInTurn(t *testing.T) {
 		t.Errorf("out-of-view events %v, want one for player 0's fleet 1", got)
 	}
 }
+
+func TestBinaryOnlyPacketObjectWaypointCheck(t *testing.T) {
+	// A waypoint aimed at a salvage object, named by its owner and number,
+	// takes its position; one whose object is gone, including another
+	// owner's object of the same number, becomes a plain go-to at its last
+	// coordinates (ORDERS.md "Salvage and mineral packet targets",
+	// stars-elegy f2f9794, BINARY-ONLY). A new object that took a freed
+	// number is followed.
+	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}, {}},
+		Salvage: []Salvage{{Pos: Point{300, 40}, Owner: 1, Number: 3}},
+		Fleets: []Fleet{{ID: 1, Owner: 0, Waypoints: []Waypoint{
+			{Pos: Point{0, 0}, Target: TargetPacketObject, Owner: 1, ID: 3},
+			{Pos: Point{5, 5}, Target: TargetPacketObject, Owner: 2, ID: 3},
+			{Pos: Point{6, 6}, Target: TargetPacketObject, Owner: 1, ID: 4},
+		}}},
+	}
+	g.waypointCheck()
+	want := []Waypoint{{Pos: Point{300, 40}, Target: TargetPacketObject, Owner: 1, ID: 3}, {Pos: Point{5, 5}}, {Pos: Point{6, 6}}}
+	if got := g.Fleets[0].Waypoints; !reflect.DeepEqual(got, want) {
+		t.Errorf("waypoints %v, want %v", got, want)
+	}
+	// The object is gone and a new one of the same owner takes number 3
+	// elsewhere before the next check.
+	g.Salvage = []Salvage{{Pos: Point{410, 90}, Owner: 1, Number: 3}}
+	g.waypointCheck()
+	if got := g.Fleets[0].Waypoints[0]; got != (Waypoint{Pos: Point{410, 90}, Target: TargetPacketObject, Owner: 1, ID: 3}) {
+		t.Errorf("reused number: %v, want the new object", got)
+	}
+}

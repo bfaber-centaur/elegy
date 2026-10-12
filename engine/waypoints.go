@@ -27,6 +27,18 @@ const (
 // object's position the same way, and becomes a plain go-to when the
 // object is gone ("Ordering with moving objects").
 //
+// So does a waypoint aimed at a mineral packet or salvage object
+// (TargetPacketObject; ORDERS.md "Salvage and mineral packet targets",
+// stars-elegy f2f9794, BINARY-ONLY): every check copies the object's
+// position, so it follows a packet's move, and one that is gone becomes a
+// plain go-to at its last coordinates with no message. The object is
+// looked up by owner and number at each check, so a new object that took
+// the freed number (numbers are reused, first gap first) is followed
+// instead. While the object exists the target is kept when the players'
+// files are written, whether or not the owner sees it, so fileRetarget
+// leaves it alone (also MEASURED in RG-002: computer players' salvage
+// targets came back in the next year's files).
+//
 // Not modelled: the exception bit that holds a waypoint's coordinates
 // (BINARY-ONLY; no order sets it) and following fleets (step 1a.3): Elegy
 // does not keep waypoint 0's target, which that rule reads.
@@ -40,6 +52,12 @@ func (g *Game) waypointCheck() {
 					wp.Pos = g.Fleets[t].Pos
 				} else {
 					wp.Target, wp.ID = TargetSpace, 0
+				}
+			case TargetPacketObject:
+				if p, ok := g.packetObjectPos(wp.Owner, wp.ID); ok {
+					wp.Pos = p
+				} else {
+					wp.Target, wp.ID, wp.Owner = TargetSpace, 0, 0
 				}
 			case TargetWormhole, TargetTrader:
 				if g.Objects == nil {
@@ -362,4 +380,53 @@ func (g *Game) patrol(views []PlayerView) {
 		e := &g.Fleets[best]
 		f.Waypoints = []Waypoint{{Pos: e.Pos, Warp: min(10, f.Task.Range/5), Target: TargetFleet, ID: e.ID, Task: f.Task}}
 	}
+}
+
+// TargetPacketObject is a waypoint's mineral packet or salvage object:
+// Waypoint.Owner's object number Waypoint.ID. Packets and salvage are one
+// kind of object in the original's files and share each owner's numbers
+// (OBJECTS.md "Salvage", "Owner"; vectors README "packet_object").
+const TargetPacketObject TargetKind = TargetSalvage + 1
+
+// packetObjectPos is where owner's salvage or packet number is now.
+func (g *Game) packetObjectPos(owner, number int) (Point, bool) {
+	for _, s := range g.Salvage {
+		if s.Owner == owner && s.Number == number {
+			return s.Pos, true
+		}
+	}
+	if g.Objects != nil {
+		return g.Objects.PacketPos(owner, number)
+	}
+	return Point{}, false
+}
+
+// EventTransportNoHold: Player's Fleet reached a waypoint aimed at a
+// mineral packet with a transport task, and the task was cancelled because
+// a packet holds no cargo (MESSAGES.md 0x11e). Elegy's wording.
+const EventTransportNoHold EventKind = EventArtifactFound + 1
+
+// cancelPacketTransport cancels the transport task of fleet f, which has
+// just reached waypoint reached, when that waypoint is aimed at a mineral
+// packet (ORDERS.md "Salvage and mineral packet targets", "Arrival",
+// stars-elegy f2f9794, BINARY-ONLY; MESSAGES.md 0x11e). Salvage holds
+// cargo, so a transport task aimed at salvage runs.
+//
+// The original cancels the task in the load pass after movement (MESSAGES.md
+// 0x11e, phase P6c), the first pass to read it after the arrival, so
+// cancelling at the arrival is the same outcome. Not modelled: the same
+// cancel in the pass before movement (P2) for a waypoint 0 still aimed at
+// a packet, because Elegy does not keep waypoint 0's target, and for
+// minefield, wormhole and Trader targets, which 0x11e also names.
+func (g *Game) cancelPacketTransport(f *Fleet, reached Waypoint) []Event {
+	if reached.Target != TargetPacketObject || f.Task.Kind != TaskTransport || g.Objects == nil {
+		return nil
+	}
+	// Salvage and packets share each owner's numbers, so salvage is not
+	// found here.
+	if _, ok := g.Objects.PacketPos(reached.Owner, reached.ID); !ok {
+		return nil
+	}
+	f.Task = Task{}
+	return []Event{g.fleetEvent(f, EventTransportNoHold, 0)}
 }
