@@ -498,3 +498,27 @@ func TestLoadHomeworldRecord(t *testing.T) {
 		t.Errorf("absent field: record %v %d, want none", pl.HasHomeworld, pl.Homeworld)
 	}
 }
+
+// TestMisslottedPartDropped: CB-009's designs with a part in a slot that
+// does not take it keep the part in the year that reads them and lose it
+// at the end of that year (COMBAT.md "Parts the game drops from a
+// design").
+func TestMisslottedPartDropped(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/cb/cb009.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, games, genErr, stop := generate(v, pvRun{})
+	if genErr != nil || stop != "" || len(games) < 2 {
+		t.Fatalf("generate: %v %q, %d games", genErr, stop, len(games))
+	}
+	// Player 1's slot 1: a Small Freighter with a Beam Deflector in its
+	// shield-or-armor slot.
+	d := l.design[[2]int{1, 1}]
+	if n := len(games[0].Designs[d].Slots); n != 2 {
+		t.Errorf("at the start: %d parts, want the engine and the deflector", n)
+	}
+	if n := len(games[1].Designs[d].Slots); n != 1 {
+		t.Errorf("after the year: %d parts, want the engine only", n)
+	}
+}

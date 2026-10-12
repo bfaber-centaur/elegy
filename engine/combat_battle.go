@@ -162,6 +162,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 			d := battleDesign(g.Designs[s.Design])
 			cost, salvage := b.tokenCost(f.Owner, g.Designs[s.Design])
 			t := tokenValues(d, race, false, cost)
+			t.armor = tokenValues(g.Designs[s.Design], race, false, cost).armor // a dropped part's armor counts this year (battleDesign)
 			t.minerals = salvage
 			t.player, t.fleet, t.stack, t.planet, t.design = f.Owner, i, si, -1, s.Design
 			t.ships, t.dmg = s.Count, s.Damage

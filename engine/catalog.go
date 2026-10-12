@@ -584,7 +584,7 @@ func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error)
 }
 
 // NewDesignAnyKind is NewDesign keeping a part of a kind its slot does
-// not take (newDesign with kinds false, ASSUMPTION K10). The parity
+// not take, for that year's cost (newDesign with kinds false). The parity
 // vectors' loader (internal/vectors) uses it for oracle states written
 // with such designs.
 func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design, error) {
@@ -596,15 +596,21 @@ func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design,
 // designs (CB-009, CB-010: a Beam Deflector in a shield-or-armor slot);
 // the parity harness loads those.
 //
-// ASSUMPTION K10: such a part counts in the design's cost. TAKEOVER.md
-// "Design parts dropped when the year is generated" says parity is "keep
-// and use" for parts beyond the owner's tech or race; extending it to a
-// part in a slot of the wrong kind is inferred, supported by CB-009's
-// salvage, which needs the part's cost. The part is not used in battle:
-// the battle records of CB-009 and CB-010 show the token without it, its
-// deflector and mass left out (MEASURED, 13 token lists), and battle
-// setup drops it from the token (#139). Whether the design keeps it
-// after the year is open.
+// COMBAT.md "Parts the game drops from a design" (stars-elegy #141,
+// de2836a): the game drops such a part when it reads the design, but the
+// cost is computed first, so in the year that reads it the part counts in
+// the design's cost, and so in target choice and salvage (MEASURED,
+// CB-009), and in battle armor (BINARY-ONLY); everything else computed
+// from the parts leaves it out (MEASURED, CB-009 and CB-010: deflector
+// and mass). The design keeps the part in Slots for that year's cost and
+// leaves it out of mass, fuel and cargo; battle setup leaves it out of
+// the token but its armor (battleDesign), and dropMisslottedParts takes
+// it out of the stored design at the end of the year.
+//
+// Known difference, that year only: the other readers of Slots (scanning
+// and cloaking, score power, and the rest) still count the part, where
+// COMBAT.md says it adds nothing to any use of the design (BINARY-ONLY).
+// No vector exercises it.
 func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {
@@ -639,6 +645,14 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 		if f.Count < 1 || f.Count > hs.Max {
 			return Design{}, fmt.Errorf("design %q: slot %d holds 1..%d, not %d", name, f.Slot, hs.Max, f.Count)
 		}
+		if !kindIn(p.Kind, hs.Kinds) {
+			// Kept in Slots for this year's cost; mass, fuel and cargo
+			// leave it out (COMBAT.md "Parts the game drops from a
+			// design"; the other Slots readers: see above).
+			d.Slots = append(d.Slots, Slot{Part: p, Count: f.Count})
+			d.SlotPos = append(d.SlotPos, f.Slot)
+			continue
+		}
 		if p.Kind == PartEngine {
 			if d.Engines > 0 {
 				return Design{}, fmt.Errorf("design %q: more than one engine slot", name)
@@ -659,6 +673,37 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 		return Design{}, fmt.Errorf("design %q: %s needs %d engines", name, hull, h.Slots[0].Max)
 	}
 	return d, nil
+}
+
+// dropMisslottedParts takes every part in a hull slot that does not take
+// its kind out of the stored designs, at the end of the year that read
+// them: from the next year their cost leaves it out, and the written
+// files no longer have it (COMBAT.md "Parts the game drops from a
+// design"). CONFIRMED for salvage, CB-054 (stars-elegy 8384191, 2 of 2
+// streams): a misslotted Beam Deflector's cost counts in the year the
+// design is read and not the next, and the files after the first year
+// hold the design without it; target choice is not tested. Mass, fuel
+// and cargo already leave it out (newDesign).
+func (g *Game) dropMisslottedParts() {
+	for i, d := range g.Designs {
+		if len(d.SlotPos) != len(d.Slots) {
+			continue
+		}
+		var slots []Slot
+		var pos []int
+		dropped := false
+		for k, s := range d.Slots {
+			if p := d.SlotPos[k]; p >= 0 && p < len(d.Hull.Slots) && !kindIn(s.Part.Kind, d.Hull.Slots[p].Kinds) {
+				dropped = true
+				continue
+			}
+			slots = append(slots, s)
+			pos = append(pos, d.SlotPos[k])
+		}
+		if dropped {
+			g.Designs[i].Slots, g.Designs[i].SlotPos = slots, pos
+		}
+	}
 }
 
 func kindIn(k PartKind, ks []PartKind) bool {

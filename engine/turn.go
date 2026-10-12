@@ -564,6 +564,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	g.Year++
 	scores := g.scores()
 	events = append(events, g.decide(scores)...)
+	g.dropMisslottedParts() // after this year's costs, before the files
 
 	// Knowledge is computed last, from the final state (SCANNING.md "When
 	// knowledge is computed").

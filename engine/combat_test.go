@@ -395,9 +395,15 @@ func TestMeasuredPartInWrongSlotLeftOutOfBattle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// The design's mass already leaves the part out (COMBAT.md "Parts the
+	// game drops from a design"): 1 kT under the design as built.
+	bare, err := cat.NewDesign("bare", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
 	bd := battleDesign(d)
-	if bd.Mass != d.Mass-1 || len(bd.Slots) != 2 || len(bd.SlotPos) != 2 {
-		t.Fatalf("battle design mass %d (design %d), slots %d", bd.Mass, d.Mass, len(bd.Slots))
+	if d.Mass != bare.Mass || bd.Mass != bare.Mass || len(bd.Slots) != 2 || len(bd.SlotPos) != 2 || len(d.Slots) != 3 {
+		t.Fatalf("battle design mass %d (design %d, without the part %d), slots %d of %d", bd.Mass, d.Mass, bare.Mass, len(bd.Slots), len(d.Slots))
 	}
 	if got := tokenValues(bd, Race{}, false, Cost{}).deflector; got != 100 {
 		t.Errorf("deflector %d, want 100", got)
@@ -412,12 +418,12 @@ func TestMeasuredPartInWrongSlotLeftOutOfBattle(t *testing.T) {
 	if bd := battleDesign(ok); bd.Mass != ok.Mass || len(bd.Slots) != len(ok.Slots) {
 		t.Errorf("a valid design changed: %+v", bd)
 	}
-	// Every dropped part's mass leaves the token: two deflectors, 2 kT.
+	// Every dropped part's mass is left out: two deflectors, 2 kT.
 	two, err := cat.newDesign("gunboat", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}, {Slot: 3, Part: "Beam Deflector", Count: 2}}, false)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if bd := battleDesign(two); bd.Mass != two.Mass-2 || len(bd.Slots) != 2 {
+	if bd := battleDesign(two); two.Mass != bare.Mass || bd.Mass != bare.Mass || len(bd.Slots) != 2 {
 		t.Errorf("two deflectors: battle design mass %d (design %d), slots %d", bd.Mass, two.Mass, len(bd.Slots))
 	}
 }

@@ -585,3 +585,28 @@ func TestComputerLevelSaved(t *testing.T) {
 		t.Errorf("computer level 4: err = %v, want ErrSave", err)
 	}
 }
+
+// A design with a part in a slot that does not take it exists only before
+// the year that reads it is generated (COMBAT.md "Parts the game drops
+// from a design"); a save of such a state keeps the part and its slot, so
+// the save format needs no change for it.
+func TestSaveKeepsMisslottedPart(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	d, err := engine.Components().NewDesignAnyKind("x", "Frigate", []engine.SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 1, Part: "Tritanium", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.State.Designs = append(g.State.Designs, d)
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := loaded.State.Designs[len(loaded.State.Designs)-1]
+	if !reflect.DeepEqual(got, d) {
+		t.Errorf("loaded design %+v\nwant %+v", got, d)
+	}
+}
