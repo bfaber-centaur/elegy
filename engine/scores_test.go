@@ -165,3 +165,32 @@ func TestPredictionVictoryAnswers(t *testing.T) {
 		t.Errorf("starbases %+v", r)
 	}
 }
+
+// The lead needs a second player in the game. MEASURED: no record of a
+// one-player game has it (KX-001 ×13, KX-002 ×27, RD-P1..RD-P19 ×17),
+// though a second score of 0 passes the lead test. A dead second player
+// does not count (ASSUMPTION).
+func TestMeasuredLeadNeedsSecondPlayer(t *testing.T) {
+	lead := func(g Game, scores ...int) bool {
+		recs := make([]ScoreRecord, len(scores))
+		for i, s := range scores {
+			recs[i] = ScoreRecord{Player: i, Score: s, Rank: 1}
+			for _, o := range scores {
+				if o > s {
+					recs[i].Rank++
+				}
+			}
+		}
+		g.victoryFlags(recs)
+		return recs[0].Flags&(0x40<<VictoryLead) != 0
+	}
+	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 1)}, 50) {
+		t.Error("sole player flagged for the lead")
+	}
+	if !lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 50, 0) {
+		t.Error("lead over a living second player with score 0 not flagged")
+	}
+	if lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}}}, 50, 0) {
+		t.Error("lead flagged over a dead second player")
+	}
+}

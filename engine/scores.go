@@ -181,14 +181,22 @@ func (g *Game) scores() []ScoreRecord {
 //
 // The planets test rounds halves up, and a tie for the top score flags
 // nobody for the lead (BINARY-ONLY).
+//
+// The lead needs a second player still in the game: a one-player game
+// never flags it (MEASURED: KX-001 ×13, KX-002 ×27 and RD-P ×17 records,
+// none with the lead, where a second score of 0 would pass the test).
+// ASSUMPTION: a dead player does not count as the second.
 func (g *Game) victoryFlags(recs []ScoreRecord) {
 	v := g.Victory
 	sorted := make([]int, len(recs))
-	firsts := 0
+	firsts, alive := 0, 0
 	for i, r := range recs {
 		sorted[i] = r.Score
 		if r.Rank == 1 {
 			firsts++
+		}
+		if !g.Players[i].Dead {
+			alive++
 		}
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(sorted)))
@@ -201,7 +209,7 @@ func (g *Game) victoryFlags(recs []ScoreRecord) {
 		met := [NumVictory]bool{
 			VictoryPlanets:   r.Planets >= (len(g.Planets)*(v.Planets+4)*5+50)/100,
 			VictoryScore:     r.Score >= (v.Score+1)*1000,
-			VictoryLead:      r.Rank == 1 && firsts == 1 && second*(100+(v.Lead+2)*10)/100 <= r.Score,
+			VictoryLead:      r.Rank == 1 && firsts == 1 && alive > 1 && second*(100+(v.Lead+2)*10)/100 <= r.Score,
 			VictoryResources: r.Resources/1000 >= (v.Resources+1)*10,
 			VictoryCapital:   r.Capital >= (v.Capital+1)*10,
 			VictoryHighest:   g.yearIndex() >= (v.Highest+3)*10 && firsts == 1 && r.Rank == 1,
