@@ -110,15 +110,18 @@ func TestStealerLoadWaits(t *testing.T) {
 
 // At a source, a "set amount to" the target cannot meet waits and, after
 // movement, is told so each year (KERNEL.md "Which loads are unmet";
-// MESSAGES.md 0x121, 0x122 for colonists, BINARY-ONLY).
+// MESSAGES.md 0x121, 0x122 for colonists, BINARY-ONLY). One that is met
+// ends the task, and at the fleet's last waypoint its owner is told it
+// has finished its orders (0x04e (a)), before or after movement.
 func TestSetAmountWaitingMessage(t *testing.T) {
+	done := []Event{{Kind: EventFleetArrived, Player: 0, Planet: -1, Fleet: 1}}
 	for _, tt := range []struct {
-		name  string
-		tr    Transport
-		after []Event
+		name          string
+		tr            Transport
+		before, after []Event
 	}{
-		{"100 from 50", Transport{SetAmount, 100}, []Event{{Kind: EventLoadWaiting, Player: 0, Planet: 0, Fleet: 1, Count: 100, Axes: []int{Ironium}}}},
-		{"50 from 50", Transport{SetAmount, 50}, nil},
+		{"100 from 50", Transport{SetAmount, 100}, nil, []Event{{Kind: EventLoadWaiting, Player: 0, Planet: 0, Fleet: 1, Count: 100, Axes: []int{Ironium}}}},
+		{"50 from 50", Transport{SetAmount, 50}, done, done},
 	} {
 		for _, after := range []bool{false, true} {
 			l, _ := sourceLab(t, "own", tt.tr, Transport{}, 0)
@@ -126,7 +129,7 @@ func TestSetAmountWaitingMessage(t *testing.T) {
 			ev := l.g.loadPass(after)
 			want := tt.after
 			if !after {
-				want = nil
+				want = tt.before
 			}
 			if !reflect.DeepEqual(ev, want) || f.Cargo.Minerals[Ironium] != 50 {
 				t.Errorf("%s, after %v: events %+v, holds %d; want %+v and 50", tt.name, after, ev, f.Cargo.Minerals[Ironium], want)

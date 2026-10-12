@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -144,6 +145,30 @@ func TestPacketTransportCancelledInTurn(t *testing.T) {
 	}
 	if told != 1 {
 		t.Errorf("%d cancel messages, want 1", told)
+	}
+	// MESSAGES.md 0x04e (a): the cancelled fleet is at its last waypoint,
+	// so 0x04e follows the 0x11e. UNRESOLVED: an oracle run contradicts the
+	// 0x11e cancel for an own packet (write-up pending in stars-elegy);
+	// lane A owns the fix. The taskless fleet gets
+	// its one arrival 0x04e and the patrol fleet none (0x04e (b)).
+	for _, c := range []struct {
+		fleet int
+		want  []engine.EventKind
+	}{
+		{0, []engine.EventKind{engine.EventTransportNoHold, engine.EventFleetArrived}},
+		{2, []engine.EventKind{engine.EventFleetArrived}},
+		{3, nil},
+	} {
+		id := r.Game.Fleets[c.fleet].ID
+		var got []engine.EventKind
+		for _, e := range r.Events {
+			if e.Fleet == id && (e.Kind == engine.EventTransportNoHold || e.Kind == engine.EventFleetArrived) {
+				got = append(got, e.Kind)
+			}
+		}
+		if !slices.Equal(got, c.want) {
+			t.Errorf("fleet %d: events %v, want %v", id, got, c.want)
+		}
 	}
 	if g := r.Game.Fleets[1]; g.Pos != at(0, 500) || g.Cargo.Minerals[0] != 60 {
 		t.Errorf("salvage fleet at %v cargo %v, want 60 kT loaded at the salvage", g.Pos, g.Cargo.Minerals)

@@ -70,8 +70,9 @@ func TestUnloadIntoSalvage(t *testing.T) {
 	if sv.Steps != 6 || sv.Fresh {
 		t.Errorf("salvage %+v: an unload refreshes nothing", sv)
 	}
-	if len(ev) != 1 || ev[0].Kind != EventDropRefused || ev[0].Count != 20 {
-		t.Errorf("events %+v, want one refused drop of 20", ev)
+	// The refusal ends the task at the fleet's last waypoint: 0x04e (a).
+	if len(ev) != 2 || ev[0].Kind != EventDropRefused || ev[0].Count != 20 || ev[1].Kind != EventFleetArrived {
+		t.Errorf("events %+v, want one refused drop of 20, then finished orders", ev)
 	}
 	if f.Task.Kind != TaskNone {
 		t.Errorf("task %+v, want none", f.Task)

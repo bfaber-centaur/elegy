@@ -168,10 +168,10 @@ func TestPredictionVictoryAnswers(t *testing.T) {
 
 // The lead needs a second player in the game. MEASURED: no record of a
 // one-player game has it (KX-001 ×13, KX-002 ×27, RD-P1..RD-P19 ×17),
-// though a second score of 0 passes the lead test. A dead second player
-// does not count (ASSUMPTION).
+// though a second score of 0 passes the lead test. The lead is decided
+// among the living players only (ASSUMPTION).
 func TestMeasuredLeadNeedsSecondPlayer(t *testing.T) {
-	lead := func(g Game, scores ...int) bool {
+	lead := func(g Game, scores ...int) []bool {
 		recs := make([]ScoreRecord, len(scores))
 		for i, s := range scores {
 			recs[i] = ScoreRecord{Player: i, Score: s, Rank: 1}
@@ -182,15 +182,70 @@ func TestMeasuredLeadNeedsSecondPlayer(t *testing.T) {
 			}
 		}
 		g.victoryFlags(recs)
-		return recs[0].Flags&(0x40<<VictoryLead) != 0
+		flagged := make([]bool, len(recs))
+		for i, r := range recs {
+			flagged[i] = r.Flags&(0x40<<VictoryLead) != 0
+		}
+		return flagged
 	}
-	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 1)}, 50) {
+	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 1)}, 50)[0] {
 		t.Error("sole player flagged for the lead")
 	}
-	if !lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 50, 0) {
-		t.Error("lead over a living second player with score 0 not flagged")
+	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 1)}, 0)[0] {
+		t.Error("sole player with score 0 flagged for the lead")
 	}
-	if lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}}}, 50, 0) {
+	if got := lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 50, 0); !got[0] || got[1] {
+		t.Errorf("lead flags %v over a living second player with score 0, want only the 50", got)
+	}
+	if lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}}}, 50, 0)[0] {
 		t.Error("lead flagged over a dead second player")
+	}
+	// A dead player with the second-highest score is not second place:
+	// at the lowest setting (20%), 50 leads the living 20 but not the
+	// dead 45.
+	if !lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}, {}}}, 50, 45, 20)[0] {
+		t.Error("lead over the living second player not flagged with a dead player scoring higher")
+	}
+	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 3)}, 50, 45, 20)[0] {
+		t.Error("lead flagged over a living second player at 45")
+	}
+	// Nor does a dead player tie for first: 50 leads the living 20.
+	if got := lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}, {}}}, 50, 50, 20); !got[0] || got[1] || got[2] {
+		t.Errorf("lead flags %v with a dead player tied at 50, want only the living 50", got)
+	}
+	// A dead player strictly first neither takes the lead nor blocks it:
+	// the living 50 leads the living 20.
+	if got := lead(Game{Rules: ElegyRules(), Players: []Player{{}, {Dead: true}, {}}}, 50, 100, 20); !got[0] || got[1] || got[2] {
+		t.Errorf("lead flags %v with a dead player at 100, want only the living 50", got)
+	}
+	if lead(Game{Rules: ElegyRules(), Players: make([]Player, 3)}, 50, 50, 20)[0] {
+		t.Error("lead flagged with a living player tied at 50")
+	}
+	// A living tie flags nobody even where the truncated margin passes:
+	// 3·120/100 = 3 and 0·120/100 = 0.
+	if got := lead(Game{Rules: ElegyRules(), Players: make([]Player, 2)}, 3, 3); got[0] || got[1] {
+		t.Errorf("lead flags %v for a living tie at 3, want none", got)
+	}
+	if got := lead(Game{Rules: ElegyRules(), Players: []Player{{}, {}, {Dead: true}}}, 0, 0, 0); got[0] || got[1] || got[2] {
+		t.Errorf("lead flags %v for a living tie at 0, want none", got)
+	}
+}
+
+// The highest-score condition still counts every rank-1 player, dead or
+// alive (KERNEL.md "Victory conditions", BINARY-ONLY): a dead player tied
+// for first stops it, unlike the lead.
+func TestHighestCountsDeadFirsts(t *testing.T) {
+	g := Game{Rules: ElegyRules(), Year: 2430, Players: []Player{{}, {Dead: true}, {}}}
+	recs := []ScoreRecord{{Player: 0, Score: 50, Rank: 1}, {Player: 1, Score: 50, Rank: 1}, {Player: 2, Score: 20, Rank: 3}}
+	g.victoryFlags(recs)
+	for i, r := range recs {
+		if r.Flags&(0x40<<VictoryHighest) != 0 {
+			t.Errorf("player %d flagged for the highest score in a tie for first", i)
+		}
+	}
+	recs[1].Score, recs[1].Rank = 40, 2
+	g.victoryFlags(recs)
+	if recs[0].Flags&(0x40<<VictoryHighest) == 0 {
+		t.Error("sole first not flagged for the highest score at year index 30")
 	}
 }
