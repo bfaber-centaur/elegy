@@ -536,16 +536,19 @@ func TestMisslottedPartWorksNowhere(t *testing.T) {
 	}
 }
 
-// TestPredictionDroppedPartTargetChoice: target choice uses the design
+// TestConfirmedDroppedPartTargetChoice: target choice uses the design
 // cost, which counts a misslotted part in the year that reads the design
 // and leaves it out from the next (COMBAT.md "Parts the game drops from a
-// design"; CB-054 CONFIRMED this for salvage, not for target choice). A
+// design": CONFIRMED for salvage, CB-054, and for target choice, CB-055,
+// stars-elegy b1e38ef, 18 of 20 battles). Written as a prediction before
+// CB-055 ran (#160, e35c871); CB-055 used Colloidal Phaser frigates and
+// 15-ship stacks, with the same freighter costs. A
 // Small Freighter with a Beam Deflector in its shield-or-armor slot costs
 // 8 (resources + boranium) that year and 6 after; one with a Fuel Tank
 // costs 7, with the same armor and no shield. A Laser frigate fires at the
 // deflector freighter first in the first year and at the Fuel Tank
 // freighter first in the next.
-func TestPredictionDroppedPartTargetChoice(t *testing.T) {
+func TestConfirmedDroppedPartTargetChoice(t *testing.T) {
 	cat := Components()
 	qj := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
 	odd, err := cat.NewDesignAnyKind("deflector", "Small Freighter", append(slices.Clone(qj), SlotFill{Slot: 2, Part: "Beam Deflector", Count: 1}))
