@@ -485,11 +485,25 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
   Their race expectations are compared.
 
 - CB-009 and CB-010 load designs written straight into the oracle's
-  state with a Beam Deflector in a shield-or-armor slot; the harness keeps
-  such a part. ASSUMPTION K10: TAKEOVER.md "Design parts dropped when the
-  year is generated" says parity is "keep and use" for parts beyond the
-  owner's tech or race, and extending it to a part in a slot of the wrong
-  kind is inferred; CB-010 passing with the part kept supports it.
+  state with a Beam Deflector in a shield-or-armor slot. The loader keeps
+  such a part for the year that reads the design
+  (`Catalog.NewDesignAnyKind`), and `dropMisslottedParts` takes it out of
+  the stored design at the end of that year (#153). Every other reader of
+  the parts uses `Design.Parts`, which leaves it out (#156). This was
+  ASSUMPTION K10 ("the harness keeps such a part"); it now follows
+  stars-elegy COMBAT.md "Parts the game drops from a design":
+  - In the year that reads the design, the part counts in the design's
+    cost, so in target choice and salvage: MEASURED (CB-009).
+  - Mass and deflector leave it out: MEASURED (CB-009, CB-010). Other
+    uses of the parts leave it out: BINARY-ONLY.
+  - Battle armor that year counts it: BINARY-ONLY, not observed.
+  - From the next year the cost leaves it out: CONFIRMED for salvage
+    (CB-054, stars-elegy 8384191, 2 of 2 streams) and for target choice
+    (CB-055, stars-elegy b1e38ef, 18 of 20 battles; the other 2 had the
+    compared stack out of reach at the first shot).
+  - Tests: `TestMisslottedPartThisYear`,
+    `TestMisslottedPartWorksNowhere`, `TestPredictionDroppedPartTargetChoice`
+    (engine) and `TestMisslottedPartDropped` (internal/vectors).
   CB-010 passes.
   CB-009 passes on all 8 seeds. Its salvage at (1060,1230) follows which
   ships the battle's draws killed, and stars-elegy #119 (4587f7d) marks
