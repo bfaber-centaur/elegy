@@ -528,14 +528,87 @@ func TestMisslottedPartDropped(t *testing.T) {
 // RG-001, chained and restarted: an order Elegy refuses there means a
 // state that has drifted from the original's (before #147, player 6's
 // fleet 0 in 2433 and 2435) or an order kind the loader converts wrongly.
+// The restarts and the chained run's first year are strict. A later
+// chained year follows Elegy's own random draws in the years before it
+// (mining, artifacts, battles), so a refusal there is a sample, logged at
+// -v and never a failure, as lane D's chained battle records are
+// (docs/RANDOM-PARITY.md).
 func TestRGNoRejectedOrders(t *testing.T) {
 	for _, name := range []string{"rg001", "rg001-y1", "rg001-y2", "rg001-y3", "rg001-y4", "rg001-y5", "rg001-y6"} {
 		v, err := ReadFile("../../engine/testdata/vectors/rg/" + name + ".json")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if c := Compare(v, 0); len(c.Rejected) != 0 {
-			t.Errorf("%s: rejected %q", name, c.Rejected)
+		checkRejected(t, name, Compare(v, 0).Rejected)
+	}
+}
+
+// checkRejected fails on each strict refusal and logs the samples
+// (rejectedSample).
+func checkRejected(t testing.TB, name string, rejected []string) {
+	var strict, samples []string
+	for _, r := range rejected {
+		if rejectedSample(r) {
+			samples = append(samples, r)
+		} else {
+			strict = append(strict, r)
+		}
+	}
+	if len(strict) != 0 {
+		t.Errorf("%s: rejected %q", name, strict)
+	}
+	if len(samples) != 0 {
+		t.Logf("%s: %d sample rejections after Elegy's own draws: %q", name, len(samples), samples)
+	}
+}
+
+// rejectedSample reports whether a refused order (Comparison.Rejected) is
+// a sample: one from a year after the vector's first, whose state follows
+// Elegy's random draws in the earlier years. A restart has only year 1.
+func rejectedSample(rejected string) bool {
+	var y int
+	if _, err := fmt.Sscanf(rejected, "year %d ", &y); err != nil {
+		return false
+	}
+	return y > 1
+}
+
+// errorCounter counts a test's errors without failing it.
+type errorCounter struct {
+	testing.TB
+	errors int
+}
+
+func (e *errorCounter) Errorf(string, ...any) { e.errors++ }
+func (e *errorCounter) Logf(string, ...any)   {}
+
+// TestRejectedSample pins which refusals TestRGNoRejectedOrders lets
+// through as samples, and that a strict one fails it.
+func TestRejectedSample(t *testing.T) {
+	for _, c := range []struct {
+		rejected []string
+		errors   int
+	}{
+		{[]string{"year 1 player 0 order 0 (CargoOrder): x"}, 1},
+		{[]string{"year 2 player 0 order 0 (CargoOrder): x"}, 0},
+		{nil, 0},
+	} {
+		e := &errorCounter{TB: t}
+		if checkRejected(e, "v", c.rejected); e.errors != c.errors {
+			t.Errorf("checkRejected(%q): %d errors, want %d", c.rejected, e.errors, c.errors)
+		}
+	}
+	for _, c := range []struct {
+		rejected string
+		want     bool
+	}{
+		{"year 3 player 5 order 10 (FleetPlanOrder): fleet 0: orders: no such object", true},
+		{"year 2 player 0 order 0 (CargoOrder): x", true},
+		{"year 1 player 5 order 10 (FleetPlanOrder): fleet 0: orders: no such object", false},
+		{"player 5 order 10: no year", false},
+	} {
+		if got := rejectedSample(c.rejected); got != c.want {
+			t.Errorf("rejectedSample(%q) = %v, want %v", c.rejected, got, c.want)
 		}
 	}
 }
