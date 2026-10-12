@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -62,12 +63,20 @@ func TestBattleRecords(t *testing.T) {
 	for _, path := range engine.BattleRecordVectors(t) {
 		starts[path] = battleStarts(t, path)
 	}
-	ungen := engine.CheckBattleRecords(t, starts)
+	// RG-002's records go to its ledger (battle_ledger_test.go).
+	l := &ledgerTB{TB: t, lines: map[string]string{}}
+	ungen := engine.CheckBattleRecords(l, starts)
 	for corpus, n := range ungen {
 		if n != 0 {
 			t.Errorf("%s: %d records of a year not generated", corpus, n)
 		}
 	}
+	ledger := readBattleLedger(t)
+	if os.Getenv("RG002_LEDGER") == "write" {
+		writeBattleLedger(t, l.lines, ledger)
+		ledger = readBattleLedger(t)
+	}
+	checkBattleLedger(t, l.lines, ledger)
 }
 
 func TestBattleRecordHarness(t *testing.T) {
