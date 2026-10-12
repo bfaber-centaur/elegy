@@ -36,6 +36,7 @@ Packages:
 | `terraform/` | terraforming, Orbital Adjusters, PP packet terraforming, remote mining | [TERRAFORM-STATUS.md](TERRAFORM-STATUS.md) |
 | `races/` | race points, repairs, Random races, built-in computer races, the yearly race check | [RACES-STATUS.md](RACES-STATUS.md) |
 | `newgame/` | a new game from settings and a seed | [UNIVERSE-STATUS.md](UNIVERSE-STATUS.md) |
+| `oraclerng/` | parity harness only: where an oracle run's random stream started (cycles, startup ticks) | [RANDOM-PARITY.md](RANDOM-PARITY.md) |
 | `game/` | the game loop: drivers, reports, save/load, hash, diff, order files | [GAME-LOOP.md](GAME-LOOP.md) |
 | `ai/` | Robotoid, Rototill and Cybertron as game drivers | [AI-STATUS.md](AI-STATUS.md) |
 | `cmd/elegy` | the command line | [GAME-LOOP.md](GAME-LOOP.md) "Command line" |
