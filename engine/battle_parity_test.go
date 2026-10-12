@@ -483,6 +483,17 @@ func replayHits(b *battle, actions []pvBattleAction, script []int, out *pvBattle
 // pvSalvoBudget bounds the replays one battle's search may run.
 const pvSalvoBudget = 20000
 
+// buildBattle builds Elegy's battle for record r from a fresh copy of the
+// battle-phase game, its tokens in the record's order.
+func (l *BattleStart) buildBattle(r pvRecordedBattle) (*battle, string) {
+	g := withRules(l.Game.clone()) // the battle changes fleets and planets
+	b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
+	if !ok {
+		return nil, "Elegy has no battle here"
+	}
+	return b, l.matchTokens(b, r.tokens)
+}
+
 // compareBattle runs the comparison for one recorded battle. A torpedo
 // group's draws are answered from the record: the search finds numbers of
 // hits, one per group, with which every hit matches the record. Two
@@ -508,14 +519,7 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 			}
 		}
 	}
-	build := func() (*battle, string) {
-		g := withRules(l.Game.clone()) // the battle changes fleets and planets
-		b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
-		if !ok {
-			return nil, "Elegy has no battle here"
-		}
-		return b, l.matchTokens(b, r.tokens)
-	}
+	build := func() (*battle, string) { return l.buildBattle(r) }
 	b, why := build()
 	if why != "" {
 		out.tokens = why
@@ -692,7 +696,7 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 			r = x
 		}
 	}
-	if o := compareBattle(&l, r); o.tokens != "" || o.stop != "" || o.compared == 0 || o.compared != o.total {
+	if o := compareBattle(&l, r); o.tokens != "" || o.stop != "" || o.compared == 0 || o.compared != o.total || o.conditioned != 0 {
 		t.Fatalf("CB-010 at 1060: %+v, want every hit replayed", o)
 	}
 	mass := r
@@ -714,6 +718,19 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	if o := compareBattle(&l, kills); o.stop == "" || o.draws {
 		t.Errorf("a changed kill count was not noticed: %+v", o)
 	}
+	// A hit the record has and Elegy does not fails at the round's end.
+	extra := r
+	extra.actions = append([]pvBattleAction(nil), r.actions...)
+	for i := len(extra.actions) - 1; i >= 0; i-- {
+		if a := extra.actions[i]; len(a.Hits) > 0 {
+			a.Hits = append(slices.Clone(a.Hits), a.Hits[len(a.Hits)-1])
+			extra.actions[i] = a
+			break
+		}
+	}
+	if o := compareBattle(&l, extra); !strings.Contains(o.stop, "Elegy has no further hit") {
+		t.Errorf("an extra recorded hit was not noticed: %+v", o)
+	}
 	n := 0
 	for _, x := range records["rg/rg001.json"] {
 		if x.year > 1 {
@@ -725,10 +742,29 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	// CS-003-C's torpedo battles replay to the end, their salvos answered
 	// from the record.
+	// The hits before the first torpedo group are compared, and every one
+	// from that group's first on is conditioned. A replay with no answers
+	// stops when the first group is over, before its hits are compared:
+	// it compares exactly the hits before it.
 	answered := false
 	for _, x := range records["cs/cs003c.json"] {
 		o := compareBattle(&lb, x)
-		answered = answered || o.salvos > 0 && o.stop == "" && o.conditioned > 0 && o.matched+o.condMatched == o.total
+		if o.salvos == 0 || o.stop != "" {
+			continue
+		}
+		answered = true
+		b, why := lb.buildBattle(x)
+		if why != "" {
+			t.Fatal(why)
+		}
+		var before pvBattleOutcome
+		if replayHits(b, x.actions, nil, &before) == nil || before.conditioned != 0 {
+			t.Fatalf("CS-003-C (%d,%d): the unanswered replay did not stop at the first group: %+v", x.x, x.y, before)
+		}
+		if o.compared != before.compared || o.matched != o.compared || o.conditioned != o.total-before.compared || o.condMatched != o.conditioned {
+			t.Errorf("CS-003-C (%d,%d): compared %d/%d, conditioned %d/%d of %d; want %d hits before the first group compared, the rest conditioned",
+				x.x, x.y, o.matched, o.compared, o.condMatched, o.conditioned, o.total, before.compared)
+		}
 	}
 	if !answered {
 		t.Error("no CS-003-C torpedo battle replayed whole with its salvos answered")
