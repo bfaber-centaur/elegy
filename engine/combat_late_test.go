@@ -261,3 +261,54 @@ func TestConfirmedCB056RegeneratingShieldsCroby(t *testing.T) {
 		t.Errorf("armor %d shield %d, want 2570 672", tk.armor, tk.shield)
 	}
 }
+
+func TestPredictionTorpedoCertainHit(t *testing.T) {
+	// COMBAT.md "Torpedoes and missiles": with c > j, p = 100 −
+	// (100 − (c − j))·(100 − acc)/100, and p ≥ 100 means every torpedo
+	// hits with no draw. A computer of 99 (sixteen Battle Nexus, CONFIRMED
+	// on CB-056's Nexus Star) against no jammer gives 100 − ⌊(100 − acc)/100⌋
+	// = 100 for every torpedo. The "all hit" branch is unobserved.
+	for _, acc := range []int{20, 45, 80} {
+		if p := hitChance(acc, 99, 0); p != 100 {
+			t.Errorf("hitChance(%d, 99, 0) = %d, want 100", acc, p)
+		}
+	}
+	// A Jammer 20 brings it back below 100: 100 − 21·55/100 = 89.
+	if p := hitChance(45, 99, 20); p != 89 {
+		t.Errorf("hitChance(45, 99, 20) = %d, want 89", p)
+	}
+	// Ten Beta Torpedo ships (20 torpedoes, at most 200, so normally 20
+	// draws) with computer 99 at an unjammed wall: 20 hits, no draw; with
+	// no shields both halves of 20·12/2 go to armor (CS-003-C2): 240.
+	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 2}), testDesign(Hull{Armor: 100000}, 10)}
+	f, e := tok(d, 0, 0, 10), tok(d, 1, 1, 1)
+	f.computer = 99
+	tb := newTestBattle(panicRand{}, d, f, e)
+	tb.torpedoes(0, f.weapons[0])
+	if len(tb.hits) != 1 || tb.hits[0].Hits != 20 || tb.hits[0].Misses != 0 || tb.hits[0].Armor != 240 {
+		t.Errorf("hits %+v, want one record of 20 hits, 0 misses, 240 armor", tb.hits)
+	}
+}
+
+func TestPredictionTargetChoiceCostCap(t *testing.T) {
+	// COMBAT.md "Target choice", "Cost": cost × ships is multiplied by
+	// 100 below 100000, and is 10^7 otherwise. Late-game stacks reach the
+	// cap: 20000 ships at cost 10 and at cost 20 both score 10^7, so at
+	// equal toughness the first in token order wins, though the second is
+	// dearer. With 1000 ships each the dearer stack is chosen (CONFIRMED
+	// at small sizes, CB-009). The cap itself is unobserved.
+	plain := testDesign(Hull{Armor: 45}, 10)
+	dear := testDesign(Hull{Armor: 45}, 20)
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), plain, dear}
+	choose := func(n int) int {
+		f := tok(d, 0, 0, 1)
+		tb := newTestBattle(panicRand{}, d, f, tok(d, 1, 1, n), tok(d, 2, 1, n))
+		return tb.choose(f, f.weapons[0])
+	}
+	if got := choose(1000); got != 2 {
+		t.Errorf("1000 ships each: chose %d, want 2 (the dearer)", got)
+	}
+	if got := choose(20000); got != 1 {
+		t.Errorf("20000 ships each: chose %d, want 1 (both at the cap)", got)
+	}
+}
