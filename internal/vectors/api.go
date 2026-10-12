@@ -16,6 +16,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	"github.com/bfaber-centaur/elegy/engine"
 )
 
 // ReadFile reads one vector. Its corpus is the name of the directory
@@ -69,4 +71,26 @@ func Run(v *Vector, variant int) []Result {
 // matched samples. runs[0] is the reference and is updated in place.
 func StreamCheck(runs [][]Result) []Result {
 	return pvStreamCheck(runs)
+}
+
+// Path is the vector's corpus and file name, such as "cb/cb010.json".
+func (v *Vector) Path() string { return v.path }
+
+// Start is a vector's starting state as the harness builds it, and how
+// the vector's fleet and planet ids map to Elegy's.
+type Start struct {
+	Game    engine.Game
+	Fleets  map[[2]int]int // (owner, vector fleet id) → Elegy fleet ID
+	Planets map[int]int    // vector planet id → Elegy planet ID
+	// Skip is why every case of the vector is skipped, if one is.
+	Skip string
+}
+
+// Start builds v's starting state.
+func (v *Vector) Start() (Start, error) {
+	l, err := loadVector(v)
+	if err != nil {
+		return Start{}, err
+	}
+	return Start{Game: l.g, Fleets: l.fleetID, Planets: l.planet, Skip: l.global}, nil
 }

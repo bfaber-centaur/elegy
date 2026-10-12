@@ -338,6 +338,88 @@ func TestConfirmedCarryRescaled(t *testing.T) {
 	}
 }
 
+func TestConfirmedCarriedShotOfZero(t *testing.T) {
+	// CB-039, CB-042..CB-044 (battle records): a carried shot that
+	// rounds to 0 through the next target's deflector still hits it, and
+	// the record shows the hit (COMBAT.md "Beams" step 4 has no stop).
+	weak := testDesign(Hull{Armor: 9}, 10)
+	defl := testDesign(Hull{Armor: 10000}, 1, Slot{Part{Deflector: true}, 1})
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), weak, defl}
+	f := tok(d, 0, 0, 1) // R = 10
+	a, c := tok(d, 1, 1, 1), tok(d, 2, 1, 1)
+	tb := newTestBattle(panicRand{}, d, f, a, c)
+	tb.beam(0, f.weapons[0])
+	// dp 10 kills the 9-armor ship, leftover 1: R' = min(9, 10·1/10) = 1,
+	// × 90% deflector = 0.
+	if len(tb.hits) != 2 || tb.hits[0].Leftover != 1 || tb.hits[1].Target != 2 || tb.hits[1].Armor != 0 || tb.hits[1].Kills != 0 {
+		t.Errorf("hits %+v, want the kill then a hit of 0 on token 2", tb.hits)
+	}
+}
+
+func TestConfirmedRecordedDamageOnKill(t *testing.T) {
+	// Battle records (every hit that destroyed a token in the cb, cb7 and
+	// cs vectors): a destroyed stack shows the damage it had before the
+	// hit; a destroyed starbase shows 500.
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Armor: 10}, 10)}
+	f := tok(d, 0, 0, 10) // R = 100
+	e := tok(d, 1, 1, 2)
+	e.dmg = Damage{Pct: 50, Units: 250}
+	tb := newTestBattle(panicRand{}, d, f, e)
+	tb.beam(0, f.weapons[0])
+	if len(tb.hits) == 0 || tb.hits[0].Kills != 2 || tb.hits[0].After != (Damage{Pct: 50, Units: 250}) {
+		t.Errorf("hits %+v, want both ships killed showing [250 50%%]", tb.hits)
+	}
+	station := testDesign(Hull{Name: "Orbital Fort", Armor: 100, Starbase: true}, 10)
+	d = []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), station}
+	sb := tokenValues(station, Race{}, true, Cost{})
+	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 1, 1, 1, -1, 0
+	sb.dmg = Damage{Pct: 100, Units: 450}
+	f = tok(d, 0, 0, 10)
+	tb = newTestBattle(panicRand{}, d, f, &sb)
+	tb.g.Planets = []Planet{{HasStarbase: true}}
+	tb.loc.planet = 0
+	tb.beam(0, f.weapons[0])
+	if len(tb.hits) != 1 || !sb.dead || tb.hits[0].After != (Damage{Pct: 100, Units: 500}) {
+		t.Errorf("hits %+v dead %v, want the starbase destroyed showing [500 100%%]", tb.hits, sb.dead)
+	}
+}
+
+func TestMeasuredPartInWrongSlotLeftOutOfBattle(t *testing.T) {
+	// CB-009, CB-010 battle records: a Beam Deflector in a Frigate's
+	// shield-or-armor slot gave deflector 100 and a battle mass 1 lower;
+	// the part's cost still counts (CB-009 salvage).
+	cat := Components()
+	d, err := cat.newDesign("gunboat", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}, {Slot: 3, Part: "Beam Deflector", Count: 1}}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bd := battleDesign(d)
+	if bd.Mass != d.Mass-1 || len(bd.Slots) != 2 || len(bd.SlotPos) != 2 {
+		t.Fatalf("battle design mass %d (design %d), slots %d", bd.Mass, d.Mass, len(bd.Slots))
+	}
+	if got := tokenValues(bd, Race{}, false, Cost{}).deflector; got != 100 {
+		t.Errorf("deflector %d, want 100", got)
+	}
+	if got := tokenValues(d, Race{}, false, Cost{}).deflector; got != 90 {
+		t.Errorf("the design itself: deflector %d, want 90", got)
+	}
+	ok, err := cat.NewDesign("valid", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Beam Deflector", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bd := battleDesign(ok); bd.Mass != ok.Mass || len(bd.Slots) != len(ok.Slots) {
+		t.Errorf("a valid design changed: %+v", bd)
+	}
+	// Every dropped part's mass leaves the token: two deflectors, 2 kT.
+	two, err := cat.newDesign("gunboat", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}, {Slot: 3, Part: "Beam Deflector", Count: 2}}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bd := battleDesign(two); bd.Mass != two.Mass-2 || len(bd.Slots) != 2 {
+		t.Errorf("two deflectors: battle design mass %d (design %d), slots %d", bd.Mass, two.Mass, len(bd.Slots))
+	}
+}
+
 func TestConfirmedGatlingHitsEveryTarget(t *testing.T) {
 	// CB-002/003/005 (P-13): one shot hits every eligible target with full
 	// damage and no dropoff.
