@@ -56,7 +56,11 @@ measured.
   that no two (year, variant) pairs reach the same effective seed, and
   `TestSeedVariantsIndependent` (skipped under `-short`) checks the
   variants' streams for correlation at shallow and deep draws. The change
-  moved tallies only where an outcome depends on Elegy's draws.
+  moved tallies only where an outcome depends on Elegy's draws. The
+  baseline measured on the old seeds is kept as a historical record in
+  `engine/testdata/vectors/baseline-pre-seedhash.txt`; no test reads it,
+  and its random and sample-only counts are not comparable with
+  `baseline.txt`'s.
 - `pvStart(v, stream, year)` returns where that year's stream started: the
   vector's `random_start` entry, else the ORACLE.md tick for the stream's
   cycles value, else nothing recorded.
