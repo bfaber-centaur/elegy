@@ -65,6 +65,30 @@ type battle struct {
 	// tech attempts (COMBAT.md "Mystery Trader chances").
 	traderChance traderChances
 	killed       map[int]bool // players that lost ships or a starbase
+	// costLevels is each player's tech levels from before this year's
+	// research, at which the year's design costs are computed; nil uses
+	// the current levels.
+	costLevels [][NumFields]int
+}
+
+// tokenCost is design d's cost to its owner p in this year's battles
+// (stars-elegy COMBAT.md "Design cost", #141): computed once a year at
+// the tech from before the year's research, for target choice and
+// salvage (MEASURED once, RG-001 2434). For a Bleeding Edge Technology
+// owner, salvage takes the cost at the kill, after research
+// (BINARY-ONLY).
+func (b *battle) tokenCost(p int, d Design) (cost Cost, salvage Minerals) {
+	pl := b.g.Players[p]
+	levels := pl.Research.Levels
+	if p < len(b.costLevels) {
+		levels = b.costLevels[p]
+	}
+	cost = designCost(d, pl.Race, levels)
+	salvage = cost.Minerals
+	if pl.Race.LRT.BleedingEdgeTech {
+		salvage = designCost(d, pl.Race, pl.Research.Levels).Minerals
+	}
+	return cost, salvage
 }
 
 func dist(ax, ay, bx, by int) int {
@@ -136,7 +160,9 @@ func (b *battle) setup(fought map[int]bool) []Event {
 				continue
 			}
 			d := battleDesign(g.Designs[s.Design])
-			t := tokenValues(d, race, false, designCost(g.Designs[s.Design], race, g.Players[f.Owner].Research.Levels))
+			cost, salvage := b.tokenCost(f.Owner, g.Designs[s.Design])
+			t := tokenValues(d, race, false, cost)
+			t.minerals = salvage
 			t.player, t.fleet, t.stack, t.planet, t.design = f.Owner, i, si, -1, s.Design
 			t.ships, t.dmg = s.Count, s.Damage
 			t.mass = battleMass(d, f.Cargo.mass(), capacity)
@@ -154,7 +180,8 @@ func (b *battle) setup(fought map[int]bool) []Event {
 		owner := sbOwner
 		pl := &g.Planets[b.loc.planet]
 		sd, race := g.Designs[pl.StarbaseDesign], g.Players[owner].Race
-		t := tokenValues(sd, race, true, designCost(sd, race, g.Players[owner].Research.Levels))
+		cost, _ := b.tokenCost(owner, sd) // a starbase leaves no salvage
+		t := tokenValues(sd, race, true, cost)
 		t.class = starbaseClass(t, g.Rules.Legacy.StarbaseArmedClass)
 		t.player, t.fleet, t.stack, t.planet, t.design = owner, -1, -1, b.loc.planet, pl.StarbaseDesign
 		t.ships, t.dmg = 1, Damage{Pct: 100, Units: pl.StarbaseDamage}

@@ -65,8 +65,9 @@ type battleSeen struct {
 // (COMBAT.md "Where battles happen in the turn", BINARY-ONLY order).
 //
 // gained holds the players that gained tech this turn, from a battle or a
-// capture (TAKEOVER.md "Capture").
-func battles(g *Game, rng Rand, gained map[int]bool) battleResult {
+// capture (TAKEOVER.md "Capture"). costLevels is each player's tech
+// levels from before this year's research (battle.costLevels).
+func battles(g *Game, rng Rand, gained map[int]bool, costLevels [][NumFields]int) battleResult {
 	res := battleResult{fleets: map[int]bool{}, bases: map[int]bool{}}
 	var prev locationHistory
 	for _, loc := range g.locations() {
@@ -75,7 +76,7 @@ func battles(g *Game, rng Rand, gained map[int]bool) battleResult {
 		if inv == nil {
 			continue
 		}
-		b := &battle{g: g, rng: rng, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+		b := &battle{g: g, rng: rng, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}, costLevels: costLevels}
 		fought := map[int]bool{}
 		res.events = append(res.events, b.setup(fought)...)
 		for i := range fought {
