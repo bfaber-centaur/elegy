@@ -422,6 +422,8 @@ type pvLoaded struct {
 	endID map[int]int
 	// views is each generated year's player views, by year.
 	views [][]engine.PlayerView
+	// rejected lists the vector's orders Elegy refused, by year.
+	rejected []string
 }
 
 // pvWormholeEnds pairs the vector's wormhole ends: in id order, an end not
@@ -1018,26 +1020,7 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 	}
 	// fleet finds a vector fleet: one from the start by its id, and one
 	// made during the run (a gift) by its owner and number.
-	fleet := func(owner, id int) *engine.Fleet {
-		fid, ok := l.fleetID[pvFleetKey(owner, id)]
-		started := map[int]bool{}
-		for _, v := range l.fleetID {
-			started[v] = true
-		}
-		for i := range g.Fleets {
-			f := &g.Fleets[i]
-			if ok && f.ID == fid {
-				return f
-			}
-			// A fleet made during the run (built or given) is known by its
-			// fleet number: the vector stores it from 0, the client shows
-			// it from 1 (PRODUCTION-LAUNCH.md "The new fleet").
-			if !ok && !started[f.ID] && f.Owner == owner && f.Number == id+1 {
-				return f
-			}
-		}
-		return nil
-	}
+	fleet := func(owner, id int) *engine.Fleet { return l.fleetAt(g, owner, id) }
 	switch e.Kind {
 	case "view":
 		return l.viewCheck(g, e, eq, fleet)
@@ -1325,12 +1308,11 @@ func (l *pvLoaded) fleetEquals(g *engine.Game, f *engine.Fleet, eq map[string]js
 			}
 			w := map[int]int{}
 			for _, s := range want {
-				d, ok := l.design[[2]int{f.Owner, s.Design}]
+				// The slot's design now: one a design order or a gift put
+				// there during the run included.
+				d, ok := l.designIn(g, f.Owner, s.Design)
 				if !ok {
-					// A design the player gained during the run (a gift).
-					if d, ok = g.PlayerDesign(f.Owner, false, s.Design); !ok {
-						d = -1 - s.Design
-					}
+					d = -1 - s.Design
 				}
 				w[d] += s.Count
 			}
@@ -1345,7 +1327,7 @@ func (l *pvLoaded) fleetEquals(g *engine.Game, f *engine.Fleet, eq map[string]js
 			}
 			json.Unmarshal(raw, &want)
 			for _, d := range want {
-				di := l.design[[2]int{f.Owner, d.Design}]
+				di, _ := l.designIn(g, f.Owner, d.Design)
 				found := false
 				for _, s := range f.Stacks {
 					if s.Design == di {
@@ -1656,6 +1638,18 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		r, err := engine.GenerateTurn(gy, files, run.rand(y))
 		if err != nil {
 			return l, games, err, ""
+		}
+		for _, o := range r.Orders {
+			if o.Err == nil {
+				continue
+			}
+			kind := "file"
+			for _, f := range files {
+				if f.Player == o.Player && o.Index >= 0 && o.Index < len(f.Orders) {
+					kind = fmt.Sprintf("%T", f.Orders[o.Index])
+				}
+			}
+			l.rejected = append(l.rejected, fmt.Sprintf("year %d player %d order %d (%s): %v", y, o.Player, o.Index, strings.TrimPrefix(kind, "engine."), o.Err))
 		}
 		g = r.Game
 		games = append(games, g)

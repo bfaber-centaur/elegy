@@ -3,6 +3,7 @@ package vectors
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/bfaber-centaur/elegy/engine"
 )
@@ -48,6 +49,13 @@ type pvOrder struct {
 		Design int `json:"design"`
 		Count  int `json:"count"`
 	} `json:"ships"`
+	Starbase           bool      `json:"starbase"`
+	Hull               string    `json:"hull"`
+	Slots              []*pvPart `json:"slots"`
+	LeftoverToResearch bool      `json:"leftover_to_research"`
+	RouteTo            int       `json:"route_to"`
+	PacketDestination  int       `json:"packet_destination"`
+	PacketWarp         int       `json:"packet_warp"`
 }
 
 // pvPlan converts a battle plan's fields as the state's battle_plans give
@@ -94,12 +102,16 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 		}
 		file := engine.PlayerOrders{Player: b.Player, GameID: g.ID, Year: g.Year}
 		split := -1 // a split's source fleet, waiting for the move that fills it
+		// Each fleet's waypoints as this file's earlier waypoint orders left
+		// them: the vector gives one waypoint per order, and each order
+		// applies on top of the ones before it.
+		route := map[int]engine.WaypointOrder{}
 		for _, raw := range b.Orders {
 			var o pvOrder
 			if err := json.Unmarshal(raw, &o); err != nil {
 				return nil, "order " + err.Error()
 			}
-			fleet := l.fleetID[pvFleetKey(b.Player, o.Fleet)]
+			fleet := l.fleetIn(g, b.Player, o.Fleet)
 			var order engine.Order
 			if split >= 0 && o.Kind != "move_ships" {
 				return nil, "order split without a move_ships"
@@ -128,7 +140,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 			case "merge":
 				from := make([]int, len(o.Fleets))
 				for i, id := range o.Fleets {
-					from[i] = l.fleetID[pvFleetKey(b.Player, id)]
+					from[i] = l.fleetIn(g, b.Player, id)
 				}
 				order = engine.MergeOrder{Into: fleet, From: from}
 			case "cargo":
@@ -141,7 +153,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 				case "planet":
 					c.Target, c.ID = engine.TargetPlanet, l.planet[o.With.ID]
 				case "fleet":
-					c.Target, c.ID = engine.TargetFleet, l.fleetID[pvFleetKey(owner, o.With.ID)]
+					c.Target, c.ID = engine.TargetFleet, l.fleetIn(g, owner, o.With.ID)
 				default:
 					return nil, "order cargo with " + o.With.Kind
 				}
@@ -157,35 +169,93 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 					c.Amounts[k] = v
 				}
 				order = c
-			case "waypoint_change":
-				i := fleetIndex(g, fleet)
-				if i < 0 {
-					return nil, "order waypoint_change: no fleet"
+			case "waypoint_change", "waypoint_add":
+				w, ok := route[fleet]
+				if !ok {
+					i := fleetIndex(g, fleet)
+					if i < 0 {
+						// A fleet Elegy does not have: the order goes to the
+						// engine, which refuses it (Comparison.Rejected).
+						order = engine.WaypointOrder{Fleet: fleet}
+						break
+					}
+					f := g.Fleets[i]
+					w = engine.WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
 				}
-				f := g.Fleets[i]
 				task, why := l.task(o.Waypoint)
 				if why != "" {
-					return nil, "order waypoint_change " + why
+					return nil, "order " + o.Kind + " " + why
 				}
-				w := engine.WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
 				if o.Index == 0 {
+					// Index 0 is the fleet's position: only its task changes.
+					if o.Kind == "waypoint_add" {
+						return nil, "order waypoint_add before the fleet's position"
+					}
 					w.Task = task
 				} else {
 					wp, why := l.waypoint(b.Player, o.Waypoint)
 					if why != "" {
-						return nil, "order waypoint_change " + why
+						return nil, "order " + o.Kind + " " + why
 					}
 					wp.Task = task
+					wps := append([]engine.Waypoint(nil), w.Waypoints...)
 					switch k := o.Index - 1; {
-					case k < len(w.Waypoints):
-						w.Waypoints[k] = wp
-					case k == len(w.Waypoints):
-						w.Waypoints = append(w.Waypoints, wp)
+					case o.Kind == "waypoint_add" && k <= len(wps):
+						// vectors/README.md: inserted before index.
+						wps = slices.Insert(wps, k, wp)
+					case k < len(wps):
+						wps[k] = wp
+					case k == len(wps):
+						wps = append(wps, wp)
 					default:
-						return nil, "order waypoint_change index"
+						return nil, "order " + o.Kind + " index"
+					}
+					w.Waypoints = wps
+				}
+				route[fleet] = w
+				order = w
+			case "waypoint_delete":
+				w, ok := route[fleet]
+				if !ok {
+					i := fleetIndex(g, fleet)
+					if i < 0 {
+						order = engine.WaypointOrder{Fleet: fleet}
+						break
+					}
+					f := g.Fleets[i]
+					w = engine.WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
+				}
+				k := o.Index - 1
+				if k < 0 || k >= len(w.Waypoints) {
+					return nil, "order waypoint_delete index"
+				}
+				w.Waypoints = slices.Delete(append([]engine.Waypoint(nil), w.Waypoints...), k, k+1)
+				route[fleet] = w
+				order = w
+			case "design":
+				var fills []engine.SlotFill
+				for i, sl := range o.Slots {
+					if sl != nil {
+						fills = append(fills, engine.SlotFill{Slot: i, Part: sl.Part, Count: sl.Count})
 					}
 				}
-				order = w
+				// The vector gives no design name; it is named as the
+				// loader names the state's designs (Elegy choice: names are
+				// not compared).
+				order = engine.DesignOrder{Starbase: o.Starbase, Slot: o.Slot, Name: fmt.Sprintf("p%d d%d", b.Player, o.Slot), Hull: o.Hull, Fills: fills}
+			case "design_delete":
+				order = engine.DeleteDesignOrder{Starbase: o.Starbase, Slot: o.Slot}
+			case "planet_settings":
+				// vectors/README.md: the planet's whole settings, -1 for no
+				// route and no packet destination.
+				ps := engine.PlanetSettingsOrder{Planet: l.planet[o.Planet], LeftoverOnly: o.LeftoverToResearch, PacketSpeed: o.PacketWarp}
+				if o.RouteTo >= 0 {
+					ps.HasRoute, ps.RouteTo = true, l.planet[o.RouteTo]
+				}
+				if o.PacketDestination >= 0 {
+					ps.HasPacketDest, ps.PacketDest = true, l.planet[o.PacketDestination]
+				}
+				order = ps
 			case "split":
 				// FORMAT.md: a new empty fleet beside it, which the next
 				// move_ships fills; Elegy's SplitOrder does both.
@@ -201,7 +271,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 				}
 				var ships []engine.Stack
 				for _, sh := range o.Ships {
-					d, ok := l.design[[2]int{b.Player, sh.Design}]
+					d, ok := l.designIn(g, b.Player, sh.Design)
 					if !ok {
 						return nil, fmt.Sprintf("order move_ships design %d", sh.Design)
 					}
@@ -220,10 +290,8 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 					order, split = engine.SplitOrder{Fleet: fleet, Ships: ships}, -1
 					break
 				}
-				order = engine.MoveShipsOrder{Fleet: fleet, With: l.fleetID[pvFleetKey(owner, o.With.ID)], Ships: ships}
+				order = engine.MoveShipsOrder{Fleet: fleet, With: l.fleetIn(g, owner, o.With.ID), Ships: ships}
 			default:
-				// design and design_delete need the players' design slots,
-				// which the harness does not load.
 				return nil, "order " + o.Kind
 			}
 			file.Orders = append(file.Orders, order)
@@ -244,4 +312,48 @@ func fleetIndex(g *engine.Game, id int) int {
 		}
 	}
 	return -1
+}
+
+// fleetIn is the Elegy id of the vector's fleet (owner, id) in g
+// (fleetAt), or 0.
+func (l *pvLoaded) fleetIn(g *engine.Game, owner, id int) int {
+	if f := l.fleetAt(g, owner, id); f != nil {
+		return f.ID
+	}
+	return 0
+}
+
+// fleetAt is the vector's fleet (owner, id) in g: the initial state's
+// fleet while it exists, else a fleet made during the run (built or
+// given), known by its fleet number: the vector stores it from 0, the
+// client shows it from 1 (PRODUCTION-LAUNCH.md "The new fleet"). A
+// number the initial fleet left is used again for a new one
+// (PRODUCTION-LAUNCH.md "the owner's lowest unused fleet number").
+func (l *pvLoaded) fleetAt(g *engine.Game, owner, id int) *engine.Fleet {
+	fid, ok := l.fleetID[pvFleetKey(owner, id)]
+	started := map[int]bool{}
+	for _, v := range l.fleetID {
+		started[v] = true
+	}
+	var made *engine.Fleet
+	for i := range g.Fleets {
+		f := &g.Fleets[i]
+		if ok && f.ID == fid {
+			return f
+		}
+		if made == nil && !started[f.ID] && f.Owner == owner && f.Number == id+1 {
+			made = f
+		}
+	}
+	return made
+}
+
+// designIn is the Game.Designs index in owner's ship design slot in g,
+// which a design order may have changed since the start.
+func (l *pvLoaded) designIn(g *engine.Game, owner, slot int) (int, bool) {
+	if d, ok := g.PlayerDesign(owner, false, slot); ok {
+		return d, true
+	}
+	d, ok := l.design[[2]int{owner, slot}]
+	return d, ok
 }

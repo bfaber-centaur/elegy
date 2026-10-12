@@ -596,11 +596,15 @@ func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design,
 // designs (CB-009, CB-010: a Beam Deflector in a shield-or-armor slot);
 // the parity harness loads those.
 //
-// ASSUMPTION K10: the original keeps and uses such a part. TAKEOVER.md
+// ASSUMPTION K10: such a part counts in the design's cost. TAKEOVER.md
 // "Design parts dropped when the year is generated" says parity is "keep
 // and use" for parts beyond the owner's tech or race; extending it to a
-// part in a slot of the wrong kind is inferred, supported by CB-010
-// passing with the part kept.
+// part in a slot of the wrong kind is inferred, supported by CB-009's
+// salvage, which needs the part's cost. The part is not used in battle:
+// the battle records of CB-009 and CB-010 show the token without it, its
+// deflector and mass left out (MEASURED, 13 token lists), and battle
+// setup drops it from the token (#139). Whether the design keeps it
+// after the year is open.
 func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {
