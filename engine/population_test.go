@@ -101,8 +101,8 @@ func TestPredictionHyperExpansionDoublesGrowth(t *testing.T) {
 // TestOvercrowdingFloor checks the −300 floor of the overcrowded branch
 // (stars-elegy 397ebfc KERNEL.md "Population growth": g = 4·max(−300,
 // trunc(c/−10) + 99), deaths at most 12% a year), which no oracle case
-// has reached; it needs P at about 4 times max. The expected values
-// follow the KERNEL text only (KERNEL-derived, untested in the original).
+// has reached; it needs P at about 4 times max. The branch is CONFIRMED
+// above the floor (KX-002 G1); the floor itself is BINARY-ONLY.
 func TestOvercrowdingFloor(t *testing.T) {
 	for _, c := range []struct {
 		pop, maxPop, wantPop int
