@@ -252,3 +252,60 @@ func levelsOf(energy, weapons, propulsion, construction, electronics, biotech in
 	l[Construction], l[Electronics], l[Biotech] = construction, electronics, biotech
 	return l
 }
+
+// KERNEL.md "Remote mining" (BINARY-ONLY, stars-elegy 8a3b9b5): only the
+// remote-mining task mines. A fleet with miners on another task at its
+// own AR planet, with no further waypoint, does not.
+func TestAROwnMinersOnlyTheTask(t *testing.T) {
+	wait := Task{Kind: TaskTransport}
+	wait.Transport[Ironium] = Transport{Action: SetAmount, Amount: 1 << 20}
+	for _, task := range []Task{wait, {Kind: TaskPatrol, Range: 50}, {Kind: TaskLayMines, Years: YearsIndefinitely}} {
+		g, h := arMineGame(t)
+		g.Fleets[0].Task = task
+		arTurn(t, g)
+		if len(h.mined) != 0 {
+			t.Errorf("task %v: mined %v, want none", task.Kind, h.mined)
+		}
+	}
+}
+
+// drawTerraform records each RemoteMine call's fleet and its first draw.
+type drawTerraform struct {
+	stubTerraform
+	draws []int
+}
+
+func (s *drawTerraform) RemoteMine(g *Game, fi int, rng Rand) (Minerals, bool) {
+	s.draws = append(s.draws, rng.Intn(1<<20))
+	return s.stubTerraform.RemoteMine(g, fi, rng)
+}
+
+// stepRand draws 0, 1, 2, … in turn.
+type stepRand struct{ n int }
+
+func (c *stepRand) Intn(n int) int { c.n++; return (c.n - 1) % n }
+
+// KERNEL.md "Remote mining" (BINARY-ONLY, stars-elegy 8a3b9b5): the
+// miners go in fleet order, each with its own draws there. Fleets 1, 2
+// and 3 are numbered 2, 3 and 1, so fleet order (3, 1, 2) is neither the
+// slice order nor its reverse.
+func TestAROwnMinersFleetOrderDraws(t *testing.T) {
+	g, _ := arMineGame(t)
+	g.Fleets[0].Number = 2
+	for _, n := range []int{3, 1} {
+		f := g.Fleets[0]
+		f.ID, f.Number = len(g.Fleets)+1, n
+		g.Fleets = append(g.Fleets, f)
+	}
+	d := &drawTerraform{stubTerraform: stubTerraform{rate: 1}}
+	g.Terraform = d
+	if _, err := GenerateTurn(withRules(g), nil, &stepRand{}); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(d.mined, []int{3, 1, 2}) {
+		t.Errorf("mined %v, want fleet order 3, 1, 2", d.mined)
+	}
+	if len(d.draws) != 3 || !(d.draws[0] < d.draws[1] && d.draws[1] < d.draws[2]) {
+		t.Errorf("draws %v, want each later in the stream than the one before", d.draws)
+	}
+}
