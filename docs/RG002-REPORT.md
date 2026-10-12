@@ -16,7 +16,7 @@ Every order is accounted for. Lane F's coverage check (`/mnt/project-files/rg002
 
 Two tests check the ledger exactly: `internal/vectors` `TestRG002Ledger` for fields and orders, and `engine` `TestBattleRecords` for battle records. Either one fails on a line the run produces that the ledger lacks, and on a ledger line the run no longer produces. So a fix fails until its lines leave the ledger, and nothing is skipped.
 
-Run on: elegy main `546dacc` plus this change. The final run on the integrated main SHA is still to come and will replace these numbers.
+Run on: elegy main `fcf16e0` (with #189 and #190) plus this change. The final run on the integrated main SHA is still to come and will replace these numbers.
 
 ## Classes
 
@@ -40,61 +40,73 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| incorrect mechanic | 64 | 9 | 2 |
-| missing mechanic | 3 | 0 | 0 |
+| incorrect mechanic | 0 | 0 | 0 |
+| missing mechanic | 0 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
-| random-driven | 40 | 0 | 0 |
-| not compared | 457 | 0 | 0 |
-| sample | 1746 | 62 | 18 |
+| random-driven | 30 | 0 | 0 |
+| not compared | 456 | 0 | 0 |
+| sample | 976 | 43 | 16 |
 
-No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both. Of the restarts' orders, Elegy refuses 9. All 9 are the same mechanic (below). The chained run refuses 62 orders, all samples, from years 3–6.
+The reference run of RG-002 has no deterministic discrepancy left. Every field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
-## Deterministic lines, by owner
+No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
-### Lane A: a waypoint aimed at a fleet merged away earlier in the replay (incorrect mechanic)
+- **Restarts:** Elegy refuses none of the orders, and all 44 strict battle records match.
+- **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
 
-- **Refused orders:**
+## Effect of #189 and #190
+
+"Before" is this change's ledger on main `546dacc`, which had neither fix. "After" is the same change rebased on `fcf16e0`, which has both: #189, lane A's merged-away and removed-fleet retargets, and #190, economy's remote-mining fix (only the remote-mining task mines).
+
+| Class | Before: fields / orders / battles | After: fields / orders / battles |
+|---|---|---|
+| incorrect mechanic | 64 / 9 / 2 | 0 / 0 / 0 |
+| missing mechanic | 3 / 0 / 0 | 0 / 0 / 0 |
+| random-driven | 40 / 0 / 0 | 30 / 0 / 0 |
+| not compared | 457 / 0 / 0 | 456 / 0 / 0 |
+| sample | 1746 / 62 / 18 | 976 / 43 / 16 |
+
+### Cleared deterministic lines
+
+All 78 deterministic lines left those classes. 71 now match on the reference seed. 7 still miss there but match on some other seed variant, so they are random-driven now (listed last). The split below follows each line's owner. The two fixes were not measured separately.
+
+**Lane A, #189 (merged-away and removed-fleet targets).**
+- Refused orders, all now accepted:
   - Y2: player 1 orders 39, 42, 59 and 72, aimed at 2/14.
   - Y4: player 1 orders 30, 35 and 45, aimed at 2/15.
   - Y5: player 1 orders 45 and 75, aimed at 6/8.
-- **The cause.** Each target fleet is emptied that year by its owner's `move_ships` into another fleet at the same spot. Elegy refuses the later waypoint order with "no such object".
-- **The spec.** stars-elegy ORDERS.md, "A fleet target merged away during order replay" (BINARY-ONLY), says the waypoint is neither dropped nor rejected. The replay order then decides between two paths:
-  - the start-of-year retarget to a co-located fleet of the owner, with draws;
-  - the removal-time retarget, with no draws.
-- **Lines that follow from it (inferred):**
-  - Y2 fleet 1/57: position and waypoint 1.
-  - Y4 fleet 1/12: no waypoint after waypoint 0, and its position and waypoint 0 (values vary).
-  - Y4 fleet 2/13: x and waypoint 0 (values vary).
-  - Y5 fleets 2/18 and 2/20: waypoint 1 at (1363,1323), where the original has (1335,1320), the Y5 battle's place (values vary).
-  - The Y2 battle at (1367,1327) and the Y5 battle at (1335,1320), which Elegy does not fight. Under lane D's rule, no other seed variant fights either one, so both are deterministic.
+- Battle records, now fought as recorded: Y2 (1367,1327) and Y5 (1335,1320).
+- Fleets:
+  - Y2 1/57: 4 lines (position and waypoint 1);
+  - Y4 1/12: 4 lines;
+  - Y4 2/13: 2 lines;
+  - Y5 2/18 and 2/20: waypoint 1 at (1335,1320);
+  - the missing-mechanic retargets: Y3 1/26 and 1/32 now name planet 79, and Y4 1/60 names planet 51.
 
-### Lane A: retarget of a removed target fleet (missing mechanic)
+**Economy, #190 (only the remote-mining task mines).**
+- Planet 35's surface minerals: chained 2463, Y1, Y3, Y4 and Y5.
+- Planet 35's build: fleet 6/12 in chained 2463, Y1 and Y4 (10 lines), fleet 6/15 in Y4, fleet 6/4 in Y5 (2 lines), and planet 35's Y5 queue.
+- Player 6's research: chained 2463, Y1 and Y5 (18 lines).
+- Player 2's research: chained 2463, Y1, Y3 and Y4 (15 lines). Its cause was not established before. These lines cleared along with planet 35's, so the ±1s probably followed planet 35's extra minerals and production (inferred).
 
-- **The lines.**
-  - Y3 fleets 1/26 and 1/32: the waypoint at (1481,1304) should name planet 79 (Elegy id 80). Elegy has deep space.
-  - Y4 fleet 1/60: the waypoint at (1293,1597) should name planet 51 (Elegy id 52).
-- **The spec.** ORDERS.md "Targets that moved, died or were captured", the B-first bullet: removing a fleet retargets its waypoints to what stands at its position. Elegy applies the plain "target gone" rule instead.
+**Now random-driven (7 of the 78).** Each of these matches on some variants after the fixes:
+- Y3 player 2 biotechnology research (5/8 variants match);
+- Y4 fleet 1/12 position and waypoint 0 (3 lines, 4/8);
+- Y4 fleet 2/13 x and waypoint 0 (2 lines, 5/8);
+- Y5 planet 35's surface minerals (5/8).
 
-### Economy: planet 35's production and player research (incorrect mechanic)
+### Other lines that moved
 
-- **Y1 and chained 2463.**
-  - Fleet 6/12 has 4 ships instead of 5, and fuel 1120 instead of 1400.
-  - Player 6's research is +8 per field and +26 energy. That is consistent with one ship's resources going to research.
-- **Y4.**
-  - The planet-35 ship is missing. Fleet 6/12 is the planet-46 build, which the original numbered 15.
-  - Fleet 6/15 is reported gone.
-- **Planet 35's surface minerals** (values vary): 37–52 iron too many and up to 37 too many of each other mineral, in chained 2463 and restarts Y1, Y3, Y4 and Y5.
-- **Y5.**
-  - Player 6's energy research is 59 against 23, and 5 other fields are 10 too high (values vary).
-  - Planet 35's queue keeps an item the original finished.
-  - Fleet 6/4 has 2 ships of design 45 instead of 3, and fuel 560 instead of 840 (values vary). Inferred: the missing ship is planet 35's build.
-- **Player 2's research.** It is off by 1 or 2 in some fields in chained 2463 and in Y1, Y3 and Y4, on all 8 variants. Three of those lines vary with the seed and the rest do not. The cause is not established. RG-001 shows similar ±1s that follow mining draws.
+- **Not compared:** chained 2468 planet 49's starbase in a design slot the comparator could not place cleared, since the chained run now has that design.
+- **Random-driven:** of the 40 lines before, 2 are unchanged, and the other 38 cleared or changed their value or match count. Of the 30 now, 7 are the former deterministic lines above, and 21 are new or changed. The fixes change how many draws come before each later draw, so a different set of draw-decided fields lands on each variant. The new ones are in the Y2–Y5 restarts: mining and surface minerals, production queues, Y3 planet 42's population and queue, Y4 fleet 1/49 and planet 35's concentrations, and Y5 fleet 6/12's waypoint task.
+- **Parity baseline:** RG-002-Y1-2463 and the chained run's RG-002-2463 now pass on 1 of 8 seed variants (`random 1` in engine/testdata/vectors/baseline.txt). Before, they failed on all 8.
+- **Sample:** the chained run now follows the original much longer before Elegy's own draws take over, so 770 fewer field lines, 19 fewer refused orders and 2 fewer missed battle records are samples.
 
 ## Not compared, by reason
 
-None of the 457 lines is an RG-002 mechanic Elegy lacks. Each falls in one of three groups.
+None of the 456 lines is an RG-002 mechanic Elegy lacks. Each falls in one of three groups.
 
 **1. The harness has no comparator, but Elegy models the quantity (lane B).**
 
@@ -105,18 +117,17 @@ None of the 457 lines is an RG-002 mechanic Elegy lacks. Each falls in one of th
 | `message` | 68 | turn events; there is no event-to-message mapping in the harness |
 | `starbase_design`, design reads ("needs the order layer's design source") | 14 | designs and design orders; the design read is not wired into the harness |
 | player `counts`, `research_percent` | 8 | the player's research percentage and per-design counts |
-| planet starbase in a design slot the comparator cannot place (`starbase design 0`) | 1 | the starbase; the slot lookup misses after a design change |
 
 **2. Compared by another test.** The 176 `battle` and `battle_actions` expectations are compared record by record by TestBattleRecords. Its RG-002 results are the ledger's battle record lines.
 
 **3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null.
 
-Group 1 is comparator work. Until it is done, a mismatch in those 273 lines would go unseen, so their count is the honest size of the gap.
+Group 1 is comparator work. Until it is done, a mismatch in those 272 lines would go unseen, so their count is the honest size of the gap.
 
 ## Random-driven
 
 Each of these lines matches on at least one of the 8 seed variants.
-- **Restarts:** 34 field lines. They are mostly mining and surface minerals, minefield decay, production percentages, and fleets whose movement rides on random merges, battles and target picks. The breakdown is Y1 6, Y3 7, Y4 9 and Y5 12.
-- **Chained year 1:** 6 more field lines.
+- **Restarts:** 30 field lines: Y2 4, Y3 10, Y4 11 and Y5 5. They are mostly mining and surface minerals, production queues, and fleets whose movement rides on random merges, battles and target picks.
+- **Chained year 1:** none.
 
-Until 5c1ca55, a line counted as random-driven whenever its value differed between variants, even when no variant matched. Those 23 lines (planet 35's minerals, player 2's and player 6's research, planet 35's queue, and fleets 1/12, 2/13, 2/18, 2/20 and 6/4) are now incorrect-mechanic lines with their owners, above.
+Until 5c1ca55, a line counted as random-driven whenever its value differed between variants, even when no variant matched. On main `546dacc` there were 23 such lines, and they were classed as incorrect mechanics with their owners. All 23 are among the cleared lines above.
