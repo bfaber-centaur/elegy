@@ -394,6 +394,9 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 			p.Surface[m] += gain
 			p.Deposits[m] = d
 		}
+		if col.alternateReality() {
+			g.mineOwnAR(i, rng)
+		}
 	}
 
 	// Growth and deaths only act on owned planets with population
