@@ -3866,7 +3866,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-03s-A HELD (MF-3): none stopped | MF-03s-B OBSERVED (MF-3): rare stops (expected 0.9 of 12) | MF-03s-C HELD (MF-3): rate interval contains 15"

@@ -3780,7 +3780,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-02-A CONTRADICTED (MF-2): C and B stopped at about the MF-1 rate; A never stopped (it moves in warp-4 steps)"

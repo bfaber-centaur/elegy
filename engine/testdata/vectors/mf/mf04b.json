@@ -2190,7 +2190,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-04b-A HELD (MF-4): F1 = 10000 less max(50, count/100) per stop in turn, then 22% decay, then the starbase sweep (1280)"

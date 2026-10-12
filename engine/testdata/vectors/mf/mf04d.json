@@ -2168,7 +2168,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-04d-A HELD (MF-4): F2 = 400 less 20 per stop, then 2% decay (min 10)"

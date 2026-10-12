@@ -117,8 +117,8 @@ type pvPlayer struct {
 	Homeworld           *int              `json:"homeworld"`
 	// DefaultQueue and DefaultLeftoverToResearch are the player's
 	// default queue settings, which a planet it newly owns takes; both
-	// absent when the vector's builder did not read them (proposed
-	// fields, not yet in the stars-elegy README).
+	// absent when the vector's builder did not read them (vectors/README.md
+	// "players").
 	DefaultQueue              *[]json.RawMessage `json:"default_queue"`
 	DefaultLeftoverToResearch *bool              `json:"default_leftover_to_research"`
 }
@@ -1865,7 +1865,7 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 				skipped(why)
 				continue
 			}
-			if got := g.Players[id].DefaultQueue; !(len(got) == 0 && len(want) == 0) && !reflect.DeepEqual(got, want) {
+			if got := g.Players[id].DefaultQueue; !reflect.DeepEqual(got, want) {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
 		case "default_leftover_to_research":

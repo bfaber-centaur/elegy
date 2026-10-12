@@ -2429,7 +2429,8 @@
       }
      },
      "seen_by": 1,
-     "year": 1
+     "year": 1,
+     "sample": true
     }
    ],
    "verdict": "MF-14-A HELD (MF-14): each stopped fleet: the Small Freighters are destroyed, the Privateer survives (dmg 15/100%); the fleet keeps 0/0/0 minerals and 24 kT colonists; a salvage object at the stop point holds 47/47/48 kT (the survivors' minerals); the destroyed ships' share 53/53/52/26 is gone | MF-14-B HELD (MF-14): F - floor(F x 520 / 1170), F = the fuel of an unstopped twin (both are charged for the full leg)"
