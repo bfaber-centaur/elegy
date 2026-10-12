@@ -16,7 +16,7 @@ const (
 
 // remoteMineTask is fleet i's remote-mining task after movement, for a
 // fleet that did not move this year (KERNEL.md "Remote mining", stars-elegy
-// b1e38ef; MESSAGES.md 0x075–0x077). The fleet mines when it orbits a
+// e2fb8c1; MESSAGES.md 0x075–0x077). The fleet mines when it orbits a
 // planet it can mine (Terraformer.RemoteMine). Otherwise the order is
 // refused with a message and the task cancelled, and the owner is told
 // the fleet has finished its orders when this was its last waypoint
@@ -28,9 +28,9 @@ const (
 //     that an Alternate Reality fleet is skipped silently and keeps its
 //     task (BINARY-ONLY).
 //
-// ASSUMPTION: the checks run in that order when more than one applies
-// (deep space, then modules, then owner), and the silent skip keeps the
-// task. Both are open oracle questions.
+// The checks run in that order and the first that fails decides, and the
+// silently skipped Alternate Reality fleet keeps its task (BINARY-ONLY,
+// KERNEL.md "Remote mining", stars-elegy e2fb8c1).
 func (g *Game) remoteMineTask(i int, rng Rand) []Event {
 	f := &g.Fleets[i]
 	pi := g.planetAt(f.Pos)

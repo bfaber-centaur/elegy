@@ -23,7 +23,7 @@ func remoteMineGame(t *testing.T, owner int, pos Point, rate int) (Game, *stubTe
 	return g, stub
 }
 
-// KERNEL.md "Remote mining" (stars-elegy b1e38ef) and MESSAGES.md
+// KERNEL.md "Remote mining" (stars-elegy e2fb8c1) and MESSAGES.md
 // 0x075–0x077 and 0x04e (a): a stationary remote-mining fleet mines only
 // where it may; otherwise its order is refused with a message, its task
 // cancelled, and, at its last waypoint, 0x04e follows (oracle 0x076 then
@@ -47,8 +47,9 @@ func TestRemoteMiningRefusals(t *testing.T) {
 		{"no modules: 0x075 (CONFIRMED CS-003)", 0, -1, free, 0, false, TaskNone, EventRemoteMineNoModules, 8},
 		{"own planet, not AR: 0x076 (CONFIRMED TK-111)", 0, -1, home.Pos, 1, false, TaskNone, EventRemoteMineInhabited, home.ID},
 		{"another player's planet: 0x076 (CONFIRMED TK-111)", 1, -1, home.Pos, 1, false, TaskNone, EventRemoteMineInhabited, home.ID},
+		{"no modules at an owned planet: 0x075 first (BINARY-ONLY order)", 0, -1, home.Pos, 0, false, TaskNone, EventRemoteMineNoModules, home.ID},
 		{"deep space: 0x077 (BINARY-ONLY)", 0, -1, deep, 1, false, TaskNone, EventRemoteMineDeepSpace, -1},
-		{"AR at another player's planet: skipped silently (BINARY-ONLY; keeps task ASSUMPTION)", 1, 1, home.Pos, 1, false, TaskRemoteMine, 0, -1},
+		{"AR at another player's planet: skipped silently, keeps task (BINARY-ONLY)", 1, 1, home.Pos, 1, false, TaskRemoteMine, 0, -1},
 		{"AR at its own planet mines (CONFIRMED KB-1B)", 0, 0, home.Pos, 1, true, TaskRemoteMine, 0, -1},
 		{"another player's miners at an AR planet: 0x076 (BINARY-ONLY)", 1, 0, home.Pos, 1, false, TaskNone, EventRemoteMineInhabited, home.ID},
 	} {
@@ -110,7 +111,8 @@ func TestRemoteMiningRefusalBeforeLastWaypoint(t *testing.T) {
 	}
 }
 
-// KERNEL.md "Remote mining": the checks run only for a fleet that did not
+// KERNEL.md "Remote mining", "Order of the checks" (BINARY-ONLY,
+// stars-elegy e2fb8c1): the checks run only for a fleet that did not
 // move this year. A fleet that moved, here from an owned planet to deep
 // space, keeps its task and gets no refusal.
 func TestRemoteMiningMovedFleetNotChecked(t *testing.T) {
