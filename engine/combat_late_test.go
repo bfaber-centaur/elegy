@@ -473,4 +473,21 @@ func TestPredictionTargetChoiceCostCap(t *testing.T) {
 	if got := tb.choose(f, f.weapons[0]); got != 2 {
 		t.Errorf("capped armor 600000 against uncapped armor 499995: chose %d, want 2", got)
 	}
+	// Exact ties at the cap: one ship of armor 49 at cost 100000 (capped:
+	// 10^7·100/50 = 2·10^7) and one of armor 48 at cost 98000 (9800000·
+	// 100/49 = 2·10^7). The first in token order wins either way round; a
+	// cap of 10^7 − 1 (19999998) or 10^7 + 1 (20000002) breaks one order.
+	capped, under := testDesign(Hull{Armor: 49}, 100000), testDesign(Hull{Armor: 48}, 98000)
+	for _, order := range [][2]Design{{capped, under}, {under, capped}} {
+		d = []Design{d[0], order[0], order[1]}
+		f := tok(d, 0, 0, 1)
+		a, b := tok(d, 1, 1, 1), tok(d, 2, 1, 1)
+		if sa, sb := attractiveness(f, f.weapons[0], a), attractiveness(f, f.weapons[0], b); sa != 20_000_000 || sb != 20_000_000 {
+			t.Fatalf("tie scores %d %d, want 20000000 each", sa, sb)
+		}
+		tb := newTestBattle(panicRand{}, d, f, a, b)
+		if got := tb.choose(f, f.weapons[0]); got != 1 {
+			t.Errorf("tie at the cap, armor %d first: chose %d, want 1", order[0].Hull.Armor, got)
+		}
+	}
 }
