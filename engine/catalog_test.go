@@ -306,8 +306,8 @@ func TestConfirmedStarbaseBuildCost(t *testing.T) {
 
 func TestConfirmedOwnerCostExemptions(t *testing.T) {
 	// COMPONENTS.md "Cost for an owner": terraform and planetary items skip
-	// miniaturization and are never doubled by BET; Claim Adjuster pays
-	// half the resources for terraform items.
+	// miniaturization and are never doubled by BET, except the Genesis
+	// Device; Claim Adjuster pays half the resources for terraform items.
 	cat := Components()
 	bet := Race{}
 	bet.LRT.BleedingEdgeTech = true
@@ -315,7 +315,7 @@ func TestConfirmedOwnerCostExemptions(t *testing.T) {
 	for f := range tech26 {
 		tech26[f] = 26
 	}
-	for _, name := range []string{"Snooper 620X", "Neutron Shield", "Genesis Device"} {
+	for _, name := range []string{"Snooper 620X", "Neutron Shield"} {
 		c, _ := cat.Lookup(name)
 		if got := c.OwnerCost(bet, c.TechReq); got != c.Cost {
 			t.Errorf("BET %s at its requirement: %+v, want base %+v", name, got, c.Cost)
@@ -333,6 +333,26 @@ func TestConfirmedOwnerCostExemptions(t *testing.T) {
 		want.Resources /= 2
 		if got != want {
 			t.Errorf("CA %s: %+v, want %+v", c.Name, got, want)
+		}
+	}
+	// The Genesis Device is miniaturized and doubled like a ship part
+	// (CS-001 readouts, stars-elegy experiments/cs001: c00 5000 at tech 0,
+	// c01 3800 at tech 26, c05 3500 with BET at tech 26, c11 10000 with BET
+	// at tech 0). GAP-001 G2–G4 bound BET at tech 26 to 3,445–3,567.
+	genesis, _ := cat.Lookup("Genesis Device")
+	for _, c := range []struct {
+		race  Race
+		tech  [NumFields]int
+		want  int
+		label string
+	}{
+		{Race{}, tech0, 5000, "c00"},
+		{Race{}, tech26, 3800, "c01"},
+		{bet, tech26, 3500, "c05"},
+		{bet, tech0, 10000, "c11"},
+	} {
+		if got := genesis.OwnerCost(c.race, c.tech); got != (Cost{Resources: c.want}) {
+			t.Errorf("%s Genesis Device %+v, want %d resources", c.label, got, c.want)
 		}
 	}
 	// A ship part with a requirement, at that requirement, is doubled

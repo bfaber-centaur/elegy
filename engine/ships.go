@@ -196,7 +196,8 @@ func StarbaseBuildCost(d Design, race Race, levels [NumFields]int) Cost {
 // itemCost is one hull's, part's or planetary item's cost for an owner
 // (COMPONENTS.md "Cost for an owner", CONFIRMED CS-001). Terraform and
 // planetary items skip miniaturization and are never doubled by Bleeding
-// Edge Technology.
+// Edge Technology; Component.OwnerCost passes the Genesis Device as
+// PartOther, since it does not skip them.
 func itemCost(base Cost, req [NumFields]int, kind PartKind, race Race, levels [NumFields]int) Cost {
 	exempt := kind == PartTerraform || kind == PartPlanetary
 	m, hasReq := 0, false
