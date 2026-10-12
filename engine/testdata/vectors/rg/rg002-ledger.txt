@@ -1043,8 +1043,6 @@ sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | ships = map[14:1], w
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | waypoints[0] position = {1311 1324}, want {1299 1325}
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | x = 1311, want 1299
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | y = 1324, want 1325
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
-sample | rg002 | year 2 | order | year 2 player 1 order 35 (FollowOrder): follow: fleet 300005: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 39 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 42 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 59 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
@@ -1057,17 +1055,13 @@ sample | rg002 | year 3 | order | year 3 player 5 order 56 (WaypointOrder): wayp
 sample | rg002 | year 4 | order | year 4 player 1 order 31 (WaypointOrder): waypoint 0 fleet 200011: orders: no such object
 sample | rg002 | year 4 | order | year 4 player 1 order 53 (WaypointOrder): waypoint 0 fleet 200011: orders: no such object
 sample | rg002 | year 4 | order | year 4 player 2 order 13 (CargoOrder): cargo: fleet 200010 and salvage 0: orders: the objects are not at the same place
-sample | rg002 | year 4 | order | year 4 player 5 order 64 (FollowOrder): follow: fleet 500085: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 2 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 2 order 25 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600027 and planet 8: orders: the objects are not at the same place
 sample | rg002 | year 5 | order | year 5 player 3 order 9 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 5 order 30 (FollowOrder): follow: fleet 400001: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 5 order 31 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 5 order 67 (FollowOrder): follow: fleet 500085: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 5 order 90 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 6 order 14 (FollowOrder): follow: fleet 300003: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 6 order 15 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 6 order 17 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 1 order 40 (WaypointOrder): waypoint 0 fleet 200014: orders: no such object
@@ -1084,7 +1078,6 @@ sample | rg002 | year 6 | order | year 6 player 4 order 0 (WaypointOrder): fleet
 sample | rg002 | year 6 | order | year 6 player 5 order 17 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600061 is not with fleet 600049: orders: the objects are not at the same place
 sample | rg002 | year 6 | order | year 6 player 5 order 45 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
-sample | rg002 | year 6 | order | year 6 player 6 order 10 (FollowOrder): follow: fleet 300003: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 11 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 12 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
@@ -1128,7 +1121,6 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #76 | fleet owner=2 id=14 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #82 | fleet owner=3 id=4 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #84 | fleet_gone owner=3 id=7 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #9 | fleet owner=1 id=7 | cargo.germanium = 0, want 1
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.boranium = 68, want 69 (6/8 variants match)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.ironium = 182, want 181 (6/8 variants match)
 sample | rg002-y2 | RG-002-Y2-2464 y1 #143 | planet id=8 | concentrations = [62 87 9], want [153 188 127]

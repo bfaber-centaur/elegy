@@ -127,20 +127,180 @@ func TestFollowNoLeader(t *testing.T) {
 	if got := followEvents(r.Events); !reflect.DeepEqual(got, map[int][]EventKind{2: {EventFollowNoLeader}}) {
 		t.Errorf("idle leader: follow messages %v, want 0x138 for fleet 2", got)
 	}
-	// The leader merged away later in the replay (ASSUMPTION F1): gone.
+	// The leader merged away later in the replay: the follow is retargeted
+	// to the fleet it joined, which has no orders: 0x138.
 	l = followLab(t, 3)
 	l.g.Fleets[0].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
 	r = followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1}, MergeOrder{Into: 3, From: []int{1}})
 	if got := followEvents(r.Events); !reflect.DeepEqual(got, map[int][]EventKind{2: {EventFollowNoLeader}}) {
 		t.Errorf("merged leader: follow messages %v, want 0x138 for fleet 2", got)
 	}
-	// A leader that does not exist when the order applies rejects it (F1),
-	// as does the fleet itself.
-	for _, leader := range []int{9, 2} {
-		g := withRules(followLab(t, 2).g)
-		a := ApplyOrders(&g, []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 2, Leader: leader}}}}, []int{0})
-		if !errors.Is(a.Results[0].Err, ErrNoSuchObject) || a.follows[2] != 0 {
-			t.Errorf("leader %d: %v, follows %v; want rejected", leader, a.Results[0].Err, a.follows)
+	// The leader is not checked when the order applies (ORDERS.md
+	// "Waypoint 0, following", BINARY-ONLY): one that never existed gets
+	// the follower 0x138 at the follow step; the fleet itself leaves it
+	// following itself, with no move and no message (F3).
+	for _, c := range []struct {
+		leader int
+		want   map[int][]EventKind
+	}{{9, map[int][]EventKind{2: {EventFollowNoLeader}}}, {2, map[int][]EventKind{}}} {
+		l := followLab(t, 2)
+		l.g.Fleets[1].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+		r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: c.leader})
+		if got := followEvents(r.Events); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("leader %d: follow messages %v, want %v", c.leader, got, c.want)
+		}
+		if f := followed(t, r.Game, 2); f.Pos != (Point{1200, 1200}) {
+			t.Errorf("leader %d: follower at %v, want unmoved", c.leader, f.Pos)
+		}
+	}
+}
+
+// mergedFollowGame has player 0's fleets 1 (F) and 3 (Y) at (1200,1200),
+// Y with a leg to (1300,1200), player 0's fleet 2 elsewhere, and player
+// 1's fleet 4 at (1200,1200). Player 0 merges F into Y; player 1's fleet 4
+// is told to follow F.
+func mergedFollowGame(t *testing.T) (*Game, []PlayerOrders) {
+	l := followLab(t, 4)
+	l.g.Fleets[1].Pos = Point{1100, 1100}
+	l.g.Fleets[2].Waypoints = []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}
+	l.g.Fleets[3].Owner = 1
+	g := withRules(l.g)
+	return &g, []PlayerOrders{
+		{Player: 0, Orders: []Order{MergeOrder{Into: 3, From: []int{1}}}},
+		{Player: 1, Orders: []Order{FollowOrder{Fleet: 4, Leader: 1}}},
+	}
+}
+
+// A follow order aimed at a fleet merged away in the replay takes the two
+// paths of ORDERS.md "A fleet target merged away during order replay",
+// "Waypoint 0, following" (stars-elegy a1c4c91, BINARY-ONLY). Merging
+// player first: the order is kept with the stale id, and the waypoint
+// check before the follow step picks one of the merging player's fleets at
+// the follower's position, with draws. Following player first: the merge
+// retargets the follow to the fleet joined, with no draws. Either way the
+// follower copies Y's leg.
+func TestFollowMergedLeader(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		order []int
+		draws []int
+	}{{"merging player first", []int{0, 1}, []int{1}}, {"following player first", []int{1, 0}, nil}} {
+		g, files := mergedFollowGame(t)
+		a := ApplyOrders(g, files, c.order)
+		for _, res := range a.Results {
+			if res.Err != nil {
+				t.Fatalf("%s: %v", c.name, res.Err)
+			}
+		}
+		rng := &recordRand{}
+		g.chaseMerged(a.merged, a.follows, rng)
+		if a.follows[4] != 3 || !reflect.DeepEqual(rng.bounds, c.draws) {
+			t.Errorf("%s: follows %v, draws %v; want fleet 4 following 3, draws %v", c.name, a.follows, rng.bounds, c.draws)
+		}
+		done, ev := g.follow(a.follows)
+		if len(ev) != 0 || !reflect.DeepEqual(done, []Event{doneFor(1, 4)}) {
+			t.Errorf("%s: follow messages %v then %v, want 0x137 for fleet 4", c.name, ev, done)
+		}
+		if f := followed(t, *g, 4); !reflect.DeepEqual(f.Waypoints, []Waypoint{{Pos: Point{1300, 1200}, Warp: 5, Target: TargetSpace}}) {
+			t.Errorf("%s: follower waypoints %v, want Y's leg", c.name, f.Waypoints)
+		}
+	}
+	// Merging player first with the follower elsewhere: none of the
+	// merging player's fleets stands at its position, so nothing is drawn,
+	// the stale id stays and the follow step sends 0x138.
+	g, files := mergedFollowGame(t)
+	g.Fleets[3].Pos = Point{1250, 1250}
+	a := ApplyOrders(g, files, []int{0, 1})
+	rng := &recordRand{}
+	g.chaseMerged(a.merged, a.follows, rng)
+	if a.follows[4] != 1 || rng.bounds != nil {
+		t.Errorf("follower elsewhere: follows %v, draws %v; want the stale fleet 1, none", a.follows, rng.bounds)
+	}
+	if _, ev := g.follow(a.follows); !reflect.DeepEqual(followEvents(ev), map[int][]EventKind{4: {EventFollowNoLeader}}) {
+		t.Errorf("follower elsewhere: %v, want 0x138 for fleet 4", ev)
+	}
+	// Following player first, F emptied by a move-ships order: the follow
+	// goes to the merging player's first fleet in fleet order at F's
+	// position, not the follower (ASSUMPTION W10's stand-in).
+	g, files = mergedFollowGame(t)
+	files[0].Orders = []Order{MoveShipsOrder{Fleet: 1, With: 3, Ships: []Stack{{Design: g.Fleets[0].Stacks[0].Design, Count: -1}}}}
+	a = ApplyOrders(g, files, []int{1, 0})
+	if a.Results[0].Err != nil || a.Results[1].Err != nil || g.fleetIndex(1) >= 0 || a.follows[4] != 3 {
+		t.Errorf("move-ships: results %v, follows %v; want fleet 1 emptied, fleet 4 following 3", a.Results, a.follows)
+	}
+	// The follower one of the merging player's own fleets, its file
+	// merging first: the follower is a candidate too (KERNEL.md step
+	// 1a.3, "possibly the follower itself"), with Y after it in fleet
+	// order. A draw of 0 for Y picks Y; otherwise the follower follows
+	// itself (F3): no move, no message.
+	for _, c := range []struct {
+		draws []int
+		want  int
+		ev    map[int][]EventKind
+	}{{[]int{0, 0}, 3, map[int][]EventKind{2: {EventFollowDone}}}, {[]int{0, 1}, 2, map[int][]EventKind{}}} {
+		g, _ = mergedFollowGame(t)
+		g.Fleets[1].Pos = Point{1200, 1200}
+		files = []PlayerOrders{{Player: 0, Orders: []Order{MergeOrder{Into: 3, From: []int{1}}, FollowOrder{Fleet: 2, Leader: 1}}}}
+		a = ApplyOrders(g, files, []int{0})
+		rng := &boundsRand{seq: seqRand{draws: c.draws}}
+		g.chaseMerged(a.merged, a.follows, rng)
+		if a.follows[2] != c.want || !reflect.DeepEqual(rng.bounds, []int{1, 2}) {
+			t.Errorf("own follower, draws %v: follows %v, bounds %v; want fleet 2 following %d, bounds [1 2]", c.draws, a.follows, rng.bounds, c.want)
+		}
+		done, ev := g.follow(a.follows)
+		if got := followEvents(append(ev, done...)); !reflect.DeepEqual(got, c.ev) {
+			t.Errorf("own follower, draws %v: follow messages %v, want %v", c.draws, got, c.ev)
+		}
+	}
+	// The follower receiving all of its leader's ships: no stand-in other
+	// than the follower, so the stale id stays.
+	g, files = mergedFollowGame(t)
+	files = []PlayerOrders{{Player: 0, Orders: []Order{FollowOrder{Fleet: 1, Leader: 3}, MoveShipsOrder{Fleet: 3, With: 1, Ships: []Stack{{Design: g.Fleets[2].Stacks[0].Design, Count: -1}}}}}}
+	a = ApplyOrders(g, files, []int{0})
+	if a.Results[0].Err != nil || a.Results[1].Err != nil || g.fleetIndex(3) >= 0 || a.follows[1] != 3 {
+		t.Errorf("follower takes the ships: results %v, follows %v; want fleet 3 emptied, fleet 1 still naming 3", a.Results, a.follows)
+	}
+	// The check touches only a follow whose leader is gone and was merged
+	// away: not a leader that exists, nor one gone some other way.
+	for _, c := range []struct {
+		name           string
+		merged, follow map[int]int
+	}{
+		{"leader exists", map[int]int{3: 0}, map[int]int{4: 3}},
+		{"leader not merged", map[int]int{2: 0}, map[int]int{4: 9}},
+	} {
+		g, _ = mergedFollowGame(t)
+		follows := map[int]int{}
+		for k, v := range c.follow {
+			follows[k] = v
+		}
+		rng = &recordRand{}
+		g.chaseMerged(c.merged, follows, rng)
+		if !reflect.DeepEqual(follows, c.follow) || rng.bounds != nil {
+			t.Errorf("%s: follows %v, draws %v; want %v, none", c.name, follows, rng.bounds, c.follow)
+		}
+	}
+}
+
+// In a turn, with the replay order drawn: whichever path ran, player 1's
+// follower follows Y.
+func TestFollowMergedLeaderInTurn(t *testing.T) {
+	for seed, draws := range [][]int{{0, 0}, {1, 1}, {0, 1}, {1, 0}} {
+		g, files := mergedFollowGame(t)
+		for i := range files {
+			files[i].GameID, files[i].Year = g.ID, g.Year
+		}
+		r, err := GenerateTurn(*g, files, &seqRand{draws: draws})
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, res := range r.Orders {
+			if res.Err != nil {
+				t.Fatalf("seed %d: order %d: %v", seed, res.Index, res.Err)
+			}
+		}
+		if got := followEvents(r.Events); !reflect.DeepEqual(got, map[int][]EventKind{4: {EventFollowDone}}) {
+			t.Errorf("seed %d: follow messages %v, want 0x137 for fleet 4", seed, got)
 		}
 	}
 }
@@ -422,4 +582,15 @@ func TestFollowDoneInFleetOrder(t *testing.T) {
 	if want := []Event{doneFor(0, 2), doneFor(0, 3)}; !reflect.DeepEqual(done, want) {
 		t.Errorf("0x137 %v, want %v", done, want)
 	}
+}
+
+// boundsRand plays seq's draws and records each bound.
+type boundsRand struct {
+	seq    seqRand
+	bounds []int
+}
+
+func (r *boundsRand) Intn(n int) int {
+	r.bounds = append(r.bounds, n)
+	return r.seq.Intn(n)
 }

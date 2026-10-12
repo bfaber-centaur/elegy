@@ -1,7 +1,5 @@
 package engine
 
-import "fmt"
-
 // Following another fleet (stars-elegy ORDERS.md "Waypoint 0 aimed at a
 // fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138;
 // stars-elegy d4eafd9).
@@ -41,14 +39,16 @@ const maxFollowPasses = 8
 // fleet, which leaves the fleet with that one waypoint"). Leader is any
 // other fleet, of any owner (KERNEL.md names only "another fleet").
 //
-// ASSUMPTION F1: a leader that does not exist when the order applies,
-// including one merged away earlier in the replay, rejects the order, as
-// a waypoint naming a target that does not exist does (ORDERS.md "Range
-// and legality clamps", chosen rule); one merged away later in the
-// replay is gone at
-// step 1a.3 and the follower gets 0x138. ORDERS.md "A fleet target merged
-// away during order replay" retargets waypoints, but says nothing of
-// waypoint 0.
+// The leader is not checked: a waypoint edit checks only the ordering
+// fleet and the index (ORDERS.md "Waypoint 0, following", stars-elegy
+// a1c4c91, BINARY-ONLY). A leader merged away, or emptied by a move-ships
+// order, earlier in the replay keeps its stale id, and the waypoint check
+// before the follow step retargets it (Game.chaseMerged); one removed
+// later in the replay is retargeted when it is removed
+// (Applied.retargetFollows), as for any waypoint (ORDERS.md "A fleet
+// target merged away during order replay"). A leader that is gone at the
+// follow step, or never existed, gets the follower 0x138; the fleet
+// itself as leader leaves it following itself (F3).
 type FollowOrder struct {
 	Fleet  int
 	Leader int
@@ -62,9 +62,6 @@ func (o FollowOrder) apply(g *Game, player int, a *Applied) error {
 	}
 	if err := validTask(o.Task); err != nil {
 		return err
-	}
-	if l := g.fleetIndex(o.Leader); l < 0 || l == i {
-		return fmt.Errorf("follow: fleet %d: %w", o.Leader, ErrNoSuchObject)
 	}
 	f := &g.Fleets[i]
 	f.Task = o.Task
