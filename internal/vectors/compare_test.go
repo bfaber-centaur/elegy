@@ -2,6 +2,7 @@ package vectors
 
 import (
 	"encoding/json"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -201,6 +202,33 @@ func TestPlayerUnsure(t *testing.T) {
 				t.Errorf("player %d %s: %q, want %q", c.id, k, got[k], c.want[k])
 			}
 		}
+	}
+}
+
+func TestPlayerUnsureSuperStealthNarrow(t *testing.T) {
+	// Stealing is modelled (engine stealResearch), so a Super Stealth
+	// player's research is skipped only when another living player's
+	// spending is not reproduced: a queue not loaded or planned orders.
+	g := engine.Game{Players: []engine.Player{{}, {}, {Computer: true, Dead: true}}}
+	g.Players[0].Race.PRT = engine.PRTSuperStealth
+	l := pvLoaded{g: g, queued: map[int]bool{2: true}, ordered: map[int]bool{}}
+	if got := l.playerUnsure(&g, 0); len(got) != 0 {
+		t.Errorf("others reproduced (the planned one dead): %v, want nothing skipped", got)
+	}
+	ss := map[string]string{"tech": "Super Stealth research stealing", "research_accumulated": "Super Stealth research stealing"}
+	g.Players[2].Dead = false
+	l.g = g
+	if got := l.playerUnsure(&g, 0); !reflect.DeepEqual(got, ss) {
+		t.Errorf("a living planned player: %v, want %v", got, ss)
+	}
+	g.Players[2].Computer = false
+	l = pvLoaded{g: g, queued: map[int]bool{1: true}, ordered: map[int]bool{}}
+	if got := l.playerUnsure(&g, 0); !reflect.DeepEqual(got, ss) {
+		t.Errorf("another player's queue not loaded: %v, want %v", got, ss)
+	}
+	l = pvLoaded{g: g, queued: map[int]bool{0: true}, ordered: map[int]bool{}}
+	if got := l.playerUnsure(&g, 0); got["tech"] != "production queue" {
+		t.Errorf("its own queue not loaded: %v, want production queue", got)
 	}
 }
 
