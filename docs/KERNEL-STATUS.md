@@ -502,7 +502,7 @@ elegy #40. `TestParityVectors -v` prints each case's status and reason.
     (CB-055, stars-elegy b1e38ef, 18 of 20 battles; the other 2 had the
     compared stack out of reach at the first shot).
   - Tests: `TestMisslottedPartThisYear`,
-    `TestMisslottedPartWorksNowhere`, `TestPredictionDroppedPartTargetChoice`
+    `TestMisslottedPartWorksNowhere`, `TestConfirmedDroppedPartTargetChoice`
     (engine) and `TestMisslottedPartDropped` (internal/vectors).
   CB-010 passes.
   CB-009 passes on all 8 seeds. Its salvage at (1060,1230) follows which
