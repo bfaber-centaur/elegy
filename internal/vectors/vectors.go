@@ -98,11 +98,15 @@ type pvEconomy struct {
 }
 
 type pvPlanet struct {
-	ID                  int   `json:"id"`
-	X                   int   `json:"x"`
-	Y                   int   `json:"y"`
-	Owner               int   `json:"owner"`
-	Concentrations      []int `json:"concentrations"`
+	ID             int   `json:"id"`
+	X              int   `json:"x"`
+	Y              int   `json:"y"`
+	Owner          int   `json:"owner"`
+	Homeworld      bool  `json:"homeworld"` // the planet record's homeworld flag
+	Concentrations []int `json:"concentrations"`
+	// each concentration's depletion fraction as the planet record
+	// stores it (vectors README "planets"; absent: all 0)
+	ConcFractions       []int `json:"concentration_fractions"`
 	Environment         []int `json:"environment"`
 	OriginalEnvironment []int `json:"original_environment"`
 	SurfaceMinerals     []int `json:"surface_minerals"`
@@ -630,12 +634,17 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 
 	for _, p := range s.Planets {
 		l.planet[p.ID] = p.ID + 1
-		pl := engine.Planet{ID: p.ID + 1, Pos: engine.Point{X: p.X, Y: p.Y}, Owner: p.Owner, StarbaseDesign: -1}
+		pl := engine.Planet{ID: p.ID + 1, Pos: engine.Point{X: p.X, Y: p.Y}, Owner: p.Owner, Homeworld: p.Homeworld, StarbaseDesign: -1}
 		if p.Owner < 0 {
 			pl.Owner = engine.NoOwner
 		}
 		for m, c := range p.Concentrations {
 			pl.Deposits[m].Concentration = c
+		}
+		// The stored byte is 1/256ths of the current point remaining, 0
+		// meaning a full 256 (KERNEL.md "Mining"), as Deposit.Fraction.
+		for m, f := range p.ConcFractions {
+			pl.Deposits[m].Fraction = f
 		}
 		copy(pl.Env[:], p.Environment)
 		copy(pl.OrigEnv[:], p.Environment)
@@ -673,7 +682,6 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 			for _, q := range s.ProductionQueues {
 				pl.HasQueue = pl.HasQueue || q.Planet == p.ID
 			}
-			pl.Homeworld = false
 		}
 		if sb := p.Starbase; sb != nil && sb.Design != nil && pl.Owner != engine.NoOwner {
 			di, ok := l.design[[2]int{p.Owner, -1 - *sb.Design}]
@@ -1465,6 +1473,12 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			}
 			if got != want {
 				errs = append(errs, pvMismatch(k, got, want))
+			}
+		case "homeworld":
+			var want bool
+			json.Unmarshal(raw, &want)
+			if p.Homeworld != want {
+				errs = append(errs, pvMismatch(k, p.Homeworld, want))
 			}
 		case "population", "defenses", "mines", "factories", "excess":
 			var want int

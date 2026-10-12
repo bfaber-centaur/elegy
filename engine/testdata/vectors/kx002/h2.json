@@ -261,10 +261,16 @@
     "x": 1113,
     "y": 1298,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      113,
      84
+    ],
+    "concentration_fractions": [
+     242,
+     86,
+     157
     ],
     "environment": [
      70,

@@ -1,6 +1,9 @@
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestConfirmedResearchPG(t *testing.T) {
 	// PG003: energy current, next "same field", electronics 5. Research each
@@ -217,5 +220,159 @@ func TestResearchSlowerTechWhileSwitching(t *testing.T) {
 	s = AddResearch(s, pgRace(), 391, true)
 	if s.Levels != [NumFields]int{1, 1, 1, 1, 1, 1} || s.Current != Energy || s.Accumulated != [NumFields]int{6, 0, 0, 0, 0, 0} {
 		t.Errorf("levels %v, current %d, accumulated %v; want all 1, energy current with 6", s.Levels, s.Current, s.Accumulated)
+	}
+}
+
+// TestConfirmedSuperStealthResearch checks KERNEL.md "Allocation", Super
+// Stealth (CONFIRMED, KX-003 S3L): the other player spent 355 on weapons
+// and the Super Stealth player 95 on energy; it ended with weapons 88 and
+// energy 95 + 23 = 118. Under slower tech ceil(s/2) is stored (KB-2B).
+func TestConfirmedSuperStealthResearch(t *testing.T) {
+	ss := pgRace()
+	ss.PRT = PRTSuperStealth
+	other := pgRace()
+	other.PRT = PRTJackOfAllTrades
+	// Levels of 20 keep the stolen research below the next level's cost.
+	high := ResearchState{Levels: [NumFields]int{20, 20, 20, 20, 20, 20}}
+	g := Game{Players: []Player{{Race: other}, {Race: ss, Research: high}}}
+	spent := [][NumFields]int{{Weapons: 355}, {Energy: 95}}
+	g.Players[1].Research.Accumulated[Energy] = 95
+	ev := g.stealResearch(spent)
+	if got := g.Players[1].Research.Accumulated; got[Energy] != 118 || got[Weapons] != 88 {
+		t.Errorf("Super Stealth accumulated %v, want energy 118, weapons 88", got)
+	}
+	if got := g.Players[0].Research.Accumulated; got != [NumFields]int{} {
+		t.Errorf("the other player gained %v", got)
+	}
+	want := []Event{
+		{Kind: EventResearchStolen, Player: 1, Planet: -1, Fleet: -1, Item: ItemKind(Energy), Count: 23},
+		{Kind: EventResearchStolen, Player: 1, Planet: -1, Fleet: -1, Item: ItemKind(Weapons), Count: 88},
+	}
+	if !reflect.DeepEqual(ev, want) {
+		t.Errorf("events %+v, want %+v", ev, want)
+	}
+
+	// Slower tech: the message shows s, ceil(s/2) is stored.
+	g = Game{SlowerTech: true, Players: []Player{{Race: other}, {Race: ss, Research: high}}}
+	if ev := g.stealResearch(spent); !reflect.DeepEqual(ev, want) {
+		t.Errorf("slower tech: events %+v, want %+v (the message shows s)", ev, want)
+	}
+	if got := g.Players[1].Research.Accumulated; got[Energy] != 12 || got[Weapons] != 44 {
+		t.Errorf("slower tech: accumulated %v, want energy 12, weapons 44", got)
+	}
+
+	// A dead player neither counts nor steals; s ≤ 1 steals nothing and
+	// s = 2 is stolen (propulsion 8 between 2 players).
+	g = Game{Players: []Player{{Race: other}, {Race: ss, Research: high}, {Race: ss, Research: high, Dead: true}}}
+	g.stealResearch([][NumFields]int{{Weapons: 355, Energy: 7, Propulsion: 8}, {}, {Weapons: 1000}})
+	if got := g.Players[1].Research.Accumulated; got[Weapons] != 88 || got[Energy] != 0 || got[Propulsion] != 2 {
+		t.Errorf("with a dead player: accumulated %v, want weapons 88, propulsion 2", got)
+	}
+	if got := g.Players[2].Research.Accumulated; got != [NumFields]int{} {
+		t.Errorf("the dead Super Stealth player gained %v", got)
+	}
+
+	// One player in the game: nothing stolen (the one-player Super
+	// Stealth PG and KX-002 games).
+	g = Game{Players: []Player{{Race: ss}}}
+	g.stealResearch([][NumFields]int{{Energy: 500}})
+	if got := g.Players[0].Research.Accumulated[Energy]; got != 0 {
+		t.Errorf("one-player game stole %d", got)
+	}
+}
+
+// TestSuperStealthResearchLevelsUp checks that the stolen research is
+// checked for level-ups at once, in field order (BINARY-ONLY,
+// stars-elegy 2f214f5): 55 each into energy and weapons buys energy 1 for 50, and
+// then weapons 1 would cost 60.
+func TestSuperStealthResearchLevelsUp(t *testing.T) {
+	ss := pgRace()
+	ss.PRT = PRTSuperStealth
+	g := Game{Players: []Player{{Race: pgRace()}, {Race: ss}}}
+	g.stealResearch([][NumFields]int{{Energy: 220, Weapons: 220}, {}})
+	r := g.Players[1].Research
+	if r.Levels != [NumFields]int{1, 0, 0, 0, 0, 0} || r.Accumulated[Energy] != 5 || r.Accumulated[Weapons] != 55 {
+		t.Errorf("levels %v, accumulated %v; want energy 1 with 5, weapons 0 with 55", r.Levels, r.Accumulated)
+	}
+}
+
+// TestResearchSpent checks the per-field split counted for Super Stealth
+// (KERNEL.md "Allocation"; GR: KX-002 R5, 211 → 106 and 32 each).
+func TestResearchSpent(t *testing.T) {
+	gr := pgRace()
+	gr.LRT.GeneralizedResearch = true
+	if got := researchSpent(ResearchState{Current: Energy}, gr, 211); got != [NumFields]int{106, 32, 32, 32, 32, 32} {
+		t.Errorf("GR %v", got)
+	}
+	// An odd share counts in full: (3·20 + 19)/20 = 3.
+	if got := researchSpent(ResearchState{Current: Energy}, gr, 20); got != [NumFields]int{10, 3, 3, 3, 3, 3} {
+		t.Errorf("GR odd share %v", got)
+	}
+	if got := researchSpent(ResearchState{Current: Weapons}, pgRace(), 50); got != [NumFields]int{0, 50, 0, 0, 0, 0} {
+		t.Errorf("plain %v", got)
+	}
+}
+
+// TestSuperStealthResearchInTurn checks the step runs in GenerateTurn,
+// after every player's research: two identical homeworlds each research
+// R in energy; the Super Stealth owner also gains trunc(trunc(2R/2)/2).
+func TestSuperStealthResearchInTurn(t *testing.T) {
+	run := func(prt PRT) Game {
+		g := pgHomeworld()
+		second := g.Players[0]
+		second.Race.PRT = prt
+		g.Players = append(g.Players, second)
+		p := g.Planets[0]
+		p.ID, p.Owner, p.Pos = 8, 1, Point{X: 500, Y: 500}
+		g.Planets = append(g.Planets, p)
+		r, err := GenerateTurn(withRules(g), nil, highRand{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return r.Game
+	}
+	plain := run(PRTJackOfAllTrades)
+	ss := run(PRTSuperStealth)
+	r := plain.Players[1].Research.Accumulated[Energy] - 65
+	if r <= 0 || plain.Players[1].Research.Levels[Energy] != 2 {
+		t.Fatalf("setup: research %d, level %d", r, plain.Players[1].Research.Levels[Energy])
+	}
+	if got, want := ss.Players[1].Research.Accumulated[Energy], 65+r+r/2; got != want {
+		t.Errorf("Super Stealth energy %d, want %d", got, want)
+	}
+}
+
+// TestSuperStealthResearchSwitchYear checks that what a player spent is
+// taken before its research switches fields: player 0's energy reaches
+// level 3 (cost 200, from 199 stored) in the research step, and its
+// explicit next field moves the leftover R − 1 to weapons, but this year's research went into energy, so the Super
+// Stealth player steals only from energy, trunc(trunc(2R/2)/2).
+func TestSuperStealthResearchSwitchYear(t *testing.T) {
+	g := pgHomeworld()
+	second := g.Players[0]
+	second.Race.PRT = PRTSuperStealth
+	g.Players = append(g.Players, second)
+	g.Players[0].Research.Next = Weapons
+	g.Players[0].Research.Accumulated[Energy] = 199
+	p := g.Planets[0]
+	p.ID, p.Owner, p.Pos = 8, 1, Point{X: 500, Y: 500}
+	g.Planets = append(g.Planets, p)
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Game.Players[0].Research; got.Levels[Energy] != 3 || got.Current != Weapons {
+		t.Fatalf("setup: player 0 energy level %d, current %d; want 3, weapons", got.Levels[Energy], got.Current)
+	}
+	research := r.Game.Players[0].Research.Accumulated[Weapons] + 1
+	var stolen []Event
+	for _, e := range r.Events {
+		if e.Kind == EventResearchStolen {
+			stolen = append(stolen, e)
+		}
+	}
+	want := []Event{{Kind: EventResearchStolen, Player: 1, Planet: -1, Fleet: -1, Item: ItemKind(Energy), Count: research / 2}}
+	if research <= 3 || !reflect.DeepEqual(stolen, want) {
+		t.Errorf("R %d: stolen %+v, want %+v", research, stolen, want)
 	}
 }

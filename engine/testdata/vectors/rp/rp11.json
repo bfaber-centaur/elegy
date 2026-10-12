@@ -931,6 +931,7 @@
     "x": 1163,
     "y": 1556,
     "owner": 4,
+    "homeworld": true,
     "concentrations": [
      98,
      88,
@@ -1517,6 +1518,7 @@
     "x": 1340,
     "y": 1703,
     "owner": 3,
+    "homeworld": true,
     "concentrations": [
      98,
      88,
@@ -1559,6 +1561,7 @@
     "x": 1348,
     "y": 1502,
     "owner": 5,
+    "homeworld": true,
     "concentrations": [
      98,
      88,
@@ -1735,6 +1738,7 @@
     "x": 1430,
     "y": 1317,
     "owner": 2,
+    "homeworld": true,
     "concentrations": [
      98,
      88,
@@ -1889,6 +1893,7 @@
     "x": 1475,
     "y": 1133,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      98,
      88,
@@ -2379,6 +2384,7 @@
     "x": 1652,
     "y": 1082,
     "owner": 1,
+    "homeworld": true,
     "concentrations": [
      107,
      97,

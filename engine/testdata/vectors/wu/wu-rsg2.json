@@ -505,6 +505,7 @@
     "x": 1306,
     "y": 1060,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -1256,6 +1257,7 @@
      "kind": "planet",
      "id": 8,
      "equals": {
+      "homeworld": true,
       "population": 287,
       "excess": 50
      },
