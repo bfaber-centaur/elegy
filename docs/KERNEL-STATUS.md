@@ -57,6 +57,23 @@ KERNEL.md gives every rule a status. Test names follow it:
 | Whole turn | `turn.go` | PG homeworld 2407 → 2436 through `GenerateTurn`; PQ C01 and C14 over two years; KX-001 Z2, Z3 | |
 | AR without a starbase | `turn.go` | | Elegy decision, below (`TestElegyDecision*`) |
 
+### GAP-001 predictions (S, G, T)
+
+These are pushed before lane F runs GAP-001 (project case `gap-001.md`, setup validated 2026-10-12). Lane A predicts S, G and T. Economy predicts W, P and A. Player 0 is IT with NRSE, CE, OBRM, LSP and BET, at tech 26. Player 1 (CA) treats player 0 as neutral. Each line is Elegy's current result in `engine/gap001_test.go`.
+
+| Sub-case | Setup | Elegy predicts | Refuted by | Test |
+|---|---|---|---|---|
+| C | The Hauler (Small Freighter, Long Hump 6, Rhino Scanner) for player 0 | 6 resources, 4/0/5 kT (BET's 80% off on every component) | another cost, which moves every S number | `TestPredictionGAP001HaulerCost` |
+| S1 | Two Haulers with 50/20/10 kT scrap at planet 21 (player 0, Orbital Fort, empty surface) | surface 56/20/18 (4C/5 of 8/0/10, plus the cargo); a scrap message; no tech gained (tech 26) | 54/20/16 or any other sum; a tech gain | `TestPredictionGAP001Scrap` |
+| S2 | The same at planet 18 (no starbase) | surface 52/20/13 (C/3 plus the cargo); a scrap message; no tech attempt | another sum | `TestPredictionGAP001Scrap` |
+| T1 | Player 0's empty Hauler in deep space, transfer to player 1 | player 1's, file number 3 (lowest unused after 0, 1, 2, 4), same place, 200 mg, no waypoints; given and received messages | refused, or another number | `TestPredictionGAP001Gifts` |
+| T2 | The same with 10 colonists | refused (colonists aboard); stays player 0's fleet 21 | given | `TestPredictionGAP001Gifts` |
+| T3 | The same with 30 kT of ironium | given with its cargo, file number 5 | given empty, or the cargo left behind or refused | `TestPredictionGAP001Gifts` |
+| G1 | Genesis Device at 99%, planet 7, 60 resources | completes: 1% is 50 of its 5,000 resources (no minerals, no miniaturization); 0x11b to every player (BINARY-ONLY) | still in the queue | `TestPredictionGAP001Genesis` (cost and arithmetic only) |
+| G2 | Genesis Device from 0%, planet 13, 37 resources | 0%, nothing spent (1% needs 50) | 1% or more, or resources spent | `TestPredictionGAP001Genesis` |
+
+Not predicted: what the rebirth does to planet 7, meaning its environment, original environment, concentrations, minerals, installations and population, and which of these are random. No spec describes it, and Elegy has no Genesis Device queue item. G's run will be the first description of it.
+
 ## Turn order implemented
 
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
@@ -108,7 +125,17 @@ at another player's fleet, friend or enemy, keeps it while its owner
 sees it; one out of sight becomes a plain position at the fleet's actual
 position (0x02a), or its planet when at one (0x029), and one whose
 target is gone a plain position at its last coordinates (0x028)
-(`fileRetarget`; W5 below). At the end of the turn, a patrol fleet
+(`fileRetarget`; W5 below). A waypoint aimed at a mineral packet or
+salvage object (`TargetPacketObject`, named by the object's owner and
+number) follows a packet's move before fleets move, and one whose object
+is gone becomes a plain position at its last coordinates with no message;
+a new object that takes the freed number is followed instead. While the
+object exists the target is kept as the files are written, seen or not
+(`waypointCheck`; ORDERS.md "Salvage and mineral packet targets",
+stars-elegy f2f9794, BINARY-ONLY; the keeping also MEASURED in RG-002).
+Not modelled: a transport task on a waypoint aimed at a packet is
+cancelled with 0x11e there; Elegy runs the task at the position as for
+any reached waypoint. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and
@@ -354,6 +381,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   draws as ORDERS.md says, but its battle-plan preference and weight are
   not modelled, because ORDERS.md defines neither. The research lane may
   pin them.
+- **W9 (ASSUMPTION).** A waypoint order aimed at a packet or salvage
+  object that does not exist is accepted with the order's coordinates,
+  and the waypoint check after the orders makes it a plain position
+  there, as a waypoint aimed at a fleet id that did not exist came back
+  (ORDERS.md "Target gone", CONFIRMED for a fleet). Wormhole and Trader
+  targets that do not exist still reject the order. One branch in
+  `WaypointOrder.apply`.
 - **Following fleets** (`follow.go`; ORDERS.md "Waypoint 0 aimed at a
   fleet", KERNEL.md "Turn order" step 1a.3, MESSAGES.md 0x137 and 0x138,
   stars-elegy d4eafd9). Only a `FollowOrder` starts a follow, and it lasts

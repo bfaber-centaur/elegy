@@ -88,8 +88,11 @@ type Waypoint struct {
 	Pos    Point
 	Warp   int
 	Target TargetKind
-	ID     int  // planet or fleet id for TargetPlanet / TargetFleet
-	Task   Task // the task the fleet takes up on arriving
+	ID     int // planet or fleet id for TargetPlanet / TargetFleet
+	// Owner is the object's owner for TargetPacketObject, whose ID is the
+	// object's number; 0 for every other target.
+	Owner int
+	Task  Task // the task the fleet takes up on arriving
 }
 
 type Fleet struct {
