@@ -114,6 +114,18 @@ type BattleStart struct {
 	// years. A year after a draw starts from a game those draws shaped,
 	// not from the record's: its battles are samples (CheckBattleRecords).
 	Downstream int
+	// InYear counts the draws Elegy made in the year itself before its
+	// battle phase (mine hits, for instance). A restart's battle that
+	// differs from its record after such draws may be decided by them
+	// (CheckBattleRecords).
+	InYear int
+}
+
+// BattleVariants gives a vector's years generated with seed variant k
+// (1 to N−1; variant 0 is the starts CheckBattleRecords is given).
+type BattleVariants struct {
+	N     int
+	Start func(name string, k int) []BattleStart
 }
 
 // pvBattleOutcome is what the comparison found for one recorded battle.
@@ -853,9 +865,18 @@ func BattleRecordVectors(t *testing.T) []string {
 // does not show parity and a difference does not show a defect. Samples
 // are compared in full but tallied on their own, as matched or missed,
 // never in the token, hit or move tallies and never as a failure; the
-// per-year restarts compare those years from the record. TestBattleRecords (battle_vectors_test.go) runs
-// it: the vector loader, package vectors, imports engine.
-func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart) map[string]int {
+// per-year restarts compare those years from the record.
+//
+// A restart's record that differs after draws made in the year before the
+// battle phase (BattleStart.InYear) is regenerated with each other seed
+// variant. If any variant's battle matches the record, the difference is
+// random-driven: the year's own draws decide it. It is logged and tallied
+// as random, matched variants / variants, and is not a failure. If no
+// variant matches, it fails as a deterministic difference. With no
+// variants (vs.N < 2) every restart difference fails. TestBattleRecords
+// (battle_vectors_test.go) runs it: the vector loader, package vectors,
+// imports engine.
+func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs BattleVariants) map[string]int {
 	records := loadBattleRecords(t)
 	type tally struct {
 		records, tokens, built, ungen, full, draws int
@@ -863,6 +884,7 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart) map[strin
 		conditioned, condMatched                   int
 		moves, movesMatched, movesUnchecked        int
 		samples, samplesMatched                    int
+		random                                     int
 	}
 	per := map[string]*tally{}
 	var names []string
@@ -901,6 +923,22 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart) map[strin
 					c.samplesMatched++
 				}
 				continue
+			}
+			if why := o.sampleMiss(); why != "" && l.InYear > 0 && vs.N > 1 {
+				hit := 0
+				for k := 1; k < vs.N; k++ {
+					if alt := vs.Start(name, k); r.year < len(alt) {
+						a := alt[r.year]
+						if a.Skip == "" && compareBattle(&a, r).sampleMiss() == "" {
+							hit++
+						}
+					}
+				}
+				if hit > 0 {
+					c.random++
+					t.Logf("%s: random (after %d draws in the year; %d of %d other variants match): %s", where, l.InYear, hit, vs.N-1, why)
+					continue
+				}
 			}
 			switch {
 			case o.built:
@@ -948,15 +986,17 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart) map[strin
 	// checked; unchecked: moves whose square scores would draw, or with
 	// too many tokens whose silent stays leave the moves left open;
 	// samples: records of a year after earlier years' draws, matched /
-	// compared (in none of the other columns)
-	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %8s  %-13s %9s  %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded", "moves", "unchecked", "samples")
+	// compared (in none of the other columns); random: restart records
+	// that differ after the year's own draws and match on another seed
+	// variant (in none of the other columns)
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %8s  %-13s %9s  %-9s %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded", "moves", "unchecked", "samples", "random")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %8d  %-13s %9d  %s", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %8d  %-13s %9d  %-9s %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
 			fmt.Sprintf("%d/%d", c.matched, c.compared), fmt.Sprintf("%d/%d", c.condMatched, c.conditioned), c.total,
 			fmt.Sprintf("%d/%d", c.movesMatched, c.moves-c.movesUnchecked), c.movesUnchecked,
-			fmt.Sprintf("%d/%d", c.samplesMatched, c.samples))
+			fmt.Sprintf("%d/%d", c.samplesMatched, c.samples), c.random)
 		all.compared += c.compared
 		all.movesMatched += c.movesMatched
 	}

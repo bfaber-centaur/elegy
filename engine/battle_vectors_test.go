@@ -19,6 +19,11 @@ import (
 // and returns each year's battle-phase game, indexed by year (index 0 is
 // unused).
 func battleStarts(t *testing.T, path string) []engine.BattleStart {
+	return battleStartsVariant(t, path, 0)
+}
+
+// battleStartsVariant is battleStarts with seed variant k.
+func battleStartsVariant(t *testing.T, path string, k int) []engine.BattleStart {
 	t.Helper()
 	v, err := vectors.ReadFile(filepath.Join("testdata", "vectors", filepath.FromSlash(path)))
 	if err != nil {
@@ -40,10 +45,10 @@ func battleStarts(t *testing.T, path string) []engine.BattleStart {
 		before := drawn.n
 		drawn.rng = rng
 		return engine.GenerateTurnAtBattles(g, orders, drawn, func(g engine.Game, costLevels [][engine.NumFields]int) {
-			out = append(out, engine.BattleStart{Game: g, CostLevels: costLevels, Fleets: s.FleetsIn(&g), Planets: s.Planets, Downstream: before})
+			out = append(out, engine.BattleStart{Game: g, CostLevels: costLevels, Fleets: s.FleetsIn(&g), Planets: s.Planets, Downstream: before, InYear: drawn.n - before})
 		})
 	}
-	vectors.Generate(v, 0, turn)
+	vectors.Generate(v, k, turn)
 	return out
 }
 
@@ -65,7 +70,7 @@ func TestBattleRecords(t *testing.T) {
 	}
 	// RG-002's records go to its ledger (battle_ledger_test.go).
 	l := &ledgerTB{TB: t, lines: map[string]string{}}
-	ungen := engine.CheckBattleRecords(l, starts)
+	ungen := engine.CheckBattleRecords(l, starts, battleVariants(t))
 	for corpus, n := range ungen {
 		if n != 0 {
 			t.Errorf("%s: %d records of a year not generated", corpus, n)
@@ -139,7 +144,12 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 		got := ""
 		for _, l := range r.logs {
 			if f := strings.Fields(l); len(f) > 0 && f[0] == "rg" {
-				got = f[len(f)-1]
+				// The last matched/compared column is samples.
+				for _, c := range f {
+					if strings.Contains(c, "/") {
+						got = c
+					}
+				}
 			}
 		}
 		return got
@@ -150,7 +160,7 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 		starts[last].Game.Fleets = nil
 		starts[last].Downstream = downstream
 		r := &recordTB{TB: t}
-		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts})
+		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts}, engine.BattleVariants{})
 		tally = samples(r)
 		for _, e := range r.errs {
 			if strings.Contains(e, marker) {
@@ -168,7 +178,7 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 		t.Fatalf("RG-001 year %d follows no draws", last)
 	}
 	r := &recordTB{TB: t}
-	engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: chain})
+	engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: chain}, engine.BattleVariants{})
 	if got := samples(r); got != "5/7" {
 		t.Errorf("unmodified chain: samples %s, want 5/7", got)
 	}
@@ -183,5 +193,83 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 	}
 	if f, m := run(0); f != missed || m != 0 {
 		t.Errorf("with no earlier draws: %d failures, %d misses, want %d and 0", f, m, missed)
+	}
+}
+
+// battleVariants generates a vector's other seed variants when
+// CheckBattleRecords asks for them, once each.
+func battleVariants(t *testing.T) engine.BattleVariants {
+	cache := map[string][]engine.BattleStart{}
+	return engine.BattleVariants{N: vectors.Seeds, Start: func(name string, k int) []engine.BattleStart {
+		key := fmt.Sprintf("%s#%d", name, k)
+		if s, ok := cache[key]; ok {
+			return s
+		}
+		s := battleStartsVariant(t, name, k)
+		cache[key] = s
+		return s
+	}}
+}
+
+// A restart's record that differs after the year's own draws is random
+// when another seed variant matches it, and fails when none does or when
+// the year drew nothing before its battles. RG-002-Y2's battle at
+// (1208,1327) is taken out of the reference variant's game, as a mine
+// hit on its fleets would; the other variants keep it.
+func TestBattleRecordRandomInYear(t *testing.T) {
+	const path = "rg/rg002-y2.json"
+	const marker = " (1208,1327) y1: "
+	base := battleStarts(t, path)
+	if base[1].InYear == 0 {
+		t.Fatalf("RG-002-Y2 draws nothing before its battles")
+	}
+	vs := battleVariants(t)
+	run := func(inYear int, vs engine.BattleVariants) (failed, random int) {
+		starts := append([]engine.BattleStart(nil), base...)
+		g := starts[1].Game
+		g.Fleets = nil
+		for _, f := range base[1].Game.Fleets {
+			if f.Pos != (engine.Point{X: 1208, Y: 1327}) {
+				g.Fleets = append(g.Fleets, f)
+			}
+		}
+		starts[1].Game, starts[1].InYear = g, inYear
+		r := &recordTB{TB: t}
+		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts}, vs)
+		for _, e := range r.errs {
+			if strings.Contains(e, marker) {
+				failed++
+			}
+		}
+		for _, l := range r.logs {
+			if strings.Contains(l, marker) && strings.Contains(l, "random") {
+				random++
+			}
+		}
+		return failed, random
+	}
+	if f, r := run(base[1].InYear, vs); f != 0 || r != 1 {
+		t.Errorf("after the year's draws: %d failures, %d random, want 0 and 1", f, r)
+	}
+	if f, r := run(0, vs); f != 1 || r != 0 {
+		t.Errorf("with no draws in the year: %d failures, %d random, want 1 and 0", f, r)
+	}
+	// only keeps variant k's game; the others lose every fleet.
+	only := func(k int) engine.BattleVariants {
+		return engine.BattleVariants{N: vs.N, Start: func(name string, j int) []engine.BattleStart {
+			s := append([]engine.BattleStart(nil), vs.Start(name, j)...)
+			if j != k {
+				s[1].Game.Fleets = nil
+			}
+			return s
+		}}
+	}
+	if f, r := run(base[1].InYear, only(-1)); f != 1 || r != 0 {
+		t.Errorf("no variant matching: %d failures, %d random, want 1 and 0", f, r)
+	}
+	for _, k := range []int{1, vs.N - 1} {
+		if f, r := run(base[1].InYear, only(k)); f != 0 || r != 1 {
+			t.Errorf("only variant %d matching: %d failures, %d random, want 0 and 1", k, f, r)
+		}
 	}
 }
