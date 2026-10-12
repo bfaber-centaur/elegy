@@ -126,7 +126,7 @@ None of the 344 lines is an RG-002 mechanic Elegy is known to lack. Each falls i
 
 Group 1 is comparator work. Until it is done, a mismatch in those 160 lines would go unseen, so their count is the honest size of the gap.
 
-**Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 109 of them match on the reference seed. The other two are Y4 planet 88's `packet_warp`, now the missing-mechanic line above, and the same field in the chained run's year 4, a sample.
+**Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. A malformed expected value fails the check rather than reading as absent, as for `starbase` (#191). That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 110 of them match on the reference seed. The other two are Y4 planet 88's `packet_warp`, now the missing-mechanic line above, and the same field in the chained run's year 4, a sample.
 
 ## Random-driven
 

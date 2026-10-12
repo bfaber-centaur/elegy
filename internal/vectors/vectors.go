@@ -1803,10 +1803,11 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 		case "packet_destination":
 			// The mass driver's target planet, -1 for none (vectors/README.md
 			// "planet_settings"). A null, where the original's file holds no
-			// value, is not compared (above): ELEGY CHOICE.
+			// value, is not compared (above): ELEGY CHOICE. Malformed
+			// expected data fails the check, never reads as absent.
 			var want int
 			if json.Unmarshal(raw, &want) != nil {
-				skipped("packet_destination " + string(raw))
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, raw))
 				continue
 			}
 			got := -1
@@ -1822,7 +1823,7 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			// which Elegy keeps as 0.
 			var want int
 			if json.Unmarshal(raw, &want) != nil {
-				skipped("packet_warp " + string(raw))
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, raw))
 				continue
 			}
 			got := p.PacketSpeed
@@ -1874,9 +1875,11 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 		}
 		switch k {
 		case "research_percent":
+			// Malformed expected data, null included, fails the check
+			// instead of reading as absent or as 0.
 			var want int
-			if json.Unmarshal(eq[k], &want) != nil {
-				skipped("research_percent " + string(eq[k]))
+			if string(eq[k]) == "null" || json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
 				continue
 			}
 			if got := g.Players[id].ResearchBudget; got != want {

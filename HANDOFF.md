@@ -20,7 +20,7 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
   - Everything in the chained run after its first year is a sample: 977 fields, 43 refused orders and 16 missed battle records.
 - #189 (lane A's fleet retargets) and #190 (economy's remote mining) cleared all 78 earlier deterministic lines. RG002-REPORT.md lists them.
 - Planet `packet_destination` and `packet_warp` and player `research_percent` are compared now (#194). A null `packet_destination` stays not compared (ELEGY CHOICE, RG002-REPORT.md).
-- **Not seen.** 160 not-compared lines are comparator gaps for quantities Elegy models. A mismatch there would go unseen:
+- **Not seen.** Of the 344 not-compared lines, 176 are battle expectations that `TestBattleRecords` compares record by record and 8 are null in the original's file. The other 160 are comparator gaps for quantities Elegy models, where a mismatch would go unseen:
   - `object`-form wormholes (72);
   - messages (68);
   - design reads (14);

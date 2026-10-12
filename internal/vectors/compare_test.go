@@ -158,7 +158,12 @@ func TestPacketSettings(t *testing.T) {
 	pvWant(t, "none wanted", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "packet_destination = 3, want -1", "")
 	pvWant(t, "warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 9}`), nil), "packet_warp = 8, want 9", "")
 	pvWant(t, "null", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null}`), nil), "", "planet field packet_destination null")
-	pvWant(t, "malformed", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": "8"}`), nil), "", `packet_warp "8"`)
+	// Malformed expected data fails the check, never reads as absent.
+	for _, k := range []string{"packet_destination", "packet_warp"} {
+		for _, raw := range []string{`"8"`, `true`, `8.5`} {
+			pvWant(t, "malformed "+k+" "+raw, l.planetEquals(nil, &p, pvEq(t, `{"`+k+`": `+raw+`}`), nil), k+": malformed expectation "+raw, "")
+		}
+	}
 	p = engine.Planet{}
 	pvWant(t, "no destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "", "")
 	pvWant(t, "unset warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 4}`), nil), "", "")
@@ -173,7 +178,9 @@ func TestResearchPercent(t *testing.T) {
 	g := &engine.Game{Players: []engine.Player{{ResearchBudget: 15}}}
 	pvWant(t, "match", l.playerEquals(g, 0, pvEq(t, `{"research_percent": 15}`), nil), "", "")
 	pvWant(t, "mismatch", l.playerEquals(g, 0, pvEq(t, `{"research_percent": 20}`), nil), "research_percent = 15, want 20", "")
-	pvWant(t, "malformed", l.playerEquals(g, 0, pvEq(t, `{"research_percent": "15"}`), nil), "", `research_percent "15"`)
+	for _, raw := range []string{`"15"`, `null`, `true`} {
+		pvWant(t, "malformed "+raw, l.playerEquals(g, 0, pvEq(t, `{"research_percent": `+raw+`}`), nil), "research_percent: malformed expectation "+raw, "")
+	}
 }
 
 func TestFleetMismatchBesideSkip(t *testing.T) {

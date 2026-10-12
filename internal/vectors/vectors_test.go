@@ -620,7 +620,7 @@ func variantRejections(v *Vector) [][]string {
 
 // TestVariantRejections checks variantRejections on a run whose refusal
 // hangs on the player shuffle: RG-002 Y1 refuses player 2's order 10 on
-// variants 1 and 6 only (the RG-002 ledger's unresolved randomness line).
+// variants 1 and 6 only (the RG-002 ledger's incorrect mechanic [lane A] line).
 func TestVariantRejections(t *testing.T) {
 	v, err := ReadFile("../../engine/testdata/vectors/rg/rg002-y1.json")
 	if err != nil {

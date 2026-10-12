@@ -49,13 +49,13 @@ Bobby's five requirements, in order:
 Samples total 1036, by kind: 977 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1020), and 16 battle records, checked by `TestBattleRecords`. All are lines of the same ledger file.
 
 The 344 not-compared lines are:
-- 160 comparator gaps for quantities Elegy models (`object`-form wormholes, messages, design reads, player counts);
+- 160 comparator gaps for quantities Elegy models (72 `object`-form wormholes, 68 messages, 14 design reads, 6 player counts);
 - 176 battle expectations that `TestBattleRecords` compares record by record instead;
 - 8 null in the original's file, among them 2 planet `packet_destination` null (ELEGY CHOICE, below).
 
 The 160 are where a mismatch could still go unseen (RG002-REPORT.md "Not compared, by reason").
 
-**Packet settings and research percent are now compared.** This branch folds in economy's comparator (internal/vectors `planetEquals` and `playerEquals`, tests `TestPacketSettings` and `TestResearchPercent`). It removed 112 not-compared lines (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). Of those, 109 match on the reference seed, 1 is the missing mechanic above and 1 is its chained-run sample.
+**Packet settings and research percent are now compared.** This branch folds in economy's comparator (internal/vectors `planetEquals` and `playerEquals`, tests `TestPacketSettings` and `TestResearchPercent`). A malformed expected value of any of the three fails the check, as a malformed `starbase` does (#191); it never reads as absent. It removed 112 not-compared lines (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). Of those, 110 match on the reference seed, 1 is the missing mechanic above and 1 is its chained-run sample.
 - `packet_destination` is the target planet id, or -1 for none (vectors/README.md "planet_settings").
 - `packet_warp` below 5 means unset on both sides (vectors/README.md "initial_state"; OBJECTS.md "Launch"), so 0 and 4 count as equal and 5 does not.
 - **ELEGY CHOICE: a null `packet_destination` stays not compared.** The vectors write null where the original's file holds no destination record, which is not the same claim as "no destination" (-1). Comparing null as -1 would read an absent record as a value. So the 2 null lines stay in the "null in the original's file" group, as `defenses` null does. Reversible if stars-elegy documents null as "none".
