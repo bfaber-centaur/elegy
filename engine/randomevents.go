@@ -59,7 +59,9 @@ func cutQueue(p *Planet) {
 }
 
 // shiftEnv moves an axis's current and original value by s, each clamped
-// to 1..99.
+// to 1..99 on its own (for a comet CONFIRMED, KX-004 S11, stars-elegy
+// 4d3a3d9: a clamp on one value makes the two drift apart; for climate
+// change BINARY-ONLY).
 func shiftEnv(p *Planet, axis, s int) {
 	p.Env[axis] = min(99, max(1, p.Env[axis]+s))
 	p.OrigEnv[axis] = min(99, max(1, p.OrigEnv[axis]+s))
@@ -75,7 +77,9 @@ func cometAxes(a [3]int, moved int, legacy bool) []int {
 }
 
 // cometStrike is KERNEL.md "Comet strike". An Alternate Reality owner gets
-// the plain message and loses no population (BINARY-ONLY).
+// the plain message and loses no population (BINARY-ONLY). An unowned
+// planet keeps the comet's surface minerals too (MEASURED, KX-004 S11,
+// three strikes).
 func (g *Game) cometStrike(rng Rand, order []int) []Event {
 	if rng.Intn(20) != 0 {
 		return nil

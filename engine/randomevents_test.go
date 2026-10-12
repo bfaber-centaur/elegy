@@ -126,3 +126,138 @@ func TestPredictionCometAxesSwitch(t *testing.T) {
 		t.Errorf("fixed %v", got)
 	}
 }
+
+// cometDraws is the draw sequence of a comet strike (KERNEL.md "Comet
+// strike") on a game's only planet that gives a comet of size e, striking
+// the minerals in order (its first min(e, 2) + 1 entries are struck),
+// adding gain kT of each mineral to the surface, raising each struck
+// mineral's concentration by dc, and moving the axes in order by moves.
+func cometDraws(t *testing.T, e int, order [3]int, gain, dc [3]int, moves []int) []int {
+	t.Helper()
+	huge := e == 3
+	d := []int{0, 0, e, 0, 0, 0}
+	moved := min(e, 2) + 1
+	struck := [3]bool{}
+	for k := range moved {
+		struck[order[k]] = true
+	}
+	for m := range 3 {
+		if struck[m] {
+			d = append(d, 0) // the base, before the struck 3000 + rand(17000)
+		} else {
+			d = append(d, 16*gain[m]-50)
+		}
+	}
+	// The order's two swaps.
+	bo := [3]int{0, 1, 2}
+	d = append(d, order[0])
+	bo[0], bo[order[0]] = bo[order[0]], bo[0]
+	j := 1
+	if bo[2] == order[1] {
+		j = 2
+	}
+	d = append(d, j-1)
+	for k := range moved {
+		m := order[k]
+		r := dc[m] - 50
+		if huge {
+			r -= 15
+		}
+		r15 := 0
+		if huge {
+			r15 = min(14, max(0, r-49))
+			r -= r15
+		}
+		d = append(d, 16*gain[m]-3050, min(49, r))
+		if huge {
+			d = append(d, r15)
+		}
+	}
+	for _, s := range moves {
+		a := max(s, -s)
+		if huge {
+			d = append(d, min(2, a-6), a-6-min(2, a-6))
+		} else {
+			d = append(d, a-3)
+		}
+		if s < 0 {
+			d = append(d, 1)
+		} else {
+			d = append(d, 0)
+		}
+	}
+	for i, v := range d {
+		if v < 0 {
+			t.Fatalf("draw %d is %d: the outcome is out of the comet's range", i, v)
+		}
+	}
+	return d
+}
+
+// TestCometStrikeS11 replays the seven comet strikes of KX-004 S11
+// (stars-elegy 4d3a3d9 PARITY.md "Comets on terraformed planets"),
+// conditioned on the draws, not as parity: each strike is given the size,
+// struck minerals and moves the original's result shows, and Elegy's
+// environment, original environment, concentrations and surface gain are
+// compared with the original's. A comet moves the current and original
+// value of each axis it hits by the same amount, each clamped to 1..99 on
+// its own (CONFIRMED, S11); an unowned struck planet keeps the comet's
+// minerals (MEASURED, S11, three strikes); a planet with no separate
+// original keeps none.
+func TestCometStrikeS11(t *testing.T) {
+	for _, c := range []struct {
+		name               string
+		owner, e           int
+		env, orig          [3]int
+		conc               [3]int
+		order              [3]int
+		gain, dc           [3]int
+		moves              []int
+		wantEnv, wantOrig  [3]int
+		wantConc           [3]int
+		checkConcentration bool
+	}{
+		{"planet 11, medium", 0, 1, [3]int{97, 48, 50}, [3]int{60, 40, 30}, [3]int{79, 49, 13}, [3]int{1, 2, 0},
+			[3]int{10, 880, 607}, [3]int{0, 85, 86}, []int{3, 4}, [3]int{99, 52, 50}, [3]int{63, 44, 30}, [3]int{79, 134, 99}, true},
+		{"planet 2, huge", 0, 3, [3]int{4, 93, 50}, [3]int{50, 50, 95}, [3]int{112, 84, 56}, [3]int{0, 1, 2},
+			[3]int{365, 814, 881}, [3]int{200, 84, 76}, []int{-7, 8, 10}, [3]int{1, 99, 60}, [3]int{43, 58, 99}, [3]int{200, 168, 132}, true},
+		{"planet 15, small", 1, 0, [3]int{50, 50, 50}, [3]int{97, 20, 20}, [3]int{89, 53, 71}, [3]int{0, 1, 2},
+			[3]int{895, 18, 15}, [3]int{86, 0, 0}, []int{4}, [3]int{54, 50, 50}, [3]int{99, 20, 20}, [3]int{175, 53, 71}, true},
+		{"planet 22, large", NoOwner, 2, [3]int{22, 3, 84}, [3]int{25, 10, 97}, [3]int{70, 52, 88}, [3]int{0, 1, 2},
+			[3]int{1207, 452, 1139}, [3]int{57, 71, 51}, []int{-3, -4, -3}, [3]int{19, 1, 81}, [3]int{22, 6, 94}, [3]int{127, 123, 139}, true},
+		{"planet 22, medium", NoOwner, 1, [3]int{22, 3, 84}, [3]int{25, 10, 97}, [3]int{70, 52, 88}, [3]int{0, 2, 1},
+			[3]int{1038, 11, 512}, [3]int{95, 0, 62}, []int{4, -4}, [3]int{26, 1, 84}, [3]int{29, 6, 97}, [3]int{165, 52, 150}, true},
+		// Planet 17 is a homeworld whose concentrations also move by
+		// mining; only its environment and surface gain are compared.
+		{"planet 17, large", 0, 2, [3]int{50, 50, 50}, [3]int{50, 50, 50}, [3]int{30, 30, 88}, [3]int{0, 1, 2},
+			[3]int{257, 379, 1107}, [3]int{50, 50, 50}, []int{5, -3, 4}, [3]int{55, 47, 54}, [3]int{55, 47, 54}, [3]int{}, false},
+		{"planet 19, small", NoOwner, 0, [3]int{52, 78, 29}, [3]int{52, 78, 29}, [3]int{23, 38, 74}, [3]int{2, 0, 1},
+			[3]int{17, 8, 395}, [3]int{0, 0, 82}, []int{-4}, [3]int{48, 78, 29}, [3]int{48, 78, 29}, [3]int{23, 38, 156}, true},
+	} {
+		pop := 0
+		if c.owner != NoOwner {
+			pop = 9101
+		}
+		g := eventGame(30, c.owner, pop)
+		p := &g.Planets[0]
+		p.Env, p.OrigEnv = c.env, c.orig
+		for m := range NumMinerals {
+			p.Deposits[m].Concentration = c.conc[m]
+		}
+		g.cometStrike(&seqRand{draws: cometDraws(t, c.e, c.order, c.gain, c.dc, c.moves)}, []int{0})
+		got := g.Planets[0]
+		if got.Env != c.wantEnv || got.OrigEnv != c.wantOrig {
+			t.Errorf("%s: environment %v, original %v; want %v, %v", c.name, got.Env, got.OrigEnv, c.wantEnv, c.wantOrig)
+		}
+		if got.Surface != Minerals(c.gain) {
+			t.Errorf("%s: surface %v, want %v", c.name, got.Surface, c.gain)
+		}
+		var conc [3]int
+		for m := range NumMinerals {
+			conc[m] = got.Deposits[m].Concentration
+		}
+		if c.checkConcentration && conc != c.wantConc {
+			t.Errorf("%s: concentrations %v, want %v", c.name, conc, c.wantConc)
+		}
+	}
+}
