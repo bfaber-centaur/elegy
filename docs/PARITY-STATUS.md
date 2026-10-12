@@ -111,7 +111,7 @@ Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0
 | not compared | 276 | 0 | 0 |
 | sample | 992 | 43 | 16 |
 
-The other classes stay 0. The 22 missing-mechanic field lines are the 21 message lines and Y4 planet 88's `packet_warp`. The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 176 results on the 22 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,792 samples.
+The other classes stay 0. The 22 missing-mechanic field lines are the 21 message lines and Y4 planet 88's `packet_warp`. Lane D's battle summaries have since cleared 9 of them ("Battle summaries" below). The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 176 results on the 22 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,792 samples.
 
 **Other corpora.** Comparing messages takes 38 cases out of the parity baseline (`engine/testdata/vectors/baseline.txt`). Every one is a known gap above, except one new finding:
 - 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
@@ -119,3 +119,9 @@ The other classes stay 0. The 22 missing-mechanic field lines are the 21 message
 - RG-002: Y1, Y6, and the chained 2463 and 2468.
 - **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sends no `EventFleetArrived` after the refusal.
 
+### Battle summaries (lane D)
+
+Elegy now sends each battle player its summary (`EventBattleSummary`, engine/combat_summary.go), and `pvMessages` maps it to MESSAGES.md's 0x07e, 0x091–0x0a8 and 0x113–0x116. All of those ids are compared now.
+- **RG-002:** lane D's 9 missing-mechanic lines match on the reference seed (0x095 ×4, 0x116 ×3, 0x09f, 0x0a1), and so do the 5 summary samples of the chained run's years 2–6. No new line appears. The ledger is missing mechanic 13 (economy 10, lane A 2, Y4 planet 88's `packet_warp`), incorrect mechanic 2 (orders), random-driven 30, not compared 276, and samples 987 fields / 43 orders / 16 battle records.
+- **Other corpora:** every summary expectation outside RG-002 matches: CB-048 and CB-048-ctl (0x098, 0x099), CB-049 (0x09b, 0x09c) and SC-036 (0x0a4, 0x0a7). The parity baseline is unchanged. Every expectation of these ids in the corpora is "present"; none checks that a wrong id is absent, so `TestBattleSummaryRules` pins the choice among the ids.
+- **What a "stack" is.** MESSAGES.md's one-stack texts (0x096–0x09a) say "exactly 2 stacks". CB-039 (140 one-ship fleets a side) sent 0x09a, and CB-048 (80 ships in one fleet against 30 one-ship fleets) sent 0x098 and 0x099. So a stack there is one player's ships of one design, whatever fleets hold them (MEASURED). Elegy counts it that way; read as fleet stacks, CB-048 fails.

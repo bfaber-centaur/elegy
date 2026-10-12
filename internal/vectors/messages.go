@@ -16,7 +16,7 @@ import (
 // An entry that starts with "none" is an id Elegy sends no event for: a
 // present expectation of it is a mismatch, a missing mechanic.
 func pvMessageIDs() map[int]string {
-	return map[int]string{
+	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
 		0x026: "none: no event for a population loss to overcrowding",
 		0x02e: "none: no event for colonists beamed down by an unload task",
@@ -34,12 +34,29 @@ func pvMessageIDs() map[int]string {
 		0x086: "EventCometStrike, huge",
 		0x08f: "EventBombed then EventPlanetEmptied, to the bomber",
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
-		0x095: "none: no per-player battle summary",
-		0x09f: "none: no per-player battle summary",
-		0x0a1: "none: no per-player battle summary",
-		0x116: "none: no per-player battle summary",
 	}
+	for k, id := range pvSummaryIDs {
+		if k != int(engine.SummaryNone) {
+			ids[id] = "EventBattleSummary " + fmt.Sprint(engine.BattleSummary(k))
+		}
+	}
+	return ids
 }
+
+// pvSummaryIDs is the MESSAGES.md id of each engine.BattleSummary, by its
+// value.
+var pvSummaryIDs = func() []int {
+	ids := []int{0}
+	for id := 0x091; id <= 0x0a8; id++ {
+		if id == 0x0a4 {
+			// SummaryMulti*: 0x0a4–0x0a8, then SummaryMultiMixed.
+			ids = append(ids, 0x0a4, 0x0a5, 0x0a6, 0x0a7, 0x0a8, 0x07e)
+			break
+		}
+		ids = append(ids, id)
+	}
+	return append(ids, 0x113, 0x114, 0x115, 0x116)
+}()
 
 // pvMessages is the set of (player, message id) that a year's events send,
 // for the ids pvMessageIDs maps. g is the game at the end of the year.
@@ -92,6 +109,10 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 				send(ev.Player, more)
 			case n == 1:
 				single[k] = ev.Player
+			}
+		case engine.EventBattleSummary:
+			if ev.Count > 0 && ev.Count < len(pvSummaryIDs) {
+				send(ev.Player, pvSummaryIDs[ev.Count])
 			}
 		case engine.EventFleetArrived:
 			send(ev.Player, 0x04e)
