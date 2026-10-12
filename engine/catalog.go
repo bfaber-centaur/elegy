@@ -606,6 +606,11 @@ func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design,
 // leaves it out of mass, fuel and cargo; battle setup leaves it out of
 // the token but its armor (battleDesign), and dropMisslottedParts takes
 // it out of the stored design at the end of the year.
+//
+// Known difference, that year only: the other readers of Slots (scanning
+// and cloaking, score power, and the rest) still count the part, where
+// COMBAT.md says it adds nothing to any use of the design (BINARY-ONLY).
+// No vector exercises it.
 func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {
@@ -641,8 +646,9 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 			return Design{}, fmt.Errorf("design %q: slot %d holds 1..%d, not %d", name, f.Slot, hs.Max, f.Count)
 		}
 		if !kindIn(p.Kind, hs.Kinds) {
-			// Kept for this year's cost only: mass, fuel and cargo leave
-			// it out (COMBAT.md "Parts the game drops from a design").
+			// Kept in Slots for this year's cost; mass, fuel and cargo
+			// leave it out (COMBAT.md "Parts the game drops from a
+			// design"; the other Slots readers: see above).
 			d.Slots = append(d.Slots, Slot{Part: p, Count: f.Count})
 			d.SlotPos = append(d.SlotPos, f.Slot)
 			continue
