@@ -233,7 +233,9 @@ func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
 // "Design delete effect", MEASURED CO-07/CO-07b/CO-07c): ships of the
 // design are removed, a fleet left without ships is removed, and a
 // starbase of the design is removed from its planet, which keeps its
-// population (KERNEL.md "Maximum population", BINARY-ONLY). The slot is
+// population (KERNEL.md "Maximum population", BINARY-ONLY), and the
+// planet's queue is stripped as a battle loss strips it (loseStarbase;
+// MEASURED CO-07b for the outcome). The slot is
 // cleared in place; later slots keep their numbers. When the removed
 // ships shared a fleet with survivors, they take their share of its fuel
 // and cargo as a ship move does: floor(amount × their capacity ÷ the
@@ -284,7 +286,10 @@ func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
 	for k := range g.Planets {
 		p := &g.Planets[k]
 		if p.Owner == player && p.HasStarbase && p.StarbaseDesign == d {
-			p.HasStarbase, p.StarbaseHull, p.StarbaseDock, p.StarbaseDamage = false, 0, false, 0
+			g.loseStarbase(k)
+			if p.HasQueue && len(p.Queue) == 0 {
+				p.HasQueue = false // ASSUMPTION P4
+			}
 		}
 	}
 	empty := map[int]bool{}
