@@ -97,8 +97,9 @@ State: both ways run, for 6 years, not 10. The restarts pass on the
 reference seed in 3 of 6 years, and every restart is now a random case
 (it passes on some seeds); the chained run passes its first year only
 (details below). RG-002, a late-game start, is in with every order loaded
-and a committed discrepancy ledger checked exactly in CI; see
-[RG002-REPORT.md](RG002-REPORT.md).
+and a committed discrepancy ledger checked exactly in CI. On main e1798ac it
+has no deterministic discrepancy left and 30 random-driven field lines; see
+[PARITY-STATUS.md](PARITY-STATUS.md) and [RG002-REPORT.md](RG002-REPORT.md).
 
 ## Critical path
 

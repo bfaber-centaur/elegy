@@ -16,7 +16,7 @@ Every order is accounted for. Lane F's coverage check (`/mnt/project-files/rg002
 
 Two tests check the ledger exactly: `internal/vectors` `TestRG002Ledger` for fields and orders, and `engine` `TestBattleRecords` for battle records. Either one fails on a line the run produces that the ledger lacks, and on a ledger line the run no longer produces. So a fix fails until its lines leave the ledger, and nothing is skipped.
 
-Run on: elegy main `fcf16e0` (with #189 and #190) plus this change. The final run on the integrated main SHA is still to come and will replace these numbers.
+Run on: elegy main `e1798ac`, the merge of #191, with the full test set, the ledger and the 8-seed matrix. That run is in [PARITY-STATUS.md](PARITY-STATUS.md) "RG-002".
 
 ## Classes
 
@@ -53,7 +53,7 @@ The reference run of RG-002 has no deterministic discrepancy left. Every field, 
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
-- **Restarts:** Elegy refuses none of the orders, and all 44 strict battle records match.
+- **Restarts:** Elegy refuses none of the orders, and none of the 44 battle records fails.
 - **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
 
 ## Effect of #189 and #190

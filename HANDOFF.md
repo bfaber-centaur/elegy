@@ -1,44 +1,36 @@
 # Handoff
 
-> Historical: this is the handoff for elegy #8 (takeover), kept as written. For the current state see [README.md](README.md), [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) and the `docs/*-STATUS.md` files.
-
 ## Current question
 
-Implement TAKEOVER.md (bombing, invasion, colonization, capture) on top of
-the component table.
+Does Elegy reproduce a representative late-game run with every recorded order (RG-002), and what is left between it and the original?
 
 ## State
 
-- Kernel, movement, battles, scanning and the component table are merged
-  (elegy #1–#7).
-- This branch (elegy #8) adds `engine/takeover.go`, following stars-elegy
-  TAKEOVER.md with the answers in stars-elegy #34 (order inside a phase,
-  unload amounts, capture tech) and the corrections in #37 (deep-space
-  unloads; colonize is tried once).
-  `docs/TAKEOVER-STATUS.md` maps rules, tests and assumptions.
-- Fleets now carry a waypoint-0 task (`Fleet.Task`, `Waypoint.Task`):
-  transport unload actions and colonize.
-- `go vet ./...` and `go test ./...` are green. Every TK vector that
-  Elegy's state can express is a `TestConfirmed*` test.
+- elegy main `e1798ac` carries the seven RG-002 runs: the chained 2463→2468 and each year's restart. Every recorded order is loaded, and no year is left out.
+- The discrepancy ledger (`engine/testdata/vectors/rg/rg002-ledger.txt`) is checked exactly by `TestRG002Ledger` and `TestBattleRecords`. A PR that changes RG-002 output rewrites it with `RG002_LEDGER=write` (both tests) and classifies any UNCLASSIFIED line.
+- The result is in [docs/PARITY-STATUS.md](docs/PARITY-STATUS.md) "RG-002", and the line-by-line breakdown is in [docs/RG002-REPORT.md](docs/RG002-REPORT.md).
 
 ## What we know
 
-- One Elegy assumption remains (TAKEOVER-STATUS.md T1): away from a
-  planet, cargo stays aboard where another fleet or salvage shares the
-  position, since Elegy's task does not record the waypoint's target.
-- Combat keeps one placeholder: A6, the plan-0 X on a turn's first
-  location (COMBAT-STATUS.md).
+- **MEASURED on `e1798ac`.**
+  - There is no deterministic discrepancy left: missing mechanic, incorrect mechanic, state-import error, unsupported order and unresolved randomness are all 0.
+  - The restarts refuse no order, and no strict battle record fails.
+  - 30 field lines are random-driven: each matches on some seed variant, not on the reference one.
+  - Everything in the chained run after its first year is a sample: 976 fields, 43 refused orders and 16 missed battle records.
+- #189 (lane A's fleet retargets) and #190 (economy's remote mining) cleared all 78 earlier deterministic lines. RG002-REPORT.md lists them.
+- **Not seen.** 272 not-compared lines are comparator gaps for quantities Elegy models. A mismatch there would go unseen:
+  - packet destination and warp (110);
+  - `object`-form wormholes (72);
+  - messages (68);
+  - design reads (14);
+  - player counts and research percent (8).
 
 ## What still matters
 
-- Load actions, merges, transfers, scrap and remote mining are not
-  modelled; TAKEOVER.md and #34 specify them.
-- An Alternate Reality colony gets no starbase yet (designs have no owner),
-  so the next year is refused.
-- KERNEL.md's BINARY-ONLY movement rules for IFE, Cheap Engines and others
-  are still not applied (KERNEL-STATUS.md).
+- Those comparator gaps. Until they are closed, "no deterministic discrepancy" covers only what is compared.
+- Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby). Until then the restarts' random-driven lines and the chained years stay unresolved.
+- RG-002 has 6 years. Milestone 2 asks for 10.
 
 ## Best next move
 
-Universe objects (stars-elegy OBJECTS.md), then turn orders (ORDERS.md),
-which would also give designs an owner.
+Close the largest comparator gap: planet `packet_destination` and `packet_warp`. Elegy models `PacketDest` and `PacketSpeed`, so this is harness work in internal/vectors. Then rewrite the ledger and see what it exposes. Messages are next.
