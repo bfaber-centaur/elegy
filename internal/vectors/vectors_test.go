@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -599,5 +600,77 @@ func TestSalvageFresh(t *testing.T) {
 	}
 	if !strings.Contains(l.global, "salvage 1/0 without fresh") {
 		t.Errorf("salvage without fresh: global %q, want the vector refused", l.global)
+	}
+}
+
+func TestVictoryConditions(t *testing.T) {
+	load := func(path string, edit func(*Vector)) (*pvLoaded, error) {
+		t.Helper()
+		v, err := ReadFile("../../engine/testdata/vectors/" + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if edit != nil {
+			edit(v)
+		}
+		return loadVector(v)
+	}
+	// KX-003-r1: planets 20%, tech level 9 in 3 fields and lead 20% on;
+	// score 1000, resources 10, capital ships 10 and highest after 30
+	// years off; 1 needed, 30 years minimum.
+	l, err := load("kx003/r1.json", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := engine.Victory{TechLevel: 1, TechFields: 1, Needed: 1,
+		Enabled: [engine.NumVictory]bool{engine.VictoryPlanets: true, engine.VictoryTech: true, engine.VictoryLead: true}}
+	if l.g.Victory != want || l.g.PublicScores {
+		t.Errorf("KX-003-r1: victory %+v public %v, want %+v false", l.g.Victory, l.g.PublicScores, want)
+	}
+	// KX-004-S1: the new-game defaults, with public scores.
+	if l, err = load("kx004/s1.json", nil); err != nil {
+		t.Fatal(err)
+	}
+	want = engine.Victory{Planets: 8, TechLevel: 14, TechFields: 2, Score: 10, Lead: 8, Resources: 9,
+		Capital: 9, Highest: 7, Needed: 1,
+		Enabled: [engine.NumVictory]bool{engine.VictoryPlanets: true, engine.VictoryTech: true, engine.VictoryLead: true}}
+	if l.g.Victory != want || !l.g.PublicScores {
+		t.Errorf("KX-004-S1: victory %+v public %v, want %+v true", l.g.Victory, l.g.PublicScores, want)
+	}
+	if l, err = load("kx004/s1.json", func(v *Vector) { v.InitialState.Game.Victory = nil }); err != nil {
+		t.Fatal(err)
+	}
+	if l.g.Victory != (engine.Victory{}) {
+		t.Errorf("no victory conditions: %+v, want none", l.g.Victory)
+	}
+	for _, c := range []struct {
+		name  string
+		value int
+		drop  bool // drop enabled
+		want  string
+	}{
+		{"planets_owned_percent", 62, false, "victory condition planets_owned_percent"},
+		{"planets_owned_percent", 15, false, "victory condition planets_owned_percent"},
+		{"minimum_years", 25, false, "victory condition minimum_years"},
+		{"score", 11000, true, "victory condition score without enabled"},
+		{"tech_fields", -1, false, "victory condition tech_fields"},
+	} {
+		_, err := load("kx004/s1.json", func(v *Vector) {
+			m := maps.Clone(v.InitialState.Game.Victory)
+			x := m[c.name]
+			x.Value = c.value
+			if c.drop {
+				x.Enabled = nil
+			}
+			if c.value < 0 {
+				delete(m, c.name)
+			} else {
+				m[c.name] = x
+			}
+			v.InitialState.Game.Victory = m
+		})
+		if err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s %d: %v, want %q", c.name, c.value, err, c.want)
+		}
 	}
 }

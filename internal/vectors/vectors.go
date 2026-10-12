@@ -57,6 +57,50 @@ type pvGame struct {
 	Size         string `json:"size"`
 	RandomEvents bool   `json:"random_events"`
 	SlowerTech   bool   `json:"slower_tech"`
+	PublicScores bool   `json:"public_scores"`
+	// Victory is the game record's victory conditions in game units, with
+	// enabled for the seven that can be switched; absent when the
+	// vector's builder did not read them.
+	Victory map[string]struct {
+		Value   int   `json:"value"`
+		Enabled *bool `json:"enabled"`
+	} `json:"victory_conditions"`
+}
+
+// victory converts the vector's victory conditions to the new-game
+// dialog's encoding (engine.Victory; KERNEL.md "Victory conditions").
+func (pg pvGame) victory() (engine.Victory, error) {
+	var v engine.Victory
+	for _, c := range []struct {
+		name     string
+		to       *int
+		div, off int // value = (v + off) · div
+		cond     int // the condition it switches, or -1
+	}{
+		{"planets_owned_percent", &v.Planets, 5, 4, engine.VictoryPlanets},
+		{"tech_level", &v.TechLevel, 1, 8, engine.VictoryTech},
+		{"tech_fields", &v.TechFields, 1, 2, -1},
+		{"score", &v.Score, 1000, 1, engine.VictoryScore},
+		{"lead_over_second_percent", &v.Lead, 10, 2, engine.VictoryLead},
+		{"resources_thousands", &v.Resources, 10, 1, engine.VictoryResources},
+		{"capital_ships", &v.Capital, 10, 1, engine.VictoryCapital},
+		{"highest_score_after_years", &v.Highest, 10, 3, engine.VictoryHighest},
+		{"conditions_needed", &v.Needed, 1, 0, -1},
+		{"minimum_years", &v.MinYears, 10, 3, -1},
+	} {
+		x, ok := pg.Victory[c.name]
+		if !ok || x.Value%c.div != 0 || x.Value/c.div < c.off {
+			return v, fmt.Errorf("victory condition %s %v", c.name, x)
+		}
+		*c.to = x.Value/c.div - c.off
+		if c.cond >= 0 {
+			if x.Enabled == nil {
+				return v, fmt.Errorf("victory condition %s without enabled", c.name)
+			}
+			v.Enabled[c.cond] = *x.Enabled
+		}
+	}
+	return v, nil
 }
 
 type pvPlayer struct {
@@ -483,6 +527,12 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 	g.Year = s.Year
 	g.RandomEvents = s.Game.RandomEvents
 	g.SlowerTech = s.Game.SlowerTech
+	g.PublicScores = s.Game.PublicScores
+	if s.Game.Victory != nil {
+		if g.Victory, err = s.Game.victory(); err != nil {
+			return nil, err
+		}
+	}
 	g.Size = map[string]int{"tiny": 0, "small": 1, "medium": 2, "large": 3, "huge": 4}[s.Game.Size]
 	g.PlanetScanners = cat.PlanetScanners()
 	g.Defenses = cat.Defenses()
