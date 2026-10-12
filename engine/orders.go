@@ -590,6 +590,35 @@ const (
 //
 // ASSUMPTION P3: a design item naming an empty slot, or a slot outside
 // the player's slots, refuses the queue order.
+// DefaultQueueOrder replaces the player's default queue settings, which a
+// new colony or a captured planet takes (stars-elegy ORDERS.md "The
+// player's default queue": the order file's record is copied over the
+// stored setting whole, BINARY-ONLY). It holds planetary items only, at
+// most maxDefaultQueueItems.
+type DefaultQueueOrder struct {
+	Queue        []QueueItem
+	LeftoverOnly bool
+}
+
+// maxDefaultQueueItems is the default queue's limit (ORDERS.md "The
+// player's default queue").
+const maxDefaultQueueItems = 12
+
+func (o DefaultQueueOrder) apply(g *Game, player int, _ *Applied) error {
+	if len(o.Queue) > maxDefaultQueueItems {
+		return fmt.Errorf("default queue: %d items: %w", len(o.Queue), ErrOutOfRange)
+	}
+	for _, it := range o.Queue {
+		if it.Kind < ItemMine || it.Kind > ItemAutoMaxTerraform || it.Kind.design() || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+			return fmt.Errorf("default queue item %+v: %w", it, ErrOutOfRange)
+		}
+	}
+	pl := &g.Players[player]
+	pl.DefaultQueue = append([]QueueItem(nil), o.Queue...)
+	pl.DefaultLeftoverOnly = o.LeftoverOnly
+	return nil
+}
+
 type QueueOrder struct {
 	Planet int
 	Queue  []QueueItem
