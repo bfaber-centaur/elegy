@@ -133,9 +133,14 @@ a new object that takes the freed number is followed instead. While the
 object exists the target is kept as the files are written, seen or not
 (`waypointCheck`; ORDERS.md "Salvage and mineral packet targets",
 stars-elegy f2f9794, BINARY-ONLY; the keeping also MEASURED in RG-002).
-Not modelled: a transport task on a waypoint aimed at a packet is
-cancelled with 0x11e there; Elegy runs the task at the position as for
-any reached waypoint. At the end of the turn, a patrol fleet
+A fleet that reaches a waypoint aimed at a packet with a transport task
+has the task cancelled (`EventTransportNoHold`, 0x11e;
+`cancelPacketTransport`, BINARY-ONLY); aimed at salvage the task runs.
+The original cancels it in the load pass after movement, the first to
+read it, so Elegy cancels at the arrival. Not modelled: the same cancel
+before movement for a waypoint 0 still aimed at a packet (Elegy keeps no
+waypoint-0 target), and 0x11e for minefield, wormhole and Trader
+targets. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and

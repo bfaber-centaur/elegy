@@ -907,6 +907,7 @@ func (g *Game) settleWaypoints(order []int) []Event {
 		if len(f.Waypoints) > 0 && g.destination(f.Waypoints[0]) == f.Pos {
 			reached := f.Waypoints[0]
 			events = append(events, g.arrive(f)...)
+			events = append(events, g.cancelPacketTransport(f, reached)...)
 			if reached.Target == TargetWormhole && g.Objects != nil {
 				events = append(events, g.transit(i, reached.ID)...)
 			}
