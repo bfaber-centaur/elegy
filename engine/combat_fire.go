@@ -379,6 +379,12 @@ func (b *battle) killEvent(e *token, kills int) {
 	// the number of ships killed (COMBAT.md "Mystery Trader chances",
 	// CONFIRMED CB-048).
 	b.traderChance.addParts(g, d, 1)
+	// Only ships become salvage (COMBAT.md "Salvage": "the destroyed
+	// ships' design mineral cost"): a destroyed starbase adds nothing to
+	// its planet's surface (CONFIRMED, CB-047; CB-041 in every stream).
+	if e.starbase {
+		return
+	}
 	var s Minerals
 	for m := range NumMinerals {
 		s[m] = e.minerals[m] * kills / 3
