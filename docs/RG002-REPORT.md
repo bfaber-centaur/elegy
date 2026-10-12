@@ -49,6 +49,8 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | not compared | 456 | 0 | 0 |
 | sample | 976 | 43 | 16 |
 
+Samples total 1035: 976 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1019), and 16 battle records, checked by `TestBattleRecords`.
+
 The reference run of RG-002 has no deterministic discrepancy left. Every field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.

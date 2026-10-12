@@ -29,6 +29,8 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 
 - Those comparator gaps. Until they are closed, "no deterministic discrepancy" covers only what is compared.
 - Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby). Until then the restarts' random-driven lines and the chained years stay unresolved.
+- A variant-only order refusal. In RG-002 Y1, variants 1 and 6 refuse player 2's waypoint-0 change aimed at a fleet that player 6's `move_ships` empties earlier in the replay. ORDERS.md covers the merged-away target only for index 1 or later, so the original's behavior for waypoint 0 is UNRESOLVED. Owner: lane A. The ledger checks variant 0 only (PARITY-STATUS.md, point 2).
+- stars-elegy #169 (ET-2): a transport loading from another player's packet is UNRESOLVED; the own-packet case is MEASURED. Owner: lane A.
 - RG-002 has 6 years. Milestone 2 asks for 10.
 
 ## Best next move

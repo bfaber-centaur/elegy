@@ -14,8 +14,11 @@ Bobby's five requirements, in order:
    - Two host-file fields are not in the vectors. Both are constant across RG-002, and their meaning is UNRESOLVED: the lay-mines task's second word, and the high nibble of the waypoint target type. The ledger header lists them.
 2. **No silent rejections: MEASURED, none in the restarts.**
    - Every order Elegy refuses is a ledger line, so a refusal is never silent.
-   - The six restarts refuse none. `TestRGNoRejectedOrders` fails on any refusal in a restart or in the chained run's first year.
+   - On the reference seed (variant 0), the six restarts and the chained run's first year refuse none. `TestRGNoRejectedOrders` fails on any refusal there.
    - The chained run refuses 43 orders in years 2–6. All 43 are samples: those years follow Elegy's own draws (RANDOM-PARITY.md "Samples").
+   - **One refusal on other variants, which no test checks yet.** In Y1, and in the chained run's year 1, variants 1 and 6 refuse player 2's order 10. That order is a waypoint-0 change aimed at player 6's fleet 10, which player 6's order 1 (`move_ships`) empties. When the year's player shuffle replays player 6 first, the target is gone and Elegy refuses the order ("no such object"). The reference seed replays player 2 first.
+     - stars-elegy ORDERS.md "A fleet target merged away during order replay" says such a waypoint is never rejected, but it covers waypoints at index 1 or later. Waypoint 0, the follow path, is not covered, so the original's behavior here is UNRESOLVED.
+     - The ledger and `TestRGNoRejectedOrders` check variant 0 only, which is why they do not see this.
 3. **Exact deterministic field diffs: MEASURED, none.**
    - The reference run (seed variant 0) has no field, order or battle record line of a deterministic class.
    - `TestRG002Ledger` and `TestBattleRecords` fail on any new line and on any ledger line no longer produced.
@@ -23,6 +26,7 @@ Bobby's five requirements, in order:
 4. **Random results classified: yes.**
    - 30 field lines are random-driven. Each misses on the reference seed and matches on at least one other seed variant. The line keeps that count.
    - A line that misses on every variant is a hand line with an owner, never random-driven.
+   - **Checked on every variant, not only the reference.** A scratch check ran all 8 variants of the seven runs and classed every failing field. Each one is a ledger random-driven line, a sample, or a field that matches on the reference seed (so random by the same rule). No variant of any run has a deterministic field mismatch.
    - No restart battle record needed lane D's in-year random rule.
 5. **Every test on the final main SHA: yes, on `e1798ac`** (below).
 
@@ -39,6 +43,8 @@ Bobby's five requirements, in order:
 | not compared | 456 | 0 | 0 |
 | sample | 976 | 43 | 16 |
 
+Samples total 1035, by kind: 976 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1019), and 16 battle records, checked by `TestBattleRecords`. All are lines of the same ledger file.
+
 The 456 not-compared lines are:
 - 272 comparator gaps for quantities Elegy models (packet destinations, `object`-form wormholes, messages, design reads, player counts);
 - 176 battle expectations that `TestBattleRecords` compares record by record instead;
@@ -49,7 +55,7 @@ The 272 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
 ### The run on `e1798ac`
 
 - `go test ./... -count=1` passes in every package: ai, cmd/elegy, engine, game, internal/vectors, newgame, objects, oraclerng, races, regress and terraform.
-- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 456, random-driven 30 and sample 1019 (fields and orders). `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
+- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 456, random-driven 30 and sample 1019 (976 fields and 43 orders; the 16 battle samples are `TestBattleRecords`'). `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
 - **Battle records.** No strict RG-002 record fails: the restarts' 44 and the chained run's 8 in its first year. Of the chained run's 36 later records, all samples, 20 match.
 - **The 8-seed matrix** (`go test -run TestParityVectors -v ./engine`, case level: a case passes on a seed when every compared expectation matches):
 
@@ -62,5 +68,6 @@ The 272 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
   | RG-002-2464 to 2467 (chained) | 0 of 8 |
   | RG-002-2468 (chained) | 6 of 8 |
 
-  - Every field in the Y2–Y5 restarts that fails on the reference seed matches on some other seed: they are the ledger's random-driven lines. A whole case can still fail on every seed, because each seed misses a different draw-decided field.
+  - **How to read it.** A case passes on a variant only when every compared expectation matches, including every draw-decided one. "0 of 8" for Y2–Y5 does not mean a deterministic failure: every field that fails, on every variant, is random-driven or a sample (point 4). Each variant misses a different few draw-decided fields, so no single variant gets them all.
   - The chained years 2–6 are samples. RG-002-2468 passing on 6 seeds is a sample result, not replay parity.
+  - Exact random outcomes need the original's generator in the harness (SPRINT.md P1-1).
