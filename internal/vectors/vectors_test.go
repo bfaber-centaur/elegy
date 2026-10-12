@@ -674,3 +674,53 @@ func TestVictoryConditions(t *testing.T) {
 		}
 	}
 }
+
+func TestDefaultQueue(t *testing.T) {
+	load := func(edit func(*pvPlayer)) (*pvLoaded, error) {
+		t.Helper()
+		v, err := ReadFile("../../engine/testdata/vectors/kx004/s1.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		edit(&v.InitialState.Players[0])
+		return loadVector(v)
+	}
+	raw := func(s ...string) *[]json.RawMessage {
+		var q []json.RawMessage
+		for _, x := range s {
+			q = append(q, json.RawMessage(x))
+		}
+		return &q
+	}
+	yes := true
+	l, err := load(func(p *pvPlayer) {
+		p.DefaultQueue = raw(`{"kind": 1, "id": 0, "count": 5}`, `{"kind": 1, "id": 1, "count": 10}`)
+		p.DefaultLeftoverToResearch = &yes
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl := l.g.Players[0]
+	want := []engine.QueueItem{{Kind: engine.ItemAutoMines, Count: 5}, {Kind: engine.ItemAutoFactories, Count: 10}}
+	if !reflect.DeepEqual(pl.DefaultQueue, want) || !pl.DefaultLeftoverOnly || !l.defaults[0] || l.defaults[1] {
+		t.Errorf("default queue %+v leftover %v, defaults %v; want %+v true, {0}", pl.DefaultQueue, pl.DefaultLeftoverOnly, l.defaults, want)
+	}
+	// An empty default queue is carried too.
+	if l, err = load(func(p *pvPlayer) { p.DefaultQueue, p.DefaultLeftoverToResearch = raw(), new(bool) }); err != nil || !l.defaults[0] {
+		t.Errorf("empty default queue: %v, defaults %v", err, l.defaults)
+	}
+	// An item Elegy does not build leaves the defaults unloaded.
+	if l, err = load(func(p *pvPlayer) {
+		p.DefaultQueue, p.DefaultLeftoverToResearch = raw(`{"id": 0, "count": 5}`), &yes
+	}); err != nil || l.defaults[0] || l.g.Players[0].DefaultQueue != nil || l.g.Players[0].DefaultLeftoverOnly {
+		t.Errorf("unbuilt item: %v, defaults %v, player %+v", err, l.defaults, l.g.Players[0].DefaultQueue)
+	}
+	for _, edit := range []func(*pvPlayer){
+		func(p *pvPlayer) { p.DefaultQueue = raw() },
+		func(p *pvPlayer) { p.DefaultLeftoverToResearch = &yes },
+	} {
+		if _, err := load(edit); err == nil || !strings.Contains(err.Error(), "go together") {
+			t.Errorf("one of the pair: %v", err)
+		}
+	}
+}

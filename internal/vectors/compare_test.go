@@ -326,3 +326,32 @@ func TestRunTalliesWhollySkippedCase(t *testing.T) {
 		}
 	}
 }
+
+func TestLeftoverToResearch(t *testing.T) {
+	l := pvLoaded{g: engine.Game{Planets: []engine.Planet{{ID: 3, Owner: 1, LeftoverOnly: true}}}, defaults: map[int]bool{}}
+	g := &engine.Game{}
+	p := engine.Planet{ID: 3, Owner: 1, LeftoverOnly: true}
+	pvWant(t, "kept", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": true}`), nil), "", "")
+	pvWant(t, "differs", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "leftover_to_research = true, want false", "")
+	// A planet with a new owner takes the owner's default setting.
+	p.Owner = 2
+	pvWant(t, "new owner", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "", "player default queue settings")
+	l.defaults[2] = true
+	pvWant(t, "new owner, defaults loaded", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "leftover_to_research = true, want false", "")
+}
+
+func TestQueueOfNewOwner(t *testing.T) {
+	planet := 3
+	l := pvLoaded{g: engine.Game{Planets: []engine.Planet{{ID: 4, Owner: 1}}}, planet: map[int]int{3: 4},
+		defaults: map[int]bool{}, ordered: map[int]bool{}, queued: map[int]bool{}, unsupported: map[[2]int]string{}}
+	g := &engine.Game{Planets: []engine.Planet{{ID: 4, Owner: 2, HasQueue: true,
+		Queue: []engine.QueueItem{{Kind: engine.ItemAutoMines, Count: 5}}}}}
+	e := pvExpect{Kind: "production_queue", Planet: &planet, Equals: json.RawMessage(`[{"kind": 1, "id": 0, "count": 6}]`)}
+	pvWant(t, "no defaults", l.queueEquals(g, e), "", "player default queue settings")
+	l.defaults[2] = true
+	if msg := l.queueEquals(g, e); msg == "" || strings.HasPrefix(msg, "skip: ") {
+		t.Errorf("defaults loaded: %q, want the queue compared", msg)
+	}
+	e.Equals = json.RawMessage(`[{"kind": 1, "id": 0, "count": 5}]`)
+	pvWant(t, "defaults loaded, match", l.queueEquals(g, e), "", "")
+}
