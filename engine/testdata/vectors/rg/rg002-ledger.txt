@@ -17,7 +17,7 @@ incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #126 | fleet owner=6 id=12
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #126 | fleet owner=6 id=12 | ships = map[43:4], want map[43:5]
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | excess = 26, want 31
-random-driven | rg002 | RG-002-2463 y1 #162 | planet id=35 | surface_minerals = [37 1735 524], want [0 1714 493] (0/8 variants match)
+incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #162 | planet id=35 | surface_minerals = [37 1735 524], want [0 1714 493] (0/8 variants match, values vary)
 random-driven | rg002 | RG-002-2463 y1 #206 | planet id=79 | surface_minerals = [2 1545 1396], want [1 1544 1394] (7/8 variants match)
 sample | rg002 | RG-002-2463 y1 #211 | planet id=83 | surface_minerals = [28709 26762 21159], want [28709 26762 21160]
 not compared | rg002 | RG-002-2463 y1 #212 | planet id=84 | planet field packet_destination
@@ -39,7 +39,7 @@ sample | rg002 | RG-002-2463 y1 #262 | player id=1 | research_accumulated.weapon
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #263 | player id=2 | research_accumulated.biotechnology = 721, want 720
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #263 | player id=2 | research_accumulated.electronics = 2152, want 2151
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #263 | player id=2 | research_accumulated.energy = 2585, want 2583
-random-driven | rg002 | RG-002-2463 y1 #263 | player id=2 | research_accumulated.propulsion = 6632, want 6631 (0/8 variants match)
+incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #263 | player id=2 | research_accumulated.propulsion = 6632, want 6631 (0/8 variants match, values vary)
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #267 | player id=6 | research_accumulated.biotechnology = 2537, want 2529
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #267 | player id=6 | research_accumulated.construction = 2237, want 2229
 incorrect mechanic [economy] | rg002 | RG-002-2463 y1 #267 | player id=6 | research_accumulated.electronics = 1527, want 1519
@@ -1922,7 +1922,7 @@ incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #126 | fleet owner=6
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #126 | fleet owner=6 id=12 | ships = map[43:4], want map[43:5]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | excess = 26, want 31
-random-driven | rg002-y1 | RG-002-Y1-2463 y1 #162 | planet id=35 | surface_minerals = [37 1735 524], want [0 1714 493] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #162 | planet id=35 | surface_minerals = [37 1735 524], want [0 1714 493] (0/8 variants match, values vary)
 random-driven | rg002-y1 | RG-002-Y1-2463 y1 #206 | planet id=79 | surface_minerals = [2 1545 1396], want [1 1544 1394] (7/8 variants match)
 sample | rg002-y1 | RG-002-Y1-2463 y1 #211 | planet id=83 | surface_minerals = [28709 26762 21159], want [28709 26762 21160]
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #212 | planet id=84 | planet field packet_destination
@@ -1944,7 +1944,7 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #262 | player id=1 | research_accumulated.
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #263 | player id=2 | research_accumulated.biotechnology = 721, want 720
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #263 | player id=2 | research_accumulated.electronics = 2152, want 2151
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #263 | player id=2 | research_accumulated.energy = 2585, want 2583
-random-driven | rg002-y1 | RG-002-Y1-2463 y1 #263 | player id=2 | research_accumulated.propulsion = 6632, want 6631 (0/8 variants match)
+incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #263 | player id=2 | research_accumulated.propulsion = 6632, want 6631 (0/8 variants match, values vary)
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #267 | player id=6 | research_accumulated.biotechnology = 2537, want 2529
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #267 | player id=6 | research_accumulated.construction = 2237, want 2229
 incorrect mechanic [economy] | rg002-y1 | RG-002-Y1-2463 y1 #267 | player id=6 | research_accumulated.electronics = 1527, want 1519
@@ -2073,7 +2073,7 @@ incorrect mechanic [lane A] | rg002-y2 | year 1 | order | year 1 player 1 order 
 incorrect mechanic [lane A] | rg002-y2 | year 1 | order | year 1 player 1 order 72 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002-y3 | RG-002-Y3-2465 y1 #147 | planet id=13 | surface_minerals = [199 1 43], want [200 1 42]
 sample | rg002-y3 | RG-002-Y3-2465 y1 #153 | planet id=18 | surface_minerals = [15 1218 823], want [15 1217 824]
-random-driven | rg002-y3 | RG-002-Y3-2465 y1 #170 | planet id=35 | surface_minerals = [38 1813 546], want [1 1812 528] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y3 | RG-002-Y3-2465 y1 #170 | planet id=35 | surface_minerals = [38 1813 546], want [1 1812 528] (0/8 variants match, values vary)
 sample | rg002-y3 | RG-002-Y3-2465 y1 #178 | planet id=42 | starbase = design 101 damage 180, want design 101 damage 120
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #192 | planet id=55 | excess = 53, want 15 (4/8 variants match)
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #192 | planet id=55 | population = 1068, want 1069 (4/8 variants match)
@@ -2097,7 +2097,7 @@ not compared | rg002-y3 | RG-002-Y3-2465 y1 #251 | planet id=110 | planet field 
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #260 | planet id=119 | planet field packet_destination
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #267 | player id=0 | player field research_percent
 sample | rg002-y3 | RG-002-Y3-2465 y1 #268 | player id=1 | research_accumulated.weapons = 3963, want 3964
-random-driven | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.biotechnology = 1007, want 1006 (0/8 variants match)
+incorrect mechanic [economy] | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.biotechnology = 1007, want 1006 (0/8 variants match, values vary)
 incorrect mechanic [economy] | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.construction = 3681, want 3680
 incorrect mechanic [economy] | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.electronics = 2553, want 2552
 incorrect mechanic [economy] | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.energy = 2760, want 2758
@@ -2150,9 +2150,9 @@ sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.boranium =
 sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.germanium = 3, want 2
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #12 | fleet owner=1 id=11 | cargo.germanium = 2, want 1 (5/8 variants match)
 incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | 0 waypoints after waypoint 0 [], want 1
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[0] position = {1386 1352}, want {1355 1356} (0/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | x = 1386, want 1355 (0/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | y = 1352, want 1356 (0/8 variants match)
+incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[0] position = {1386 1352}, want {1355 1356} (0/8 variants match, values vary)
+incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | x = 1386, want 1355 (0/8 variants match, values vary)
+incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | y = 1352, want 1356 (0/8 variants match, values vary)
 incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #132 | fleet owner=6 id=12 | fuel = 2600, want 280
 incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #132 | fleet owner=6 id=12 | orbiting = 46, want 35
 incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #132 | fleet owner=6 id=12 | ships = map[44:1], want map[45:1]
@@ -2161,7 +2161,7 @@ incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #132 | fleet owner=6
 incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #132 | fleet owner=6 id=12 | y = 1498, want 1362
 incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #135 | fleet owner=6 id=15 | fleet gone
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #164 | planet id=27 | surface_minerals = [715 359 195], want [718 359 197] (6/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #172 | planet id=35 | surface_minerals = [37 1886 581], want [0 1865 551] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y4 | RG-002-Y4-2466 y1 #172 | planet id=35 | surface_minerals = [37 1886 581], want [0 1865 551] (0/8 variants match, values vary)
 sample | rg002-y4 | RG-002-Y4-2466 y1 #175 | planet id=37 | surface_minerals = [451 12 553], want [449 12 552]
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #179 | planet id=41 | planet field defenses null
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #198 | planet id=59 | surface_minerals = [369 217 239], want [364 212 237] (1/8 variants match)
@@ -2235,28 +2235,28 @@ sample | rg002-y4 | RG-002-Y4-2466 y1 #76 | fleet owner=2 id=7 | cargo.ironium =
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | 0 waypoints after waypoint 0 [], want 1 (3/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | fuel = 1031, want 963 (3/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | orbiting = 59, want none (3/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | waypoints[0] position = {1346 1290}, want {1367 1305} (0/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | x = 1346, want 1367 (0/8 variants match)
+incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | waypoints[0] position = {1346 1290}, want {1367 1305} (0/8 variants match, values vary)
+incorrect mechanic [lane A] | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | x = 1346, want 1367 (0/8 variants match, values vary)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | y = 1290, want 1305 (3/8 variants match)
 sample | rg002-y4 | RG-002-Y4-2466 y1 #93 | fleet owner=3 id=2 | fleet gone
 incorrect mechanic [lane A] | rg002-y4 | year 1 | order | year 1 player 1 order 30 (WaypointOrder): waypoint 0 fleet 200016: orders: no such object
 incorrect mechanic [lane A] | rg002-y4 | year 1 | order | year 1 player 1 order 35 (WaypointOrder): waypoint 0 fleet 200016: orders: no such object
 incorrect mechanic [lane A] | rg002-y4 | year 1 | order | year 1 player 1 order 45 (WaypointOrder): waypoint 0 fleet 200016: orders: no such object
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #100 | fleet owner=2 id=18 | waypoints[0] position = {1354 1302}, want {1336 1305} (5/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #100 | fleet owner=2 id=18 | waypoints[1] = {{1363 1323} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match)
+incorrect mechanic [lane A] | rg002-y5 | RG-002-Y5-2467 y1 #100 | fleet owner=2 id=18 | waypoints[1] = {{1363 1323} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #100 | fleet owner=2 id=18 | x = 1354, want 1336 (5/8 variants match)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #100 | fleet owner=2 id=18 | y = 1302, want 1305 (5/8 variants match)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #102 | fleet owner=2 id=20 | waypoints[0] position = {1354 1302}, want {1336 1305} (5/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #102 | fleet owner=2 id=20 | waypoints[1] = {{1363 1323} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match)
+incorrect mechanic [lane A] | rg002-y5 | RG-002-Y5-2467 y1 #102 | fleet owner=2 id=20 | waypoints[1] = {{1363 1323} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #102 | fleet owner=2 id=20 | x = 1354, want 1336 (5/8 variants match)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #102 | fleet owner=2 id=20 | y = 1302, want 1305 (5/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #168 | fleet owner=6 id=4 | fuel = 560, want 840 (0/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #168 | fleet owner=6 id=4 | ships = map[45:2], want map[45:3] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #168 | fleet owner=6 id=4 | fuel = 560, want 840 (0/8 variants match, values vary)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #168 | fleet owner=6 id=4 | ships = map[45:2], want map[45:3] (0/8 variants match, values vary)
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #176 | design owner=6 slot=3 | design read needs the order layer's design source
 sample | rg002-y5 | RG-002-Y5-2467 y1 #178 | planet id=0 | surface_minerals = [117 16 1], want [119 18 2]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #190 | planet id=12 | surface_minerals = [63 611 10], want [64 611 10]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #210 | planet id=30 | surface_minerals = [782 384 10], want [781 383 10]
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #215 | planet id=35 | surface_minerals = [55 1929 604], want [3 1898 567] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #215 | planet id=35 | surface_minerals = [55 1929 604], want [3 1898 567] (0/8 variants match, values vary)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #218 | planet id=37 | surface_minerals = [482 16 591], want [478 14 587]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [417 1397 12], want [417 1398 12]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #234 | planet id=51 | surface_minerals = [1224 874 0], want [1224 875 0]
@@ -2285,15 +2285,15 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.
 sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.propulsion = 0, want 351
 sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.weapons = 186, want 185
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | player field counts
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.biotechnology = 301, want 291 (0/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.construction = 2901, want 2891 (0/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.electronics = 2191, want 2181 (0/8 variants match)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.biotechnology = 301, want 291 (0/8 variants match, values vary)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.construction = 2901, want 2891 (0/8 variants match, values vary)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.electronics = 2191, want 2181 (0/8 variants match, values vary)
 incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.energy = 59, want 23
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.propulsion = 563, want 553 (0/8 variants match)
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.weapons = 2876, want 2866 (0/8 variants match)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.propulsion = 563, want 553 (0/8 variants match, values vary)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | research_accumulated.weapons = 2876, want 2866 (0/8 variants match, values vary)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #322 | production_queue planet=0 | queue = [{9 1 12 5}], want [{9 1 11 5}]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #336 | production_queue planet=30 | queue = [{3 1 63 0} {7 1 0 0} {9 1 37 7}], want [{3 1 47 0} {7 1 0 0} {9 1 38 7}]
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #340 | production_queue planet=35 | queue = [{8 1 2 12} {9 1 0 9}], want [{9 1 5 9}] (0/8 variants match)
+incorrect mechanic [economy] | rg002-y5 | RG-002-Y5-2467 y1 #340 | production_queue planet=35 | queue = [{8 1 2 12} {9 1 0 9}], want [{9 1 5 9}] (0/8 variants match, values vary)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #342 | production_queue planet=37 | queue = [{3 1 11 0} {7 1 0 0} {9 1 16 7} {15 4 0 0}], want [{3 1 79 0} {7 1 0 0} {9 1 18 7} {15 4 0 0}]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #363 | production_queue planet=66 | queue = [{3 1 27 0} {7 1 0 0} {9 1 15 7} {15 3 0 0}], want [{3 1 7 0} {7 1 0 0} {9 1 16 7} {15 3 0 0}] (4/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #367 | production_queue planet=79 | queue = [{8 1 38 13} {8 1 0 14} {8 1 0 14}], want [{8 1 37 13} {8 1 0 14} {8 1 0 14}]
