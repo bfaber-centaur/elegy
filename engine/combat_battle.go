@@ -39,8 +39,9 @@ type BattleHit struct {
 	Firer, Target int // token indices after the shuffle
 	Shield, Armor int // damage taken by shields and by armor (before kills)
 	Kills         int
-	Hits, Misses  int // torpedoes
-	Leftover      int // beam damage left after the target died
+	Hits, Misses  int    // torpedoes
+	Leftover      int    // beam damage left after the target died
+	After         Damage // the target's damage after the hit, as the battle record shows it
 }
 
 // battle is one battle in progress.
@@ -134,8 +135,8 @@ func (b *battle) setup(fought map[int]bool) []Event {
 			if s.Count <= 0 {
 				continue
 			}
-			d := g.Designs[s.Design]
-			t := tokenValues(d, race, false, designCost(d, race, g.Players[f.Owner].Research.Levels))
+			d := battleDesign(g.Designs[s.Design])
+			t := tokenValues(d, race, false, designCost(g.Designs[s.Design], race, g.Players[f.Owner].Research.Levels))
 			t.player, t.fleet, t.stack, t.planet, t.design = f.Owner, i, si, -1, s.Design
 			t.ships, t.dmg = s.Count, s.Damage
 			t.mass = battleMass(d, f.Cargo.mass(), capacity)
