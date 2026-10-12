@@ -132,3 +132,37 @@ Reading it:
   harness's skip tally, which counts only inside cases with at least one
   compared expectation, and counts a sample only when it missed. The table
   above counts every expectation.
+
+## Battle records
+
+`TestBattleRecords` (`engine/battle_parity_test.go`) replays every recorded
+battle at its year's battle phase, with the record's token order and moves,
+and compares each hit. During firing Elegy's only draws are torpedo
+accuracy rolls. The harness answers them from the record instead of
+drawing, with a test-file `Rand` (`pvAnswer`): each group of rolls (one
+salvo's torpedoes at one target) gets a number of hits, and a search finds
+numbers with which every hit matches. It backtracks, because two numbers
+can give a group the same records and differ later.
+
+The hits are tallied in two kinds:
+
+- **Compared**: hits recorded before the battle's first answered roll. They
+  depend on no random outcome.
+- **Conditioned**: hits recorded after one. They show that Elegy's
+  mechanics reproduce the record given some outcome of the rolls. That is
+  not random parity: nothing shows that Elegy's or the original's draws
+  give those outcomes. A conditioned mismatch is a mechanics finding.
+
+Any other draw during firing still stops the replay; none was reached.
+
+| Corpus | Records | Replayed whole | Groups answered | Compared matched | Conditioned matched | Hits recorded |
+|---|---|---|---|---|---|---|
+| cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 |
+| cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 |
+| cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 |
+| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 |
+
+Answering the rolls turned up one mechanics difference, now fixed: on a
+shielded target the misses' shield damage is a hit record of its own,
+before the salvo's hit record (stars-elegy COMBAT.md "Torpedoes and
+missiles", CONFIRMED CB-049). Elegy had merged the two.

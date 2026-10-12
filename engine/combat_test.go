@@ -284,13 +284,15 @@ func TestConfirmedOneKillPerMissile(t *testing.T) {
 
 func TestConfirmedTorpedoMissesOnShields(t *testing.T) {
 	// CB-009 K8 (Q-14): 14 Beta misses on a shielded target do 21 to
-	// shields, recorded before any hit.
+	// shields in a miss record, before the salvo's 0-hit hit record
+	// (CB-049).
 	d := []Design{testDesign(tFrigate, 10, Slot{tBeta, 1}), testDesign(Hull{Armor: 1000}, 10, Slot{Part{Shield: 1000}, 1})}
 	f, e := tok(d, 0, 0, 14), tok(d, 1, 1, 1)
 	tb := newTestBattle(highRand{}, d, f, e) // every rand(100) is 99: all miss
 	tb.torpedoes(0, f.weapons[0])
-	if len(tb.hits) != 1 || tb.hits[0].Misses != 14 || tb.hits[0].Shield != 21 || e.shield != 979 {
-		t.Errorf("hits %+v, shield %d; want 14 misses doing 21", tb.hits, e.shield)
+	if len(tb.hits) != 2 || tb.hits[0].Shield != 21 || tb.hits[0].Misses != 0 || e.shield != 979 ||
+		tb.hits[1] != (BattleHit{Target: 1, Misses: 14, After: tb.hits[0].After}) {
+		t.Errorf("hits %+v, shield %d; want a miss record of 14 doing 21, then an empty hit record", tb.hits, e.shield)
 	}
 }
 
