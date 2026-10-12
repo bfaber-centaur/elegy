@@ -313,6 +313,7 @@ func TestConfirmedStarbaseKeepsDamage(t *testing.T) {
 		t.Fatal(err)
 	}
 	g.Designs = append(g.Designs, dock)
+	g.Players[0].Race.LRT.ImprovedStarbases = true // Space Dock needs ISB
 	g.Planets[0].StarbaseDamage = 200
 	ev := g.BuildStarbase(0, 3)
 	p := g.Planets[0]

@@ -279,9 +279,9 @@ func designArmor(d Design) int {
 // planet index pi. It returns the events and the id of the fleet the
 // ships are in, or -1.
 //
-// Without a starbase nothing is built (BINARY-ONLY). Without the tech for
-// the hull and every part nothing is built and the owner is told
-// (BINARY-ONLY). Below 512 fleets the ships make a new fleet: the lowest
+// Without a starbase nothing is built (BINARY-ONLY). When the owner cannot
+// build the design (canBuild) nothing is built and the owner is told the
+// plans were lost (BINARY-ONLY). Below 512 fleets the ships make a new fleet: the lowest
 // free number, undamaged, full tanks, no cargo, standing at the planet
 // with no task, plan 0, no name (CONFIRMED SL-01, SL-02); with a route
 // destination it gets a waypoint there with the route task (CONFIRMED
@@ -299,11 +299,8 @@ func (g *Game) Launch(pi, design, count int) ([]Event, int) {
 		return nil, -1
 	}
 	d := g.Designs[design]
-	req := d.techReq()
-	for f := range NumFields {
-		if g.Players[owner].Research.Levels[f] < req[f] {
-			return []Event{{Kind: EventPlansLost, Player: owner, Planet: p.ID, Fleet: -1}}, -1
-		}
+	if !g.canBuild(owner, d) {
+		return []Event{{Kind: EventPlansLost, Player: owner, Planet: p.ID, Fleet: -1}}, -1
 	}
 	fleets := 0
 	for _, f := range g.Fleets {
@@ -375,9 +372,43 @@ func (g *Game) DockAllows(pi, design int) bool {
 	return dock == DockUnlimited || dock > 0 && g.Designs[design].Hull.Mass <= dock
 }
 
+// canBuild reports whether owner can build design d now
+// (PRODUCTION-LAUNCH.md "Can the planet build it", BINARY-ONLY, stars-elegy
+// 7419b90): the hull and every part are researched, allowed to the
+// owner's race, and owned when a Mystery Trader item (COMPONENTS.md "Who
+// can build what"). Reading a design in jrc3-faithful checks only the
+// research (Legacy.KeepUnentitledParts), so such a design is stored but
+// is not built.
+func (g *Game) canBuild(owner int, d Design) bool {
+	pl := &g.Players[owner]
+	req := d.techReq()
+	for f := range NumFields {
+		if pl.Research.Levels[f] < req[f] {
+			return false
+		}
+	}
+	trader := g.traderItems(owner)
+	names := []string{d.Hull.Name}
+	for _, s := range d.Parts() {
+		names = append(names, s.Part.Name)
+	}
+	cat := Components()
+	for _, n := range names {
+		c, ok := cat.Lookup(n)
+		if !ok {
+			continue
+		}
+		if ok, err := c.Allowed(pl.Race, trader[n]); err != nil || !ok {
+			return false
+		}
+	}
+	return true
+}
+
 // BuildStarbase completes a starbase item of design at planet index pi
-// (PRODUCTION-LAUNCH.md "Starbases"): without the tech nothing is built
-// and there is no message (BINARY-ONLY); otherwise the new starbase
+// (PRODUCTION-LAUNCH.md "Starbases"): when the owner cannot build it
+// (canBuild) nothing is built, the old starbase and the packet settings
+// stay, and there is no message (BINARY-ONLY); otherwise the new starbase
 // replaces the old one, keeps its damage units (CONFIRMED SL-12), and the
 // owner is told what it can build, by its dock
 // (BINARY-ONLY): no ships (Orbital Fort, Count 0), ships up to N kT (Space
@@ -400,11 +431,8 @@ func (g *Game) DockAllows(pi, design int) bool {
 func (g *Game) BuildStarbase(pi, design int) []Event {
 	p := &g.Planets[pi]
 	d := g.Designs[design]
-	req := d.techReq()
-	for f := range NumFields {
-		if g.Players[p.Owner].Research.Levels[f] < req[f] {
-			return nil
-		}
+	if !g.canBuild(p.Owner, d) {
+		return nil
 	}
 	hadDriver := false
 	if p.HasStarbase && p.StarbaseDesign >= 0 && p.StarbaseDesign < len(g.Designs) {
