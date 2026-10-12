@@ -538,3 +538,66 @@ func TestRGNoRejectedOrders(t *testing.T) {
 		}
 	}
 }
+
+// TestSalvageFresh loads salvage's stored skip-decay mark (vectors/README.md
+// "objects", stars-elegy d86c4f8): RG-001 Y6's battle salvage from 2434 is
+// marked and survives 2435's decay unchanged, MF-13B's is not, and a record
+// without the field makes the vector unsupported rather than guessed.
+func TestSalvageFresh(t *testing.T) {
+	for _, c := range []struct {
+		path  string
+		pos   engine.Point
+		fresh bool
+	}{
+		{"rg/rg001-y6.json", engine.Point{X: 1324, Y: 1257}, true},
+		{"mf/mf13b.json", engine.Point{}, false},
+	} {
+		v, err := ReadFile("../../engine/testdata/vectors/" + c.path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		l, err := loadVector(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(l.g.Salvage) != 1 {
+			t.Fatalf("%s: %d salvage objects, want 1", c.path, len(l.g.Salvage))
+		}
+		s := l.g.Salvage[0]
+		if s.Fresh != c.fresh || c.fresh && s.Pos != c.pos {
+			t.Errorf("%s: salvage at %v fresh %v, want %v", c.path, s.Pos, s.Fresh, c.fresh)
+		}
+		if !c.fresh {
+			continue
+		}
+		_, games, genErr, stop := generate(v, pvRun{})
+		if genErr != nil || stop != "" || len(games) < 2 {
+			t.Fatalf("generate: %v %q, %d games", genErr, stop, len(games))
+		}
+		kept := false
+		for _, s := range games[1].Salvage {
+			kept = kept || s.Pos == c.pos && s.Minerals == engine.Minerals{3, 3, 3}
+		}
+		if !kept {
+			t.Errorf("%s: the marked salvage did not keep [3 3 3] through the decay: %v", c.path, games[1].Salvage)
+		}
+	}
+	v, err := ReadFile("../../engine/testdata/vectors/rg/rg001-y6.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, raw := range v.InitialState.Objects {
+		var o map[string]any
+		if json.Unmarshal(raw, &o) == nil && o["kind"] == "salvage" {
+			delete(o, "fresh")
+			v.InitialState.Objects[i], _ = json.Marshal(o)
+		}
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(l.global, "salvage 1/0 without fresh") {
+		t.Errorf("salvage without fresh: global %q, want the vector refused", l.global)
+	}
+}
