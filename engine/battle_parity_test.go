@@ -102,12 +102,6 @@ type BattleStart struct {
 	Skip    string         // why every case of the vector is skipped, if one is
 }
 
-// BattleStartOf builds the start of the vector at path ("cb/cb010.json").
-// The vector loader, package vectors, imports engine, so this package's
-// tests reach it through battle_vectors_test.go (package engine_test),
-// which sets this.
-var BattleStartOf func(path string) (BattleStart, error)
-
 // pvBattleOutcome is what the comparison found for one recorded battle.
 type pvBattleOutcome struct {
 	tokens string // "" when the token lists match, else the first difference
@@ -405,12 +399,25 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	return out
 }
 
-// TestBattleRecords compares Elegy's battles with every recorded battle,
-// given the record's token order and moves (see the top of this file). Any
-// difference in a token list or a compared hit fails. A round that needs
-// the original's draws ends that battle's comparison without failing:
-// that is the random level (docs/RANDOM-PARITY.md).
-func TestBattleRecords(t *testing.T) {
+// BattleRecordVectors lists the vectors holding battle records, by path
+// ("cb/cb010.json").
+func BattleRecordVectors(t *testing.T) []string {
+	var names []string
+	for name := range loadBattleRecords(t) {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+// CheckBattleRecords compares Elegy's battles with every recorded battle,
+// given the record's token order and moves (see the top of this file),
+// from each vector's start in starts, by path. Any difference in a token
+// list or a compared hit fails. A round that needs the original's draws
+// ends that battle's comparison without failing: that is the random level
+// (docs/RANDOM-PARITY.md). TestBattleRecords (battle_vectors_test.go)
+// runs it: the vector loader, package vectors, imports engine.
+func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) {
 	records := loadBattleRecords(t)
 	type tally struct {
 		records, tokens, built, full, draws int
@@ -428,8 +435,12 @@ func TestBattleRecords(t *testing.T) {
 			per[corpus] = &tally{}
 		}
 		c := per[corpus]
-		l, err := BattleStartOf(name)
-		if err == nil && l.Skip != "" {
+		l, ok := starts[name]
+		var err error
+		switch {
+		case !ok:
+			err = fmt.Errorf("no start")
+		case l.Skip != "":
 			err = fmt.Errorf("%s", l.Skip)
 		}
 		for _, r := range records[name] {
@@ -481,14 +492,12 @@ func TestBattleRecords(t *testing.T) {
 	}
 }
 
-// TestBattleRecordHarness checks that the comparison notices a difference:
-// a recorded token value or hit changed by one, and a round with draws.
-func TestBattleRecordHarness(t *testing.T) {
+// CheckBattleRecordHarness checks that the comparison notices a
+// difference: a recorded token value or hit changed by one, and a round
+// with draws. l is CB-010's start (cb/cb010.json), lb CS-003-C's
+// (cs/cs003c.json).
+func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	records := loadBattleRecords(t)
-	l, err := BattleStartOf("cb/cb010.json")
-	if err != nil {
-		t.Fatal(err)
-	}
 	var r pvRecordedBattle
 	for _, x := range records["cb/cb010.json"] {
 		if x.x == 1060 {
@@ -516,10 +525,6 @@ func TestBattleRecordHarness(t *testing.T) {
 	}
 	if o := compareBattle(&l, kills); o.stop == "" || o.draws {
 		t.Errorf("a changed kill count was not noticed: %+v", o)
-	}
-	lb, err := BattleStartOf("cs/cs003c.json")
-	if err != nil {
-		t.Fatal(err)
 	}
 	drawn := false
 	for _, x := range records["cs/cs003c.json"] {

@@ -410,6 +410,14 @@ func TestMeasuredPartInWrongSlotLeftOutOfBattle(t *testing.T) {
 	if bd := battleDesign(ok); bd.Mass != ok.Mass || len(bd.Slots) != len(ok.Slots) {
 		t.Errorf("a valid design changed: %+v", bd)
 	}
+	// Every dropped part's mass leaves the token: two deflectors, 2 kT.
+	two, err := cat.newDesign("gunboat", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}, {Slot: 3, Part: "Beam Deflector", Count: 2}}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bd := battleDesign(two); bd.Mass != two.Mass-2 || len(bd.Slots) != 2 {
+		t.Errorf("two deflectors: battle design mass %d (design %d), slots %d", bd.Mass, two.Mass, len(bd.Slots))
+	}
 }
 
 func TestConfirmedGatlingHitsEveryTarget(t *testing.T) {
