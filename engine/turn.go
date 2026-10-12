@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 )
 
@@ -246,6 +247,19 @@ func GenerateTurn(
 	orders []PlayerOrders,
 	rng Rand,
 ) (TurnResult, error) {
+	return generateTurn(game, orders, rng, turnOptions{})
+}
+
+// turnOptions are generateTurn's test observers. The zero value observes
+// nothing, which is GenerateTurn.
+type turnOptions struct {
+	// beforeBattles, when set, receives a clone of the game as the battle
+	// phase finds it, with the tech levels its design costs use
+	// (battle.costLevels).
+	beforeBattles func(g Game, costLevels [][NumFields]int)
+}
+
+func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) (TurnResult, error) {
 	if rng == nil {
 		return TurnResult{}, ErrNilRand
 	}
@@ -448,6 +462,9 @@ func GenerateTurn(
 	// research gained in a battle levels up the same turn, CB-018,
 	// CB-021).
 	owned := g.phaseStart()
+	if opts.beforeBattles != nil {
+		opts.beforeBattles(g.clone(), slices.Clone(costLevels))
+	}
 	fights := battles(&g, rng, gained, costLevels)
 	events = append(events, fights.events...)
 	bombs := g.bombChecks()

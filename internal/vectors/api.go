@@ -94,3 +94,43 @@ func (v *Vector) Start() (Start, error) {
 	}
 	return Start{Game: l.g, Fleets: l.fleetID, Planets: l.planet, Skip: l.global}, nil
 }
+
+// TurnFunc generates one year, as engine.GenerateTurn does.
+type TurnFunc func(game engine.Game, orders []engine.PlayerOrders, rng engine.Rand) (engine.TurnResult, error)
+
+// Generate generates v's years as Run does for the seed variant, each
+// year with turn. games holds the start and every year generated; stop is
+// why generation ended before v's last year, if it did.
+func Generate(v *Vector, variant int, turn TurnFunc) (games []engine.Game, stop string) {
+	_, games, err, stop := generate(v, pvRun{seed: variant, turn: turn})
+	if err != nil {
+		stop = err.Error()
+	}
+	return games, stop
+}
+
+// FleetsIn maps each fleet of g to the vector's (owner, fleet id), as the
+// vector's orders and expectations refer to it: a fleet of the start by
+// its id while it exists, and a fleet made since by its number less one,
+// which is the original's fleet id.
+func (s Start) FleetsIn(g *engine.Game) map[[2]int]int {
+	started := map[int][2]int{}
+	for k, id := range s.Fleets {
+		started[id] = k
+	}
+	out := map[[2]int]int{}
+	for _, f := range g.Fleets {
+		if _, ok := started[f.ID]; !ok {
+			k := [2]int{f.Owner, f.Number - 1}
+			if _, dup := out[k]; !dup {
+				out[k] = f.ID
+			}
+		}
+	}
+	for _, f := range g.Fleets {
+		if k, ok := started[f.ID]; ok {
+			out[k] = f.ID
+		}
+	}
+	return out
+}

@@ -99,6 +99,9 @@ type pvRun struct {
 	// observe, when set, receives every expectation's outcome: "" when it
 	// matched, else the mismatch or "skip: " and the reason.
 	observe func(c pvCase, i int, msg string)
+	// turn, when set, generates each year in place of
+	// engine.GenerateTurn.
+	turn TurnFunc
 }
 
 // rand is the random source for year y.
