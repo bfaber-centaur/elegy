@@ -454,3 +454,22 @@ func TestResearchPassAfterSharesOnly(t *testing.T) {
 		t.Errorf("levels %v, accumulated %v; want energy 2 with 10, biotech 2 with 10", s.Levels, s.Accumulated)
 	}
 }
+
+// TestResearchPassesWithoutGR checks the same passes for a player without
+// Generalized Research: weapons, before the current field, levels first
+// with its stored 140, which raises propulsion's cost to 150, so this
+// year's 140 stays stored. KERNEL.md gives the pass mechanism
+// (BINARY-ONLY, stars-elegy 2f214f5) under Generalized Research; that a
+// player without it is checked the same way is an ASSUMPTION, as no
+// oracle case yet has stored research outside the current field without
+// Generalized Research.
+func TestResearchPassesWithoutGR(t *testing.T) {
+	race := pgRace()
+	s := ResearchState{Current: Propulsion, Next: NextSameField}
+	s.Levels = [NumFields]int{1, 1, 1, 1, 1, 1}
+	s.Accumulated[Weapons] = 140 // level 2 at a level sum of 6
+	s = AddResearch(s, race, 140, false)
+	if s.Levels != [NumFields]int{1, 2, 1, 1, 1, 1} || s.Accumulated[Weapons] != 0 || s.Accumulated[Propulsion] != 140 {
+		t.Errorf("levels %v, accumulated %v; want weapons 2, propulsion 1 with 140", s.Levels, s.Accumulated)
+	}
+}
