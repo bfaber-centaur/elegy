@@ -673,7 +673,11 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 // its kind out of the stored designs, at the end of the year that read
 // them: from the next year their cost leaves it out, and the written
 // files no longer have it (COMBAT.md "Parts the game drops from a
-// design"). Mass, fuel and cargo already leave it out (newDesign).
+// design"). CONFIRMED for salvage, CB-054 (stars-elegy 8384191, 2 of 2
+// streams): a misslotted Beam Deflector's cost counts in the year the
+// design is read and not the next, and the files after the first year
+// hold the design without it; target choice is not tested. Mass, fuel
+// and cargo already leave it out (newDesign).
 func (g *Game) dropMisslottedParts() {
 	for i, d := range g.Designs {
 		if len(d.SlotPos) != len(d.Slots) {
