@@ -56,8 +56,8 @@ func TestPredictionLateShipTokenValues(t *testing.T) {
 	// Regenerating Shields: shields × 7/5; armor parts count half
 	// (Mega Poly 200, Fielded Kelarium 87). The shield parts' armor
 	// (Langston Shell, Croby Sharmor) is not an armor part's, and counts
-	// whole (CONFIRMED for Croby Sharmor, CB-056, stars-elegy b0ca924; the
-	// Langston Shell is not observed).
+	// whole (CONFIRMED for Croby Sharmor, CB-056, stars-elegy b0ca924, and
+	// the Langston Shell, CB-058, stars-elegy 726d943).
 	rs := tokenValues(d, Race{LRT: LRTs{RegeneratingShields: true}}, false, Cost{})
 	if rs.shield != 469 || rs.maxShield != 469 || rs.armor != hull.Armor+65+200+65+87 {
 		t.Errorf("RS: shield %d max %d armor %d, want 469 469 %d", rs.shield, rs.maxShield, rs.armor, hull.Armor+417)
@@ -268,10 +268,11 @@ func TestMeasuredRG002RegeneratingShieldsArmor(t *testing.T) {
 	// 2 Organic Armor (175 each) took Delta Torpedo hits putting 26, 13,
 	// 13, 26, 26, 13 and 26 on its armor (shields 252 = 3 × 60 × 7/5).
 	// The recorded damage units, 21 32 43 64 85 96 117, fit only armor 625
-	// or 626: 450 + 350/2 (halved per slot, stars-elegy COMBAT.md "Armor",
-	// BINARY-ONLY), not 450 + 2 × 87 = 624 (per part, which gives 42 at
-	// the third hit). One slot does not tell per slot from the parts'
-	// total halved once (TestMeasuredCB057RegeneratingShieldsTwoSlots).
+	// or 626: 450 + 350/2 (halved per slot, stars-elegy COMBAT.md "Armor"),
+	// not 450 + 2 × 87 = 624 (per part, which gives 42 at the third hit).
+	// One slot does not tell per slot from the parts' total halved once;
+	// CB-057's two slots do (MEASURED, 374 not 375,
+	// TestMeasuredCB057RegeneratingShieldsTwoSlots).
 	d := lateDesign(t, "Rogue",
 		SlotFill{Slot: 0, Part: "Trans-Galactic Fuel Scoop", Count: 2},
 		SlotFill{Slot: 1, Part: "Wolverine Diffuse Shield", Count: 3},
@@ -420,7 +421,9 @@ func TestPredictionTorpedoCertainHit(t *testing.T) {
 	// (100 − (c − j))·(100 − acc)/100, and p ≥ 100 means every torpedo
 	// hits with no draw. A computer of 99 (sixteen Battle Nexus, CONFIRMED
 	// on CB-056's Nexus Star) against no jammer gives 100 − ⌊(100 − acc)/100⌋
-	// = 100 for every torpedo. The "all hit" branch is unobserved.
+	// = 100 for every torpedo. The "all hit" branch is MEASURED (CB-057,
+	// 24 salvos, stars-elegy 726d943), consistent with Elegy 89cbc6a
+	// (TestMeasuredCB057NexusTorpedoes).
 	for _, acc := range []int{20, 45, 80} {
 		if p := hitChance(acc, 99, 0); p != 100 {
 			t.Errorf("hitChance(%d, 99, 0) = %d, want 100", acc, p)
@@ -449,7 +452,10 @@ func TestPredictionTargetChoiceCostCap(t *testing.T) {
 	// cap: 20000 ships at cost 10 and at cost 20 both score 10^7, so at
 	// equal toughness the first in token order wins, though the second is
 	// dearer. With 1000 ships each the dearer stack is chosen (CONFIRMED
-	// at small sizes, CB-009). The cap itself is unobserved.
+	// at small sizes, CB-009). A common cap at or below 10,240,000 is
+	// MEASURED (CB-057, stars-elegy 726d943,
+	// TestMeasuredCB057TargetCostCap); its value 10^7, which this test
+	// pins, stays BINARY-ONLY.
 	plain := testDesign(Hull{Armor: 45}, 10)
 	dear := testDesign(Hull{Armor: 45}, 20)
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), plain, dear}
