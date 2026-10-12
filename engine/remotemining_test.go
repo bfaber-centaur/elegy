@@ -48,6 +48,7 @@ func TestRemoteMiningRefusals(t *testing.T) {
 		{"own planet, not AR: 0x076 (CONFIRMED TK-111)", 0, -1, home.Pos, 1, false, TaskNone, EventRemoteMineInhabited, home.ID},
 		{"another player's planet: 0x076 (CONFIRMED TK-111)", 1, -1, home.Pos, 1, false, TaskNone, EventRemoteMineInhabited, home.ID},
 		{"no modules at an owned planet: 0x075 first (BINARY-ONLY order)", 0, -1, home.Pos, 0, false, TaskNone, EventRemoteMineNoModules, home.ID},
+		{"deep space, no modules: 0x077 first (BINARY-ONLY order, e2fb8c1)", 0, -1, deep, 0, false, TaskNone, EventRemoteMineDeepSpace, -1},
 		{"deep space: 0x077 (BINARY-ONLY)", 0, -1, deep, 1, false, TaskNone, EventRemoteMineDeepSpace, -1},
 		{"AR at another player's planet: skipped silently, keeps task (BINARY-ONLY)", 1, 1, home.Pos, 1, false, TaskRemoteMine, 0, -1},
 		{"AR at its own planet mines (CONFIRMED KB-1B)", 0, 0, home.Pos, 1, true, TaskRemoteMine, 0, -1},
