@@ -172,7 +172,9 @@ The encoding is canonical: a game encodes to the same bytes every time,
 and a loaded game saves back byte for byte. `Hash` is the SHA-256 of
 those bytes. `Load` refuses an unknown format, another version, unknown
 fields, a state that fails `Check` and a level out of range (0..3 for a
-computer player, 0 for a human). Version 8 added each player's record of
+computer player, 0 for a human). Version 9 added each planet's ancient
+artifact (`engine.Planet.Artifact`); a version 8 save is refused because
+it would load with no artifacts, and nobody could find one. Version 8 added each player's record of
 its homeworld (`engine.Player.HasHomeworld`, `Homeworld`), which re-marks
 the homeworld every year; a version 7 save is refused because it would
 load with no records, and every homeworld would lose its mark after the

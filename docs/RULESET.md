@@ -25,11 +25,13 @@ included, not just the ID.
 
 | ID | Version | Settings |
 |---|---|---|
-| `elegy` | 4 | `engine.ElegyRules()`, the default: version 3 with `bare_record_drop` on. |
+| `elegy` | 5 | `engine.ElegyRules()`, the default: version 4 with `artifact_full_slower_tech` on. |
+| `elegy` | 4 | Version 3 with `bare_record_drop` on. Kept for games saved under it. |
 | `elegy` | 3 | Version 2 with `ai_wormhole_distance_wrap` on. Kept for games saved under it. |
 | `elegy` | 2 | Version 1 with `zero_max_population_stop` off, so an Alternate Reality planet with population and no starbase no longer stops the year (Bobby's "Keep going", 2026-10-08). Kept for games saved under it. |
 | `elegy` | 1 | The behaviour Elegy had before rulesets existed. Every switch on except `merge_overflow`, `keep_unentitled_parts` and `field_limit_511`, where Elegy has chosen its own rule. Kept for games saved under it. |
-| `jrc3-faithful` | 4 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. Version 3 with `bare_record_drop` on. |
+| `jrc3-faithful` | 5 | `engine.FaithfulRules()`: every legacy switch on. Only as faithful as the switches go; behaviour Elegy models differently without a switch is the same in both. Version 4 with `artifact_full_slower_tech` on. |
+| `jrc3-faithful` | 4 | Version 3 with `bare_record_drop` on. Kept for games saved under it. |
 | `jrc3-faithful` | 3 | Version 2 with `ai_wormhole_distance_wrap` on. Kept for games saved under it. |
 | `jrc3-faithful` | 2 | Version 1 with `cybertron_packet_mark_next_id` and `cybertron_scanner_shot_overflow` on. Kept for games saved under it. |
 | `jrc3-faithful` | 1 | Every switch that existed before the two Cybertron switches on. Kept for games saved under it. |
@@ -49,7 +51,8 @@ switch has it off: a new switch that is on in a built-in ruleset makes
 a new version of that ruleset, and one that is off leaves the version
 alone (the two Cybertron switches made `jrc3-faithful` v2 and left `elegy` at
 v2; `ai_wormhole_distance_wrap`, on in both, made `elegy` v3 and
-`jrc3-faithful` v3; `bare_record_drop`, on in both, made both v4).
+`jrc3-faithful` v3; `bare_record_drop`, on in both, made both v4;
+`artifact_full_slower_tech`, on in both, made both v5).
 
 ## Switch inventory
 
@@ -64,7 +67,7 @@ opponents, the player report's `Rules`); no package-level compatibility
 constant or variable remains. A function that has no game takes the
 switch as a parameter from a caller that does.
 
-| Saved name | Field | `elegy` v4 | `jrc3-faithful` v4 | Read in | Spec and evidence |
+| Saved name | Field | `elegy` v5 | `jrc3-faithful` v5 | Read in | Spec and evidence |
 |---|---|---|---|---|---|
 | `fuel_wrap` | `FuelWrap` | on | on | `engine/fleetships.go` `NewFleetShips` (used by `Game.Ships` and by planners, from a valid ruleset), read by `fuelTermWrap` in `engine/movement.go` | KERNEL.md "Designs without a full set of engines", LEGACY BUG, CONFIRMED FM-105 |
 | `colocation` | `Colocation` | on | on | `engine/scanning.go` `seesFleet` | SCANNING.md "Co-location", LEGACY BUG, CONFIRMED SC-002, SC-014. Off: a scanner is needed and cloaking applies at distance 0 too, so a fleet with no scanner part sees no fleet, also at its own position (ELEGY CHOICE, `TestElegyDecisionColocationOff`) |
@@ -78,6 +81,7 @@ switch as a parameter from a caller that does.
 | `keep_unentitled_parts` | `KeepUnentitledParts` | off | on | `engine/fleetops.go` `Catalog.ReadDesign` (takes the ruleset) | ORDERS.md "Design legality (Mystery Trader parts kept)", LEGACY BUG, CONFIRMED |
 | `zero_max_population_stop` | `ZeroMaxPopulationStop` | off (on in v1) | on | `engine/turn.go` `GenerateTurn` (`checkGenerable`) | KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1; see below |
 | `bare_record_drop` | `BareRecordDrop` | on (off in v1–v3) | on (off in v1–v3) | `engine/population.go` `Game.dropBareRecords`, when the year's files are written | stars-elegy 9a355fe TAKEOVER.md "Capture: what a planet keeps": an unowned planet with no mines, factories, defenses or scanner is written without its installations record, so it loses its growth carry and leftover setting, LEGACY BUG (a file round trip artifact); the behaviour BINARY-ONLY, MEASURED RG-001 planets 50 and 87 |
+| `artifact_full_slower_tech` | `ArtifactFullSlowerTech` | on (off in v1–v4) | on (off in v1–v4) | `engine/artifact.go` `Game.findArtifact` | stars-elegy 7c06f47 TAKEOVER.md "Ancient artifacts": slower tech does not halve an artifact's points, LEGACY BUG in the binary reading (the halving is computed and never used), MEASURED TK-304. Off: half the points are stored, rounded up as slower tech stores stolen research (ELEGY CHOICE, not measured; no built-in uses it; `TestElegyChoiceArtifactHalvedSwitchOff`) |
 | `field_limit_511` | `FieldLimit511` | off | on | `objects/minefields.go` `Space.Lay` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
 | `empty_fleet_salvage` | `EmptyFleetSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Hits on moving fleets", LEGACY BUG candidate, MEASURED OB-024 |
 | `due_north_south_cut` | `DueNorthSouthCut` | on | on | `objects/minefields.go` `CheckStep` | OBJECTS.md "Due-north and due-south legs", LEGACY BUG, MEASURED MF-15 |

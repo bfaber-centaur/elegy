@@ -210,6 +210,10 @@ type Planet struct {
 	HasPacketDest bool
 	PacketDest    int
 	PacketSpeed   int
+
+	// Artifact marks an ancient artifact on the planet, found by its
+	// owner after a drop resolution (artifact.go).
+	Artifact bool
 }
 
 type TurnResult struct {
