@@ -191,3 +191,39 @@ Answering the rolls turned up one mechanics difference, now fixed: on a
 shielded target the misses' shield damage is a hit record of its own,
 before the salvo's hit record (stars-elegy COMBAT.md "Torpedoes and
 missiles", CONFIRMED CB-049). Elegy had merged the two.
+
+## Random cases, one by one
+
+**CB-009 (passes with 7 of 8 seeds).** The failing variant, 7, differs
+only at K8's salvage (x 1300): boranium 1 where the original left 0
+(salvage [3 1 3] against [3 0 3]). The cause is the torpedo accuracy
+rolls, not the walk of the fleeing tokens:
+
+- K8's 10 Beta Cruisers fire 20 torpedoes per salvo at 3 Shield
+  Frigates, with rolled hits (20 is at most 200). Salvage is a third of
+  the killed ships' cost per kill event, truncated (stars-elegy COMBAT.md
+  "Salvage", CONFIRMED). A frigate costs 1 kT boranium, so killing all
+  three in one salvo leaves 1 kT and killing them over two or three
+  salvos leaves 0.
+- The original killed them as 1 then 2 (run1) and 1, 1, 1 (run2). Elegy
+  kills them as 1 then 2 with the reference seed, and as 3 in one salvo
+  with variant 7.
+- The frigates move every round in both runs' records, a walk with its
+  own draws, and the cruisers hold their square once in range. With the torpedo rolls fixed and every
+  other draw left to the seed, every one of 400 variants passed. With only
+  the torpedo rolls left to the seed, 3 of 400 failed; with Elegy's plain
+  seeding, 4 of 400 failed (seeds 7, 20, 169 and 397). MEASURED on Elegy,
+  `TestCB009RandomIsTorpedoRolls` keeps the first result for the 8 seeds.
+
+**RG-001-Y5-2434, seed variant 4: player 2's minefield.** Random: a mine
+hit draw. Player 1's one-ship fleet crosses player 2's standard field at
+1340,1269 at warp 7 (9 per mille per light-year, `objects.CheckStep`).
+With variant 4 it is hit and lost. Player 2's fleets chasing it then stop
+at 1325,1260 instead of 1324,1257, no battle leaves salvage there, the
+field ends with 798 mines instead of 824, and player 1 learns of it. In
+the original the fleet crossed unhit: the field is known only to player 2.
+With every mine-hit draw answered "no hit" and every other draw left to
+the variant, the minefield, salvage and player-2 fleet expectations hold
+on all 8 variants (`TestRG001Y5MinefieldIsHitDraws`). Variant 4 then
+passes the whole case. The variants that fail then fail on a research
+line and a production-queue line, which are unrelated to the minefield. No code change is needed.
