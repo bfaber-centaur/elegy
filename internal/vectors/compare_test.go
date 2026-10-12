@@ -213,10 +213,10 @@ func TestRunComparesYearsBeforeUnappliedOrders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	v.Orders = append(v.Orders, pvOrderBlock{Year: 2, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "design_delete", "slot": 0}`)}})
+	v.Orders = append(v.Orders, pvOrderBlock{Year: 2, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "no_such_kind"}`)}})
 	r := Run(v, 0)[0]
-	if r.Status != "pass" || !slices.Contains(r.Skipped, "order design_delete") {
-		t.Errorf("status %s, why %q, skipped %q; want a pass with order design_delete skipped", r.Status, r.Why, r.Skipped)
+	if r.Status != "pass" || !slices.Contains(r.Skipped, "order no_such_kind") {
+		t.Errorf("status %s, why %q, skipped %q; want a pass with order no_such_kind skipped", r.Status, r.Why, r.Skipped)
 	}
 	e := &v.Cases[0].Expect[0]
 	if e.Year != 1 {
@@ -241,13 +241,13 @@ func TestRunTalliesWhollySkippedCase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	v.Orders = append(v.Orders, pvOrderBlock{Year: 1, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "design_delete", "slot": 0}`)}})
+	v.Orders = append(v.Orders, pvOrderBlock{Year: 1, Player: 0, Orders: []json.RawMessage{json.RawMessage(`{"kind": "no_such_kind"}`)}})
 	r := Run(v, 0)[0]
 	if r.Status != "skip" || len(r.Skipped) != len(v.Cases[0].Expect) {
 		t.Fatalf("status %s, skipped %q; want a skip tallying all %d expectations", r.Status, r.Skipped, len(v.Cases[0].Expect))
 	}
 	for _, why := range r.Skipped {
-		if why != "order design_delete" && !strings.HasPrefix(why, "stream ") {
+		if why != "order no_such_kind" && !strings.HasPrefix(why, "stream ") {
 			t.Errorf("skipped %q", why)
 		}
 	}

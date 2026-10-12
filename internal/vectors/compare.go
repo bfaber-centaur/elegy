@@ -35,6 +35,9 @@ type Comparison struct {
 	Variant int      `json:"variant"`
 	Cases   []Result `json:"cases"`
 	Fields  []Field  `json:"fields"`
+	// Rejected lists the vector's orders Elegy refused: year, player, the
+	// order's index in the player's orders, its kind and the reason.
+	Rejected []string `json:"rejected_orders,omitempty"`
 }
 
 // splitKinds are the expectation kinds whose equals fields are checked
@@ -53,6 +56,9 @@ func Compare(v *Vector, variant int) Comparison {
 	out := Comparison{ID: v.ID, Years: v.Years, Variant: variant, Cases: []Result{}, Fields: []Field{}}
 	l, games, genErr, stop := generate(v, run)
 	out.Cases = checkCases(v, run, l, games, genErr, stop)
+	if l != nil {
+		out.Rejected = l.rejected
+	}
 	for _, c := range v.Cases {
 		for _, e := range c.Expect {
 			out.Fields = append(out.Fields, l.fields(run, c, e, games, genErr, stop)...)
