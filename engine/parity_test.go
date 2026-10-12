@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -37,8 +36,11 @@ type pvVector struct {
 	Cases        []pvCase `json:"cases"`
 	// Orders are the orders players submitted (FORMAT.md "orders").
 	Orders []pvOrderBlock `json:"orders"`
-	path   string         // corpus/run
-	corpus string
+	// RandomStart is where each stream's years started (streams_test.go;
+	// a proposed field, not yet in FORMAT.md).
+	RandomStart []pvRandomStart `json:"random_start"`
+	path        string          // corpus/run
+	corpus      string
 }
 
 type pvState struct {
@@ -1557,10 +1559,14 @@ func pvKeys[V any](m map[string]V) []string {
 	return keys
 }
 
-// runVector generates the vector's years once and checks every case.
 // runVector generates v's years with the seed variant k (0 is the
 // harness's reference seeding) and checks its cases.
 func runVector(v *pvVector, k int) []pvResult {
+	return runVectorWith(v, pvRun{seed: k})
+}
+
+// runVectorWith generates v's years as run says and checks its cases.
+func runVectorWith(v *pvVector, run pvRun) []pvResult {
 	var out []pvResult
 	res := func(c pvCase, status, why string) {
 		out = append(out, pvResult{id: c.ID, corpus: v.corpus, tag: c.Tag, status: status, why: why})
@@ -1591,7 +1597,7 @@ func runVector(v *pvVector, k int) []pvResult {
 			}
 			return out
 		}
-		r, err := GenerateTurn(withRules(g), files, rand.New(rand.NewSource(int64(y)+int64(k)<<32)))
+		r, err := GenerateTurn(withRules(g), files, run.rand(y))
 		if err != nil {
 			genErr = err
 			break
@@ -1613,20 +1619,23 @@ func runVector(v *pvVector, k int) []pvResult {
 		// checked counts the compared expectations; exact, those of them
 		// that are not samples.
 		checked, exact := 0, 0
-		for _, e := range c.Expect {
-			if e.Stream != "" {
+		for i, e := range c.Expect {
+			if !run.checks(e) {
 				skips = append(skips, "stream "+e.Stream)
+				run.observe1(c, i, "skip: stream "+e.Stream)
 				continue
 			}
 			if e.Year >= len(games) {
 				fails = append(fails, fmt.Sprintf("year %d not generated: %v", e.Year, genErr))
+				run.observe1(c, i, "year not generated")
 				continue
 			}
 			msg := l.pvCheck(&games[e.Year], e)
+			run.observe1(c, i, msg)
 			switch {
 			case strings.HasPrefix(msg, "skip: "):
 				skips = append(skips, strings.TrimPrefix(msg, "skip: "))
-			case msg != "" && e.Sample:
+			case msg != "" && run.sample(e):
 				skips = append(skips, "sample: one stream's random outcome")
 			case msg != "":
 				checked++
@@ -1634,7 +1643,7 @@ func runVector(v *pvVector, k int) []pvResult {
 				fails = append(fails, fmt.Sprintf("y%d %s: %s", e.Year, e.Kind, msg))
 			default:
 				checked++
-				if !e.Sample {
+				if !run.sample(e) {
 					exact++
 				}
 			}
