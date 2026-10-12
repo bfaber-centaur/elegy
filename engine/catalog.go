@@ -680,8 +680,10 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 // design"). CONFIRMED for salvage, CB-054 (stars-elegy 8384191, 2 of 2
 // streams): a misslotted Beam Deflector's cost counts in the year the
 // design is read and not the next, and the files after the first year
-// hold the design without it; target choice is not tested. Mass, fuel
-// and cargo already leave it out (newDesign).
+// hold the design without it. CONFIRMED for target choice, CB-055
+// (stars-elegy b1e38ef, 18 of 20 battles, the other 2 out of reach at
+// the first shot; TestConfirmedDroppedPartTargetChoice). Mass, fuel and
+// cargo already leave it out (newDesign).
 func (g *Game) dropMisslottedParts() {
 	for i, d := range g.Designs {
 		w := d.working()
