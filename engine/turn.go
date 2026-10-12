@@ -595,8 +595,9 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		views[v].Scores = g.visibleScores(v, scores)
 	}
 	// As each player's file is written: the retarget of other players'
-	// fleets, then patrol intercepts (ORDERS.md).
-	g.fileRetarget()
+	// fleets that are gone or that the owner does not see, then patrol
+	// intercepts (ORDERS.md).
+	events = append(events, g.fileRetarget(views)...)
 	g.patrol(views)
 
 	// The year's files are written: numbers held by fleets that went away

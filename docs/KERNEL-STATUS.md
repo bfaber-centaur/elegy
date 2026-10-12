@@ -103,19 +103,27 @@ the repeat flag in an order yet; `validTask` in `orders.go` belongs to
 that lane.
 
 Waypoint 0 keeps its task while the fleet is in transit (ORDERS.md Q2,
-MEASURED WU-ROUTE). When the year's files are written, a waypoint aimed
-at another player's fleet becomes a plain position (ORDERS.md Q1,
-BINARY-ONLY; WU-A fleet 13 shows the target's current position as
-space, and the vector agrees). At the end of the turn, a patrol fleet
+MEASURED WU-ROUTE). As the year's files are written, a waypoint aimed
+at another player's fleet, friend or enemy, keeps it while its owner
+sees it; one out of sight becomes a plain position at the fleet's actual
+position (0x02a), or its planet when at one (0x029), and one whose
+target is gone a plain position at its last coordinates (0x028)
+(`fileRetarget`; W5 below). At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and
 WU-RNG20). A computer player never accepts a gifted fleet (ORDERS.md,
 CONFIRMED WU-AICOMP3/4; `Player.Computer`).
 
-- **W5 (ASSUMPTION).** The enemy-target rewrite is applied to the game
-  state itself, not only to the written file, so next year's waypoint
-  check sees a plain position.
+- **W5 (MEASURED WF-01..05, one stream; the earlier W5 is contradicted).**
+  Another player's fleet, friend or enemy, stays a waypoint's target, in
+  the game and the owner's file, while the owner sees it, at its
+  end-of-year position; one no scanner of the owner's saw becomes a plain
+  position at its actual end-of-year position (0x02a); one scrapped
+  before movement becomes a plain position at its last position (0x028)
+  (PARITY "Representative game (RG-001)" WF-01..05 and ORDERS.md
+  "Contradicted in part", stars-elegy 30272be). The 0x029 planet case is
+  BINARY-ONLY (MESSAGES.md).
 - **P1 (ASSUMPTION).** "Enemy" for patrol is the player relation enemy;
   neutral fleets are not acquired.
 
@@ -555,7 +563,7 @@ WT 18) as of this list.
 
 **Unmodelled steps:** see "Not modelled yet" above.
 
-**Open questions:** K2 and K7 below; ASSUMPTIONs O9–O14, W1–W5, P1 and
+**Open questions:** K2 and K7 below; ASSUMPTIONs O9–O14, W1–W4, P1 and
 S5 above.
 
 ## Open spec questions

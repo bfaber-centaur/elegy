@@ -257,3 +257,77 @@ func TestMeasuredRouteTaskStargate(t *testing.T) {
 		}
 	}
 }
+
+func TestMeasuredWFFileRetarget(t *testing.T) {
+	// MEASURED W5 (waypoints.go fileRetarget; WF-01..05, stars-elegy
+	// 30272be): a waypoint aimed at another player's fleet keeps it while
+	// the owner sees it; one unseen becomes space at its actual position
+	// (0x02a), or its planet when at one (0x029, BINARY-ONLY); a gone one
+	// becomes space at the last position (0x028); an own fleet stays the
+	// target.
+	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}},
+		Planets: []Planet{{ID: 7, Pos: Point{50, 50}}},
+		Fleets: []Fleet{
+			{ID: 1, Owner: 0, Waypoints: []Waypoint{
+				{Pos: Point{10, 0}, Target: TargetFleet, ID: 2},
+				{Pos: Point{80, 0}, Target: TargetFleet, ID: 3},
+				{Pos: Point{40, 40}, Target: TargetFleet, ID: 5},
+				{Pos: Point{5, 0}, Target: TargetFleet, ID: 4},
+				{Pos: Point{70, 0}, Target: TargetFleet, ID: 99},
+			}},
+			{ID: 2, Owner: 1, Pos: Point{10, 0}},
+			{ID: 3, Owner: 1, Pos: Point{90, 0}},
+			{ID: 4, Owner: 0, Pos: Point{5, 0}},
+			{ID: 5, Owner: 1, Pos: Point{50, 50}},
+		}}
+	views := []PlayerView{{Player: 0, Fleets: []FleetSighting{{Fleet: 2, Owner: 1, Pos: Point{10, 0}}}}, {Player: 1}}
+	ev := g.fileRetarget(views)
+	want := []Waypoint{
+		{Pos: Point{10, 0}, Target: TargetFleet, ID: 2},
+		{Pos: Point{90, 0}},
+		{Pos: Point{50, 50}, Target: TargetPlanet, ID: 7},
+		{Pos: Point{5, 0}, Target: TargetFleet, ID: 4},
+		{Pos: Point{70, 0}},
+	}
+	if got := g.Fleets[0].Waypoints; !reflect.DeepEqual(got, want) {
+		t.Errorf("waypoints %v, want %v", got, want)
+	}
+	var kinds []EventKind
+	for _, e := range ev {
+		kinds = append(kinds, e.Kind)
+	}
+	if !reflect.DeepEqual(kinds, []EventKind{EventTargetOutOfView, EventTargetAtPlanet, EventTargetGone}) || ev[1].Planet != 7 {
+		t.Errorf("events %v, want out of view, at planet 7, gone", ev)
+	}
+}
+
+func TestMeasuredWFRetargetInTurn(t *testing.T) {
+	// MEASURED W5 (WF-01..05, stars-elegy 30272be) through GenerateTurn:
+	// player 0's scout aims at player 1's fleet 800 ly away, out of every
+	// scanner of player 0's, so the year ends with the waypoint at the
+	// target's position in space and player 0's 0x02a.
+	l := followLab(t, 1)
+	scout := l.g.Fleets[0].Stacks[0].Design
+	pi := l.planet(NoOwner, 0, 0)
+	ti := l.fleet(1, pi, 0, Stack{Design: scout, Count: 1})
+	l.g.Fleets[ti].Pos = Point{1200, 2000}
+	target := l.g.Fleets[ti].ID
+	l.g.Fleets[0].Waypoints = []Waypoint{
+		{Pos: Point{1200, 1200}},
+		{Pos: Point{1200, 2000}, Target: TargetFleet, ID: target, Warp: 5},
+	}
+	r := followTurn(t, l)
+	f := followed(t, r.Game, 1)
+	if n := len(f.Waypoints); n == 0 || f.Waypoints[n-1].Target != TargetSpace || f.Waypoints[n-1].Pos != (Point{1200, 2000}) {
+		t.Errorf("waypoints %v, want the last in space at (1200, 2000)", f.Waypoints)
+	}
+	var got []Event
+	for _, e := range r.Events {
+		if e.Kind == EventTargetOutOfView {
+			got = append(got, e)
+		}
+	}
+	if len(got) != 1 || got[0].Player != 0 || got[0].Fleet != 1 {
+		t.Errorf("out-of-view events %v, want one for player 0's fleet 1", got)
+	}
+}
