@@ -207,6 +207,10 @@ Still open:
    (`D > s`, which corrupts the original's record), every ship of the
    design is destroyed. A design's ships are taken as one stack with its
    first stack's damage.
+2. **G5** A Regenerating Shields owner's ships take gate damage on the
+   plain armor. Mine damage uses the battle's halved armor parts (MEASURED,
+   CB-056), but RS at a gate is unobserved
+   (`TestAssumptionGateDamageRegeneratingShieldsPlainArmor`).
 
 
 ## Salvage

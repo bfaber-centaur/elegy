@@ -120,3 +120,20 @@ func TestPredictionMineDamageRegeneratingShieldsCroby(t *testing.T) {
 		t.Errorf("RS Croby Battleships: %+v, want 100%% at 258/500", got)
 	}
 }
+
+// With Regenerating Shields each armor part's armor is halved and
+// truncated per part, as the battle token does (COMBAT.md "Token
+// values"; the per-part truncation BINARY-ONLY): three Fielded Kelarium
+// (175 each) add 3 × 87, not ⌊3 × 175/2⌋ = 262.
+func TestPredictionRegeneratingShieldsArmorPerPart(t *testing.T) {
+	d, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
+		{Slot: 0, Part: "Trans-Galactic Drive", Count: 4},
+		{Slot: 8, Part: "Fielded Kelarium", Count: 3},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a, plain := designArmor(d, true), designArmor(d, false); a != 2000+261 || plain != 2000+525 {
+		t.Errorf("armor RS %d plain %d, want 2261 2525", a, plain)
+	}
+}

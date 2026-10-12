@@ -290,7 +290,7 @@ func Jump(g *engine.Game, fi int, dest engine.Point, rng engine.Rand) GateJump {
 			gd.Lost, lostAny = true, true
 			count -= 2
 		default:
-			armor := designArmor(dsg, false) // RS at a gate is unobserved: the plain armor
+			armor := designArmor(dsg, false) // ASSUMPTION G5: plain armor under RS
 			old := firstDamage(f, gr.design)
 			D, Dm := 0, 0
 			if old.Pct > 0 && old.Units > 0 {

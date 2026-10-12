@@ -165,7 +165,7 @@ Also observed: the Nexus Star token had initiative 63 and computer 99
 Battle Nexus. The weapon initiative, the Death Star's reach and its 1500
 armor were not measured and stay predictions. A Regenerating Shields
 owner at a stargate is not observed: `objects/stargates.go` keeps the
-plain armor.
+plain armor (ASSUMPTION G5, OBJECTS-STATUS.md).
 
 ### Settled by current COMBAT.md
 
