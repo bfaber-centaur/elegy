@@ -96,15 +96,17 @@ func (t *token) toughArmor() int {
 }
 
 // battleDesign is design d as a battle sees it: without the parts in hull
-// slots that do not take their kind, and without their mass. Such designs
-// exist only in states written directly (Catalog.newDesign, ASSUMPTION
-// K10). The design's cost keeps the parts: salvage counts them (CB-009).
+// slots that do not take their kind (their mass is already left out,
+// Catalog.newDesign). Such designs exist only in states written directly,
+// in the year that reads them. The design's cost keeps the parts: salvage
+// counts them (CB-009), and so does the token's armor, computed with the
+// cost (COMBAT.md "Parts the game drops from a design", BINARY-ONLY).
 //
 // MEASURED (the vectors' battle records, CB-009 two streams and CB-010):
 // a Beam Deflector in a Frigate's or a Small Freighter's shield-or-armor
 // slot gave deflector 100 and a mass 1 lower, and a Fuel Tank in a
-// Frigate's scanner slot a mass 3 lower. That the part is left out of
-// every other token value as well is an ASSUMPTION.
+// Frigate's scanner slot a mass 3 lower. COMBAT.md: everything else
+// computed from the parts leaves it out.
 func battleDesign(d Design) Design {
 	if len(d.SlotPos) != len(d.Slots) {
 		return d
@@ -113,7 +115,6 @@ func battleDesign(d Design) Design {
 	var pos []int
 	for i, s := range d.Slots {
 		if p := d.SlotPos[i]; p >= 0 && p < len(d.Hull.Slots) && !kindIn(s.Part.Kind, d.Hull.Slots[p].Kinds) {
-			d.Mass -= s.Count * s.Part.Mass
 			continue
 		}
 		slots = append(slots, s)

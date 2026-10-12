@@ -566,8 +566,9 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 		ds, err := cat.NewDesign(name, d.Hull, fills)
 		if err != nil && strings.Contains(err.Error(), "does not take") {
 			// A design written directly into the oracle's state, with a
-			// part in a slot the client would not allow, is kept (ASSUMPTION
-			// K10, Catalog.NewDesignAnyKind).
+			// part in a slot the client would not allow, keeps it for the
+			// year's cost (Catalog.NewDesignAnyKind; COMBAT.md "Parts the
+			// game drops from a design").
 			ds, err = cat.NewDesignAnyKind(name, d.Hull, fills)
 		}
 		if err != nil && !starbase {

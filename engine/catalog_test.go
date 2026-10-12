@@ -420,3 +420,61 @@ func TestConfirmedPlanetaryCatalogue(t *testing.T) {
 		}
 	}
 }
+
+// TestMisslottedPartThisYear: a part in a hull slot that does not take
+// its kind counts in the design's cost and in the battle token's armor in
+// the year that reads the design, and in nothing else computed from the
+// parts; at the end of the year it leaves the stored design (COMBAT.md
+// "Parts the game drops from a design"; armor BINARY-ONLY).
+func TestMisslottedPartThisYear(t *testing.T) {
+	cat := Components()
+	fills := []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}}
+	bare, err := cat.NewDesign("bare", "Frigate", fills)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err := cat.NewDesignAnyKind("armored", "Frigate", append(fills, SlotFill{Slot: 1, Part: "Tritanium", Count: 1}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.Mass != bare.Mass || d.FuelCapacity != bare.FuelCapacity || d.CargoCapacity != bare.CargoCapacity {
+		t.Errorf("mass, fuel, cargo %d %d %d, want the design without the part's %d %d %d", d.Mass, d.FuelCapacity, d.CargoCapacity, bare.Mass, bare.FuelCapacity, bare.CargoCapacity)
+	}
+	var lv [NumFields]int
+	if designCost(d, Race{}, lv) == designCost(bare, Race{}, lv) {
+		t.Error("this year's cost leaves the part out")
+	}
+	plan := []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies}}
+	g := &Game{
+		Rules: ElegyRules(),
+		Players: []Player{
+			{Plans: plan, Relations: []Relation{RelationFriend, RelationEnemy}},
+			{Plans: plan, Relations: []Relation{RelationEnemy, RelationFriend}},
+		},
+		Designs: []Design{d, bare},
+		Fleets: []Fleet{
+			{ID: 1, Owner: 0, Pos: Point{5, 5}, Stacks: []Stack{{Design: 0, Count: 1}}},
+			{ID: 2, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}},
+		},
+	}
+	loc := g.locations()[0]
+	sets, inv, n := g.whoFights(loc, locationHistory{})
+	b := &battle{g: g, rng: &seqRand{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+	b.setup(map[int]bool{})
+	want, without := tokenValues(d, Race{}, false, Cost{}).armor, tokenValues(bare, Race{}, false, Cost{}).armor
+	if want <= without {
+		t.Fatalf("Tritanium adds no armor: %d, %d", want, without)
+	}
+	for _, tk := range b.tokens {
+		if tk.player == 0 && (tk.armor != want || tk.mass != bare.Mass) {
+			t.Errorf("token armor %d, mass %d; want armor %d with the Tritanium, mass %d without", tk.armor, tk.mass, want, bare.Mass)
+		}
+	}
+	g.dropMisslottedParts()
+	if got := g.Designs[0]; len(got.Slots) != 2 || len(got.SlotPos) != 2 || designCost(got, Race{}, lv) != designCost(bare, Race{}, lv) || got.Mass != bare.Mass {
+		t.Errorf("after the year: %d slots, cost %+v; want the design without the part, cost %+v", len(got.Slots), designCost(got, Race{}, lv), designCost(bare, Race{}, lv))
+	}
+	if got := g.Designs[1]; len(got.Slots) != len(bare.Slots) {
+		t.Errorf("a valid design lost a part: %+v", got)
+	}
+}
