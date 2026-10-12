@@ -93,6 +93,21 @@ type pvRecordedBattle struct {
 	hasActions             bool
 }
 
+// BattleStart is a vector's starting state for this test, with how the
+// vector's fleet and planet ids map to Elegy's.
+type BattleStart struct {
+	Game    Game
+	Fleets  map[[2]int]int // (owner, vector fleet id) → Elegy fleet ID
+	Planets map[int]int    // vector planet id → Elegy planet ID
+	Skip    string         // why every case of the vector is skipped, if one is
+}
+
+// BattleStartOf builds the start of the vector at path ("cb/cb010.json").
+// The vector loader, package vectors, imports engine, so this package's
+// tests reach it through battle_vectors_test.go (package engine_test),
+// which sets this.
+var BattleStartOf func(path string) (BattleStart, error)
+
 // pvBattleOutcome is what the comparison found for one recorded battle.
 type pvBattleOutcome struct {
 	tokens string // "" when the token lists match, else the first difference
@@ -217,7 +232,7 @@ func pvRecordCapacitor(c int) int {
 
 // matchTokens puts b's tokens in the record's order and compares their
 // values. It returns the first difference, or "".
-func (l *pvLoaded) matchTokens(b *battle, rec []pvBattleToken) string {
+func (l *BattleStart) matchTokens(b *battle, rec []pvBattleToken) string {
 	g := b.g
 	key := func(owner int, starbase bool, slot, obj int) string {
 		return fmt.Sprintf("%d %t %d %d", owner, starbase, slot, obj)
@@ -248,9 +263,9 @@ func (l *pvLoaded) matchTokens(b *battle, rec []pvBattleToken) string {
 		var obj int
 		switch {
 		case r.Kind == "starbase" && r.Planet != nil:
-			obj = l.planet[*r.Planet]
+			obj = l.Planets[*r.Planet]
 		case r.Kind == "ships" && r.Fleet != nil:
-			obj = l.fleetID[pvFleetKey(r.Owner, *r.Fleet)]
+			obj = l.Fleets[[2]int{r.Owner, *r.Fleet}]
 		default:
 			return fmt.Sprintf("token %d: kind %q", i, r.Kind)
 		}
@@ -358,15 +373,15 @@ func replayHits(b *battle, actions []pvBattleAction, out *pvBattleOutcome) {
 }
 
 // compareBattle runs the comparison for one recorded battle.
-func compareBattle(l *pvLoaded, r pvRecordedBattle) pvBattleOutcome {
+func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	var out pvBattleOutcome
 	for _, a := range r.actions {
 		out.total += len(a.Hits)
 	}
-	g := withRules(l.g.clone()) // the battle changes fleets and planets
+	g := withRules(l.Game.clone()) // the battle changes fleets and planets
 	for _, rt := range r.tokens {
 		if rt.Kind == "ships" && rt.Fleet != nil {
-			if _, ok := l.fleetID[pvFleetKey(rt.Owner, *rt.Fleet)]; !ok {
+			if _, ok := l.Fleets[[2]int{rt.Owner, *rt.Fleet}]; !ok {
 				// Production comes before battles (COMBAT.md
 				// "Starbases"), so a fleet built this year fights; this
 				// test starts from the year's start.
@@ -397,10 +412,6 @@ func compareBattle(l *pvLoaded, r pvRecordedBattle) pvBattleOutcome {
 // that is the random level (docs/RANDOM-PARITY.md).
 func TestBattleRecords(t *testing.T) {
 	records := loadBattleRecords(t)
-	vectors := map[string]*pvVector{}
-	for _, v := range loadVectors(t) {
-		vectors[v.path] = v
-	}
 	type tally struct {
 		records, tokens, built, full, draws int
 		compared, matched, total            int
@@ -417,9 +428,9 @@ func TestBattleRecords(t *testing.T) {
 			per[corpus] = &tally{}
 		}
 		c := per[corpus]
-		l, err := loadVector(vectors[name])
-		if err == nil && l.global != "" {
-			err = fmt.Errorf("%s", l.global)
+		l, err := BattleStartOf(name)
+		if err == nil && l.Skip != "" {
+			err = fmt.Errorf("%s", l.Skip)
 		}
 		for _, r := range records[name] {
 			where := fmt.Sprintf("%s %s %q (%d,%d)", name, r.caseID, r.stream, r.x, r.y)
@@ -431,7 +442,7 @@ func TestBattleRecords(t *testing.T) {
 				t.Errorf("%s: load: %v", where, err)
 				continue
 			}
-			o := compareBattle(l, r)
+			o := compareBattle(&l, r)
 			switch {
 			case o.built:
 				c.built++
@@ -474,7 +485,7 @@ func TestBattleRecords(t *testing.T) {
 // a recorded token value or hit changed by one, and a round with draws.
 func TestBattleRecordHarness(t *testing.T) {
 	records := loadBattleRecords(t)
-	l, err := loadVector(pvFind(t, "cb/cb010.json"))
+	l, err := BattleStartOf("cb/cb010.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -484,13 +495,13 @@ func TestBattleRecordHarness(t *testing.T) {
 			r = x
 		}
 	}
-	if o := compareBattle(l, r); o.tokens != "" || o.stop != "" || o.compared == 0 || o.compared != o.total {
+	if o := compareBattle(&l, r); o.tokens != "" || o.stop != "" || o.compared == 0 || o.compared != o.total {
 		t.Fatalf("CB-010 at 1060: %+v, want every hit replayed", o)
 	}
 	mass := r
 	mass.tokens = append([]pvBattleToken(nil), r.tokens...)
 	mass.tokens[3].Mass++
-	if o := compareBattle(l, mass); o.tokens == "" {
+	if o := compareBattle(&l, mass); o.tokens == "" {
 		t.Error("a changed token mass was not noticed")
 	}
 	kills := r
@@ -503,29 +514,18 @@ func TestBattleRecordHarness(t *testing.T) {
 			break
 		}
 	}
-	if o := compareBattle(l, kills); o.stop == "" || o.draws {
+	if o := compareBattle(&l, kills); o.stop == "" || o.draws {
 		t.Errorf("a changed kill count was not noticed: %+v", o)
 	}
-	lb, err := loadVector(pvFind(t, "cs/cs003c.json"))
+	lb, err := BattleStartOf("cs/cs003c.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	drawn := false
 	for _, x := range records["cs/cs003c.json"] {
-		drawn = drawn || compareBattle(lb, x).draws
+		drawn = drawn || compareBattle(&lb, x).draws
 	}
 	if !drawn {
 		t.Error("no CS-003-C torpedo battle stopped at its draws")
 	}
-}
-
-// pvFind returns the vector at path.
-func pvFind(t *testing.T, path string) *pvVector {
-	for _, v := range loadVectors(t) {
-		if v.path == path {
-			return v
-		}
-	}
-	t.Fatalf("no vector %s", path)
-	return nil
 }
