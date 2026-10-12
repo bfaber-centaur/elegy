@@ -16,7 +16,7 @@ Every order is accounted for. Lane F's coverage check (`/mnt/project-files/rg002
 
 Two tests check the ledger exactly: `internal/vectors` `TestRG002Ledger` for fields and orders, and `engine` `TestBattleRecords` for battle records. Either one fails on a line the run produces that the ledger lacks, and on a ledger line the run no longer produces. So a fix fails until its lines leave the ledger, and nothing is skipped.
 
-Run on: elegy main `fcf16e0` (with #189 and #190) plus this change. The final run on the integrated main SHA is still to come and will replace these numbers.
+Run on: elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors), with the full test set, the ledger, the 8-seed matrix and the long-game matrix. That run is in [PARITY-STATUS.md](PARITY-STATUS.md) "RG-002".
 
 ## Classes
 
@@ -32,7 +32,7 @@ These are classified by hand, with an owner. They cover a field that misses on a
 - **incorrect mechanic**;
 - **state-import error**;
 - **unsupported order**;
-- **unresolved randomness**, for a field that misses on all 8 variants by an amount that varies between them, when its owner argues it is draw-driven all the same. The class carries the owner and a one-line reason (`unresolved randomness [lane D]: reason`), and the test refuses it on a line whose value is the same on every variant. No line has it yet.
+- **unresolved randomness**, for a field that misses on all 8 variants by an amount that varies between them, when its owner argues it is draw-driven all the same. The class carries the owner and a one-line reason (`unresolved randomness [lane D]: reason`), and the test refuses it on a line whose value is the same on every variant. No line has it.
 
 A field that misses on all 8 variants by a varying amount says so in its detail: "(0/8 variants match, values vary)". Its value depends on Elegy's draws, but no draw gets it right, so it is a mechanic difference until its owner shows otherwise.
 
@@ -40,20 +40,23 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| incorrect mechanic | 0 | 0 | 0 |
-| missing mechanic | 0 | 0 | 0 |
+| incorrect mechanic | 0 | 2 | 0 |
+| missing mechanic | 1 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
-| not compared | 456 | 0 | 0 |
-| sample | 976 | 43 | 16 |
+| not compared | 344 | 0 | 0 |
+| sample | 977 | 43 | 16 |
 
-The reference run of RG-002 has no deterministic discrepancy left. Every field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+Samples total 1036: 977 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1020), and 16 battle records, checked by `TestBattleRecords`.
+
+The reference run of RG-002 has one deterministic discrepancy, a field: Y4 planet 88's `packet_warp` is 0 in Elegy and 8 in the original, `missing mechanic [economy]: packet warp not set when a starbase with a mass driver completes (inferred from one observation)`. It showed up when this branch started comparing packet settings ("Not compared, by reason"). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
-- **Restarts:** Elegy refuses none of the orders, and all 44 strict battle records match.
+- **Restarts:** on the reference seed Elegy refuses none of the orders, and none of the 44 battle records fails.
+- **Refusals on other variants:** the ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There is one, in Y1 and in the chained run's year 1. Player 2's order 10 is a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refuse it. stars-elegy #170 (BINARY-ONLY) says the original never rejects such an order, so both lines are incorrect mechanic for lane A.
 - **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
 
 ## Effect of #189 and #190
@@ -106,23 +109,24 @@ All 78 deterministic lines left those classes. 71 now match on the reference see
 
 ## Not compared, by reason
 
-None of the 456 lines is an RG-002 mechanic Elegy lacks. Each falls in one of three groups.
+None of the 344 lines is an RG-002 mechanic Elegy is known to lack. Each falls in one of three groups.
 
 **1. The harness has no comparator, but Elegy models the quantity (lane B).**
 
 | Reason | Lines | What Elegy has |
 |---|---|---|
-| planet `packet_destination`, `packet_warp` | 110 | `Planet.HasPacketDest`, `PacketDest`, `PacketSpeed` (the mass-driver setting) |
 | `object` wormhole (the whole-object form) | 72 | wormholes; only the `wormhole` expectation kind is compared, not `object` |
 | `message` | 68 | turn events; there is no event-to-message mapping in the harness |
 | `starbase_design`, design reads ("needs the order layer's design source") | 14 | designs and design orders; the design read is not wired into the harness |
-| player `counts`, `research_percent` | 8 | the player's research percentage and per-design counts |
+| player `counts` | 6 | per-design counts |
 
 **2. Compared by another test.** The 176 `battle` and `battle_actions` expectations are compared record by record by TestBattleRecords. Its RG-002 results are the ledger's battle record lines.
 
-**3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null.
+**3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null. Keeping null `packet_destination` out of the comparison is an ELEGY CHOICE: null means the file holds no destination record, which is not the same claim as -1 ("none"), so it is not compared as -1. Reversible if stars-elegy documents null as "none".
 
-Group 1 is comparator work. Until it is done, a mismatch in those 272 lines would go unseen, so their count is the honest size of the gap.
+Group 1 is comparator work. Until it is done, a mismatch in those 160 lines would go unseen, so their count is the honest size of the gap.
+
+**Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. A malformed expected value fails the check rather than reading as absent, as for `starbase` (#191). That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 110 of them match on the reference seed. The other two are Y4 planet 88's `packet_warp`, now the missing-mechanic line above, and the same field in the chained run's year 4, a sample.
 
 ## Random-driven
 

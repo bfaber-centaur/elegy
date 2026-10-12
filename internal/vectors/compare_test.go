@@ -147,6 +147,42 @@ func TestStarbase(t *testing.T) {
 	pvWant(t, "none as written, starbase there", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": null, "damage": -1}}`), nil), "starbase = design 4, want none", "")
 }
 
+// TestPacketSettings pins the planet's mass-driver comparison
+// (vectors/README.md): the destination planet or -1 for none, a null
+// not compared (ELEGY CHOICE), and a warp below 5 read as unset.
+func TestPacketSettings(t *testing.T) {
+	var l pvLoaded
+	p := engine.Planet{HasPacketDest: true, PacketDest: 4, PacketSpeed: 8}
+	pvWant(t, "match", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": 3, "packet_warp": 8}`), nil), "", "")
+	pvWant(t, "destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": 4}`), nil), "packet_destination = 3, want 4", "")
+	pvWant(t, "none wanted", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "packet_destination = 3, want -1", "")
+	pvWant(t, "warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 9}`), nil), "packet_warp = 8, want 9", "")
+	pvWant(t, "null", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null}`), nil), "", "planet field packet_destination null")
+	// Malformed expected data fails the check, never reads as absent.
+	for _, k := range []string{"packet_destination", "packet_warp"} {
+		for _, raw := range []string{`"8"`, `true`, `8.5`} {
+			pvWant(t, "malformed "+k+" "+raw, l.planetEquals(nil, &p, pvEq(t, `{"`+k+`": `+raw+`}`), nil), k+": malformed expectation "+raw, "")
+		}
+	}
+	p = engine.Planet{}
+	pvWant(t, "no destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "", "")
+	pvWant(t, "unset warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 4}`), nil), "", "")
+	pvWant(t, "warp set, unset in Elegy", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 8}`), nil), "packet_warp = 0, want 8", "")
+	p.PacketSpeed = 5
+	pvWant(t, "warp 5 is set", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 4}`), nil), "packet_warp = 5, want 4", "")
+}
+
+// TestResearchPercent pins the player's research budget comparison.
+func TestResearchPercent(t *testing.T) {
+	var l pvLoaded
+	g := &engine.Game{Players: []engine.Player{{ResearchBudget: 15}}}
+	pvWant(t, "match", l.playerEquals(g, 0, pvEq(t, `{"research_percent": 15}`), nil), "", "")
+	pvWant(t, "mismatch", l.playerEquals(g, 0, pvEq(t, `{"research_percent": 20}`), nil), "research_percent = 15, want 20", "")
+	for _, raw := range []string{`"15"`, `null`, `true`} {
+		pvWant(t, "malformed "+raw, l.playerEquals(g, 0, pvEq(t, `{"research_percent": `+raw+`}`), nil), "research_percent: malformed expectation "+raw, "")
+	}
+}
+
 func TestFleetMismatchBesideSkip(t *testing.T) {
 	var l pvLoaded
 	f := engine.Fleet{Pos: engine.Point{X: 5, Y: 6}}
