@@ -192,6 +192,10 @@ func (b *battle) beam(fi int, w weaponSlot) {
 
 // gatling hits every eligible target once, in token order, with no
 // dropoff and no carry.
+//
+// ASSUMPTION A12: a starbase among the targets does not end the shot.
+// COMBAT.md says a beam stops at a starbase ("Starbases"); a gatling shot
+// with targets after one is unobserved.
 func (b *battle) gatling(fi int, w weaponSlot) {
 	t := b.tokens[fi]
 	for _, ti := range b.eligible(t, w) {
@@ -358,6 +362,10 @@ func (b *battle) damage(e *token, dp, extra int, shieldOnly bool, limit int) (h 
 
 // starbaseDamage applies armor damage to a starbase (COMBAT.md "Damage",
 // "Starbases"). dp already includes extra.
+//
+// ASSUMPTION A11: a hit that leaves the total below the armor but would
+// need a 500th step (at 499 units, less than one unit of damage) destroys
+// the starbase. COMBAT.md's "at least one step more" does not say.
 func (b *battle) starbaseDamage(e *token, dp, extra int, h *BattleHit) {
 	total := dp + e.dmg.Units*e.armor/500
 	if total < e.armor {

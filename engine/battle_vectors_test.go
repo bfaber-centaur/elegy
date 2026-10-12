@@ -54,3 +54,11 @@ func TestBattleRecords(t *testing.T) {
 func TestBattleRecordHarness(t *testing.T) {
 	engine.CheckBattleRecordHarness(t, battleStarts(t, "cb/cb010.json")[1], battleStarts(t, "cs/cs003c.json")[1])
 }
+
+// RG-001 2435: the Orbital Forts at the vector's planets 54 and 55 keep
+// the damage the replayed battles give them (360 and 180, as in the
+// original). Elegy's own battles differ only in the attacker's random
+// walk (COMBAT.md "Disengaging").
+func TestRG001StarbaseDamageKept(t *testing.T) {
+	engine.CheckStarbaseDamageKept(t, battleStarts(t, "rg/rg001-y6.json")[1])
+}
