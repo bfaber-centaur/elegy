@@ -854,8 +854,30 @@ func TestOrderFollow(t *testing.T) {
 	if w := files[0].Orders[2].(engine.WaypointOrder); len(w.Waypoints) != 1 || w.Waypoints[0].ID != l.planet[1] {
 		t.Errorf("waypoint after the follow = %+v, want one waypoint at planet 1", w.Waypoints)
 	}
+	if w := files[0].Orders[2].(engine.WaypointOrder); w.Task.Kind != engine.TaskColonize {
+		t.Errorf("waypoint after the follow: task %+v, want the follow's colonize", w.Task)
+	}
 	if w := files[0].Orders[3].(engine.WaypointOrder); w.Task.Kind != engine.TaskColonize {
 		t.Errorf("waypoint 0 at a planet: %+v, want only the task changed", w)
+	}
+	g = l.g
+	files, why = l.orders(testBlock(t,
+		`{"kind": "waypoint_change", "fleet": 0, "index": 1, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`,
+	), 1, &g)
+	if why != "" {
+		t.Fatal(why)
+	}
+	if _, ok := files[0].Orders[0].(engine.WaypointOrder); !ok {
+		t.Errorf("waypoint 1 aimed at a fleet = %+v, want a waypoint order, not a follow", files[0].Orders[0])
+	}
+	for _, c := range []struct{ order, why string }{
+		{`{"kind": "waypoint_add", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 6, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_add before the fleet's position"},
+		{`{"kind": "waypoint_change", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 12, "target": {"kind": "fleet", "owner": 0, "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_change warp 12"},
+	} {
+		g = l.g
+		if _, why := l.orders(testBlock(t, c.order), 1, &g); why != c.why {
+			t.Errorf("%s: %q, want %q", c.order, why, c.why)
+		}
 	}
 }
 
@@ -874,5 +896,9 @@ func TestWaypointPacketObject(t *testing.T) {
 	w.Target.Owner = nil
 	if _, why := l.waypoint(0, w); why != "packet_object target without an owner and id" {
 		t.Errorf("without an owner: %q", why)
+	}
+	w.Target.Owner, w.Target.ID = w.Target.ID, nil
+	if _, why := l.waypoint(0, w); why != "packet_object target without an owner and id" {
+		t.Errorf("without an id: %q", why)
 	}
 }
