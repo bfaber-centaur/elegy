@@ -154,6 +154,13 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 					c.Target, c.ID = engine.TargetPlanet, l.planet[o.With.ID]
 				case "fleet":
 					c.Target, c.ID = engine.TargetFleet, l.fleetIn(g, owner, o.With.ID)
+				case "salvage":
+					// Salvage is named by its owner and number
+					// (vectors/README.md "cargo").
+					if o.With.Owner == nil {
+						return nil, "order cargo with salvage without an owner"
+					}
+					c.Target, c.ID, c.Owner = engine.TargetSalvage, o.With.ID, owner
 				default:
 					return nil, "order cargo with " + o.With.Kind
 				}
