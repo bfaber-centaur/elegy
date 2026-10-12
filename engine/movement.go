@@ -496,10 +496,24 @@ func (g *Game) moveAll(rng Rand) (events []Event, gated map[int]bool) {
 		if !moving(f) {
 			continue
 		}
+		gate := f.Waypoints[0].Warp == StargateWarp
+		// Each fleet makes all of its draws before the next fleet: the
+		// Cheap Engines stall, the warp-10 losses, then its minefield and
+		// salvage draws (KERNEL.md "Random draws" item 3, CONFIRMED KX-006).
+		if g.stalls(f, rng) {
+			events = append(events, g.fleetEvent(f, EventEngineStall, 0))
+			continue
+		}
 		events = append(events, g.arColonistLoss(f)...)
-		if f.Waypoints[0].Warp == StargateWarp {
+		if gate {
 			events = append(events, g.stargate(i, rng, gated)...)
 			continue
+		}
+		if ev, gone := g.warp10Losses(f, rng); len(ev) > 0 {
+			events = append(events, ev...)
+			if gone {
+				continue
+			}
 		}
 		if f.Waypoints[0].Target == TargetFleet && g.fleetIndex(f.Waypoints[0].ID) >= 0 {
 			chasers = append(chasers, i)
@@ -509,6 +523,144 @@ func (g *Game) moveAll(rng Rand) (events []Event, gated map[int]bool) {
 	}
 	events = append(events, g.moveChasers(chasers, rng)...)
 	return append(events, g.settleWaypoints(order)...), gated
+}
+
+const (
+	EventEngineStall     EventKind = iota + EventColonistsBredLanded + 1 // Fleet: a Cheap Engines fleet's engines did not start (0x0f2)
+	EventWarp10ShipsLost                                                 // Fleet, Count = ships lost at warp 10, some left (0x0df, 0x0e0)
+	EventWarp10FleetLost                                                 // Fleet: every ship lost at warp 10; the fleet is gone (0x0e1)
+)
+
+// stalls is the Cheap Engines stall (KERNEL.md "Other movement rules",
+// stars-elegy fda4173): a Cheap Engines fleet whose next waypoint is at
+// warp 7 to 10 draws rand(10), and 0 stops it for the year with 0x0f2
+// (CONFIRMED by replay, KX-006 FM-101 F). It keeps its fuel and
+// waypoints and makes no warp-10 loss draws (BINARY-ONLY). A stargate
+// jump (StargateWarp, above 10) and warp 6 or slower draw nothing
+// (CONFIRMED). Without a generator nothing is drawn.
+//
+// ASSUMPTION M1: a stalled fleet has no Alternate Reality colonist loss;
+// MESSAGES.md orders the engine failure before either path's messages.
+func (g *Game) stalls(f *Fleet, rng Rand) bool {
+	w := f.Waypoints[0].Warp
+	if rng == nil || w < 7 || w > 10 || f.Owner < 0 || f.Owner >= len(g.Players) || !g.Players[f.Owner].Race.LRT.CheapEngines {
+		return false
+	}
+	return rng.Intn(10) == 0
+}
+
+// warp10Losses is the loss of ships at warp 10 on engines not rated for
+// it (KERNEL.md "Other movement rules", stars-elegy fda4173): at the start
+// of the fleet's move each ship of a stack whose design is not rated
+// draws rand(10), and 0 loses it (CONFIRMED by replay, KX-006 OB-024,
+// FM-102); a rated stack draws nothing (CONFIRMED, FM-102). Stacks are
+// visited in design-slot order (BINARY-ONLY). The lost ships' share of the
+// fuel goes with them, by fuel capacity (MEASURED, FM round 2:
+// 30000 − trunc(30000·11/100)). Some ships lost sends 0x0df or 0x0e0;
+// all of them, 0x0e1, and the fleet is gone (reported true): it draws
+// nothing more and is removed with the year's other shipless fleets. A
+// chaser draws in this first pass only (BINARY-ONLY).
+//
+// ASSUMPTION M2: the lost ships' share of the cargo, by cargo capacity,
+// is destroyed with them, as for ships destroyed by mines or in battle.
+//
+// ASSUMPTION M3: the fuel share lost is truncated, trunc(F·lost/total):
+// KERNEL.md says only "in proportion", and FM round 2 divided exactly.
+func (g *Game) warp10Losses(f *Fleet, rng Rand) ([]Event, bool) {
+	if rng == nil || f.Waypoints[0].Warp != 10 {
+		return nil, false
+	}
+	capBefore, fuelBefore := 0, 0
+	for _, st := range f.Stacks {
+		d := g.Designs[st.Design]
+		capBefore += st.Count * d.CargoCapacity
+		fuelBefore += st.Count * d.FuelCapacity
+	}
+	lost, lostCap, lostFuel, left := 0, 0, 0, 0
+	for _, si := range g.slotOrder(f) {
+		st := &f.Stacks[si]
+		d := g.Designs[st.Design]
+		if d.Engine.BattleWarp10 {
+			left += st.Count
+			continue
+		}
+		n := 0
+		for range st.Count {
+			if rng.Intn(10) == 0 {
+				n++
+			}
+		}
+		st.Count -= n
+		lost += n
+		lostCap += n * d.CargoCapacity
+		lostFuel += n * d.FuelCapacity
+		left += st.Count
+	}
+	if lost == 0 {
+		return nil, false
+	}
+	if left == 0 {
+		f.Stacks = nil // removed after movement
+		return []Event{g.fleetEvent(f, EventWarp10FleetLost, lost)}, true
+	}
+	if fuelBefore > 0 {
+		f.Fuel -= f.Fuel * lostFuel / fuelBefore
+	}
+	if capBefore > 0 {
+		loseCargoShare(&f.Cargo, lostCap, capBefore)
+	}
+	kept := f.Stacks[:0]
+	for _, st := range f.Stacks {
+		if st.Count > 0 {
+			kept = append(kept, st)
+		}
+	}
+	f.Stacks = kept
+	return []Event{g.fleetEvent(f, EventWarp10ShipsLost, lost)}, false
+}
+
+// slotOrder is f's stack indexes in its owner's design-slot order
+// (shipSlot: a design with no slot after every slot, by design index),
+// stacks of one design in stack order.
+func (g *Game) slotOrder(f *Fleet) []int {
+	order := make([]int, len(f.Stacks))
+	for i := range order {
+		order[i] = i
+	}
+	sort.SliceStable(order, func(a, b int) bool {
+		return g.shipSlot(f.Owner, f.Stacks[order[a]].Design) < g.shipSlot(f.Owner, f.Stacks[order[b]].Design)
+	})
+	return order
+}
+
+// loseCargoShare takes trunc(C·lost/total) of the cargo C, split as
+// trunc(c·x/C) per item, then the remainder 1 kT at a time over ironium,
+// boranium, germanium and colonists (as COMBAT.md "Salvage" shares).
+func loseCargoShare(c *Cargo, lost, total int) {
+	items := []*int{&c.Minerals[Ironium], &c.Minerals[Boranium], &c.Minerals[Germanium], &c.Colonists}
+	C := 0
+	for _, v := range items {
+		C += *v
+	}
+	if C == 0 || lost <= 0 {
+		return
+	}
+	x := C * lost / total
+	taken := 0
+	for _, v := range items {
+		t := *v * x / C
+		*v -= t
+		taken += t
+	}
+	for _, v := range items {
+		if taken >= x {
+			break
+		}
+		if *v > 0 {
+			*v--
+			taken++
+		}
+	}
 }
 
 // stargate is a fleet's stargate order (OBJECTS.md "Stargates"): on a
