@@ -341,3 +341,38 @@ func TestSuperStealthResearchInTurn(t *testing.T) {
 		t.Errorf("Super Stealth energy %d, want %d", got, want)
 	}
 }
+
+// TestSuperStealthResearchSwitchYear checks that what a player spent is
+// taken before its research switches fields: player 0's energy reaches
+// level 3 (cost 200, from 199 stored) in the research step, and its
+// explicit next field moves the leftover R − 1 to weapons, but this year's research went into energy, so the Super
+// Stealth player steals only from energy, trunc(trunc(2R/2)/2).
+func TestSuperStealthResearchSwitchYear(t *testing.T) {
+	g := pgHomeworld()
+	second := g.Players[0]
+	second.Race.PRT = PRTSuperStealth
+	g.Players = append(g.Players, second)
+	g.Players[0].Research.Next = Weapons
+	g.Players[0].Research.Accumulated[Energy] = 199
+	p := g.Planets[0]
+	p.ID, p.Owner, p.Pos = 8, 1, Point{X: 500, Y: 500}
+	g.Planets = append(g.Planets, p)
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Game.Players[0].Research; got.Levels[Energy] != 3 || got.Current != Weapons {
+		t.Fatalf("setup: player 0 energy level %d, current %d; want 3, weapons", got.Levels[Energy], got.Current)
+	}
+	research := r.Game.Players[0].Research.Accumulated[Weapons] + 1
+	var stolen []Event
+	for _, e := range r.Events {
+		if e.Kind == EventResearchStolen {
+			stolen = append(stolen, e)
+		}
+	}
+	want := []Event{{Kind: EventResearchStolen, Player: 1, Planet: -1, Fleet: -1, Item: ItemKind(Energy), Count: research / 2}}
+	if research <= 3 || !reflect.DeepEqual(stolen, want) {
+		t.Errorf("R %d: stolen %+v, want %+v", research, stolen, want)
+	}
+}
