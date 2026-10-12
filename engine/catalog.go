@@ -562,9 +562,15 @@ func contains(list []string, s string) bool {
 }
 
 // OwnerCost is one unit's cost for an owner (COMPONENTS.md "Cost for an
-// owner", CONFIRMED CS-001).
+// owner", CONFIRMED CS-001). The Genesis Device is the one planetary item
+// that is miniaturized and doubled by Bleeding Edge Technology like a ship
+// part (CS-001: 3800 at tech 26, 3500 with BET, 10000 with BET at tech 0).
 func (c Component) OwnerCost(race Race, levels [NumFields]int) Cost {
-	return itemCost(c.Cost, c.TechReq, c.Kind(), race, levels)
+	kind := c.Kind()
+	if c.Category == CatPlanetary && c.str("kind") == "genesis_device" {
+		kind = PartOther
+	}
+	return itemCost(c.Cost, c.TechReq, kind, race, levels)
 }
 
 // SlotFill puts Count of the part named Part into hull slot Slot.

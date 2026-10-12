@@ -449,10 +449,18 @@ func (g *Game) unloadTasks(owned []bool, mine func(i int) []Event, scrap func(i 
 	return queue, events
 }
 
+// RemoveFleets removes the fleets in ids, first retargeting the
+// waypoints that name them (retargetRemoved), for the space objects'
+// rules (a fleet a Mystery Trader takes).
+func (g *Game) RemoveFleets(ids map[int]bool) { g.removeFleets(ids) }
+
+// removeFleets removes the fleets in ids, first retargeting the
+// waypoints that name them (retargetRemoved).
 func (g *Game) removeFleets(ids map[int]bool) {
 	if len(ids) == 0 {
 		return
 	}
+	g.retargetRemoved(ids)
 	fleets := g.Fleets[:0]
 	for _, f := range g.Fleets {
 		if !ids[f.ID] {

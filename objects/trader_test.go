@@ -161,7 +161,16 @@ func TestConfirmedTraderEncounters(t *testing.T) {
 	cargo(l, c, 5000)
 	cargo(l, d, 9000)
 	ids := []int{l.g.Fleets[a].ID, l.g.Fleets[b].ID, l.g.Fleets[c].ID, l.g.Fleets[d].ID}
+	// Fleet d chases fleet b, which the Trader takes: the waypoint is
+	// retargeted to player 0's fleet a, refused and still there (ORDERS.md
+	// "Targets that moved, died or were captured", BINARY-ONLY).
+	l.g.Fleets[d].Waypoints = []engine.Waypoint{{Pos: at(1, 0)}, {Pos: origin, Warp: 5, Target: engine.TargetFleet, ID: ids[1]}}
 	enc := meetFleets(s, l.g, TraderContext{}, &script{})
+	for _, f := range l.g.Fleets {
+		if f.ID == ids[3] && (f.Waypoints[1].Target != engine.TargetFleet || f.Waypoints[1].ID != ids[0]) {
+			t.Errorf("chasing waypoint %+v, want fleet %d", f.Waypoints[1], ids[0])
+		}
+	}
 	if len(enc) != 3 || !enc[0].Refused || enc[1].Reward.Kind != ItemPart || enc[2].Reward.Part != BitJumpGate {
 		t.Fatalf("encounters %+v", enc)
 	}

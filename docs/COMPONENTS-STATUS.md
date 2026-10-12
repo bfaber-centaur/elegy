@@ -20,7 +20,7 @@ BINARY-ONLY columns) from the table.
 | Hull and starbase hull values, slots, docks | `Component.Hull` | CONFIRMED | `TestNewDesign` |
 | Designs from a hull and filled slots | `Catalog.NewDesign` | see below | `TestNewDesign` |
 | Who can build what, Mystery Trader items | `Component.Allowed`, `Buildable` | CONFIRMED (CS-001) | `TestConfirmedWhoCanBuild` |
-| Cost for an owner, terraform/planetary exemption, CA | `Component.OwnerCost`, `itemCost` | CONFIRMED (CS-001) | `TestConfirmedOwnerCostExemptions`, `TestConfirmedStarbaseBuildCost` |
+| Cost for an owner, terraform/planetary exemption (not the Genesis Device), CA | `Component.OwnerCost`, `itemCost` | CONFIRMED (CS-001; the Genesis Device's miniaturization also GAP-001 G2–G4) | `TestConfirmedOwnerCostExemptions`, `TestConfirmedStarbaseBuildCost` |
 | Starbase build cost (ISB/AR, halved) | `StarbaseBuildCost` | CONFIRMED (CS-001 designer) | `TestConfirmedStarbaseBuildCost` |
 | Planetary scanners and defenses | `Catalog.PlanetScanners`, `Defenses` | CONFIRMED | `TestConfirmedPlanetaryCatalogue` |
 | Defense coverage `1 − (1 − c/1000)^n` | `DefenseCoverage` | CONFIRMED (CS-001) | `TestConfirmedPlanetaryCatalogue` |
