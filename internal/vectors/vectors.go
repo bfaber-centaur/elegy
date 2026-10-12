@@ -1478,7 +1478,7 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 	}
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
-		if string(raw) == "null" && k != "environment" && k != "original_environment" {
+		if string(raw) == "null" && k != "environment" && k != "original_environment" && k != "starbase" {
 			// The vectors write null for a value the original's file
 			// does not hold, such as an unowned planet's population
 			// and growth carry: it is not a 0 to compare.
@@ -1518,6 +1518,35 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 					errs = append(errs, pvMismatch(k, p.Surface, want))
 					break
 				}
+			}
+		case "starbase":
+			// The planet's starbase: its owner's starbase design slot and
+			// its damage, or null for none (vectors/README.md "planets").
+			var want *struct {
+				Design *int `json:"design"`
+				Damage int  `json:"damage"`
+			}
+			json.Unmarshal(raw, &want)
+			if want == nil || want.Design == nil {
+				if p.HasStarbase {
+					errs = append(errs, pvMismatch(k, fmt.Sprintf("design %d", p.StarbaseDesign), "none"))
+				}
+				continue
+			}
+			d, ok := g.PlayerDesign(p.Owner, true, *want.Design)
+			if !ok {
+				d, ok = l.design[[2]int{p.Owner, -1 - *want.Design}]
+			}
+			if !ok {
+				skipped(fmt.Sprintf("starbase design %d", *want.Design))
+				continue
+			}
+			if !p.HasStarbase || p.StarbaseDesign != d || p.StarbaseDamage != max(0, want.Damage) {
+				got := "none"
+				if p.HasStarbase {
+					got = fmt.Sprintf("design %d damage %d", p.StarbaseDesign, p.StarbaseDamage)
+				}
+				errs = append(errs, pvMismatch(k, got, fmt.Sprintf("design %d damage %d", d, max(0, want.Damage))))
 			}
 		case "concentrations":
 			// The stored concentration bytes (KERNEL.md "Mining":

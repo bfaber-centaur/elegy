@@ -118,6 +118,27 @@ func TestConcentrationsAndResearchFields(t *testing.T) {
 	pvWant(t, "unknown next value", l.playerEquals(g, 0, pvEq(t, `{"research_next_field": 3}`), nil), "", "research_next_field 3")
 }
 
+// TestStarbase compares a planet's starbase: the owner's starbase design
+// slot (the loaded design, or one a design order put there) and damage,
+// and null for none.
+func TestStarbase(t *testing.T) {
+	l := pvLoaded{design: map[[2]int]int{{1, -1 - 2}: 4}}
+	g := &engine.Game{Designs: make([]engine.Design, 6)}
+	p := engine.Planet{Owner: 1, HasStarbase: true, StarbaseDesign: 4, StarbaseDamage: 180}
+	pvWant(t, "match", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 2, "damage": 180}}`), nil), "", "")
+	pvWant(t, "damage", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 2, "damage": 0}}`), nil), "starbase = design 4 damage 180, want design 4 damage 0", "")
+	pvWant(t, "none wanted", l.planetEquals(g, &p, pvEq(t, `{"starbase": null}`), nil), "starbase = design 4, want none", "")
+	pvWant(t, "unknown slot", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 3, "damage": 0}}`), nil), "", "starbase design 3")
+	// A design order's slot wins over the loaded one.
+	g.DesignSlots = []engine.DesignSlot{{Owner: 1, Starbase: true, Slot: 2, Design: 5}}
+	pvWant(t, "ordered design", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 2, "damage": 180}}`), nil), "starbase = design 4 damage 180, want design 5 damage 180", "")
+	// No starbase, with leftover design and damage values that would
+	// otherwise match.
+	p.HasStarbase, p.StarbaseDesign, p.StarbaseDamage = false, 5, 0
+	pvWant(t, "none", l.planetEquals(g, &p, pvEq(t, `{"starbase": null}`), nil), "", "")
+	pvWant(t, "missing", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 2, "damage": 0}}`), nil), "starbase = none, want design 5 damage 0", "")
+}
+
 func TestFleetMismatchBesideSkip(t *testing.T) {
 	var l pvLoaded
 	f := engine.Fleet{Pos: engine.Point{X: 5, Y: 6}}
