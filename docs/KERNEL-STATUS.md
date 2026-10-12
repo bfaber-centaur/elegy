@@ -185,8 +185,8 @@ starbase has a stargate within range of one of its own planets' gates
 
 The parity harness loads `initial_state.objects` and checks the
 minefield, wormhole, trader, packet, object and object_gone
-expectations through a hook in `engine/objects_parity_test.go`
-(package `engine_test`, because `objects` imports the engine).
+expectations in `internal/vectors/objects.go` (the vector loader,
+which imports `objects`).
 
 Choices where OBJECTS.md is silent:
 

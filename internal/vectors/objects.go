@@ -1,4 +1,4 @@
-package engine_test
+package vectors
 
 import (
 	"encoding/json"
@@ -12,10 +12,7 @@ import (
 
 // The parity harness's space objects (FORMAT.md "objects", and the
 // minefield, wormhole, trader, packet, object and object_gone
-// expectations). This file is in package engine_test because package
-// objects imports the engine.
-
-func init() { engine.SetParitySpace(pvObjects{}) }
+// expectations).
 
 type pvObjects struct{}
 
@@ -47,7 +44,9 @@ type pvObject struct {
 	Decay    int   `json:"decay_class"`
 }
 
-var pvMineKinds = map[string]objects.MineKind{"standard": objects.Standard, "heavy": objects.Heavy, "speed_bump": objects.SpeedBump}
+func pvMineKinds() map[string]objects.MineKind {
+	return map[string]objects.MineKind{"standard": objects.Standard, "heavy": objects.Heavy, "speed_bump": objects.SpeedBump}
+}
 
 func pvMarks(players []int) []bool {
 	var m []bool
@@ -83,7 +82,7 @@ func pvOffer(name string) (objects.TraderItem, error) {
 	return objects.TraderItem{}, fmt.Errorf("trader offer %q", name)
 }
 
-func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m engine.PVMaps) (engine.SpaceObjects, error) {
+func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m pvMaps) (engine.SpaceObjects, error) {
 	s := &objects.Space{}
 	var traders []pvObject
 	for _, r := range raw {
@@ -93,7 +92,7 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m engine.PVMaps) (e
 		}
 		switch o.Kind {
 		case "minefield":
-			k, ok := pvMineKinds[o.Type]
+			k, ok := pvMineKinds()[o.Type]
 			if !ok {
 				return nil, fmt.Errorf("minefield type %q", o.Type)
 			}
@@ -138,10 +137,6 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m engine.PVMaps) (e
 	}
 	s.SortMinefields()
 	return s, nil
-}
-
-func pvMismatch(field string, got, want any) string {
-	return fmt.Sprintf("%s = %v, want %v", field, got, want)
 }
 
 // pvCompare checks each field in eq against got (both as JSON values);
@@ -203,14 +198,16 @@ func pvPacket(s *objects.Space, owner, id int) *objects.Packet {
 	return nil
 }
 
-var pvKindNames = map[objects.MineKind]string{objects.Standard: "standard", objects.Heavy: "heavy", objects.SpeedBump: "speed_bump"}
+func pvKindNames() map[objects.MineKind]string {
+	return map[objects.MineKind]string{objects.Standard: "standard", objects.Heavy: "heavy", objects.SpeedBump: "speed_bump"}
+}
 
 // pvRadius is the reason a minefield's radius is not compared: SCANNING.md
 // defines no per-player known radius.
 const pvRadius = "minefield radius (SCANNING.md defines no known radius)"
 
 func minefieldFields(m *objects.Minefield) map[string]any {
-	return map[string]any{"kind": "minefield", "owner": m.Owner, "id": m.Number, "x": m.Pos.X, "y": m.Pos.Y, "mines": m.Count, "type": pvKindNames[m.Kind], "detonating": m.Detonate, "known_to": pvMarked(m.Known)}
+	return map[string]any{"kind": "minefield", "owner": m.Owner, "id": m.Number, "x": m.Pos.X, "y": m.Pos.Y, "mines": m.Count, "type": pvKindNames()[m.Kind], "detonating": m.Detonate, "known_to": pvMarked(m.Known)}
 }
 
 func traderFields(t objects.Trader, id int) map[string]any {
@@ -234,7 +231,7 @@ func packetFields(p *objects.Packet, planet map[int]int) map[string]any {
 	return map[string]any{"kind": "packet", "owner": p.Owner, "id": p.Number, "x": p.Pos.X, "y": p.Pos.Y, "destination_planet": dest, "warp": p.Warp, "minerals": p.Cargo[:], "decay_class": p.Class}
 }
 
-func (pvObjects) Check(g *engine.Game, e engine.PVExpect, m engine.PVMaps) string {
+func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 	s, ok := g.Objects.(*objects.Space)
 	if !ok {
 		return "skip: no space objects"
