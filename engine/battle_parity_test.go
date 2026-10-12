@@ -87,6 +87,7 @@ type pvBattleExpect struct {
 // pvRecordedBattle is one battle record: its tokens and actions.
 type pvRecordedBattle struct {
 	vector, caseID, stream string
+	year                   int // the expectation's year: 1 is the vector's first
 	x, y                   int
 	tokens                 []pvBattleToken
 	actions                []pvBattleAction
@@ -112,6 +113,9 @@ type pvBattleOutcome struct {
 	stop              string // why the replay stopped early, if it did
 	draws             bool   // stopped at a round where Elegy would draw
 	built             bool   // a token's fleet was built this year: not compared
+	// the battle is in a year after the vector's first: the vector's
+	// start is not that year's start, so it is not compared
+	later bool
 }
 
 // loadBattleRecords reads every battle record in the vectors.
@@ -149,7 +153,7 @@ func loadBattleRecords(t *testing.T) map[string][]pvRecordedBattle {
 				if !ok {
 					i = len(out[name])
 					at[key] = i
-					out[name] = append(out[name], pvRecordedBattle{vector: name, caseID: c.ID, stream: e.Stream, x: e.X, y: e.Y})
+					out[name] = append(out[name], pvRecordedBattle{vector: name, caseID: c.ID, stream: e.Stream, year: e.Year, x: e.X, y: e.Y})
 				}
 				r := &out[name][i]
 				if e.Kind == "battle" {
@@ -372,6 +376,13 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	for _, a := range r.actions {
 		out.total += len(a.Hits)
 	}
+	if r.year > 1 {
+		// A chained vector (RG-001) records battles in later years;
+		// comparing them needs the generated start of that year, which
+		// this test does not build yet.
+		out.later = true
+		return out
+	}
 	g := withRules(l.Game.clone()) // the battle changes fleets and planets
 	for _, rt := range r.tokens {
 		if rt.Kind == "ships" && rt.Fleet != nil {
@@ -416,12 +427,14 @@ func BattleRecordVectors(t *testing.T) []string {
 // list or a compared hit fails. A round that needs the original's draws
 // ends that battle's comparison without failing: that is the random level
 // (docs/RANDOM-PARITY.md). TestBattleRecords (battle_vectors_test.go)
-// runs it: the vector loader, package vectors, imports engine.
-func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) {
+// runs it: the vector loader, package vectors, imports engine. It returns
+// how many records were in a year after their vector's first, by corpus
+// ("rg"): those are counted, not compared.
+func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) map[string]int {
 	records := loadBattleRecords(t)
 	type tally struct {
-		records, tokens, built, full, draws int
-		compared, matched, total            int
+		records, tokens, built, later, full, draws int
+		compared, matched, total                   int
 	}
 	per := map[string]*tally{}
 	var names []string
@@ -455,6 +468,9 @@ func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) {
 			}
 			o := compareBattle(&l, r)
 			switch {
+			case o.later:
+				c.later++
+				continue
 			case o.built:
 				c.built++
 				continue
@@ -480,16 +496,22 @@ func CheckBattleRecords(t *testing.T, starts map[string]BattleStart) {
 		corpora = append(corpora, c)
 	}
 	sort.Strings(corpora)
-	t.Logf("%-5s %8s %8s %8s %8s %8s  %s", "", "records", "tokens", "built", "replayed", "draws", "hits matched/compared of recorded")
+	// later: in a year after the vector's first (needs a generated start)
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s  %s", "", "records", "tokens", "built", "later", "replayed", "draws", "hits matched/compared of recorded")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d  %d/%d of %d", name, c.records, c.tokens, c.built, c.full, c.draws, c.matched, c.compared, c.total)
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d  %d/%d of %d", name, c.records, c.tokens, c.built, c.later, c.full, c.draws, c.matched, c.compared, c.total)
 		all.compared += c.compared
 	}
 	if all.compared == 0 {
 		t.Error("no hit was compared")
 	}
+	later := map[string]int{}
+	for name, c := range per {
+		later[name] = c.later
+	}
+	return later
 }
 
 // CheckBattleRecordHarness checks that the comparison notices a
@@ -525,6 +547,23 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if o := compareBattle(&l, kills); o.stop == "" || o.draws {
 		t.Errorf("a changed kill count was not noticed: %+v", o)
+	}
+	later := r
+	later.year = 2
+	if o := compareBattle(&l, later); !o.later || o.tokens != "" || o.compared != 0 {
+		t.Errorf("a record in the vector's second year was compared against its start: %+v", o)
+	}
+	if o := compareBattle(&l, r); o.later {
+		t.Error("a first-year record was counted as a later year")
+	}
+	n := 0
+	for _, x := range records["rg/rg001.json"] {
+		if x.year > 1 {
+			n++
+		}
+	}
+	if n != 7 {
+		t.Errorf("RG-001 has %d battle records after its first year, want 7", n)
 	}
 	drawn := false
 	for _, x := range records["cs/cs003c.json"] {

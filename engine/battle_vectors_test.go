@@ -31,7 +31,13 @@ func TestBattleRecords(t *testing.T) {
 	for _, path := range engine.BattleRecordVectors(t) {
 		starts[path] = battleStart(t, path)
 	}
-	engine.CheckBattleRecords(t, starts)
+	// RG-001 (rg/rg001.json) chains six years; its battles after the first
+	// year need that year's generated start, which this test does not
+	// build, so they are counted apart.
+	later := engine.CheckBattleRecords(t, starts)
+	if later["rg"] != 7 || later["cb"] != 0 {
+		t.Errorf("later-year records by corpus: %v, want rg 7 and none in cb", later)
+	}
 }
 
 func TestBattleRecordHarness(t *testing.T) {

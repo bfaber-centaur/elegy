@@ -568,8 +568,14 @@ func cmdVector(args []string, out io.Writer) error {
 		}
 		fmt.Fprintln(out, line)
 	}
+	for _, r := range c.Rejected {
+		fmt.Fprintln(out, "rejected order:", r)
+	}
 	fmt.Fprintf(out, "cases: %s\n", counts(cases, "pass", "sample-only", "fail", "differs", "skip"))
 	fmt.Fprintf(out, "fields: %s\n", counts(fields, "pass", "differ", "sample", "skip"))
+	if len(c.Rejected) > 0 {
+		fmt.Fprintf(out, "rejected orders: %d\n", len(c.Rejected))
+	}
 	return nil
 }
 
