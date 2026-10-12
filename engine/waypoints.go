@@ -257,28 +257,70 @@ func (g *Game) transferFleet(fi int, gone map[int]bool) []Event {
 // task", CONFIRMED: an enemy at 50 ly was engaged, one at 55 ly was not).
 const patrolRadius = 50
 
-// fileRetarget is the retarget made as each player's file is written
-// (ORDERS.md "Targets that moved, died or were captured", BINARY-ONLY,
-// seen in WU-A): a waypoint aimed at another player's fleet becomes a
-// deep-space waypoint at that fleet's position, which the end-of-year
-// waypoint check has just set. A waypoint aimed at the owner's own fleet
-// stays a fleet target.
+const (
+	EventTargetGone      EventKind = iota + EventRemoteMineDeepSpace + 1 // Fleet: a waypoint's target fleet is gone; it goes to the last position (0x028)
+	EventTargetAtPlanet                                                  // Fleet, Planet: a target fleet out of sight at a planet; the waypoint goes to the planet (0x029)
+	EventTargetOutOfView                                                 // Fleet: a target fleet out of sight in deep space; the waypoint goes to its position (0x02a)
+)
+
+// fileRetarget is the check of waypoints aimed at another player's fleet,
+// friend or enemy, as the year's files are written (ORDERS.md "Targets
+// that moved, died or were captured"; MESSAGES.md 0x028–0x02a). A target
+// the waypoint owner's scanners see at the end of the year stays the
+// target, in the game and in the owner's file. One out of every scanner
+// becomes a plain waypoint at its actual end-of-year position (0x02a),
+// or at its planet when it is at one (0x029, BINARY-ONLY). A target that
+// is gone becomes a plain waypoint at its last position (0x028).
 //
-// ASSUMPTION W5: the written file is the game's state, so the waypoint
-// no longer tracks the fleet in later years.
-func (g *Game) fileRetarget() {
+// MEASURED W5 (PARITY "Representative game (RG-001)" WF-01..05, one
+// stream, stars-elegy 30272be; ORDERS.md "Contradicted in part"): a seen
+// target, enemy or friend, stayed the target at its end-of-year position
+// in the host file and the owner's file over two years; an unseen one
+// became space at its actual end-of-year position with 0x02a; one
+// scrapped before movement became space at its last position with 0x028.
+func (g *Game) fileRetarget(views []PlayerView) []Event {
+	var events []Event
 	for i := range g.Fleets {
 		f := &g.Fleets[i]
+		var seen map[int]bool
 		for j := range f.Waypoints {
 			wp := &f.Waypoints[j]
 			if wp.Target != TargetFleet {
 				continue
 			}
-			if t := g.fleetIndex(wp.ID); t >= 0 && g.Fleets[t].Owner != f.Owner {
+			t := g.fleetIndex(wp.ID)
+			if t < 0 {
 				wp.Target, wp.ID = TargetSpace, 0
+				events = append(events, g.fleetEvent(f, EventTargetGone, 0))
+				continue
 			}
+			if g.Fleets[t].Owner == f.Owner {
+				continue
+			}
+			if seen == nil {
+				seen = map[int]bool{}
+				if f.Owner >= 0 && f.Owner < len(views) {
+					for _, s := range views[f.Owner].Fleets {
+						seen[s.Fleet] = true
+					}
+				}
+			}
+			if seen[wp.ID] {
+				continue
+			}
+			wp.Pos = g.Fleets[t].Pos
+			if pid, ok := g.OrbitedPlanet(&g.Fleets[t]); ok {
+				wp.Target, wp.ID = TargetPlanet, pid
+				e := g.fleetEvent(f, EventTargetAtPlanet, 0)
+				e.Planet = pid
+				events = append(events, e)
+				continue
+			}
+			wp.Target, wp.ID = TargetSpace, 0
+			events = append(events, g.fleetEvent(f, EventTargetOutOfView, 0))
 		}
 	}
+	return events
 }
 
 // patrol chooses each patrolling fleet's intercept at the end of the
