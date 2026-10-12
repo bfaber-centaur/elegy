@@ -107,6 +107,11 @@ type Game struct {
 	// that goes away keeps its number until the year's files are written
 	// (holdFleetNumbers). It is nil outside that span and is not saved.
 	heldNumbers map[[2]int]bool
+	// costLevels is, during a generation, each player's tech levels from
+	// before the year's research, which price the year's designs
+	// (battle.costLevels, colonize). It is nil outside that span and is
+	// not saved.
+	costLevels [][NumFields]int
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -283,6 +288,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	for i, p := range g.Players {
 		costLevels[i] = p.Research.Levels
 	}
+	g.costLevels = costLevels
 
 	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
 	// whose draws are the first of the year, then each player's file in
@@ -594,7 +600,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
-	g.heldNumbers = nil
+	g.heldNumbers, g.costLevels = nil, nil
 	g.dropBareRecords()
 	return TurnResult{
 		Game:   g,

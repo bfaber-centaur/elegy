@@ -898,6 +898,16 @@ func (g *Game) dropColonists(f *Fleet, pi, amount int, owned []bool, queue *[]dr
 // colonists are queued as a drop; the colony's event comes when the drop
 // is resolved.
 //
+// The cost is at the owner's tech from before the year's research, as for
+// a battle (MEASURED, stars-elegy ec1b38a TAKEOVER.md "Colonization",
+// RG-001 2434: Mini-Colony Ships colonizing planets 97 and 114 after
+// movement left 10/6/9, ⌊3/4⌋ of their cost at the year's starting
+// energy 3, not 9/6/8 at energy 5 after the year's research). That these
+// are the year's starting levels, not those after the first level-up
+// check (step 2.4), is an ASSUMPTION: RG-001 does not tell them apart; it
+// follows COMBAT.md "Design cost" (a design's cost is computed as the
+// game file is read; CB-053 for salvage).
+//
 // The order is tried once (TAKEOVER.md "Colonize is tried once",
 // CONFIRMED TK-113): on any failure the task is cleared and the fleet
 // keeps its cargo; there is no retry.
@@ -913,9 +923,13 @@ func (g *Game) colonize(f *Fleet, queue *[]drop) (ev Event, ok bool) {
 	}
 	p := &g.Planets[pi]
 	pl := &g.Players[f.Owner]
+	levels := pl.Research.Levels
+	if f.Owner < len(g.costLevels) {
+		levels = g.costLevels[f.Owner]
+	}
 	var C Minerals
 	for _, st := range f.Stacks {
-		c := designCost(g.Designs[st.Design], pl.Race, pl.Research.Levels)
+		c := designCost(g.Designs[st.Design], pl.Race, levels)
 		for m := range NumMinerals {
 			C[m] += st.Count * c.Minerals[m]
 		}
