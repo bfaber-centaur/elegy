@@ -15,15 +15,6 @@
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | excess = 26, want 31
 sample | rg002 | RG-002-2463 y1 #211 | planet id=83 | surface_minerals = [28708 26762 21160], want [28709 26762 21160]
-not compared | rg002 | RG-002-2463 y1 #212 | planet id=84 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #215 | planet id=86 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #220 | planet id=90 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #221 | planet id=91 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #224 | planet id=94 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #226 | planet id=96 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #232 | planet id=101 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #238 | planet id=107 | planet field packet_destination
-not compared | rg002 | RG-002-2463 y1 #241 | planet id=110 | planet field packet_destination
 sample | rg002 | RG-002-2463 y1 #245 | planet id=114 | environment = [53 17 9], want [53 17 8]
 sample | rg002 | RG-002-2463 y1 #252 | planet id=120 | environment = [58 72 10], want [58 72 11]
 sample | rg002 | RG-002-2463 y1 #338 | salvage_at x=1364 y=1319 | salvage = [[86 71 44] [139 95 86]], want [169 104 106]
@@ -93,24 +84,15 @@ sample | rg002 | RG-002-2464 y2 #202 | planet id=64 | surface_minerals = [0 58 2
 not compared | rg002 | RG-002-2464 y2 #203 | planet id=65 | planet field defenses null
 sample | rg002 | RG-002-2464 y2 #205 | planet id=66 | surface_minerals = [528 1110 18], want [527 1110 18]
 sample | rg002 | RG-002-2464 y2 #208 | planet id=69 | surface_minerals = [82 1174 0], want [80 1175 0]
-not compared | rg002 | RG-002-2464 y2 #213 | planet id=74 | planet field packet_destination
 sample | rg002 | RG-002-2464 y2 #216 | planet id=77 | surface_minerals = [34 2 85], want [34 1 82]
 sample | rg002 | RG-002-2464 y2 #218 | planet id=78 | surface_minerals = [2 585 351], want [2 586 354]
 sample | rg002 | RG-002-2464 y2 #222 | planet id=81 | environment = [75 30 57], want [74 30 57]
 sample | rg002 | RG-002-2464 y2 #222 | planet id=81 | surface_minerals = [660 345 1], want [662 348 2]
 sample | rg002 | RG-002-2464 y2 #225 | planet id=83 | starbase = design 88 damage 28, want design 88 damage 27
-not compared | rg002 | RG-002-2464 y2 #226 | planet id=84 | planet field packet_destination
-not compared | rg002 | RG-002-2464 y2 #228 | planet id=86 | planet field packet_destination
-not compared | rg002 | RG-002-2464 y2 #232 | planet id=90 | planet field packet_destination
-not compared | rg002 | RG-002-2464 y2 #233 | planet id=91 | planet field packet_destination
-not compared | rg002 | RG-002-2464 y2 #236 | planet id=94 | planet field packet_destination
 sample | rg002 | RG-002-2464 y2 #238 | planet id=95 | surface_minerals = [146 112 0], want [146 113 0]
-not compared | rg002 | RG-002-2464 y2 #239 | planet id=96 | planet field packet_destination
-not compared | rg002 | RG-002-2464 y2 #253 | planet id=110 | planet field packet_destination
 sample | rg002 | RG-002-2464 y2 #253 | planet id=110 | surface_minerals = [11 191 66], want [12 191 64]
 sample | rg002 | RG-002-2464 y2 #257 | planet id=114 | surface_minerals = [72 20 1], want [73 20 1]
 sample | rg002 | RG-002-2464 y2 #259 | planet id=116 | surface_minerals = [93 71 51], want [91 70 51]
-not compared | rg002 | RG-002-2464 y2 #262 | planet id=119 | planet field packet_destination
 not compared | rg002 | RG-002-2464 y2 #270 | player id=1 | player field counts
 sample | rg002 | RG-002-2464 y2 #271 | player id=1 | research_accumulated.weapons = 238, want 242
 sample | rg002 | RG-002-2464 y2 #276 | player id=5 | research_accumulated.electronics = 432, want 433
@@ -217,33 +199,22 @@ sample | rg002 | RG-002-2465 y3 #215 | planet id=77 | surface_minerals = [39 1 1
 sample | rg002 | RG-002-2465 y3 #216 | planet id=78 | surface_minerals = [2 664 408], want [2 665 410]
 sample | rg002 | RG-002-2465 y3 #218 | planet id=79 | surface_minerals = [9 1796 1686], want [9 1794 1684]
 sample | rg002 | RG-002-2465 y3 #223 | planet id=84 | factories = 635, want 636
-not compared | rg002 | RG-002-2465 y3 #223 | planet id=84 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #225 | planet id=85 | surface_minerals = [1595 0 937], want [1594 0 938]
-not compared | rg002 | RG-002-2465 y3 #226 | planet id=86 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #227 | planet id=87 | surface_minerals = [54 133 106], want [54 133 108]
-not compared | rg002 | RG-002-2465 y3 #230 | planet id=90 | planet field packet_destination
-not compared | rg002 | RG-002-2465 y3 #231 | planet id=91 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #231 | planet id=91 | surface_minerals = [56 234 2], want [104 243 33]
 sample | rg002 | RG-002-2465 y3 #232 | planet id=92 | surface_minerals = [93 160 101], want [95 160 100]
-not compared | rg002 | RG-002-2465 y3 #234 | planet id=94 | planet field packet_destination
-not compared | rg002 | RG-002-2465 y3 #236 | planet id=96 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #240 | planet id=100 | factories = 88, want 87
 sample | rg002 | RG-002-2465 y3 #240 | planet id=100 | mines = 103, want 105
 sample | rg002 | RG-002-2465 y3 #240 | planet id=100 | surface_minerals = [364 547 1], want [363 547 3]
-not compared | rg002 | RG-002-2465 y3 #241 | planet id=101 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #242 | planet id=101 | surface_minerals = [0 244 201], want [0 246 203]
 sample | rg002 | RG-002-2465 y3 #244 | planet id=103 | surface_minerals = [41 30 35], want [39 29 35]
-not compared | rg002 | RG-002-2465 y3 #248 | planet id=107 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #250 | planet id=109 | surface_minerals = [222 30 0], want [224 29 0]
-not compared | rg002 | RG-002-2465 y3 #251 | planet id=110 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #251 | planet id=110 | surface_minerals = [491 212 79], want [492 212 76]
 sample | rg002 | RG-002-2465 y3 #255 | planet id=114 | environment = [52 20 9], want [51 20 8]
 sample | rg002 | RG-002-2465 y3 #257 | planet id=116 | surface_minerals = [109 92 53], want [107 91 53]
-not compared | rg002 | RG-002-2465 y3 #260 | planet id=119 | planet field packet_destination
 sample | rg002 | RG-002-2465 y3 #261 | planet id=122 | surface_minerals = [88 65 76], want [86 65 76]
 sample | rg002 | RG-002-2465 y3 #263 | planet id=124 | surface_minerals = [128 73 2], want [129 71 2]
 sample | rg002 | RG-002-2465 y3 #266 | planet id=127 | surface_minerals = [79 72 33], want [81 73 33]
-not compared | rg002 | RG-002-2465 y3 #267 | player id=0 | player field research_percent
 sample | rg002 | RG-002-2465 y3 #268 | player id=1 | research_accumulated.weapons = 3957, want 3964
 sample | rg002 | RG-002-2465 y3 #269 | player id=2 | research_accumulated.electronics = 2549, want 2552
 sample | rg002 | RG-002-2465 y3 #269 | player id=2 | research_accumulated.propulsion = 10878, want 10717
@@ -383,25 +354,19 @@ sample | rg002 | RG-002-2466 y4 #209 | planet id=69 | surface_minerals = [263 79
 sample | rg002 | RG-002-2466 y4 #210 | planet id=70 | factories = 318, want 319
 sample | rg002 | RG-002-2466 y4 #210 | planet id=70 | surface_minerals = [101 233 0], want [101 231 0]
 sample | rg002 | RG-002-2466 y4 #211 | planet id=71 | surface_minerals = [0 3000 79], want [0 3004 78]
-not compared | rg002 | RG-002-2466 y4 #214 | planet id=74 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #217 | planet id=77 | surface_minerals = [39 83 177], want [42 84 178]
 sample | rg002 | RG-002-2466 y4 #218 | planet id=77 | environment = [11 80 88], want [11 79 88]
 sample | rg002 | RG-002-2466 y4 #218 | planet id=77 | original_environment = [11 84 89], want [11 84 90]
 sample | rg002 | RG-002-2466 y4 #220 | planet id=79 | surface_minerals = [14 1929 1839], want [14 1927 1838]
 sample | rg002 | RG-002-2466 y4 #221 | planet id=80 | surface_minerals = [226 2757 85], want [225 2755 85]
 sample | rg002 | RG-002-2466 y4 #225 | planet id=84 | factories = 702, want 703
-not compared | rg002 | RG-002-2466 y4 #225 | planet id=84 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #227 | planet id=85 | surface_minerals = [1689 0 1034], want [1688 0 1034]
-not compared | rg002 | RG-002-2466 y4 #228 | planet id=86 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #230 | planet id=87 | surface_minerals = [60 162 129], want [60 162 131]
-not compared | rg002 | RG-002-2466 y4 #231 | planet id=88 | planet field packet_warp
+sample | rg002 | RG-002-2466 y4 #231 | planet id=88 | packet_warp = 0, want 8
 sample | rg002 | RG-002-2466 y4 #231 | planet id=88 | surface_minerals = [295 558 77], want [297 558 78]
-not compared | rg002 | RG-002-2466 y4 #233 | planet id=90 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #234 | planet id=91 | factories = 263, want 273
 sample | rg002 | RG-002-2466 y4 #234 | planet id=91 | surface_minerals = [203 375 0], want [251 384 1]
 sample | rg002 | RG-002-2466 y4 #235 | planet id=92 | surface_minerals = [93 167 85], want [95 167 84]
-not compared | rg002 | RG-002-2466 y4 #237 | planet id=94 | planet field packet_destination
-not compared | rg002 | RG-002-2466 y4 #239 | planet id=96 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #24 | fleet owner=1 id=24 | cargo.germanium = 77, want 76
 sample | rg002 | RG-002-2466 y4 #240 | planet id=97 | surface_minerals = [9 150 45], want [9 150 43]
 sample | rg002 | RG-002-2466 y4 #241 | planet id=98 | surface_minerals = [37 352 0], want [38 351 2]
@@ -409,9 +374,7 @@ sample | rg002 | RG-002-2466 y4 #244 | planet id=100 | starbase = design 48 dama
 sample | rg002 | RG-002-2466 y4 #245 | planet id=101 | surface_minerals = [21 307 263], want [20 308 265]
 sample | rg002 | RG-002-2466 y4 #246 | planet id=102 | surface_minerals = [641 1042 31], want [643 1041 29]
 sample | rg002 | RG-002-2466 y4 #247 | planet id=103 | surface_minerals = [46 33 25], want [44 32 26]
-not compared | rg002 | RG-002-2466 y4 #252 | planet id=107 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #254 | planet id=109 | surface_minerals = [301 33 3], want [303 32 3]
-not compared | rg002 | RG-002-2466 y4 #255 | planet id=110 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #255 | planet id=110 | surface_minerals = [467 300 108], want [468 300 105]
 sample | rg002 | RG-002-2466 y4 #257 | planet id=112 | surface_minerals = [181 86 1], want [180 80 1]
 sample | rg002 | RG-002-2466 y4 #258 | planet id=115 | surface_minerals = [37 39 5], want [37 37 5]
@@ -421,7 +384,6 @@ sample | rg002 | RG-002-2466 y4 #26 | fleet owner=1 id=26 | waypoints[0] positio
 sample | rg002 | RG-002-2466 y4 #26 | fleet owner=1 id=26 | x = 1481, want 1429
 sample | rg002 | RG-002-2466 y4 #26 | fleet owner=1 id=26 | y = 1304, want 1301
 sample | rg002 | RG-002-2466 y4 #260 | planet id=117 | surface_minerals = [10 47 0], want [11 47 2]
-not compared | rg002 | RG-002-2466 y4 #262 | planet id=119 | planet field packet_destination
 sample | rg002 | RG-002-2466 y4 #263 | planet id=122 | surface_minerals = [97 72 0], want [95 72 0]
 sample | rg002 | RG-002-2466 y4 #265 | planet id=124 | surface_minerals = [148 84 0], want [149 82 0]
 sample | rg002 | RG-002-2466 y4 #269 | player id=0 | research_accumulated.biotechnology = 889, want 888
@@ -621,7 +583,6 @@ sample | rg002 | RG-002-2467 y5 #249 | planet id=66 | surface_minerals = [624 13
 sample | rg002 | RG-002-2467 y5 #250 | planet id=67 | surface_minerals = [996 848 522], want [998 848 520]
 sample | rg002 | RG-002-2467 y5 #253 | planet id=70 | factories = 348, want 349
 sample | rg002 | RG-002-2467 y5 #254 | planet id=71 | surface_minerals = [3 3002 88], want [28 3028 99]
-not compared | rg002 | RG-002-2467 y5 #257 | planet id=74 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #259 | planet id=76 | surface_minerals = [7 184 3], want [7 185 1]
 sample | rg002 | RG-002-2467 y5 #260 | planet id=77 | surface_minerals = [39 89 177], want [42 90 178]
 sample | rg002 | RG-002-2467 y5 #261 | planet id=77 | environment = [11 80 88], want [11 78 88]
@@ -630,17 +591,12 @@ sample | rg002 | RG-002-2467 y5 #264 | planet id=80 | surface_minerals = [179 27
 sample | rg002 | RG-002-2467 y5 #267 | planet id=83 | surface_minerals = [31453 29457 23824], want [31455 29456 23825]
 sample | rg002 | RG-002-2467 y5 #268 | planet id=84 | factories = 771, want 772
 not compared | rg002 | RG-002-2467 y5 #268 | planet id=84 | planet field packet_destination null
-not compared | rg002 | RG-002-2467 y5 #271 | planet id=86 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #272 | planet id=87 | surface_minerals = [66 190 151], want [66 191 154]
-not compared | rg002 | RG-002-2467 y5 #273 | planet id=88 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #273 | planet id=88 | surface_minerals = [322 523 96], want [325 524 97]
-not compared | rg002 | RG-002-2467 y5 #275 | planet id=90 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #276 | planet id=91 | factories = 327, want 338
 sample | rg002 | RG-002-2467 y5 #276 | planet id=91 | surface_minerals = [297 591 2], want [345 600 2]
 sample | rg002 | RG-002-2467 y5 #277 | planet id=92 | surface_minerals = [93 174 68], want [95 174 66]
 sample | rg002 | RG-002-2467 y5 #278 | planet id=93 | surface_minerals = [18 500 295], want [20 500 294]
-not compared | rg002 | RG-002-2467 y5 #279 | planet id=94 | planet field packet_destination
-not compared | rg002 | RG-002-2467 y5 #281 | planet id=96 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #282 | planet id=97 | surface_minerals = [2 175 73], want [2 175 70]
 sample | rg002 | RG-002-2467 y5 #283 | planet id=98 | factories = 27, want 28
 sample | rg002 | RG-002-2467 y5 #286 | planet id=101 | surface_minerals = [11 343 273], want [9 344 276]
@@ -649,7 +605,6 @@ sample | rg002 | RG-002-2467 y5 #290 | planet id=104 | surface_minerals = [707 0
 sample | rg002 | RG-002-2467 y5 #293 | planet id=106 | surface_minerals = [353 175 2], want [353 176 3]
 sample | rg002 | RG-002-2467 y5 #295 | planet id=108 | surface_minerals = [288 412 82], want [288 412 84]
 sample | rg002 | RG-002-2467 y5 #296 | planet id=109 | surface_minerals = [371 17 1], want [373 16 2]
-not compared | rg002 | RG-002-2467 y5 #297 | planet id=110 | planet field packet_destination
 sample | rg002 | RG-002-2467 y5 #297 | planet id=110 | surface_minerals = [433 374 119], want [433 374 116]
 sample | rg002 | RG-002-2467 y5 #299 | planet id=112 | surface_minerals = [0 60 1], want [0 48 1]
 sample | rg002 | RG-002-2467 y5 #301 | planet id=114 | environment = [52 21 9], want [51 20 9]
@@ -897,38 +852,29 @@ sample | rg002 | RG-002-2468 y6 #258 | planet id=68 | surface_minerals = [0 36 3
 sample | rg002 | RG-002-2468 y6 #259 | planet id=69 | surface_minerals = [430 1098 178], want [431 1100 179]
 sample | rg002 | RG-002-2468 y6 #260 | planet id=70 | factories = 380, want 381
 sample | rg002 | RG-002-2468 y6 #261 | planet id=71 | surface_minerals = [3 3077 1], want [22 3101 8]
-not compared | rg002 | RG-002-2468 y6 #264 | planet id=74 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #266 | planet id=75 | surface_minerals = [1 262 1527], want [2 262 1529]
 sample | rg002 | RG-002-2468 y6 #268 | planet id=78 | surface_minerals = [535 818 394], want [533 818 396]
 sample | rg002 | RG-002-2468 y6 #269 | planet id=79 | surface_minerals = [2 2195 2138], want [1 2193 2135]
 sample | rg002 | RG-002-2468 y6 #271 | planet id=81 | surface_minerals = [757 395 2], want [755 393 2]
 sample | rg002 | RG-002-2468 y6 #273 | planet id=83 | surface_minerals = [32119 30123 24481], want [32121 30123 24482]
 sample | rg002 | RG-002-2468 y6 #274 | planet id=84 | surface_minerals = [207 1 155], want [209 1 157]
-not compared | rg002 | RG-002-2468 y6 #276 | planet id=86 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #277 | planet id=87 | surface_minerals = [72 219 174], want [72 220 177]
-not compared | rg002 | RG-002-2468 y6 #278 | planet id=88 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #278 | planet id=88 | surface_minerals = [339 475 97], want [343 476 98]
-not compared | rg002 | RG-002-2468 y6 #280 | planet id=90 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #281 | planet id=91 | factories = 383, want 396
-not compared | rg002 | RG-002-2468 y6 #281 | planet id=91 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #281 | planet id=91 | surface_minerals = [361 739 7], want [408 748 3]
 sample | rg002 | RG-002-2468 y6 #282 | planet id=92 | surface_minerals = [94 181 50], want [95 181 48]
 sample | rg002 | RG-002-2468 y6 #283 | planet id=93 | surface_minerals = [2 658 427], want [2 657 422]
-not compared | rg002 | RG-002-2468 y6 #284 | planet id=94 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #284 | planet id=94 | surface_minerals = [43 130 4], want [44 132 3]
-not compared | rg002 | RG-002-2468 y6 #286 | planet id=96 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #287 | planet id=97 | surface_minerals = [1 211 112], want [1 210 109]
 sample | rg002 | RG-002-2468 y6 #288 | planet id=98 | factories = 29, want 30
 sample | rg002 | RG-002-2468 y6 #290 | planet id=100 | factories = 155, want 154
 sample | rg002 | RG-002-2468 y6 #290 | planet id=100 | mines = 122, want 124
 sample | rg002 | RG-002-2468 y6 #291 | planet id=100 | starbase = design 48 damage 102, want design 48 damage 26
 sample | rg002 | RG-002-2468 y6 #291 | planet id=100 | surface_minerals = [623 856 0], want [624 857 3]
-not compared | rg002 | RG-002-2468 y6 #292 | planet id=101 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #292 | planet id=101 | surface_minerals = [0 389 294], want [0 401 313]
 sample | rg002 | RG-002-2468 y6 #293 | planet id=102 | surface_minerals = [663 1249 0], want [668 1251 0]
 sample | rg002 | RG-002-2468 y6 #295 | planet id=104 | surface_minerals = [152 0 8], want [150 0 7]
 sample | rg002 | RG-002-2468 y6 #297 | planet id=106 | surface_minerals = [384 164 2], want [381 165 1]
-not compared | rg002 | RG-002-2468 y6 #298 | planet id=107 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #299 | planet id=108 | surface_minerals = [280 446 85], want [280 445 87]
 sample | rg002 | RG-002-2468 y6 #3 | fleet owner=1 id=3 | cargo.boranium = 107, want 108
 sample | rg002 | RG-002-2468 y6 #3 | fleet owner=1 id=3 | cargo.ironium = 143, want 142
@@ -943,7 +889,6 @@ sample | rg002 | RG-002-2468 y6 #306 | planet id=116 | surface_minerals = [174 1
 sample | rg002 | RG-002-2468 y6 #307 | planet id=117 | factories = 3, want 4
 sample | rg002 | RG-002-2468 y6 #307 | planet id=117 | surface_minerals = [11 64 0], want [11 66 0]
 sample | rg002 | RG-002-2468 y6 #308 | planet id=118 | surface_minerals = [258 157 3], want [259 157 1]
-not compared | rg002 | RG-002-2468 y6 #309 | planet id=119 | planet field packet_destination
 sample | rg002 | RG-002-2468 y6 #31 | fleet owner=1 id=34 | waypoints[0] position = {1271 1529}, want {1268 1530}
 sample | rg002 | RG-002-2468 y6 #31 | fleet owner=1 id=34 | waypoints[1] = {{1211 1337} 6 1 41 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1215 1409} 6 1 42 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg002 | RG-002-2468 y6 #31 | fleet owner=1 id=34 | x = 1271, want 1268
@@ -1089,7 +1034,7 @@ sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | ships = map[14:1], w
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | waypoints[0] position = {1311 1324}, want {1299 1325}
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | x = 1311, want 1299
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | y = 1324, want 1325
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', #170, BINARY-ONLY) | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
+incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 sample | rg002 | year 2 | order | year 2 player 1 order 35 (FollowOrder): follow: fleet 300005: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 39 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 42 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
@@ -1136,15 +1081,6 @@ sample | rg002 | year 6 | order | year 6 player 6 order 12 (WaypointOrder): wayp
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | excess = 26, want 31
 sample | rg002-y1 | RG-002-Y1-2463 y1 #211 | planet id=83 | surface_minerals = [28708 26762 21160], want [28709 26762 21160]
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #212 | planet id=84 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #215 | planet id=86 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #220 | planet id=90 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #221 | planet id=91 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #224 | planet id=94 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #226 | planet id=96 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #232 | planet id=101 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #238 | planet id=107 | planet field packet_destination
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #241 | planet id=110 | planet field packet_destination
 sample | rg002-y1 | RG-002-Y1-2463 y1 #245 | planet id=114 | environment = [53 17 9], want [53 17 8]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #252 | planet id=120 | environment = [58 72 10], want [58 72 11]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #338 | salvage_at x=1364 y=1319 | salvage = [[86 71 44] [139 95 86]], want [169 104 106]
@@ -1186,7 +1122,7 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #76 | fleet owner=2 id=14 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #82 | fleet owner=3 id=4 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #84 | fleet_gone owner=3 id=7 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #9 | fleet owner=1 id=7 | cargo.germanium = 0, want 1
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', #170, BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
+incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.boranium = 68, want 69 (6/8 variants match)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.ironium = 182, want 181 (6/8 variants match)
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #133 | design owner=1 slot=3 | design read needs the order layer's design source
@@ -1200,23 +1136,14 @@ sample | rg002-y2 | RG-002-Y2-2464 y1 #189 | planet id=51 | starbase = design 46
 sample | rg002-y2 | RG-002-Y2-2464 y1 #194 | planet id=55 | environment = [62 22 86], want [63 23 86]
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #203 | planet id=65 | planet field defenses null
 sample | rg002-y2 | RG-002-Y2-2464 y1 #205 | planet id=66 | surface_minerals = [528 1111 18], want [527 1110 18]
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #213 | planet id=74 | planet field packet_destination
 sample | rg002-y2 | RG-002-Y2-2464 y1 #218 | planet id=78 | surface_minerals = [1 584 352], want [2 586 354]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #222 | planet id=81 | environment = [75 30 57], want [74 30 57]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #222 | planet id=81 | surface_minerals = [660 346 1], want [662 348 2]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #225 | planet id=83 | starbase = design 88 damage 28, want design 88 damage 27
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #226 | planet id=84 | planet field packet_destination
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #228 | planet id=86 | planet field packet_destination
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #232 | planet id=90 | planet field packet_destination
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #233 | planet id=91 | planet field packet_destination
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #236 | planet id=94 | planet field packet_destination
 sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | factories = 52, want 53
 sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | mines = 74, want 72
 sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | surface_minerals = [146 113 3], want [146 113 0]
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #239 | planet id=96 | planet field packet_destination
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #253 | planet id=110 | planet field packet_destination
 sample | rg002-y2 | RG-002-Y2-2464 y1 #257 | planet id=114 | surface_minerals = [72 20 1], want [73 20 1]
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #262 | planet id=119 | planet field packet_destination
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #270 | player id=1 | player field counts
 sample | rg002-y2 | RG-002-Y2-2464 y1 #271 | player id=1 | research_accumulated.weapons = 236, want 242
 sample | rg002-y2 | RG-002-Y2-2464 y1 #276 | player id=5 | research_accumulated.electronics = 432, want 433
@@ -1269,18 +1196,7 @@ random-driven | rg002-y3 | RG-002-Y3-2465 y1 #192 | planet id=55 | population = 
 sample | rg002-y3 | RG-002-Y3-2465 y1 #193 | planet id=55 | environment = [63 24 86], want [63 25 86]
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #204 | planet id=66 | planet field defenses null
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #215 | planet id=77 | surface_minerals = [40 1 120], want [42 2 123] (4/8 variants match)
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #223 | planet id=84 | planet field packet_destination
 sample | rg002-y3 | RG-002-Y3-2465 y1 #225 | planet id=85 | surface_minerals = [1593 0 937], want [1594 0 938]
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #226 | planet id=86 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #230 | planet id=90 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #231 | planet id=91 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #234 | planet id=94 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #236 | planet id=96 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #241 | planet id=101 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #248 | planet id=107 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #251 | planet id=110 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #260 | planet id=119 | planet field packet_destination
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #267 | player id=0 | player field research_percent
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #267 | player id=0 | research_accumulated.biotechnology = 218, want 213 (5/8 variants match)
 sample | rg002-y3 | RG-002-Y3-2465 y1 #268 | player id=1 | research_accumulated.weapons = 3959, want 3964
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #269 | player id=2 | research_accumulated.biotechnology = 1007, want 1006 (5/8 variants match)
@@ -1335,20 +1251,11 @@ random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | x = 136
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | y = 1321, want 1356 (4/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #172 | planet id=35 | concentrations = [61 53 64], want [61 53 54] (7/8 variants match)
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #179 | planet id=41 | planet field defenses null
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #214 | planet id=74 | planet field packet_destination
 sample | rg002-y4 | RG-002-Y4-2466 y1 #218 | planet id=77 | environment = [11 80 87], want [11 79 88]
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #225 | planet id=84 | planet field packet_destination
 sample | rg002-y4 | RG-002-Y4-2466 y1 #227 | planet id=85 | surface_minerals = [1684 0 1032], want [1688 0 1034]
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #228 | planet id=86 | planet field packet_destination
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #231 | planet id=88 | planet field packet_warp
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #233 | planet id=90 | planet field packet_destination
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #237 | planet id=94 | planet field packet_destination
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #239 | planet id=96 | planet field packet_destination
+missing mechanic [economy]: packet warp not set when a starbase with a mass driver completes (inferred from one observation) | rg002-y4 | RG-002-Y4-2466 y1 #231 | planet id=88 | packet_warp = 0, want 8
 sample | rg002-y4 | RG-002-Y4-2466 y1 #244 | planet id=100 | starbase = design 50 damage 0, want design 50 damage 9
 sample | rg002-y4 | RG-002-Y4-2466 y1 #249 | planet id=104 | surface_minerals = [569 0 0], want [570 0 0]
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #252 | planet id=107 | planet field packet_destination
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #255 | planet id=110 | planet field packet_destination
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #262 | planet id=119 | planet field packet_destination
 sample | rg002-y4 | RG-002-Y4-2466 y1 #271 | player id=1 | research_accumulated.weapons = 272, want 275
 sample | rg002-y4 | RG-002-Y4-2466 y1 #319 | production_queue planet=75 | queue = [{8 1 79 13} {8 1 0 3} {8 1 0 14} {8 1 0 14} {8 1 0 14}], want [{8 1 80 13} {8 1 0 3} {8 1 0 14} {8 1 0 14} {8 1 0 14}]
 sample | rg002-y4 | RG-002-Y4-2466 y1 #323 | production_queue planet=85 | queue = [{8 1 97 13}], want [{8 1 95 13}]
@@ -1404,17 +1311,10 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [
 sample | rg002-y5 | RG-002-Y5-2467 y1 #234 | planet id=51 | factories = 312, want 313
 sample | rg002-y5 | RG-002-Y5-2467 y1 #234 | planet id=51 | surface_minerals = [1225 875 3], want [1224 875 0]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #249 | planet id=66 | surface_minerals = [622 1311 20], want [620 1310 20] (3/8 variants match)
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #257 | planet id=74 | planet field packet_destination
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #271 | planet id=86 | planet field packet_destination
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #273 | planet id=88 | planet field packet_destination
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #275 | planet id=90 | planet field packet_destination
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #275 | planet id=90 | surface_minerals = [882 665 1], want [882 667 1] (6/8 variants match)
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #279 | planet id=94 | planet field packet_destination
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #281 | planet id=96 | planet field packet_destination
 sample | rg002-y5 | RG-002-Y5-2467 y1 #290 | planet id=104 | surface_minerals = [706 0 3], want [705 0 3]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #293 | planet id=106 | surface_minerals = [353 175 3], want [353 176 3]
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #297 | planet id=110 | planet field packet_destination
 sample | rg002-y5 | RG-002-Y5-2467 y1 #301 | planet id=114 | environment = [51 21 9], want [51 20 9]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #313 | player id=0 | research_accumulated.biotechnology = 1458, want 1453
 sample | rg002-y5 | RG-002-Y5-2467 y1 #315 | player id=1 | research_accumulated.weapons = 4453, want 4458
@@ -1464,24 +1364,14 @@ not compared | rg002-y6 | RG-002-Y6-2468 y1 #184 | starbase_design owner=6 slot=
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #185 | starbase_design owner=6 slot=8 | expectation starbase_design
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #186 | starbase_design owner=6 slot=9 | expectation starbase_design
 sample | rg002-y6 | RG-002-Y6-2468 y1 #239 | planet id=49 | starbase = design 102 damage 0, want design 102 damage 390
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #264 | planet id=74 | planet field packet_destination
 sample | rg002-y6 | RG-002-Y6-2468 y1 #275 | planet id=85 | surface_minerals = [1886 0 1235], want [1884 0 1233]
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #276 | planet id=86 | planet field packet_destination
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #278 | planet id=88 | planet field packet_destination
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #280 | planet id=90 | planet field packet_destination
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #281 | planet id=91 | planet field packet_destination
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #284 | planet id=94 | planet field packet_destination
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #286 | planet id=96 | planet field packet_destination
 sample | rg002-y6 | RG-002-Y6-2468 y1 #291 | planet id=100 | starbase = design 51 damage 39, want design 51 damage 26
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #292 | planet id=101 | planet field packet_destination
 sample | rg002-y6 | RG-002-Y6-2468 y1 #293 | planet id=102 | surface_minerals = [666 1249 0], want [668 1251 0]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #297 | planet id=106 | surface_minerals = [384 165 3], want [381 165 1]
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #298 | planet id=107 | planet field packet_destination
 sample | rg002-y6 | RG-002-Y6-2468 y1 #3 | fleet owner=1 id=3 | cargo.boranium = 107, want 108
 sample | rg002-y6 | RG-002-Y6-2468 y1 #3 | fleet owner=1 id=3 | cargo.ironium = 143, want 142
 sample | rg002-y6 | RG-002-Y6-2468 y1 #304 | planet id=114 | environment = [50 20 9], want [50 21 9]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #304 | planet id=114 | original_environment = [53 16 5], want [53 17 5]
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #309 | planet id=119 | planet field packet_destination
 sample | rg002-y6 | RG-002-Y6-2468 y1 #317 | player id=1 | research_accumulated.weapons = 8908, want 8904
 sample | rg002-y6 | RG-002-Y6-2468 y1 #321 | player id=5 | research_accumulated.propulsion = 3538, want 3539
 sample | rg002-y6 | RG-002-Y6-2468 y1 #360 | production_queue planet=79 | queue = [{8 1 69 13} {8 1 0 14} {8 1 0 14}], want [{8 1 70 13} {8 1 0 14} {8 1 0 14}]

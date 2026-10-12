@@ -1800,6 +1800,38 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			if got != *want {
 				errs = append(errs, pvMismatch(k, got, *want))
 			}
+		case "packet_destination":
+			// The mass driver's target planet, -1 for none (vectors/README.md
+			// "planet_settings"). A null, where the original's file holds no
+			// value, is not compared (above): ELEGY CHOICE.
+			var want int
+			if json.Unmarshal(raw, &want) != nil {
+				skipped("packet_destination " + string(raw))
+				continue
+			}
+			got := -1
+			if p.HasPacketDest {
+				got = p.PacketDest - 1
+			}
+			if got != want {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
+		case "packet_warp":
+			// The packet speed setting, 4..19; a setting below 5 counts as
+			// unset (vectors/README.md "initial_state", OBJECTS.md "Launch"),
+			// which Elegy keeps as 0.
+			var want int
+			if json.Unmarshal(raw, &want) != nil {
+				skipped("packet_warp " + string(raw))
+				continue
+			}
+			got := p.PacketSpeed
+			if got < 5 && want < 5 {
+				got = want
+			}
+			if got != want {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
 		case "leftover_to_research":
 			// A newly owned planet takes its new owner's default setting,
 			// which not every vector carries.
@@ -1841,6 +1873,15 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 			continue
 		}
 		switch k {
+		case "research_percent":
+			var want int
+			if json.Unmarshal(eq[k], &want) != nil {
+				skipped("research_percent " + string(eq[k]))
+				continue
+			}
+			if got := g.Players[id].ResearchBudget; got != want {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
 		case "tech", "research_accumulated":
 			var want map[string]int
 			json.Unmarshal(eq[k], &want)

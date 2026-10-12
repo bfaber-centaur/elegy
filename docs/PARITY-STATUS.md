@@ -4,7 +4,7 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## RG-002: full-order six-year regression
 
-Measured on elegy main `e1798ac` (#191 merged). Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
+Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
 
 Bobby's five requirements, in order:
 
@@ -18,48 +18,54 @@ Bobby's five requirements, in order:
    - The ledger also lists any order refused on another variant but not on the reference one, outside the chained run's samples, with the variants that refuse it. `TestRGNoRejectedOrders` checks every variant of RG-001, which refuses nothing on any of them.
    - The chained run refuses 43 orders in years 2–6. All 43 are samples: those years follow Elegy's own draws (RANDOM-PARITY.md "Samples").
    - **One refusal on other variants: incorrect mechanic [lane A], 2 ledger lines.** In Y1, and in the chained run's year 1, variants 1 and 6 refuse player 2's order 10. That order is a waypoint-0 change aimed at player 6's fleet 10, which player 6's order 1 (`move_ships`) empties. When the year's player shuffle replays player 6 first, the target is gone and Elegy refuses the order ("no such object"). The reference seed replays player 2 first.
-     - stars-elegy #170 (BINARY-ONLY, in review) says the original never rejects a waypoint-0 follow whose target was merged away: a waypoint edit checks only the ordering fleet and the index. The stale id is resolved later, by the start-of-year waypoint check or by the removal-time retarget. So Elegy's refusal is the bug. #170 also says the player shuffle itself matches the original: the year's first draws, Fisher-Yates.
-     - It is classed `incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', #170, BINARY-ONLY)`, one line each for Y1 and the chained run.
-3. **Exact deterministic field diffs: MEASURED, none.**
-   - The reference run (seed variant 0) has no field, order or battle record line of a deterministic class (missing mechanic, incorrect mechanic, state-import error, unsupported order).
-   - Across all variants, the only hand lines are the 2 incorrect-mechanic refusal lines above: orders, not fields.
+     - stars-elegy #170 (a1c4c91, BINARY-ONLY) says the original never rejects a waypoint-0 follow whose target was merged away: a waypoint edit checks only the ordering fleet and the index. The stale id is resolved later, by the start-of-year waypoint check or by the removal-time retarget. So Elegy's refusal is the bug. #170 also says the player shuffle itself matches the original: the year's first draws, Fisher-Yates.
+     - It is classed `incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY)`, one line each for Y1 and the chained run.
+3. **Exact deterministic field diffs: MEASURED, one.**
+   - The reference run (seed variant 0) has one field line of a deterministic class, and no order or battle record line of one. It appeared when this branch began comparing packet settings (below).
+   - **Missing mechanic [economy], 1 field line.** In the Y4 restart, planet 88's `packet_warp` is 0 in Elegy and 8 in the original. The planet's starbase with a mass driver completes that year. Economy infers that the original sets the launch warp when such a starbase completes, from this one observation: "packet warp not set when a starbase with a mass driver completes (inferred from one observation)". The same field in the chained run's year 4 is a sample.
+   - Across all variants, the other hand lines are the 2 incorrect-mechanic refusal lines above: orders, not fields.
    - `TestRG002Ledger` and `TestBattleRecords` fail on any new line and on any ledger line no longer produced.
    - Before #189 and #190 there were 78 such lines. RG002-REPORT.md "Effect of #189 and #190" lists them.
 4. **Random results classified: yes.**
    - 30 field lines are random-driven. Each misses on the reference seed and matches on at least one other seed variant. The line keeps that count.
    - A line that misses on every variant is a hand line with an owner, never random-driven.
-   - **Checked on every variant, not only the reference.** A scratch check ran all 8 variants of the seven runs and classed every failing field. Each one is a ledger random-driven line, a sample, or a field that matches on the reference seed (so random by the same rule). No variant of any run has a deterministic field mismatch.
+   - **Checked on every variant, not only the reference.** A scratch check ran all 8 variants of the seven runs and classed every failing field. Each one is a ledger random-driven line, a sample, or a field that matches on the reference seed (so random by the same rule). On main `8426a6a` plus this branch the 56 runs have 10,931 failing field results: 94 on random-driven lines, 157 on fields that match on the reference seed, 10,672 samples, and 8 on the missing-mechanic line above (it fails on every variant). No variant of any run has a deterministic field mismatch beyond that line.
    - No restart battle record needed lane D's in-year random rule.
-5. **Every test on the final main SHA: yes, on `e1798ac`** (below).
+5. **Every test on the final main SHA: yes, on main `8426a6a` plus this branch** (below).
 
 ### Counts per class
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| missing mechanic | 0 | 0 | 0 |
+| missing mechanic | 1 | 0 | 0 |
 | incorrect mechanic | 0 | 2 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
-| not compared | 456 | 0 | 0 |
-| sample | 976 | 43 | 16 |
+| not compared | 344 | 0 | 0 |
+| sample | 977 | 43 | 16 |
 
-Samples total 1035, by kind: 976 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1019), and 16 battle records, checked by `TestBattleRecords`. All are lines of the same ledger file.
+Samples total 1036, by kind: 977 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1020), and 16 battle records, checked by `TestBattleRecords`. All are lines of the same ledger file.
 
-The 456 not-compared lines are:
-- 272 comparator gaps for quantities Elegy models (packet destinations, `object`-form wormholes, messages, design reads, player counts);
+The 344 not-compared lines are:
+- 160 comparator gaps for quantities Elegy models (`object`-form wormholes, messages, design reads, player counts);
 - 176 battle expectations that `TestBattleRecords` compares record by record instead;
-- 8 null in the original's file.
+- 8 null in the original's file, among them 2 planet `packet_destination` null (ELEGY CHOICE, below).
 
-The 272 are where a mismatch could still go unseen (RG002-REPORT.md "Not compared, by reason").
+The 160 are where a mismatch could still go unseen (RG002-REPORT.md "Not compared, by reason").
 
-### The run on `e1798ac`
+**Packet settings and research percent are now compared.** This branch folds in economy's comparator (internal/vectors `planetEquals` and `playerEquals`, tests `TestPacketSettings` and `TestResearchPercent`). It removed 112 not-compared lines (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). Of those, 109 match on the reference seed, 1 is the missing mechanic above and 1 is its chained-run sample.
+- `packet_destination` is the target planet id, or -1 for none (vectors/README.md "planet_settings").
+- `packet_warp` below 5 means unset on both sides (vectors/README.md "initial_state"; OBJECTS.md "Launch"), so 0 and 4 count as equal and 5 does not.
+- **ELEGY CHOICE: a null `packet_destination` stays not compared.** The vectors write null where the original's file holds no destination record, which is not the same claim as "no destination" (-1). Comparing null as -1 would read an absent record as a value. So the 2 null lines stay in the "null in the original's file" group, as `defenses` null does. Reversible if stars-elegy documents null as "none".
+
+### The run on main `8426a6a`
 
 - `go test ./... -count=1` passes in every package: ai, cmd/elegy, engine, game, internal/vectors, newgame, objects, oraclerng, races, regress and terraform.
-- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 456, random-driven 30, sample 1019 (976 fields and 43 orders; the 16 battle samples are `TestBattleRecords`') and incorrect mechanic 2. `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
+- **The ledger.** `go test -run 'TestRG002Ledger|TestRGNoRejectedOrders' -v ./internal/vectors` passes, logging not compared 344, random-driven 30, sample 1020 (977 fields and 43 orders; the 16 battle samples are `TestBattleRecords`'), incorrect mechanic 2 and missing mechanic 1. `TestBattleRecords` passes. `RG002_LEDGER=write` and `PARITY_BASELINE=write` both leave the tree unchanged.
 - **Battle records.** No strict RG-002 record fails: the restarts' 44 and the chained run's 8 in its first year. Of the chained run's 36 later records, all samples, 20 match.
-- **The long-game matrix**, separate from the RG-002 variants: `go test ./regress -run '^TestLongGames$' -count=1 -v -args -seeds=1,2,3,4,5,6,7,8 -years=150 -save-at=77 -size=2`. That is 8 seeds × 2 rulesets × 4 opponent sets = 64 games of 150 years on a medium map. Each game is replayed and reloaded after 77 years. Result: 64 of 64 games played 150 of 150 years with no failure, in 201 s.
+- **The long-game matrix**, separate from the RG-002 variants: `go test ./regress -run '^TestLongGames$' -count=1 -v -args -seeds=1,2,3,4,5,6,7,8 -years=150 -save-at=77 -size=2`. That is 8 seeds × 2 rulesets × 4 opponent sets = 64 games of 150 years on a medium map. Each game is replayed and reloaded after 77 years. Result: 64 of 64 games played 150 of 150 years with no failure, in 238 s.
 - **The RG-002 8-seed matrix** (`go test -run TestParityVectors -v ./engine`, case level: a case passes on a seed when every compared expectation matches):
 
   | Case | Seeds that pass |

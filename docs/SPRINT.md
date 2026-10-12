@@ -97,8 +97,11 @@ State: both ways run, for 6 years, not 10. The restarts pass on the
 reference seed in 3 of 6 years, and every restart is now a random case
 (it passes on some seeds); the chained run passes its first year only
 (details below). RG-002, a late-game start, is in with every order loaded
-and a committed discrepancy ledger checked exactly in CI. On main e1798ac it
-has no deterministic discrepancy left and 30 random-driven field lines; see
+and a committed discrepancy ledger checked exactly in CI. On main 8426a6a plus #194
+(which compares packet settings) its reference seed has one deterministic
+discrepancy, Y4 planet 88's packet warp (missing mechanic, economy), 30 field
+lines are random-driven, and one order is refused only on seed variants 1 and
+6 (incorrect mechanic, lane A); see
 [PARITY-STATUS.md](PARITY-STATUS.md) and [RG002-REPORT.md](RG002-REPORT.md).
 
 ## Critical path
