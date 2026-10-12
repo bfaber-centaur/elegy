@@ -203,7 +203,8 @@ func (g *Game) gateSafe(f *Fleet, src, dst, d int) bool {
 // (PRODUCTION-LAUNCH.md "The new fleet", CONFIRMED SL-02: the owner's
 // lowest unused fleet number, counting from 1). It sorts among the
 // owner's fleets by that number (BINARY-ONLY;
-// Game.fleetOrder).
+// Game.fleetOrder). A number held this year by a fleet that went away is
+// not unused (holdFleetNumbers).
 func (g *Game) lowestFreeFleetNumber(owner int) int {
 	used := map[int]bool{}
 	for _, f := range g.Fleets {
@@ -212,10 +213,31 @@ func (g *Game) lowestFreeFleetNumber(owner int) int {
 		}
 	}
 	n := 1
-	for used[n] {
+	for used[n] || g.heldNumbers[[2]int{owner, n}] {
 		n++
 	}
+	if g.heldNumbers != nil {
+		g.heldNumbers[[2]int{owner, n}] = true
+	}
 	return n
+}
+
+// NewFleetNumber is lowestFreeFleetNumber for space objects that create
+// fleets (a Mystery Trader's gift).
+func (g *Game) NewFleetNumber(owner int) int { return g.lowestFreeFleetNumber(owner) }
+
+// holdFleetNumbers starts the span, after the year's orders are read, in
+// which a fleet that goes away keeps holding its number until the year's
+// files are written (KERNEL.md "Fleet numbers": CONFIRMED for colonizing
+// from orbit and scrapping, KX-007 and RG-001 2432; BINARY-ONLY for the
+// other ways a fleet goes away). A fleet deleted while the orders are
+// read, merged away or emptied by a ship move, freed its number at once
+// (BINARY-ONLY).
+func (g *Game) holdFleetNumbers() {
+	g.heldNumbers = map[[2]int]bool{}
+	for _, f := range g.Fleets {
+		g.heldNumbers[[2]int{f.Owner, f.Number}] = true
+	}
 }
 
 // newFleetID is an unused Fleet.ID, Elegy's internal key.

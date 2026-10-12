@@ -604,3 +604,24 @@ func TestTraderBitAdapter(t *testing.T) {
 		t.Errorf("parts %v", s.TraderParts)
 	}
 }
+
+// A Trader's gift fleet takes the lowest number no fleet of its owner has
+// held this year: fleet 1, scrapped at the start of the year, keeps its
+// number until the year's files are written, and the traded fleet 2 is
+// still there when the gift is made (KERNEL.md "Fleet numbers").
+func TestPredictionTraderGiftNumberInTurn(t *testing.T) {
+	l, s := traderLab(t, TraderItem{Kind: ItemShip})
+	s.Traders[0].Dest = at(0, 0)
+	s.Traders[0].Pos = at(0, 0)
+	scrapped := l.fleet(0, at(0, 300), "Tank", 1)
+	l.g.Fleets[scrapped].Number = 1
+	l.g.Fleets[scrapped].Task = engine.Task{Kind: engine.TaskScrap}
+	fi := l.fleet(0, origin, "Freighter", 1)
+	l.g.Fleets[fi].Number = 2
+	cargo(l, fi, 5000)
+	l.g.Objects = s
+	g := turn(t, *l.g, top{})
+	if len(g.Fleets) != 1 || g.Fleets[0].Number != 3 {
+		t.Errorf("fleets %+v, want only the gift fleet, number 3", g.Fleets)
+	}
+}

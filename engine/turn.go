@@ -100,6 +100,12 @@ type Game struct {
 	// Nil skips remote mining and the adjusters, and terraform items then
 	// stop the queue.
 	Terraform Terraformer
+
+	// heldNumbers is, during a generation after the orders are read,
+	// every (owner, fleet number) a fleet has held since then: a fleet
+	// that goes away keeps its number until the year's files are written
+	// (holdFleetNumbers). It is nil outside that span and is not saved.
+	heldNumbers map[[2]int]bool
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -266,6 +272,7 @@ func GenerateTurn(
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
+	g.holdFleetNumbers()
 	// Following fleets, then the waypoint check after the orders (step
 	// 1a.3), first retargeting waypoints that name a fleet merged away in
 	// the replay.
@@ -557,6 +564,9 @@ func GenerateTurn(
 	g.fileRetarget()
 	g.patrol(views)
 
+	// The year's files are written: numbers held by fleets that went away
+	// are free next year.
+	g.heldNumbers = nil
 	return TurnResult{
 		Game:   g,
 		Events: events,
