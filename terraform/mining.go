@@ -49,18 +49,21 @@ func CanRemoteMine(g *engine.Game, f *engine.Fleet, pi int) bool {
 }
 
 // RemoteMine runs one year of remote mining by fleet fi at the planet it
-// orbits (KERNEL.md "Remote mining", turn order step 6c). Which fleets
-// mine is the turn engine's: a fleet whose task is remote mining and that
-// did not move this year, so a fleet that arrived this year mines nothing
-// until the next (CONFIRMED T-35; TAKEOVER.md, the order stays).
+// orbits (KERNEL.md "Remote mining"). Which fleets mine, and when, is the
+// turn engine's: at an unowned planet a fleet whose task is remote mining
+// and that did not move this year, at step 6c, so a fleet that arrived
+// this year mines nothing until the next (CONFIRMED T-35; TAKEOVER.md,
+// the order stays); at its owner's Alternate Reality planet, in the
+// year's mining step (engine mineOwnAR).
 //
 // Each mineral, in order ironium, boranium, germanium, is mined as
 // planetary mining is with m in place of the mines and the race's mine
 // output ignored (engine.MineYear with eff 10): output conc·m/100 kT, the
-// same random +1 and depletion, no homeworld floor. At an Alternate
-// Reality planet this is a separate mining step from the planet's own
-// (KB-1B); the order of the two steps is BINARY-ONLY and the turn
-// engine's.
+// same random +1 and depletion. The homeworld floor of 30 applies at an
+// owned (Alternate Reality) homeworld, not at an unowned planet
+// (BINARY-ONLY, stars-elegy 8a3b9b5). At an Alternate Reality planet
+// each fleet is a separate mining step after the planet's own (KB-1B;
+// the order BINARY-ONLY).
 //
 // It returns the kT added to the planet's surface and whether the fleet
 // mined (orbiting a planet it can mine, with a rate above 0); a fleet
@@ -78,7 +81,7 @@ func RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Minerals, bool)
 	}
 	p := &g.Planets[pi]
 	for k := range engine.NumMinerals {
-		gain[k], p.Deposits[k] = engine.MineYear(p.Deposits[k], m, 10, false, rng)
+		gain[k], p.Deposits[k] = engine.MineYear(p.Deposits[k], m, 10, p.Owner >= 0 && p.Homeworld, rng)
 		p.Surface[k] += gain[k]
 	}
 	return gain, true

@@ -68,10 +68,13 @@ has room, and changes nothing otherwise.
 | Rule (KERNEL.md "Remote mining") | Function | Status |
 |---|---|---|
 | Rate: Σ count × mining_rate, at most 4,000 | `MiningRate` | CONFIRMED (CS-003-B X1/X2, T-35, KB-1A) |
-| Output `conc·m/100`, random +1, depletion, no homeworld floor, race output ignored | `RemoteMine` (engine `MineYear`, eff 10) | CONFIRMED (T-35, CS-003-B, KB-1A); the +1 draw BINARY-ONLY |
+| Output `conc·m/100`, random +1, depletion, race output ignored | `RemoteMine` (engine `MineYear`, eff 10) | CONFIRMED (T-35, CS-003-B, KB-1A); the +1 draw BINARY-ONLY |
 | Unowned planets only, except the owner's own miners at an Alternate Reality planet | `CanRemoteMine` | CONFIRMED (T-35, KB-1B) |
 | AR: a separate mining step from the planet's own | `RemoteMine` | CONFIRMED (KB-1B); the order of the two steps BINARY-ONLY; regression for the SL-starbases year-2 gap (8 points at 62/10/87 → 5/1/7) |
-| A fleet that arrived or moved this year mines nothing | the caller | CONFIRMED (T-35) |
+| A fleet that arrived or moved this year mines nothing (unowned planets) | the caller | CONFIRMED (T-35) |
+| An AR owner's own miners at its own AR planet mine in the year's mining step, before production | engine `mineOwnAR` | MEASURED (RG-002 Y1, Y4 restarts; stars-elegy 8a3b9b5) |
+| ...after the planet's own mines, each fleet a step in fleet order; arriving this year counts, a further waypoint excludes; not again at 6c, task kept | engine `mineOwnAR`, `remoteMineTask` | BINARY-ONLY (stars-elegy 8a3b9b5) |
+| Homeworld floor of 30 at an owned (AR) homeworld, none at an unowned planet | `RemoteMine` | BINARY-ONLY (stars-elegy 8a3b9b5) |
 
 ## Assumptions (spec gaps)
 
