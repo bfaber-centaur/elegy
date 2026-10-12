@@ -220,8 +220,8 @@ tasks other than unloads, colonize, merge, route, transfer, patrol, lay
 mines, remote mining and scrap (load from and unload into salvage only
 by task, ASSUMPTION T5; ORDERS-STATUS.md), the messages for
 an Orbital Adjuster or remote miner that changed nothing (MESSAGES.md
-0x12d, 0x15b), Super Stealth research stealing and the duplicate-serial
-penalty. Terraforming production items are
+0x12d, 0x15b) and the duplicate-serial penalty. Super Stealth research
+stealing is modelled (#146, `research.go` `stealResearch`). Terraforming production items are
 built (#41, `production_terraform.go`; TERRAFORM-STATUS.md), and a fleet
 whose transport task is still current does not move (#123, above).
 
@@ -510,7 +510,8 @@ skipped in checked cases"): other oracle random streams 4222, `message`
 754 (Elegy's events are its own), `score_record` 319, samples that did
 not match 318, player default queue settings 103, `battle` 54 and
 `battle_actions` 42, planet `starbase` 22, transport `fuel` 6, computer players' planned orders 19, Super Stealth
-research stealing 13, `battle_plan` 13, wormhole objects 10,
+research stealing 3 (only where another player's spending is not
+reproduced), `battle_plan` 13, wormhole objects 10,
 `no_battle` 9, player `research_field` 6, original environment null 5,
 `mystery_trader_items` 5, and 1 to 4 each for planet `concentrations`,
 `planetary_scanner` and `starbase_design`, player `counts` and

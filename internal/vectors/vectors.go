@@ -1176,10 +1176,13 @@ func (l *pvLoaded) playerUnsure(g *engine.Game, id int) map[string]string {
 		// orders, as its fleets and queues do.
 		research(pvPlannedWhy)
 	}
-	if g.Players[id].Race.PRT == engine.PRTSuperStealth && len(g.Players) > 1 {
-		// Elegy does not steal research yet (KERNEL.md "Super Stealth",
-		// stars-elegy fda4173); stolen research is stored, and can
-		// raise a level.
+	if g.Players[id].Race.PRT == engine.PRTSuperStealth && l.unsureSpender(g) {
+		// A Super Stealth player steals from every player's research
+		// spending (KERNEL.md "Super Stealth", stars-elegy fda4173;
+		// engine stealResearch). When another player's spending rests
+		// on a queue the harness cannot load or on planned orders, so
+		// does the stolen research, which is stored and can raise a
+		// level.
 		for _, k := range []string{"tech", "research_accumulated"} {
 			if unsure[k] == "" {
 				unsure[k] = "Super Stealth research stealing"
@@ -1187,6 +1190,17 @@ func (l *pvLoaded) playerUnsure(g *engine.Game, id int) map[string]string {
 		}
 	}
 	return unsure
+}
+
+// unsureSpender reports whether a player still in the game has research
+// spending the harness cannot reproduce.
+func (l *pvLoaded) unsureSpender(g *engine.Game) bool {
+	for j, pl := range g.Players {
+		if !pl.Dead && (l.queued[j] || l.planned(j)) {
+			return true
+		}
+	}
+	return false
 }
 
 // pvPlannedWhy is the reason a computer player's fleets, planets and
