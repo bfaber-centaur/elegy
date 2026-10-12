@@ -409,6 +409,7 @@
     "x": 1169,
     "y": 1145,
     "owner": 1,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -569,6 +570,7 @@
     "x": 1306,
     "y": 1060,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -1303,6 +1305,22 @@
       ],
       "original_environment": null
      }
+    },
+    {
+     "year": 1,
+     "kind": "player",
+     "id": 0,
+     "equals": {
+      "tech": {
+       "energy": 0,
+       "weapons": 0,
+       "propulsion": 3,
+       "construction": 3,
+       "electronics": 0,
+       "biotechnology": 0
+      }
+     },
+     "sample": true
     }
    ]
   },

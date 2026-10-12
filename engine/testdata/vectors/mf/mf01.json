@@ -349,6 +349,7 @@
     "x": 1169,
     "y": 1145,
     "owner": 1,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -509,6 +510,7 @@
     "x": 1306,
     "y": 1060,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -3518,7 +3520,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 15000"
+     "stream": "cycles 15000",
+     "sample": true
     },
     {
      "kind": "message",
@@ -4264,7 +4267,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 20000"
+     "stream": "cycles 20000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5002,7 +5006,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 25000"
+     "stream": "cycles 25000",
+     "sample": true
     },
     {
      "kind": "fleet",
@@ -5732,7 +5737,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 30000"
+     "stream": "cycles 30000",
+     "sample": true
     },
     {
      "kind": "message",
@@ -6470,7 +6476,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 35000"
+     "stream": "cycles 35000",
+     "sample": true
     },
     {
      "kind": "message",
@@ -7208,7 +7215,8 @@
       ]
      },
      "year": 1,
-     "stream": "cycles 40000"
+     "stream": "cycles 40000",
+     "sample": true
     },
     {
      "kind": "message",

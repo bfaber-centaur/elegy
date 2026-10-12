@@ -387,6 +387,7 @@
     "x": 1169,
     "y": 1145,
     "owner": 1,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
@@ -547,6 +548,7 @@
     "x": 1306,
     "y": 1060,
     "owner": 0,
+    "homeworld": true,
     "concentrations": [
      30,
      30,
