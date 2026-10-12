@@ -691,6 +691,7 @@
     "x": 1014,
     "y": 1596,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      69,
      13,
@@ -967,6 +968,7 @@
     "x": 1050,
     "y": 1054,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      62,
      87,
@@ -1025,6 +1027,7 @@
     "x": 1076,
     "y": 1735,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      5,
      75,
@@ -1157,6 +1160,7 @@
     "x": 1097,
     "y": 1083,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      66,
      20,
@@ -2271,6 +2275,7 @@
     "x": 1243,
     "y": 1015,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      93,
      60,
@@ -4611,6 +4616,7 @@
     "x": 1741,
     "y": 1713,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      84,
      17,
@@ -4659,6 +4665,7 @@
     "x": 1755,
     "y": 1789,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      17,
      7,
@@ -4819,6 +4826,7 @@
     "x": 1774,
     "y": 1116,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      79,
      76,
@@ -4851,6 +4859,7 @@
     "x": 1779,
     "y": 1447,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      85,
      83,
@@ -12426,7 +12435,8 @@
      3,
      3,
      3
-    ]
+    ],
+    "fresh": true
    },
    {
     "kind": "packet",

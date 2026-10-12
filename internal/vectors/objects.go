@@ -42,6 +42,8 @@ type pvObject struct {
 	Target   int   `json:"destination_planet"`
 	Minerals []int `json:"minerals"`
 	Decay    int   `json:"decay_class"`
+	// Salvage: the stored skip-decay mark (vectors/README.md "objects").
+	Fresh *bool `json:"fresh"`
 }
 
 func pvMineKinds() map[string]objects.MineKind {
@@ -119,7 +121,12 @@ func (pvObjects) Load(g *engine.Game, raw []json.RawMessage, m pvMaps) (engine.S
 			for _, x := range m {
 				steps += (x + 9) / 10
 			}
-			g.Salvage = append(g.Salvage, engine.Salvage{Pos: engine.Point{X: o.X, Y: o.Y}, Minerals: m, Owner: o.Owner, Number: o.ID, Steps: steps})
+			if o.Fresh == nil {
+				// Every salvage record carries the mark; without it the
+				// next decay is unknown (OBJECTS.md "Salvage", "Decay").
+				return nil, fmt.Errorf("salvage %d/%d without fresh", o.Owner, o.ID)
+			}
+			g.Salvage = append(g.Salvage, engine.Salvage{Pos: engine.Point{X: o.X, Y: o.Y}, Minerals: m, Owner: o.Owner, Number: o.ID, Fresh: *o.Fresh, Steps: steps})
 		default:
 			return nil, fmt.Errorf("object kind %q", o.Kind)
 		}

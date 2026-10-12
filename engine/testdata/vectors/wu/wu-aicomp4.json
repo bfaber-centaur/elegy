@@ -684,6 +684,7 @@
     "x": 1011,
     "y": 1125,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      30,
      61,
@@ -716,6 +717,7 @@
     "x": 1029,
     "y": 1135,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      76,
      94,
@@ -732,6 +734,7 @@
     "x": 1032,
     "y": 1291,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      52,
      37,
@@ -830,6 +833,7 @@
     "x": 1067,
     "y": 1711,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      42,
      59,
@@ -846,6 +850,7 @@
     "x": 1069,
     "y": 1550,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      63,
      81,
@@ -905,6 +910,7 @@
     "x": 1087,
     "y": 1078,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      88,
      48,
@@ -1259,6 +1265,7 @@
     "x": 1206,
     "y": 1013,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      30,
      98,
@@ -1275,6 +1282,7 @@
     "x": 1216,
     "y": 1410,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      53,
      76,
@@ -1339,6 +1347,7 @@
     "x": 1259,
     "y": 1743,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      63,
      97,
@@ -1420,6 +1429,7 @@
     "x": 1277,
     "y": 1044,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      82,
      59,
@@ -1452,6 +1462,7 @@
     "x": 1290,
     "y": 1191,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      88,
      70,
@@ -1468,6 +1479,7 @@
     "x": 1295,
     "y": 1148,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      96,
      54,
@@ -1516,6 +1528,7 @@
     "x": 1309,
     "y": 1028,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      28,
      1,
@@ -1548,6 +1561,7 @@
     "x": 1328,
     "y": 1422,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      87,
      73,
@@ -1612,6 +1626,7 @@
     "x": 1372,
     "y": 1226,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      55,
      17,
@@ -1773,6 +1788,7 @@
     "x": 1425,
     "y": 1063,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      94,
      26,
@@ -2073,6 +2089,7 @@
     "x": 1527,
     "y": 1341,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      30,
      68,
@@ -2153,6 +2170,7 @@
     "x": 1547,
     "y": 1475,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      75,
      23,
@@ -2265,6 +2283,7 @@
     "x": 1587,
     "y": 1330,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      46,
      18,
@@ -2377,6 +2396,7 @@
     "x": 1616,
     "y": 1311,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      93,
      8,
@@ -2409,6 +2429,7 @@
     "x": 1634,
     "y": 1017,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      8,
      20,
@@ -2425,6 +2446,7 @@
     "x": 1642,
     "y": 1310,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      40,
      100,
@@ -2457,6 +2479,7 @@
     "x": 1654,
     "y": 1725,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      15,
      62,
@@ -2473,6 +2496,7 @@
     "x": 1656,
     "y": 1240,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      12,
      6,
@@ -2489,6 +2513,7 @@
     "x": 1657,
     "y": 1492,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      74,
      70,
@@ -2553,6 +2578,7 @@
     "x": 1678,
     "y": 1556,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      86,
      69,
@@ -2633,6 +2659,7 @@
     "x": 1711,
     "y": 1696,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      62,
      69,
@@ -2665,6 +2692,7 @@
     "x": 1714,
     "y": 1624,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      53,
      69,
@@ -2681,6 +2709,7 @@
     "x": 1738,
     "y": 1679,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      2,
      109,
@@ -2729,6 +2758,7 @@
     "x": 1758,
     "y": 1718,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      25,
      96,
@@ -2777,6 +2807,7 @@
     "x": 1769,
     "y": 1429,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      91,
      27,
@@ -2841,6 +2872,7 @@
     "x": 1785,
     "y": 1241,
     "owner": -1,
+    "artifact": true,
     "concentrations": [
      44,
      97,
