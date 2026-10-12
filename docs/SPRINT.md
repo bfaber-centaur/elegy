@@ -33,23 +33,27 @@ Elegy already runs complete turns without the original executable. What
 it cannot yet show is that a **representative** game, with several
 players and many objects, comes out of a year the way the original's does.
 
-## Now (verified at main 395bcdc, stars-elegy b1e38ef, 2026-10-12)
+## Now (verified at main 71f70f9, stars-elegy 56ebfcf, 2026-10-12)
 
 - `go test -skip '^TestLongGames$' ./...`: every package passes.
-- `go test -run TestParityVectors -v ./engine`, over 31 corpora: 982
-  pass, 175 measured pass, 25 sample-only, 7 fail (all RG-001), 2 differs
-  (FO-03-E, FO-06-G), 569 skip, and 7 random cases (5 pass on the
-  reference seed, 2 fail on it: RG-001-Y3-2432 and TK-120-A). CO-07b
-  passes since #158. Expectations skipped include 4,836 from other oracle
-  streams and 362 samples of one stream's random outcome.
+- `go test -run TestParityVectors -v ./engine`, over 31 corpora: 981
+  pass, 175 measured pass, 25 sample-only, 5 fail (chained RG-001
+  2431–2435), 2 differs (FO-03-E, FO-06-G), 569 skip, and 10 random
+  cases. 6 of those pass on the reference seed (CB-009, OB-031-A,
+  RG-001-Y1, Y2, Y4 and chained 2430) and 4 fail on it (RG-001-Y3, Y5,
+  Y6 and TK-120-A). Expectations skipped include 4,836 from other oracle
+  streams and 358 samples of one stream's random outcome.
 - `go test -run TestBattleRecords -v ./engine` (RANDOM-PARITY.md "Battle
   records"): every record with hits in cb, cb7, cs and rg replayed whole
-  (13 of cb's 400 records have none). Compared hits (before any answered
-  roll) match 12,561 of 12,561; conditioned hits (after one) match 952 of
-  952. Conditioned is not random parity.
+  (13 of cb's 400 records have none).
+  - Compared hits (before any answered roll): 12,561 of 12,561 match.
+  - Conditioned hits (after one): 952 of 952 match. Conditioned is not
+    random parity.
+  - Recorded moves that Elegy's rule allows with some outcome of its tie
+    draws: 9,111 of 9,111 checked; 6,462 unchecked (mostly CB-042 and
+    CB-044).
 - Nightly long games: not re-checked for this refresh.
-- Open pull requests: economy's #165 (remote-mining refusal messages and
-  task cancel, pending) and this one.
+- Open pull requests: this one.
 
 ## Milestone 1: one representative year against the oracle
 
@@ -66,7 +70,7 @@ Done when all of these hold:
 3. RG-001's year is compared field by field. Each mismatch is fixed or
    listed under "Known parity failures" with a cause or "not looked at".
 
-State at 395bcdc:
+State at 71f70f9:
 
 1. Met. RG-001 (stars-elegy `vectors/rg/rg001.json`, MEASURED): seven
    players, 97 fleets, 93 of 128 planets owned, six chained years
@@ -90,13 +94,14 @@ oracle's state each year, and run on from Elegy's own state. Exact random
 outcomes need the harness to draw from the original's generator (P1-1).
 
 State: both ways run, for 6 years, not 10. The restarts pass on the
-reference seed in 3 of 6 years; the chained run passes its first year
-only (details below). RG-002, a late-game start, is planned by lane F
+reference seed in 3 of 6 years, and every restart is now a random case
+(it passes on some seeds); the chained run passes its first year only
+(details below). RG-002, a late-game start, is planned by lane F
 (`/mnt/project-files/rg002/plan.md`); nothing is recorded yet.
 
 ## Critical path
 
-RG-001's deterministic diffs (W5) → fixes by the owning lane → RG-002 and
+RG-001's remaining diffs, all random-driven or not looked at → RG-002 and
 longer recordings
 → the original generator in the harness (P1-1, waiting on Bobby's
 seed-table decision) for exact random outcomes.
@@ -112,24 +117,24 @@ seed-table decision) for exact random outcomes.
    seam (#133); RANDOM-PARITY.md counts exact random parity at 0. The
    generator's seed-table publication is pending Bobby. Every chained
    surface-mineral mismatch in RG-001 is random-driven (below).
-2. RG-001's deterministic restart diff: a waypoint aimed at another
-   player's fleet loses its target in 2434 and 2435 (W5; lane A).
-3. RG-001 has 6 recorded years; milestone 2 needs 10. RG-002 is planned.
-4. Oracle computer players' orders must replay as vector orders. RG-001
+2. RG-001 has 6 recorded years; milestone 2 needs 10. RG-002 is planned.
+3. Oracle computer players' orders must replay as vector orders. RG-001
    rejects none of its orders, chained or restarted (#157); the
    capture-to-vector conversion is not checked for every order kind.
 
 Done since the start: the representative vector (#145, #149), the
-importable loader (#134), `elegy vector` (#140), following fleets (#130).
+importable loader (#134), `elegy vector` (#140), following fleets (#130),
+waypoints aimed at another player's fleet (W5, #167).
 
 **P2 (blocks substantial gameplay coverage):**
 
 - Messages are not compared (867 expectations): Elegy's events have no
   mapping to MESSAGES.md kinds.
-- Fields the harness still skips. Lane B's order: concentrations (83)
-  and `research_field` (37) first, then `starbase` (71) and the null
-  fields, then `score_record` (422). Default queue settings (58) are not
-  compared either.
+- Fields the harness still skips: default queue settings (58), then
+  `score_record` (422), are lane B's next. The null fields (`defenses`
+  103, `planetary_scanner` 2, `population` 1) are skipped too.
+  Concentrations, `research_field` (#166) and `starbase` (#169) are
+  compared now.
   Battle records are compared by `TestBattleRecords`, not by the vector
   harness, which still lists 95 `battle` and 82 `battle_actions` as
   skipped.
@@ -223,6 +228,18 @@ elegy (merge commit, PR):
   synced from stars-elegy d86c4f8.
 - 395bcdc #164: dropped-part target choice re-cited to CB-055
   (CONFIRMED).
+- 23a18e7 #168: this record refreshed to 395bcdc; K10 relabelled.
+- 6d98b45 #165: remote mining refuses the orders the spec refuses.
+- 589a12f #166: planet concentrations and the players' research fields
+  compared.
+- 5ea1c74 #169: a planet's starbase compared.
+- 79f3cdc #170: a fleeing (tactic 0) token counts itself on its own
+  square; recorded battle moves checked; late-game combat coverage.
+- 641c9d5 #171: no lead flag without a second player in the game.
+- 01a2906 #167: a waypoint aimed at another player's fleet keeps a seen
+  target and retargets an unseen one (W5).
+- f2b347a #172: a vector's victory conditions and public scores loaded.
+- 71f70f9 #173: CB-056 predictions (late-game combat and mine damage).
 
 stars-elegy: fda4173 #138 (move draws), de2836a #141 (fleet numbers),
 30272be #143 (concentration fractions; FN, WF, CB-053, GR-ORDER cases),
@@ -237,7 +254,8 @@ and 87), 4d3a3d9 #150 (KX-004 S11, comets on terraformed planets),
 ec1b38a #153 (RG-001's mining +1 calibration; which tech prices a colony
 ship), d86c4f8 #152 (salvage records carry `fresh`), b1e38ef #154 (CB-055,
 target choice uses a dropped part's cost), e2fb8c1 #155 (remote-mining
-check order and refusals, BINARY-ONLY). Also merged: 77b282a #139,
+check order and refusals, BINARY-ONLY), 56ebfcf #156 (packed ship counts
+and end-of-year counting in the score record). Also merged: 77b282a #139,
 52af513 #140.
 
 apparatus: #69, the CB-055 oracle evidence (predictions pushed before
@@ -253,43 +271,56 @@ PR.
   `elegy`.
 - TK-120-A: random, 6 of 8 seeds, fails on the reference seed
   (environment). Not looked at in this sprint.
+- CB-009: random, 7 of 8 seeds, passes on the reference seed. Not looked
+  at.
 
-**RG-001 at 395bcdc.** A first subset of the representative game, not
+**RG-001 at 71f70f9.** A first subset of the representative game, not
 complete parity. Field counts from `elegy vector` on the reference seed
 (variant 0); `sample` is a missed sample, which counts as skipped:
 
 | Vector | Cases | Pass | Differ | Sample | Skip |
 |---|---|---|---|---|---|
-| `rg001` (chained 2430–2435) | 1 pass, 5 fail | 6,089 | 190 | 25 | 297 |
-| `rg001-y1` (2430) | pass | 996 | 0 | 2 | 48 |
-| `rg001-y2` (2431) | pass | 1,021 | 0 | 2 | 36 |
-| `rg001-y3` (2432) | fail | 1,029 | 1 | 6 | 48 |
-| `rg001-y4` (2433) | pass | 1,073 | 0 | 0 | 44 |
-| `rg001-y5` (2434) | fail | 1,086 | 4 | 2 | 63 |
-| `rg001-y6` (2435) | fail | 1,082 | 7 | 2 | 49 |
+| `rg001` (chained 2430–2435) | 1 pass, 5 fail | 6,199 | 179 | 27 | 196 |
+| `rg001-y1` (2430) | pass | 1,014 | 0 | 2 | 30 |
+| `rg001-y2` (2431) | pass | 1,032 | 0 | 2 | 25 |
+| `rg001-y3` (2432) | fail | 1,047 | 1 | 6 | 30 |
+| `rg001-y4` (2433) | pass | 1,089 | 0 | 0 | 28 |
+| `rg001-y5` (2434) | fail | 1,111 | 2 | 2 | 40 |
+| `rg001-y6` (2435) | fail | 1,102 | 1 | 3 | 34 |
 
-Over 8 seeds (`TestParityVectors`) Y1, Y2 and Y4 and chained 2430 are
-random cases that pass on the reference seed; Y3 is random and fails on
-it; Y5, Y6 and chained 2431–2435 fail. RG-001's battles: 16 records, all
-replayed whole; compared hits 28 of 28, conditioned 50 of 50.
+Over 8 seeds (`TestParityVectors`) every restart is a random case: Y1 3,
+Y2 6, Y3 5, Y4 7, Y5 4 and Y6 5 of 8 seeds pass, and Y3, Y5 and Y6 fail
+on the reference seed. Chained 2430 passes on 3 of 8; chained 2431–2435
+fail. RG-001's battles: 16 records, all replayed whole; compared hits 28
+of 28, conditioned 50 of 50, recorded moves allowed 254 of 254.
 
-Restart mismatches (each year starts from the original's state):
+Restart mismatches on the reference seed (each year starts from the
+original's state):
 
-- Y5, Y6: a waypoint aimed at another player's fleet loses its target
-  (Elegy keeps a plain waypoint; the oracle keeps the fleet target, type 2,
-  ids 100014 and 100048). 2 waypoints in Y5, 6 in Y6. stars-elegy PARITY
-  "A waypoint aimed at another player's fleet (WF-01..05)", MEASURED,
-  which contradicts ORDERS.md and ASSUMPTION W5. Lane A.
 - Y3 planet 92 and Y6 planet 95: `original_environment` off by one in one
   axis. Not looked at.
-- Y5: player 6 research energy 1978, want 1977; planet 35's queue item is
-  [8 1 8 7], want [8 1 11 7]. Not looked at.
-- Fixed since 4612da1: Y6's salvage at (1324, 1257) (#163).
+- Y5: player 6 research energy 1978, want 1977, and planet 35's queue item
+  [8 1 8 7], want [8 1 11 7]. Random-driven, coordinator triage from the
+  economy lane's analysis: one planet's mining +1 draw decides whether a
+  queue item completes (planets 86, 41 and 35 across Y1 and Y5), and
+  research matches on every seed where that planet's minerals match.
+- Y5 over the 8 variants: the player 6 research and planet 35 queue pair
+  above fails on variants 0 and 6, a minefield of player 2 on variant 4,
+  and planet 39's concentrations (compared since #166) on variant 7.
+  Random-driven by the coordinator's triage; the minefield is not looked
+  at.
+- Fixed since 395bcdc: the waypoint fleet targets in Y5 and Y6 (W5, #167);
+  the starbase damage on planets 54 and 55 in Y6 (#170). That one was
+  deterministic: a fleeing token did not count itself on its own square,
+  so out of reach it stayed put, where the original's Privateer walked up
+  and fired (360 and 180). With the record's moves every hit replays and
+  the damage is kept (`TestRG001StarbaseDamageKept`). Elegy's own walk is
+  random, as the original's is (RANDOM-PARITY.md "Moves").
 
-Chained-only mismatches (Elegy's own state carried from year to year):
+Chained-only mismatches (Elegy's own state carried from year to year), all
+in the random-driven group unless listed as not looked at:
 
-- Surface minerals on 149 planet-years (13 in 2431, rising to 42 in
-  2435): random-driven.
+- Surface minerals on 149 planet-years (13 in 2431, rising to 42 in 2435).
   - 140 are sums of mining's random +1 kT steps. MEASURED: stars-elegy
     ec1b38a, PARITY "Representative game (RG-001)"; over the restarts,
     the original's +1 came 584 times against 582 expected at `r/100`.
@@ -300,14 +331,18 @@ Chained-only mismatches (Elegy's own state carried from year to year):
   them: the ancient-artifact gift, whose field and amount are random
   draws. Coordinator triage; lane A's artifacts PR (pending) has a test
   conditioned on the oracle's gift draws, which clears 2433 and 2434.
+- Players 0 and 2 research, off by 1–2 in 2434–2435. Coordinator triage,
+  from the economy lane's analysis: a harness-only change in #158
+  (333b4ac) unmasked them, with no change in Elegy's output; Super Stealth
+  stealing matches the original on every restart, and the chained
+  differences vary by seed (4, 4, 0, 8, 8, 8, 8, 2) because the thieves
+  steal from spending that has drifted.
 - Not looked at:
   - `excess` and population on planets 40 and 119;
   - planet 40's environment and queue, planet 41's queue and planet 86's
     defenses;
-  - research of players 0, 2, 5 and 6 (players 0 and 2 off by 1–2 in
-    2434–2435);
-  - player 2's fleet 14 position and fuel in 2435.
-- Fixed since 4612da1: planet 50's `excess` (#155).
+  - research of players 5 and 6;
+  - planet 92's `original_environment` in 2432.
 
 Comets: RG-001 has none. KX-004 S11's strikes are checked conditioned on
 the draws (#161), which is not parity.
@@ -316,16 +351,12 @@ the draws (#161), which is not parity.
 
 Per lane, as the coordinator set them on 2026-10-12:
 
-1. Lane A: W5 (keep a waypoint's fleet target while its owner sees the
-   target, WF), then artifacts: the v5 switch, SaveVersion 9 and the
-   conditioned planet-71 test.
-2. Lane B: compare RG-001's skipped fields: concentrations and research
-   fields, then `starbase` and the null fields, then `score_record`.
-3. Lane D: free.
-4. Economy: #165 (remote-mining refusal messages and task cancel).
-5. Lane F: build RG-002, a state-edited AIX 2461 late-game start covering
-   the economy lane's top coverage gaps
-   (`/mnt/project-files/rg002/plan.md`).
-6. Lane G: idle. The original generator as a public rule waits on Bobby's
+1. Lane A: artifacts (the v5 switch, SaveVersion 9 and the conditioned
+   planet-71 test), pending.
+2. Lane B: load default queue settings, then compare `score_record`
+   (stars-elegy 56ebfcf).
+3. Lane F: RG-002 (`/mnt/project-files/rg002/plan.md`), the RM cases and
+   CB-056's oracle run (predictions in #173).
+4. Lane G: idle. The original generator as a public rule waits on Bobby's
    seed-table decision.
-7. Lane A (for E): map events to MESSAGES.md kinds and compare messages.
+5. Lane A (for E): map events to MESSAGES.md kinds and compare messages.
