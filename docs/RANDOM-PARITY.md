@@ -160,7 +160,7 @@ Any other draw during firing still stops the replay; none was reached.
 | cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 |
 | cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 |
 | cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 |
-| rg | 8 | 8 | 15 | 14/14 | 25/25 | 39 |
+| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 |
 
 Answering the rolls turned up one mechanics difference, now fixed: on a
 shielded target the misses' shield damage is a hit record of its own,
