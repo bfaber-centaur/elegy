@@ -535,3 +535,76 @@ func TestMisslottedPartWorksNowhere(t *testing.T) {
 		t.Error("the cost leaves the parts out")
 	}
 }
+
+// TestPredictionDroppedPartTargetChoice: target choice uses the design
+// cost, which counts a misslotted part in the year that reads the design
+// and leaves it out from the next (COMBAT.md "Parts the game drops from a
+// design"; CB-054 CONFIRMED this for salvage, not for target choice). A
+// Small Freighter with a Beam Deflector in its shield-or-armor slot costs
+// 8 (resources + boranium) that year and 6 after; one with a Fuel Tank
+// costs 7, with the same armor and no shield. A Laser frigate fires at the
+// deflector freighter first in the first year and at the Fuel Tank
+// freighter first in the next.
+func TestPredictionDroppedPartTargetChoice(t *testing.T) {
+	cat := Components()
+	qj := []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}
+	odd, err := cat.NewDesignAnyKind("deflector", "Small Freighter", append(slices.Clone(qj), SlotFill{Slot: 2, Part: "Beam Deflector", Count: 1}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tank, err := cat.NewDesign("tank", "Small Freighter", append(slices.Clone(qj), SlotFill{Slot: 1, Part: "Fuel Tank", Count: 1}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gun, err := cat.NewDesign("gun", "Frigate", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Laser", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lv [NumFields]int
+	for f := range lv {
+		lv[f] = 26
+	}
+	plan := []BattlePlan{{Tactic: TacticMaximizeDamage, Primary: TargetAny, Attack: AttackEnemies}}
+	g := &Game{
+		Rules: ElegyRules(),
+		Players: []Player{
+			{Plans: plan, Relations: []Relation{RelationFriend, RelationEnemy}},
+			{Plans: plan, Relations: []Relation{RelationEnemy, RelationFriend}, Research: ResearchState{Levels: lv}},
+		},
+		Designs: []Design{gun, odd, tank},
+		Fleets: []Fleet{
+			{ID: 1, Owner: 0, Pos: Point{5, 5}, Stacks: []Stack{{Design: 0, Count: 1}}},
+			{ID: 2, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 1, Count: 1}}},
+			{ID: 3, Owner: 1, Pos: Point{5, 5}, Stacks: []Stack{{Design: 2, Count: 1}}},
+		},
+	}
+	first := func() (int, [3]int) {
+		gg := *g
+		gg.Designs = slices.Clone(g.Designs)
+		gg.Fleets = slices.Clone(g.Fleets)
+		for i := range gg.Fleets {
+			gg.Fleets[i].Stacks = slices.Clone(gg.Fleets[i].Stacks)
+		}
+		loc := gg.locations()[0]
+		sets, inv, n := gg.whoFights(loc, locationHistory{})
+		b := &battle{g: &gg, rng: pvNoDraws{}, loc: loc, sets: sets, players: inv, involved: n, killed: map[int]bool{}}
+		b.setup(map[int]bool{})
+		var cost [3]int
+		for _, tk := range b.tokens {
+			cost[tk.design] = tk.cost
+			tk.x, tk.y = 0, 0 // all in range
+		}
+		b.fire()
+		if len(b.hits) == 0 {
+			t.Fatal("no hit")
+		}
+		return b.tokens[b.hits[0].Target].design, cost
+	}
+	if d, c := first(); d != 1 || c[1] != 8 || c[2] != 7 {
+		t.Errorf("first year: first target design %d, costs %v; want the deflector freighter (1) at 8 over the tank at 7", d, c)
+	}
+	g.dropMisslottedParts()
+	if d, c := first(); d != 2 || c[1] != 6 || c[2] != 7 {
+		t.Errorf("next year: first target design %d, costs %v; want the tank freighter (2) at 7 over the deflector freighter at 6", d, c)
+	}
+}
