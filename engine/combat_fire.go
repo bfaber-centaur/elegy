@@ -147,6 +147,14 @@ func ceilDiv(a, b int) int { return (a + b - 1) / b }
 
 func (b *battle) record(firer, target int, h BattleHit) {
 	h.Round, h.Firer, h.Target = b.round, firer, target
+	// A destroyed stack keeps the damage it had before the hit, and a
+	// destroyed starbase shows 500 (MEASURED: every recorded hit that
+	// destroyed a token in the cb, cb7 and cs vectors).
+	e := b.tokens[target]
+	h.After = e.dmg
+	if e.dead && e.starbase {
+		h.After = Damage{Pct: 100, Units: 500}
+	}
 	b.hits = append(b.hits, h)
 }
 
@@ -168,9 +176,9 @@ func (b *battle) beam(fi int, w weaponSlot) {
 		if x := dist(t.x, t.y, e.x, e.y); x > 0 && p.Range > 0 {
 			dp = (100 - x*10/p.Range) * dp / 100
 		}
-		if dp <= 0 {
-			return
-		}
+		// A shot that rounds to 0 still hits and is recorded: COMBAT.md
+		// "Beams" has no stop before step 4, and the battle records of
+		// CB-039 and CB-042 to CB-044 hold carried shots of 0 (MEASURED).
 		h, ok := b.damage(e, dp, 0, p.Sapper, -1)
 		if ok {
 			b.record(fi, ti, h)
@@ -327,9 +335,8 @@ func (b *battle) damage(e *token, dp, extra int, shieldOnly bool, limit int) (h 
 	}
 	switch {
 	case surv == 0:
-		e.dead = true
+		e.dead = true // its damage stays as it was (see record)
 		h.Leftover = max(0, dp-extra)
-		e.dmg = Damage{}
 	case dp > 0:
 		if damaged > 0 {
 			dp = ceilDiv(dp+damaged*per, surv)
