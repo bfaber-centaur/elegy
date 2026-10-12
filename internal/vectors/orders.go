@@ -1,8 +1,10 @@
-package engine
+package vectors
 
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/bfaber-centaur/elegy/engine"
 )
 
 // Submitted orders in the parity vectors (FORMAT.md "orders"), converted
@@ -50,12 +52,12 @@ type pvOrder struct {
 
 // pvPlan converts a battle plan's fields as the state's battle_plans give
 // them.
-func pvPlan(name string, tactic, primary, secondary, attackWho int, dump bool) BattlePlan {
-	p := BattlePlan{Name: name, Tactic: Tactic(tactic), Primary: TargetType(primary), Secondary: TargetType(secondary), DumpCargo: dump}
-	if attackWho >= int(AttackPlayer) {
-		p.Attack, p.Player = AttackPlayer, attackWho-int(AttackPlayer)
+func pvPlan(name string, tactic, primary, secondary, attackWho int, dump bool) engine.BattlePlan {
+	p := engine.BattlePlan{Name: name, Tactic: engine.Tactic(tactic), Primary: engine.TargetType(primary), Secondary: engine.TargetType(secondary), DumpCargo: dump}
+	if attackWho >= int(engine.AttackPlayer) {
+		p.Attack, p.Player = engine.AttackPlayer, attackWho-int(engine.AttackPlayer)
 	} else {
-		p.Attack = AttackWho(attackWho)
+		p.Attack = engine.AttackWho(attackWho)
 	}
 	return p
 }
@@ -63,7 +65,7 @@ func pvPlan(name string, tactic, primary, secondary, attackWho int, dump bool) B
 // pvNextField converts a next-field choice: a field, "same" or "lowest".
 func pvNextField(raw json.RawMessage) (int, error) {
 	if len(raw) == 0 {
-		return NextSameField, nil
+		return engine.NextSameField, nil
 	}
 	var next string
 	if json.Unmarshal(raw, &next) != nil {
@@ -71,11 +73,11 @@ func pvNextField(raw json.RawMessage) (int, error) {
 	}
 	switch next {
 	case "same":
-		return NextSameField, nil
+		return engine.NextSameField, nil
 	case "lowest":
-		return NextLowestField, nil
+		return engine.NextLowestField, nil
 	}
-	f, ok := pvFields[next]
+	f, ok := pvFields()[next]
 	if !ok {
 		return 0, fmt.Errorf("next field %q", next)
 	}
@@ -85,12 +87,12 @@ func pvNextField(raw json.RawMessage) (int, error) {
 // orders converts the vector's orders for generated year y (1-based)
 // against g, the game at the start of that year. why names an order the
 // harness cannot convert.
-func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []PlayerOrders, why string) {
+func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files []engine.PlayerOrders, why string) {
 	for _, b := range blocks {
 		if b.Year != y {
 			continue
 		}
-		file := PlayerOrders{Player: b.Player, GameID: g.ID, Year: g.Year}
+		file := engine.PlayerOrders{Player: b.Player, GameID: g.ID, Year: g.Year}
 		split := -1 // a split's source fleet, waiting for the move that fills it
 		for _, raw := range b.Orders {
 			var o pvOrder
@@ -98,7 +100,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 				return nil, "order " + err.Error()
 			}
 			fleet := l.fleetID[pvFleetKey(b.Player, o.Fleet)]
-			var order Order
+			var order engine.Order
 			if split >= 0 && o.Kind != "move_ships" {
 				return nil, "order split without a move_ships"
 			}
@@ -108,47 +110,47 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 				if err != nil {
 					return nil, "order research " + err.Error()
 				}
-				order = ResearchOrder{Budget: o.Percent, Field: pvFields[o.Field], Next: next}
+				order = engine.ResearchOrder{Budget: o.Percent, Field: pvFields()[o.Field], Next: next}
 			case "production_queue":
 				items, why := pvQueue(o.Items)
 				if why != "" {
 					return nil, "order " + why
 				}
-				order = QueueOrder{Planet: l.planet[o.Planet], Queue: items}
+				order = engine.QueueOrder{Planet: l.planet[o.Planet], Queue: items}
 			case "battle_plan":
-				order = BattlePlanOrder{Index: o.Slot, Plan: pvPlan(o.Name, o.Tactic, o.Primary, o.Secondary, o.AttackWho, o.DumpCargo)}
+				order = engine.BattlePlanOrder{Index: o.Slot, Plan: pvPlan(o.Name, o.Tactic, o.Primary, o.Secondary, o.AttackWho, o.DumpCargo)}
 			case "battle_plan_delete":
-				order = DeletePlanOrder{Index: o.Slot}
+				order = engine.DeletePlanOrder{Index: o.Slot}
 			case "fleet_battle_plan":
-				order = FleetPlanOrder{Fleet: fleet, Plan: o.Plan}
+				order = engine.FleetPlanOrder{Fleet: fleet, Plan: o.Plan}
 			case "rename":
-				order = RenameOrder{Fleet: fleet, Name: o.Name}
+				order = engine.RenameOrder{Fleet: fleet, Name: o.Name}
 			case "merge":
 				from := make([]int, len(o.Fleets))
 				for i, id := range o.Fleets {
 					from[i] = l.fleetID[pvFleetKey(b.Player, id)]
 				}
-				order = MergeOrder{Into: fleet, From: from}
+				order = engine.MergeOrder{Into: fleet, From: from}
 			case "cargo":
-				c := CargoOrder{Fleet: fleet}
+				c := engine.CargoOrder{Fleet: fleet}
 				owner := b.Player
 				if o.With.Owner != nil {
 					owner = *o.With.Owner
 				}
 				switch o.With.Kind {
 				case "planet":
-					c.Target, c.ID = TargetPlanet, l.planet[o.With.ID]
+					c.Target, c.ID = engine.TargetPlanet, l.planet[o.With.ID]
 				case "fleet":
-					c.Target, c.ID = TargetFleet, l.fleetID[pvFleetKey(owner, o.With.ID)]
+					c.Target, c.ID = engine.TargetFleet, l.fleetID[pvFleetKey(owner, o.With.ID)]
 				default:
 					return nil, "order cargo with " + o.With.Kind
 				}
 				for name, v := range o.Amounts {
 					if name == "fuel" {
-						c.Amounts[CargoFuel] = v
+						c.Amounts[engine.CargoFuel] = v
 						continue
 					}
-					k, ok := pvCargo[name]
+					k, ok := pvCargo()[name]
 					if !ok {
 						return nil, "order cargo " + name
 					}
@@ -156,7 +158,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 				}
 				order = c
 			case "waypoint_change":
-				i := g.fleetIndex(fleet)
+				i := fleetIndex(g, fleet)
 				if i < 0 {
 					return nil, "order waypoint_change: no fleet"
 				}
@@ -165,7 +167,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 				if why != "" {
 					return nil, "order waypoint_change " + why
 				}
-				w := WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]Waypoint(nil), f.Waypoints...)}
+				w := engine.WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
 				if o.Index == 0 {
 					w.Task = task
 				} else {
@@ -197,13 +199,13 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 				if o.With.Kind != "fleet" || owner != b.Player {
 					return nil, "order move_ships with another player's object"
 				}
-				var ships []Stack
+				var ships []engine.Stack
 				for _, sh := range o.Ships {
 					d, ok := l.design[[2]int{b.Player, sh.Design}]
 					if !ok {
 						return nil, fmt.Sprintf("order move_ships design %d", sh.Design)
 					}
-					ships = append(ships, Stack{Design: d, Count: sh.Count})
+					ships = append(ships, engine.Stack{Design: d, Count: sh.Count})
 				}
 				if split >= 0 {
 					if o.Fleet != split {
@@ -215,10 +217,10 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 						}
 						ships[k].Count = -ships[k].Count
 					}
-					order, split = SplitOrder{Fleet: fleet, Ships: ships}, -1
+					order, split = engine.SplitOrder{Fleet: fleet, Ships: ships}, -1
 					break
 				}
-				order = MoveShipsOrder{Fleet: fleet, With: l.fleetID[pvFleetKey(owner, o.With.ID)], Ships: ships}
+				order = engine.MoveShipsOrder{Fleet: fleet, With: l.fleetID[pvFleetKey(owner, o.With.ID)], Ships: ships}
 			default:
 				// design and design_delete need the players' design slots,
 				// which the harness does not load.
@@ -232,4 +234,14 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *Game) (files []Player
 		files = append(files, file)
 	}
 	return files, ""
+}
+
+// fleetIndex is the index in g.Fleets of the fleet with ID id, or -1.
+func fleetIndex(g *engine.Game, id int) int {
+	for i := range g.Fleets {
+		if g.Fleets[i].ID == id {
+			return i
+		}
+	}
+	return -1
 }
