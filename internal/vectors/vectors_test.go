@@ -568,18 +568,55 @@ func TestMisslottedPartDropped(t *testing.T) {
 // RG-001, chained and restarted: an order Elegy refuses there means a
 // state that has drifted from the original's (before #147, player 6's
 // fleet 0 in 2433 and 2435) or an order kind the loader converts wrongly.
-// The restarts and the chained run's first year are strict. A later
+// The restarts and the chained run's first year are strict on every seed
+// variant, since a refusal can hang on the year's draws (the player
+// shuffle decides which player's orders replay first). A later
 // chained year follows Elegy's own random draws in the years before it
 // (mining, artifacts, battles), so a refusal there is a sample, logged at
 // -v and never a failure, as lane D's chained battle records are
 // (docs/RANDOM-PARITY.md).
 func TestRGNoRejectedOrders(t *testing.T) {
+	checked := 0
 	for _, name := range []string{"rg001", "rg001-y1", "rg001-y2", "rg001-y3", "rg001-y4", "rg001-y5", "rg001-y6"} {
 		v, err := ReadFile("../../engine/testdata/vectors/rg/" + name + ".json")
 		if err != nil {
 			t.Fatal(err)
 		}
-		checkRejected(t, name, Compare(v, 0).Rejected)
+		for k, rejected := range variantRejections(v) {
+			checkRejected(t, fmt.Sprintf("%s variant %d", name, k), rejected)
+			checked++
+		}
+	}
+	if checked != 7*Seeds {
+		t.Errorf("checked %d runs, want every variant of the 7 vectors (%d)", checked, 7*Seeds)
+	}
+}
+
+// variantRejections returns each seed variant's refused orders.
+func variantRejections(v *Vector) [][]string {
+	var out [][]string
+	for k := 0; k < Seeds; k++ {
+		out = append(out, Compare(v, k).Rejected)
+	}
+	return out
+}
+
+// TestVariantRejections checks variantRejections on a run whose refusal
+// hangs on the player shuffle: RG-002 Y1 refuses player 2's order 10 on
+// variants 1 and 6 only (the RG-002 ledger's unresolved randomness line).
+func TestVariantRejections(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/rg/rg002-y1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []int
+	for k, rejected := range variantRejections(v) {
+		if len(rejected) != 0 {
+			got = append(got, k)
+		}
+	}
+	if fmt.Sprint(got) != "[1 6]" {
+		t.Errorf("variants refusing an RG-002 Y1 order: %v, want [1 6]", got)
 	}
 }
 

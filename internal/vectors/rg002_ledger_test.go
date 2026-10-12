@@ -39,7 +39,10 @@ import (
 //     one-line reason ("unresolved randomness [lane D]: reason").
 //
 // A field that misses on every variant but not the same way on all of
-// them says so in its detail ("0/8 variants match, values vary").
+// them says so in its detail ("0/8 variants match, values vary"). An
+// order refused on other variants but not on the reference one, outside
+// the chained run's samples, is a hand line naming those variants; it
+// varies, so it may be unresolved randomness.
 //
 // The first four are computed. A deterministic line carries the class
 // written in the ledger; a new one is written as UNCLASSIFIED and fails
@@ -181,8 +184,10 @@ func rg002Lines(t *testing.T) []ledgerLine {
 				same[k]++
 			}
 		}
+		others := [][]string{nil}
 		for seed := 1; seed < Seeds; seed++ {
-			fs, _, _ := rg002Run(t, name, seed)
+			fs, rs, _ := rg002Run(t, name, seed)
+			others = append(others, rs)
 			for k := range ref {
 				// A field another variant does not list matched there
 				// (its expectation matched or named other fields).
@@ -203,6 +208,9 @@ func rg002Lines(t *testing.T) []ledgerLine {
 				class = "sample"
 			}
 			add(class, name, strings.SplitN(r, " player", 2)[0], "order", r)
+		}
+		for r, seeds := range rg002VariantRefusals(name == "rg002", rejected, others) {
+			out = append(out, rg002VariantRefusalLine(name, r, seeds))
 		}
 		for k, d := range ref {
 			if d == "" {
@@ -243,6 +251,38 @@ func rg002FieldLine(where, detail string, skip, sample bool, matches, same int) 
 		detail += " (" + note + ")"
 	}
 	return ledgerLine{class: class, key: where + " | " + detail, varies: class == "" && note != ""}
+}
+
+// rg002VariantRefusals lists, by refusal, the other variants (others[k]
+// is variant k's refusals; others[0] is unused) that refuse an order the
+// reference run (ref) accepts, leaving out a chained run's samples.
+func rg002VariantRefusals(chained bool, ref []string, others [][]string) map[string][]int {
+	refused := map[string]bool{}
+	for _, r := range ref {
+		refused[r] = true
+	}
+	out := map[string][]int{}
+	for k := 1; k < len(others); k++ {
+		for _, r := range others[k] {
+			if !refused[r] && !(chained && rejectedSample(r)) {
+				out[r] = append(out[r], k)
+			}
+		}
+	}
+	return out
+}
+
+// rg002VariantRefusalLine is the ledger line of an order refused on the
+// other variants listed (seeds, in order) but not on the reference one:
+// a hand line, its refusal depending on Elegy's draws (the player
+// shuffle, for one), so it varies.
+func rg002VariantRefusalLine(vector, refusal string, seeds []int) ledgerLine {
+	var vs []string
+	for _, k := range seeds {
+		vs = append(vs, fmt.Sprint(k))
+	}
+	detail := fmt.Sprintf("%s (refused on variants %s of %d, not on the reference)", refusal, strings.Join(vs, ", "), Seeds)
+	return ledgerLine{key: strings.Join([]string{vector, strings.SplitN(refusal, " player", 2)[0], "order", detail}, " | "), varies: true}
 }
 
 // readLedger reads the ledger's lines of kind other than "battle", by
@@ -474,6 +514,34 @@ func TestCheckLedger(t *testing.T) {
 	} {
 		if rg002UnresolvedClass(class) != want {
 			t.Errorf("rg002UnresolvedClass(%q) = %v, want %v", class, !want, want)
+		}
+	}
+}
+
+// TestRG002VariantRefusalLine pins a variant-only refusal's line: the
+// variants that refuse it, a hand class, and that it varies.
+func TestRG002VariantRefusalLine(t *testing.T) {
+	got := rg002VariantRefusalLine("rg002-y1", "year 1 player 2 order 10 (FollowOrder): no such object", []int{1, 6})
+	want := ledgerLine{key: "rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): no such object (refused on variants 1, 6 of 8, not on the reference)", varies: true}
+	if got != want {
+		t.Errorf("rg002VariantRefusalLine = %+v, want %+v", got, want)
+	}
+}
+
+// TestRG002VariantRefusals pins which refusals of other variants are
+// listed: not the reference's own, and not a chained run's samples.
+func TestRG002VariantRefusals(t *testing.T) {
+	ref := []string{"year 1 player 1 order 2 (X): a"}
+	others := [][]string{nil, {"year 1 player 1 order 2 (X): a", "year 1 player 2 order 3 (X): b"}, {"year 2 player 2 order 4 (X): c"}, {"year 1 player 2 order 3 (X): b"}}
+	for _, c := range []struct {
+		chained bool
+		want    string
+	}{
+		{false, "map[year 1 player 2 order 3 (X): b:[1 3] year 2 player 2 order 4 (X): c:[2]]"},
+		{true, "map[year 1 player 2 order 3 (X): b:[1 3]]"},
+	} {
+		if got := fmt.Sprint(rg002VariantRefusals(c.chained, ref, others)); got != c.want {
+			t.Errorf("rg002VariantRefusals(chained %v) = %s, want %s", c.chained, got, c.want)
 		}
 	}
 }
