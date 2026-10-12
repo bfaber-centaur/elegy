@@ -47,6 +47,20 @@ measured.
   which stream's expectations to check, and `replay`, a random source per
   year. `runVector(v, k)` is `runVectorWith(v, pvRun{seed: k})`, unchanged
   behaviour.
+- Without replay, year y of seed variant k draws from `pvSeed(y, k)`, a
+  splitmix64 hash of the pair (ELEGY CHOICE). Before it, the seed was
+  `y + k<<32`, which `math/rand` reduces modulo 2^31−1 to `y + 2k`: year
+  y's variant k drew the same stream as year y+2's variant k−1, so a
+  chained run's variants shared year-streams (80 of the ordered pairs over
+  years 1..6) and were not independent samples. `TestSeedsDistinct` checks
+  that no two (year, variant) pairs reach the same effective seed, and
+  `TestSeedVariantsIndependent` (skipped under `-short`) checks the
+  variants' streams for correlation at shallow and deep draws. The change
+  moved tallies only where an outcome depends on Elegy's draws. The
+  baseline measured on the old seeds is kept as a historical record in
+  `engine/testdata/vectors/baseline-pre-seedhash.txt`; no test reads it,
+  and its random and sample-only counts are not comparable with
+  `baseline.txt`'s.
 - `pvStart(v, stream, year)` returns where that year's stream started: the
   vector's `random_start` entry, else the ORACLE.md tick for the stream's
   cycles value, else nothing recorded.
@@ -160,7 +174,19 @@ Any other draw during firing still stops the replay; none was reached.
 | cb | 400 | 387 (13 have no hits) | 286 | 8423/8423 | 403/403 | 8826 | 4456/4456 | 6360 |
 | cb7 | 44 | 44 | 87 | 4106/4106 | 129/129 | 4235 | 4252/4252 | 25 |
 | cs | 18 | 18 | 334 | 4/4 | 370/370 | 374 | 149/149 | 61 |
-| rg | 16 | 16 | 30 | 28/28 | 50/50 | 78 | 254/254 | 16 |
+| rg | 16 (7 samples) | 9 | 15 | 16/16 | 25/25 | 78 | 195/195 | 8 |
+
+**Samples.** A record of a year that follows Elegy's own draws in the
+vector's earlier years (a chained run past its first random year) starts
+from fleets and states those draws shaped, not from the record's. It is
+a sample: compared in full, tallied only as matched or missed in its own
+column, never in the other tallies and never a failure. A match does not
+show parity and a miss does not show a defect; the per-year restarts
+compare those years from the record. The rg row's 7 samples are the records of
+RG-001's chained run after its first year; 5 match at the reference seed
+(variant 0 of `pvSeed`). Two, 2434 (1658,1174) and 2435 (1319,1460),
+miss. On the old folded seeds (before #188) all 7 matched, only because
+that seed's chain happened to reproduce those fleets and states.
 
 **Moves.** The replay also checks each recorded move before applying it:
 the recorded square must be one Elegy's `step` can choose with some

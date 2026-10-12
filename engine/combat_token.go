@@ -148,11 +148,10 @@ func tokenValues(d Design, race Race, starbase bool, cost Cost) token {
 		}
 		shield += p.Shield * s.Count
 		// RS halves the armor parts' armor; a shield part's armor counts
-		// whole (CONFIRMED for Croby Sharmor, CB-056, stars-elegy b0ca924;
-		// the Langston Shell is not observed). The halving truncates once
-		// per slot (stars-elegy COMBAT.md "Armor", BINARY-ONLY; MEASURED
-		// in RG-002-Y6, one stream: an RS Rogue with 2 Organic Armor in one
-		// slot took damage that fits 450 + 350/2 = 625, not 450 + 2 × 87).
+		// whole in any slot, by the part's kind (CONFIRMED for Croby
+		// Sharmor, CB-056, and the Langston Shell, CB-058). The halving
+		// truncates once per slot (stars-elegy COMBAT.md "Armor"; MEASURED
+		// in CB-057, 374 for two slots, and RG-002-Y6, 625 for one).
 		if rs && p.Kind == PartArmor {
 			armor += p.Armor * s.Count / 2
 		} else {
