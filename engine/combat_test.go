@@ -524,6 +524,35 @@ func TestConfirmedSalvage(t *testing.T) {
 	}
 }
 
+func TestConfirmedStarbaseLeavesNoSalvage(t *testing.T) {
+	// CB-047: a destroyed Space Station adds nothing to its planet's
+	// surface; only the Destroyer killed there does. With the station's
+	// third added, the planet ended [438 504 506] against the original's
+	// [414 485 465]; CB-041's destroyed starbase agrees in every stream.
+	station := testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)
+	station.Hull.Cost.Minerals = Minerals{92, 72, 157}
+	ship := testDesign(Hull{Name: "Destroyer", Armor: 200}, 10)
+	ship.Hull.Cost.Minerals = Minerals{30, 30, 30}
+	d := []Design{station, ship}
+	sb := tokenValues(station, Race{}, true, designCost(station, Race{}, [NumFields]int{}))
+	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 1, 0, 1, -1, 0
+	e := tok(d, 1, 1, 1)
+	tb := newTestBattle(panicRand{}, d, &sb, e)
+	tb.g.Planets = []Planet{{HasStarbase: true, Surface: Minerals{423, 487, 459}}}
+	tb.loc.planet = 0
+	tb.killEvent(e, 1)
+	if got := tb.g.Planets[0].Surface; got != (Minerals{431, 495, 467}) {
+		t.Fatalf("after the Destroyer: surface %v, want [431 495 467]", got)
+	}
+	tb.starbaseDamage(&sb, 10000, 0, &BattleHit{})
+	if !sb.dead || !tb.killed[1] {
+		t.Fatalf("starbase dead %v, killed %v", sb.dead, tb.killed)
+	}
+	if got := tb.g.Planets[0].Surface; got != (Minerals{431, 495, 467}) || len(tb.pending) != 0 {
+		t.Errorf("after the starbase: surface %v pending %v, want [431 495 467] and nothing pending", got, tb.pending)
+	}
+}
+
 func TestConfirmedRepair(t *testing.T) {
 	// CB-017 (Q-12): units repaired per turn by situation, pct kept.
 	ft := testDesign(Hull{Name: "Fuel Transport", FuelTransport: true, RepairBonus: 25}, 10)

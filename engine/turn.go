@@ -390,10 +390,18 @@ func GenerateTurn(
 	// environment production terraformed (KERNEL.md "Turn order";
 	// MEASURED KX-002 T1, T2).
 	for i := range g.Planets {
+		p := &g.Planets[i]
 		if !grows[i] {
+			if p.Owner != NoOwner && p.Population <= 0 {
+				// An owned planet that already has no colonists when
+				// growth runs, every one loaded off it this year, is
+				// lost (MESSAGES.md 0x040, CONFIRMED mg/mg002;
+				// TAKEOVER.md "Unload and load amounts", CONFIRMED
+				// TK-201 G; stars-elegy d4eafd9).
+				events = append(events, g.emptyPlanet(i))
+			}
 			continue
 		}
-		p := &g.Planets[i]
 		player := &g.Players[p.Owner]
 		col := NewColony(p, player)
 		p.Population, p.GrowthCarry = GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)

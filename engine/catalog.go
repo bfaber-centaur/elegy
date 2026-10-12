@@ -583,6 +583,14 @@ func (c *Catalog) NewDesign(name, hull string, fills []SlotFill) (Design, error)
 	return c.newDesign(name, hull, fills, true)
 }
 
+// NewDesignAnyKind is NewDesign keeping a part of a kind its slot does
+// not take (newDesign with kinds false, ASSUMPTION K10). The parity
+// vectors' loader (internal/vectors) uses it for oracle states written
+// with such designs.
+func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design, error) {
+	return c.newDesign(name, hull, fills, false)
+}
+
 // newDesign is NewDesign; with kinds false a part of a kind its slot does
 // not take is kept. Some oracle states were written directly with such
 // designs (CB-009, CB-010: a Beam Deflector in a shield-or-armor slot);
