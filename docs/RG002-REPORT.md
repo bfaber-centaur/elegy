@@ -12,6 +12,8 @@ The ledger, [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/v
 - a refused order;
 - a battle record that does not match.
 
+Every order is accounted for. Lane F's coverage check (`/mnt/project-files/rg002/orders-coverage.md`) found that all 1867 order records in the 42 order files decode into the vectors, and it lists the two known vector omissions.
+
 Two tests check the ledger exactly: `internal/vectors` `TestRG002Ledger` for fields and orders, and `engine` `TestBattleRecords` for battle records. Either one fails on a line the run produces that the ledger lacks, and on a ledger line the run no longer produces. So a fix fails until its lines leave the ledger, and nothing is skipped.
 
 Run on: elegy main `cf41aab` plus #188 and this change. The final run on the integrated main SHA is still to come and will replace these numbers.
@@ -80,19 +82,26 @@ No order fails to load. Lane F's coverage check found that the 42 order files ho
 - **Y5.** Player 6's energy research is 59 against 23.
 - **Player 2's research.** It is off by 1 or 2 in some fields in Y1, Y3 and Y4, the same on all 8 variants. The cause is not established. RG-001 shows similar ±1s that follow mining draws, but here they do not vary with the seed.
 
-## Not compared (lane B comparator gaps)
+## Not compared, by reason
 
-| Reason | Lines |
-|---|---|
-| planet `packet_destination` (incl. null) and `packet_warp` | 112 |
-| `battle`, `battle_actions` expectations | 176 |
-| `object` wormhole | 72 |
-| `message` | 68 |
-| `starbase_design` and design reads | 15 |
-| player `counts`, `research_percent` | 8 |
-| planet `defenses` null | 6 |
+None of the 457 lines is an RG-002 mechanic Elegy lacks. Each falls in one of three groups.
 
-The 176 `battle` and `battle_actions` expectations are compared record by record by TestBattleRecords, and its RG-002 results are the battle lines above. The other gaps are comparator work for lane B.
+**1. The harness has no comparator, but Elegy models the quantity (lane B).**
+
+| Reason | Lines | What Elegy has |
+|---|---|---|
+| planet `packet_destination`, `packet_warp` | 110 | `Planet.HasPacketDest`, `PacketDest`, `PacketSpeed` (the mass-driver setting) |
+| `object` wormhole (the whole-object form) | 72 | wormholes; only the `wormhole` expectation kind is compared, not `object` |
+| `message` | 68 | turn events; there is no event-to-message mapping in the harness |
+| `starbase_design`, design reads ("needs the order layer's design source") | 14 | designs and design orders; the design read is not wired into the harness |
+| player `counts`, `research_percent` | 8 | the player's research percentage and per-design counts |
+| planet starbase in a design slot the comparator cannot place (`starbase design 0`) | 1 | the starbase; the slot lookup misses after a design change |
+
+**2. Compared by another test.** The 176 `battle` and `battle_actions` expectations are compared record by record by TestBattleRecords. Its RG-002 results are the ledger's battle record lines.
+
+**3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null.
+
+Group 1 is comparator work. Until it is done, a mismatch in those 273 lines would go unseen, so their count is the honest size of the gap.
 
 ## Random-driven
 
