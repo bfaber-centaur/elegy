@@ -40,6 +40,8 @@ func (r *routed) turn(g engine.Game, o []engine.PlayerOrders, rng engine.Rand) (
 // With the torpedo rolls the same on every variant and every other draw
 // left to the variant (the frigates' walk among them), every variant
 // passes: the case's random outcome is the torpedo rolls alone.
+// Conditioned on the answered torpedo rolls, this is not random parity;
+// it shows only which draws the outcome depends on.
 func TestCB009RandomIsTorpedoRolls(t *testing.T) {
 	v, err := ReadFile("../../engine/testdata/vectors/cb/cb009.json")
 	if err != nil {
@@ -67,7 +69,8 @@ func TestCB009RandomIsTorpedoRolls(t *testing.T) {
 // the fleet crossed unhit (the field is known to player 2 only). With
 // every mine-hit draw answered "no hit" and every other draw left to the
 // variant, those expectations hold on every variant: the difference is
-// the hit draws.
+// the hit draws. Conditioned on the answered mine-hit draws, this is not
+// random parity; it shows only which draws the outcome depends on.
 func TestRG001Y5MinefieldIsHitDraws(t *testing.T) {
 	v, err := ReadFile("../../engine/testdata/vectors/rg/rg001-y5.json")
 	if err != nil {
