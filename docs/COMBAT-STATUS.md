@@ -69,6 +69,9 @@ experiments"):
   ships;
 - salvage at more than one point.
 
+CB-058 asks these, with the Langston Shell under RS and the Death Star's
+reach and armor (predictions below, "CB-058 predictions").
+
 The battle record goes to every player in P and no one else (CONFIRMED,
 CB-031): Elegy emits `EventBattle` for each player in P.
 
@@ -182,6 +185,26 @@ each of two slots runs (174 against 175).
 The halving is in the design's armor, so mine damage and stargate damage
 use it too: the stargate's plain armor under RS (ASSUMPTION G5) is
 replaced (BINARY-ONLY, OBJECTS-STATUS.md).
+
+### CB-058 predictions
+
+Pushed before lane F's run. Each is a PREDICTION from COMBAT.md and
+OBJECTS.md as Elegy reads them; the tests are in
+`engine/combat_cb058_test.go`. Values are Elegy's for a race with no
+cost LRT.
+
+| Q | Setup for the oracle | Elegy predicts | Current label | Test |
+|---|---|---|---|---|
+| 1 | A Destroyer (Long Hump 6, one Alpha Torpedo, no computer) fires at a Battleship with six Jammer 50 and no shields: hit chance 35·(100−95)/100 = 1% | when the torpedo misses, one hit record with 0 hits and 1 miss, and no damage | BINARY-ONLY | `TestPredictionCB058ZeroHitTorpedoRecord` |
+| 2 | Three players, 100 one-ship fleets each (ids 0..99) at one deep-space point | quota 85; player 0's fleets 0 and 16..99 and players 1 and 2's 15..99 fight (255); all three get the left-out message | not observed for three players (CONFIRMED for two, CB-039) | `TestPredictionCB058TokenCapThreePlayers` |
+| 3 | A fleet of 4 Large Freighters (2 Long Hump 6) with 1000 Fe, 700 Bo, 333 Ge, 500 kT colonists loses one freighter per kill event | cargo left 750/525/249/376, then 500/350/166/251, then 250/175/83/126, then none: each share truncated, the remainder 1 kT at a time to Fe, Bo, Ge, colonists | BINARY-ONLY (the fuel share CONFIRMED, CB-023) | `TestPredictionCB058CargoShare` |
+| 4 | Player 0 destroys all of player 1's ships at two deep-space points in one turn, the second point's fleets earlier in the fleet table | the salvage at the point of player 0's lower fleet is player 1's number 0, the other number 1 (battles by each location's first fleet; lowest free number) | BINARY-ONLY | `TestPredictionCB058SalvageTwoPoints` |
+| 5 | An RS player's Rogue with 3 Langston Shell in slot 1 (a shield-or-armor slot); a Battleship with 3 Langston Shell in slot 2 (shield only); a Rogue with 3 Organic Armor in slot 1. Each has Trans-Galactic Drives in slot 0 | 645, 2195, 712; shields 525. Elegy halves by part kind, so the Shell counts whole in either slot. Halving by slot kind would give the first Rogue 547 | BINARY-ONLY (Croby Sharmor in a shield-only slot CONFIRMED, CB-056) | `TestPredictionCB058LangstonShellRegeneratingShields` |
+| 6 | A Death Star with 8 Heavy Blasters (range 3) | armor 1500; reach 4: a ship 4 squares away is a target, one 5 away is not | BINARY-ONLY (not measured in CB-056) | `TestPredictionCB058DeathStarReach` |
+
+Q5 separates the two readings of "armor slot": the Rogue's slot 1 takes
+shields or armor, the Battleship's slot 2 only shields. If the Rogue's
+armor is 547, the halving goes by slot kind; if 645, by part kind.
 
 ### Settled by current COMBAT.md
 
