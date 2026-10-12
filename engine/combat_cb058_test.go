@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-// CB-058 predictions: the combat paths still BINARY-ONLY or unobserved
-// after CB-057 (COMBAT-STATUS.md "Not tested against the oracle"). Each
-// names the designs and counts for the oracle case. Costs and values are
-// Elegy's for a race with no cost LRT at tech 26.
+// CB-058: the combat paths still BINARY-ONLY or unobserved after CB-057.
+// Pushed as predictions (elegy eaa474e) before lane F's runs; the results
+// are stars-elegy #166 (726d943, experiments/cb058, PARITY.md "Round 12").
+// Costs and values are Elegy's for a race with no cost LRT at tech 26.
 
 // lateToken is a ship token of catalogue design d for player p.
 func lateToken(d Design, i, p, ships int, race Race) *token {
@@ -19,9 +19,11 @@ func lateToken(d Design, i, p, ships int, race Race) *token {
 	return &t
 }
 
-func TestPredictionCB058ZeroHitTorpedoRecord(t *testing.T) {
+func TestConfirmedCB058ZeroHitTorpedoRecord(t *testing.T) {
 	// Q1. COMBAT.md "Torpedoes and missiles" step 4: a target the salvo
-	// reaches gets a hit record even with 0 hits (BINARY-ONLY). A
+	// reaches gets a hit record even with 0 hits. CONFIRMED (CB-058, 6
+	// runs: 268 missed one-torpedo salvos each wrote exactly one record
+	// with no change). A
 	// Destroyer (Long Hump 6, one Alpha Torpedo: accuracy 35, computer 0)
 	// fires at a Battleship with six Jammer 50 (jammer 95, no shields):
 	// p = 35·(100 − 95)/100 = 1. With the draw a miss (99 of 100 streams)
@@ -47,9 +49,10 @@ func TestPredictionCB058ZeroHitTorpedoRecord(t *testing.T) {
 	}
 }
 
-func TestPredictionCB058TokenCapThreePlayers(t *testing.T) {
-	// Q2. COMBAT.md "Token cap" (CONFIRMED for two players, CB-039): with
-	// three players, each with 100 one-ship fleets of one design in deep
+func TestConfirmedCB042TokenCapThreePlayers(t *testing.T) {
+	// COMBAT.md "Token cap", CONFIRMED for this layout by CB-042 (two
+	// streams; CB-058's Q2 was not run for that reason): with three
+	// players, each with 100 one-ship fleets of one design in deep
 	// space (fleet ids 0..99, the location's fleets ordered by owner then
 	// id), the quota is 255/3 = 85. First pass: player 0's fleet 0, then
 	// from the location's last fleet back: player 2's 99..15, player 1's
@@ -90,10 +93,13 @@ func TestPredictionCB058TokenCapThreePlayers(t *testing.T) {
 	// starbase counts toward the 255 but not toward its owner's quota.
 }
 
-func TestPredictionCB058CargoShare(t *testing.T) {
+func TestConfirmedCB058CargoShare(t *testing.T) {
 	// Q3. COMBAT.md "Salvage": a destroyed ship's share of its fleet's
-	// cargo goes with it, by cargo capacity (BINARY-ONLY; the fuel share
-	// is CONFIRMED, CB-023). A fleet of 4 Large Freighters (Long Hump 6 ×2:
+	// cargo goes with it, by cargo capacity. CONFIRMED (CB-058, 6 runs:
+	// the per-event shares were pushed before the run; the run's salvage,
+	// 764/528/257, is eaa474e applied afterwards to the observed kill
+	// events: these shares plus a third of each hull, less a quarter per
+	// event; the fuel share CB-023). A fleet of 4 Large Freighters (Long Hump 6 ×2:
 	// capacity 1200, fuel 2600 each) carrying 1000 Fe, 700 Bo, 333 Ge and
 	// 500 kT of colonists, with a plan that does not dump cargo, loses one
 	// freighter per kill event. moved = C·1200/capacity before, each
@@ -130,16 +136,19 @@ func TestPredictionCB058CargoShare(t *testing.T) {
 	}
 }
 
-func TestPredictionCB058SalvageTwoPoints(t *testing.T) {
+func TestMeasuredCB058SalvageTwoPoints(t *testing.T) {
 	// Q4. Salvage at two points in one turn: battles go in the order of
 	// each location's first fleet (fleets by owner then id), and each
 	// battle's deep-space salvage takes its owner's lowest free number
-	// (OBJECTS.md "Salvage", "Owner"; BINARY-ONLY for two battles). Player
+	// (OBJECTS.md "Salvage", "Owner"). MEASURED (CB-058, 6 runs),
+	// consistent with eaa474e: the numbers pushed before the run were for
+	// other victims, so this is not CONFIRMED by prediction. The
+	// battle order by first fleet stays BINARY-ONLY: CB-058's first-fleet
+	// point also had the smaller y, so ascending y fits as well. Player
 	// 0's fleets 1 and 3 attack player 1's freighters 2 at (100,100) and 4
 	// at (200,200) and destroy them all: the salvage at (100,100), the
 	// location of player 0's fleet 1, is player 1's number 0, and the one
-	// at (200,200) number 1. The weapon only has to destroy every
-	// freighter; the oracle case can use any that does.
+	// at (200,200) number 1.
 	sf := testDesign(Hull{Name: "Small Freighter", Armor: 25}, 10)
 	sf.Hull.Cost.Minerals = Minerals{4, 0, 5}
 	for seed := range int64(8) {
@@ -168,13 +177,12 @@ func TestPredictionCB058SalvageTwoPoints(t *testing.T) {
 	}
 }
 
-func TestPredictionCB058LangstonShellRegeneratingShields(t *testing.T) {
-	// Q5. COMBAT.md "Armor": RS halves each armor slot's total (stars-elegy
-	// #164, BINARY-ONLY), and a shield part's own armor is not halved
-	// (CONFIRMED for Croby Sharmor in a shield-only slot, CB-056). Elegy
-	// reads "armor slot" as the part's kind: a Langston Shell (a shield,
-	// armor 65) counts whole in any slot. The designs separate part kind
-	// from slot kind:
+func TestConfirmedCB058LangstonShellRegeneratingShields(t *testing.T) {
+	// Q5. COMBAT.md "Armor": RS halves each armor slot's total, and a
+	// shield part's own armor is not halved, in any slot: the halving goes
+	// by the part's kind. CONFIRMED (CB-058, 6 runs: every Mega Disruptor
+	// hit replays only with 645, 2195 and 712; Croby Sharmor CB-056). The
+	// designs separate part kind from slot kind:
 	//   A: Rogue, 2 Trans-Galactic Drive, 3 Langston Shell in slot 1
 	//      (shield or armor): 450 + 195 = 645 (by slot kind, halved: 547).
 	//   B: Battleship, 4 Trans-Galactic Drive, 3 Langston Shell in slot 2
@@ -199,11 +207,13 @@ func TestPredictionCB058LangstonShellRegeneratingShields(t *testing.T) {
 	}
 }
 
-func TestPredictionCB058DeathStarReach(t *testing.T) {
-	// Q6. COMBAT.md "Starbases in battle": a starbase's weapons reach one
-	// square further. A Death Star with 8 Heavy Blasters (range 3 in the
+func TestConfirmedCB058DeathStarReach(t *testing.T) {
+	// Q6. COMBAT.md "Token values": a starbase's weapons reach one square
+	// further. A Death Star with 8 Heavy Blasters (range 3 in the
 	// component table) in slot 1 reaches a ship 4 squares away
-	// (Chebyshev) and not one 5 away. Its armor is the hull's 1500.
+	// (Chebyshev) and not one 5 away: CONFIRMED (CB-058, 6 runs). Its
+	// armor is the hull's 1500: MEASURED as consistent (the hits fit
+	// 1126–1500).
 	ds := lateDesign(t, "Death Star", SlotFill{Slot: 1, Part: "Heavy Blaster", Count: 8})
 	sb := tokenValues(ds, Race{}, true, Cost{})
 	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 0, 0, 1, -1, -1

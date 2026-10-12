@@ -271,7 +271,7 @@ func TestMeasuredRG002RegeneratingShieldsArmor(t *testing.T) {
 	// or 626: 450 + 350/2 (halved per slot, stars-elegy COMBAT.md "Armor",
 	// BINARY-ONLY), not 450 + 2 × 87 = 624 (per part, which gives 42 at
 	// the third hit). One slot does not tell per slot from the parts'
-	// total halved once (TestPredictionCB057RegeneratingShieldsTwoSlots).
+	// total halved once (TestMeasuredCB057RegeneratingShieldsTwoSlots).
 	d := lateDesign(t, "Rogue",
 		SlotFill{Slot: 0, Part: "Trans-Galactic Fuel Scoop", Count: 2},
 		SlotFill{Slot: 1, Part: "Wolverine Diffuse Shield", Count: 3},
@@ -300,12 +300,15 @@ func TestMeasuredRG002RegeneratingShieldsArmor(t *testing.T) {
 	}
 }
 
-// CB-057 predictions (stars-elegy COMBAT.md; the cases are lane F's,
-// planned in RG-002's wake). Each is a PREDICTION until the run.
+// CB-057 (stars-elegy COMBAT.md; PARITY.md "Round 11"). Predicted in elegy
+// 89cbc6a before the runs, but Elegy's numbers for the exact run designs
+// were pushed after the runs began, so the results are MEASURED (oracle)
+// and consistent with 89cbc6a, not CONFIRMED by prediction.
 
-func TestPredictionCB057RegeneratingShieldsTwoSlots(t *testing.T) {
+func TestMeasuredCB057RegeneratingShieldsTwoSlots(t *testing.T) {
 	// Q1. RS halves each armor slot's armor, truncated per slot
-	// (stars-elegy COMBAT.md "Armor", BINARY-ONLY). A Destroyer (armor
+	// (stars-elegy COMBAT.md "Armor"). MEASURED (CB-057, 6 streams: the
+	// two-slot Destroyer fits 372–374, the one-slot one 375–376). A Destroyer (armor
 	// 200) with one Organic Armor (175) in its general-purpose slot and one
 	// in its armor slot: 200 + 87 + 87 = 374, where the parts' total
 	// halved once gives 375. Control: both in the armor slot, 200 + 175 =
@@ -337,8 +340,10 @@ func TestPredictionCB057RegeneratingShieldsTwoSlots(t *testing.T) {
 	}
 }
 
-func TestPredictionCB057NexusTorpedoes(t *testing.T) {
-	// Q2. A Death Star with sixteen Battle Nexus (computer 99) and 32
+func TestMeasuredCB057NexusTorpedoes(t *testing.T) {
+	// Q2. MEASURED (CB-057, 6 streams: 24 salvos all hit, no miss
+	// record, and the battle replays only without draws for them). A
+	// Death Star with sixteen Battle Nexus (computer 99) and 32
 	// Delta Torpedoes (accuracy 60) at an unjammed stack of 20 Battleships
 	// with 6 Superlatanium (no shields, armor 11000 each): p = 100 −
 	// 1·40/100 = 100, so all 32 hit with no draw (panicRand), and 32·26/2
@@ -370,7 +375,7 @@ func TestPredictionCB057NexusTorpedoes(t *testing.T) {
 	}
 }
 
-func TestPredictionCB057TargetCostCap(t *testing.T) {
+func TestMeasuredCB057TargetCostCap(t *testing.T) {
 	// Q3. COMBAT.md "Target choice": cost × ships is ×100 below 100000,
 	// else 10^7; a beam's score is that × 100/(A + S + 1). Costs are
 	// Elegy's for a race with no cost LRT at tech 26 in every field
@@ -382,7 +387,10 @@ func TestPredictionCB057TargetCostCap(t *testing.T) {
 	//       A = 32000000.
 	// Capped, both score 10^7, so the beam picks S1 (lower A). With no
 	// cap (or cost × ships uncapped above 100000) S2's 640/2000 per ship
-	// beats S1's 11/200 and the beam picks S2.
+	// beats S1's 11/200 and the beam picks S2. MEASURED (CB-057, 4
+	// streams, 14 shots: S1 every time): a common cap at or below
+	// 10,240,000. Any common cap gives this choice, so the value 10^7
+	// stays BINARY-ONLY (TestPredictionTargetChoiceCostCap).
 	var lv [NumFields]int
 	for i := range lv {
 		lv[i] = 26
