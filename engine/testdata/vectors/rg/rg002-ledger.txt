@@ -362,7 +362,6 @@ sample | rg002 | RG-002-2466 y4 #221 | planet id=80 | surface_minerals = [226 27
 sample | rg002 | RG-002-2466 y4 #225 | planet id=84 | factories = 702, want 703
 sample | rg002 | RG-002-2466 y4 #227 | planet id=85 | surface_minerals = [1689 0 1034], want [1688 0 1034]
 sample | rg002 | RG-002-2466 y4 #230 | planet id=87 | surface_minerals = [60 162 129], want [60 162 131]
-sample | rg002 | RG-002-2466 y4 #231 | planet id=88 | packet_warp = 0, want 8
 sample | rg002 | RG-002-2466 y4 #231 | planet id=88 | surface_minerals = [295 558 77], want [297 558 78]
 sample | rg002 | RG-002-2466 y4 #234 | planet id=91 | factories = 263, want 273
 sample | rg002 | RG-002-2466 y4 #234 | planet id=91 | surface_minerals = [203 375 0], want [251 384 1]
@@ -1253,7 +1252,6 @@ random-driven | rg002-y4 | RG-002-Y4-2466 y1 #172 | planet id=35 | concentration
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #179 | planet id=41 | planet field defenses null
 sample | rg002-y4 | RG-002-Y4-2466 y1 #218 | planet id=77 | environment = [11 80 87], want [11 79 88]
 sample | rg002-y4 | RG-002-Y4-2466 y1 #227 | planet id=85 | surface_minerals = [1684 0 1032], want [1688 0 1034]
-missing mechanic [economy]: packet warp not set when a starbase with a mass driver completes (inferred from one observation) | rg002-y4 | RG-002-Y4-2466 y1 #231 | planet id=88 | packet_warp = 0, want 8
 sample | rg002-y4 | RG-002-Y4-2466 y1 #244 | planet id=100 | starbase = design 50 damage 0, want design 50 damage 9
 sample | rg002-y4 | RG-002-Y4-2466 y1 #249 | planet id=104 | surface_minerals = [569 0 0], want [570 0 0]
 sample | rg002-y4 | RG-002-Y4-2466 y1 #271 | player id=1 | research_accumulated.weapons = 272, want 275
