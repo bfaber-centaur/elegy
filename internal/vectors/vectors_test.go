@@ -471,3 +471,30 @@ func TestConcentrationFractions(t *testing.T) {
 		t.Errorf("fractions [0 128 255] loaded as %v", got)
 	}
 }
+
+// TestLoadHomeworldRecord loads WU-RSG2's players' homeworld records
+// (vectors/README.md "homeworld", stars-elegy ac792b0): player 1's names
+// planet 8, which starts without the flag, and an absent field leaves no
+// record.
+func TestLoadHomeworldRecord(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/wu/wu-rsg2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, want := range map[int]int{0: 17, 1: 8} {
+		if pl := l.g.Players[id]; !pl.HasHomeworld || pl.Homeworld != l.planet[want] {
+			t.Errorf("player %d record %v %d, want planet %d (Elegy %d)", id, pl.HasHomeworld, pl.Homeworld, want, l.planet[want])
+		}
+	}
+	v.InitialState.Players[1].Homeworld = nil
+	if l, err = loadVector(v); err != nil {
+		t.Fatal(err)
+	}
+	if pl := l.g.Players[1]; pl.HasHomeworld || pl.Homeworld != 0 {
+		t.Errorf("absent field: record %v %d, want none", pl.HasHomeworld, pl.Homeworld)
+	}
+}

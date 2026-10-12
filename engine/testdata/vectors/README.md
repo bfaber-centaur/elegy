@@ -93,6 +93,14 @@ file, so nothing in it is a default you have to guess.
   resource, factory and mine settings, research cost per field, the leftover
   points spend (`UNIVERSE.md` "Leftover advantage points") and race stat 15 (PARITY "Turn-time penalty"). An out-of-range PRT is given
   as its stored number.
+  `homeworld` is the planet id the player's own record names as its
+  homeworld. Each year the game clears every planet's `homeworld` flag and
+  sets it again on that planet, whoever owns it (`docs/KERNEL.md` "Turn
+  order" step 3.6, `docs/TAKEOVER.md` "The homeworld mark after capture"),
+  so it can differ from the planets' flags in a start state: in WU-RSG2
+  planet 8 starts without the flag while player 1's record names it, and
+  the flag is back after the year. Absent when the record names no planet
+  of the state.
 - `planets`: position, owner (-1 none), `homeworld: true` for a planet whose
   record carries the homeworld flag (absent otherwise), mineral concentrations,
   `concentration_fractions` (each concentration's depletion fraction in

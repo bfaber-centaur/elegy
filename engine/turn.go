@@ -147,8 +147,9 @@ type Player struct {
 	// it from the player's setup (newgame.PlayerSetup.Level).
 	Level int
 	// HasHomeworld and Homeworld are the player's record of its homeworld,
-	// a planet ID. Only new-game creation writes it; each year the
-	// homeworld marks are set again from these records (remarkHomeworlds).
+	// a planet ID. New-game creation writes it (and the parity loader,
+	// from a vector's start); no step of the turn changes it, and each
+	// year the homeworld marks are set again from it (remarkHomeworlds).
 	HasHomeworld bool
 	Homeworld    int
 }

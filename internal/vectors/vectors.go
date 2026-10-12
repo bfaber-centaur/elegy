@@ -70,6 +70,7 @@ type pvPlayer struct {
 	Relations           map[string]string `json:"relations"`
 	MysteryTraderItems  []string          `json:"mystery_trader_items"`
 	Race                pvRace            `json:"race"`
+	Homeworld           *int              `json:"homeworld"`
 }
 
 // pvRace is a vector race (FORMAT.md "race").
@@ -490,6 +491,12 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
 		pl.Computer = p.Computer
+		// The planet the player's own record names as its homeworld,
+		// re-marked each year (vectors/README.md "homeworld"; KERNEL.md
+		// "Turn order" step 3.6); absent, the record names none.
+		if p.Homeworld != nil {
+			pl.HasHomeworld, pl.Homeworld = true, *p.Homeworld+1
+		}
 		race, err := p.Race.race()
 		if err != nil {
 			return nil, err

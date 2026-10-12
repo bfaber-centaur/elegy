@@ -147,7 +147,8 @@
     "counts": {
      "ship_designs": 3,
      "starbase_designs": 1
-    }
+    },
+    "homeworld": 51
    },
    {
     "id": 1,
@@ -234,7 +235,8 @@
      "ship_designs": 3,
      "starbase_designs": 5
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 71
    },
    {
     "id": 2,
@@ -321,7 +323,8 @@
      "ship_designs": 5,
      "starbase_designs": 5
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 57
    },
    {
     "id": 3,
@@ -408,7 +411,8 @@
      "ship_designs": 3,
      "starbase_designs": 5
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 7
    },
    {
     "id": 4,
@@ -496,7 +500,8 @@
      "ship_designs": 3,
      "starbase_designs": 5
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 83
    },
    {
     "id": 5,
@@ -585,7 +590,8 @@
      "ship_designs": 4,
      "starbase_designs": 5
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 86
    },
    {
     "id": 6,
@@ -675,7 +681,8 @@
      "ship_designs": 4,
      "starbase_designs": 9
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 35
    }
   ],
   "planets": [
