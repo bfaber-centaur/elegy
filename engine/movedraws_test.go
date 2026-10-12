@@ -146,6 +146,60 @@ func TestPredictionWarp10CargoShare(t *testing.T) {
 	}
 }
 
+func TestAssumptionWarp10RoundsDown(t *testing.T) {
+	// ASSUMPTION M2 and M3: the lost shares are truncated. 1 of 3 ships
+	// lost takes trunc(100/3) = 33 mg of fuel and trunc(10/3) = 3 kT of
+	// cargo.
+	f := mover(1, 10, Stack{Design: 0, Count: 3})
+	f.Cargo = Cargo{Minerals: Minerals{10, 0, 0}}
+	g := drawGame(false, f)
+	// The loss itself, before movement's fuel use and scooping.
+	g.warp10Losses(&g.Fleets[0], &scriptRand{draws: []int{0, 1, 1}})
+	if got := g.Fleets[0]; got.Fuel != 67 || got.Cargo.Minerals[Ironium] != 7 {
+		t.Errorf("fuel %d, ironium %d; want 67 and 7", got.Fuel, got.Cargo.Minerals[Ironium])
+	}
+}
+
+func TestAssumptionStallKeepsARColonists(t *testing.T) {
+	// ASSUMPTION M1: a stalled Alternate Reality fleet loses no colonists
+	// in flight; one that moves does.
+	for _, c := range []struct {
+		stall int
+		want  int
+	}{{0, 100}, {1, 97}} {
+		f := mover(1, 7, Stack{Design: 1, Count: 1})
+		f.Cargo.Colonists = 100
+		g := drawGame(true, f)
+		g.Players[0].Race.PRT = PRTAlternateReality
+		g.Designs[1].CargoCapacity = 1000
+		g.moveAll(&scriptRand{draws: []int{c.stall}})
+		if got := g.Fleets[0].Cargo.Colonists; got != c.want {
+			t.Errorf("stall draw %d: %d kT colonists, want %d", c.stall, got, c.want)
+		}
+	}
+}
+
+func TestBinaryOnlySlotOrderOwnShipSlots(t *testing.T) {
+	// slotOrder reads only the owner's ship-design slots: another owner's
+	// slot and a starbase slot naming the same design index are ignored
+	// (design indexes can be shared, orders_design.go designShared), and
+	// a design with no slot sorts after every slot by its design index,
+	// as shipSlot orders a fleet's stacks.
+	g := drawGame(false)
+	g.Players = append(g.Players, Player{})
+	f := Fleet{Owner: 0, Stacks: []Stack{{Design: 3}, {Design: 1}, {Design: 2}, {Design: 0}}}
+	g.DesignSlots = []DesignSlot{
+		{Owner: 1, Slot: 0, Design: 1},
+		{Owner: 0, Starbase: true, Slot: 0, Design: 1},
+		{Owner: 0, Slot: 4, Design: 0},
+		{Owner: 0, Slot: 6, Design: 1},
+	}
+	// Designs 0 (slot 4) and 1 (slot 6), then the slotless 2 and 3.
+	if got, want := g.slotOrder(&f), []int{3, 1, 2, 0}; !reflect.DeepEqual(got, want) {
+		t.Errorf("order %v, want %v", got, want)
+	}
+}
+
 func TestBinaryOnlyWarp10SlotOrder(t *testing.T) {
 	// Stacks draw in their design-slot order (BINARY-ONLY): design 0 in
 	// slot 5 draws after its unrated copy, design 2, in slot 2.

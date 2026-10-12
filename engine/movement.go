@@ -558,10 +558,14 @@ func (g *Game) stalls(f *Fleet, rng Rand) bool {
 // fuel goes with them, by fuel capacity (MEASURED, FM round 2:
 // 30000 − trunc(30000·11/100)). Some ships lost sends 0x0df or 0x0e0;
 // all of them, 0x0e1, and the fleet is gone (reported true): it draws
-// nothing more and is removed with the year's other shipless fleets. A chaser draws in this first pass only (BINARY-ONLY).
+// nothing more and is removed with the year's other shipless fleets. A
+// chaser draws in this first pass only (BINARY-ONLY).
 //
 // ASSUMPTION M2: the lost ships' share of the cargo, by cargo capacity,
 // is destroyed with them, as for ships destroyed by mines or in battle.
+//
+// ASSUMPTION M3: the fuel share lost is truncated, trunc(F·lost/total):
+// KERNEL.md says only "in proportion", and FM round 2 divided exactly.
 func (g *Game) warp10Losses(f *Fleet, rng Rand) ([]Event, bool) {
 	if rng == nil || f.Waypoints[0].Warp != 10 {
 		return nil, false
@@ -615,26 +619,17 @@ func (g *Game) warp10Losses(f *Fleet, rng Rand) ([]Event, bool) {
 	return []Event{g.fleetEvent(f, EventWarp10ShipsLost, lost)}, false
 }
 
-// slotOrder is f's stack indexes in its owner's design-slot order, stacks
-// of a design with no slot last, each group in stack order.
+// slotOrder is f's stack indexes in its owner's design-slot order
+// (shipSlot: a design with no slot after every slot, by design index),
+// stacks of one design in stack order.
 func (g *Game) slotOrder(f *Fleet) []int {
-	slot := map[int]int{}
-	for _, s := range g.DesignSlots {
-		if s.Owner == f.Owner && !s.Starbase {
-			slot[s.Design] = s.Slot
-		}
-	}
-	key := func(si int) int {
-		if s, ok := slot[f.Stacks[si].Design]; ok {
-			return s
-		}
-		return math.MaxInt
-	}
 	order := make([]int, len(f.Stacks))
 	for i := range order {
 		order[i] = i
 	}
-	sort.SliceStable(order, func(a, b int) bool { return key(order[a]) < key(order[b]) })
+	sort.SliceStable(order, func(a, b int) bool {
+		return g.shipSlot(f.Owner, f.Stacks[order[a]].Design) < g.shipSlot(f.Owner, f.Stacks[order[b]].Design)
+	})
 	return order
 }
 
