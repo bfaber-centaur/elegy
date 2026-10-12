@@ -185,31 +185,41 @@ func (g *Game) scores() []ScoreRecord {
 // The lead needs a second player still in the game: a one-player game
 // never flags it (MEASURED: KX-001 ×13, KX-002 ×27 and RD-P ×17 records,
 // none with the lead, where a second score of 0 would pass the test).
-// ASSUMPTION: a dead player does not count as the second.
+// ASSUMPTION: the lead is decided among the living players only. The
+// leader is the one living player with the highest living score (a
+// living tie flags nobody: the margin alone would pass a tie at low
+// scores, since it truncates) and second place is the next living
+// score; with fewer than two living players nobody leads. A dead player
+// is never flagged and never sets the bar, whatever their rank. The
+// highest-score condition still counts every rank-1 player.
 func (g *Game) victoryFlags(recs []ScoreRecord) {
 	v := g.Victory
-	sorted := make([]int, len(recs))
-	firsts, alive := 0, 0
+	var living []int
+	firsts := 0
 	for i, r := range recs {
-		sorted[i] = r.Score
 		if r.Rank == 1 {
 			firsts++
 		}
 		if !g.Players[i].Dead {
-			alive++
+			living = append(living, r.Score)
 		}
 	}
-	sort.Sort(sort.Reverse(sort.IntSlice(sorted)))
-	second := 0
-	if len(sorted) > 1 {
-		second = sorted[1]
+	sort.Sort(sort.Reverse(sort.IntSlice(living)))
+	top, second, leaders := 0, 0, 0
+	if len(living) > 1 {
+		top, second = living[0], living[1]
+		for _, sc := range living {
+			if sc == top {
+				leaders++
+			}
+		}
 	}
 	for i := range recs {
 		r := &recs[i]
 		met := [NumVictory]bool{
 			VictoryPlanets:   r.Planets >= (len(g.Planets)*(v.Planets+4)*5+50)/100,
 			VictoryScore:     r.Score >= (v.Score+1)*1000,
-			VictoryLead:      r.Rank == 1 && firsts == 1 && alive > 1 && second*(100+(v.Lead+2)*10)/100 <= r.Score,
+			VictoryLead:      !g.Players[i].Dead && leaders == 1 && r.Score == top && second*(100+(v.Lead+2)*10)/100 <= r.Score,
 			VictoryResources: r.Resources/1000 >= (v.Resources+1)*10,
 			VictoryCapital:   r.Capital >= (v.Capital+1)*10,
 			VictoryHighest:   g.yearIndex() >= (v.Highest+3)*10 && firsts == 1 && r.Rank == 1,
