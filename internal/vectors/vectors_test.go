@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -25,6 +26,50 @@ func TestReadFile(t *testing.T) {
 func TestReadDirNoVectors(t *testing.T) {
 	if _, err := ReadDir(t.TempDir()); err == nil {
 		t.Fatal("ReadDir of an empty directory: no error")
+	}
+}
+
+// Compare gives every case the result Run gives it. A case fails, or
+// differs under a legacy switch, exactly when one of its fields differs.
+// A sample's mismatch is a sample, never a difference; an expectation of
+// another oracle stream is skipped with the harness's reason.
+func TestCompareAgreesWithRun(t *testing.T) {
+	vs, err := ReadDir("../../engine/testdata/vectors")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fields, samples, streams := 0, 0, 0
+	for _, v := range vs {
+		c := Compare(v, 0)
+		v2, err := ReadFile(filepath.Join("../../engine/testdata/vectors", v.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := Run(v2, 0); !reflect.DeepEqual(c.Cases, want) {
+			t.Fatalf("%s: Compare's cases %+v, Run's %+v", v.path, c.Cases, want)
+		}
+		differ := map[string]bool{}
+		for _, f := range c.Fields {
+			switch {
+			case f.Status == "differ" && f.Sample:
+				t.Errorf("%s: a sample's field differs: %+v", v.path, f)
+			case f.Status == "differ":
+				differ[f.Case] = true
+			case f.Status == "sample":
+				samples++
+			case f.Status == "skip" && strings.HasPrefix(f.Why, "stream "):
+				streams++
+			}
+		}
+		for _, r := range c.Cases {
+			if failed := r.Status == "fail" || r.Status == "differs"; failed != differ[r.ID] {
+				t.Errorf("%s: case %s %s, a field differs: %v", v.path, r.ID, r.Status, differ[r.ID])
+			}
+		}
+		fields += len(c.Fields)
+	}
+	if fields == 0 || samples == 0 || streams == 0 {
+		t.Fatalf("%d fields, %d missed samples, %d other-stream skips; want some of each", fields, samples, streams)
 	}
 }
 

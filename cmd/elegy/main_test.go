@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
 	"github.com/bfaber-centaur/elegy/game"
+	"github.com/bfaber-centaur/elegy/internal/vectors"
 	"github.com/bfaber-centaur/elegy/newgame"
 	"github.com/bfaber-centaur/elegy/races"
 )
@@ -207,5 +209,39 @@ func TestCLIErrors(t *testing.T) {
 		if err := run(args, &bytes.Buffer{}); err == nil {
 			t.Errorf("elegy %v: no error", args)
 		}
+	}
+}
+
+// TestCLIVector runs a parity vector through the command line: the text
+// prints the case's result and every field, the JSON carries the same
+// comparison as package vectors.
+func TestCLIVector(t *testing.T) {
+	path := filepath.Join("..", "..", "engine", "testdata", "vectors", "pq", "c01.json")
+	text := cli(t, "vector", path)
+	for _, want := range []string{
+		"vector PQ-001-C01: 2 years, seed variant 0\n",
+		"case PQ-001-C01 pass [CONFIRMED]\n",
+		"PQ-001-C01 y2 planet (id 7) mines: pass\n",
+		"PQ-001-C01 y1 message: skip: expectation message\n",
+		"cases: pass 1, sample-only 0, fail 0, differs 0, skip 0\n",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("vector output lacks %q:\n%s", want, text)
+		}
+	}
+	var got vectors.Comparison
+	if err := json.Unmarshal([]byte(cli(t, "vector", "-json", "-variant", "2", path)), &got); err != nil {
+		t.Fatal(err)
+	}
+	v, err := vectors.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := vectors.Compare(v, 2)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("vector -json =\n%+v\nwant\n%+v", got, want)
+	}
+	if err := run([]string{"vector"}, &bytes.Buffer{}); err == nil {
+		t.Error("vector with no file: no error")
 	}
 }

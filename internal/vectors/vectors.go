@@ -1625,45 +1625,52 @@ func runVector(v *Vector, k int) []Result {
 
 // runVectorWith generates v's years as run says and checks its cases.
 func runVectorWith(v *Vector, run pvRun) []Result {
-	var out []Result
-	res := func(c pvCase, status, why string) {
-		out = append(out, Result{ID: c.ID, Corpus: v.corpus, Tag: c.Tag, Status: status, Why: why})
-	}
-	// stop is why the years from len(games) on were not generated: the
-	// vector could not be loaded, or the orders of a year could not be
-	// applied. Each expectation of those years is skipped with it, one by
-	// one, so the years before it are still compared.
-	var stop string
-	var games []engine.Game
-	var genErr error
+	l, games, genErr, stop := generate(v, run)
+	return checkCases(v, run, l, games, genErr, stop)
+}
+
+// generate loads v and generates its years as run says. games holds the
+// start and every year generated. stop is why the years from len(games)
+// on were not generated: the vector could not be loaded, or the orders of
+// a year could not be applied; genErr is the engine error that stopped
+// generation early instead.
+func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr error, stop string) {
 	l, err := loadVector(v)
 	switch {
 	case err != nil:
-		stop = "load: " + err.Error()
+		return nil, nil, nil, "load: " + err.Error()
 	case l.global != "":
-		stop = l.global
-	default:
-		// Generate year by year, keeping each year's game.
-		games = []engine.Game{l.g}
-		l.views = [][]engine.PlayerView{nil}
-		g := l.g
-		for y := 1; y <= v.Years; y++ {
-			files, why := l.orders(v.Orders, y, &g)
-			if why != "" {
-				stop = why
-				break
-			}
-			gy := g
-			gy.Rules = engine.ElegyRules()
-			r, err := engine.GenerateTurn(gy, files, run.rand(y))
-			if err != nil {
-				genErr = err
-				break
-			}
-			g = r.Game
-			games = append(games, g)
-			l.views = append(l.views, r.Views)
+		return l, nil, nil, l.global
+	}
+	// Generate year by year, keeping each year's game.
+	games = []engine.Game{l.g}
+	l.views = [][]engine.PlayerView{nil}
+	g := l.g
+	for y := 1; y <= v.Years; y++ {
+		files, why := l.orders(v.Orders, y, &g)
+		if why != "" {
+			return l, games, nil, why
 		}
+		gy := g
+		gy.Rules = engine.ElegyRules()
+		r, err := engine.GenerateTurn(gy, files, run.rand(y))
+		if err != nil {
+			return l, games, err, ""
+		}
+		g = r.Game
+		games = append(games, g)
+		l.views = append(l.views, r.Views)
+	}
+	return l, games, nil, ""
+}
+
+// checkCases checks every case of v against the generated games. Each
+// expectation of a year not generated is skipped with stop, one by one,
+// so the years before it are still compared.
+func checkCases(v *Vector, run pvRun, l *pvLoaded, games []engine.Game, genErr error, stop string) []Result {
+	var out []Result
+	res := func(c pvCase, status, why string) {
+		out = append(out, Result{ID: c.ID, Corpus: v.corpus, Tag: c.Tag, Status: status, Why: why})
 	}
 	for _, c := range v.Cases {
 		var fails, skips []string

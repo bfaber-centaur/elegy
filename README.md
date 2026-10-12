@@ -14,7 +14,7 @@ Elegy can generate a galaxy and play it for many years without the original prog
 - **Rulesets**: each game carries its own typed ruleset (`elegy` by default, or `jrc3-faithful`). Every compatibility switch is a setting of it. See [docs/RULESET.md](docs/RULESET.md).
 - **Game loop** (`game/`): advance years with per-player drivers, per-player reports, a versioned save format with a state hash, deterministic replay of uninterrupted games and diffs between games. A game saved and reloaded continues identically in the tests (`TestSmokeSaveLoadContinues` with scripted players; computer players below). See [docs/GAME-LOOP.md](docs/GAME-LOOP.md).
 - **Computer players** (`ai/`): Robotoid, Rototill and Cybertron, as game drivers. They play smoke games inside the tests. Their turns are partial: the steps not implemented yet are listed in [docs/AI-STATUS.md](docs/AI-STATUS.md) "Not implemented yet". A game with computer players replays identically uninterrupted. `TestDriversSaveReload` shows it also continues identically after a save and reload, for one tiny galaxy (seed 7) with the three at expert level, over 50 years under both rulesets, reloaded once or every year. Beyond that case, the claim rests on the drivers keeping no state between years (`ai/driver.go`). The command line can add them to a game (`-ai`).
-- **Command line** (`cmd/elegy`): new games, order files, turns, reports and hashes. There is no other front end yet.
+- **Command line** (`cmd/elegy`): new games, order files, turns, reports and hashes, and parity vectors run field by field. There is no other front end yet.
 
 Parity with the original game is measured by the parity vectors in `engine/testdata/vectors`. `go test -run TestParityVectors -v ./engine` prints each corpus's passes, samples, failures and skips, with every skip's reason. [engine/testdata/vectors/README.md](engine/testdata/vectors/README.md) explains what a sample is. Passing those tests does not mean exact parity in every case.
 
@@ -30,6 +30,7 @@ go run ./cmd/elegy new -seed 1 -players 3 -size small -o game.json   # -rules jr
 go run ./cmd/elegy orders -game game.json -player 0 > orders0.json   # an empty order file to fill in
 go run ./cmd/elegy turn -game game.json orders0.json                 # generate the next year
 go run ./cmd/elegy report -game game.json -player 0                  # what player 0 knows, as JSON
+go run ./cmd/elegy vector engine/testdata/vectors/pq/c01.json        # a parity vector, field by field
 ```
 
 ## Project split
