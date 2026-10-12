@@ -764,7 +764,15 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 				pl.HasQueue = pl.HasQueue || q.Planet == p.ID
 			}
 		}
-		if sb := p.Starbase; sb != nil && sb.Design != nil && pl.Owner != engine.NoOwner {
+		// The states write no starbase as design null with damage -1.
+		// Any other record without a design is an error in the state,
+		// not a planet without a starbase; so is a design the owner
+		// (none at a planet nobody owns) does not have.
+		sb := p.Starbase
+		if sb != nil && sb.Design == nil && sb.Damage != -1 {
+			return nil, fmt.Errorf("planet %d: starbase without a design", p.ID)
+		}
+		if sb != nil && sb.Design != nil {
 			di, ok := l.design[[2]int{p.Owner, -1 - *sb.Design}]
 			if !ok {
 				return nil, fmt.Errorf("planet %d: starbase design %d", p.ID, *sb.Design)
@@ -1730,11 +1738,18 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 		case "starbase":
 			// The planet's starbase: its owner's starbase design slot and
 			// its damage, or null for none (vectors/README.md "planets").
+			// null, or design null with damage -1 as the states write
+			// it, is no starbase. Any other value must name a design:
+			// malformed expected data fails the check rather than
+			// reading as no starbase.
 			var want *struct {
 				Design *int `json:"design"`
 				Damage int  `json:"damage"`
 			}
-			json.Unmarshal(raw, &want)
+			if err := json.Unmarshal(raw, &want); err != nil || want != nil && want.Design == nil && want.Damage != -1 {
+				errs = append(errs, fmt.Sprintf("starbase: malformed expectation %s", raw))
+				continue
+			}
 			if want == nil || want.Design == nil {
 				if p.HasStarbase {
 					errs = append(errs, pvMismatch(k, fmt.Sprintf("design %d", p.StarbaseDesign), "none"))

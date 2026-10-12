@@ -137,6 +137,14 @@ func TestStarbase(t *testing.T) {
 	p.HasStarbase, p.StarbaseDesign, p.StarbaseDamage = false, 5, 0
 	pvWant(t, "none", l.planetEquals(g, &p, pvEq(t, `{"starbase": null}`), nil), "", "")
 	pvWant(t, "missing", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": 2, "damage": 0}}`), nil), "starbase = none, want design 5 damage 0", "")
+	// Design null with damage -1 is none, as the states write it.
+	pvWant(t, "none as written", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": null, "damage": -1}}`), nil), "", "")
+	// Malformed expected data fails the check, never reads as none.
+	for _, raw := range []string{`true`, `{"damage": 0}`, `{"design": null, "damage": 0}`, `{"design": "2", "damage": 0}`} {
+		pvWant(t, "malformed "+raw, l.planetEquals(g, &p, pvEq(t, `{"starbase": `+raw+`}`), nil), "starbase: malformed expectation "+raw, "")
+	}
+	p.HasStarbase, p.StarbaseDesign = true, 4
+	pvWant(t, "none as written, starbase there", l.planetEquals(g, &p, pvEq(t, `{"starbase": {"design": null, "damage": -1}}`), nil), "starbase = design 4, want none", "")
 }
 
 func TestFleetMismatchBesideSkip(t *testing.T) {

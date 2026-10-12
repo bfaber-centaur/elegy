@@ -96,8 +96,9 @@ outcomes need the harness to draw from the original's generator (P1-1).
 State: both ways run, for 6 years, not 10. The restarts pass on the
 reference seed in 3 of 6 years, and every restart is now a random case
 (it passes on some seeds); the chained run passes its first year only
-(details below). RG-002, a late-game start, is planned by lane F
-(`/mnt/project-files/rg002/plan.md`); nothing is recorded yet.
+(details below). RG-002, a late-game start, is in with every order loaded
+and a committed discrepancy ledger checked exactly in CI; see
+[RG002-REPORT.md](RG002-REPORT.md).
 
 ## Critical path
 
@@ -117,7 +118,8 @@ seed-table decision) for exact random outcomes.
    seam (#133); RANDOM-PARITY.md counts exact random parity at 0. The
    generator's seed-table publication is pending Bobby. Every chained
    surface-mineral mismatch in RG-001 is random-driven (below).
-2. RG-001 has 6 recorded years; milestone 2 needs 10. RG-002 is planned.
+2. RG-001 has 6 recorded years; milestone 2 needs 10. RG-002 adds 6 late-game
+   years ([RG002-REPORT.md](RG002-REPORT.md)).
 3. Oracle computer players' orders must replay as vector orders. RG-001
    rejects none of its orders, chained or restarted (#157); the
    capture-to-vector conversion is not checked for every order kind.
