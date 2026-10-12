@@ -221,6 +221,7 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		switch {
 		case f.Task.Kind == TaskTransport:
 			events = append(events, g.load(f, afterMovement)...)
+			events = append(events, g.taskEnded(f)...)
 		case f.Task.Kind == TaskMerge && f.Task.Fleet == f.ID:
 			// A merge with itself completes, merging nothing, and the
 			// owner is told the fleet has finished its orders

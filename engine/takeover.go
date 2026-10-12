@@ -426,11 +426,12 @@ func (g *Game) unloadTasks(owned []bool, mine func(i int) []Event, scrap func(i 
 		switch f.Task.Kind {
 		case TaskTransport:
 			events = append(events, g.unload(f, owned, &queue)...)
+			events = append(events, g.taskEnded(f)...)
 		case TaskColonize:
 			if ev, ok := g.colonize(f, &queue); ok {
 				consumed[f.ID] = true
 			} else {
-				events = append(events, ev)
+				events = append(append(events, ev), g.taskEnded(f)...)
 			}
 		case TaskRoute:
 			events = append(events, g.routeTask(f)...)

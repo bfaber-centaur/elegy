@@ -368,7 +368,11 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 // position: so a single forward leg collapses to the reached waypoint and
 // the fleet ends idle, and coincident last waypoints do not grow the list
 // (CONFIRMED, WU-FALLBACK). A patrol waypoint never repeats (MEASURED,
-// WU wuPNR). A fleet left with no waypoint is idle and its owner told.
+// WU wuPNR). A fleet left with no waypoint is idle and its owner told
+// (MESSAGES.md 0x04e (b)), unless its task is transport, colonize, remote
+// mining, scrap, lay mines or patrol: a transport or colonize task tells
+// its owner when it ends (taskEnded). Remote mining is CONFIRMED (RM-4,
+// stars-elegy #167 at f2650a7).
 func (g *Game) arrive(f *Fleet) []Event {
 	reached := f.Waypoints[0]
 	f.Task = reached.Task
@@ -378,9 +382,24 @@ func (g *Game) arrive(f *Fleet) []Event {
 	}
 	if len(f.Waypoints) == 0 {
 		f.Waypoints = nil
+		switch f.Task.Kind {
+		case TaskTransport, TaskColonize, TaskRemoteMine, TaskScrap, TaskLayMines, TaskPatrol:
+			return nil
+		}
 		return []Event{g.fleetEvent(f, EventFleetArrived, 0)}
 	}
 	return nil
+}
+
+// taskEnded is MESSAGES.md 0x04e (a) for a transport or colonize task: a
+// fleet at its last waypoint whose task has just ended, done or cancelled
+// by a refusal, is told it has finished its orders, after the refusal
+// (oracle 0x165 then 0x04e, TK-201 F; 0x051 or 0x053 then 0x04e, TK-201 H).
+func (g *Game) taskEnded(f *Fleet) []Event {
+	if f.Task.Kind != TaskNone || len(f.Waypoints) > 0 {
+		return nil
+	}
+	return []Event{g.fleetEvent(f, EventFleetArrived, 0)}
 }
 
 // EventColonistsLostInFlight: Count = kT of colonists an Alternate Reality

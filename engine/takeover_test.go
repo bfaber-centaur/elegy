@@ -614,8 +614,8 @@ func TestPredictionGroundStrengthTraits(t *testing.T) {
 	l.g.Fleets[fi].Cargo.Colonists = 100
 	l.g.Fleets[fi].Task = unloadColonists
 	queue, ev := l.g.unloadPhase(l.g.phaseStart())
-	if len(queue) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused || l.g.Fleets[fi].Cargo.Colonists != 100 {
-		t.Errorf("Alternate Reality drop should be refused: queue %v events %v", queue, ev)
+	if len(queue) != 0 || len(ev) != 2 || ev[0].Kind != EventDropRefused || ev[1].Kind != EventFleetArrived || l.g.Fleets[fi].Cargo.Colonists != 100 {
+		t.Errorf("Alternate Reality drop should be refused, then finished orders (0x04e (a)): queue %v events %v", queue, ev)
 	}
 }
 
@@ -815,7 +815,7 @@ func TestPredictionForeignMinerals(t *testing.T) {
 
 func TestPredictionDeepSpaceUnload(t *testing.T) {
 	// #37: in deep space minerals are destroyed with no salvage, and
-	// colonists are refused and stay aboard.
+	// colonists are refused and stay aboard; then 0x04e (TK-201 F).
 	l := newTKLab(t, 3)
 	freighter := l.design("Small Freighter", SlotFill{0, "Quick Jump 5", 1})
 	l.g.Fleets = append(l.g.Fleets, Fleet{ID: 1, Owner: 0, Pos: Point{50, 50}, Stacks: []Stack{{Design: freighter, Count: 1}},
@@ -823,8 +823,8 @@ func TestPredictionDeepSpaceUnload(t *testing.T) {
 		Task:  Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}, CargoColonists: {Action: UnloadAll}}}})
 	_, ev := l.g.unloadPhase(l.g.phaseStart())
 	f := l.g.Fleets[0]
-	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 1 || ev[0].Kind != EventDropRefused {
-		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal", f.Cargo, l.g.Salvage, ev)
+	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 2 || ev[0].Kind != EventDropRefused || ev[1].Kind != EventFleetArrived {
+		t.Errorf("cargo %+v salvage %v events %v; want ironium destroyed, 20 colonists kept, no salvage, one refusal, then finished orders", f.Cargo, l.g.Salvage, ev)
 	}
 }
 
