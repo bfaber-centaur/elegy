@@ -2,6 +2,7 @@ package vectors
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"slices"
 	"strings"
@@ -94,6 +95,29 @@ func TestPlayerMismatchBesideSkip(t *testing.T) {
 	pvWant(t, "unsure field", msg, "tech.energy = 3, want 4", "why")
 }
 
+// TestConcentrationsAndResearchFields compares the planet concentration
+// bytes and the player's current and next research fields, which were
+// skipped before: a mismatch fails, an unknown value is skipped, never
+// passed.
+func TestConcentrationsAndResearchFields(t *testing.T) {
+	var l pvLoaded
+	p := engine.Planet{}
+	p.Deposits[0].Concentration, p.Deposits[1].Concentration, p.Deposits[2].Concentration = 74, 62, 63
+	pvWant(t, "concentrations match", l.planetEquals(nil, &p, pvEq(t, `{"concentrations": [74, 62, 63]}`), nil), "", "")
+	pvWant(t, "concentrations differ", l.planetEquals(nil, &p, pvEq(t, `{"concentrations": [73, 62, 63]}`), nil), "concentrations = [74 62 63], want [73 62 63]", "")
+	g := &engine.Game{Players: []engine.Player{{}}}
+	g.Players[0].Research.Current = engine.Weapons
+	g.Players[0].Research.Next = engine.NextLowestField
+	pvWant(t, "fields match", l.playerEquals(g, 0, pvEq(t, `{"research_field": "weapons", "research_next_field": "lowest"}`), nil), "", "")
+	msg := l.playerEquals(g, 0, pvEq(t, `{"research_field": "energy", "research_next_field": "same"}`), nil)
+	want := fmt.Sprintf("research_field = %d, want %d; research_next_field = %d, want %d", engine.Weapons, engine.Energy, engine.NextLowestField, engine.NextSameField)
+	pvWant(t, "fields differ", msg, want, "")
+	g.Players[0].Research.Next = engine.Biotech
+	pvWant(t, "next field by name", l.playerEquals(g, 0, pvEq(t, `{"research_next_field": "biotechnology"}`), nil), "", "")
+	pvWant(t, "unknown field value", l.playerEquals(g, 0, pvEq(t, `{"research_field": "alchemy"}`), nil), "", `research_field "alchemy"`)
+	pvWant(t, "unknown next value", l.playerEquals(g, 0, pvEq(t, `{"research_next_field": 3}`), nil), "", "research_next_field 3")
+}
+
 func TestFleetMismatchBesideSkip(t *testing.T) {
 	var l pvLoaded
 	f := engine.Fleet{Pos: engine.Point{X: 5, Y: 6}}
@@ -180,18 +204,18 @@ func TestPlayerUnsure(t *testing.T) {
 	g.Players[4].Race.PRT = engine.PRTSuperStealth
 	g.Players = append(g.Players, engine.Player{Computer: true})
 	l := pvLoaded{g: *g, queued: map[int]bool{0: true, 4: true, 5: true}, ordered: map[int]bool{2: true}}
-	research := []string{"tech", "research_accumulated", "research_field"}
+	research := []string{"tech", "research_accumulated", "research_field", "research_next_field"}
 	for _, c := range []struct {
 		id   int
 		want map[string]string
 	}{
-		{0, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue"}},
-		{1, map[string]string{"tech": pvPlannedWhy, "research_accumulated": pvPlannedWhy, "research_field": pvPlannedWhy}},
+		{0, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue", "research_next_field": "production queue"}},
+		{1, map[string]string{"tech": pvPlannedWhy, "research_accumulated": pvPlannedWhy, "research_field": pvPlannedWhy, "research_next_field": pvPlannedWhy}},
 		{2, map[string]string{}},
-		{3, map[string]string{"tech": "Super Stealth research stealing", "research_accumulated": "Super Stealth research stealing"}},
+		{3, map[string]string{"tech": "Super Stealth research stealing", "research_accumulated": "Super Stealth research stealing", "research_field": "Super Stealth research stealing", "research_next_field": "Super Stealth research stealing"}},
 		// The first reason found is kept.
-		{4, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue"}},
-		{5, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue"}},
+		{4, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue", "research_next_field": "production queue"}},
+		{5, map[string]string{"tech": "production queue", "research_accumulated": "production queue", "research_field": "production queue", "research_next_field": "production queue"}},
 	} {
 		got := l.playerUnsure(g, c.id)
 		if len(got) != len(c.want) {
@@ -215,7 +239,8 @@ func TestPlayerUnsureSuperStealthNarrow(t *testing.T) {
 	if got := l.playerUnsure(&g, 0); len(got) != 0 {
 		t.Errorf("others reproduced (the planned one dead): %v, want nothing skipped", got)
 	}
-	ss := map[string]string{"tech": "Super Stealth research stealing", "research_accumulated": "Super Stealth research stealing"}
+	const why = "Super Stealth research stealing"
+	ss := map[string]string{"tech": why, "research_accumulated": why, "research_field": why, "research_next_field": why}
 	g.Players[2].Dead = false
 	l.g = g
 	if got := l.playerUnsure(&g, 0); !reflect.DeepEqual(got, ss) {

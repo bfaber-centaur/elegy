@@ -1160,7 +1160,7 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 func (l *pvLoaded) playerUnsure(g *engine.Game, id int) map[string]string {
 	unsure := map[string]string{}
 	research := func(why string) {
-		for _, k := range []string{"tech", "research_accumulated", "research_field"} {
+		for _, k := range []string{"tech", "research_accumulated", "research_field", "research_next_field"} {
 			if unsure[k] == "" {
 				unsure[k] = why
 			}
@@ -1182,8 +1182,8 @@ func (l *pvLoaded) playerUnsure(g *engine.Game, id int) map[string]string {
 		// engine stealResearch). When another player's spending rests
 		// on a queue the harness cannot load or on planned orders, so
 		// does the stolen research, which is stored and can raise a
-		// level.
-		for _, k := range []string{"tech", "research_accumulated"} {
+		// level, and a level can move the current and next fields.
+		for _, k := range []string{"tech", "research_accumulated", "research_field", "research_next_field"} {
 			if unsure[k] == "" {
 				unsure[k] = "Super Stealth research stealing"
 			}
@@ -1519,6 +1519,15 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 					break
 				}
 			}
+		case "concentrations":
+			// The stored concentration bytes (KERNEL.md "Mining":
+			// depletion uses the mining before its random +1).
+			var want [3]int
+			json.Unmarshal(raw, &want)
+			got := [3]int{p.Deposits[0].Concentration, p.Deposits[1].Concentration, p.Deposits[2].Concentration}
+			if got != want {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
 		case "environment", "original_environment":
 			var want *[3]int
 			json.Unmarshal(raw, &want)
@@ -1577,6 +1586,31 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 				if got != want[f] {
 					errs = append(errs, pvMismatch(k+"."+f, got, want[f]))
 				}
+			}
+		case "research_field":
+			var want string
+			json.Unmarshal(eq[k], &want)
+			f, ok := pvFields()[want]
+			if !ok {
+				skipped("research_field " + string(eq[k]))
+				continue
+			}
+			if got := g.Players[id].Research.Current; got != f {
+				errs = append(errs, pvMismatch(k, got, f))
+			}
+		case "research_next_field":
+			var want string
+			json.Unmarshal(eq[k], &want)
+			f, ok := map[string]int{"same": engine.NextSameField, "lowest": engine.NextLowestField}[want]
+			if !ok {
+				f, ok = pvFields()[want]
+			}
+			if !ok {
+				skipped("research_next_field " + string(eq[k]))
+				continue
+			}
+			if got := g.Players[id].Research.Next; got != f {
+				errs = append(errs, pvMismatch(k, got, f))
 			}
 		case "race":
 			var q pvRace
