@@ -26,6 +26,7 @@ func gap001W(t *testing.T, starbase bool) (*lab, int) {
 	l.g.Players[1].Relations[0] = engine.RelationNeutral
 	pi := l.planet(0, [3]int{60, 60, 60}, [3]int{})
 	l.g.Planets[pi].HasStarbase = starbase
+	l.g.Planets[pi].ID = 15 // GAP-001's planet 15, not 0, so a message names it
 	// Fleet 1/4 (one adjuster) is listed before fleet 1/1 (two), so the
 	// fleet-number order is Elegy's, not the slice's.
 	l.g.Fleets[l.fleet(1, pi, "OA1", 1)].Number = 4
@@ -57,7 +58,7 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 	if h := [3]int{engine.Habitability(race(), [3]int{60, 60, 60}), engine.Habitability(race(), [3]int{62, 60, 60}), engine.Habitability(race(), [3]int{63, 60, 60})}; h != [3]int{72, 70, 70} {
 		t.Fatalf("habitability %v, want 72/70/70", h)
 	}
-	type msg struct{ kind, player, fleetNumber, hab int }
+	type msg struct{ kind, player, planet, fleetNumber, hab int }
 	var got []msg
 	for _, e := range ev {
 		n := -1
@@ -66,11 +67,12 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 				n = f.Number
 			}
 		}
-		got = append(got, msg{int(e.Kind), e.Player, n, e.Count})
+		got = append(got, msg{int(e.Kind), e.Player, e.Planet, n, e.Count})
 	}
 	deg := int(engine.EventPlanetDegraded)
 	not := int(engine.EventPlanetNotDegraded)
-	want := []msg{{deg, 1, 1, 70}, {deg, 0, 1, 70}, {not, 1, 4, 70}}
+	id := l.g.Planets[pi].ID
+	want := []msg{{deg, 1, id, 1, 70}, {deg, 0, id, 1, 70}, {not, 1, id, 4, 70}}
 	if len(got) != len(want) {
 		t.Fatalf("W1: messages %+v, want %+v", got, want)
 	}
@@ -89,6 +91,15 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 	l.g.Fleets = l.g.Fleets[:1]
 	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{62, 60, 60} {
 		t.Errorf("friendly: env %v, messages %+v", l.g.Planets[pi].Env, ev)
+	}
+	// Not GAP-001: a hostile fleet that can make no click (every axis
+	// already at the edge of its reach, 71/63/63 from 60/60/60) changes
+	// nothing and gets no message ("cannot degrade" for a fleet that made
+	// no click is not modelled).
+	l, pi = gap001W(t, false)
+	l.g.Planets[pi].Env = [3]int{71, 63, 63}
+	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{71, 63, 63} {
+		t.Errorf("no click: env %v, messages %+v", l.g.Planets[pi].Env, ev)
 	}
 	// W2: a starbase blocks every hostile click; no message.
 	l, pi = gap001W(t, true)
