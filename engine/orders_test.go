@@ -840,6 +840,11 @@ func TestDefaultQueueOrder(t *testing.T) {
 		"design item": {Queue: []QueueItem{{Kind: ItemShip, Count: 1}}},
 		"13 items":    {Queue: slices.Repeat([]QueueItem{{Kind: ItemAutoMines, Count: 1}}, 13)},
 		"count 0":     {Queue: []QueueItem{{Kind: ItemAutoMines}}},
+		"count 1024":  {Queue: []QueueItem{{Kind: ItemAutoMines, Count: maxItemCount + 1}}},
+		"percent 101": {Queue: []QueueItem{{Kind: ItemAutoMines, Count: 1, Percent: 101}}},
+		"percent -1":  {Queue: []QueueItem{{Kind: ItemAutoMines, Count: 1, Percent: -1}}},
+		"kind below":  {Queue: []QueueItem{{Kind: ItemMine - 1, Count: 1}}},
+		"kind above":  {Queue: []QueueItem{{Kind: ItemAutoMaxTerraform + 1, Count: 1}}},
 	} {
 		if err := apply(o); !errors.Is(err, ErrOutOfRange) {
 			t.Errorf("%s: %v, want refused", name, err)
