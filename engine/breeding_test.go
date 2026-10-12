@@ -1,6 +1,9 @@
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 type zeroRand struct{}
 
@@ -110,5 +113,60 @@ func TestBreedInTransitZeroDraw(t *testing.T) {
 		if got := g.Fleets[0].Cargo.Colonists; got != c.want {
 			t.Errorf("%s: colonists %d, want %d", c.name, got, c.want)
 		}
+	}
+}
+
+// TestBreedInTransitDrawIsRand3 checks that the zero draw is rand(3), once
+// per fleet that bred 0, and not drawn when the breed is above 0.
+func TestBreedInTransitDrawIsRand3(t *testing.T) {
+	is := pgRace()
+	is.PRT = PRTInnerStrength
+	is.GrowthRate = 15
+	g := Game{Rules: ElegyRules(),
+		Players: []Player{{Race: is}},
+		Designs: []Design{{CargoCapacity: 1000}},
+		Fleets: []Fleet{
+			{ID: 1, Owner: 0, Pos: Point{X: 10, Y: 10}, Stacks: []Stack{{Design: 0, Count: 1}}, Cargo: Cargo{Colonists: 13}},
+			{ID: 2, Owner: 0, Pos: Point{X: 20, Y: 10}, Stacks: []Stack{{Design: 0, Count: 1}}, Cargo: Cargo{Colonists: 200}},
+		},
+	}
+	rng := &recordRand{}
+	g.breedInTransit(rng)
+	if len(rng.bounds) != 1 || rng.bounds[0] != 3 {
+		t.Errorf("draws %v, want one rand(3)", rng.bounds)
+	}
+}
+
+// TestBreedInTransitSplitEvents checks the split between hold and planet
+// with minerals aboard, and both messages: 200 kT of colonists and 10 kT
+// of ironium in a 215 kT hold breed 15; 5 fit (0x0fb) and 10 land on the
+// owner's planet ID 7 (0x158), which is not at index 7.
+func TestBreedInTransitSplitEvents(t *testing.T) {
+	is := pgRace()
+	is.PRT = PRTInnerStrength
+	is.GrowthRate = 15
+	pos := Point{X: 100, Y: 100}
+	var cargo Cargo
+	cargo.Colonists = 200
+	cargo.Minerals[Ironium] = 10
+	g := Game{Rules: ElegyRules(),
+		Players: []Player{{Race: pgRace()}, {Race: is}},
+		Designs: []Design{{CargoCapacity: 215}},
+		Planets: []Planet{{ID: 3, Pos: Point{X: 300, Y: 300}, Owner: 1, Population: 500}, {ID: 7, Pos: pos, Owner: 1, Population: 1000}},
+		Fleets:  []Fleet{{ID: 4, Owner: 1, Pos: pos, Stacks: []Stack{{Design: 0, Count: 1}}, Cargo: cargo}},
+	}
+	ev := g.breedInTransit(highRand{})
+	if got := g.Fleets[0].Cargo.Colonists; got != 205 {
+		t.Errorf("fleet colonists %d, want 205", got)
+	}
+	if got := g.Planets[1].Population; got != 1010 {
+		t.Errorf("planet population %d, want 1010", got)
+	}
+	want := []Event{
+		{Kind: EventColonistsBred, Player: 1, Planet: -1, Fleet: 4, Count: 5},
+		{Kind: EventColonistsBredLanded, Player: 1, Planet: 7, Fleet: 4, Count: 10},
+	}
+	if !reflect.DeepEqual(ev, want) {
+		t.Errorf("events %+v, want %+v", ev, want)
 	}
 }
