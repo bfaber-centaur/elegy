@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"math"
 	"os"
+	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -476,5 +478,60 @@ func TestMisslottedPartThisYear(t *testing.T) {
 	}
 	if got := g.Designs[1]; len(got.Slots) != len(bare.Slots) {
 		t.Errorf("a valid design lost a part: %+v", got)
+	}
+}
+
+// TestMisslottedPartWorksNowhere: in the year that reads the design, a
+// misslotted part counts in the cost and the armor but adds nothing to
+// any other use of the parts: scanning, cloaking, weapons, score power
+// and tech requirements read Parts, which leaves it out (COMBAT.md
+// "Parts the game drops from a design", BINARY-ONLY).
+func TestMisslottedPartWorksNowhere(t *testing.T) {
+	cat := Components()
+	fills := []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}
+	bare, err := cat.NewDesign("bare", "Frigate", fills)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The Frigate's slot 1 takes scanners, slot 3 shields and armor.
+	d, err := cat.NewDesignAnyKind("odd", "Frigate", append(slices.Clone(fills),
+		SlotFill{Slot: 1, Part: "Laser", Count: 1},
+		SlotFill{Slot: 3, Part: "Bat Scanner", Count: 1},
+	))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cloak, err := cat.NewDesignAnyKind("cloak", "Frigate", append(slices.Clone(fills), SlotFill{Slot: 1, Part: "Transport Cloaking", Count: 1}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !d.misslotted(1) || !d.misslotted(2) || d.misslotted(0) || !cloak.misslotted(1) {
+		t.Fatalf("misslotted parts: %+v at %v", d.Slots, d.SlotPos)
+	}
+	if designCloakPoints(cloak) != 0 {
+		t.Errorf("cloak points %d, want 0", designCloakPoints(cloak))
+	}
+	if got := d.Parts(); !reflect.DeepEqual(got, bare.Slots) {
+		t.Errorf("Parts %+v, want %+v", got, bare.Slots)
+	}
+	if got := bare.Parts(); !reflect.DeepEqual(got, bare.Slots) {
+		t.Errorf("a valid design's Parts %+v, want its Slots", got)
+	}
+	g := &Game{Players: []Player{{}}}
+	if _, _, any := g.designScan(d, 0); any {
+		t.Error("the misslotted scanner scans")
+	}
+	if d.armed() {
+		t.Error("the misslotted Laser arms the design")
+	}
+	if shipPower(d) != shipPower(bare) {
+		t.Errorf("power %d, want %d", shipPower(d), shipPower(bare))
+	}
+	if d.techReq() != bare.techReq() {
+		t.Errorf("tech %v, want %v", d.techReq(), bare.techReq())
+	}
+	var lv [NumFields]int
+	if designCost(d, Race{}, lv) == designCost(bare, Race{}, lv) {
+		t.Error("the cost leaves the parts out")
 	}
 }

@@ -108,20 +108,7 @@ func (t *token) toughArmor() int {
 // Frigate's scanner slot a mass 3 lower. COMBAT.md: everything else
 // computed from the parts leaves it out.
 func battleDesign(d Design) Design {
-	if len(d.SlotPos) != len(d.Slots) {
-		return d
-	}
-	var slots []Slot
-	var pos []int
-	for i, s := range d.Slots {
-		if p := d.SlotPos[i]; p >= 0 && p < len(d.Hull.Slots) && !kindIn(s.Part.Kind, d.Hull.Slots[p].Kinds) {
-			continue
-		}
-		slots = append(slots, s)
-		pos = append(pos, d.SlotPos[i])
-	}
-	d.Slots, d.SlotPos = slots, pos
-	return d
+	return d.working()
 }
 
 // tokenValues computes a design's per-ship battle values (COMBAT.md
@@ -251,7 +238,7 @@ func speedCode(d Design, race Race, mass int, dumped bool) int {
 	if d.Engine.EnigmaPulsar {
 		half += d.Engines
 	}
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		thrust += s.Part.Thrust * s.Count
 		if s.Part.HalfThrust {
 			half += s.Count

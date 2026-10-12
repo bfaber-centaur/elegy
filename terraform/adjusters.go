@@ -18,7 +18,7 @@ func AdjusterClicks(g *engine.Game, f *engine.Fleet) int {
 			continue
 		}
 		per := 0
-		for _, sl := range g.Designs[st.Design].Slots {
+		for _, sl := range g.Designs[st.Design].Parts() {
 			c, ok := cat.Lookup(sl.Part.Name)
 			if !ok {
 				continue

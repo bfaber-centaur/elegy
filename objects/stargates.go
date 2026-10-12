@@ -24,7 +24,7 @@ type Gate struct {
 // (OBJECTS.md "What makes a gate", CONFIRMED GT-004; limits from the
 // component table's safe_mass and safe_range, null meaning any).
 func StarbaseGate(d engine.Design) (Gate, bool) {
-	for _, sl := range d.Slots {
+	for _, sl := range d.Parts() {
 		if sl.Count <= 0 || sl.Part.Kind != engine.PartStargate {
 			continue
 		}
@@ -132,7 +132,7 @@ func allJumpGates(g *engine.Game, f *engine.Fleet) bool {
 			continue
 		}
 		has := false
-		for _, sl := range g.Designs[st.Design].Slots {
+		for _, sl := range g.Designs[st.Design].Parts() {
 			if sl.Count > 0 && sl.Part.Name == "Jump Gate" {
 				has = true
 			}

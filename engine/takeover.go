@@ -238,7 +238,7 @@ func (g *Game) bomberPass(bomber, pi int) bombPass {
 			continue
 		}
 		for _, st := range f.Stacks {
-			for _, sl := range g.Designs[st.Design].Slots {
+			for _, sl := range g.Designs[st.Design].Parts() {
 				pass.add(sl.Part, st.Count*sl.Count)
 			}
 		}
@@ -836,7 +836,7 @@ func (g *Game) loadWaiting(f *Fleet, c, planet int) Event {
 // cancelled, holding the fleet until it gets new orders.
 func (g *Game) stealsFromPlanets(f *Fleet) bool {
 	for _, st := range f.Stacks {
-		for _, sl := range g.Designs[st.Design].Slots {
+		for _, sl := range g.Designs[st.Design].Parts() {
 			if st.Count > 0 && sl.Count > 0 && sl.Part.DetailedPlanetScan {
 				return true
 			}
@@ -932,7 +932,7 @@ func (g *Game) canColonize(f *Fleet) bool {
 		if st.Count <= 0 {
 			continue
 		}
-		for _, sl := range g.Designs[st.Design].Slots {
+		for _, sl := range g.Designs[st.Design].Parts() {
 			if sl.Count > 0 && sl.Part.Colonizer {
 				return true
 			}

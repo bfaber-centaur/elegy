@@ -36,7 +36,7 @@ func (c *traderChances) addParts(g *Game, d Design, n int) {
 	if g.Objects == nil {
 		return
 	}
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		if b := g.Objects.TraderBit(s.Part.Name); b >= 0 && b < traderTries {
 			c[b] = min(maxTraderChance, c[b]+n*s.Count)
 		}

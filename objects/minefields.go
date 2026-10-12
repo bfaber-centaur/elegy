@@ -226,7 +226,7 @@ func LayAmounts(g *engine.Game, f *engine.Fleet) [NumMineKinds]int {
 			}
 		}
 		var per [NumMineKinds]int
-		for _, sl := range d.Slots {
+		for _, sl := range d.Parts() {
 			c, ok := cat.Lookup(sl.Part.Name)
 			if !ok {
 				continue
@@ -397,7 +397,7 @@ func (s *Space) freeNumber(owner int, limit511 bool) (int, bool) {
 // Sappers, torpedoes, missiles and bombs sweep nothing.
 func SweepRating(d engine.Design) int {
 	s := 0
-	for _, sl := range d.Slots {
+	for _, sl := range d.Parts() {
 		p := sl.Part
 		if p.Kind != engine.PartBeam || p.Sapper {
 			continue
@@ -780,7 +780,7 @@ func designArmor(d engine.Design) int {
 
 func designShield(d engine.Design) int {
 	sh := 0
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		sh += s.Count * s.Part.Shield
 	}
 	return sh

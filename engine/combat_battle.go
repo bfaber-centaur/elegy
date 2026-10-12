@@ -202,7 +202,7 @@ func (b *battle) setup(fought map[int]bool) []Event {
 	damp := false
 	for _, t := range b.tokens {
 		d := g.Designs[t.design]
-		for _, s := range d.Slots {
+		for _, s := range d.Parts() {
 			if s.Count > 0 && s.Part.Dampener {
 				damp = true
 			}

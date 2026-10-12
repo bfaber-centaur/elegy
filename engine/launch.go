@@ -145,7 +145,7 @@ func (g *Game) planetGate(pi int) (mass, rng int, ok bool) {
 	if !p.HasStarbase || p.StarbaseDesign < 0 || p.StarbaseDesign >= len(g.Designs) {
 		return 0, 0, false
 	}
-	for _, sl := range g.Designs[p.StarbaseDesign].Slots {
+	for _, sl := range g.Designs[p.StarbaseDesign].Parts() {
 		if sl.Count <= 0 || sl.Part.Kind != PartStargate {
 			continue
 		}

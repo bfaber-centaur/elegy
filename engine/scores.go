@@ -79,7 +79,7 @@ func techScore(l int) int {
 func shipPower(d Design) int {
 	beam, torp, bomb := 0, 0, 0
 	factor := 1000
-	for _, s := range d.Slots {
+	for _, s := range d.Parts() {
 		p := s.Part
 		switch p.Kind {
 		case PartBeam:

@@ -607,10 +607,8 @@ func (c *Catalog) NewDesignAnyKind(name, hull string, fills []SlotFill) (Design,
 // the token but its armor (battleDesign), and dropMisslottedParts takes
 // it out of the stored design at the end of the year.
 //
-// Known difference, that year only: the other readers of Slots (scanning
-// and cloaking, score power, and the rest) still count the part, where
-// COMBAT.md says it adds nothing to any use of the design (BINARY-ONLY).
-// No vector exercises it.
+// Every other reader of the parts uses Design.Parts, which leaves the
+// part out: it adds nothing to any other use of the design (BINARY-ONLY).
 func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (Design, error) {
 	hc, ok := c.Lookup(hull)
 	if !ok {
@@ -648,7 +646,7 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 		if !kindIn(p.Kind, hs.Kinds) {
 			// Kept in Slots for this year's cost; mass, fuel and cargo
 			// leave it out (COMBAT.md "Parts the game drops from a
-			// design"; the other Slots readers: see above).
+			// design"; the other readers use Parts).
 			d.Slots = append(d.Slots, Slot{Part: p, Count: f.Count})
 			d.SlotPos = append(d.SlotPos, f.Slot)
 			continue
@@ -686,24 +684,55 @@ func (c *Catalog) newDesign(name, hull string, fills []SlotFill, kinds bool) (De
 // and cargo already leave it out (newDesign).
 func (g *Game) dropMisslottedParts() {
 	for i, d := range g.Designs {
-		if len(d.SlotPos) != len(d.Slots) {
-			continue
-		}
-		var slots []Slot
-		var pos []int
-		dropped := false
-		for k, s := range d.Slots {
-			if p := d.SlotPos[k]; p >= 0 && p < len(d.Hull.Slots) && !kindIn(s.Part.Kind, d.Hull.Slots[p].Kinds) {
-				dropped = true
-				continue
-			}
+		w := d.working()
+		g.Designs[i].Slots, g.Designs[i].SlotPos = w.Slots, w.SlotPos
+	}
+}
+
+// misslotted reports whether part k of d sits in a hull slot that does not
+// take its kind. Only a design with SlotPos knows its parts' slots.
+func (d Design) misslotted(k int) bool {
+	if len(d.SlotPos) != len(d.Slots) {
+		return false
+	}
+	p := d.SlotPos[k]
+	return p >= 0 && p < len(d.Hull.Slots) && !kindIn(d.Slots[k].Part.Kind, d.Hull.Slots[p].Kinds)
+}
+
+// working is d without its misslotted parts; d itself when it has none.
+func (d Design) working() Design {
+	if !d.anyMisslotted() {
+		return d
+	}
+	var slots []Slot
+	var pos []int
+	for k, s := range d.Slots {
+		if !d.misslotted(k) {
 			slots = append(slots, s)
 			pos = append(pos, d.SlotPos[k])
 		}
-		if dropped {
-			g.Designs[i].Slots, g.Designs[i].SlotPos = slots, pos
+	}
+	d.Slots, d.SlotPos = slots, pos
+	return d
+}
+
+func (d Design) anyMisslotted() bool {
+	for k := range d.Slots {
+		if d.misslotted(k) {
+			return true
 		}
 	}
+	return false
+}
+
+// Parts is the design's parts that work: Slots without a part in a hull
+// slot that does not take its kind. Such a part stays in Slots only in
+// the year that reads the design, for its cost (and battle armor); it
+// adds nothing to any other use of the design's parts (COMBAT.md "Parts
+// the game drops from a design", BINARY-ONLY). Readers of the parts use
+// Parts; cost, armor and the design's identity read Slots.
+func (d Design) Parts() []Slot {
+	return d.working().Slots
 }
 
 func kindIn(k PartKind, ks []PartKind) bool {
