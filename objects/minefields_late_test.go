@@ -8,9 +8,9 @@ import (
 
 // Mine damage on late-game fleets (OBJECTS.md "Hits on moving fleets",
 // damage CONFIRMED by MF-9 and OB-010-S on one-engine Destroyers). The
-// engine count and shields worth less than half the damage are terms of
-// the same rule that no observed fleet exercised: these are predictions.
-func TestPredictionMineDamageLateFleets(t *testing.T) {
+// engine count and shields worth less than half the damage: CONFIRMED by
+// CB-056 (66 fleets, 2 streams; OBJECTS.md at stars-elegy b0ca924).
+func TestConfirmedMineDamageLateFleets(t *testing.T) {
 	newBB := func(l *lab, name, eng string) {
 		d, err := engine.Components().NewDesign(name, "Battleship", []engine.SlotFill{
 			{Slot: 0, Part: eng, Count: 4},
@@ -67,12 +67,12 @@ func TestPredictionMineDamageLateFleets(t *testing.T) {
 	}
 }
 
-// CB-056 Q7: mine damage on a Regenerating Shields race uses the design's
-// plain shield and armor sums (Elegy's reading; OBJECTS.md does not say).
-// Five Battleships (armor 5000, shield 25) in a heavy field take 197/500,
-// as without RS. A battle-style reading (shields ×7/5 = 35, armor parts
-// halved: 2000 + 1500 = 3500) would give (10000 − 175)/5 = 1965 → 280.
-func TestPredictionMineDamageRegeneratingShields(t *testing.T) {
+// CB-056 (MEASURED, 23 fleets; OBJECTS.md at stars-elegy b0ca924): mine
+// damage on a Regenerating Shields race uses the battle's shields and armor.
+// Five Battleships (shield 25 × 7/5 = 35; armor 2000 + 2 × 1500/2 = 3500) in
+// a heavy field take (10000 − 175)/5 = 1965 → 280/500. The plain sums (armor
+// 5000, shield 25) would give 197.
+func TestMeasuredMineDamageRegeneratingShields(t *testing.T) {
 	l := newLab(t)
 	l.g.Players[0].Race.LRT.RegeneratingShields = true
 	d, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
@@ -86,8 +86,37 @@ func TestPredictionMineDamageRegeneratingShields(t *testing.T) {
 	l.designs["BB"] = len(l.g.Designs)
 	l.g.Designs = append(l.g.Designs, d)
 	fi := l.fleet(0, origin, "BB", 5)
+	hits := MineDamage(l.g, &l.g.Fleets[fi], Heavy, nil)
+	if got := l.g.Fleets[fi].Stacks[0].Damage; got != (engine.Damage{Pct: 100, Units: 280}) {
+		t.Errorf("RS Battleships: %+v, want 100%% at 280/500", got)
+	}
+	if len(hits) != 1 || hits[0].Absorbed != 175 {
+		t.Errorf("hits %+v, want one with 175 absorbed", hits)
+	}
+}
+
+// With Regenerating Shields a shield part's armor counts whole in mine damage
+// too, as in battle (CB-056 for battle; for mines a prediction that follows
+// the RS mine-damage result). Five Battleships with 8 Croby Sharmor and 2
+// Tritanium: shield 8·60·7/5 = 672, armor 2000 + 520 + 50 = 2570; heavy:
+// (10000 − 3360)/5 = 1328 → 258/500. Croby Sharmor halved (armor 2306) would
+// give 287.
+func TestPredictionMineDamageRegeneratingShieldsCroby(t *testing.T) {
+	l := newLab(t)
+	l.g.Players[0].Race.LRT.RegeneratingShields = true
+	d, err := engine.Components().NewDesign("BB", "Battleship", []engine.SlotFill{
+		{Slot: 0, Part: "Trans-Galactic Drive", Count: 4},
+		{Slot: 2, Part: "Croby Sharmor", Count: 8},
+		{Slot: 8, Part: "Tritanium", Count: 2},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l.designs["BB"] = len(l.g.Designs)
+	l.g.Designs = append(l.g.Designs, d)
+	fi := l.fleet(0, origin, "BB", 5)
 	MineDamage(l.g, &l.g.Fleets[fi], Heavy, nil)
-	if got := l.g.Fleets[fi].Stacks[0].Damage; got != (engine.Damage{Pct: 100, Units: 197}) {
-		t.Errorf("RS Battleships: %+v, want 100%% at 197/500", got)
+	if got := l.g.Fleets[fi].Stacks[0].Damage; got != (engine.Damage{Pct: 100, Units: 258}) {
+		t.Errorf("RS Croby Battleships: %+v, want 100%% at 258/500", got)
 	}
 }
