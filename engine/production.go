@@ -150,6 +150,10 @@ const (
 	EventQueueCompleted
 	EventOrderClipped // Item, Count = new count
 	EventAlchemy      // Count = kT of each mineral
+	// EventFleetArrived: Player's Fleet has finished its orders
+	// (MESSAGES.md 0x04e): at the end of movement, a fleet left with no
+	// waypoint (Elegy sends it whatever the task; 0x04e (b) leaves out
+	// some tasks), and a completed merge with itself (0x04e (a)).
 	EventFleetArrived
 	EventOutOfFuel
 	EventRamScoopFuel // Count = mg

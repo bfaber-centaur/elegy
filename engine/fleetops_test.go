@@ -250,3 +250,48 @@ func TestPredictionMergeStackOrder(t *testing.T) {
 		t.Errorf("order %v", got)
 	}
 }
+
+func TestConfirmedMergeWithItself(t *testing.T) {
+	// MESSAGES.md 0x04e (a) (CONFIRMED, stars-elegy d4eafd9): a merge with
+	// itself completes, merging nothing, and the owner is told the fleet
+	// has finished its orders (Elegy's EventFleetArrived); nothing is
+	// refused. Ordered at the fleet's position by a waypoint order, it
+	// completes before movement.
+	finished := func(events []Event, id int) (n int, refused bool) {
+		for _, e := range events {
+			if e.Kind == EventFleetArrived && e.Fleet == id {
+				n++
+			}
+			refused = refused || e.Kind == EventMergeRefused
+		}
+		return n, refused
+	}
+	l := followLab(t, 1)
+	r := followTurn(t, l, WaypointOrder{Fleet: 1, Task: Task{Kind: TaskMerge, Fleet: 1}})
+	f := followed(t, r.Game, 1)
+	if n, refused := finished(r.Events, 1); n != 1 || refused || f.Task != (Task{}) || f.Stacks[0].Count != 1 {
+		t.Errorf("0x04e x%d refused %v task %+v stacks %v; want once, no refusal, no task, one ship", n, refused, f.Task, f.Stacks)
+	}
+	// Reached as the last waypoint, the end-of-movement 0x04e is replaced
+	// by the task's ("an earlier copy for the same fleet is removed
+	// first"): one message.
+	l = followLab(t, 1)
+	r = followTurn(t, l, WaypointOrder{Fleet: 1, Waypoints: []Waypoint{{Pos: Point{1210, 1200}, Warp: 5, Target: TargetSpace, Task: Task{Kind: TaskMerge, Fleet: 1}}}})
+	f = followed(t, r.Game, 1)
+	if n, refused := finished(r.Events, 1); n != 1 || refused || f.Pos != (Point{1210, 1200}) || f.Task != (Task{}) {
+		t.Errorf("0x04e x%d refused %v at %v task %+v; want once at (1210,1200), no task", n, refused, f.Pos, f.Task)
+	}
+}
+
+func TestWithFinished(t *testing.T) {
+	// MESSAGES.md 0x04e (a): only the earlier 0x04e of a fleet that gets
+	// another is removed; its other messages, and other fleets' 0x04e,
+	// stay.
+	ev := func(k EventKind, id int) Event { return Event{Kind: k, Player: 0, Planet: -1, Fleet: id} }
+	events := []Event{ev(EventOutOfFuel, 1), ev(EventFleetArrived, 1), ev(EventFleetArrived, 2)}
+	got := withFinished(events, []Event{ev(EventFleetArrived, 1)})
+	want := []Event{ev(EventOutOfFuel, 1), ev(EventFleetArrived, 2), ev(EventFleetArrived, 1)}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}

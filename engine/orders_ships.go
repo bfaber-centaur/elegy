@@ -113,6 +113,10 @@ func withNewFleets(o Order, names map[int]int) Order {
 	case FleetPlanOrder:
 		o.Fleet = id(o.Fleet)
 		return o
+	case FollowOrder:
+		o.Fleet, o.Leader = id(o.Fleet), id(o.Leader)
+		o.Task = task(o.Task)
+		return o
 	case RenameOrder:
 		o.Fleet = id(o.Fleet)
 		return o

@@ -222,6 +222,12 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 		switch {
 		case f.Task.Kind == TaskTransport:
 			events = append(events, g.load(f, afterMovement)...)
+		case f.Task.Kind == TaskMerge && f.Task.Fleet == f.ID:
+			// A merge with itself completes, merging nothing, and the
+			// owner is told the fleet has finished its orders
+			// (MESSAGES.md 0x04e (a), CONFIRMED; FO-03-F).
+			f.Task = Task{}
+			events = append(events, g.fleetEvent(f, EventFleetArrived, 0))
 		case f.Task.Kind == TaskMerge:
 			if ev, ok := g.mergeTask(f, gone); ok {
 				gone[id] = true
@@ -236,15 +242,39 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 	return events
 }
 
+// withFinished appends more to events, first removing an earlier "fleet
+// has finished its orders" message (EventFleetArrived) for each fleet that
+// gets one in more (MESSAGES.md 0x04e (a): "an earlier copy for the same
+// fleet is removed first").
+func withFinished(events, more []Event) []Event {
+	again := map[int]bool{}
+	for _, e := range more {
+		if e.Kind == EventFleetArrived {
+			again[e.Fleet] = true
+		}
+	}
+	if len(again) > 0 {
+		kept := events[:0:0]
+		for _, e := range events {
+			if e.Kind != EventFleetArrived || !again[e.Fleet] {
+				kept = append(kept, e)
+			}
+		}
+		events = kept
+	}
+	return append(events, more...)
+}
+
 // mergeTask runs a Merge with Fleet task (ORDERS.md "Merge", CONFIRMED
 // FO-01..07): f joins the target, which keeps its id, if the target is at
 // f's position; otherwise the task is refused and cleared, both fleets
 // unchanged. A target that is gone, has already merged away, or is another
-// player's fleet is refused the same way (BINARY-ONLY). It reports whether
-// f merged.
+// player's fleet is refused the same way (BINARY-ONLY). A merge with
+// itself is not refused: loadPass completes it. It reports whether f
+// merged.
 func (g *Game) mergeTask(f *Fleet, gone map[int]bool) (Event, bool) {
 	t := g.fleetIndex(f.Task.Fleet)
-	if t < 0 || gone[f.Task.Fleet] || f.Task.Fleet == f.ID || g.Fleets[t].Owner != f.Owner || g.Fleets[t].Pos != f.Pos {
+	if t < 0 || gone[f.Task.Fleet] || g.Fleets[t].Owner != f.Owner || g.Fleets[t].Pos != f.Pos {
 		f.Task = Task{}
 		return Event{Kind: EventMergeRefused, Player: f.Owner, Planet: -1, Fleet: f.ID}, false
 	}
