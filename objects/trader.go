@@ -611,10 +611,7 @@ func (s *Space) shipGift(g *engine.Game, ctx TraderContext, owner int, pos engin
 	if kind != 0 {
 		n += rng.Intn(n + 1)
 	}
-	num := 1
-	for used[num] {
-		num++
-	}
+	num := g.NewFleetNumber(owner)
 	id := 0
 	for _, f := range g.Fleets {
 		id = max(id, f.ID)
