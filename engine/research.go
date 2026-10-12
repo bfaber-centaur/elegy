@@ -83,8 +83,8 @@ func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech boo
 // Generalized Research's split and research lost at level 26 are CONFIRMED
 // (KX-002 G1, R2–R6); only the current field switching under Generalized
 // Research, and the level-10 cap, are BINARY-ONLY. With Generalized
-// Research every field is checked before any switch (the order is the
-// code's choice; KERNEL.md does not give it).
+// Research every field receives its share when the current field's turn
+// comes in the first of the field-order passes (BINARY-ONLY; see below).
 //
 // Under slower tech the stored accumulation is kept at half scale
 // (KERNEL.md "Slower tech", CONFIRMED KX-003 S2, KX-005 R2): the year works
@@ -105,17 +105,18 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		}
 		s.Accumulated[field] += amount
 	}
+	var shares [NumFields]int
 	if race.LRT.GeneralizedResearch {
 		for f := range NumFields {
 			if f == s.Current {
-				add(f, (resources+1)/2)
+				shares[f] = (resources + 1) / 2
 			} else {
 				share := (3*resources + 19) / 20
-				add(f, share/scale*scale)
+				shares[f] = share / scale * scale
 			}
 		}
 	} else {
-		add(s.Current, resources)
+		shares[s.Current] = resources
 	}
 
 	// levelOnce raises field by one level when its accumulation covers
@@ -155,13 +156,6 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		return levelOnce(field)
 	}
 
-	gained := step(s.Current)
-	for f := range NumFields {
-		if f != s.Current {
-			levelUp(f)
-		}
-	}
-
 	// Only a level-up in the current field switches fields. The leftover
 	// moves to the new field, which is checked for level-ups the same
 	// year, and may switch again. An explicit next field is used once and
@@ -173,10 +167,10 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	// CONFIRMED KX-005 R3, KB-2A). ASSUMPTION: a field reaching the
 	// level-10 cap of a capped player does not switch; KERNEL.md gives
 	// only level 26, and the level-10 cap itself is BINARY-ONLY.
-	for gained {
+	switchField := func() {
 		if s.Next == NextSameField && !lowest {
 			if s.Levels[s.Current] < MaxTechLevel {
-				break
+				return
 			}
 			lowest = true
 		}
@@ -196,7 +190,37 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 			s.Accumulated[s.Current] = 0
 			s.Current = next
 		}
-		gained = step(s.Current)
+	}
+
+	// The fields are checked in passes, in field order. In the first
+	// pass the current field receives this year's research when its turn
+	// comes, and under Generalized Research every other field receives
+	// its share at the same moment, so the fields before the current one
+	// see their shares only in the next pass. Passes repeat while
+	// anything levels (BINARY-ONLY, stars-elegy 2f214f5; with nothing
+	// added the first affordable field in field order levels, with
+	// shares arriving the field after the current one comes first,
+	// wrapping round: lane F's GR-ORDER cases and RG-001 2433, where
+	// electronics, then biotech, then energy levelled).
+	added := false
+	for changed := true; changed; {
+		changed = false
+		for f := range NumFields {
+			if f != s.Current {
+				changed = levelUp(f) || changed
+				continue
+			}
+			if !added {
+				for g := range NumFields {
+					add(g, shares[g])
+				}
+				added = true
+			}
+			if step(f) {
+				changed = true
+				switchField()
+			}
+		}
 	}
 	if slowerTech {
 		for f := range NumFields {
