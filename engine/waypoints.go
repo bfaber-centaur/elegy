@@ -73,8 +73,9 @@ func (g *Game) waypointCheck() {
 }
 
 // chaseMerged is the waypoint check's retarget of a waypoint that names
-// a fleet a merge order removed earlier in the replay (merged: fleet id to
-// owner), when the waypoint's own order came later (ORDERS.md "Targets
+// a fleet a merge order, or a move-ships order that emptied it, removed
+// earlier in the replay (merged: fleet id to owner), when the waypoint's
+// own order came later (ORDERS.md "Targets
 // that moved, died or were captured", "A fleet target merged away during
 // order replay", BINARY-ONLY). The waypoint takes a fleet of the merged
 // fleet's owner that stands exactly at its coordinates; with none it keeps

@@ -52,9 +52,13 @@ func TestMeasuredRemovedTargetBecomesPlanet(t *testing.T) {
 }
 
 // A fleet of the removed fleet's owner standing there is taken, before the
-// planet (BINARY-ONLY), whichever rule removes the fleet; with nothing
-// there the waypoint keeps the stale id, and the waypoint check makes it
-// deep space at its last position (MEASURED WF-04).
+// planet, whichever rule removes the fleet: BINARY-ONLY, as stars-elegy
+// ORDERS.md "Targets that moved, died or were captured", "A fleet target
+// merged away during order replay (BINARY-ONLY; no oracle run)", "B
+// replayed first" ("a fleet if one is there ... else the planet there,
+// else deep space"). With nothing there the waypoint keeps the stale id,
+// and the waypoint check makes it deep space at its last position
+// (MEASURED WF-04).
 func TestBinaryOnlyRemovedTargetRetargets(t *testing.T) {
 	g := removedGame()
 	g.Fleets = append(g.Fleets,
