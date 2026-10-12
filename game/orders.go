@@ -35,6 +35,7 @@ var orderKinds = map[string]engine.Order{
 	"Waypoint":       engine.WaypointOrder{},
 	"Detonate":       engine.DetonateOrder{},
 	"Queue":          engine.QueueOrder{},
+	"DefaultQueue":   engine.DefaultQueueOrder{},
 	"PlanetSettings": engine.PlanetSettingsOrder{},
 	"Relations":      engine.RelationsOrder{},
 	"Cargo":          engine.CargoOrder{},

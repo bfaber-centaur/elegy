@@ -596,6 +596,36 @@ const (
 	maxItemCount  = 1023
 )
 
+// DefaultQueueOrder replaces the player's default queue settings, which a
+// new colony or a captured planet takes (stars-elegy f2f9794, ORDERS.md "The
+// player's default queue": the order file's record is copied over the
+// stored setting whole, BINARY-ONLY). It holds planetary items only, at
+// most maxDefaultQueueItems; the item checks are Elegy's chosen rule, as for
+// QueueOrder.
+type DefaultQueueOrder struct {
+	Queue        []QueueItem
+	LeftoverOnly bool
+}
+
+// maxDefaultQueueItems is the default queue's limit (ORDERS.md "The
+// player's default queue").
+const maxDefaultQueueItems = 12
+
+func (o DefaultQueueOrder) apply(g *Game, player int, _ *Applied) error {
+	if len(o.Queue) > maxDefaultQueueItems {
+		return fmt.Errorf("default queue: %d items: %w", len(o.Queue), ErrOutOfRange)
+	}
+	for _, it := range o.Queue {
+		if it.Kind < ItemMine || it.Kind > ItemAutoMaxTerraform || it.Kind.design() || it.Count < 1 || it.Count > maxItemCount || it.Percent < 0 || it.Percent > 100 {
+			return fmt.Errorf("default queue item %+v: %w", it, ErrOutOfRange)
+		}
+	}
+	pl := &g.Players[player]
+	pl.DefaultQueue = append([]QueueItem(nil), o.Queue...)
+	pl.DefaultLeftoverOnly = o.LeftoverOnly
+	return nil
+}
+
 // QueueOrder replaces a planet's whole production queue (LIMITS.md
 // "Production-queue replace", CONFIRMED LQ-1..LQ-6): the
 // planet must be the sender's; an empty list removes the queue; otherwise
