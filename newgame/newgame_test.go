@@ -502,6 +502,11 @@ func TestConfirmedHomeworld(t *testing.T) {
 		if hw.Owner != i || !hw.Homeworld || res.Artifact[hw.ID] {
 			t.Errorf("player %d homeworld: owner %d homeworld %v artifact %v", i, hw.Owner, hw.Homeworld, res.Artifact[hw.ID])
 		}
+		// The player's record of its homeworld, which re-marks it each
+		// year (TAKEOVER.md "The homeworld mark after capture").
+		if pl := res.Game.Players[i]; !pl.HasHomeworld || pl.Homeworld != hw.ID {
+			t.Errorf("player %d homeworld record %v %d, want planet %d", i, pl.HasHomeworld, pl.Homeworld, hw.ID)
+		}
 		if hw.Mines != 10 || hw.Factories != 10 || hw.Defenses != 10 || !hw.HasScanner {
 			t.Errorf("player %d: installations %d/%d/%d scanner %v", i, hw.Mines, hw.Factories, hw.Defenses, hw.HasScanner)
 		}

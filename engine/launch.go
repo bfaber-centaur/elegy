@@ -229,8 +229,10 @@ func (g *Game) NewFleetNumber(owner int) int { return g.lowestFreeFleetNumber(ow
 // holdFleetNumbers starts the span, after the year's orders are read, in
 // which a fleet that goes away keeps holding its number until the year's
 // files are written (KERNEL.md "Fleet numbers": CONFIRMED for colonizing
-// from orbit and scrapping, KX-007 and RG-001 2432; BINARY-ONLY for the
-// other ways a fleet goes away). A fleet deleted while the orders are
+// from orbit and scrapping, KX-007 and RG-001 2432, and for colonizing on
+// arrival and a waypoint-0 merge, FN-02..05 in PARITY.md "Representative
+// game (RG-001)", stars-elegy 30272be; BINARY-ONLY for the other ways a
+// fleet goes away). A fleet deleted while the orders are
 // read, merged away or emptied by a ship move, freed its number at once
 // (BINARY-ONLY).
 func (g *Game) holdFleetNumbers() {

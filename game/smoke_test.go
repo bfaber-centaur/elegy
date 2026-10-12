@@ -379,6 +379,7 @@ func TestLoadRejects(t *testing.T) {
 		"version":       strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 99`, 1),
 		"older version": strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), fmt.Sprintf(`"version": %d`, SaveVersion-1), 1),
 		"version 6":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 6`, 1),
+		"version 7":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 7`, 1),
 		"human level":   regexp.MustCompile(`("Computer": false,\s*"Level": )0`).ReplaceAllString(string(b), "${1}2"),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
@@ -406,4 +407,16 @@ func population(g engine.Game, player int) int {
 		}
 	}
 	return n
+}
+
+func TestCheckHomeworldRecord(t *testing.T) {
+	// A player's homeworld record names a planet that exists.
+	g := engine.Game{Players: []engine.Player{{HasHomeworld: true, Homeworld: 4}}, Planets: []engine.Planet{{ID: 3, Owner: engine.NoOwner}}}
+	if bad := Check(g); len(bad) != 1 || !strings.Contains(bad[0], "homeworld planet 4") {
+		t.Errorf("Check = %q, want the missing homeworld planet", bad)
+	}
+	g.Players[0].Homeworld = 3
+	if bad := Check(g); len(bad) != 0 {
+		t.Errorf("Check = %q, want nothing", bad)
+	}
 }

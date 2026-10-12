@@ -261,6 +261,9 @@ func (g *generator) setUpPlayers(hws []int) error {
 				}
 			}
 		}
+		// The player's record of its homeworld, which re-marks it each
+		// year (TAKEOVER.md "The homeworld mark after capture").
+		pl.HasHomeworld, pl.Homeworld = true, planets[hws[i]].ID
 		game.Players = append(game.Players, pl)
 		g.setUpHomeworld(&planets[hws[i]], i, ps, shared, sharedConc)
 		g.res.Players = append(g.res.Players, start)

@@ -136,7 +136,8 @@
     "counts": {
      "ship_designs": 3,
      "starbase_designs": 2
-    }
+    },
+    "homeworld": 39
    },
    {
     "id": 1,
@@ -219,7 +220,8 @@
      "ship_designs": 3,
      "starbase_designs": 1
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 108
    },
    {
     "id": 2,
@@ -302,7 +304,8 @@
      "ship_designs": 2,
      "starbase_designs": 1
     },
-    "computer": true
+    "computer": true,
+    "homeworld": 80
    }
   ],
   "planets": [

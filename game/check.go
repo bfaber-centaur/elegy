@@ -77,6 +77,12 @@ func Check(g engine.Game) []string {
 		}
 	}
 
+	for i, p := range g.Players {
+		if p.HasHomeworld && !planetIDs[p.Homeworld] {
+			bad("player %d: homeworld planet %d does not exist", i, p.Homeworld)
+		}
+	}
+
 	type slotKey struct {
 		owner    int
 		starbase bool
