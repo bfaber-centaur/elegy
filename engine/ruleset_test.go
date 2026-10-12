@@ -179,17 +179,20 @@ func TestRulesetsCoexist(t *testing.T) {
 // built-in version that predates a switch has it off, so its old saves
 // still validate: here jrc3-faithful v1 and elegy v2 without the two
 // Cybertron switches, both v2s without the AI wormhole switch, and every
-// version before v4 without the bare-record switch.
+// version before v4 without the bare-record switch, and every version
+// before v5 without the artifact switch.
 func TestRulesetSavedBeforeSwitch(t *testing.T) {
 	for _, c := range []struct {
 		r    Ruleset
 		keys []string
 	}{
-		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop"}},
-		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop"}},
-		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap", "bare_record_drop"}},
-		{elegyRulesV3(), []string{"bare_record_drop"}},
-		{faithfulRulesV3(), []string{"bare_record_drop"}},
+		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
+		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
+		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
+		{elegyRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech"}},
+		{faithfulRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech"}},
+		{elegyRulesV4(), []string{"artifact_full_slower_tech"}},
+		{faithfulRulesV4(), []string{"artifact_full_slower_tech"}},
 	} {
 		r := c.r
 		b, err := json.Marshal(r)
@@ -234,12 +237,20 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 			t.Errorf("%s v%d differs from v2 beyond ai_wormhole_distance_wrap", c.v3.ID, c.v3.Version)
 		}
 	}
-	for _, c := range []struct{ v4, v3 Ruleset }{{ElegyRules(), elegyRulesV3()}, {FaithfulRules(), faithfulRulesV3()}} {
+	for _, c := range []struct{ v4, v3 Ruleset }{{elegyRulesV4(), elegyRulesV3()}, {faithfulRulesV4(), faithfulRulesV3()}} {
 		v4 := c.v4
 		v4.Version = 3
 		v4.Legacy.BareRecordDrop = false
 		if c.v4.Version != 4 || !c.v4.Legacy.BareRecordDrop || c.v3.Legacy.BareRecordDrop || v4 != c.v3 {
 			t.Errorf("%s v%d differs from v3 beyond bare_record_drop, on in v4 only", c.v4.ID, c.v4.Version)
+		}
+	}
+	for _, c := range []struct{ v5, v4 Ruleset }{{ElegyRules(), elegyRulesV4()}, {FaithfulRules(), faithfulRulesV4()}} {
+		v5 := c.v5
+		v5.Version = 4
+		v5.Legacy.ArtifactFullSlowerTech = false
+		if c.v5.Version != 5 || !c.v5.Legacy.ArtifactFullSlowerTech || c.v4.Legacy.ArtifactFullSlowerTech || v5 != c.v4 {
+			t.Errorf("%s v%d differs from v4 beyond artifact_full_slower_tech, on in v5 only", c.v5.ID, c.v5.Version)
 		}
 	}
 }

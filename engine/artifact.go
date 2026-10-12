@@ -16,7 +16,11 @@ const EventArtifactFound EventKind = EventTargetOutOfView + 1
 // happens (BINARY-ONLY).
 //
 // Slower tech does not halve the points (MEASURED TK-304; LEGACY BUG in
-// the binary reading, where the halving is computed and never used).
+// the binary reading, where the halving is computed and never used), under
+// Legacy.ArtifactFullSlowerTech, on in every current built-in. Off, half
+// the points are stored, rounded up as stealResearch stores stolen
+// research under slower tech (ELEGY CHOICE); the message keeps the points
+// found.
 //
 // ASSUMPTION A1: the scaling truncates, points × colonists ÷ 1000;
 // TAKEOVER.md gives the factor, not the rounding.
@@ -34,6 +38,10 @@ func (g *Game) findArtifact(pi int, rng Rand) []Event {
 		points = points * colonists / 1000
 	}
 	p.Artifact = false
-	g.Players[p.Owner].Research.Accumulated[f] += points
+	stored := points
+	if g.SlowerTech && !g.Rules.Legacy.ArtifactFullSlowerTech {
+		stored = (points + 1) / 2
+	}
+	g.Players[p.Owner].Research.Accumulated[f] += stored
 	return []Event{{Kind: EventArtifactFound, Player: p.Owner, Planet: p.ID, Fleet: -1, Item: ItemKind(f), Count: points}}
 }

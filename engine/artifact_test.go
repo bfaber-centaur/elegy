@@ -89,11 +89,32 @@ func TestArtifactKept(t *testing.T) {
 }
 
 func TestMeasuredArtifactNotHalvedBySlowerTech(t *testing.T) {
-	// TK-304 (MEASURED): slower tech gives the same points.
-	l, pi := artifactLab(t)
-	l.g.SlowerTech = true
-	l.g.resolveQueue([]drop{{pi, 0, 25}}, &scriptRand{draws: []int{Weapons, 200}}, map[int]bool{})
-	if got := l.g.Players[0].Research.Accumulated[Weapons]; got != 300 {
-		t.Errorf("weapons %d, want 300", got)
+	// TK-304 (MEASURED; LEGACY BUG, Legacy.ArtifactFullSlowerTech, on in
+	// both built-ins): slower tech gives the same points.
+	for _, r := range []Ruleset{ElegyRules(), FaithfulRules()} {
+		l, pi := artifactLab(t)
+		l.g.Rules, l.g.SlowerTech = r, true
+		l.g.resolveQueue([]drop{{pi, 0, 25}}, &scriptRand{draws: []int{Weapons, 200}}, map[int]bool{})
+		if got := l.g.Players[0].Research.Accumulated[Weapons]; got != 300 {
+			t.Errorf("%s: weapons %d, want 300", r.ID, got)
+		}
+	}
+}
+
+func TestElegyChoiceArtifactHalvedSwitchOff(t *testing.T) {
+	// ELEGY CHOICE, no built-in: with ArtifactFullSlowerTech off, slower
+	// tech stores half the points, rounded up (301 → 151); the message
+	// keeps 301. Without slower tech the switch changes nothing.
+	for _, c := range []struct {
+		slower bool
+		want   int
+	}{{true, 151}, {false, 301}} {
+		l, pi := artifactLab(t)
+		l.g.Rules.Legacy.ArtifactFullSlowerTech = false
+		l.g.SlowerTech = c.slower
+		ev := l.g.resolveQueue([]drop{{pi, 0, 25}}, &scriptRand{draws: []int{Weapons, 201}}, map[int]bool{})
+		if got := l.g.Players[0].Research.Accumulated[Weapons]; got != c.want || ev[len(ev)-1].Count != 301 {
+			t.Errorf("slower tech %v: weapons %d, message %d; want %d and 301", c.slower, got, ev[len(ev)-1].Count, c.want)
+		}
 	}
 }
