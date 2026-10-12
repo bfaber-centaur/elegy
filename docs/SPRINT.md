@@ -309,13 +309,16 @@ original's state):
   and planet 39's concentrations (compared since #166) on variant 7.
   Random-driven by the coordinator's triage; the minefield is not looked
   at.
-- Fixed since 395bcdc: the waypoint fleet targets in Y5 and Y6 (W5, #167);
-  the starbase damage on planets 54 and 55 in Y6 (#170). That one was
-  deterministic: a fleeing token did not count itself on its own square,
-  so out of reach it stayed put, where the original's Privateer walked up
-  and fired (360 and 180). With the record's moves every hit replays and
-  the damage is kept (`TestRG001StarbaseDamageKept`). Elegy's own walk is
-  random, as the original's is (RANDOM-PARITY.md "Moves").
+- Fixed since 395bcdc: the waypoint fleet targets in Y5 and Y6 (W5, #167).
+- Y6 starbase damage on planets 54 and 55 (samples). #170 fixed a
+  deterministic movement difference that kept the attacker away: a fleeing
+  token did not count itself on its own square, so out of reach it stayed
+  put (found by `TestBattleRecords`' move check; RANDOM-PARITY.md
+  "Moves"). Since then, planet 55's Y6 starbase damage matches (sample
+  pass). Planet 54's is still a sample miss, 380 vs 360, because of
+  Elegy's own random walk. The replayed battles keep both values
+  (`TestRG001StarbaseDamageKept`). In the chained run both are sample
+  misses (54: 180 vs 360, 55: 0 vs 180).
 
 Chained-only mismatches (Elegy's own state carried from year to year), all
 in the random-driven group unless listed as not looked at:
