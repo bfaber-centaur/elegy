@@ -125,12 +125,24 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 	chain := battleStarts(t, path)
 	last := len(chain) - 1
 	marker := fmt.Sprintf(" y%d: ", last)
+	// samples is the rg tally line's samples column, matched/compared.
+	samples := func(r *recordTB) string {
+		got := ""
+		for _, l := range r.logs {
+			if f := strings.Fields(l); len(f) > 0 && f[0] == "rg" {
+				got = f[len(f)-1]
+			}
+		}
+		return got
+	}
+	var tally string
 	run := func(downstream int) (failed, missed int) {
 		starts := append([]engine.BattleStart(nil), chain...)
 		starts[last].Game.Fleets = nil
 		starts[last].Downstream = downstream
 		r := &recordTB{TB: t}
 		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts})
+		tally = samples(r)
 		for _, e := range r.errs {
 			if strings.Contains(e, marker) {
 				failed++
@@ -146,9 +158,19 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 	if chain[last].Downstream == 0 {
 		t.Fatalf("RG-001 year %d follows no draws", last)
 	}
+	r := &recordTB{TB: t}
+	engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: chain})
+	if got := samples(r); got != "5/7" {
+		t.Errorf("unmodified chain: samples %s, want 5/7", got)
+	}
 	failed, missed := run(chain[last].Downstream)
 	if failed != 0 || missed == 0 {
 		t.Errorf("as a sample: %d failures, %d misses, want 0 and some", failed, missed)
+	}
+	// The last year's samples all miss now; the earlier years' still
+	// match as before.
+	if want := "3/7"; tally != want {
+		t.Errorf("as a sample: samples %s, want %s", tally, want)
 	}
 	if f, m := run(0); f != missed || m != 0 {
 		t.Errorf("with no earlier draws: %d failures, %d misses, want %d and 0", f, m, missed)

@@ -183,12 +183,10 @@ a sample: compared in full, tallied only as matched or missed in its own
 column, never in the other tallies and never a failure. A match does not
 show parity and a miss does not show a defect; the per-year restarts
 compare those years from the record. The rg row's 7 samples are the records of
-RG-001's chained run after its first year, all matched at the current
-reference seed. The
-seed derivation's fix (lane B) changes the chain, and two of them,
-2434 (1658,1174) and 2435 (1319,1460), then miss: they had matched only
-because the old seed's chain happened to reproduce those fleets and
-states.
+RG-001's chained run after its first year; 5 match at the reference seed
+(variant 0 of `pvSeed`). Two, 2434 (1658,1174) and 2435 (1319,1460),
+miss. On the old folded seeds (before #188) all 7 matched, only because
+that seed's chain happened to reproduce those fleets and states.
 
 **Moves.** The replay also checks each recorded move before applying it:
 the recorded square must be one Elegy's `step` can choose with some
