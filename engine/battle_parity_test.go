@@ -110,6 +110,10 @@ type BattleStart struct {
 	Fleets     map[[2]int]int // (owner, vector fleet id) → Elegy fleet ID
 	Planets    map[int]int    // vector planet id → Elegy planet ID
 	Skip       string         // why every case of the vector is skipped, if one is
+	// Downstream counts the draws Elegy made in the vector's earlier
+	// years. A year after a draw starts from a game those draws shaped,
+	// not from the record's: its battles are samples (CheckBattleRecords).
+	Downstream int
 }
 
 // pvBattleOutcome is what the comparison found for one recorded battle.
@@ -134,7 +138,7 @@ type pvBattleOutcome struct {
 }
 
 // loadBattleRecords reads every battle record in the vectors.
-func loadBattleRecords(t *testing.T) map[string][]pvRecordedBattle {
+func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 	paths, err := filepath.Glob(filepath.Join("testdata", "vectors", "*", "*.json"))
 	if err != nil || len(paths) == 0 {
 		t.Fatalf("no vectors: %v", err)
@@ -803,6 +807,24 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	}
 }
 
+// sampleMiss is why a sample's comparison missed, or "" when everything
+// compared matched: the tokens, every hit and move compared (conditioned
+// ones included). A round with draws ends the comparison without a miss,
+// as it does for a record.
+func (o pvBattleOutcome) sampleMiss() string {
+	switch {
+	case o.built:
+		return "tokens: a recorded fleet is not in Elegy's game"
+	case o.tokens != "":
+		return "tokens: " + o.tokens
+	case o.moveStop != "":
+		return "moves: " + o.moveStop
+	case !o.draws && o.stop != "":
+		return "hits: " + o.stop
+	}
+	return ""
+}
+
 // BattleRecordVectors lists the vectors holding battle records, by path
 // ("cb/cb010.json").
 func BattleRecordVectors(t *testing.T) []string {
@@ -823,15 +845,24 @@ func BattleRecordVectors(t *testing.T) []string {
 // battle's comparison without failing: that is the random level
 // (docs/RANDOM-PARITY.md). A record of a year Elegy did
 // not generate is counted, not compared; CheckBattleRecords returns that
-// count by corpus ("rg"). TestBattleRecords (battle_vectors_test.go) runs
+// count by corpus ("rg").
+//
+// A record of a year that follows Elegy's draws in earlier years
+// (BattleStart.Downstream: a chained run past a random year) is a sample:
+// its fleets and states come from Elegy's own random outcomes, so a match
+// does not show parity and a difference does not show a defect. Samples
+// are compared in full but tallied on their own, as matched or missed,
+// never in the token, hit or move tallies and never as a failure; the
+// per-year restarts compare those years from the record. TestBattleRecords (battle_vectors_test.go) runs
 // it: the vector loader, package vectors, imports engine.
-func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[string]int {
+func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart) map[string]int {
 	records := loadBattleRecords(t)
 	type tally struct {
 		records, tokens, built, ungen, full, draws int
 		compared, matched, total, salvos           int
 		conditioned, condMatched                   int
 		moves, movesMatched, movesUnchecked        int
+		samples, samplesMatched                    int
 	}
 	per := map[string]*tally{}
 	var names []string
@@ -862,6 +893,15 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 				continue
 			}
 			o := compareBattle(&l, r)
+			if l.Downstream > 0 {
+				c.samples++
+				if why := o.sampleMiss(); why != "" {
+					t.Logf("%s: sample (after %d draws of earlier years) missed: %s", where, l.Downstream, why)
+				} else {
+					c.samplesMatched++
+				}
+				continue
+			}
 			switch {
 			case o.built:
 				// The battle-phase game has every fleet that fights.
@@ -906,14 +946,17 @@ func CheckBattleRecords(t *testing.T, starts map[string][]BattleStart) map[strin
 	// taken from the record (not random parity)
 	// moves: recorded moves on a square Elegy's rule allows / moves
 	// checked; unchecked: moves whose square scores would draw, or with
-	// too many tokens whose silent stays leave the moves left open
-	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %8s  %-13s %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded", "moves", "unchecked")
+	// too many tokens whose silent stays leave the moves left open;
+	// samples: records of a year after earlier years' draws, matched /
+	// compared (in none of the other columns)
+	t.Logf("%-5s %8s %8s %8s %8s %8s %8s %8s  %-17s %-17s %8s  %-13s %9s  %s", "", "records", "tokens", "missing", "not gen", "replayed", "draws", "salvos", "matched/compared", "conditioned", "recorded", "moves", "unchecked", "samples")
 	var all tally
 	for _, name := range corpora {
 		c := per[name]
-		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %8d  %-13s %d", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
+		t.Logf("%-5s %8d %8d %8d %8d %8d %8d %8d  %-17s %-17s %8d  %-13s %9d  %s", name, c.records, c.tokens, c.built, c.ungen, c.full, c.draws, c.salvos,
 			fmt.Sprintf("%d/%d", c.matched, c.compared), fmt.Sprintf("%d/%d", c.condMatched, c.conditioned), c.total,
-			fmt.Sprintf("%d/%d", c.movesMatched, c.moves-c.movesUnchecked), c.movesUnchecked)
+			fmt.Sprintf("%d/%d", c.movesMatched, c.moves-c.movesUnchecked), c.movesUnchecked,
+			fmt.Sprintf("%d/%d", c.samplesMatched, c.samples))
 		all.compared += c.compared
 		all.movesMatched += c.movesMatched
 	}
@@ -1031,6 +1074,27 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if !answered {
 		t.Error("no CS-003-C torpedo battle replayed whole with its salvos answered")
+	}
+}
+
+// A sample misses on any difference the comparison reports for a record,
+// except a round with draws, which ends the comparison of both.
+func TestBattleSampleMiss(t *testing.T) {
+	cases := []struct {
+		o    pvBattleOutcome
+		miss bool
+	}{
+		{pvBattleOutcome{}, false},
+		{pvBattleOutcome{draws: true, stop: "round 3: Elegy draws"}, false},
+		{pvBattleOutcome{built: true}, true},
+		{pvBattleOutcome{tokens: "token 2"}, true},
+		{pvBattleOutcome{moveStop: "round 1"}, true},
+		{pvBattleOutcome{stop: "salvo 1"}, true},
+	}
+	for _, c := range cases {
+		if got := c.o.sampleMiss() != ""; got != c.miss {
+			t.Errorf("%+v: miss %v, want %v", c.o, got, c.miss)
+		}
 	}
 }
 

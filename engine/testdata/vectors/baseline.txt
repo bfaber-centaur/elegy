@@ -13,7 +13,7 @@ CB-005
 CB-006
 CB-007
 CB-008
-CB-009 random 7
+CB-009
 CB-010
 CB-011
 CB-012
@@ -74,7 +74,7 @@ CB-048-ctl
 CB-048
 CB-049
 SC-035
-SC-036 random 3
+SC-036 random 1
 CO-01
 CO-02
 CO-03
@@ -460,7 +460,7 @@ OB-021-C2
 OB-021-D
 OB-021-D2
 OB-021-E
-OB-021-F
+OB-021-F random 7
 OB-021-H
 OB-021-I
 OB-022-A
@@ -476,8 +476,8 @@ OB-023-P3
 OB-023-P4
 OB-023-Q
 OB-023-R
-OB-023-T sample-only 4
-OB-024-B sample-only 7
+OB-023-T sample-only 3
+OB-024-B sample-only
 OB-024-D
 OB-025-A1
 OB-025-A2
@@ -485,7 +485,7 @@ OB-025-A3
 OB-025-B1
 OB-025-B2
 OB-025-B3
-OB-026-B sample-only 7
+OB-026-B sample-only
 OB-028-A
 OB-028-Ac
 OB-028-B
@@ -512,7 +512,7 @@ OB-029-T3
 OB-029-D
 OB-030-A
 OB-030-T sample-only
-OB-031-A random 4
+OB-031-A random 3
 PG-002-A
 PG-002-B
 PG-003-A
@@ -533,13 +533,13 @@ PQ-001-C12
 PQ-001-C13
 PQ-001-C14
 PQ-001-P0
-RG-001-Y1-2430 random 3
-RG-001-Y2-2431 random 6
+RG-001-Y1-2430 random 5
+RG-001-Y2-2431
 RG-001-Y3-2432 random 5
-RG-001-Y4-2433 random 7
-RG-001-Y5-2434 random 4
-RG-001-Y6-2435 random 5
-RG-001-2430 random 3
+RG-001-Y4-2433
+RG-001-Y5-2434 random 7
+RG-001-Y6-2435 random 6
+RG-001-2430 random 5
 RD-P1
 RD-P2
 RD-P3
@@ -1061,7 +1061,7 @@ SL-limit-b
 SL-limit-b300-ctl
 SL-limit-b300
 SL-routes
-SL-starbases-ctl
+SL-starbases-ctl random 7
 SL-starbases
 TK-101-A
 TK-102-A
@@ -1119,7 +1119,7 @@ TK-118-A
 TK-118-B
 TK-119-A
 TK-119-B
-TK-120-A random 6
+TK-120-A
 TK-120-B
 TK-121-A
 TK-121-B
@@ -1137,21 +1137,21 @@ WT-001-C
 WT-001-D
 WT-001-E sample-only
 WT-001-F1
-WT-001-F2 sample-only 7
+WT-001-F2 sample-only
 WT-002-A
-WT-002-B sample-only 7
+WT-002-B sample-only
 WT-003-A00 sample-only
-WT-003-A01 sample-only 7
+WT-003-A01 sample-only
 WT-003-A02 sample-only
 WT-003-A03 sample-only
-WT-003-A04 sample-only 7
+WT-003-A04 sample-only
 WT-003-A05 sample-only
-WT-003-A06 sample-only 6
+WT-003-A06 sample-only
 WT-003-A07 sample-only
-WT-003-A08 sample-only
+WT-003-A08 sample-only 7
 WT-003-A09 sample-only
-WT-003-A10 sample-only
-WT-003-A11 sample-only
+WT-003-A10 sample-only 7
+WT-003-A11 sample-only 7
 WT-003-A sample-only
 WT-003-B sample-only
 WT-005-A sample-only
