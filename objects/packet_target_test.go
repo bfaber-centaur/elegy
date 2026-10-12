@@ -146,8 +146,10 @@ func TestPacketTransportCancelledInTurn(t *testing.T) {
 	if told != 1 {
 		t.Errorf("%d cancel messages, want 1", told)
 	}
-	// MESSAGES.md 0x04e (a), BINARY-ONLY: the cancelled fleet is at its
-	// last waypoint, so 0x04e follows the 0x11e. The taskless fleet gets
+	// MESSAGES.md 0x04e (a): the cancelled fleet is at its last waypoint,
+	// so 0x04e follows the 0x11e. UNRESOLVED: an oracle run contradicts the
+	// 0x11e cancel for an own packet (write-up pending in stars-elegy);
+	// lane A owns the fix. The taskless fleet gets
 	// its one arrival 0x04e and the patrol fleet none (0x04e (b)).
 	for _, c := range []struct {
 		fleet int

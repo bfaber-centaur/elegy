@@ -484,6 +484,8 @@ func (g *Game) cancelPacketTransport(f *Fleet, reached Waypoint) []Event {
 		return nil
 	}
 	f.Task = Task{}
-	// At the last waypoint 0x04e (a) follows the refusal (BINARY-ONLY).
+	// At the last waypoint 0x04e (a) follows the refusal. UNRESOLVED: an
+	// oracle run contradicts the 0x11e cancel for an own packet (write-up
+	// pending in stars-elegy); lane A owns the fix.
 	return append([]Event{g.fleetEvent(f, EventTransportNoHold, 0)}, g.taskEnded(f)...)
 }
