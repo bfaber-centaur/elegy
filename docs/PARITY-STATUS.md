@@ -194,3 +194,27 @@ Every corpus was copied verbatim from stars-elegy main `19896cd`. The only diffe
   - **TK-108-A and TK-108-C leave it: incorrect mechanic (lane A).** T-26 says a Claim Adjuster owner skips items 4–5, the auto minimum and maximum terraform, and an Alternate Reality owner skips items 0–2 (auto mines, factories, defenses). These are item ids. `newColony` (engine/takeover.go) skips queue positions instead. TK-108's default queue is factories, mines, defenses, minimum terraform, maximum terraform, so Elegy drops only the maximum terraform (position 4) and keeps the minimum terraform: `queue = [... {16 2 0 0}], want [...]`.
 - **`message_sequence` is not compared yet** (the within-id comparator follows). In RG-002 it adds 84 not-compared ledger lines, one per player and year. The ledger's other lines are unchanged apart from their expectation numbers.
 - The galaxy fields are not read yet (lane A's clamp PR).
+
+### Alchemy message (economy)
+
+Measured on elegy main `3d33192` (#211) plus this branch.
+
+- **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
+- **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **Order:** with 0x08c mapped, the order check (section above) makes 1662 comparisons over the 8 seed variants, up from 1534. The 128 new ones each place a 0x035 (40) or 0x036 (88) after a 0x08c, and every one holds: no per-corpus tally changes.
+- **RG-002:** it carries no 0x08c, so the ledger is unchanged.
+
+### Deferred: client estimators (milestone 3)
+
+The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
+
+| Count | Reading |
+|---:|---|
+| 19 | production_tile completion |
+| 5 | production_dialog completion |
+| 10 | status_tile population |
+| 10 | planet_summary_report value |
+| 10 | planet_summary_report mining_rate |
+| 15 | research_dialog: resources_needed 4, annual_resources_from_all_planets 3, estimated_time_to_completion 3, next_year_projected_research_budget 3, next_field_choice_after_the_year 1, total_resources_spent_on_research_last_year 1 |
+
+Counts are from the reference seed on main `217ab4b`.
