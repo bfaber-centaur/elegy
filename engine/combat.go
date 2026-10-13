@@ -293,7 +293,9 @@ func removeEmptyFleets(g *Game) {
 			gone[f.ID] = true
 		}
 	}
-	g.removeFleets(gone)
+	// A fleet destroyed in battle has no stand-in: waypoints chasing it
+	// go to the planet where it died (retargetRemoved, MEASURED RG-003).
+	g.removeFleetsAs(gone, false)
 }
 
 // repair repairs fleets and starbases that did not fight (COMBAT.md

@@ -20,6 +20,7 @@ func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
 		0x026: "EventOvercrowded",
+		0x028: "EventTargetGone",
 		0x02e: "EventColonistsBeamedDown",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
@@ -315,6 +316,16 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			if code, ok := fleet(ev.Fleet); ok {
 				m = pvMsg{id: 0x02e, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0},
 					known: []bool{true, true, true, false, false, false}, why: "0x02e mineral and location slots"}
+			}
+			send(ev.Player, m)
+		case engine.EventTargetGone:
+			// Slots: the follower, the gone target (MESSAGES.md 0x028;
+			// params MEASURED, WK-1). The event does not name the
+			// target, so its slot is not compared.
+			m := pvMsg{id: 0x028, params: make([]int, 2), known: make([]bool, 2), why: "0x028 fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m = pvMsg{id: 0x028, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, 0},
+					known: []bool{true, false}, why: "0x028 target slot"}
 			}
 			send(ev.Player, m)
 		case engine.EventFleetScrapped:

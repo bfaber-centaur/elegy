@@ -147,7 +147,7 @@
    1 player field relations
    1 player field ship_design_count
  291 player not in the state
-1855 sample: one stream's random outcome
+1854 sample: one stream's random outcome
    1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
   10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
    3 score_record: Super Stealth research stealing

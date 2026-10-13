@@ -461,10 +461,17 @@ func (g *Game) RemoveFleets(ids map[int]bool) { g.removeFleets(ids) }
 // removeFleets removes the fleets in ids, first retargeting the
 // waypoints that name them (retargetRemoved).
 func (g *Game) removeFleets(ids map[int]bool) {
+	g.removeFleetsAs(ids, true)
+}
+
+// removeFleetsAs is removeFleets; standIn false retargets the waypoints
+// that name a removed fleet with no stand-in fleet (retargetRemoved), as
+// for fleets destroyed in battle.
+func (g *Game) removeFleetsAs(ids map[int]bool, standIn bool) {
 	if len(ids) == 0 {
 		return
 	}
-	g.retargetRemoved(ids)
+	g.retargetRemoved(ids, standIn)
 	fleets := g.Fleets[:0]
 	for _, f := range g.Fleets {
 		if !ids[f.ID] {
