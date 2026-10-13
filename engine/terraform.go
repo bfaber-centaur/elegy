@@ -4,6 +4,11 @@ package engine
 // one click toward the owner's centre. Axes = the axis.
 const EventOriginalDrift EventKind = EventColonistsKilledByEngine + 1
 
+// EventClaimAdjusted: the year-end step moved Player's Claim Adjuster
+// Planet; Count = the owner's habitability after, in percent (MESSAGES.md
+// 0x156 at stars-elegy f38c843, CONFIRMED tk2/tk108, KX-003).
+const EventClaimAdjusted EventKind = EventHostileShrink + 1
+
 // terraformReach is how far a race at these levels can terraform each
 // axis from its original value (KERNEL.md "Terraforming", reach per
 // axis): the largest available terraform part for the axis, a Total
@@ -74,11 +79,18 @@ func (g *Game) claimAdjusterYearEnd(rng Rand) []Event {
 			events = append(events, Event{Kind: EventOriginalDrift, Player: p.Owner, Planet: p.ID, Fleet: -1, Axes: []int{axis}})
 		}
 		reach := terraformReach(pl.Race, pl.Research.Levels)
+		before := p.Env
 		for a, r := range pl.Race.Env {
 			if r.Immune {
 				continue
 			}
 			p.Env[a] = terraformLimit(p.Env[a], p.OrigEnv[a], r.Center, reach[a])
+		}
+		// 0x156 follows the planet's 0x15c and is sent only when the step
+		// moved the planet: KX-003 R3 and KX-005 T0 have none for a planet
+		// already at its limit (MEASURED).
+		if p.Env != before {
+			events = append(events, Event{Kind: EventClaimAdjusted, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: Habitability(pl.Race, p.Env)})
 		}
 	}
 	return events

@@ -1,6 +1,9 @@
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 // caGame is one Claim Adjuster planet of pgRace with these environments
 // and levels.
@@ -47,7 +50,10 @@ func TestPredictionTerraformReach(t *testing.T) {
 
 // TestConfirmedClaimAdjusterYearEnd: KERNEL.md "Terraforming" → Claim
 // Adjuster worked examples (KX-003 S3/S3L at reach 3; TK-108,
-// TK-118..121 after a capture at reach 15 and TT 30).
+// TK-118..121 after a capture at reach 15 and TT 30). A planet the step
+// moves gets EventClaimAdjusted with the habitability after (MESSAGES.md
+// 0x156; KX-003 R3 has 87 and 94 for S3 and S3L); one it cannot move gets
+// none.
 func TestConfirmedClaimAdjusterYearEnd(t *testing.T) {
 	var reach3, reach15, none [NumFields]int
 	reach3[Energy], reach3[Weapons], reach3[Propulsion], reach3[Biotech] = 1, 1, 1, 1
@@ -59,17 +65,23 @@ func TestConfirmedClaimAdjusterYearEnd(t *testing.T) {
 		env, orig, want [3]int
 		levels          [NumFields]int
 		tt              bool
+		pct             int // the 0x156 percent; 0: no message
 	}{
-		{"S3 reach 3", [3]int{60, 42, 56}, [3]int{60, 42, 56}, [3]int{57, 45, 53}, reach3, false},
-		{"S3L terraformed", [3]int{58, 50, 50}, [3]int{60, 50, 50}, [3]int{57, 50, 50}, reach3, false},
-		{"capture ±15 near centre", [3]int{55, 47, 52}, [3]int{55, 47, 52}, [3]int{50, 50, 50}, reach15, false},
-		{"capture ±15", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{65, 35, 65}, reach15, false},
-		{"capture TT ±30", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{50, 50, 50}, tt30, true},
-		{"capture no tech", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{80, 20, 80}, none, false},
+		{"S3 reach 3", [3]int{60, 42, 56}, [3]int{60, 42, 56}, [3]int{57, 45, 53}, reach3, false, 87},
+		{"S3L terraformed", [3]int{58, 50, 50}, [3]int{60, 50, 50}, [3]int{57, 50, 50}, reach3, false, 94},
+		{"capture ±15 near centre", [3]int{55, 47, 52}, [3]int{55, 47, 52}, [3]int{50, 50, 50}, reach15, false, 100},
+		{"capture ±15", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{65, 35, 65}, reach15, false, 58},
+		{"capture TT ±30", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{50, 50, 50}, tt30, true, 100},
+		{"capture no tech", [3]int{80, 20, 80}, [3]int{80, 20, 80}, [3]int{80, 20, 80}, none, false, 0},
+		{"at its limit", [3]int{57, 45, 53}, [3]int{60, 42, 56}, [3]int{57, 45, 53}, reach3, false, 0},
 	} {
 		g := caGame(c.env, c.orig, c.levels, c.tt)
-		if ev := g.claimAdjusterYearEnd(noDrift{}); len(ev) != 0 {
-			t.Errorf("%s: events %v, want none", c.name, ev)
+		var want []Event
+		if c.pct != 0 {
+			want = []Event{{Kind: EventClaimAdjusted, Player: 0, Planet: 1, Fleet: -1, Count: c.pct}}
+		}
+		if ev := g.claimAdjusterYearEnd(noDrift{}); !reflect.DeepEqual(ev, want) {
+			t.Errorf("%s: events %v, want %v", c.name, ev, want)
 		}
 		if got := g.Planets[0].Env; got != c.want {
 			t.Errorf("%s: env = %v, want %v", c.name, got, c.want)
@@ -90,8 +102,9 @@ func TestConfirmedClaimAdjusterDrift(t *testing.T) {
 	g.Planets[0].Population = 100
 	rng := &seqRand{draws: []int{1, 0, 99}}
 	ev := g.claimAdjusterYearEnd(rng)
-	if len(ev) != 1 || ev[0].Kind != EventOriginalDrift || ev[0].Axes[0] != 1 {
-		t.Fatalf("events = %v, want one drift on temperature", ev)
+	// 0x15c, then 0x156 for the same planet (MESSAGES.md P7 order).
+	if len(ev) != 2 || ev[0].Kind != EventOriginalDrift || ev[0].Axes[0] != 1 || ev[1].Kind != EventClaimAdjusted || ev[1].Planet != 1 {
+		t.Fatalf("events = %v, want a drift on temperature, then the planet's 0x156", ev)
 	}
 	if got := g.Planets[0].OrigEnv; got != [3]int{50, 69, 50} {
 		t.Errorf("original = %v, want [50 69 50]", got)
@@ -113,8 +126,8 @@ func TestConfirmedClaimAdjusterDrift(t *testing.T) {
 	g = caGame([3]int{50, 70, 50}, [3]int{50, 70, 50}, none, false)
 	g.Planets[0].Population = 1000
 	rng = &seqRand{draws: []int{1, 0, 999, 7}}
-	if ev := g.claimAdjusterYearEnd(rng); len(ev) != 1 || len(rng.draws) != 2 {
-		t.Errorf("events = %v, draws left %d; want one drift and two left", ev, len(rng.draws))
+	if ev := g.claimAdjusterYearEnd(rng); len(ev) != 2 || ev[0].Kind != EventOriginalDrift || len(rng.draws) != 2 {
+		t.Errorf("events = %v, draws left %d; want a drift (and its 0x156) and two left", ev, len(rng.draws))
 	}
 	// An axis at the centre draws only rand(3).
 	g = caGame([3]int{50, 70, 50}, [3]int{50, 70, 50}, none, false)

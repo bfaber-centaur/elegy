@@ -100,9 +100,7 @@
    1 message 0x14d has no event mapping
    1 message 0x14e has no event mapping
    1 message 0x150 has no event mapping
-   5 message 0x156 has no event mapping
    4 message 0x15a has no event mapping
-   2 message 0x15c has no event mapping
    2 message 0x15e has no event mapping
    3 message 0x160 has no event mapping
    1 message 0x162 has no event mapping
@@ -123,7 +121,7 @@
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping
-   3 message_sequence entry 0x156 has no event mapping
+   2 message_sequence entry 0x12d has no event mapping
    2 message_sequence entry 0x15a has no event mapping
    1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
@@ -137,7 +135,7 @@
    1 player field relations
    1 player field ship_design_count
  291 player not in the state
-1854 sample: one stream's random outcome
+1856 sample: one stream's random outcome
    1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
   10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
    3 score_record: Super Stealth research stealing
