@@ -384,8 +384,19 @@ func (g *Game) DockAllows(pi, design int) bool {
 // Dock, Count N), or any size (Count DockUnlimited).
 //
 // Production's queue change when the new hull is earlier in the hull list
-// is in production.go (afterEarlierHull). Not modelled: the mass driver
-// (no packets).
+// is in production.go (afterEarlierHull).
+//
+// Mass driver (PRODUCTION-LAUNCH.md "Starbases", stars-elegy a1c4c91,
+// BINARY-ONLY): if the planet had no mass driver before and the new
+// starbase has one, the planet's packet speed is set to the new driver's
+// speed, whatever it was set to. The speed is Dw + t: RG-002 Y4 planet 88
+// built a Station with two Mass Driver 7s on a planet with no starbase and
+// read packet warp 8 (MEASURED, consistent: one observation, stars-elegy
+// 6880639; Dw + t as at launch, BINARY-ONLY, stars-elegy 86ca470). If the
+// planet had no driver and still has none, its packet destination and
+// speed are cleared (BINARY-ONLY, stars-elegy 86ca470); production removes
+// its queued mineral packet items (dropPacketItems). A planet that had a
+// driver keeps its settings.
 func (g *Game) BuildStarbase(pi, design int) []Event {
 	p := &g.Planets[pi]
 	d := g.Designs[design]
@@ -395,10 +406,57 @@ func (g *Game) BuildStarbase(pi, design int) []Event {
 			return nil
 		}
 	}
+	hadDriver := false
+	if p.HasStarbase && p.StarbaseDesign >= 0 && p.StarbaseDesign < len(g.Designs) {
+		_, _, hadDriver = DriverWarp(g.Designs[p.StarbaseDesign])
+	}
+	if !hadDriver {
+		if dw, t, ok := DriverWarp(d); ok {
+			p.PacketSpeed = dw + t
+		} else {
+			p.HasPacketDest, p.PacketDest, p.PacketSpeed = false, 0, 0
+		}
+	}
 	p.HasStarbase, p.StarbaseDesign = true, design
 	p.StarbaseHull = d.Hull.StarbaseNumber
 	p.StarbaseDock = d.Hull.Dock != 0
 	return []Event{{Kind: EventStarbaseBuilt, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: d.Hull.Dock}}
+}
+
+// DriverWarp is a starbase design's driver warp Dw and the two-driver
+// bonus t (OBJECTS.md "Launch", CONFIRMED OB-028-C, D): Dw is the best
+// mass driver's rating; t is 1 when two different slots each hold that
+// best driver. ok is false without a mass driver.
+func DriverWarp(d Design) (dw, t int, ok bool) {
+	slots := 0
+	for _, sl := range d.Parts() {
+		if sl.Count <= 0 || sl.Part.Kind != PartMassDriver {
+			continue
+		}
+		w := driverRating(sl.Part.Name)
+		switch {
+		case w > dw:
+			dw, slots = w, 1
+		case w == dw:
+			slots++
+		}
+	}
+	if dw == 0 {
+		return 0, 0, false
+	}
+	if slots >= 2 {
+		t = 1
+	}
+	return dw, t, true
+}
+
+func driverRating(name string) int {
+	c, ok := Components().Lookup(name)
+	if !ok {
+		return 0
+	}
+	w, _ := c.Stats["warp"].(float64)
+	return int(w)
 }
 
 // StarbaseReplacementCost is what a starbase design costs to build where a

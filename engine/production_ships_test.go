@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -224,5 +225,91 @@ func TestMeasuredDesignEditQueueBuildsEdited(t *testing.T) {
 	shipyardRun(g, 0, 10000)
 	if len(g.Fleets) != 1 || g.Designs[g.Fleets[0].Stacks[0].Design].Name != "Edited" {
 		t.Errorf("fleets %+v", g.Fleets)
+	}
+}
+
+func TestStarbaseWithoutDriverDropsPacketItems(t *testing.T) {
+	// PRODUCTION-LAUNCH.md "Starbases", mass driver (BINARY-ONLY,
+	// stars-elegy 86ca470): a starbase without a mass driver built where there
+	// was none clears the packet destination and speed and silently removes
+	// the queued mineral packet items; Auto Mineral Packets and other items
+	// stay. With a driver on the new starbase, the destination and the
+	// items are kept and the speed becomes the driver's, 5. A driverless
+	// starbase replacing one with a driver changes neither the settings nor
+	// the items. A starbase the owner lacks the tech for is not built and
+	// changes nothing.
+	for _, tt := range []struct {
+		name                      string
+		driver, noTech, oldDriver bool
+	}{
+		{"no driver", false, false, false},
+		{"Mass Driver 5", true, false, false},
+		{"not built", false, true, false},
+		{"driver before, none now", false, false, true},
+	} {
+		g := shipyard(t)
+		if tt.oldDriver {
+			d, err := Components().NewDesign("Station", "Space Station", []SlotFill{{Slot: 0, Part: "Mass Driver 5", Count: 1}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.Designs[2] = d // the planets' starbase, starbase slot 2
+		}
+		if tt.noTech {
+			g.Players[0].Research.Levels = [NumFields]int{}
+			d, err := Components().NewDesign("Fort", "Orbital Fort", []SlotFill{{Slot: 1, Part: "Gatling Gun", Count: 1}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.Designs[3] = d
+		}
+		if tt.driver {
+			g.Players[0].Race.PRT = PRTPacketPhysics // mass drivers are PP-only
+			d, err := Components().NewDesign("Fort", "Orbital Fort", []SlotFill{{Slot: 0, Part: "Mass Driver 5", Count: 1}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.Designs[3] = d
+		}
+		p := &g.Planets[0]
+		p.HasPacketDest, p.PacketDest, p.PacketSpeed = true, 2, 6
+		race, levels := g.Players[0].Race, g.Players[0].Research.Levels
+		fort, _ := StarbaseReplacementCost(g.Designs[3], g.Designs[2], race, levels)
+		p.HasQueue, p.Queue = true, []QueueItem{
+			{Kind: ItemStarbase, Slot: 0, Count: 1},
+			{Kind: ItemIroniumPacket, Count: 2},
+			{Kind: ItemAutoPackets, Count: 5},
+			{Kind: ItemMixedPacket, Count: 1, Percent: 40},
+			{Kind: ItemMine, Count: 3},
+		}
+		shipyardRun(g, 0, fort.Resources)
+		if tt.noTech {
+			if p.StarbaseDesign != 2 || len(p.Queue) != 4 || p.Queue[0].Kind != ItemIroniumPacket || !p.HasPacketDest || p.PacketSpeed != 6 {
+				t.Errorf("%s: starbase %d, queue %+v, destination %v, speed %d", tt.name, p.StarbaseDesign, p.Queue, p.HasPacketDest, p.PacketSpeed)
+			}
+			continue
+		}
+		if p.StarbaseDesign != 3 {
+			t.Fatalf("%s: starbase %d", tt.name, p.StarbaseDesign)
+		}
+		var kinds []ItemKind
+		for _, it := range p.Queue {
+			kinds = append(kinds, it.Kind)
+		}
+		wantKinds := []ItemKind{ItemAutoPackets, ItemMine}
+		wantDest, wantSpeed := false, 0
+		switch {
+		case tt.oldDriver:
+			// The settings and items stay; production then stops at the
+			// Ironium item, which a planet without objects cannot launch.
+			wantKinds = []ItemKind{ItemIroniumPacket, ItemAutoPackets, ItemMixedPacket, ItemMine}
+			wantDest, wantSpeed = true, 6
+		case tt.driver:
+			wantKinds = []ItemKind{ItemIroniumPacket, ItemAutoPackets, ItemMixedPacket, ItemMine}
+			wantDest, wantSpeed = true, 5
+		}
+		if fmt.Sprint(kinds) != fmt.Sprint(wantKinds) || p.HasPacketDest != wantDest || p.PacketSpeed != wantSpeed {
+			t.Errorf("%s: queue %v, destination %v (%d), speed %d; want %v, %v, %d", tt.name, kinds, p.HasPacketDest, p.PacketDest, p.PacketSpeed, wantKinds, wantDest, wantSpeed)
+		}
 	}
 }
