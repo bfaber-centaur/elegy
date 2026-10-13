@@ -151,6 +151,42 @@ Disruptors, Pulverizers, a Gatling, the Big Mutha Cannon or the Syncro
 Sapper. Those values stay pinned by the CB cases (CB-056 to CB-058), not
 by a representative game. Every RG-002 restart battle record matches (RG002-REPORT.md).
 
+### Late-tech weapons
+
+The table lists, for each weapon, which battle evidence uses it. Measured
+2026-10-13 over every battle record in `engine/testdata/vectors`, whose
+designs give each token's parts.
+- **Compared** means `TestBattleRecords` checks that weapon's hits record
+  by record, outside samples.
+- **Oracle only** means stars-elegy measured it in a CB round that has
+  no vector. Elegy's unit test is labelled from that.
+
+No SC or KX vector has a battle with any of these parts. The case specs
+for the gaps (G, S, B and N below) are lane F's queue:
+`/mnt/project-files/combat/late-weapons-cases.md`.
+
+| Weapon (Elegy catalog: damage, range, kind) | Battle evidence | In Elegy's vectors | Case |
+|---|---|---|---|
+| Mini Gun (13, 2, gatling) | none | none | G3 |
+| Gatling Gun (31, 2, gatling) | CB-002 to CB-005: hits at distances 0–2, 3 from a station, deflector 90 | compared | G1 (check these records first) |
+| Gatling Neutrino Cannon (80, 2, gatling) | CB-056, one stream: the shot goes on past a starbase, one hit per deflector | oracle only (`TestGatlingDeflectorPerTarget`) | G1 |
+| Big Mutha Cannon (204, 2, gatling) | none in battle (OT-6 counts it only in the score's ship power) | none | G2 |
+| Pulsed Sapper (82, 3, sapper) | CB-002, CB-049; RG-002 Y5 and the chained run's first year | compared (RG-002 Y3 and the chained run's later years are samples) | S3 |
+| Phased Sapper (211, 3, sapper) | none | none | S1 |
+| Syncro Sapper (541, 3, sapper) | none | none | S1, S2 |
+| Myopic Disruptor (169, 1), Disruptor (169, 2) | none | none | B |
+| Mega Disruptor (169, 3) | CB-058 Q5: every hit replays | oracle only | B |
+| Mini Blaster (66, 1), Mark IV Blaster (66, 2) | none | none | B |
+| Heavy Blaster (66, 3) | CB-056: one hit of 66 × 2.55; CB-058 Q6: reach 4 from a Death Star | oracle only (`TestPredictionDeathStarTokenValues`, `TestConfirmedCB058DeathStarReach`) | B |
+| Streaming Pulverizer (433, 1), Anti-Matter Pulverizer (433, 2) | none | none | B |
+| Battle Nexus (initiative +3, computer 50) | CB-056, CB-057: a starbase with 16 had initiative 63 and computer 99 | oracle only | N |
+
+The catalog marks the disruptors', blasters' and pulverizers' `kind` and
+`mines_swept` BINARY-ONLY. Their beam rules are the general ones that the
+compared beams check (Laser, X-Ray Laser, Colloidal Phaser, Yakimora,
+Phaser Bazooka and others), so the B cases test only each part's own
+damage, range and initiative.
+
 Oracle questions for a late-game run (RG-002 or a CB case); CB-056
 answered all seven (below):
 
