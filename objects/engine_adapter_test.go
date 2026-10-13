@@ -224,9 +224,11 @@ func TestSweepMinesEvents(t *testing.T) {
 		if c.fort != "" {
 			l.g.Planets = []engine.Planet{{ID: 7, Pos: at(5, 0), Owner: 1, HasStarbase: true, StarbaseDesign: l.designs[c.fort]}}
 		}
-		s := &Space{Minefields: []Minefield{{Owner: 0, Kind: Standard, Pos: origin, Count: 1000}}}
+		s := &Space{Minefields: []Minefield{{Owner: 0, Number: 3, Kind: Heavy, Pos: at(4, 2), Count: 1000}}}
 		got := s.SweepMines(l.g)
 		var want []engine.Event
+		p := at(4, 2)
+		field := []int{0, int(Heavy), p.X, p.Y, 3} // owner, kind, x, y, number
 		total := 0
 		for k := 0; k < c.sweeps && 2*k+1 < len(got); k++ {
 			n := got[2*k].Count
@@ -236,11 +238,11 @@ func TestSweepMinesEvents(t *testing.T) {
 				fleet, planet = -1, 7
 			}
 			want = append(want,
-				engine.Event{Kind: engine.EventMinesSwept, Player: 1, Planet: planet, Fleet: fleet, Count: n},
-				engine.Event{Kind: engine.EventMinefieldSwept, Player: 0, Planet: planet, Fleet: fleet, Count: n})
+				engine.Event{Kind: engine.EventMinesSwept, Player: 1, Planet: planet, Fleet: fleet, Count: n, Axes: field},
+				engine.Event{Kind: engine.EventMinefieldSwept, Player: 0, Planet: planet, Fleet: fleet, Count: n, Axes: field})
 		}
 		if len(got) != 2*c.sweeps || !reflect.DeepEqual(got, want) || 1000-s.Minefields[0].Count != total {
-			t.Errorf("%s: events %+v, want each of %d sweeps to its sweeper (player 1), then the same to the field's owner 0", c.name, got, c.sweeps)
+			t.Errorf("%s: events %+v, want each of %d sweeps to its sweeper (player 1), then the same to the field's owner 0, naming the field", c.name, got, c.sweeps)
 		}
 		for _, e := range got {
 			if e.Count <= 0 {

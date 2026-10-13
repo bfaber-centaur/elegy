@@ -46,6 +46,13 @@ func MaxPopulation(race Race, hab int, starbaseHull int) int {
 // KX-002). A planet that dies out is emptied instead (0x023).
 const EventOvercrowded EventKind = EventPartAvailable + 1
 
+// EventHostileShrink: Player's planet, with a hab value below 0 for its
+// owner, shrank in growth from Count population (units of 100 colonists)
+// to Axes[0] and did not die out (MESSAGES.md 0x025 at stars-elegy
+// de1bd6f, CONFIRMED cb5/cb037-owner, ob/ob007). It is 0x026's hostile
+// twin.
+const EventHostileShrink EventKind = EventMinefieldSwept + 1
+
 // GrowPopulation advances one year of population growth (or death) on a
 // planet: pop in units, carry in hundredths of a unit (the persistent
 // excessPop byte), maxPop in units, growthRate G in percent (already doubled

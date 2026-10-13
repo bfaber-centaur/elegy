@@ -264,7 +264,11 @@ Measured on elegy main `bd0ed07` (#231) plus this branch.
   - **0x0f4**: a starbase swept mines. `EventMinesSwept` with a planet, to its owner (CONFIRMED ob/ob007, mf/mf01).
   - **0x0c2**: a fleet swept mines. `EventMinesSwept` with a fleet, to its owner (CONFIRMED ob/ob010, cs).
   - **0x0be**: someone swept your field. The new `EventMinefieldSwept` (kind 96) goes to the field's owner right after each sweeper's event (CONFIRMED ob/ob010, cs, mf/mf01). One per sweeper per field, so two sweepers give two, each with its own amount: BINARY-ONLY (MESSAGES.md "Duplicates"; no run with two sweepers in one field is cited). A fleet or starbase that cannot sweep sends none: ASSUMPTION (the triggers name a sweeper that sweeps; no vector has a non-sweeper in an enemy field). `TestSweepMinesEvents` pins both.
-- **Slots.** The sweeper (planet or fleet) and the amount are compared. The player slot's flags, the field type value and the location encoding have no public table, so the field owner, type and centre slots (and 0x0be's field object) are not compared.
+- **Slots.** The sweeper (planet or fleet) and the amount are compared. ~~The field owner, type and centre slots are not compared.~~ Corrected 2026-10-13: every slot is now compared, by the table in MESSAGES.md "Sweep slots" (stars-elegy e1b2ad9, MEASURED SW-1). The sweep events carry the field's owner, type, centre and number (`Event.Axes`).
+  - 0x0c2 and 0x0f4: field owner (the plain player number), type (0 standard, 1 heavy, 2 speed bump) and the centre's x and y.
+  - 0x0be: the field's object id, owner·512 + number (MESSAGES.md "Object ids in slots"), then type, x and y.
+  - Not compared: 0x0f4's type slot when a starbase sweeps a speed bump (NOT RUN in the oracle), and every slot of a 0x0c2 whose fleet is gone. That the owner slot never carries a flag is UNRESOLVED; Elegy writes the plain number.
+  - RG-003-Y11's restart 0x0f4 now matches in full: [95 82 0 5 0 1548 1298], player 5's standard field at (1548,1298). Its "not compared" line is gone from the ledger and the census.
 - **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
 
@@ -315,31 +319,27 @@ Counts are from the reference seed on main `217ab4b`.
 
 ### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `6cde505` (after #232 WK-1, #234, #236 and #237 ship moves).
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `0ca6c3b` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235 and #240 GC-1).
 
-**Totals (5956 lines).**
+**Totals (5943 lines).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 5300 | 452 | 5752 |
+| sample | 5289 | 452 | 5741 |
 | matched | 8 | 100 | 108 |
-| not compared | 11 | 12 | 23 |
+| not compared | 11 | 11 | 22 |
 | random-driven | 0 | 72 | 72 |
-| incorrect mechanic | 0 | 1 | 1 |
 
+- **No deterministic hand lines remain.** Every compared difference in the restarts is random-driven (it matches on some seed variant) or a sample.
 - **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
 - **Restarts:** "matched" counts battle records.
+- **GC-1 (#240, `0ca6c3b`)** cleared the last hand line, y7 planet 51's population (15083 against 15084, the per-drop ground-combat floor), and the 11 chained sample lines that carried it forward (planet 51's population and excess in years 7–12).
 - **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
 - **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
+- **#238** compares the 0x0f4 slots, which removes the y11 restart's not-compared line.
 - **stars-elegy #203** adds an `alt_battle` expectation at RG-003 y9 (1388,1386), in the chained run and in the restart. The vectors comparator leaves it to the battle harness, so it stays 2 not-compared lines there. Lane D's #236 consumes it in the battle harness: the extra battle at (1388,1386) is now an ordinary sample, and its random-driven hand line is gone.
 
-**Hand line (1).** It is in a restart and misses on all 8 seed variants.
-
-| year | object | class and owner | cause |
-|---|---|---|---|
-| y7 | planet 51 | incorrect mechanic [lane A] | Population 15083, want 15084. The cause is ground combat (the per-drop floor, GC-1), not growth. |
-
-**RG-003 still has 1 deterministic gap,** lane A's planet 51. GC-1 (`fe7f7b5`, in lane A's queued stack) is expected to clear it; a ledger rewrite on that PR will confirm. It is the only deterministic gap in compared fields. The 23 not-compared lines stay unjudged, and the section below sorts them by cause and owner.
+"No deterministic hand lines" holds for compared fields only. The 22 not-compared lines stay unjudged, and the section below sorts them by cause and owner.
 
 ### RG-004: a second game, 12 chained years
 

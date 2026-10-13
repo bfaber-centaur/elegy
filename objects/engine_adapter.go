@@ -375,7 +375,8 @@ func (s *Space) LayMines(g *engine.Game, layers []engine.MineLayer) []engine.Eve
 func (s *Space) SweepMines(g *engine.Game) []engine.Event {
 	var out []engine.Event
 	for _, w := range s.Sweep(g) {
-		ev := engine.Event{Kind: engine.EventMinesSwept, Player: w.Sweeper, Planet: -1, Fleet: -1, Count: w.Mines}
+		ev := engine.Event{Kind: engine.EventMinesSwept, Player: w.Sweeper, Planet: -1, Fleet: -1, Count: w.Mines,
+			Axes: []int{w.Field.Owner, int(w.Field.Kind), w.Field.Pos.X, w.Field.Pos.Y, w.Field.Number}}
 		if w.Fleet >= 0 {
 			ev.Fleet = g.Fleets[w.Fleet].ID
 		}
