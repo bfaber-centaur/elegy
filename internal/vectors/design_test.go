@@ -1,6 +1,7 @@
 package vectors
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -56,4 +57,29 @@ func TestPlayerCounts(t *testing.T) {
 	pvWant(t, "other count", l.playerEquals(g, 0, pvEq(t, `{"counts": {"fleets": 1}}`), nil), "", "player counts fleets")
 	pvWant(t, "malformed", l.playerEquals(g, 0, pvEq(t, `{"counts": 3}`), nil), "counts: malformed expectation 3", "")
 	pvWant(t, "empty", l.playerEquals(g, 0, pvEq(t, `{"counts": {}}`), nil), "counts: malformed expectation {}", "")
+}
+
+// TestDesignPlanned pins that a planned player's design expectations are
+// skipped through pvCheck, and a played player's are compared.
+func TestDesignPlanned(t *testing.T) {
+	l := pvLoaded{g: engine.Game{Players: []engine.Player{{}, {Computer: true}}}}
+	g := &engine.Game{
+		Designs:     []engine.Design{{Hull: engine.Hull{Name: "Scout"}}},
+		DesignSlots: []engine.DesignSlot{{Owner: 0, Slot: 2, Design: 0}, {Owner: 1, Slot: 2, Design: 0}},
+	}
+	i := func(n int) *int { return &n }
+	for _, c := range []struct {
+		kind  string
+		owner int
+		want  string
+	}{
+		{"design", 1, "skip: " + pvPlannedWhy},
+		{"starbase_design", 1, "skip: " + pvPlannedWhy},
+		{"design", 0, "hull = Scout, want Frigate"},
+	} {
+		e := pvExpect{Kind: c.kind, Owner: i(c.owner), Slot: i(2), Equals: json.RawMessage(`{"hull": "Frigate"}`)}
+		if got := l.pvCheck(g, e); got != c.want {
+			t.Errorf("%s of player %d: %q, want %q", c.kind, c.owner, got, c.want)
+		}
+	}
 }

@@ -143,5 +143,5 @@ Measured on elegy main `2ba78f1` (#201) plus the design branch.
 - Player `counts` is compared with the numbers of ship and starbase designs the player holds.
 - **RG-002: all 20 lines match on the reference seed.** That is 6 design reads, 8 starbase designs (samples, all matching) and 6 counts.
 - Not compared is now 184: 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. No quantity Elegy models is left uncompared in RG-002.
-- **Other corpora:** the parity baseline is unchanged. The comparison also shows a known gap in two cases that already failed, TK-104-A and TK-105-A. Stars-elegy PARITY.md T-37 (CONFIRMED) says the original removes LBU-17 and LBU-32 from designs after generation, at electronics 7. Elegy keeps them (lane A).
+- **Other corpora:** the parity baseline is unchanged. TK-104-A and TK-105-A were skipped before ("design read needs the order layer's design source") and now fail on T-37 (lane A), so tk2 goes from fail 0 / skip 4 to fail 2 / skip 2. Stars-elegy PARITY.md T-37 (CONFIRMED) says the original removes LBU-17 and LBU-32 from designs after generation, at electronics 7. Elegy keeps them (lane A).
 
