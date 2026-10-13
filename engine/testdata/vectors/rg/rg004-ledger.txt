@@ -657,7 +657,6 @@ sample | rg004 | RG-004-2471 y6 #203 | production_queue planet=88 | queue = [{9 
 sample | rg004 | RG-004-2471 y6 #206 | minefield owner=2 id=0 | minefield: mines = 3372, want 3378
 sample | rg004 | RG-004-2471 y6 #207 | minefield owner=6 id=0 | minefield: mines = 2417, want 2456
 sample | rg004 | RG-004-2471 y6 #208 | minefield owner=6 id=1 | minefield: known_to = [0 1 3 5 6], want [0 1 5 6]
-sample | rg004 | RG-004-2471 y6 #209 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
 sample | rg004 | RG-004-2471 y6 #210 | salvage_at x=1267 y=1405 | salvage = [], want [0 0 32]
 sample | rg004 | RG-004-2471 y6 #212 | object | packet 4/3 missing
 sample | rg004 | RG-004-2471 y6 #213 | salvage_at x=1367 y=1384 | salvage = [], want [0 51 0]
@@ -884,7 +883,6 @@ sample | rg004 | RG-004-2472 y7 #202 | production_queue planet=24 | queue = [{3 
 sample | rg004 | RG-004-2472 y7 #206 | production_queue planet=88 | queue = [{9 1 6 5}], want [{9 1 36 5}]
 sample | rg004 | RG-004-2472 y7 #209 | minefield owner=2 id=0 | minefield: mines = 3341, want 2954
 sample | rg004 | RG-004-2472 y7 #210 | minefield owner=6 id=0 | minefield: mines = 2872, want 2909
-sample | rg004 | RG-004-2472 y7 #212 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
 sample | rg004 | RG-004-2472 y7 #213 | salvage_at x=1310 y=1403 | salvage = [[0 0 29]], want [3 0 2]
 sample | rg004 | RG-004-2472 y7 #215 | salvage_at x=1367 y=1384 | salvage = [], want [0 41 0]
 sample | rg004 | RG-004-2472 y7 #216 | object | wormhole: x = 1109, want 1101
@@ -1124,7 +1122,6 @@ sample | rg004 | RG-004-2473 y8 #208 | minefield owner=6 id=0 | minefield: mines
 sample | rg004 | RG-004-2473 y8 #21 | fleet owner=3 id=88 | waypoints[0] position = {1310 1403}, want {1311 1403}
 sample | rg004 | RG-004-2473 y8 #21 | fleet owner=3 id=88 | waypoints[1] = {{1402 1078} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2473 y8 #21 | fleet owner=3 id=88 | x = 1310, want 1311
-sample | rg004 | RG-004-2473 y8 #210 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
 sample | rg004 | RG-004-2473 y8 #211 | salvage_at x=1310 y=1403 | salvage = [[0 0 19] [23 9 24]], want [3 0 2]
 sample | rg004 | RG-004-2473 y8 #214 | object | wormhole: x = 1103, want 1112
 sample | rg004 | RG-004-2473 y8 #214 | object | wormhole: y = 1101, want 1112
@@ -1364,7 +1361,6 @@ sample | rg004 | RG-004-2474 y9 #208 | production_queue planet=88 | queue = [{9 
 sample | rg004 | RG-004-2474 y9 #21 | fleet_gone owner=3 id=86 | fleet still exists
 sample | rg004 | RG-004-2474 y9 #212 | minefield owner=2 id=0 | minefield: mines = 2999, want 2227
 sample | rg004 | RG-004-2474 y9 #213 | minefield owner=6 id=0 | minefield: mines = 3702, want 3735
-sample | rg004 | RG-004-2474 y9 #215 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
 sample | rg004 | RG-004-2474 y9 #216 | salvage_at x=1310 y=1403 | salvage = [[0 0 9] [23 9 24]], want [3 0 2]
 sample | rg004 | RG-004-2474 y9 #219 | object | wormhole: x = 1100, want 1119
 sample | rg004 | RG-004-2474 y9 #219 | object | wormhole: y = 1103, want 1113
@@ -1627,8 +1623,6 @@ sample | rg004 | RG-004-2475 y10 #208 | production_queue planet=85 | queue = [{9
 sample | rg004 | RG-004-2475 y10 #209 | production_queue planet=88 | queue = [{9 1 18 5}], want [{9 1 56 5}]
 sample | rg004 | RG-004-2475 y10 #213 | minefield owner=2 id=0 | minefield: mines = 3033, want 2464
 sample | rg004 | RG-004-2475 y10 #214 | minefield owner=6 id=0 | minefield: mines = 4080, want 4111
-sample | rg004 | RG-004-2475 y10 #216 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
-sample | rg004 | RG-004-2475 y10 #217 | minefield owner=6 id=3 | minefield: known_to = [3 4 6], want [0 3 4 6]
 sample | rg004 | RG-004-2475 y10 #218 | minefield owner=6 id=4 | minefield 6/4 gone
 sample | rg004 | RG-004-2475 y10 #219 | salvage_at x=1310 y=1403 | salvage = [[13 0 14]], want [3 0 2]
 sample | rg004 | RG-004-2475 y10 #22 | fleet owner=3 id=93 | battle_plan = 0, want 4
@@ -1901,8 +1895,6 @@ sample | rg004 | RG-004-2476 y11 #21 | fleet owner=3 id=86 | waypoints[0] positi
 sample | rg004 | RG-004-2476 y11 #21 | fleet owner=3 id=86 | waypoints[1] = {{1386 1089} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2476 y11 #212 | minefield owner=2 id=0 | minefield: mines = 3157, want 2668
 sample | rg004 | RG-004-2476 y11 #213 | minefield owner=6 id=0 | minefield: mines = 4272, want 4300
-sample | rg004 | RG-004-2476 y11 #215 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
-sample | rg004 | RG-004-2476 y11 #216 | minefield owner=6 id=3 | minefield: known_to = [3 4 6], want [0 3 4 6]
 sample | rg004 | RG-004-2476 y11 #216 | minefield owner=6 id=3 | minefield: mines = 2028, want 2232
 sample | rg004 | RG-004-2476 y11 #217 | minefield owner=6 id=4 | minefield 6/4 gone
 sample | rg004 | RG-004-2476 y11 #218 | salvage_at x=1310 y=1403 | salvage = [[3 0 4]], want [3 0 2]
@@ -2211,8 +2203,6 @@ sample | rg004 | RG-004-2477 y12 #227 | minefield owner=2 id=0 | minefield: mine
 sample | rg004 | RG-004-2477 y12 #229 | minefield owner=6 id=0 | minefield: mines = 4445, want 4425
 sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[0] position = {1305 1422}, want {1302 1422}
 sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[1] = {{1382 1083} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1330 1032} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg004 | RG-004-2477 y12 #231 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
-sample | rg004 | RG-004-2477 y12 #232 | minefield owner=6 id=3 | minefield: known_to = [3 4 6], want [0 3 4 6]
 sample | rg004 | RG-004-2477 y12 #232 | minefield owner=6 id=3 | minefield: mines = 2425, want 3120
 sample | rg004 | RG-004-2477 y12 #233 | minefield owner=6 id=4 | minefield 6/4 gone
 sample | rg004 | RG-004-2477 y12 #234 | salvage_at x=1303 y=1415 | salvage = [], want [5 0 6]
@@ -2423,7 +2413,6 @@ sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | excess = 96, want 90
 sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | population = 2119, want 1675
 sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | surface_minerals = [980 0 1584], want [941 0 1524]
 sample | rg004 | RG-004-2477 y12 #98 | planet id=26 | surface_minerals = [105 20 74], want [106 4 0]
-sample | rg004 | year 10 | order | year 10 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 10 | order | year 10 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 10 | order | year 10 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 10 | order | year 10 player 3 order 74 (WaypointOrder): fleet 0: orders: no such object
@@ -2431,7 +2420,6 @@ sample | rg004 | year 10 | order | year 10 player 4 order 6 (CargoOrder): cargo:
 sample | rg004 | year 10 | order | year 10 player 6 order 35 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 10 | order | year 10 player 6 order 37 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 10 | order | year 10 player 6 order 39 (QueueOrder): planet 14: orders: the object belongs to another player
-sample | rg004 | year 11 | order | year 11 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 11 | order | year 11 player 0 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 11 | order | year 11 player 0 order 6 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 11 | order | year 11 player 3 order 10 (WaypointOrder): waypoint 0 fleet 600021: orders: no such object
@@ -2440,12 +2428,11 @@ sample | rg004 | year 11 | order | year 11 player 6 order 25 (QueueOrder): plane
 sample | rg004 | year 11 | order | year 11 player 6 order 29 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 11 | order | year 11 player 6 order 30 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 11 | order | year 11 player 6 order 33 (QueueOrder): planet 49: orders: the object belongs to another player
-sample | rg004 | year 12 | order | year 12 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 0 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 0 order 6 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 4 order 3 (CargoOrder): cargo: fleet 400040 and planet 66: orders: the objects are not at the same place
-sample | rg004 | year 12 | order | year 12 player 6 order 1 (MoveShipsOrder): fleet 600065 has 0 ships of design 27, not 1: orders: a value is out of range
-sample | rg004 | year 12 | order | year 12 player 6 order 12 (CargoOrder): cargo: fleet 600071 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 12 | order | year 12 player 6 order 1 (MoveShipsOrder): fleet 600068 has 0 ships of design 27, not 1: orders: a value is out of range
+sample | rg004 | year 12 | order | year 12 player 6 order 12 (CargoOrder): cargo: fleet 600074 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 12 | order | year 12 player 6 order 14 (WaypointOrder): waypoint 0 fleet 300021: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 6 order 17 (WaypointOrder): waypoint 0 fleet 300021: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 6 order 33 (QueueOrder): planet 49: orders: the object belongs to another player
@@ -2458,14 +2445,12 @@ sample | rg004 | year 3 | order | year 3 player 6 order 16 (WaypointOrder): flee
 sample | rg004 | year 3 | order | year 3 player 6 order 21 (CargoOrder): cargo: fleet 600031 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 3 | order | year 3 player 6 order 24 (CargoOrder): cargo: fleet 600032 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 3 | order | year 3 player 6 order 33 (WaypointOrder): fleet 0: orders: no such object
-sample | rg004 | year 4 | order | year 4 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
-sample | rg004 | year 4 | order | year 4 player 6 order 11 (CargoOrder): cargo: fleet 600038 and planet 25: orders: the objects are not at the same place
+sample | rg004 | year 4 | order | year 4 player 6 order 11 (CargoOrder): cargo: fleet 600039 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 4 | order | year 4 player 6 order 13 (FleetPlanOrder): fleet 0: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 14 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 18 (WaypointOrder): waypoint 0 fleet 300092: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 24 (WaypointOrder): waypoint 0 fleet 300092: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 25 (WaypointOrder): fleet 0: orders: no such object
-sample | rg004 | year 5 | order | year 5 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 5 | order | year 5 player 0 order 7 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 5 | order | year 5 player 3 order 13 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 5 | order | year 5 player 3 order 5 (FleetPlanOrder): fleet 0: orders: no such object
@@ -2476,8 +2461,7 @@ sample | rg004 | year 5 | order | year 5 player 6 order 27 (WaypointOrder): wayp
 sample | rg004 | year 5 | order | year 5 player 6 order 36 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 5 | order | year 5 player 6 order 42 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 5 | order | year 5 player 6 order 6 (CargoOrder): cargo: fleet 600011 and planet 12: orders: the objects are not at the same place
-sample | rg004 | year 5 | order | year 5 player 6 order 9 (CargoOrder): cargo: fleet 600041 and planet 25: orders: the objects are not at the same place
-sample | rg004 | year 6 | order | year 6 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
+sample | rg004 | year 5 | order | year 5 player 6 order 9 (CargoOrder): cargo: fleet 600043 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 6 | order | year 6 player 0 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 6 | order | year 6 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 6 | order | year 6 player 3 order 10 (WaypointOrder): fleet 0: orders: no such object
@@ -2490,17 +2474,15 @@ sample | rg004 | year 6 | order | year 6 player 6 order 31 (QueueOrder): planet 
 sample | rg004 | year 6 | order | year 6 player 6 order 36 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 6 | order | year 6 player 6 order 8 (FleetPlanOrder): fleet 0: orders: no such object
 sample | rg004 | year 6 | order | year 6 player 6 order 9 (WaypointOrder): fleet 0: orders: no such object
-sample | rg004 | year 7 | order | year 7 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 3 order 12 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 6 order 14 (CargoOrder): cargo: salvage 4 of player 3: orders: no such object
-sample | rg004 | year 7 | order | year 7 player 6 order 17 (CargoOrder): cargo: fleet 600049 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 7 | order | year 7 player 6 order 17 (CargoOrder): cargo: fleet 600051 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 7 | order | year 7 player 6 order 44 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 7 | order | year 7 player 6 order 48 (QueueOrder): planet 32: orders: the object belongs to another player
-sample | rg004 | year 7 | order | year 7 player 6 order 8 (CargoOrder): cargo: fleet 600038 and planet 4: orders: the objects are not at the same place
+sample | rg004 | year 7 | order | year 7 player 6 order 8 (CargoOrder): cargo: fleet 600039 and planet 4: orders: the objects are not at the same place
 sample | rg004 | year 7 | order | year 7 player 6 vector order 6 (waypoint_delete): waypoint 1 of fleet 20 past its 0 waypoints
-sample | rg004 | year 8 | order | year 8 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 8 | order | year 8 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 8 | order | year 8 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 8 | order | year 8 player 3 order 34 (WaypointOrder): fleet 0: orders: no such object
@@ -2508,14 +2490,13 @@ sample | rg004 | year 8 | order | year 8 player 3 order 7 (CargoOrder): cargo: s
 sample | rg004 | year 8 | order | year 8 player 3 order 9 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 8 | order | year 8 player 6 order 19 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 8 | order | year 8 player 6 order 20 (QueueOrder): planet 32: orders: the object belongs to another player
-sample | rg004 | year 9 | order | year 9 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004 | year 9 | order | year 9 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 9 | order | year 9 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 9 | order | year 9 player 3 order 7 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 9 | order | year 9 player 6 order 25 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 9 | order | year 9 player 6 order 26 (QueueOrder): planet 18: orders: the object belongs to another player
-sample | rg004 | year 9 | order | year 9 player 6 order 5 (CargoOrder): cargo: fleet 600037 and planet 58: orders: the objects are not at the same place
-sample | rg004 | year 9 | order | year 9 player 6 order 8 (CargoOrder): cargo: fleet 600041 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 9 | order | year 9 player 6 order 5 (CargoOrder): cargo: fleet 600038 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 9 | order | year 9 player 6 order 8 (CargoOrder): cargo: fleet 600043 and planet 58: orders: the objects are not at the same place
 sample | rg004-y1 | RG-004-Y1-2466 y1 #136 | planet id=77 | original_environment = [45 49 67], want [45 50 67]
 sample | rg004-y1 | RG-004-Y1-2466 y1 #148 | planet id=88 | surface_minerals = [85 118 1], want [87 118 3]
 sample | rg004-y1 | RG-004-Y1-2466 y1 #18 | fleet owner=3 id=4 | fuel = 252, want 224
@@ -2544,7 +2525,6 @@ sample | rg004-y10 | RG-004-Y10-2475 y1 #197 | player id=6 | research_accumulate
 sample | rg004-y10 | RG-004-Y10-2475 y1 #197 | player id=6 | tech.propulsion = 7, want 8
 sample | rg004-y10 | RG-004-Y10-2475 y1 #20 | fleet_gone owner=3 id=90 | fleet still exists
 sample | rg004-y10 | RG-004-Y10-2475 y1 #206 | production_queue planet=61 | queue = [{9 1 96 5}], want [{9 1 97 5}]
-incorrect mechanic [lane D]: player 0 does not learn player 6's minefield; the original adds player 0 to known_to | rg004-y10 | RG-004-Y10-2475 y1 #217 | minefield owner=6 id=3 | minefield: known_to = [3 4 6], want [0 3 4 6]
 sample | rg004-y10 | RG-004-Y10-2475 y1 #223 | object | wormhole: x = 1115, want 1114
 sample | rg004-y10 | RG-004-Y10-2475 y1 #223 | object | wormhole: y = 1117, want 1103
 sample | rg004-y10 | RG-004-Y10-2475 y1 #224 | object | wormhole: x = 1333, want 1323
@@ -2558,7 +2538,6 @@ not compared | rg004-y10 | RG-004-Y10-2475 y1 #242 | message_sequence | message_
 sample | rg004-y10 | RG-004-Y10-2475 y1 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 96, want 95
 sample | rg004-y10 | RG-004-Y10-2475 y1 #249 | player id=6 seen_by=6 | score_record.score = 300, want 303
 sample | rg004-y10 | RG-004-Y10-2475 y1 #249 | player id=6 seen_by=6 | score_record.tech_level_sum = 46, want 47
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y10 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y11 | RG-004-Y11-2476 y1 #152 | planet id=87 | environment = [30 48 32], want [30 49 32]
 sample | rg004-y11 | RG-004-Y11-2476 y1 #19 | fleet owner=3 id=80 | waypoints[1] = {{1316 1040} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y11 | RG-004-Y11-2476 y1 #21 | fleet owner=3 id=86 | waypoints[1] = {{1316 1040} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
@@ -2575,7 +2554,6 @@ sample | rg004-y11 | RG-004-Y11-2476 y1 #75 | planet id=10 | concentrations = [9
 sample | rg004-y11 | RG-004-Y11-2476 y1 #75 | planet id=10 | environment = [95 67 1], want [91 72 1]
 sample | rg004-y11 | RG-004-Y11-2476 y1 #75 | planet id=10 | population = 4, want 2
 sample | rg004-y11 | RG-004-Y11-2476 y1 #75 | planet id=10 | surface_minerals = [9 6 8], want [319 300 1159]
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y11 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y12 | RG-004-Y12-2477 y1 #12 | fleet_gone owner=3 id=20 | fleet still exists
 sample | rg004-y12 | RG-004-Y12-2477 y1 #123 | planet id=50 | surface_minerals = [13079 11182 6027], want [13066 11179 6023]
 sample | rg004-y12 | RG-004-Y12-2477 y1 #151 | planet id=78 | environment = [15 53 85], want [15 52 86]
@@ -2595,7 +2573,6 @@ sample | rg004-y12 | RG-004-Y12-2477 y1 #243 | object | wormhole: x = 1113, want
 sample | rg004-y12 | RG-004-Y12-2477 y1 #243 | object | wormhole: y = 1340, want 1330
 sample | rg004-y12 | RG-004-Y12-2477 y1 #264 | player id=3 seen_by=3 | score_record.unarmed_ships = 95, want 93
 sample | rg004-y12 | RG-004-Y12-2477 y1 #27 | fleet_gone owner=3 id=96 | fleet still exists
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y12 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y2 | RG-004-Y2-2467 y1 #123 | planet id=70 | surface_minerals = [8629 6211 3155], want [8607 6209 3148]
 sample | rg004-y2 | RG-004-Y2-2467 y1 #140 | planet id=87 | environment = [30 47 32], want [28 46 32]
 random-driven | rg004-y2 | RG-004-Y2-2467 y1 #143 | planet id=91 | surface_minerals = [147 145 69], want [145 145 69] (7/8 variants match)
@@ -2699,12 +2676,6 @@ not compared | rg004-y4 | RG-004-Y4-2469 y1 #224 | message_sequence | message_se
 sample | rg004-y4 | RG-004-Y4-2469 y1 #23 | fleet owner=3 id=40 | fleet gone
 sample | rg004-y4 | RG-004-Y4-2469 y1 #231 | player id=3 seen_by=3 | score_record.unarmed_ships = 90, want 92
 sample | rg004-y4 | RG-004-Y4-2469 y1 #29 | fleet owner=3 id=93 | cargo.ironium = 32, want 31
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #43 | fleet owner=6 id=10 | fleet gone
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | orbiting = 11, want 57
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | waypoints[0] position = {1045 1237}, want {1265 1381}
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | x = 1045, want 1265
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | y = 1237, want 1381
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y4 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | fuel = 151, want 176
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | orbiting = 64, want none
@@ -2734,12 +2705,10 @@ sample | rg004-y5 | RG-004-Y5-2470 y1 #24 | fleet owner=3 id=40 | fleet gone
 sample | rg004-y5 | RG-004-Y5-2470 y1 #28 | fleet owner=3 id=85 | waypoints[1] = {{1411 1081} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1401 1083} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y5 | RG-004-Y5-2470 y1 #35 | fleet_gone owner=4 id=39 | fleet still exists
 sample | rg004-y5 | RG-004-Y5-2470 y1 #42 | fleet owner=6 id=4 | cargo.germanium = 112, want 113
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y5 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y6 | RG-004-Y6-2471 y1 #12 | fleet owner=3 id=0 | waypoints[1] = {{1410 1081} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1412 1093} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y6 | RG-004-Y6-2471 y1 #15 | fleet owner=3 id=3 | waypoints[1] = {{1410 1081} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1412 1093} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y6 | RG-004-Y6-2471 y1 #187 | player id=0 | research_accumulated.electronics = 378, want 566
 sample | rg004-y6 | RG-004-Y6-2471 y1 #187 | player id=0 | research_accumulated.weapons = 514, want 341
-incorrect mechanic [lane D]: player 0 does not learn player 6's minefield; the original adds player 0 to known_to | rg004-y6 | RG-004-Y6-2471 y1 #209 | minefield owner=6 id=2 | minefield: known_to = [3 6], want [0 3 6]
 sample | rg004-y6 | RG-004-Y6-2471 y1 #214 | object | wormhole: x = 1093, want 1100
 sample | rg004-y6 | RG-004-Y6-2471 y1 #214 | object | wormhole: y = 1113, want 1111
 sample | rg004-y6 | RG-004-Y6-2471 y1 #215 | object | wormhole: x = 1410, want 1412
@@ -2753,7 +2722,6 @@ sample | rg004-y6 | RG-004-Y6-2471 y1 #27 | fleet owner=3 id=92 | waypoints[1] =
 random-driven | rg004-y6 | RG-004-Y6-2471 y1 #45 | fleet owner=6 id=10 | cargo.ironium = 87, want 86 (2/8 variants match)
 sample | rg004-y6 | RG-004-Y6-2471 y1 #53 | fleet owner=6 id=18 | cargo.boranium = 111, want 112
 sample | rg004-y6 | RG-004-Y6-2471 y1 #59 | fleet owner=6 id=23 | cargo.boranium = 70, want 71
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y6 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 random-driven | rg004-y7 | RG-004-Y7-2472 y1 #140 | planet id=79 | original_environment = [57 8 74], want [57 8 75] (3/8 variants match)
 sample | rg004-y7 | RG-004-Y7-2472 y1 #141 | planet id=79 | environment = [56 10 72], want [56 9 74]
 sample | rg004-y7 | RG-004-Y7-2472 y1 #150 | planet id=87 | environment = [31 47 32], want [30 48 32]
@@ -2774,7 +2742,6 @@ sample | rg004-y7 | RG-004-Y7-2472 y1 #22 | fleet_gone owner=3 id=91 | fleet sti
 sample | rg004-y7 | RG-004-Y7-2472 y1 #238 | player id=3 seen_by=3 | score_record.unarmed_ships = 94, want 93
 random-driven | rg004-y7 | RG-004-Y7-2472 y1 #52 | fleet owner=6 id=21 | cargo.boranium = 16, want 17 (6/8 variants match)
 sample | rg004-y7 | RG-004-Y7-2472 y1 #85 | planet id=24 | surface_minerals = [604 1 1058], want [602 0 1054]
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y7 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y8 | RG-004-Y8-2473 y1 #110 | planet id=50 | surface_minerals = [12027 10166 5053], want [12013 10163 5049]
 sample | rg004-y8 | RG-004-Y8-2473 y1 #17 | fleet owner=3 id=40 | waypoints[1] = {{1405 1090} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y8 | RG-004-Y8-2473 y1 #206 | minefield owner=2 id=0 | minefield: mines = 2589, want 2546
@@ -2797,7 +2764,6 @@ sample | rg004-y8 | RG-004-Y8-2473 y1 #35 | fleet owner=6 id=1 | x = 1360, want 
 sample | rg004-y8 | RG-004-Y8-2473 y1 #35 | fleet owner=6 id=1 | y = 1363, want 1343
 sample | rg004-y8 | RG-004-Y8-2473 y1 #7 | fleet owner=3 id=2 | cargo.germanium = 21, want 22
 sample | rg004-y8 | RG-004-Y8-2473 y1 #7 | fleet owner=3 id=2 | cargo.ironium = 25, want 24
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y8 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 sample | rg004-y9 | RG-004-Y9-2474 y1 #110 | planet id=46 | environment = [87 18 79], want [88 18 78]
 sample | rg004-y9 | RG-004-Y9-2474 y1 #13 | fleet owner=3 id=20 | waypoints[1] = {{1407 1076} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 5 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y9 | RG-004-Y9-2474 y1 #16 | fleet owner=3 id=35 | waypoints[1] = {{1407 1076} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
@@ -2820,7 +2786,6 @@ sample | rg004-y9 | RG-004-Y9-2474 y1 #239 | player id=3 seen_by=3 | score_recor
 sample | rg004-y9 | RG-004-Y9-2474 y1 #38 | fleet owner=6 id=1 | fuel = 1680, want 1380
 sample | rg004-y9 | RG-004-Y9-2474 y1 #38 | fleet owner=6 id=1 | waypoints[0] position = {1351 1368}, want {1351 1366}
 sample | rg004-y9 | RG-004-Y9-2474 y1 #38 | fleet owner=6 id=1 | y = 1368, want 1366
-incorrect mechanic [lane A]: deleting an empty design slot is refused; the original's planner sends it every year from y4 and no refusal is recorded (state unchanged; that the original accepts it is inferred) | rg004-y9 | year 1 | order | year 1 player 0 order 1 (DeleteDesignOrder): design slot 0: orders: no such object
 matched | rg004 | RG-004-2466 y1 | battle record (1244,1377) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 18 moves allowed
 matched | rg004 | RG-004-2466 y1 | battle record (1305,1423) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
 matched | rg004 | RG-004-2466 y1 | battle record (1310,1403) | matched: 6 tokens, players and planet; 1 of 1 hits compared; 47 moves allowed

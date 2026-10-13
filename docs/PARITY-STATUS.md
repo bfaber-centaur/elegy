@@ -319,20 +319,20 @@ Counts are from the reference seed on main `217ab4b`.
 
 ### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `0ca6c3b` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235 and #240 GC-1).
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `896a546` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235, #240 GC-1 and #239) with the year-6 rebuild below.
 
-**Totals (5943 lines).**
+**Totals (5946 lines).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 5289 | 452 | 5741 |
+| sample | 5291 | 451 | 5742 |
 | matched | 8 | 100 | 108 |
 | not compared | 11 | 11 | 22 |
-| random-driven | 0 | 72 | 72 |
+| random-driven | 0 | 75 | 75 |
 
 - **No deterministic hand lines remain.** Every compared difference in the restarts is random-driven (it matches on some seed variant) or a sample.
 - **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
-- **Restarts:** "matched" counts battle records.
+- **Restarts:** "matched" counts battle records. Three random-driven lines carry their draw (Y6 restart, "RG-002 and RG-003 year 6 rebuilt" below).
 - **GC-1 (#240, `0ca6c3b`)** cleared the last hand line, y7 planet 51's population (15083 against 15084, the per-drop ground-combat floor), and the 11 chained sample lines that carried it forward (planet 51's population and excess in years 7–12).
 - **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
 - **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
@@ -347,27 +347,102 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 
 **One harness change.** In year 7, player 6's order file deletes waypoint 1 of fleet 20. In the chained run, Elegy's fleet 20 has no waypoint 1 at that point. That used to stop the whole chained run ("order waypoint_delete index", 1447 not-compared lines). Now such a delete is recorded as a refused order, as an engine refusal is, and the year goes on (ELEGY CHOICE, harness). A delete of waypoint 0 still fails the load. The chained year-7 refusal is a sample, and no restart hits it. The same refusal changes RG-003's baseline: chained years 10–12 (2472–2474) used to stop on this load error with 2 of the 8 seeds and fail with the rest, which the baseline listed as `random 0`. They now fail with every seed, so those 3 entries leave the baseline. None of them passed before or passes now.
 
-**Totals (2928 lines).**
+**Totals (2893 lines, main `513a146` plus lane D's #242).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 2542 | 263 | 2805 |
+| sample | 2523 | 263 | 2786 |
 | matched | 4 | 47 | 51 |
 | not compared | 19 | 19 | 38 |
 | random-driven | 1 | 17 | 18 |
-| incorrect mechanic | 0 | 16 | 16 |
+| incorrect mechanic | 0 | 0 | 0 |
 
 - **Battle records:** 51 matched, 63 samples and 2 random-driven. None is a hand line. Since #236, the y3 restart's extra battle at (1365,1400) is a sample, not random-driven, because the vector has an `alt_battle` there.
 - **Not compared (38):** 0x007 (24 lines: 14 message, 10 sequence entry) and 0x040 (8 lines) have no event mapping. Also 2 `alt_battle`, 2 `design_gone`, and 2 sequences of sample entries only.
-- **Baseline:** RG-004 adds 10 entries. Restarts Y1, Y2, Y3, Y5, Y7, Y8, Y9, Y11 and Y12 and chained year 1 (2466) pass with some seeds (`random k`). Restarts Y4, Y6 and Y10 fail on the hand lines below. Chained years 2–12 fail on samples.
+- **Baseline:** RG-004 has 13 entries. All 12 restarts and chained year 1 (2466) pass with some seeds (`random k`; Y6 with 1 of 8, Y10 with 7 of 8, Y4 with 5 of 8). Chained years 2–12 fail on samples.
 
-**Hand lines (16).** All are incorrect mechanic, each is in a restart, and the owner is in the last column.
+**Hand lines: 0 deterministic.** The 16 incorrect-mechanic lines first found, all in restarts, are cleared: lane A's 14 by #244, lane D's 2 by #242.
 
 | year | object | lines | cause | owner |
 |---|---|---:|---|---|
-| y4–y12 | player 0's order: delete ship design slot 0 | 9 | Elegy refuses the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way. That the original accepts it is inferred. | lane A |
-| y4 | fleets 10 and 23 (player 6) | 5 | The original numbers the new fleets at planets 11 and 57 as 10 and 23. Elegy puts fleet 23 at planet 11 and has no fleet 10. Cause not traced. | lane A |
-| y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
+| y4–y12 | player 0's order: delete ship design slot 0 | 9 | Cleared (lane A): Elegy refused the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way (MEASURED). Elegy now accepts a delete of an empty slot and changes nothing. That the original accepts it is inferred. | lane A |
+| y4 | fleets 10 and 23 (player 6) | 5 | Cleared (lane A): Elegy's fleet numbers matched; its internal fleet key did not. A ship move in the orders empties start fleet 23, and the new fleet 10 at planet 11 took that fleet's internal id, so the harness read it as fleet 23. Elegy no longer reuses, within a year, the id of a fleet that went away that year (ELEGY CHOICE; KERNEL-STATUS.md). | lane A |
+| y6, y10 | player 6's minefields 2 and 3 | 2 | Cleared (lane D): `known_to` lacked player 0. Each field is centred on a player 0 planet with no scanner, which now sees it (co-location; see below). | lane D |
+
+**Resolved: a minefield laid on a planet with no scanner (lane D).** Two hand lines were player 6's minefields 2 (restart Y6) and 3 (restart Y10): the original added player 0 to `known_to` and Elegy did not. Each field was laid that year by a player 6 fleet in orbit, so its centre is exactly the position of a player 0 planet with no planetary scanner (planet 47 at (1208,1314) in Y6, planet 23 at (1118,1277) in Y10). No other player 0 viewer was within range.
+- **Reading.** Under the co-location rule (SCANNING.md "Co-location", LEGACY BUG, `Legacy.Colocation`), every test passes at distance 0. Elegy now treats an owned planet with no scanner as a viewer with ranges 0 for space objects, so it sees a minefield centred on it. The restart results are MEASURED. The mechanism is CONFIRMED by prediction (stars-elegy `898c526`, MV-1: player 0 at tech 3 with electronics 0, standard fields, one year, one planet per case): with no fleet anywhere near, a field centred exactly on the planet was seen, and fields at d² 1 and 1280 containing it were not. So it is co-location, not sight of the laying fleet.
+- **Not seen when merely inside.** RG-002 and RG-003 hold the counter-case. Player 3's field 2 contains player 6's scannerless planet 6 at d² 1280. In 15 restarts (RG-002 Y1–Y6, RG-003 Y1–Y9) it was unknown to player 6 at the start of the year and stayed unknown (MEASURED; SCANNING.md already says planets do not get the inside rule). In RG-003 Y10 player 6 learns it because its fleet 13 ends the year inside the field, 22 ly from the centre (the fleet inside rule).
+- **Effect.** Both hand lines go, and so do 10 chained sample lines on the same fields. Restarts Y6 and Y10 now pass with some seeds (baseline `random 1` and `random 7`). No RG-002 or RG-003 line moves. Packets, salvage and wormholes at a scannerless planet's exact position would also be seen; MV-1 did not run them and no vector has one (ASSUMPTION).
+
+### RG-002 and RG-003 year 6 rebuilt (stars-elegy #206, DA-1)
+
+stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`rg002.json`, `rg002-y6.json`, `rg003.json`, `rg003-y6.json`). The alternative-stream host file behind them had been truncated mid-write, which flagged 459 of year 6's 476 expectations as samples; the rebuilt year has 493, 82 of them samples, so 394 expectations became strict. The four files are copied verbatim. RG-002 and RG-003 move identically.
+- **No new deterministic miss.** Every newly strict expectation matches on the reference seed except three, and each of those matches on some seed variant.
+- **The three, in the Y6 restart, each with the draw behind it** (`random-driven [owner]: evidence`; the vectors ledger now accepts that form on a random-driven line, as the battle ledger does since #229):
+  - **fleet 6/12, waypoint 1 (lane D):** its target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target. On seeds 1 and 5 the fleet survives and the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample.
+  - **planet 102, surface minerals (economy):** mining's +1 draw (KERNEL.md "Mining", BINARY-ONLY). Germanium enters production at 54 kT on seed 0 and 53 kT on seed 7, the only seed that matches. Germanium limits the ship being built, so the ironium and boranium spent follow it (666/1249 against 668/1251).
+  - **planet 102, production queue (economy):** follows the same draw: 53 kT gives 93%, as recorded, and 54 kT gives 99%.
+- **Samples:** two new sample lines in the restart (planets 29 and 79, surface minerals) and two in the chained run (planets 29 and 85).
+- **Baseline:** RG-002-Y6-2468 and RG-003-Y6-2468 leave it. They passed only because every year-6 miss was a sample; with the three lines above strict, the reference seed fails them. This is the honest result of the rebuild, not a regression.
+- **Census:** "sample: one stream's random outcome" 2241 → 2001.
+
+### Order accounting (RG-002, RG-003, RG-004)
+
+Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
+
+Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P, objects not at the same place; O, the object belongs to another player; R, a value out of range (a ship count); H, the harness refusal of a waypoint_delete past the end of the fleet's list (ELEGY CHOICE, harness).
+
+**RG-002**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| total | 1867 | 37 | 0 |
+
+**RG-003**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| 7 | 311 | 22 (17/5/0/0/0) | 0 |
+| 8 | 301 | 18 (13/5/0/0/0) | 0 |
+| 9 | 298 | 26 (18/6/1/1/0) | 0 |
+| 10 | 308 | 35 (27/8/0/0/0) | 0 |
+| 11 | 335 | 39 (25/13/1/0/0) | 0 |
+| 12 | 311 | 43 (22/19/1/1/0) | 0 |
+| total | 3731 | 220 | 0 |
+
+**RG-004**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 158 | 0 | 0 |
+| 2 | 157 | 0 | 0 |
+| 3 | 190 | 6 (4/2/0/0/0) | 0 |
+| 4 | 162 | 7 (6/1/0/0/0) | 1 (1/0/0/0/0) |
+| 5 | 171 | 12 (8/2/2/0/0) | 1 (1/0/0/0/0) |
+| 6 | 173 | 13 (10/0/2/1/0) | 1 (1/0/0/0/0) |
+| 7 | 183 | 10 (5/2/2/0/1) | 1 (1/0/0/0/0) |
+| 8 | 161 | 8 (6/0/2/0/0) | 1 (1/0/0/0/0) |
+| 9 | 164 | 8 (4/2/2/0/0) | 1 (1/0/0/0/0) |
+| 10 | 173 | 8 (4/1/3/0/0) | 1 (1/0/0/0/0) |
+| 11 | 172 | 9 (5/0/4/0/0) | 1 (1/0/0/0/0) |
+| 12 | 185 | 12 (5/2/4/1/0) | 1 (1/0/0/0/0) |
+| total | 2049 | 93 | 9 |
+
+- **Chained runs:** every refusal is a sample line. It follows earlier divergence, because the order names an object that Elegy's diverged state no longer has, or has elsewhere. RG-002 has 37, RG-003 220 and RG-004 93.
+- **Restarts:** RG-002 and RG-003 refuse nothing. RG-004's 9 restart refusals are the lane A hand lines "empty design-slot delete refused", one in each restart from Y4 to Y12 (see the RG-004 section).
+- **RG-004 ledger:** 102 order lines (93 + 9), matching the steward's count.
 
 ### Planet records without installations block
 

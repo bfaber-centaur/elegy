@@ -242,9 +242,10 @@ func (g *Game) holdFleetNumbers() {
 	}
 }
 
-// newFleetID is an unused Fleet.ID, Elegy's internal key.
+// newFleetID is an unused Fleet.ID, Elegy's internal key: during a
+// generation, also above every ID the year started with (fleetIDs).
 func (g *Game) newFleetID() int {
-	id := 0
+	id := g.fleetIDs
 	for _, f := range g.Fleets {
 		id = max(id, f.ID)
 	}

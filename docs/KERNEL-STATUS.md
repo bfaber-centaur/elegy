@@ -518,13 +518,19 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   elsewhere), the follower follows nothing, as when left following
   itself: no move, no 0x138, no 0x137 (MESSAGES.md 0x138: a follower
   whose leader is elsewhere does not get it). Its task is left as it is.
-- **Known issue: a stale chase id can be reused.** `Fleet.ID` is Elegy's
-  internal key, and a new fleet takes the highest id plus one
-  (`Game.newFleetID`). If the merged-away fleet held the highest id, a
-  fleet split later in the same replay takes that id. A chase order naming
-  the merged fleet then resolves to the split fleet and skips W8's pick.
-  The fleet number, which the specs count, still follows
-  PRODUCTION-LAUNCH.md "The new fleet" (lowest unused, CONFIRMED SL-02).
+- **Fleet ids are not reused within a year (ELEGY CHOICE).** `Fleet.ID`
+  is Elegy's internal key. A new fleet takes the highest id plus one
+  (`Game.newFleetID`), and during a generation never one at or below the
+  highest id the year started with, so a fleet that went away that year
+  (merged, emptied by a ship move, scrapped) keeps its id unused while
+  the year's events and orders may still name it. A chase order naming a
+  merged fleet therefore never resolves to a fleet split later in the
+  replay. Before, the merged fleet's id could be reused that year; in
+  RG-004-Y4-2469 the parity harness then took player 6's new fleet 10 for
+  the emptied start fleet 23. The fleet number, which the specs count,
+  still follows PRODUCTION-LAUNCH.md "The new fleet" (lowest unused,
+  CONFIRMED SL-02). `fleetnumbers_test.go`
+  `TestNewFleetTakesNoIDGoneThisYear`.
 
 ## Year invariants
 

@@ -255,15 +255,29 @@ func fitFills(cat *Catalog, hull string, fills []SlotFill) []SlotFill {
 // removes a queue emptied during the year; KERNEL.md says a zero-item
 // queue does not arise in play. The entry in
 // Game.Designs stays, so other indices do not move.
+//
+// A delete of an empty slot within the slot range changes nothing and is
+// not refused. MEASURED: in RG-004 player 0's computer player deletes
+// empty ship slot 0 every year from 2469 to 2477, and the original's
+// state is unchanged with no message about it. Inferred: that the
+// original accepts the order. A slot outside the range is refused
+// (ELEGY CHOICE: no case sends one).
 type DeleteDesignOrder struct {
 	Starbase bool
 	Slot     int
 }
 
 func (o DeleteDesignOrder) apply(g *Game, player int, _ *Applied) error {
+	limit := maxShipDesigns
+	if o.Starbase {
+		limit = maxStarbaseDesigns
+	}
+	if o.Slot < 0 || o.Slot >= limit {
+		return fmt.Errorf("design slot %d: %w", o.Slot, ErrOutOfRange)
+	}
 	i := g.designSlot(player, o.Starbase, o.Slot)
 	if i < 0 {
-		return fmt.Errorf("design slot %d: %w", o.Slot, ErrNoSuchObject)
+		return nil
 	}
 	d := g.DesignSlots[i].Design
 	g.DesignSlots = append(g.DesignSlots[:i:i], g.DesignSlots[i+1:]...)
