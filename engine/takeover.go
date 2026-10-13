@@ -600,6 +600,13 @@ func (t *Transport) loaded(capacity, held, avail, free int) {
 	t.Action, t.Amount = TransportNone, 0
 }
 
+// EventColonistsBeamedDown: Player's Fleet unloaded Count colonists
+// (units) onto its owner's own Planet with an unload task (MESSAGES.md
+// 0x02e, CONFIRMED fo/fo02; PARITY.md ET-1 C: 0x02e, then 0x04e).
+// Elegy's wording. A drop on another player's planet has its own
+// messages and does not send it (ASSUMPTION).
+const EventColonistsBeamedDown EventKind = EventNoQueue + 1
+
 // unload runs a transport task's unload actions at the orbited planet
 // (TAKEOVER.md "Unload and load amounts", BINARY-ONLY): "unload all"
 // moves C, "unload exactly v" moves min(v, C). The actions then clear, so
@@ -674,6 +681,7 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 		case p.Owner == f.Owner:
 			p.Population += amount
 			f.Cargo.Colonists -= amount
+			events = append(events, Event{Kind: EventColonistsBeamedDown, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: amount})
 		case c == CargoColonists:
 			events = append(events, g.dropColonists(f, pi, amount, owned, queue)...)
 		}

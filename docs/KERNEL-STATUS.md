@@ -383,6 +383,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   design of a gift takes a free slot (CONFIRMED that a differing existing
   design is not matched).
 - **W3 (ASSUMPTION).** A gifted fleet has no name and repeat orders off.
+- **Refused gift (CONFIRMED).** A refused transfer-fleet task is
+  cancelled, and a fleet with no waypoint ahead then gets 0x04e
+  (`EventFleetArrived`) after the refusal (MESSAGES.md 0x04e (a): "cancelled
+  by any refusal message"; WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2). A fleet
+  given away sends its old owner no 0x04e (ASSUMPTION: it is the
+  recipient's fleet now; a vector's messages do not name the fleet).
+  `TestConfirmedTransferFleet`, `TestConfirmedTransferFleetRefused`.
 - **W4 (ASSUMPTION).** The route task runs only for a fleet with no
   further waypoint, so a fleet already routed is not routed again before
   it leaves.

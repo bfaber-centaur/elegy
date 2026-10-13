@@ -41,7 +41,7 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
 | incorrect mechanic | 0 | 0 | 0 |
-| missing mechanic | 2 | 0 | 0 |
+| missing mechanic | 0 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
@@ -51,7 +51,7 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 
 These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below), lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1191: 1138 fields and 37 orders, checked by `TestRG002Ledger` (which logs them together as 1175), and 16 battle records, checked by `TestBattleRecords`.
 
-The reference run of RG-002 has 2 deterministic field discrepancies, both lane A's 0x02e message, which Elegy sends no event for ("Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+The reference run of RG-002 has no deterministic field discrepancy. The last two, lane A's 0x02e message for colonists beamed down by an unload task (Y1 and the chained year 1), cleared when Elegy began sending it (`EventColonistsBeamedDown`). With them gone, the Y1 restart (RG-002-Y1-2463) and the chained run's first year (RG-002-2463) pass on 1 of the 8 seed variants (baseline.txt `random 1`); every field they miss on the other variants is random-driven or a sample. Before them, Y4 planet 88's `packet_warp` (missing mechanic [economy]) was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
@@ -142,7 +142,7 @@ Every RG-002 expectation of a quantity Elegy models is now compared, by the ledg
 
 No line was added.
 
-**Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
+**Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 were missing-mechanic lines for ids Elegy sent no event for. Lane D's battle summaries cleared 9, economy's level-up and overcrowding messages 10, and lane A's 0x02e the last 2. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
 
 **Closed after the final run: `object`-form wormholes.** The 72 `object` expectations of kind `wormhole` are compared now, with the fields the `wormhole` form already used plus `id` and `partner` (the other end's vector id). The vectors mark all 72 as samples: a wormhole end jiggles or jumps on draws every year (OBJECTS.md). All 72 miss, making 160 sample field lines: x (72), y (65), `years_since_jump` (13, a jump on one side and not the other) and `known_to` (10). `partner`, `stability_class` and `destination_known_to` match in all 72.
 

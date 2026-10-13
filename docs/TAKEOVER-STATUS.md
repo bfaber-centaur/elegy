@@ -39,6 +39,7 @@ takes up `Waypoint.Task` of the waypoint it arrives at.
 | Unloading colonists on another player's planet (refusals, relation unchecked) | `dropColonists` | CONFIRMED (T-4, T-28, T-29); AR BINARY-ONLY | `TestConfirmedTakeoverTiming`, `TestConfirmedFriendInvaded`, `TestPredictionGroundStrengthTraits` |
 | "At the start of this phase" ownership | `phaseStart` | BINARY-ONLY (#34) | `TestPredictionPhaseStartOwnership` |
 | Unload amounts; own-planet unloads before or after growth; minerals on any planet | `unload` | BINARY-ONLY (#34) | `TestPredictionUnloadAmounts`, `TestPredictionForeignMinerals` |
+| Colonists an unload task beams down onto the owner's own planet send the owner 0x02e, before the task's 0x04e at the last waypoint; a drop on another player's planet sends none (ASSUMPTION) | `unload`, `EventColonistsBeamedDown` | CONFIRMED (MESSAGES.md 0x02e, fo/fo02; PARITY.md ET-1 C; RG-002 Y1) | `TestPredictionUnloadAmounts`, `TestConfirmedTakeoverTiming` |
 | Deep space: minerals destroyed (no salvage), colonists refused | `unload`, `deepSpace` | BINARY-ONLY (#37) | `TestPredictionDeepSpaceUnload` |
 | Salvage: a transport task loads minerals from it, capped by what it holds, and unloads minerals into it up to its stored size (ASSUMPTION T5–T7) | `loadSalvage`, `unloadSalvage`, `SpaceObjects.SalvageLoad`, `SalvageRoom` | BINARY-ONLY (OBJECTS.md "Salvage", "Loading") | `TestLoadFromSalvage`, `TestUnloadIntoSalvage`; through the adapter `TestSalvageLoadInTurn`, `TestSalvageUnloadInTurn`, `TestSalvageFirstAtPosition` |
 | Mineral packet named by the waypoint the fleet reached this year: a transport task loads minerals from it, whoever owns it, capped by what it holds; no 0x11e; the emptied packet flies on (ASSUMPTION T5, T6) | `loadPacket`, `namedSource`, `SpaceObjects.PacketCargo` | MEASURED own packet (ET-2), CONFIRMED by prediction another player's (ET-2c); the owner never checked BINARY-ONLY (ORDERS.md "Salvage and mineral packet targets", "Arrival", stars-elegy a1c4c91) | `TestPacketTransportLoadsInTurn`, `TestPacketTransportNamedSource` |
@@ -102,4 +103,4 @@ spec does not give the scan's start value. The code says so at
   (`ai/designs.go`) makes a design, so a design made any other way keeps
   every part;
 - the old owner's message beyond `EventPlanetEmptied`.
-- stealing cargo (a Robber Baron's loads at another player's planet wait, T10), the "fleet has finished its orders" message (MESSAGES.md 0x04e) after a transport task ends, and loads from another player's fleet (0x120): transport tasks do not target fleets.
+- stealing cargo (a Robber Baron's loads at another player's planet wait, T10), and loads from another player's fleet (0x120): transport tasks do not target fleets.
