@@ -382,6 +382,7 @@ func TestLoadRejects(t *testing.T) {
 		"version 7":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 7`, 1),
 		"version 8":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 8`, 1),
 		"version 9":     strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 9`, 1),
+		"version 10":    strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 10`, 1),
 		"human level":   regexp.MustCompile(`("Computer": false,\s*"Level": )0`).ReplaceAllString(string(b), "${1}2"),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
 	} {
@@ -420,5 +421,23 @@ func TestCheckHomeworldRecord(t *testing.T) {
 	g.Players[0].Homeworld = 3
 	if bad := Check(g); len(bad) != 0 {
 		t.Errorf("Check = %q, want nothing", bad)
+	}
+}
+
+func TestCheckFleetTarget0(t *testing.T) {
+	// A fleet's waypoint-0 object is named by a player and a number that
+	// is not negative.
+	for _, c := range []struct {
+		ref *engine.ObjectRef
+		bad bool
+	}{
+		{nil, false}, {&engine.ObjectRef{Owner: 0, Number: 3}, false},
+		{&engine.ObjectRef{Owner: 1, Number: 0}, true}, {&engine.ObjectRef{Owner: -1, Number: 0}, true}, {&engine.ObjectRef{Owner: 0, Number: -1}, true},
+	} {
+		g := engine.Game{Players: []engine.Player{{}}, Designs: []engine.Design{{}},
+			Fleets: []engine.Fleet{{ID: 1, Stacks: []engine.Stack{{Design: 0, Count: 1}}, Target0: c.ref}}}
+		if bad := Check(g); (len(bad) > 0) != c.bad {
+			t.Errorf("target %v: Check = %q, want bad %v", c.ref, bad, c.bad)
+		}
 	}
 }

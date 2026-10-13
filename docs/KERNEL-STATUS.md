@@ -140,14 +140,17 @@ A transport task at a packet loads minerals from it, whoever owns it,
 and the emptied packet flies on; there is no 0x11e (`loadPacket`;
 ORDERS.md "Salvage and mineral packet targets", "Arrival", stars-elegy
 a1c4c91: MEASURED for an own packet, ET-2, and CONFIRMED by prediction
-for another player's, ET-2c). Only a fleet that reached a waypoint naming
-the packet this year loads from it, and from that packet only, found by
-owner and number; likewise a named salvage object (`namedSource`,
-T5 in TAKEOVER-STATUS.md for the cases Elegy cannot name). Two of those
-are INCORRECT against NS-1 (stars-elegy a1b3651): a waypoint 0 naming
-salvage or a packet loads from it before movement, over a planet and
-from a packet 40 ly away (CONFIRMED by prediction), where Elegy takes
-the planet or nothing; the NS-1 PR fixes them. Not
+for another player's, ET-2c). A fleet whose waypoint 0 names a packet
+or salvage (`Fleet.Target0`, kept in the save) loads from that object
+only, found by owner and number, in both load passes: before movement
+over a planet and from a packet 40 ly away (CONFIRMED by prediction,
+NS-1 A3–A6, B1, B2, stars-elegy a1b3651), and on arrival after the
+year's decay (MEASURED, NS-1 A1, A2: Elegy's step 3a decay already runs
+before the load after movement, so no step moved). The fleet sets
+`Target0` on arriving and clears it on setting off or when the task
+ends (T5, T14 in TAKEOVER-STATUS.md). Retargeting waypoints whose
+fleet or object went away (W7–W10) and the merged-away follow are
+unchanged and do not read `Target0`; they could later. Not
 modelled: 0x11e for minefield, wormhole and Trader targets, and the load
 message 0x02b. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,

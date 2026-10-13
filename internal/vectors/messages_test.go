@@ -59,6 +59,9 @@ func TestPvMessages(t *testing.T) {
 		{"queue completed", []engine.Event{{Kind: engine.EventQueueCompleted, Player: 2, Planet: 5, Fleet: -1}}, [][2]int{{2, 0x03e}}},
 		{"no queue", []engine.Event{{Kind: engine.EventNoQueue, Player: 2, Planet: 5, Fleet: -1}}, [][2]int{{2, 0x03f}}},
 		{"alchemy", []engine.Event{{Kind: engine.EventAlchemy, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemMineralAlchemy, Count: 1}}, [][2]int{{2, 0x08c}}},
+		{"factory order reduced", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemFactory, Count: 3}}, [][2]int{{2, 0x12a}}},
+		{"defense order removed", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemDefenses, Count: 0}}, [][2]int{{2, 0x12a}}},
+		{"terraform order reduced", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 2}}, [][2]int{{2, 0x12f}}},
 		{"overcrowded", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Fleet: -1, Count: 30}}, [][2]int{{2, 0x026}}},
 		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Count: 3}}, [][2]int{{2, 0x050}}},
 		{"level up, Generalized Research (0x136)", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Planet: -1, Fleet: -1, Count: 3}}, nil},
@@ -101,7 +104,7 @@ func TestMessageCheck(t *testing.T) {
 	l := pvLoaded{
 		g:      engine.Game{Players: []engine.Player{{}, {Computer: true}, {}}},
 		queued: map[int]bool{2: true},
-		events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 2}, {Kind: engine.EventAlchemy, Player: 0, Planet: 3, Item: engine.ItemMineralAlchemy, Count: 1}}},
+		events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 2}, {Kind: engine.EventAlchemy, Player: 0, Planet: 3, Item: engine.ItemMineralAlchemy, Count: 1}, {Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 4}, {Kind: engine.EventOrderClipped, Player: 0, Planet: 3, Item: engine.ItemTerraform, Count: 0}}},
 	}
 	g := &engine.Game{}
 	i := func(n int) *int { return &n }
@@ -122,6 +125,10 @@ func TestMessageCheck(t *testing.T) {
 		{"unmapped id", msg(0, 0x0be, true, 1), "skip: message 0x0be has no event mapping"},
 		{"alchemy", msg(0, 0x08c, true, 1), ""},
 		{"alchemy, not sent", msg(2, 0x08c, true, 1), "message 0x08c to player 2 present = false, want true"},
+		{"installation order reduced", msg(2, 0x12a, true, 1), ""},
+		{"installation order reduced, not sent", msg(0, 0x12a, true, 1), "message 0x12a to player 0 present = false, want true"},
+		{"terraform order reduced", msg(0, 0x12f, true, 1), ""},
+		{"terraform order reduced, not sent", msg(2, 0x12f, true, 1), "message 0x12f to player 2 present = false, want true"},
 		{"no queue, not sent", msg(0, 0x03f, true, 1), "message 0x03f to player 0 present = false, want true"},
 		{"queue not loaded, no queue", msg(2, 0x03f, true, 1), "skip: a queue message from a production queue not loaded"},
 		{"queue not loaded, queue completed", msg(2, 0x03e, false, 1), "skip: a queue message from a production queue not loaded"},

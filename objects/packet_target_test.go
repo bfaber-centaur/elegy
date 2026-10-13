@@ -273,10 +273,11 @@ func TestPacketTransportNamedSource(t *testing.T) {
 		{"set amount, short", []Packet{packet(2, engine.Minerals{30, 0, 0})}, nil, false,
 			named(1, 2, task(0, engine.SetAmount, 50)), engine.Minerals{30, 0, 0}, []engine.Minerals{{}}, nil, engine.SetAmount, nil},
 		// A packet launched this year waits at the origin until after
-		// movement, then flies on: the fleet that reached it there loads
-		// nothing.
+		// movement, then flies on: the fleet that reached it there still
+		// loads from it, wherever it is (ASSUMPTION T5: NS-1 B1, B2 loaded
+		// a packet 40 ly away before movement; after movement NOT RUN).
 		{"named packet gone on", []Packet{{Owner: 1, Number: 2, Pos: at(100, 0), Target: 7, Warp: 10, New: true, Cargo: engine.Minerals{100, 0, 0}}}, nil, false,
-			engine.Waypoint{Pos: at(100, 0), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 2, Task: loadIronium}, engine.Minerals{}, []engine.Minerals{{100, 0, 0}}, nil, engine.TransportNone, nil},
+			engine.Waypoint{Pos: at(100, 0), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 2, Task: loadIronium}, engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, nil, engine.TransportNone, nil},
 		// "set waypoint to 10" from 30 kT: 20 load, the packet holds 10, met.
 		{"set waypoint", []Packet{packet(2, engine.Minerals{30, 0, 0})}, nil, false,
 			named(1, 2, task(0, engine.SetWaypoint, 10)), engine.Minerals{20, 0, 0}, []engine.Minerals{{10, 0, 0}}, nil, engine.TransportNone, nil},

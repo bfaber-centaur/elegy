@@ -31,6 +31,8 @@ func pvMessageIDs() map[int]string {
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x12a: "EventOrderClipped of an installation",
+		0x12f: "EventOrderClipped of terraforming",
 		0x083: "EventCometStrike, small",
 		0x084: "EventCometStrike, medium",
 		0x085: "EventCometStrike, large",
@@ -166,6 +168,12 @@ func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
 			send(ev.Player, 0x03f)
 		case engine.EventAlchemy:
 			send(ev.Player, 0x08c)
+		case engine.EventOrderClipped:
+			if ev.Item == engine.ItemTerraform {
+				send(ev.Player, 0x12f)
+			} else {
+				send(ev.Player, 0x12a)
+			}
 		case engine.EventLevelUp:
 			if ev.Player >= 0 && ev.Player < len(g.Players) && !g.Players[ev.Player].Race.LRT.GeneralizedResearch {
 				send(ev.Player, 0x050)

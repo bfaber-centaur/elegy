@@ -876,6 +876,10 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 			}
 			if i == 0 {
 				ef.Task = task
+				// Waypoint 0 naming a packet or salvage (Fleet.Target0).
+				if wp, why := l.waypoint(f.Owner, w); why == "" && wp.Target == engine.TargetPacketObject {
+					ef.Target0 = &engine.ObjectRef{Owner: wp.Owner, Number: wp.ID}
+				}
 				continue
 			}
 			wp, why := l.waypoint(f.Owner, w)
@@ -926,9 +930,10 @@ func (l *pvLoaded) queueEquals(g *engine.Game, e pvExpect) string {
 	for i := range g.Planets {
 		if g.Planets[i].ID == l.planet[*e.Planet] {
 			for _, p0 := range l.g.Planets {
-				if p0.ID == g.Planets[i].ID && p0.Owner != g.Planets[i].Owner && !l.defaults[g.Planets[i].Owner] {
+				if p0.ID == g.Planets[i].ID && p0.Owner != g.Planets[i].Owner && g.Planets[i].Owner != engine.NoOwner && !l.defaults[g.Planets[i].Owner] {
 					// A new owner's planet takes that player's default
-					// queue, which this vector does not carry.
+					// queue, which this vector does not carry. A planet
+					// left with no owner takes no default.
 					return "skip: player default queue settings"
 				}
 			}
@@ -1850,7 +1855,8 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			}
 		case "leftover_to_research":
 			// A newly owned planet takes its new owner's default setting,
-			// which not every vector carries.
+			// which not every vector carries. A planet left with no owner
+			// takes none.
 			changed := true
 			for _, p0 := range l.g.Planets {
 				if p0.ID == p.ID {
@@ -1859,7 +1865,7 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			}
 			var want bool
 			switch {
-			case changed && !l.defaults[p.Owner]:
+			case changed && p.Owner != engine.NoOwner && !l.defaults[p.Owner]:
 				skipped("player default queue settings")
 			case json.Unmarshal(raw, &want) != nil:
 				skipped("leftover_to_research " + string(raw))
