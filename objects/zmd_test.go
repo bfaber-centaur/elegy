@@ -93,3 +93,38 @@ func TestConfirmedChaseTargetDestroyedByMines(t *testing.T) {
 		}
 	})
 }
+
+// ASSUMPTION (NOT RUN): a target that is itself a chaser and dies in a
+// field during the chaser pass. Its chasers go to the coordinates their
+// waypoint held before movement, its start, not to where it died: after
+// its death `destination` gives the waypoint's own coordinates, in the
+// later rounds and in the settlement.
+func TestAssumptionChaseTargetDestroyedWhileChasing(t *testing.T) {
+	l := newLab(t)
+	s := at(100, 200)
+	x := l.fleet(1, at(181, 200), "Tank", 1)
+	ti := l.fleet(1, s, "Freighter", 1)
+	l.g.Fleets[ti].Fuel = 450
+	l.g.Fleets[ti].Waypoints = []engine.Waypoint{{Pos: at(181, 200), Warp: 9, Target: engine.TargetFleet, ID: l.g.Fleets[x].ID}}
+	c := l.fleet(0, at(100, 260), "Tank", 1)
+	l.g.Fleets[c].Fuel = 500
+	l.g.Fleets[c].Waypoints = []engine.Waypoint{{Pos: s, Warp: 5, Target: engine.TargetFleet, ID: l.g.Fleets[ti].ID}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 0, Kind: Heavy, Pos: at(200, 200), Count: 2500}}}
+	target, cid := l.g.Fleets[ti], l.g.Fleets[c].ID
+	g := turn(t, *l.g, zero{})
+	for _, f := range g.Fleets {
+		if f.ID == target.ID {
+			t.Fatal("the target survived the field")
+		}
+		if f.ID != cid {
+			continue
+		}
+		if f.Pos != at(100, 235) {
+			t.Errorf("chaser at %v, want 25 ly toward the target's start, %v", f.Pos, at(100, 235))
+		}
+		want := []engine.Waypoint{{Pos: s, Warp: 5, Target: engine.TargetSpace}}
+		if !reflect.DeepEqual(f.Waypoints, want) {
+			t.Errorf("chaser's waypoints %+v, want deep space at the start %+v", f.Waypoints, want)
+		}
+	}
+}
