@@ -1215,8 +1215,8 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	planet := r
 	other := 0
-	if r.planet != nil {
-		other = *r.planet + 1
+	for id := range l.Planets {
+		other = max(other, id+1)
 	}
 	planet.planet = &other
 	if o, want := compareBattle(&l, planet), fmt.Sprintf("planet: the record's planet %d is not in Elegy's game", other); o.tokens != want {
