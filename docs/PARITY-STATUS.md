@@ -184,10 +184,11 @@ Measured on elegy main `133816c` (#207) plus the order branch.
 
 ### Alchemy message (economy)
 
-Measured on elegy main `133816c` plus this branch.
+Measured on elegy main `397cd2e` (#206) plus this branch.
 
 - **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
 - **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **Order:** with 0x08c mapped, the order check (section above) makes 1662 comparisons over the 8 seed variants, up from 1534. The 128 new ones each place a 0x035 (40) or 0x036 (88) after a 0x08c, and every one holds: no per-corpus tally changes.
 - **RG-002:** it carries no 0x08c, so the ledger is unchanged.
 
 ### Deferred: client estimators (milestone 3)
