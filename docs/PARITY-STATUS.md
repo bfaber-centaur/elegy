@@ -2,16 +2,17 @@
 
 Elegy's end-to-end results against the original, one entry per full-order regression. The behavioral record these rest on is stars-elegy `docs/PARITY.md`. Other elegy docs mean that file when they cite "docs/PARITY.md".
 
-## Current status: RG-002, RG-003 and RG-004 on main `5a735e1`
+## Current status: RG-002, RG-003 and RG-004 on main `215cd38`
 
-The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-elegy main `104e8f5`'s, with #206's year-6 rebuild) is the result the three corpora rest on. Run on that SHA with no local change:
+The combined run on elegy main `215cd38` (after #251–#257; the RG vectors are stars-elegy main `104e8f5`'s, with #206's year-6 rebuild) is the result the three corpora rest on. Run on that SHA with no local change, the ledgers regenerated with `RG002_LEDGER=write` (no line moved):
+- Updated 2026-10-13: this section was first measured on main `5a735e1` (after #242). The changes since are in the dated notes below, which quote the `5a735e1` values.
 - `go test ./...`: every package passes.
 - `go test ./regress -run TestLongGames`, the PR subset: 3 seeds × 2 rulesets × 4 opponent sets = 24 games of 60 years on a small map, each played three times (primary, replay, and reload after 23 years). 24 of 24 have no failure. This is not the steward's full matrix (64 cases at 150 years), so the two results are not interchangeable.
 - `TestRG002Ledger`, `TestRG003Ledger`, `TestRG004Ledger` and `TestBattleRecords` pass: every ledger matches the run exactly, with no UNCLASSIFIED line.
 - `TestParityVectors`, rg corpus: pass 0, measured pass 2, fail 48, random 13, random with the reference seed failing 9. baseline.txt keeps 17 RG entries: RG-002 and RG-003 chained year 1 and Y1 (`random 1` each), and RG-004's 12 restarts and chained year 1 (`random 1` to `random 7`).
-- **Why the failing cases fail, given 0 deterministic misses.** A case fails on a seed when any of its strict field expectations misses there, and it is listed `fail` when no seed matches all of them at once. Every RG-002, RG-003 and RG-004 case that fails (10, 22 and 11) fails for one of two reasons (per-seed check of every strict non-battle field expectation, all 8 seeds, main `5a735e1`):
+- **Why the failing cases fail, given 0 deterministic misses.** A case fails on a seed when any of its strict field expectations misses there, and it is listed `fail` when no seed matches all of them at once. Every RG-002, RG-003 and RG-004 case that fails (10, 22 and 11) fails for one of two reasons (per-seed check of every strict non-battle field expectation, all 8 seeds, main `215cd38`):
   - **Restarts (RG-002 Y2–Y6, RG-003 Y2–Y12):** every expectation that misses on any seed matches on at least one other seed. These cases have random-driven expectations only, and no single seed matches them all together. RG-004's restarts all pass on some seed.
-  - **Chained runs after year 1** (RG-002 years 2–6, RG-003 years 2–12, RG-004 years 2–12): these years continue from Elegy's own year-1 state, which already differs from the original's on the draws. Some strict expectations miss on all 8 seeds here: RG-002 5 in year 2 rising to 47 in year 6, RG-003 to 166 in year 12, RG-004 3 in year 2 to 48 in year 12. The ledger classes every chained difference after year 1 as a sample, as downstream of that divergence.
+  - **Chained runs after year 1** (RG-002 years 2–6, RG-003 years 2–12, RG-004 years 2–12): these years continue from Elegy's own year-1 state, which already differs from the original's on the draws. Some strict expectations miss on all 8 seeds here: RG-002 5 in year 2 rising to 47 in year 6, RG-003 to 169 in year 12, RG-004 3 in year 2 to 50 in year 12. (Updated 2026-10-13: on `5a735e1` this read "RG-003 to 166 in year 12, RG-004 3 in year 2 to 48 in year 12".) The ledger classes every chained difference after year 1 as a sample, as downstream of that divergence.
   - Chained year 1 and every restart: no strict expectation misses on all 8 seeds.
   - Battle records are not in this check. `TestBattleRecords` and the ledgers judge them, with no hand line.
 
@@ -43,6 +44,17 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 
 | corpus | run | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
 |---|---|---:|---:|---:|---:|---:|---:|
+| RG-002 | chained | 355 | 0 | 0 | 1663 | 562 | 1 |
+| RG-002 | restarts | 2226 | 25 | 0 | 185 | 144 | 1 |
+| RG-003 | chained | 355 | 0 | 0 | 3112 | 2196 | 2 |
+| RG-003 | restarts | 4832 | 59 | 0 | 452 | 320 | 2 |
+| RG-004 | chained | 197 | 1 | 0 | 1732 | 898 | 3 |
+| RG-004 | restarts | 2517 | 12 | 0 | 139 | 160 | 3 |
+
+Recomputed on main `215cd38` (2026-10-13). On `5a735e1` the table read:
+
+| corpus | run | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
+|---|---|---:|---:|---:|---:|---:|---:|
 | RG-002 | chained | 355 | 0 | 0 | 1662 | 562 | 2 |
 | RG-002 | restarts | 2224 | 25 | 0 | 185 | 144 | 3 |
 | RG-003 | chained | 355 | 0 | 0 | 3106 | 2196 | 8 |
@@ -50,15 +62,7 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-004 | chained | 197 | 1 | 0 | 1724 | 890 | 19 |
 | RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
 
-Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
-
-Not recomputed for #248 (2026-10-13): #248 compares the null `packet_destination` entries counted here as not compared (RG-002 2, RG-003 4). Lane B will refresh this table.
-
-Not recomputed for the 0x040 PR (2026-10-13): it compares the 0x040 entries counted here as not compared in RG-004, and every one of them matches on the reference seed (no ledger line names 0x040 or 0x023).
-
-Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones that miss are samples.
-
-Not recomputed for the 0x0cd PR (2026-10-13): it compares the 0x0cd entries counted here as not compared in RG-003, and every one of them matches on the reference seed (no ledger line names 0x0cd).
+Every expectation that left "not compared" since (0x08f/0x090 #247, packet settings #248, 0x040/0x023, 0x004/0x007, 0x0cd) is now strict matched or a sample. Strict random-driven and strict missed do not move, and every row's total is unchanged (RG-002 2581, RG-003 5665, RG-004 2831 expectations per run).
 
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
@@ -527,7 +531,7 @@ stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`r
 
 ### Order accounting (RG-002, RG-003, RG-004)
 
-Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed on main `5a735e1`. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
+Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed on main `215cd38`; they are the same as on `5a735e1`. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
 
 Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P, objects not at the same place; O, the object belongs to another player; R, a value out of range (a ship count); H, the harness refusal of a waypoint_delete past the end of the fleet's list (ELEGY CHOICE, harness).
 

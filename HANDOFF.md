@@ -6,50 +6,57 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 
 ## State
 
-- elegy main `5a735e1` (after #242). The RG vectors are stars-elegy main `104e8f5`'s, including #206's rebuilt year 6.
-- The combined run on that SHA is recorded in [docs/PARITY-STATUS.md](docs/PARITY-STATUS.md) "Current status".
+- elegy main `215cd38` (after #251–#257). The RG vectors are stars-elegy main `104e8f5`'s, including #206's rebuilt year 6.
+- The combined run on that SHA is recorded in [docs/PARITY-STATUS.md](docs/PARITY-STATUS.md) "Current status":
   - `go test ./...` passes.
   - The PR-subset long-game matrix passes: 24 games of 60 years, with replay and save/reload. The steward's full matrix is 64 cases at 150 years.
-  - The three RG ledgers and `TestBattleRecords` match the run exactly.
+  - The three RG ledgers and `TestBattleRecords` match the run exactly. Regenerating them moves no line.
 - Each corpus's ledger (`engine/testdata/vectors/rg/rg00N-ledger.txt`) is checked exactly. A PR that moves RG output regenerates it rather than editing it by hand:
   - `RG002_LEDGER=write go test ./internal/vectors -run 'TestRG00[234]Ledger'`
   - `RG002_LEDGER=write go test ./engine -run 'TestBattleRecords$'`
-  - and `PARITY_BASELINE=write` for the baseline.
+  - `PARITY_BASELINE=write` for the baseline.
 
 ## What we know
 
 - **0 deterministic misses in all three corpora** on the reference seed: no incorrect-mechanic line and no unresolved-randomness line.
   - Every compared difference is a sample, or random-driven: it matches on at least one of the 8 seed variants.
   - The chained runs diverge in year 1 and are samples after it.
-  - Ledger lines (chained / restarts):
-    - RG-002: matched 8 / 44, random-driven 0 / 35, sample 1019 / 199, not compared 1 / 1 (main after #247 and #248).
-    - RG-003: matched 8 / 100, random-driven 0 / 76, sample 5286 / 450, not compared 2 / 2.
-    - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2519 / 263, not compared 3 / 3.
-    - Updated 2026-10-13 (lane A, invasion messages): these were RG-003 not compared 7 / 7, RG-004 sample 2523 / 263 and not compared 16 / 16.
-    - Updated 2026-10-13 (0x0cd PR): RG-003 not compared was 4 / 4.
-    - Updated 2026-10-13 (lane A, chase, Z-MD): RG-003's random-driven was 0 / 75 (the Y11 battle at (1323,1300) is now random-driven); samples were RG-002 1024, RG-003 5291 / 451, RG-004 2531.
+- **Ledger lines** (chained / restarts):
+
+  | corpus | matched | random-driven | sample | not compared | total |
+  |---|---|---|---|---|---:|
+  | RG-002 | 8 / 44 | 0 / 35 | 1019 / 199 | 1 / 1 | 1307 |
+  | RG-003 | 8 / 100 | 0 / 76 | 5286 / 450 | 2 / 2 | 5924 |
+  | RG-004 | 4 / 47 | 1 / 17 | 2519 / 263 | 3 / 3 | 2857 |
+
+- **Field expectations** (strict on year 1 and in the restarts): none is a strict miss.
+  - The random-driven ones are RG-002 25, RG-003 59 and RG-004 13.
+  - Everything that has left "not compared" since `5a735e1` matches or is a sample.
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
-  - RG-002 has 1867 orders, of which 37 are refused in the chained run.
-  - RG-003 has 3731, with 220 refused in the chained run.
-  - RG-004 has 2049, with 84 refused in the chained run.
-  - All chained refusals are samples. No restart refuses an order.
-- **Random-driven lines with a named draw.** Each corpus has 3 in the Y6 restart, the same 3 in RG-002 and RG-003:
-  - fleet 6/12's waypoint (lane D, movement tie draws in the battle at (1296,1356));
-  - planet 102's minerals and production queue (economy, the germanium mining +1 draw).
-  - RG-004's random-driven lines have no named draw.
-- **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
-- **Not compared, by owner:**
-  - lane A: 0x02e's mineral and location slots (updated 2026-10-13: these year-1 lines were listed as lane D's 0x05b fleet slot, compared since FS-1, stars-elegy 28a3175);
-  - lane B: `design_gone`.
-  - `alt_battle` is judged by the battle harness instead of the vectors comparator.
+  - RG-002 has 1867 orders, and the chained run refuses 37.
+  - RG-003 has 3731, and the chained run refuses 220.
+  - RG-004 has 2049, and the chained run refuses 84.
+  - All of these refusals are samples. No restart refuses an order.
+- **Random-driven lines with a named draw.** RG-002 and RG-003 each have the same 3, in the Y6 restart:
+  - fleet 6/12's waypoint (lane D: movement tie draws in the battle at (1296,1356));
+  - planet 102's minerals and production queue (economy: the germanium mining +1 draw).
+  - RG-004 has none.
+- **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** The per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
+- **Not compared** (RG-002 2, RG-003 4, RG-004 6 lines), by owner:
+  - lane A: 0x02e's mineral and location slots;
+  - lane B: `design_gone`;
+  - judged by the battle harness instead of the vectors comparator: `alt_battle`;
+  - nothing to compare: 2 sequences of sample entries only.
 
 ## What still matters
 
-- The not-compared lines are unjudged, not matched. Updated 2026-10-13: RG-004's 26 0x007 lines, the largest group, are compared since the invasion messages; what is left is 2 | 8 | 6 lines (PARITY-STATUS.md "Not compared, by owner").
-- `design_gone` (RG-004, 2 lines) is harness work for lane B.
-- Random-driven lines stay open until the original's generator is in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby).
-- The parity case tally lists most RG cases as `fail`, although there are 0 deterministic misses. Restarts fail because no single seed matches all their random-driven expectations at once. Chained years after the first fail because they continue from a diverged year 1. PARITY-STATUS.md "Current status" has the per-seed check behind this.
+- Not-compared lines are unjudged, not matched. The ones left are 0x02e's slots (lane A) and `design_gone` (lane B, RG-004).
+- Random-driven lines stay open until the original's generator is in the harness (SPRINT.md P1-1; the seed-table publication is pending Bobby).
+- The parity case tally lists most RG cases as `fail`, although there are 0 deterministic misses.
+  - Restarts fail because no single seed matches all their random-driven expectations at once.
+  - Chained years after the first fail because they continue from a diverged year 1.
+  - PARITY-STATUS.md "Current status" has the per-seed check behind this.
 
 ## Best next move
 
-Updated 2026-10-13: the invasion messages are mapped (0x004's slots, 0x007, 0x00c); the restarts' messages match and the chained ones are samples. The not-compared lines left are small groups with named owners (PARITY-STATUS.md "Not compared, by owner").
+Compare `design_gone` in the harness (lane B), so that RG-004's two remaining lines are judged. Then regenerate the ledgers and baseline.
