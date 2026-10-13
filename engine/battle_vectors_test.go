@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -77,8 +78,16 @@ func TestBattleRecords(t *testing.T) {
 			t.Errorf("%s: %d records of a year not generated", corpus, n)
 		}
 	}
-	// Each representative game's lines go to its own ledger.
-	for _, path := range []string{rgBattleLedgers["rg002"], rgBattleLedgers["rg003"]} {
+	// Each representative game's lines go to its own ledger, and every
+	// line taken is checked against one.
+	var games []string
+	for game := range rgBattleLedgers {
+		games = append(games, game)
+	}
+	sort.Strings(games)
+	checked := 0
+	for _, game := range games {
+		path := rgBattleLedgers[game]
 		got := map[string]string{}
 		for k, class := range l.lines {
 			if rgBattleLedger(k) == path {
@@ -91,6 +100,10 @@ func TestBattleRecords(t *testing.T) {
 			ledger = readBattleLedger(t, path)
 		}
 		checkBattleLedger(t, got, ledger)
+		checked += len(got)
+	}
+	if checked != len(l.lines) {
+		t.Errorf("%d battle ledger lines taken, %d checked against a ledger", len(l.lines), checked)
 	}
 	checkRGBattleCoverage(t, l.lines, "rg002", rg002BattleRecords)
 	checkRGBattleCoverage(t, l.lines, "rg003", rg003BattleRecords)
