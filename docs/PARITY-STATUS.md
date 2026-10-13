@@ -205,10 +205,11 @@ Measured on elegy main `3d33192` (#211) plus this branch.
 
 ### Orders reduced to their limit (economy)
 
-Measured on elegy main `133816c` plus this branch.
+Measured on elegy main `3d33192` (#211) plus #209 and this branch.
 
 - **0x12a** from the existing `EventOrderClipped` of a factory, mine or defense order, and **0x12f** from the same event of a terraform order (MESSAGES.md 0x12a, CONFIRMED KX-002, PQ-001; 0x12f, CONFIRMED KX-002; both at stars-elegy d89b8a3). Production emits the event when it cuts an order to what still fits, including a cut to 0.
 - **Other corpora:** 6 expectations that were skipped as unmapped are compared now (0x12a 4, 0x12f 2). All 6 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **Order:** the order check makes 1694 comparisons over the 8 seed variants, up from 1662 with #209. The 32 new ones place a 0x036 (16) or 0x038 (8) after a 0x12a, and a 0x03e (8) after a 0x12f. Every one holds: no per-corpus tally changes.
 - **RG-002:** it carries neither id, so the ledger is unchanged.
 
 ### Deferred: client estimators (milestone 3)
