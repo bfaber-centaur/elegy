@@ -27,7 +27,6 @@ func pvMessageIDs() map[int]string {
 		0x038: "EventBuilt of mines, more than one (merge rule)",
 		0x039: "EventBuilt of defenses, one in all (merge rule)",
 		0x03a: "EventBuilt of defenses, more than one (merge rule)",
-		0x0f4: "EventMinesSwept by a starbase",
 		0x03e: "EventQueueCompleted",
 		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
@@ -251,16 +250,6 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				if j := send(ev.Player, atPlanet(one, ev.Planet)); j >= 0 {
 					single[k] = j
 				}
-			}
-		case engine.EventMinesSwept:
-			if ev.Fleet == -1 && ev.Planet >= 0 {
-				// MESSAGES.md 0x0f4: slots planet, amount (two slots),
-				// field owner, field type, field centre (two slots). The
-				// event does not name the field.
-				send(ev.Player, pvMsg{id: 0x0f4, focus: ev.Planet - 1, focusKnown: true,
-					params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0, 0},
-					known:  []bool{true, true, true, false, false, false, false},
-					why:    "0x0f4 field owner, type and centre"})
 			}
 		case engine.EventBattleSummary:
 			if ev.Count > 0 && ev.Count < len(pvSummaryIDs) {

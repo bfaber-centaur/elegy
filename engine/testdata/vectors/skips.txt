@@ -83,6 +83,7 @@
    2 message 0x0ea has no event mapping
    3 message 0x0ec has no event mapping
    1 message 0x0f2 has no event mapping
+  18 message 0x0f4 has no event mapping
    9 message 0x0ff has no event mapping
    2 message 0x109 has no event mapping
   10 message 0x10b has no event mapping
@@ -121,11 +122,11 @@
    2 message_sequence 0x004 colonists and player slots not compared
    4 message_sequence 0x05b salvage and fleet slots not compared
   16 message_sequence 0x08f and 0x090 bombing fleet not compared
-   1 message_sequence 0x0f4 field owner, type and centre not compared
    2 message_sequence entry 0x007 has no event mapping
    3 message_sequence entry 0x025 has no event mapping
    8 message_sequence entry 0x07b has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
+   2 message_sequence entry 0x0f4 has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x156 has no event mapping
    1 message_sequence entry 0x182 has no event mapping

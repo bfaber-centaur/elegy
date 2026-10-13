@@ -323,18 +323,17 @@ stars-elegy ORACLE.md (main `1d4c97b`, the `dump` notes) says: "The game omits a
 
 ### Not-compared lines sorted by cause (main `1de8ab6`)
 
-The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32) were sorted by cause. This change fixes the comparator-side ones:
+The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32) were sorted by cause. This change fixes the comparator-side ones, except 0x0f4/0x0c2/0x0be, which lane D's #233 maps:
 - **`battle_plan` expectations** are compared now (vectors/README.md "battle_plan": every field of the plan in the slot, `attack_who` numbered as the state's battle_plans). The loader now keeps a state plan's name. The census drops "expectation battle_plan" (15). RG-003 y9's plan 5 matches, in the chained run and in the restart.
 - **0x039/0x03a** (one or more defenses built) map to EventBuilt of defenses, with the merge rule (MESSAGES.md 0x039, 0x03a, "Merging of build counts").
-- **0x0f4** (a starbase swept mines) maps to EventMinesSwept by a starbase. Its planet and amount slots are compared. The field owner, type and centre slots are not, because the event does not name the field.
 - **packet_destination/packet_warp null** is read as absent (vectors/README.md "initial_state": no destination, warp 4), but only when the planet still has a starbase. All 6 records so far are planets whose starbase was lost in the year. Elegy keeps the planet's settings there, and the restarts would miss. Whether the original cleared them or only does not write them for a planet with no starbase is UNRESOLVED, so those records stay skipped under a new reason.
 
 Left as they were, with the reason:
-- **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. So no mapping is added until the rule is settled. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.
-- **Engine-side:**
+- **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. No mapping is added until lanes F and G settle the rule. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.
+- **Engine-side (lane D):**
   - 0x05b: the salvage and fleet slots are not compared, because EventFleetScrapped names neither the salvage object nor a fleet that still exists.
   - 0x08f/0x090: EventBombed names the bomber, not its fleet.
-  - 0x0f4: as above, the event does not name the field.
-- **Slot meaning open:**
+  - 0x0f4: lane D's #233 maps it. Its field owner, type and centre slots wait for lane D's follow-up.
+- **Slot meaning open (lanes F and G):**
   - 0x004 and 0x007 each hold 49 in the slot MESSAGES.md calls "player" (RG-003 y7 `[51 550 0 49]`, y12 `[49 49 600 0]`). That is not a player number.
   - 0x007's colonists slot is the winner's landed troops, which no event carries.
