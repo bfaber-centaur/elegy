@@ -257,7 +257,7 @@ Measured on elegy main `97ac630` (#217) plus this branch.
 
 ### Mine-sweep messages (lane D)
 
-Measured on elegy main `3d65e46` (#225) plus this branch.
+Measured on elegy main `33b91e3` (#229) plus this branch.
 
 - **Mapped** from Elegy's existing sweep step (objects `Sweep`, OBJECTS.md "Sweeping"), by MESSAGES.md at stars-elegy 1d4c97b:
   - **0x0f4**: a starbase swept mines. `EventMinesSwept` with a planet, to its owner (CONFIRMED ob/ob007, mf/mf01).
