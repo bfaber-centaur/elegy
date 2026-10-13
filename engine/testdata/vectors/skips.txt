@@ -44,7 +44,6 @@
   10 message 0x02f has no event mapping
    4 message 0x030 has no event mapping
    1 message 0x031 has no event mapping
-   5 message 0x040 has no event mapping
    1 message 0x051 has no event mapping
    1 message 0x053 has no event mapping
    1 message 0x054 has no event mapping
@@ -112,7 +111,6 @@
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
    4 message_sequence 0x05b fleet slot not compared
-   4 message_sequence entry 0x040 has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping

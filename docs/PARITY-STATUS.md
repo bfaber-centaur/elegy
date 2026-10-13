@@ -24,12 +24,13 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
 | sample | 1024 / 199 | 5291 / 451 | 2531 / 263 |
-| not compared | 1 / 1 | 4 / 4 | 7 / 7 |
-| total | 1312 | 5933 | 2877 |
+| not compared | 1 / 1 | 4 / 4 | 3 / 3 |
+| total | 1312 | 5933 | 2869 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
-- Updated 2026-10-13 (lane A, invasion messages): 0x004's slots and 0x007 are now compared (section "Invasion messages"). RG-003 loses 3 not-compared lines in the chained run and 3 in the restarts, which all match. RG-004 loses 12 and 12: the restarts' 0x007 match, and the chained run gains 8 sample lines (years 3, 4, 8, 9, 10, after the year-1 divergence). The rows were "not compared 1 / 1 | 7 / 7 | 19 / 19", "sample 1024 / 199 | 5291 / 451 | 2523 / 263" and the totals 1312, 5939, 2893.
+- Updated 2026-10-13 (0x040 PR): 0x040 and 0x023 are mapped, which removes RG-004's 8 0x040 lines (4 chained, 4 restart). Two RG-004 sequences (y4 #224, chained and Y4 restart) now stop at their next unmapped entry, 0x007, which adds 2 lines. The row was "1 / 1 | 7 / 7 | 19 / 19" and the totals 1312, 5939, 2893.
+- Updated 2026-10-13 (lane A, invasion messages): 0x004's slots and 0x007 are now compared (section "Invasion messages"). RG-003 loses 3 not-compared lines in the chained run and 3 in the restarts, which all match. RG-004 loses 13 and 13: the restarts' 0x007 match, and the chained run gains 8 sample lines (years 3, 4, 8, 9, 10, after the year-1 divergence). The rows were "not compared 1 / 1 | 7 / 7 | 16 / 16", "sample 1024 / 199 | 5291 / 451 | 2523 / 263" and the totals 1312, 5939, 2887.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -50,7 +51,9 @@ Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247
 
 Not recomputed for #248 (2026-10-13): #248 compares the null `packet_destination` entries counted here as not compared (RG-002 2, RG-003 4). Lane B will refresh this table.
 
-Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones are samples.
+Not recomputed for the 0x040 PR (2026-10-13): it compares the 0x040 entries counted here as not compared in RG-004, and every one of them matches on the reference seed (no ledger line names 0x040 or 0x023).
+
+Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones that miss are samples.
 
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
@@ -81,13 +84,13 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 | 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
-| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy (next PR) |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 2 | 8 | 14 | |
+| total | 2 | 8 | 6 | |
 
-- stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 24) are gone.
+- stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 26) are gone; the total was 2 | 14 | 32.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
+  - Updated 2026-10-13 (0x040 PR): mapped with that rule (Legacy `lost_planet_message_carry`, ruleset v6). The 0x007 row was 24 (RG-004) and the total 2 | 14 | 38; two sequences now stop at 0x007 instead of 0x040.
 
 ## RG-002: full-order six-year regression
 
@@ -371,7 +374,7 @@ Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
 
 ### Invasion messages (lane A)
 
-Measured on elegy main `c3e53c2` (#248).
+Measured on elegy main `030875d` (#252).
 
 - **Mapped** by MESSAGES.md "Invasion slots" (stars-elegy #204, e1b2ad9; MEASURED: TK-301, TK-302, GC-1, RG-003, RG-004):
   - **0x004** keeps its trigger (`EventDropRepelled`, to the planet's owner) and now compares every slot: planet, troops (two slots), attacker + 0x30. Troops are what the attacker dropped there that year, which the event already counted.
@@ -380,8 +383,8 @@ Measured on elegy main `c3e53c2` (#248).
 - **Order.** A fleet whose unload task dropped colonists on another player's planet is told it has finished (0x04e) after every drop of the phase is resolved. MEASURED, one run each: in TK-501 and WU-CAP that fleet's 0x04e came after the capture's 0x00c, while in TK-201 the mineral unloads' 0x04e came before the capture. Inferred: that the drop is what decides it. TK-201, TK-501 and WU-CAP pin it: without the hold, TK-501 and WU-CAP fail on order once 0x00c is compared; holding every 0x04e back fails TK-201.
 - **Other corpora:** 14 expectations that were skipped are now compared (0x007 6, 0x00c 4, and the `message_sequence` skips of 0x004's slots 2 and 0x007 2). Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the six "not compared" lines go: y7's 0x004 [51, 550, 0, 49] and y12's 0x007 [49, 49, 600, 0] match, in the chained run and the restarts.
-- **RG-004:** the 24 "not compared" 0x007 lines go. The 12 in the restarts (years 2, 3, 4, 5, 8, 9, 10) match. Of the 12 in the chained run, 6 match (y2 #233 #234, y3 #241, y5 #226 #227, y9 #231) and 6 become samples, from the chained state after the year-1 divergence: y3 #242 (sent, want not sent), y4 #223, y8 #238 and #239, y9 #232, y10 #241 (not sent). Two more sample lines are y4 #224's two 0x007 sequence entries (not sent), which no earlier line named (the entry's 0x040 stays not compared). 8 sample lines in all.
-- **Census:** skips.txt loses "message 0x007 has no event mapping" (20), "message 0x00c has no event mapping" (4), "message_sequence 0x004 colonists and player slots not compared" (2) and "message_sequence entry 0x007 has no event mapping" (12). No case changes status; the chained RG-004 cases that already failed (2468, 2469, 2473, 2474, 2475) list the new sample differences. baseline.txt is unchanged.
+- **RG-004:** the 26 "not compared" 0x007 lines go (24, plus the two y4 #224 sequences that stop at 0x007 since the 0x040 PR). The 13 in the restarts (years 2, 3, 4, 5, 8, 9, 10) match. Of the 13 in the chained run, 6 match (y2 #233 #234, y3 #241, y5 #226 #227, y9 #231) and 7 become 8 sample lines, from the chained state after the year-1 divergence: y3 #242 (sent, want not sent), y4 #223, y4 #224's two 0x007 entries, y8 #238 and #239, y9 #232, y10 #241 (not sent).
+- **Census:** skips.txt loses "message 0x007 has no event mapping" (20), "message 0x00c has no event mapping" (4), "message_sequence 0x004 colonists and player slots not compared" (2) and "message_sequence entry 0x007 has no event mapping" (14). No case changes status; the chained RG-004 cases that already failed (2468, 2469, 2473, 2474, 2475) list the new sample differences. baseline.txt is unchanged.
 
 ### Deferred: client estimators (milestone 3)
 
@@ -470,6 +473,7 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 
 - **Battle records:** 51 matched, 63 samples and 2 random-driven. None is a hand line. Since #236, the y3 restart's extra battle at (1365,1400) is a sample, not random-driven, because the vector has an `alt_battle` there.
 - **Not compared (38):** 0x007 (24 lines: 14 message, 10 sequence entry) and 0x040 (8 lines) have no event mapping. Also 2 `alt_battle`, 2 `design_gone`, and 2 sequences of sample entries only.
+  - Updated 2026-10-13 (0x040 PR): 0x040 is mapped, so RG-004 has 32 not-compared lines (16 / 16) and 2887 in all. 0x007 has 26 (14 message, 12 sequence entry).
 - **Baseline:** RG-004 has 13 entries. All 12 restarts and chained year 1 (2466) pass with some seeds (`random k`; Y6 with 1 of 8, Y10 with 7 of 8, Y4 with 5 of 8). Chained years 2–12 fail on samples.
 
 **Hand lines: 0 deterministic.** The 16 incorrect-mechanic lines first found, all in restarts, are cleared: lane A's 14 by #244, lane D's 2 by #242.

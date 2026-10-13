@@ -11,6 +11,7 @@ import (
 func TestPvMessages(t *testing.T) {
 	g := &engine.Game{Planets: []engine.Planet{{ID: 5, Owner: 2}, {ID: 6, Owner: engine.NoOwner}}, Players: make([]engine.Player, 3)}
 	g.Players[1].Race.LRT.GeneralizedResearch = true
+	g.Players[0].Race.PRT = engine.PRTAlternateReality
 	part := func(name string) engine.Event {
 		for i, c := range engine.Components().Components {
 			if c.Name == name {
@@ -22,6 +23,9 @@ func TestPvMessages(t *testing.T) {
 	}
 	summary := func(player int, k engine.BattleSummary) engine.Event {
 		return engine.Event{Kind: engine.EventBattleSummary, Player: player, Planet: -1, Fleet: -1, Count: int(k)}
+	}
+	emptied := func(player, cause int) engine.Event {
+		return engine.Event{Kind: engine.EventPlanetEmptied, Player: player, Planet: 6, Fleet: -1, Count: cause}
 	}
 	built := func(planet int, item engine.ItemKind, n int) engine.Event {
 		return engine.Event{Kind: engine.EventBuilt, Player: 2, Planet: planet, Fleet: -1, Item: item, Count: n}
@@ -94,6 +98,13 @@ func TestPvMessages(t *testing.T) {
 		{"lone ship won all", []engine.Event{summary(0, engine.SummaryLoneWonAll)}, [][2]int{{0, 0x113}}},
 		{"lone enemy survived", []engine.Event{summary(0, engine.SummaryLoneEnemySurvived)}, [][2]int{{0, 0x116}}},
 		{"no summary", []engine.Event{summary(0, engine.SummaryNone)}, nil},
+		{"planet left", []engine.Event{emptied(2, engine.EmptiedLeft)}, [][2]int{{2, 0x040}}},
+		{"planet died out", []engine.Event{emptied(2, engine.EmptiedDiedOut)}, [][2]int{{2, 0x023}}},
+		{"planet left, shown as died out", []engine.Event{emptied(2, engine.EmptiedLeftShownDiedOut)}, [][2]int{{2, 0x023}}},
+		{"AR planet left", []engine.Event{emptied(0, engine.EmptiedLeft)}, [][2]int{{0, 0x041}}},
+		{"AR planet died out", []engine.Event{emptied(0, engine.EmptiedDiedOut)}, [][2]int{{0, 0x024}}},
+		{"AR planet left, shown as died out", []engine.Event{emptied(0, engine.EmptiedLeftShownDiedOut)}, [][2]int{{0, 0x024}}},
+		{"planet emptied otherwise", []engine.Event{emptied(2, 0)}, nil},
 	} {
 		got := pvMessages(g, c.events)
 		want := map[[2]int]bool{}
@@ -128,7 +139,9 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventHostileShrink, Player: 0, Planet: 3, Fleet: -1, Count: 486, Axes: []int{479}},
 			{Kind: engine.EventOriginalDrift, Player: 2, Planet: 5, Fleet: -1, Axes: []int{1}},
 			{Kind: engine.EventClaimAdjusted, Player: 2, Planet: 5, Fleet: -1, Count: 92},
-			{Kind: engine.EventPacketNoDriver, Player: 0, Planet: 3, Fleet: -1, Item: engine.ItemIroniumPacket, Count: 1}}},
+			{Kind: engine.EventPacketNoDriver, Player: 0, Planet: 3, Fleet: -1, Item: engine.ItemIroniumPacket, Count: 1},
+			{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5, Fleet: -1, Count: engine.EmptiedLeft},
+			{Kind: engine.EventPlanetEmptied, Player: 0, Planet: 3, Fleet: -1, Count: engine.EmptiedDiedOut}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -154,6 +167,10 @@ func TestMessageCheck(t *testing.T) {
 		{"installation order reduced, not sent", msg(0, 0x12a, true, 1), "message 0x12a to player 0 present = false, want true"},
 		{"packet item cancelled", msg(0, 0x129, true, 1), ""},
 		{"packet item cancelled, not sent", msg(2, 0x129, true, 1), "message 0x129 to player 2 present = false, want true"},
+		{"planet left", msg(2, 0x040, true, 1), ""},
+		{"planet left, not sent", msg(0, 0x040, true, 1), "message 0x040 to player 0 present = false, want true"},
+		{"planet died out", msg(0, 0x023, true, 1), ""},
+		{"planet died out, not sent", msg(2, 0x023, true, 1), "message 0x023 to player 2 present = false, want true"},
 		{"claim adjusted", msg(2, 0x156, true, 1), ""},
 		{"claim adjusted, not sent", msg(0, 0x156, true, 1), "message 0x156 to player 0 present = false, want true"},
 		{"original drift", msg(2, 0x15c, true, 1), ""},

@@ -24,8 +24,8 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - Ledger lines (chained / restarts):
     - RG-002: matched 8 / 44, random-driven 0 / 35, sample 1024 / 199, not compared 1 / 1 (main after #247 and #248).
     - RG-003: matched 8 / 100, random-driven 0 / 75, sample 5291 / 451, not compared 4 / 4.
-    - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2531 / 263, not compared 7 / 7.
-    - Updated 2026-10-13 (lane A, invasion messages): these were RG-003 not compared 7 / 7, RG-004 sample 2523 / 263 and not compared 19 / 19.
+    - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2531 / 263, not compared 3 / 3.
+    - Updated 2026-10-13 (lane A, invasion messages): these were RG-003 not compared 7 / 7, RG-004 sample 2523 / 263 and not compared 16 / 16.
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - RG-002 has 1867 orders, of which 37 are refused in the chained run.
   - RG-003 has 3731, with 220 refused in the chained run.
@@ -38,18 +38,17 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 - **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
 - **Not compared, by owner:**
   - lane D: the 0x05b fleet slot, whose owner bits are UNRESOLVED (the salvage slot and the 0x08f/0x090 bombing fleet are compared since #247);
-  - economy: 0x040 and the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
+  - economy: the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
   - lane B: `design_gone`.
   - `alt_battle` is judged by the battle harness instead of the vectors comparator.
 
 ## What still matters
 
-- The not-compared lines are unjudged, not matched. RG-004's 8 0x040 lines are now the largest group (updated 2026-10-13: its 24 0x007 lines are compared since the invasion messages).
-  - 0x040 also needs the previous-planet rule that picks 0x040 or 0x023.
+- The not-compared lines are unjudged, not matched. Updated 2026-10-13: RG-004's 26 0x007 lines, the largest group, are compared since the invasion messages; what is left is 2 | 8 | 6 lines (PARITY-STATUS.md "Not compared, by owner").
 - `design_gone` (RG-004, 2 lines) is harness work for lane B.
 - Random-driven lines stay open until the original's generator is in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby).
 - The parity case tally lists most RG cases as `fail`, although there are 0 deterministic misses. Restarts fail because no single seed matches all their random-driven expectations at once. Chained years after the first fail because they continue from a diverged year 1. PARITY-STATUS.md "Current status" has the per-seed check behind this.
 
 ## Best next move
 
-Updated 2026-10-13: the invasion messages are mapped (0x004's slots, 0x007, 0x00c); the restarts' messages match and the chained ones are samples. The largest not-compared group left is RG-004's 0x040 (economy, with the previous-planet rule).
+Updated 2026-10-13: the invasion messages are mapped (0x004's slots, 0x007, 0x00c); the restarts' messages match and the chained ones are samples. The not-compared lines left are small groups with named owners (PARITY-STATUS.md "Not compared, by owner").
