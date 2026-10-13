@@ -1709,9 +1709,7 @@ sample | rg003 | RG-003-2470 y8 #476 | object | wormhole: y = 1448, want 1671
 sample | rg003 | RG-003-2470 y8 #476 | object | wormhole: years_since_jump = 44, want 5
 sample | rg003 | RG-003-2470 y8 #477 | object | wormhole: x = 1233, want 1248
 sample | rg003 | RG-003-2470 y8 #477 | object | wormhole: y = 1771, want 1779
-not compared | rg003 | RG-003-2470 y8 #496 | message | message 0x0cd has no event mapping
 sample | rg003 | RG-003-2470 y8 #504 | message_sequence | message 0x038 (focus 51, params [31 51]) = sent as 0x038 (focus 51, params [32 51])
-not compared | rg003 | RG-003-2470 y8 #504 | message_sequence | message_sequence entry 0x0cd has no event mapping
 sample | rg003 | RG-003-2470 y8 #507 | player id=1 seen_by=1 | score_record.escort_ships = 121, want 125
 sample | rg003 | RG-003-2470 y8 #507 | player id=1 seen_by=1 | score_record.resources = 20010, want 19926
 sample | rg003 | RG-003-2470 y8 #507 | player id=1 seen_by=1 | score_record.tech_level_sum = 56, want 57
@@ -5659,8 +5657,6 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #476 | object | wormhole: x = 1427, want 1
 sample | rg003-y8 | RG-003-Y8-2470 y1 #476 | object | wormhole: y = 1664, want 1671
 sample | rg003-y8 | RG-003-Y8-2470 y1 #477 | object | wormhole: x = 1236, want 1248
 sample | rg003-y8 | RG-003-Y8-2470 y1 #477 | object | wormhole: y = 1767, want 1779
-not compared | rg003-y8 | RG-003-Y8-2470 y1 #496 | message | message 0x0cd has no event mapping
-not compared | rg003-y8 | RG-003-Y8-2470 y1 #504 | message_sequence | message_sequence entry 0x0cd has no event mapping
 sample | rg003-y8 | RG-003-Y8-2470 y1 #507 | player id=1 seen_by=1 | score_record.score = 1078, want 1081
 sample | rg003-y8 | RG-003-Y8-2470 y1 #507 | player id=1 seen_by=1 | score_record.tech_level_sum = 56, want 57
 sample | rg003-y8 | RG-003-Y8-2470 y1 #509 | player id=2 seen_by=2 | score_record.score = 336, want 339

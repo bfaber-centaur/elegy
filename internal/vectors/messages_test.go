@@ -140,7 +140,8 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventClaimAdjusted, Player: 2, Planet: 5, Fleet: -1, Count: 92},
 			{Kind: engine.EventPacketNoDriver, Player: 0, Planet: 3, Fleet: -1, Item: engine.ItemIroniumPacket, Count: 1},
 			{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5, Fleet: -1, Count: engine.EmptiedLeft},
-			{Kind: engine.EventPlanetEmptied, Player: 0, Planet: 3, Fleet: -1, Count: engine.EmptiedDiedOut}}},
+			{Kind: engine.EventPlanetEmptied, Player: 0, Planet: 3, Fleet: -1, Count: engine.EmptiedDiedOut},
+			{Kind: engine.EventStarbaseBuilt, Player: 0, Planet: 3, Fleet: -1, Axes: []int{0}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -170,6 +171,8 @@ func TestMessageCheck(t *testing.T) {
 		{"planet left, not sent", msg(0, 0x040, true, 1), "message 0x040 to player 0 present = false, want true"},
 		{"planet died out", msg(0, 0x023, true, 1), ""},
 		{"planet died out, not sent", msg(2, 0x023, true, 1), "message 0x023 to player 2 present = false, want true"},
+		{"starbase built", msg(0, 0x0cd, true, 1), ""},
+		{"starbase built, not sent", msg(2, 0x0cd, true, 1), "message 0x0cd to player 2 present = false, want true"},
 		{"claim adjusted", msg(2, 0x156, true, 1), ""},
 		{"claim adjusted, not sent", msg(0, 0x156, true, 1), "message 0x156 to player 0 present = false, want true"},
 		{"original drift", msg(2, 0x15c, true, 1), ""},

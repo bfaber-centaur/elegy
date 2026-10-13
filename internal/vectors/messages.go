@@ -49,6 +49,7 @@ func pvMessageIDs() map[int]string {
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x0cd: "EventStarbaseBuilt",
 		0x07b: "EventTerraformed",
 		0x129: "EventPacketNoDriver",
 		0x12a: "EventOrderClipped of an installation",
@@ -267,6 +268,16 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				if j := send(ev.Player, atPlanet(one, ev.Planet)); j >= 0 {
 					single[k] = j
 				}
+			}
+		case engine.EventStarbaseBuilt:
+			// MESSAGES.md 0x0cd: every starbase built gives 0x0cd,
+			// whatever its dock (MEASURED, SL-12, PD-1, PK-1; the dock
+			// rule's 0x0ce/0x0cf are never observed). Slots: planet, then
+			// the design as owner·32 + 16 + the starbase design slot
+			// (MEASURED, SL-12).
+			if len(ev.Axes) == 1 {
+				send(ev.Player, pvMsg{id: 0x0cd, focus: ev.Planet - 1, focusKnown: true,
+					params: []int{ev.Planet - 1, ev.Player*32 + 16 + ev.Axes[0]}})
 			}
 		case engine.EventTerraformed:
 			// MESSAGES.md 0x07b: planet, 1 up / 0 down, axis, hab value.
