@@ -9,6 +9,7 @@ import (
 	"github.com/bfaber-centaur/elegy/engine"
 	"github.com/bfaber-centaur/elegy/game"
 	"github.com/bfaber-centaur/elegy/newgame"
+	"github.com/bfaber-centaur/elegy/objects"
 	"github.com/bfaber-centaur/elegy/races"
 )
 
@@ -165,6 +166,62 @@ func TestDriversSaveReload(t *testing.T) {
 			check("reloaded every year", yearly)
 		})
 	}
+
+	// A fleet still waiting on the packet its waypoint 0 names
+	// (Fleet.Target0) keeps it across the save, and the game continues as
+	// the uninterrupted one.
+	t.Run("named object", func(t *testing.T) {
+		setup := func() *game.Game {
+			g, _ := loopSetup(t, engine.ElegyRules(), 7)
+			st := &g.State
+			// Player 0, the idle human, gives no orders; its fleet with the
+			// most cargo room waits.
+			fi, room := -1, -1
+			for i, f := range st.Fleets {
+				if c := st.Designs[f.Stacks[0].Design].CargoCapacity; f.Owner == 0 && c > room {
+					fi, room = i, c
+				}
+			}
+			f := &st.Fleets[fi]
+			sp := st.Objects.(*objects.Space)
+			sp.Packets = append(sp.Packets, objects.Packet{Owner: 0, Number: 0, Pos: f.Pos, Target: st.Planets[0].ID, Warp: 5, Cargo: engine.Minerals{0, 1000, 0}})
+			f.Target0 = &engine.ObjectRef{Owner: 0, Number: 0}
+			f.Task = engine.Task{Kind: engine.TaskTransport}
+			// The packet holds no ironium, so the wait is never met.
+			f.Task.Transport[engine.Ironium] = engine.Transport{Action: engine.WaitFor, Amount: 100}
+			f.Waypoints = nil
+			return g
+		}
+		want, _ := advance(t, setup(), freshDrivers(), 6)
+		g := setup()
+		first, _ := advance(t, g, freshDrivers(), 2)
+		var named *engine.ObjectRef
+		for _, f := range g.State.Fleets {
+			if f.Target0 != nil {
+				named = f.Target0
+			}
+		}
+		if named == nil || *named != (engine.ObjectRef{Owner: 0, Number: 0}) {
+			t.Fatalf("before the save: named object %v, want packet 0/0 still waited on", named)
+		}
+		g = reload(t, g)
+		named = nil
+		for _, f := range g.State.Fleets {
+			if f.Target0 != nil {
+				named = f.Target0
+			}
+		}
+		if named == nil || *named != (engine.ObjectRef{Owner: 0, Number: 0}) {
+			t.Fatalf("after the save: named object %v, want packet 0/0", named)
+		}
+		rest, _ := advance(t, g, freshDrivers(), 4)
+		got := append(first, rest...)
+		for i := range want {
+			if got[i] != want[i] {
+				t.Fatalf("year %d differs from the uninterrupted game", 2401+i)
+			}
+		}
+	})
 }
 
 // scrapSpy records the fleets a driver orders scrapped.
