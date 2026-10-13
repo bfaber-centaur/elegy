@@ -88,6 +88,8 @@ type pvBattleExpect struct {
 	Y       int              `json:"y"`
 	Tokens  []pvBattleToken  `json:"tokens"`
 	Actions []pvBattleAction `json:"actions"`
+	Players []int            `json:"players"`
+	Planet  *int             `json:"planet"`
 }
 
 // pvRecordedBattle is one battle record: its tokens and actions.
@@ -98,6 +100,8 @@ type pvRecordedBattle struct {
 	tokens                 []pvBattleToken
 	actions                []pvBattleAction
 	hasActions             bool
+	players                []int // the record's players, as a set
+	planet                 *int  // the vector planet the battle is at, or nil
 }
 
 // BattleStart is the game a vector's year's battles start from: the game
@@ -188,7 +192,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 				}
 				r := &out[name][i]
 				if e.Kind == "battle" {
-					r.tokens = e.Tokens
+					r.tokens, r.players, r.planet = e.Tokens, e.Players, e.Planet
 				} else {
 					r.actions, r.hasActions = e.Actions, true
 				}
@@ -200,7 +204,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 				r := &out[name][i]
 				if r.tokens == nil {
 					if j, ok := at[fmt.Sprintf(" %d %d", r.x, r.y)]; ok {
-						r.tokens = out[name][j].tokens
+						r.tokens, r.players, r.planet = out[name][j].tokens, out[name][j].players, out[name][j].planet
 					}
 				}
 			}
@@ -738,7 +742,41 @@ func (l *BattleStart) buildBattle(r pvRecordedBattle) (*battle, string) {
 	if !ok {
 		return nil, "Elegy has no battle here"
 	}
+	if r.players != nil && !sameSet(b.players, r.players) {
+		return b, fmt.Sprintf("players: Elegy %v, record %v", b.players, r.players)
+	}
+	var mine *int
+	if b.loc.planet >= 0 {
+		id := g.Planets[b.loc.planet].ID
+		mine = &id
+	}
+	var want *int
+	if r.planet != nil {
+		id, ok := l.Planets[*r.planet]
+		if !ok {
+			return b, fmt.Sprintf("planet: the record's planet %d is not in Elegy's game", *r.planet)
+		}
+		want = &id
+	}
+	if (mine == nil) != (want == nil) || mine != nil && *mine != *want {
+		return b, fmt.Sprintf("planet: Elegy %s, record %s", pvPlanetString(mine), pvPlanetString(want))
+	}
 	return b, l.matchTokens(b, r.tokens)
+}
+
+// sameSet reports whether a and b hold the same numbers.
+func sameSet(a, b []int) bool {
+	a, b = slices.Clone(a), slices.Clone(b)
+	slices.Sort(a)
+	slices.Sort(b)
+	return slices.Equal(a, b)
+}
+
+func pvPlanetString(p *int) string {
+	if p == nil {
+		return "none"
+	}
+	return fmt.Sprint(*p)
 }
 
 // compareBattle runs the comparison for one recorded battle. A torpedo
@@ -837,6 +875,99 @@ func (o pvBattleOutcome) sampleMiss() string {
 	return ""
 }
 
+// matchedDetail says what a record that matched was compared on.
+func (o pvBattleOutcome) matchedDetail(r pvRecordedBattle) string {
+	d := fmt.Sprintf("%d tokens, players and planet; %d of %d hits compared", len(r.tokens), o.matched, o.total)
+	if o.conditioned > 0 {
+		d += fmt.Sprintf(" and %d conditioned", o.conditioned)
+	}
+	if o.draws {
+		d += ", the replay stopping at a draw"
+	}
+	return d + fmt.Sprintf("; %d moves allowed", o.movesMatched)
+}
+
+// elegyBattles returns the locations where Elegy fights in the
+// battle-phase game l, with each battle's players.
+func elegyBattles(l *BattleStart) map[Point][]int {
+	g := withRules(l.Game.clone())
+	out := map[Point][]int{}
+	var prev locationHistory
+	for _, loc := range g.locations() {
+		_, inv, _ := g.whoFights(loc, prev)
+		prev = locationHistory{any: true, battle: inv != nil, lastOwner: g.Fleets[loc.fleets[len(loc.fleets)-1]].Owner}
+		if inv != nil {
+			out[loc.pos] = inv
+		}
+	}
+	return out
+}
+
+// checkBattleSet fails on each battle Elegy fights in a year of vector
+// name that has battle records but none at that location: a vector
+// records every battle of its years (a year with no record is not
+// checked, as nothing shows the vector recorded it). Classes as in
+// CheckBattleRecords: a chained year past a random year is a sample, and
+// a restart's extra battle that another seed variant does not fight is
+// random-driven.
+func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, years []BattleStart, vs BattleVariants) {
+	type yearRecs struct {
+		caseID string
+		at     map[Point]bool
+	}
+	byYear := map[int]*yearRecs{}
+	for _, r := range recs {
+		if byYear[r.year] == nil {
+			byYear[r.year] = &yearRecs{caseID: r.caseID, at: map[Point]bool{}}
+		}
+		byYear[r.year].at[Point{X: r.x, Y: r.y}] = true
+	}
+	var ys []int
+	for y := range byYear {
+		ys = append(ys, y)
+	}
+	sort.Ints(ys)
+	for _, y := range ys {
+		if y < 1 || y >= len(years) || years[y].Skip != "" {
+			continue
+		}
+		l := years[y]
+		mine := elegyBattles(&l)
+		var extra []Point
+		for p := range mine {
+			if !byYear[y].at[p] {
+				extra = append(extra, p)
+			}
+		}
+		sort.Slice(extra, func(i, j int) bool {
+			return extra[i].X < extra[j].X || extra[i].X == extra[j].X && extra[i].Y < extra[j].Y
+		})
+		for _, p := range extra {
+			where := fmt.Sprintf("%s %s %q (%d,%d) y%d", name, byYear[y].caseID, "", p.X, p.Y, y)
+			why := fmt.Sprintf("battle set: Elegy fights here (players %v), the record has no battle", mine[p])
+			if l.Downstream > 0 {
+				t.Logf("%s: sample (after %d draws of earlier years) missed: %s", where, l.Downstream, why)
+				continue
+			}
+			if l.InYear > 0 && vs.N > 1 {
+				hit := 0
+				for k := 1; k < vs.N; k++ {
+					if alt := vs.Start(name, k); y < len(alt) && alt[y].Skip == "" {
+						if _, fights := elegyBattles(&alt[y])[p]; !fights {
+							hit++
+						}
+					}
+				}
+				if hit > 0 {
+					t.Logf("%s: random (after %d draws in the year; %d of %d other variants match): %s", where, l.InYear, hit, vs.N-1, why)
+					continue
+				}
+			}
+			t.Errorf("%s: %s", where, why)
+		}
+	}
+}
+
 // BattleRecordVectors lists the vectors holding battle records, by path
 // ("cb/cb010.json").
 func BattleRecordVectors(t *testing.T) []string {
@@ -846,6 +977,38 @@ func BattleRecordVectors(t *testing.T) []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+// recordTBInternal keeps a check's failures.
+type recordTBInternal struct {
+	testing.TB
+	errs []string
+}
+
+func (r *recordTBInternal) Errorf(format string, args ...any) {
+	r.errs = append(r.errs, fmt.Sprintf(format, args...))
+}
+
+// BattleRecordKeys lists the records of vector name ("rg/rg002.json") as
+// "case yN | battle record (x,y)", with "" for each record that has both
+// its `battle` and its `battle_actions` expectation, else what it lacks.
+func BattleRecordKeys(t testing.TB, name string) map[string]string {
+	out := map[string]string{}
+	for _, r := range loadBattleRecords(t)[name] {
+		where := fmt.Sprintf("%s y%d", r.caseID, r.year)
+		if r.stream != "" {
+			where += " stream " + r.stream
+		}
+		var lacks string
+		switch {
+		case r.tokens == nil:
+			lacks = "no battle expectation"
+		case !r.hasActions:
+			lacks = "no battle_actions expectation"
+		}
+		out[fmt.Sprintf("%s | battle record (%d,%d)", where, r.x, r.y)] = lacks
+	}
+	return out
 }
 
 // CheckBattleRecords compares Elegy's battles with every recorded battle,
@@ -921,6 +1084,7 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 					t.Logf("%s: sample (after %d draws of earlier years) missed: %s", where, l.Downstream, why)
 				} else {
 					c.samplesMatched++
+					t.Logf("%s: sample (after %d draws of earlier years) matched", where, l.Downstream)
 				}
 				continue
 			}
@@ -950,6 +1114,7 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 				t.Errorf("%s: tokens: %s", where, o.tokens)
 				continue
 			}
+			failed := false
 			c.tokens++
 			c.compared += o.compared
 			c.matched += o.matched
@@ -960,17 +1125,23 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 			c.movesMatched += o.movesMatched
 			c.movesUnchecked += o.movesUnchecked
 			if o.moveStop != "" {
+				failed = true
 				t.Errorf("%s: moves: %s", where, o.moveStop)
 			}
 			switch {
 			case o.draws:
 				c.draws++
 			case o.stop != "":
+				failed = true
 				t.Errorf("%s: hits: %s", where, o.stop)
 			case r.hasActions:
 				c.full++
 			}
+			if !failed {
+				t.Logf("%s: matched: %s", where, o.matchedDetail(r))
+			}
 		}
+		checkBattleSet(t, name, records[name], starts[name], vs)
 	}
 	var corpora []string
 	for c := range per {
@@ -1030,6 +1201,62 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if o := compareBattle(&l, r); o.moves == 0 || o.movesMatched != o.moves-o.movesUnchecked || o.moveStop != "" {
 		t.Fatalf("CB-010 at 1060: moves %+v, want every move checked and allowed", o)
+	}
+	// A record's players are compared as a set, and its planet.
+	players := r
+	players.players = append([]int{}, r.players...)
+	players.players[0] = 5
+	if o := compareBattle(&l, players); !strings.HasPrefix(o.tokens, "players: ") {
+		t.Errorf("a changed players list was not noticed: %+v", o)
+	}
+	players.players = []int{r.players[1], r.players[0]}
+	if o := compareBattle(&l, players); o.tokens != "" {
+		t.Errorf("players in another order: %+v, want a match", o)
+	}
+	planet := r
+	other := 0
+	for id := range l.Planets {
+		other = max(other, id+1)
+	}
+	planet.planet = &other
+	if o, want := compareBattle(&l, planet), fmt.Sprintf("planet: the record's planet %d is not in Elegy's game", other); o.tokens != want {
+		t.Errorf("a record planet not in the game: %q, want %q", o.tokens, want)
+	}
+	// Both planets exist but differ: CS-003-C's battle at planet 5 with
+	// the record naming planet 4.
+	var at5 pvRecordedBattle
+	for _, x := range records["cs/cs003c.json"] {
+		if x.planet != nil && *x.planet == 5 {
+			at5 = x
+		}
+	}
+	if at5.planet == nil {
+		t.Fatal("no CS-003-C battle at planet 5")
+	}
+	if o := compareBattle(&lb, at5); strings.HasPrefix(o.tokens, "planet: ") {
+		t.Fatalf("CS-003-C at planet 5: %q, want its planet to match", o.tokens)
+	}
+	four := 4
+	at5.planet = &four
+	if o, want := compareBattle(&lb, at5), fmt.Sprintf("planet: Elegy %d, record %d", lb.Planets[5], lb.Planets[4]); o.tokens != want {
+		t.Errorf("a record naming another planet in the game: %q, want %q", o.tokens, want)
+	}
+	// A battle Elegy fights where the year has no record fails.
+	var rest []pvRecordedBattle
+	for _, x := range records["cb/cb010.json"] {
+		if x.year == 1 && x.x != 1060 {
+			rest = append(rest, x)
+		}
+	}
+	set := &recordTBInternal{TB: t}
+	checkBattleSet(set, "cb/cb010.json", rest, []BattleStart{{}, l}, BattleVariants{})
+	if len(set.errs) != 1 || !strings.Contains(set.errs[0], "(1060,") || !strings.Contains(set.errs[0], "battle set: Elegy fights here") {
+		t.Errorf("an unrecorded battle: %q, want one battle-set failure at 1060", set.errs)
+	}
+	set = &recordTBInternal{TB: t}
+	checkBattleSet(set, "cb/cb010.json", append(rest, r), []BattleStart{{}, l}, BattleVariants{})
+	if len(set.errs) != 0 {
+		t.Errorf("every battle recorded: %q, want none", set.errs)
 	}
 	// A recorded move two squares long is not one Elegy's rule allows.
 	jump := r

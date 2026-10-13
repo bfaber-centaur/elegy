@@ -12,8 +12,9 @@ import (
 // The RG-002 ledger (engine/testdata/vectors/rg/rg002-ledger.txt) lists
 // every way the reference run of RG-002 (seed variant 0, every recorded
 // order loaded) differs from the original: each mismatched field, each
-// expectation or field not compared, each refused order, and each battle
-// record that does not match (engine TestBattleRecords). TestRG002Ledger
+// expectation or field not compared and each refused order. Each battle
+// record has its own line, matched or not, and so does each battle Elegy
+// fights where the record has none (engine TestBattleRecords). TestRG002Ledger
 // fails on any line the run produces that the ledger lacks and on any
 // ledger line the run no longer produces, so the file is the exact
 // current state, never a skip.
@@ -29,6 +30,9 @@ import (
 //     decide it; the line names how many variants match;
 //   - not compared: an expectation or field the harness does not compare,
 //     with its reason;
+//   - matched: a restart's battle record that matched, saying what was
+//     compared (hits after an answered torpedo roll are conditioned, not
+//     parity);
 //   - unsupported order: an order the loader cannot convert;
 //   - missing mechanic, incorrect mechanic, state-import error: a field
 //     that matches on none of the 8 variants, or an order Elegy refuses,
@@ -130,6 +134,12 @@ func rg002Run(t *testing.T, name string, seed int) (fields map[rg002Field]string
 	fields = map[rg002Field]string{}
 	for _, c := range v.Cases {
 		for i, e := range c.Expect {
+			// A battle record's two expectations get one line per record
+			// from engine TestBattleRecords, which compares them
+			// (battle_ledger_test.go); it fails if a record has none.
+			if e.Kind == "battle" || e.Kind == "battle_actions" {
+				continue
+			}
 			// The expectation's index keeps two alike (two messages)
 			// apart.
 			k := rg002Field{vector: name, where: fmt.Sprintf("%s y%d #%d", c.ID, e.Year, i), object: rg002Describe(e),
@@ -453,11 +463,12 @@ func readBattleLines(t *testing.T, path string) []string {
 }
 
 const rg002LedgerHeader = `# RG-002 discrepancy ledger: every difference of the reference run (seed
-# variant 0, every recorded order loaded) from the original, one per line:
+# variant 0, every recorded order loaded) from the original, one per line,
+# and one line for each battle record, matched or not:
 # class | vector | case and year | object | detail
 # Checked exactly by internal/vectors TestRG002Ledger and, for the
-# "battle" lines, engine TestBattleRecords; see rg002_ledger_test.go for
-# the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
+# "battle record" lines, engine TestBattleRecords; see rg002_ledger_test.go
+# for the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
 #
 # Order coverage (lane F, at stars-elegy fe0ccc5): the 42 order files hold
