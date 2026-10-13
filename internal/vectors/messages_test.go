@@ -139,7 +139,7 @@ func TestMessageCheck(t *testing.T) {
 		{"missing", msg(0, 0x026, true, 1), "message 0x026 to player 0 present = false, want true"},
 		{"not wanted", msg(0, 0x04e, false, 1), "message 0x04e to player 0 present = true, want false"},
 		{"another player's", msg(2, 0x04e, true, 1), "message 0x04e to player 2 present = false, want true"},
-		{"unmapped id", msg(0, 0x0be, true, 1), "skip: message 0x0be has no event mapping"},
+		{"unmapped id", msg(0, 0x117, true, 1), "skip: message 0x117 has no event mapping"},
 		{"alchemy", msg(0, 0x08c, true, 1), ""},
 		{"alchemy, not sent", msg(2, 0x08c, true, 1), "message 0x08c to player 2 present = false, want true"},
 		{"installation order reduced", msg(2, 0x12a, true, 1), ""},
