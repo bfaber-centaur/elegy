@@ -323,8 +323,8 @@ func TestConfirmedStarbaseKeepsDamage(t *testing.T) {
 }
 
 func TestStarbaseDriverSetsPacketSpeed(t *testing.T) {
-	// PRODUCTION-LAUNCH.md "Starbases", mass driver (stars-elegy a1c4c91,
-	// BINARY-ONLY, stars-elegy 86ca470): a starbase with a mass driver built
+	// PRODUCTION-LAUNCH.md "Starbases", mass driver (stars-elegy 35c48f0,
+	// PD-1 CONFIRMED by prediction, PD-1b MEASURED): a starbase with a mass driver built
 	// where there was none sets the planet's packet speed to Dw + t,
 	// whatever it was set to, and keeps the destination; one without a
 	// driver clears the destination and speed; a planet that had a driver

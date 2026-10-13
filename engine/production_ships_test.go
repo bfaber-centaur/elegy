@@ -230,8 +230,8 @@ func TestMeasuredDesignEditQueueBuildsEdited(t *testing.T) {
 }
 
 func TestStarbaseWithoutDriverDropsPacketItems(t *testing.T) {
-	// PRODUCTION-LAUNCH.md "Starbases", mass driver (BINARY-ONLY,
-	// stars-elegy 86ca470): a starbase without a mass driver built where there
+	// PRODUCTION-LAUNCH.md "Starbases", mass driver (stars-elegy 35c48f0,
+	// CONFIRMED by prediction in PD-1; mixed items BINARY-ONLY): a starbase without a mass driver built where there
 	// was none clears the packet destination and speed and silently removes
 	// the queued mineral packet items; Auto Mineral Packets and other items
 	// stay. With a driver on the new starbase, the destination and the
@@ -316,8 +316,9 @@ func TestStarbaseWithoutDriverDropsPacketItems(t *testing.T) {
 }
 
 func TestProductionRefusesUnentitledDesign(t *testing.T) {
-	// PRODUCTION-LAUNCH.md "Can the planet build it" (BINARY-ONLY,
-	// stars-elegy 7419b90): a design holding a part the owner's race may
+	// PRODUCTION-LAUNCH.md "Can the planet build it" (stars-elegy 35c48f0,
+	// CONFIRMED by prediction in FB-1; FB-1's own rows are
+	// TestConfirmedFB1RefusedDesigns): a design holding a part the owner's race may
 	// not use is not built when a unit completes; the owner is told the
 	// plans were lost. The spend is a normal build's. An item with units
 	// left is emptied and production stops at it; it is dropped, with its
@@ -407,9 +408,10 @@ func TestProductionRefusesUnentitledDesign(t *testing.T) {
 }
 
 func TestCanBuildDesign(t *testing.T) {
-	// PRODUCTION-LAUNCH.md "Can the planet build it" (BINARY-ONLY,
-	// stars-elegy 7419b90): the hull and every part researched and allowed
-	// to the race (COMPONENTS.md "Who can build what").
+	// PRODUCTION-LAUNCH.md "Can the planet build it" (stars-elegy 35c48f0):
+	// the hull and every part researched and allowed to the race (parts
+	// CONFIRMED by prediction in FB-1; the research half and the hull rows
+	// BINARY-ONLY) (COMPONENTS.md "Who can build what").
 	g := launchGame(t)
 	c := Components()
 	for _, tt := range []struct {
@@ -469,5 +471,92 @@ func TestStarbaseQueueChangesKeepEarlierItems(t *testing.T) {
 		if !reflect.DeepEqual(p.Queue, tt.want) {
 			t.Errorf("%s: queue %+v, want %+v", tt.name, p.Queue, tt.want)
 		}
+	}
+}
+
+func TestConfirmedFB1RefusedDesigns(t *testing.T) {
+	// PARITY.md FB-1 (CONFIRMED by prediction, stars-elegy 35c48f0): a JOAT
+	// at tech 26 queues designs it may not build (placed by state edit),
+	// FB-1 read the resources spent from the mines built after the item;
+	// here they are what is left for research.
+	scout := func(t *testing.T, extra ...SlotFill) Design {
+		d, err := Components().NewDesign("Scout", "Scout", append([]SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}, extra...))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	setup := func(t *testing.T, d Design) (*Game, *Planet) {
+		g := shipyard(t)
+		g.Players[0].Race.PRT = PRTJackOfAllTrades
+		g.Designs[1] = d // ship slot 1
+		return g, &g.Planets[0]
+	}
+	spent := func(before, after Minerals) Minerals {
+		return Minerals{before[0] - after[0], before[1] - after[1], before[2] - after[2]}
+	}
+	for _, tt := range []struct {
+		name      string
+		d         Design
+		resources int
+		spent     Minerals
+	}{
+		{"a: Gun Scout (Mini Gun, Inner Strength only)", scout(t, SlotFill{Slot: 2, Part: "Mini Gun", Count: 1}), 5, Minerals{2, 5, 2}},
+		{"b: MT Scout (unowned Multi Function Pod)", scout(t, SlotFill{Slot: 2, Part: "Multi Function Pod", Count: 1}), 9, Minerals{4, 1, 4}},
+	} {
+		// One unit from 0%: 0x04f, no fleet, the whole unit cost spent,
+		// and the item removed.
+		g, p := setup(t, tt.d)
+		p.HasQueue, p.Queue = true, []QueueItem{{Kind: ItemShip, Slot: 1, Count: 1}}
+		before := p.Surface
+		left, ev := shipyardRun(g, 0, 200)
+		lost := 0
+		for _, e := range ev {
+			if e.Kind == EventPlansLost {
+				lost++
+			}
+		}
+		if lost != 1 || len(g.Fleets) != 0 || spent(before, p.Surface) != tt.spent || 200-left != tt.resources || p.HasQueue && len(p.Queue) != 0 {
+			t.Errorf("%s: plans lost %d, fleets %d, spent %v and %d resources (want %v and %d), queue %+v", tt.name, lost, len(g.Fleets), spent(before, p.Surface), 200-left, tt.spent, tt.resources, p.Queue)
+		}
+	}
+
+	// d: Gun Scout ×3 with 6 resources (FB-1: "about 6", 39% after):
+	// one unit and the progress on the next spent (2/6/2 kT), no mines, an
+	// empty item left; next year it is dropped and a mine is built.
+	g, p := setup(t, scout(t, SlotFill{Slot: 2, Part: "Mini Gun", Count: 1}))
+	p.HasQueue, p.Queue = true, []QueueItem{{Kind: ItemShip, Slot: 1, Count: 3}, {Kind: ItemMine, Count: 1}}
+	before := p.Surface
+	shipyardRun(g, 0, 6)
+	if got := spent(before, p.Surface); got != (Minerals{2, 6, 2}) || p.Mines != 0 || len(p.Queue) != 2 || p.Queue[0].Count != 0 || p.Queue[0].Percent != 39 {
+		t.Errorf("d, year 1: spent %v, mines %d, queue %+v", got, p.Mines, p.Queue)
+	}
+	before = p.Surface
+	shipyardRun(g, 0, 5)
+	if got := spent(before, p.Surface); got != (Minerals{}) || p.Mines != 1 || p.HasQueue && len(p.Queue) != 0 {
+		t.Errorf("d, year 2: spent %v, mines %d, queue %+v", got, p.Mines, p.Queue)
+	}
+
+	// c: Fort to Fort MD5 (Packet Physics only) from 0%: the Fort kept,
+	// 6/5/5 kT spent, no message of its own.
+	g = shipyard(t)
+	g.Players[0].Race.PRT = PRTJackOfAllTrades
+	md5, err := Components().NewDesign("Fort MD5", "Orbital Fort", []SlotFill{{Slot: 0, Part: "Mass Driver 5", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.Designs[4] = md5 // starbase slot 1
+	p = &g.Planets[0]
+	p.StarbaseDesign, p.StarbaseHull = 3, 1 // an Orbital Fort
+	p.HasQueue, p.Queue = true, []QueueItem{{Kind: ItemStarbase, Slot: 1, Count: 1}}
+	before = p.Surface
+	_, ev := shipyardRun(g, 0, 200)
+	for _, e := range ev {
+		if e.Kind == EventStarbaseBuilt || e.Kind == EventPlansLost {
+			t.Errorf("c: event %+v", e)
+		}
+	}
+	if got := spent(before, p.Surface); got != (Minerals{6, 5, 5}) || p.StarbaseDesign != 3 || p.HasQueue && len(p.Queue) != 0 {
+		t.Errorf("c: spent %v, starbase %d, queue %+v", got, p.StarbaseDesign, p.Queue)
 	}
 }

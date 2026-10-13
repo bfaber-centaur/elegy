@@ -373,10 +373,12 @@ func (g *Game) DockAllows(pi, design int) bool {
 }
 
 // canBuild reports whether owner can build design d now
-// (PRODUCTION-LAUNCH.md "Can the planet build it", BINARY-ONLY, stars-elegy
-// 7419b90): the hull and every part are researched, allowed to the
-// owner's race, and owned when a Mystery Trader item (COMPONENTS.md "Who
-// can build what"). Reading a design in jrc3-faithful checks only the
+// (PRODUCTION-LAUNCH.md "Can the planet build it", stars-elegy 35c48f0):
+// the hull and every part are researched, allowed to the owner's race,
+// and owned when a Mystery Trader item (COMPONENTS.md "Who can build
+// what"). Race-restricted and unowned Mystery Trader parts are CONFIRMED
+// by prediction (FB-1); the research half and a race-restricted hull are
+// BINARY-ONLY. Reading a design in jrc3-faithful checks only the
 // research (Legacy.KeepUnentitledParts), so such a design is stored but
 // is not built.
 func (g *Game) canBuild(owner int, d Design) bool {
@@ -417,17 +419,16 @@ func (g *Game) canBuild(owner int, d Design) bool {
 // Production's queue change when the new hull is earlier in the hull list
 // is in production.go (afterEarlierHull).
 //
-// Mass driver (PRODUCTION-LAUNCH.md "Starbases", stars-elegy a1c4c91,
-// BINARY-ONLY): if the planet had no mass driver before and the new
-// starbase has one, the planet's packet speed is set to the new driver's
-// speed, whatever it was set to. The speed is Dw + t: RG-002 Y4 planet 88
-// built a Station with two Mass Driver 7s on a planet with no starbase and
-// read packet warp 8 (MEASURED, consistent: one observation, stars-elegy
-// 6880639; Dw + t as at launch, BINARY-ONLY, stars-elegy 86ca470). If the
+// Mass driver (PRODUCTION-LAUNCH.md "Starbases", stars-elegy 35c48f0): if
+// the planet had no mass driver before and the new starbase has one, the
+// planet's packet speed is set to Dw + t, whatever it was set to, and the
+// destination is kept (CONFIRMED by prediction, PD-1, one Mass Driver 7;
+// two Mass Driver 7s MEASURED in PD-1b and RG-002 Y4 planet 88). If the
 // planet had no driver and still has none, its packet destination and
-// speed are cleared (BINARY-ONLY, stars-elegy 86ca470); production removes
+// speed are cleared (CONFIRMED by prediction, PD-1); production removes
 // its queued mineral packet items (dropPacketItems). A planet that had a
-// driver keeps its settings.
+// driver keeps its settings (CONFIRMED by prediction, PD-1, for a
+// driverless replacement; MEASURED in PD-1b for a new driver).
 func (g *Game) BuildStarbase(pi, design int) []Event {
 	p := &g.Planets[pi]
 	d := g.Designs[design]

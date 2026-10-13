@@ -520,10 +520,10 @@ func (pr *production) plain(i int, alch bool) bool {
 	done := it.Count == 0
 	if refused && !done {
 		// The owner could not build the design (PRODUCTION-LAUNCH.md "Can
-		// the planet build it", BINARY-ONLY, stars-elegy 7419b90): an item
-		// with units left is emptied; production has stopped at it on the
-		// unit it could not afford, and drops it, with its progress, when
-		// it next reaches it.
+		// the planet build it", stars-elegy 35c48f0, CONFIRMED by
+		// prediction in FB-1): an item with units left is emptied;
+		// production has stopped at it on the unit it could not afford,
+		// and drops it, with its progress, when it next reaches it.
 		it.Count = 0
 	}
 	if earlier {
@@ -641,8 +641,9 @@ func (pr *production) buildStarbase(slot int) (earlier, noDriver, refused bool) 
 
 // dropPacketItems removes the queued mineral packet items after index i,
 // silently, when a starbase without a mass driver is built where there was
-// none (PRODUCTION-LAUNCH.md "Starbases", BINARY-ONLY, stars-elegy 86ca470).
-// Auto Mineral Packets stays.
+// none (PRODUCTION-LAUNCH.md "Starbases", stars-elegy 35c48f0: CONFIRMED by
+// prediction in PD-1 for an Ironium item; mixed items BINARY-ONLY). Auto
+// Mineral Packets stays.
 func (pr *production) dropPacketItems(i int) {
 	q := pr.planet.Queue
 	out := append([]QueueItem(nil), q[:i+1]...)
