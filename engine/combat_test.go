@@ -650,8 +650,8 @@ func combatLabGame(defender Design, attackers, defenders int) Game {
 		},
 		Designs: []Design{att, defender},
 		Fleets: []Fleet{
-			{ID: 1, Owner: 0, Pos: Point{100, 100}, Stacks: []Stack{{Design: 0, Count: attackers}}},
-			{ID: 2, Owner: 1, Pos: Point{100, 100}, Stacks: []Stack{{Design: 1, Count: defenders}}},
+			{ID: 1, Owner: 0, Pos: Point{1100, 1100}, Stacks: []Stack{{Design: 0, Count: attackers}}},
+			{ID: 2, Owner: 1, Pos: Point{1100, 1100}, Stacks: []Stack{{Design: 1, Count: defenders}}},
 		},
 	}
 }
@@ -893,7 +893,7 @@ func TestPredictionBattleTurn(t *testing.T) {
 	if len(a.Game.Fleets) != 1 || a.Game.Fleets[0].Owner != 0 {
 		t.Fatalf("fleets after battle: %+v", a.Game.Fleets)
 	}
-	if len(a.Game.Salvage) != 1 || a.Game.Salvage[0].Pos != (Point{100, 100}) || a.Game.Salvage[0].Minerals == (Minerals{}) {
+	if len(a.Game.Salvage) != 1 || a.Game.Salvage[0].Pos != (Point{1100, 1100}) || a.Game.Salvage[0].Minerals == (Minerals{}) {
 		t.Errorf("salvage %+v", a.Game.Salvage)
 	}
 	battles := 0

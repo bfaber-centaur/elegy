@@ -19,9 +19,18 @@ const (
 // CONFIRMED): a waypoint aimed at a fleet that still exists takes the
 // fleet's current position, whoever owns it now; a waypoint aimed at a
 // fleet that no longer exists becomes a plain go-to at its last
-// coordinates. A planet target never moves. Waypoints are clamped to the
-// galaxy when ordered (ORDERS.md "Waypoint coordinates"), and refreshed
-// positions are fleet positions, so nothing here needs clamping.
+// coordinates. A planet target never moves.
+//
+// Each check first clamps every fleet's position, which is its waypoint
+// 0, into the galaxy box, each axis on its own, with no message and no
+// fuel (ORDERS.md "Waypoint upkeep", "Outside the galaxy"): CONFIRMED by
+// prediction at the start of the year for a stationary fleet (ET-2c fleet
+// K); at the end of the year BINARY-ONLY, fitting ET-2b fleet Q
+// (MEASURED). ASSUMPTION: the checks after objects move (steps 3.2 and
+// 5.1), which KERNEL.md names the same waypoint check, clamp too. Later
+// waypoints are not clamped (BINARY-ONLY): one aimed at a packet outside
+// the box keeps the packet's position. Ordered coordinates are clamped
+// when ordered (ORDERS.md "Waypoint coordinates").
 //
 // A waypoint aimed at a wormhole end or a Mystery Trader takes the
 // object's position the same way, and becomes a plain go-to when the
@@ -43,6 +52,9 @@ const (
 // (BINARY-ONLY; no order sets it) and following fleets (step 1a.3): Elegy
 // does not keep waypoint 0's target, which that rule reads.
 func (g *Game) waypointCheck() {
+	for i := range g.Fleets {
+		g.Fleets[i].Pos = g.clampToGalaxy(g.Fleets[i].Pos)
+	}
 	for i := range g.Fleets {
 		for j := range g.Fleets[i].Waypoints {
 			wp := &g.Fleets[i].Waypoints[j]

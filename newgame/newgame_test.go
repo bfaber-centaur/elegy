@@ -167,6 +167,11 @@ func TestConfirmedPlacementAndSpacing(t *testing.T) {
 		s := Settings{Size: size, Density: Packed, Players: twoPlayers()}
 		res := generate(t, s, 7)
 		w := s.Width()
+		// The game carries its size: the waypoint check's galaxy box is
+		// 1000..1000+W on each axis.
+		if res.Game.Size != int(size) {
+			t.Errorf("size %d: game size %d", size, res.Game.Size)
+		}
 		ps := res.Game.Planets
 		for i, p := range ps {
 			if p.ID != i {

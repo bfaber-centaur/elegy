@@ -88,6 +88,10 @@ func TestSalvageWaypointInTurn(t *testing.T) {
 // the packet is not told anything more.
 func TestPacketTransportLoadsInTurn(t *testing.T) {
 	l := newLab(t)
+	// A large galaxy, 1000..2600, with the layout moved inside it.
+	l.g.Size = 3
+	at := func(dx, dy int) engine.Point { return engine.Point{X: 1100 + dx, Y: 1700 + dy} }
+	origin := at(0, 0)
 	l.g.Planets = []engine.Planet{{ID: 7, Pos: at(900, 0), Owner: engine.NoOwner}}
 	l.g.Objects = &Space{Packets: []Packet{
 		{Owner: 1, Number: 2, Pos: origin, Target: 7, Warp: 10, Cargo: engine.Minerals{100, 0, 0}},
@@ -189,6 +193,9 @@ func TestPacketTransportLoadsInTurn(t *testing.T) {
 // space objects' rules.)
 func TestSalvageTransportWithoutObjects(t *testing.T) {
 	l := newLab(t)
+	// A large galaxy, 1000..2600, with the layout moved inside it.
+	l.g.Size = 3
+	at := func(dx, dy int) engine.Point { return engine.Point{X: 1100 + dx, Y: 1700 + dy} }
 	l.g.Objects = nil
 	l.g.Salvage = []engine.Salvage{{Pos: at(0, 500), Owner: 1, Number: 0, Minerals: engine.Minerals{60, 0, 0}, Steps: 6, Fresh: true}}
 	load := engine.Task{Kind: engine.TaskTransport}
