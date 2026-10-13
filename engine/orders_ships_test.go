@@ -74,6 +74,38 @@ func TestConfirmedMoveShips(t *testing.T) {
 	}
 }
 
+func TestMeasuredMoveShipsDamage(t *testing.T) {
+	// RG-003 2474 (MEASURED, one ship move): 3 ships at 275 units and
+	// 100% join 3 at 292 units and 67%. The record holds 235 units,
+	// ceil((3·275 + 2·292)/6), and 84%, ceil(100·5/6): the Merge with
+	// Fleet task's dilution, not the merge order's floor(1409/5) = 281.
+	// That ship moves use the task's routine is inferred from this
+	// outcome, so the off case is inferred too: with Legacy.MergeDilution
+	// off, the task's rule divides by the damaged ships, rounding up:
+	// ceil(1409/5) = 282.
+	for _, c := range []struct {
+		dilution bool
+		want     Damage
+	}{{true, Damage{Pct: 84, Units: 235}}, {false, Damage{Pct: 84, Units: 282}}} {
+		g := shipsGame()
+		g.Rules.Legacy.MergeDilution = c.dilution
+		g.Fleets[0].Stacks = []Stack{{Design: 1, Count: 3, Damage: Damage{Pct: 100, Units: 275}}}
+		g.Fleets[1].Stacks = []Stack{{Design: 1, Count: 3, Damage: Damage{Pct: 67, Units: 292}}}
+		if errs, _ := apply(g, 0, MoveShipsOrder{Fleet: 2, With: 1, Ships: []Stack{{Design: 1, Count: 3}}}); errs[0] != nil {
+			t.Fatal(errs)
+		}
+		var b Fleet
+		for _, f := range g.Fleets {
+			if f.Owner == 0 && f.Number == 2 {
+				b = f
+			}
+		}
+		if len(b.Stacks) != 1 || b.Stacks[0].Count != 6 || b.Stacks[0].Damage != c.want {
+			t.Errorf("dilution %v: stacks %+v, want 6 ships at %+v", c.dilution, b.Stacks, c.want)
+		}
+	}
+}
+
 func TestMoveShipsChecks(t *testing.T) {
 	// More ships than the fleet has, a fleet elsewhere, another player's
 	// fleet and a design named twice are refused; a fleet emptied by a

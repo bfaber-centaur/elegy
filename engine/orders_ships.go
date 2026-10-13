@@ -152,10 +152,14 @@ func withNewFleets(o Order, names map[int]int) Order {
 // rounding remainder staying with the giver. A stack holds at most 32765
 // ships after a move; the rest are lost (MEASURED CO-06).
 //
-// Moved ships joining ships of their design combine damage by the merge
-// order's rule, the units averaged over the damaged ships and rounded
-// down (ORDERS.md
-// "Merge", CONFIRMED CO-05, CO-05b, CO-05c).
+// Moved ships joining ships of their design combine damage by the Merge
+// with Fleet task's rule (Game.taskMergeRule): with Legacy.MergeDilution
+// on, the units are divided by all ships of the stack, rounded up.
+// MEASURED: the RG-003 2474 outcome, one ship move (3 ships at 275 units
+// and 100% joined 3 at 292 units and 67%, giving 235 units,
+// ceil(1409/6), and 84%); the merge order's own rule (floor over the
+// damaged ships, CONFIRMED CO-05) would give 281. Inferred: that ship
+// moves use the task's routine, and so its rule with the switch off.
 //
 // ASSUMPTION L22: the moved ships of a damaged stack keep its damage
 // percentage and units, as do the ships left behind; ORDERS.md does not
@@ -297,7 +301,7 @@ func (g *Game) moveShips(from, to int, ships []Stack) {
 			j = g.insertStack(dst, moved)
 		} else {
 			d := &dst.Stacks[j]
-			d.Damage = mergeDamage(*d, moved, mergeOrderDamaged)
+			d.Damage = mergeDamage(*d, moved, g.taskMergeRule())
 			d.Count += moved.Count
 		}
 		dst.Stacks[j].Count = min(dst.Stacks[j].Count, maxExchangeStack)
