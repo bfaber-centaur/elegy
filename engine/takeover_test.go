@@ -283,6 +283,62 @@ func TestConfirmedGroundCombat(t *testing.T) {
 	}
 }
 
+func TestConfirmedGroundCombatGC1(t *testing.T) {
+	// GC-1 (stars-elegy 5962b72, CONFIRMED by prediction, 2 of 2
+	// streams): ten Neutron Shields, player 0 drops 395 and 165 (drop
+	// strengths 329 and 137; one strength from 560 would be 467). C and
+	// C2 capture a planet of 329 and land 164 in either order (per player
+	// 165, one after another 166 with 395 first); R is repelled by 600
+	// and loses 466 (per player 467).
+	for _, tt := range []struct {
+		name        string
+		pop         int
+		drops       []int
+		owner, want int
+	}{
+		{"C, 395 first", 329, []int{395, 165}, 0, 164},
+		{"C2, 165 first", 329, []int{165, 395}, 0, 164},
+		{"R, 395 first", 600, []int{395, 165}, 1, 134},
+	} {
+		l, pi := groundLab(t, 26, tt.pop, 10)
+		var q []drop
+		for _, n := range tt.drops {
+			q = append(q, drop{pi, 0, n})
+		}
+		l.g.resolveQueue(q, &seqRand{}, map[int]bool{})
+		p := l.g.Planets[pi]
+		if p.Owner != tt.owner || p.Population != tt.want {
+			t.Errorf("%s: owner %d pop %d, want %d and %d", tt.name, p.Owner, p.Population, tt.owner, tt.want)
+		}
+	}
+}
+
+func TestMeasuredGroundCombatPerDrop(t *testing.T) {
+	// RG-003-Y7-2469 planet 51 (MEASURED, TAKEOVER.md "Ground combat"
+	// step 2): ten Neutron Shields, s' ≈ 0.75911, and population 15542
+	// after growth. Player 0's drops of 250 and 300 are repelled and kill
+	// ⌊275·s'⌋ + ⌊330·s'⌋ = 208 + 250 = 458, leaving 15084. One drop of
+	// 550 has strength ⌊605·s'⌋ = 459, leaving 15083. The inner floor
+	// is BINARY-ONLY: a drop of 16 has strength ⌊17·s'⌋ = 12, not
+	// ⌊17.6·s'⌋ = 13.
+	for _, tt := range []struct {
+		name  string
+		drops []int
+		want  int
+	}{{"two drops", []int{250, 300}, 15084}, {"one drop", []int{550}, 15083}, {"inner floor (BINARY-ONLY)", []int{16}, 15530}} {
+		l, pi := groundLab(t, 26, 15542, 10)
+		var q []drop
+		for _, n := range tt.drops {
+			q = append(q, drop{pi, 0, n})
+		}
+		l.g.resolveQueue(q, panicRand{}, map[int]bool{})
+		p := l.g.Planets[pi]
+		if p.Owner != 1 || p.Population != tt.want {
+			t.Errorf("%s: owner %d pop %d, want 1 and %d", tt.name, p.Owner, p.Population, tt.want)
+		}
+	}
+}
+
 func TestConfirmedSeveralPlayersDrop(t *testing.T) {
 	// T-32 (LEGACY BUG): colony ships of 25 and 12 units on an unowned
 	// planet. A lower-index winner is not reduced; a higher-index winner

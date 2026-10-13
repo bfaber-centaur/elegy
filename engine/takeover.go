@@ -1097,13 +1097,13 @@ func (g *Game) resolveQueue(queue []drop, rng Rand, gained map[int]bool) []Event
 			continue
 		}
 		done[d.planet] = true
-		troops := make([]int, len(g.Players))
+		var drops []drop
 		for _, e := range queue {
 			if e.planet == d.planet {
-				troops[e.player] += e.troops
+				drops = append(drops, e)
 			}
 		}
-		events = append(events, g.resolveDrops(d.planet, troops, rng, gained)...)
+		events = append(events, g.resolveDrops(d.planet, drops, rng, gained)...)
 	}
 	return events
 }
@@ -1121,22 +1121,36 @@ func groundStrength(r Race) int {
 	return 110
 }
 
-// resolveDrops resolves every drop on one planet, troops by player
-// (TAKEOVER.md "Ground combat", CONFIRMED T-21..T-25, and "Several
-// players dropping at once", LEGACY BUG, CONFIRMED T-32). A capture of
-// an owned planet gives the winner one tech attempt against the old
-// owner's levels (TAKEOVER.md "Capture", BINARY-ONLY). A planet owned
-// afterwards gives up its ancient artifact (findArtifact).
-func (g *Game) resolveDrops(pi int, troops []int, rng Rand, gained map[int]bool) []Event {
+// resolveDrops resolves every drop on one planet together (TAKEOVER.md
+// "Ground combat", CONFIRMED T-21..T-25, and "Several players dropping
+// at once", LEGACY BUG, CONFIRMED T-32). A capture of an owned planet
+// gives the winner one tech attempt against the old owner's levels
+// (TAKEOVER.md "Capture", BINARY-ONLY). A planet owned afterwards gives
+// up its ancient artifact (findArtifact).
+//
+// Each drop's strength is ⌊⌊c·k/100⌋·s'⌋, and a player's strength is
+// the sum over its drops (TAKEOVER.md "Ground combat" step 2, corrected
+// in stars-elegy #195). Per drop and pooled, against one strength per
+// player and against resolving the drops one after another, is CONFIRMED
+// by prediction for one attacker with two drops against a non-IS
+// defender (GC-1, stars-elegy 5962b72, 2 of 2 streams); several
+// attackers, three or more drops and IS defenders are NOT RUN. The outer
+// floor per drop is also MEASURED (RG-003-Y7-2469, planet 51: drops of
+// 250 and 300 kill 208 + 250 = 458, where one strength from 550 would
+// kill 459). Which floor GC-1 takes per drop is BINARY-ONLY.
+func (g *Game) resolveDrops(pi int, drops []drop, rng Rand, gained map[int]bool) []Event {
 	p := &g.Planets[pi]
 	s, _ := g.survival(p)
 	s2 := s + (1-s)/4 // defenses are 75% as effective against troops
+	troops := make([]int, len(g.Players))
 	strength := make([]int, len(g.Players))
 	sum := 0
-	for q, t := range troops {
-		if t > 0 {
-			strength[q] = int(float64(t*groundStrength(g.Players[q].Race)/100) * float64(s2))
-			sum += strength[q]
+	for _, d := range drops {
+		if d.troops > 0 {
+			st := int(float64(d.troops*groundStrength(g.Players[d.player].Race)/100) * float64(s2))
+			troops[d.player] += d.troops
+			strength[d.player] += st
+			sum += st
 		}
 	}
 
