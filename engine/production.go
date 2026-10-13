@@ -848,15 +848,17 @@ func (pr *production) boughtEvent(at int) {
 }
 
 // alchemize converts the remaining resources into whole alchemy units and
-// leaves a Mineral Alchemy ×1 partial at the queue front for the rest.
+// leaves a Mineral Alchemy ×1 partial at the queue front for the rest,
+// also when nothing is left (stars-elegy PARITY.md "Production queue"
+// rules: the partial is left unconditionally; MEASURED once with 0
+// resources left, RG-003 2472 planet 22: Mineral Alchemy @3% at rate 25,
+// the partial-percentage formula's value for 0).
 func (pr *production) alchemize() {
 	rate := pr.cost(ItemMineralAlchemy).Resources
 	units := pr.r / rate
 	pr.r -= units * rate
 	pr.complete(ItemMineralAlchemy, units)
-	if pr.r > 0 {
-		pct := pr.partial(pr.cost(ItemMineralAlchemy), 0)
-		pr.insertFront(QueueItem{Kind: ItemMineralAlchemy, Count: 1, Percent: pct})
-		pr.stopped = true
-	}
+	pct := pr.partial(pr.cost(ItemMineralAlchemy), 0)
+	pr.insertFront(QueueItem{Kind: ItemMineralAlchemy, Count: 1, Percent: pct})
+	pr.stopped = true
 }

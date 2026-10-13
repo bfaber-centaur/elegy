@@ -202,7 +202,7 @@ sample | rg002 | RG-002-2465 y3 #282 | production_queue planet=18 | queue = [{3 
 sample | rg002 | RG-002-2465 y3 #285 | production_queue planet=22 | queue = [{3 1 31 0} {7 1 0 0}], want [{3 1 15 0} {7 1 0 0}]
 sample | rg002 | RG-002-2465 y3 #288 | production_queue planet=30 | queue = [{3 1 79 0} {7 1 0 0} {9 1 38 7}], want [{3 1 63 0} {7 1 0 0} {9 1 39 7}]
 sample | rg002 | RG-002-2465 y3 #292 | production_queue planet=35 | queue = [{8 1 49 14} {8 4 0 12} {9 1 0 9}], want [{8 1 48 14} {8 4 0 12} {9 1 0 9}]
-sample | rg002 | RG-002-2465 y3 #294 | production_queue planet=37 | queue = [{7 1 0 0}], want [{3 1 87 0} {7 1 0 0}]
+sample | rg002 | RG-002-2465 y3 #294 | production_queue planet=37 | queue = [{3 1 3 0} {7 1 0 0}], want [{3 1 87 0} {7 1 0 0}]
 sample | rg002 | RG-002-2465 y3 #296 | production_queue planet=39 | queue = [{3 1 19 0} {7 1 0 0} {9 1 32 7}], want [{3 1 39 0} {7 1 0 0} {9 1 31 7}]
 sample | rg002 | RG-002-2465 y3 #298 | production_queue planet=41 | queue = [{3 1 51 0} {7 1 0 0}], want [{3 1 67 0} {7 1 0 0}]
 sample | rg002 | RG-002-2465 y3 #316 | production_queue planet=78 | queue = [{9 1 1 5}], want [{9 1 9 5}]
