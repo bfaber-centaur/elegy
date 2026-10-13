@@ -331,11 +331,14 @@ func (g *Game) emptyPlanet(pi int) Event {
 }
 
 // newColony gives an empty planet to player with pop units (TAKEOVER.md
-// "Colonization"): the owner's default production queue, less the first
-// three items for Alternate Reality and the fifth and sixth for Claim
-// Adjuster, and the owner's default leftover setting (BINARY-ONLY). An
-// Alternate Reality colony gets a starbase of the owner's first starbase
-// design (CONFIRMED T-26, T-33; PARITY.md: starbase design 0).
+// "Colonization"): the owner's default production queue in queue order,
+// skipping auto mines, auto factories and auto defenses (items 0–2) for
+// Alternate Reality and auto minimum and maximum terraform (items 4–5)
+// for Claim Adjuster wherever they stand in the queue, and the owner's
+// default leftover setting (CONFIRMED T-26; PARITY.md "Default queue and
+// leftover setting"). An Alternate Reality colony gets a starbase of the
+// owner's first starbase design (CONFIRMED T-26, T-33; PARITY.md:
+// starbase design 0).
 //
 // ASSUMPTION T3: "first" is the design in the owner's lowest occupied
 // starbase slot, so with slot 0 empty the next slot's design is used;
@@ -350,10 +353,10 @@ func (g *Game) newColony(pi, player, pop int) Event {
 	pl := &g.Players[player]
 	p.Owner, p.Population = player, pop
 	p.HasQueue, p.Queue = true, nil
-	for i, it := range pl.DefaultQueue {
+	for _, it := range pl.DefaultQueue {
 		switch {
-		case pl.Race.PRT == PRTAlternateReality && i < 3,
-			pl.Race.PRT == PRTClaimAdjuster && (i == 4 || i == 5):
+		case pl.Race.PRT == PRTAlternateReality && (it.Kind == ItemAutoMines || it.Kind == ItemAutoFactories || it.Kind == ItemAutoDefenses),
+			pl.Race.PRT == PRTClaimAdjuster && (it.Kind == ItemAutoMinTerraform || it.Kind == ItemAutoMaxTerraform):
 			continue
 		}
 		p.Queue = append(p.Queue, it)
