@@ -24,6 +24,8 @@ func pvMessageIDs() map[int]string {
 		0x036: "EventBuilt of factories, more than one (merge rule)",
 		0x037: "EventBuilt of mines, one in all (merge rule)",
 		0x038: "EventBuilt of mines, more than one (merge rule)",
+		0x03e: "EventQueueCompleted",
+		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
 		0x050: "EventLevelUp, a player without Generalized Research",
 		0x05b: "EventFleetScrapped in deep space",
@@ -121,6 +123,10 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 			send(ev.Player, 0x04e)
 		case engine.EventOvercrowded:
 			send(ev.Player, 0x026)
+		case engine.EventQueueCompleted:
+			send(ev.Player, 0x03e)
+		case engine.EventNoQueue:
+			send(ev.Player, 0x03f)
 		case engine.EventLevelUp:
 			if ev.Player >= 0 && ev.Player < len(g.Players) && !g.Players[ev.Player].Race.LRT.GeneralizedResearch {
 				send(ev.Player, 0x050)
@@ -173,6 +179,10 @@ func (l *pvLoaded) messageCheck(g *engine.Game, e pvExpect) string {
 	}
 	if l.queued[player] && id >= 0x035 && id <= 0x038 {
 		return "skip: a build message from a production queue not loaded"
+	}
+	if l.queued[player] && (id == 0x03e || id == 0x03f) {
+		// A planet whose queue the harness cannot load runs with none.
+		return "skip: a queue message from a production queue not loaded"
 	}
 	if e.Year >= len(l.events) {
 		return "skip: no events for the year"
