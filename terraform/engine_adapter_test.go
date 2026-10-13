@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -40,8 +41,16 @@ func TestConfirmedTerraformItemClipAndClicks(t *testing.T) {
 	if p.Env != [3]int{58, 50, 50} || len(p.Queue) != 1 || p.Queue[0].Count != 1 || p.Queue[0].Percent != 50 {
 		t.Errorf("env %v, queue %+v", p.Env, p.Queue)
 	}
-	if len(ev) < 2 || ev[0].Kind != engine.EventOrderClipped || ev[0].Count != 3 || ev[1].Kind != engine.EventBuilt || ev[1].Item != engine.ItemTerraform || ev[1].Count != 2 {
-		t.Errorf("events %+v", ev)
+	// One 0x07b per click, gravity down to 59 then 58 (MESSAGES.md 0x07b,
+	// KX-002 T1: params [7 0 0 59] and [7 0 0 58]).
+	if len(ev) < 3 || ev[0].Kind != engine.EventOrderClipped || ev[0].Count != 3 {
+		t.Fatalf("events %+v", ev)
+	}
+	for i, v := range []int{59, 58} {
+		e := ev[1+i]
+		if e.Kind != engine.EventTerraformed || e.Player != 0 || e.Planet != p.ID || e.Count != -1 || !slices.Equal(e.Axes, []int{0, v}) {
+			t.Errorf("click %d: %+v, want gravity −1 to %d", i, e, v)
+		}
 	}
 }
 
