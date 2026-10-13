@@ -1202,13 +1202,13 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #464 | player id=5 seen_by=5 | score_recor
 sample | rg002-y5 | RG-002-Y5-2467 y1 #47 | fleet owner=1 id=47 | cargo.boranium = 252, want 253
 sample | rg002-y5 | RG-002-Y5-2467 y1 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg002-y6 | RG-002-Y6-2468 y1 #114 | fleet owner=3 id=2 | fleet gone
-random-driven | rg002-y6 | RG-002-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (2/8 variants match)
+random-driven [lane D]: the target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target; it survives on seeds 1 and 5, where the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample | rg002-y6 | RG-002-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (2/8 variants match)
 sample | rg002-y6 | RG-002-Y6-2468 y1 #225 | planet id=29 | surface_minerals = [9 24 7], want [9 23 7]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #250 | planet id=49 | starbase = design 102 damage 0, want design 102 damage 390
 sample | rg002-y6 | RG-002-Y6-2468 y1 #281 | planet id=79 | surface_minerals = [2 2193 2136], want [1 2193 2135]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #289 | planet id=85 | surface_minerals = [1886 0 1235], want [1884 0 1233]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #305 | planet id=100 | starbase = design 51 damage 39, want design 51 damage 26
-random-driven | rg002-y6 | RG-002-Y6-2468 y1 #307 | planet id=102 | surface_minerals = [666 1249 0], want [668 1251 0] (1/8 variants match)
+random-driven [economy]: mining's +1 draw (KERNEL.md "Mining", BINARY-ONLY): germanium enters production at 54 kT on seed 0 and 53 kT on seed 7, the only seed that matches; germanium limits the ship in production, so ironium and boranium spent follow it | rg002-y6 | RG-002-Y6-2468 y1 #307 | planet id=102 | surface_minerals = [666 1249 0], want [668 1251 0] (1/8 variants match)
 sample | rg002-y6 | RG-002-Y6-2468 y1 #312 | planet id=106 | surface_minerals = [384 165 3], want [381 165 1]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #320 | planet id=114 | environment = [50 20 9], want [50 21 9]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #320 | planet id=114 | original_environment = [53 16 5], want [53 17 5]
@@ -1217,7 +1217,7 @@ sample | rg002-y6 | RG-002-Y6-2468 y1 #338 | player id=5 | research_accumulated.
 sample | rg002-y6 | RG-002-Y6-2468 y1 #377 | production_queue planet=79 | queue = [{8 1 69 13} {8 1 0 14} {8 1 0 14}], want [{8 1 70 13} {8 1 0 14} {8 1 0 14}]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #381 | production_queue planet=85 | queue = [{8 1 81 13} {8 1 0 3}], want [{8 1 83 13} {8 1 0 3}]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #390 | production_queue planet=101 | queue = [{8 1 8 1} {8 2 0 6} {8 2 0 7}], want [{8 1 3 1} {8 2 0 6} {8 2 0 7}]
-random-driven | rg002-y6 | RG-002-Y6-2468 y1 #391 | production_queue planet=102 | queue = [{8 1 99 14}], want [{8 1 93 14}] (1/8 variants match)
+random-driven [economy]: follows planet 102's germanium mining +1 draw (53 kT on seed 7 gives 93%, 54 kT gives 99%) | rg002-y6 | RG-002-Y6-2468 y1 #391 | production_queue planet=102 | queue = [{8 1 99 14}], want [{8 1 93 14}] (1/8 variants match)
 sample | rg002-y6 | RG-002-Y6-2468 y1 #393 | production_queue planet=106 | queue = [{9 1 95 5}], want [{9 1 96 5}]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #4 | fleet owner=1 id=3 | cargo.boranium = 107, want 108
 sample | rg002-y6 | RG-002-Y6-2468 y1 #4 | fleet owner=1 id=3 | cargo.ironium = 143, want 142

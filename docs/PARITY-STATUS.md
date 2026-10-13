@@ -369,6 +369,18 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 | y4 | fleets 10 and 23 (player 6) | 5 | The original numbers the new fleets at planets 11 and 57 as 10 and 23. Elegy puts fleet 23 at planet 11 and has no fleet 10. Cause not traced. | lane A |
 | y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
 
+### RG-002 and RG-003 year 6 rebuilt (stars-elegy #206, DA-1)
+
+stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`rg002.json`, `rg002-y6.json`, `rg003.json`, `rg003-y6.json`). The alternative-stream host file behind them had been truncated mid-write, which flagged 459 of year 6's 476 expectations as samples; the rebuilt year has 493, 82 of them samples, so 394 expectations became strict. The four files are copied verbatim. RG-002 and RG-003 move identically.
+- **No new deterministic miss.** Every newly strict expectation matches on the reference seed except three, and each of those matches on some seed variant.
+- **The three, in the Y6 restart, each with the draw behind it** (`random-driven [owner]: evidence`; the vectors ledger now accepts that form on a random-driven line, as the battle ledger does since #229):
+  - **fleet 6/12, waypoint 1 (lane D):** its target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target. On seeds 1 and 5 the fleet survives and the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample.
+  - **planet 102, surface minerals (economy):** mining's +1 draw (KERNEL.md "Mining", BINARY-ONLY). Germanium enters production at 54 kT on seed 0 and 53 kT on seed 7, the only seed that matches. Germanium limits the ship being built, so the ironium and boranium spent follow it (666/1249 against 668/1251).
+  - **planet 102, production queue (economy):** follows the same draw: 53 kT gives 93%, as recorded, and 54 kT gives 99%.
+- **Samples:** two new sample lines in the restart (planets 29 and 79, surface minerals) and two in the chained run (planets 29 and 85).
+- **Baseline:** RG-002-Y6-2468 and RG-003-Y6-2468 leave it. They passed only because every year-6 miss was a sample; with the three lines above strict, the reference seed fails them. This is the honest result of the rebuild, not a regression.
+- **Census:** "sample: one stream's random outcome" 2241 → 2001.
+
 ### Planet records without installations block
 
 stars-elegy ORACLE.md (main `1d4c97b`, the `dump` notes) says: "The game omits a planet's 8-byte installations block when growth carry, mines, factories, defenses and the leftover-only box are all 0 and there is no scanner." The vector diff then writes null for `excess`, `mines`, `factories`, `defenses`, `planetary_scanner` and `leftover_to_research` where the start state had them. The comparator used to skip those fields as "planet field … null". It now reads them as 0, no scanner and false whenever the record has a population, and compares them. The sentence names all six fields (DOCUMENTED). Reading a missing block as those values is its converse, which is an ASSUMPTION: that the block is written whenever any of them is non-zero. Every field read this way matches except one (corrected below). A record whose population is also null stays skipped. The second ORACLE.md note ("Populations above 0 with no mines, factories, defenses or carry are written without an installations section") covers populated planets only, so it says nothing about such a record. Measured on elegy main `7c4f6b0` (#227):
