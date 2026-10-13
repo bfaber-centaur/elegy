@@ -229,7 +229,9 @@ const (
 // EventMinefieldSwept is the field owner's side of EventMinesSwept
 // (MESSAGES.md 0x0be, CONFIRMED ob/ob010, mf/mf01): Player = the field's
 // owner, Fleet or Planet = the sweeper's (as EventMinesSwept), Count =
-// mines swept. One per sweeper per field, right after the sweeper's.
+// mines swept. It comes right after the sweeper's, one per sweeper per
+// field (BINARY-ONLY: MESSAGES.md "Duplicates" cites no run with two
+// sweepers in one field).
 const EventMinefieldSwept EventKind = EventTerraformed + 1
 
 // loseFollowers turns other players' waypoints aimed at fleet f into
