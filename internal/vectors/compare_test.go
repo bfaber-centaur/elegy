@@ -79,6 +79,35 @@ func TestPlanetMismatchBesideSkip(t *testing.T) {
 	pvWant(t, "match", msg, "", "planet field aaa")
 }
 
+// A planet record written without its installations block (stars-elegy
+// ORACLE.md) leaves its carry, installations, scanner and leftover box
+// null in an expectation: they are 0, none and false. A record with no
+// population at all is still skipped.
+func TestPlanetInstallationsOmitted(t *testing.T) {
+	p := engine.Planet{ID: 5, Owner: 0, Population: 100}
+	l := pvLoaded{g: engine.Game{Planets: []engine.Planet{p}}}
+	omitted := `{"population": 100, "excess": null, "mines": null, "factories": null, "defenses": null, "planetary_scanner": null, "leftover_to_research": null}`
+	pvWant(t, "all zero", l.planetEquals(nil, &p, pvEq(t, omitted), nil), "", "")
+	for _, c := range []struct {
+		name     string
+		set      func(*engine.Planet)
+		mismatch string
+	}{
+		{"carry", func(p *engine.Planet) { p.GrowthCarry = 3 }, "excess = 3, want 0"},
+		{"mines", func(p *engine.Planet) { p.Mines = 4 }, "mines = 4, want 0"},
+		{"factories", func(p *engine.Planet) { p.Factories = 5 }, "factories = 5, want 0"},
+		{"defenses", func(p *engine.Planet) { p.Defenses = 6 }, "defenses = 6, want 0"},
+		{"scanner", func(p *engine.Planet) { p.HasScanner = true }, "planetary_scanner = a scanner, want none"},
+		{"leftover", func(p *engine.Planet) { p.LeftoverOnly = true }, "leftover_to_research = true, want false"},
+	} {
+		q := p
+		c.set(&q)
+		pvWant(t, c.name, l.planetEquals(nil, &q, pvEq(t, omitted), nil), c.mismatch, "")
+	}
+	msg := l.planetEquals(nil, &p, pvEq(t, `{"population": null, "defenses": null, "planetary_scanner": null}`), nil)
+	pvWant(t, "no population", msg, "", "planet field defenses null")
+}
+
 func TestPlayerMismatchBesideSkip(t *testing.T) {
 	var l pvLoaded
 	g := &engine.Game{Players: []engine.Player{{}}}
