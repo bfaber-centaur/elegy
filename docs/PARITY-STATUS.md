@@ -315,35 +315,31 @@ Counts are from the reference seed on main `217ab4b`.
 
 ### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `40b27ba` (after #232 WK-1, #234 and #236).
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `6cde505` (after #232 WK-1, #234, #236 and #237 ship moves).
 
 **Totals (5956 lines).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
 | sample | 5300 | 452 | 5752 |
-| matched | 8 | 99 | 107 |
+| matched | 8 | 100 | 108 |
 | not compared | 11 | 12 | 23 |
 | random-driven | 0 | 72 | 72 |
-| incorrect mechanic | 0 | 2 | 2 |
+| incorrect mechanic | 0 | 1 | 1 |
 
 - **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
 - **Restarts:** "matched" counts battle records.
+- **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
 - **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
 - **stars-elegy #203** adds an `alt_battle` expectation at RG-003 y9 (1388,1386), in the chained run and in the restart. The vectors comparator leaves it to the battle harness, so it stays 2 not-compared lines there. Lane D's #236 consumes it in the battle harness: the extra battle at (1388,1386) is now an ordinary sample, and its random-driven hand line is gone.
 
-**Hand lines (2).** Each is in a restart and misses on all 8 seed variants.
+**Hand line (1).** It is in a restart and misses on all 8 seed variants.
 
 | year | object | class and owner | cause |
 |---|---|---|---|
 | y7 | planet 51 | incorrect mechanic [lane A] | Population 15083, want 15084. The cause is ground combat (the per-drop floor, GC-1), not growth. |
-| y12 | battle (1288,1347) | incorrect mechanic [lane A] | Token 0's damage is 281 units, want 235 (ship-move dilution). It is strict because the record's start is the same in every stream (`start_sample: false`, #229). |
 
-**RG-003 still has 2 deterministic gaps.** Both incorrect-mechanic lines are lane A's. Each maps to a commit in lane A's queued stack:
-- the ship-move change (`67e9acd`) should clear the y12 battle;
-- GC-1 (`fe7f7b5`) should clear planet 51.
-
-These are expectations; a ledger rewrite on each PR will confirm them. These are the only deterministic gaps in compared fields. The 23 not-compared lines stay unjudged, and the section below sorts them by cause and owner.
+**RG-003 still has 1 deterministic gap,** lane A's planet 51. GC-1 (`fe7f7b5`, in lane A's queued stack) is expected to clear it; a ledger rewrite on that PR will confirm. It is the only deterministic gap in compared fields. The 23 not-compared lines stay unjudged, and the section below sorts them by cause and owner.
 
 ### RG-004: a second game, 12 chained years
 
