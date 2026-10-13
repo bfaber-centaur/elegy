@@ -98,7 +98,6 @@
    1 message 0x129 has no event mapping
    2 message 0x12c has no event mapping
    3 message 0x12d has no event mapping
-   1 message 0x136 has no event mapping
    6 message 0x139 has no event mapping
    1 message 0x140 has no event mapping
    2 message 0x141 has no event mapping
@@ -111,7 +110,6 @@
    1 message 0x150 has no event mapping
    5 message 0x156 has no event mapping
    2 message 0x157 has no event mapping
-  20 message 0x159 has no event mapping
    4 message 0x15a has no event mapping
    2 message 0x15c has no event mapping
    2 message 0x15e has no event mapping

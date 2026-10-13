@@ -221,6 +221,15 @@ Measured on elegy main `fd606a1` (#209) plus this branch.
 - The other 2 were one RG-001 planet that was owned at the start of the year and had no owner at its end, counted in two cases. A planet left with no owner takes no default (Elegy clears its queue and setting when it empties, engine `emptyPlanet`), so the harness now compares its queue and `leftover_to_research` as it does an unchanged owner's. Both expectations match on every seed variant.
 - No skip of this kind is left. Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged.
 
+### Research stolen and Generalized Research level messages (economy)
+
+Measured on elegy main `426bb35` (#216) plus this branch.
+
+- **0x159** from the existing `EventResearchStolen`, one per field (MESSAGES.md 0x159 at stars-elegy d89b8a3, CONFIRMED tk2/tk113, KX-003).
+- **0x136** from `EventLevelUp` for a player with Generalized Research, in place of 0x050 (MESSAGES.md 0x136 and "0x050 vs 0x136" at d89b8a3; the id is BINARY-ONLY there, and this vector match is its first comparison here).
+- **Other corpora:** 21 expectations that were skipped as unmapped (0x159 20, 0x136 1) are compared now, and all match on the reference seed. The order check makes 1910 comparisons over the 8 seed variants, up from 1742 on main. 244 of them have 0x159 or 0x136 on one side, and every one holds. Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged.
+- **Not mapped yet: 0x078, 0x145, 0x157** (a level made a ship hull, planetary defense or planetary scanner available). With them mapped, every presence check matches, but the order check fails in KX-003 r2, KX-005 T0–T2 and RG-001 Y4: the vectors list a 0x05f of the same level before the hull or planetary message (energy 5: Temp Terraform ±7 before Missile Battery; construction 2: Robo-Mini-Miner before Mini-Miner). Elegy announces a level's components in table order. The original's order within one level is not in MESSAGES.md, so these ids wait for that rule.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
