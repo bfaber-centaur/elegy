@@ -1747,12 +1747,19 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
 		if string(raw) == "null" && string(eq["population"]) != "null" {
-			// A planet record whose growth carry, mines, factories and
-			// defenses are 0, with no scanner and the leftover-only box
-			// clear, is written without its installations block
-			// (stars-elegy ORACLE.md, the `dump` notes), so the vectors
-			// write null for those fields where the start state had
-			// them. A record with no population at all is not this case.
+			// stars-elegy ORACLE.md (main 1d4c97b, the `dump` notes):
+			// "The game omits a planet's 8-byte installations block when
+			// growth carry, mines, factories, defenses and the
+			// leftover-only box are all 0 and there is no scanner." The
+			// vectors then write null for those fields where the start
+			// state had them. Reading a missing block as those zero
+			// values is the converse of that rule (ASSUMPTION: the block
+			// is written whenever any of them is non-zero); every field
+			// read this way matches. The ORACLE.md note that pins this
+			// to populated planets ("Populations above 0 with no mines,
+			// factories, defenses or carry are written without an
+			// installations section") says nothing about a record whose
+			// population is null too, so that record stays skipped.
 			switch k {
 			case "excess", "mines", "factories", "defenses":
 				raw = json.RawMessage("0")
