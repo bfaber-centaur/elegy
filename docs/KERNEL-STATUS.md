@@ -141,7 +141,11 @@ a1c4c91: MEASURED for an own packet, ET-2, and CONFIRMED by prediction
 for another player's, ET-2c). Only a fleet that reached a waypoint naming
 the packet this year loads from it, and from that packet only, found by
 owner and number; likewise a named salvage object (`namedSource`,
-ASSUMPTION T5 for the cases Elegy cannot name). Not
+T5 in TAKEOVER-STATUS.md for the cases Elegy cannot name). Two of those
+are INCORRECT against NS-1 (stars-elegy a1b3651): a waypoint 0 naming
+salvage or a packet loads from it before movement, over a planet and
+from a packet 40 ly away (CONFIRMED by prediction), where Elegy takes
+the planet or nothing; the NS-1 PR fixes them. Not
 modelled: 0x11e for minefield, wormhole and Trader targets, and the load
 message 0x02b. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,

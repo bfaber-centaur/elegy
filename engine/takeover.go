@@ -775,20 +775,31 @@ func (g *Game) loadSalvage(f *Fleet, after bool, si int) []Event {
 // cargo; with neither, the object is gone and there is no source. Salvage
 // does not move, so the fleet is at it.
 //
-// ASSUMPTION T5, the cases Elegy does not know the target for:
-//   - Waypoint 0's target is not kept from one year to the next, so the
-//     load pass before movement, and the one after movement for a fleet
-//     that did not arrive this year (a "set amount" or "wait for" still
-//     waiting), take a fleet as at a plain position: away from a planet,
-//     the first salvage there, in object order, and never a packet.
-//   - A waypoint at a plain position or a planet that happens to share a
-//     packet's position does not load from the packet.
-//   - A named packet or salvage is the source even at a planet.
-//   - A named packet no longer at the fleet's position is no source: one
-//     launched this year flies on after movement (KERNEL.md step 5.1)
-//     and can leave a fleet that reached it.
-//   - Without space objects (Game.Objects nil) a named object is no
-//     source.
+// T5, the cases Elegy does not know the target for, with their labels
+// against NS-1 (stars-elegy a1b3651, PARITY.md "A transport task whose
+// waypoint names a packet or salvage (NS-1)", ORDERS.md "Clarified
+// 2026-10-13"):
+//   - INCORRECT: waypoint 0's target is not kept from one year to the
+//     next, so the load pass before movement, and the one after movement
+//     for a fleet that did not arrive this year (a "set amount" or "wait
+//     for" still waiting), take a fleet as at a plain position: a planet
+//     first, else the first salvage there, in object order, and never a
+//     packet. NS-1 A3–A6 (CONFIRMED by prediction): a waypoint 0 naming
+//     salvage or a packet over a planet loads from that object before
+//     movement, never from the planet. The NS-1 PR fixes this.
+//   - ASSUMPTION: a waypoint at a plain position or a planet that happens
+//     to share a packet's position does not load from the packet.
+//   - A named packet or salvage is the source even at a planet: CONFIRMED
+//     by prediction for waypoint 0 (NS-1 A3–A6), MEASURED on arrival at
+//     salvage (NS-1 A1, A2).
+//   - INCORRECT: a named packet no longer at the fleet's position is no
+//     source (one launched this year flies on after movement, KERNEL.md
+//     step 5.1, and can leave a fleet that reached it). NS-1 B1, B2
+//     (CONFIRMED by prediction): a waypoint 0 naming a packet 40 ly away
+//     loads from it before movement; other distances, and the pass after
+//     movement, are NOT RUN. The NS-1 PR fixes this.
+//   - ASSUMPTION: without space objects (Game.Objects nil) a named object
+//     is no source.
 func (g *Game) namedSource(f *Fleet) (named bool, si int, cargo *Minerals) {
 	wp, ok := g.reached[f.ID]
 	if !ok || wp.Target != TargetPacketObject {
