@@ -378,8 +378,19 @@ func rg002HandClass(class string) bool {
 // rg002UnresolvedClass reports whether class is the unresolved
 // randomness class with an owner and a reason ("unresolved randomness
 // [lane D]: reason").
-func rg002UnresolvedClass(class string) bool {
-	rest, ok := strings.CutPrefix(class, rg002Unresolved+" [")
+func rg002UnresolvedClass(class string) bool { return rg002OwnedReason(class, rg002Unresolved) }
+
+// rg002RandomEvidenceClass reports whether class is the random-driven
+// class with an owner and the evidence naming the draw behind it
+// ("random-driven [lane D]: evidence"), which a computed random-driven
+// line may carry in place of the bare class (the battle ledger's form,
+// #229).
+func rg002RandomEvidenceClass(class string) bool { return rg002OwnedReason(class, "random-driven") }
+
+// rg002OwnedReason reports whether class is name, an owner in brackets
+// and a reason: "name [owner]: reason".
+func rg002OwnedReason(class, name string) bool {
+	rest, ok := strings.CutPrefix(class, name+" [")
 	if !ok {
 		return false
 	}
@@ -388,7 +399,8 @@ func rg002UnresolvedClass(class string) bool {
 }
 
 // checkLedger compares the run's lines with the ledger's. A computed
-// class must match the ledger's; a hand line takes the ledger's class,
+// class must match the ledger's, except that a random-driven line may
+// carry its owner and evidence; a hand line takes the ledger's class,
 // which must be a hand class with an owner. It returns the lines to
 // write.
 func checkLedger(t testing.TB, got []ledgerLine, ledger map[string]string) []ledgerLine {
@@ -410,6 +422,8 @@ func checkLedger(t testing.TB, got []ledgerLine, ledger map[string]string) []led
 			t.Errorf("ledger line needs a hand class with its owner, has %q: %s", class, l.key)
 			l.class = class
 		case l.class == "":
+			l.class = class
+		case l.class == "random-driven" && rg002RandomEvidenceClass(class):
 			l.class = class
 		case l.class != class:
 			t.Errorf("ledger line is %s, was %s: %s", l.class, class, l.key)
@@ -571,6 +585,11 @@ func TestCheckLedger(t *testing.T) {
 		{"varying line, unresolved without a reason", []ledgerLine{random, fixed, varies}, with("unresolved randomness [lane D]"), 1},
 		{"fixed line, unresolved randomness", []ledgerLine{random, fixed},
 			map[string]string{random.key: "random-driven", fixed.key: "unresolved randomness [lane D]: mining draws"}, 1},
+		{"random line with evidence", []ledgerLine{random, fixed}, map[string]string{random.key: "random-driven [lane D]: battle draw", fixed.key: "incorrect mechanic [lane A]"}, 0},
+		{"random line, evidence without owner", []ledgerLine{random, fixed}, map[string]string{random.key: "random-driven: battle draw", fixed.key: "incorrect mechanic [lane A]"}, 1},
+		{"random line, owner without evidence", []ledgerLine{random, fixed}, map[string]string{random.key: "random-driven [lane D]", fixed.key: "incorrect mechanic [lane A]"}, 1},
+		{"hand line, random evidence", []ledgerLine{random, fixed}, map[string]string{random.key: "random-driven", fixed.key: "random-driven [lane D]: battle draw"}, 1},
+		{"sample line, random evidence", []ledgerLine{{class: "sample", key: random.key}, fixed}, map[string]string{random.key: "random-driven [lane D]: battle draw", fixed.key: "incorrect mechanic [lane A]"}, 1},
 	} {
 		e := &errorCounter{TB: t}
 		if checkLedger(e, c.got, c.ledger); e.errors != c.errors {

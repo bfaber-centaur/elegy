@@ -140,9 +140,8 @@ func resolveGone(g *Game, wp *Waypoint) {
 // is taken when its rand(k) is 0, a uniform choice, and the extra rand(2)
 // is drawn without changing the choice. Waypoints are visited in fleet
 // order, and a fleet is never its own candidate for a waypoint (a
-// follower can be, below). Elegy's fleet ids can be
-// reused (Game.newFleetID): a fleet made later in the replay with the
-// merged fleet's id is chased as itself.
+// follower can be, below). During a generation a fleet made later in
+// the replay never takes the merged fleet's id (Game.newFleetID).
 func (g *Game) chaseMerged(merged, follows map[int]int, rng Rand) {
 	if len(merged) == 0 {
 		return

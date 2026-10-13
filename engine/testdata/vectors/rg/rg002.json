@@ -130379,12 +130379,6 @@
         "count": 1
        }
       ],
-      "cargo": {
-       "ironium": 142,
-       "boranium": 108,
-       "germanium": 0,
-       "colonists": 0
-      },
       "fuel": 155,
       "battle_plan": 4,
       "waypoints": [
@@ -130401,6 +130395,20 @@
         }
        }
       ]
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 3,
+     "equals": {
+      "cargo": {
+       "ironium": 142,
+       "boranium": 108,
+       "germanium": 0,
+       "colonists": 0
+      }
      },
      "year": 6,
      "sample": true
@@ -130463,8 +130471,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130503,8 +130510,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130591,8 +130597,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130664,8 +130669,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130715,8 +130719,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet_gone",
@@ -130771,8 +130774,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130836,8 +130838,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130901,8 +130902,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -130962,8 +130962,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131023,8 +131022,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131063,8 +131061,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131124,8 +131121,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131189,8 +131185,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131229,8 +131224,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131294,8 +131288,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131367,8 +131360,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131424,8 +131416,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131464,8 +131455,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131518,8 +131508,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131602,8 +131591,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131671,8 +131659,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131732,8 +131719,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131776,8 +131762,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131800,7 +131785,15 @@
        "colonists": 0
       },
       "fuel": 840,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 32,
+     "equals": {
       "waypoints": [
        {
         "x": 1358,
@@ -131883,8 +131876,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -131940,8 +131932,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132001,8 +131992,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132041,8 +132031,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132102,8 +132091,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132163,8 +132151,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132232,8 +132219,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132297,8 +132283,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132321,7 +132306,15 @@
        "colonists": 0
       },
       "fuel": 280,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 42,
+     "equals": {
       "waypoints": [
        {
         "x": 1297,
@@ -132406,8 +132399,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132475,8 +132467,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132576,8 +132567,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132616,8 +132606,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132673,8 +132662,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132713,8 +132701,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132778,8 +132765,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132839,8 +132825,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132896,8 +132881,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132936,8 +132920,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -132976,8 +132959,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133033,8 +133015,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133098,8 +133079,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133163,8 +133143,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133214,8 +133193,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133279,8 +133257,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133336,8 +133313,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133436,8 +133412,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133460,7 +133435,15 @@
        "colonists": 0
       },
       "fuel": 1120,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 65,
+     "equals": {
       "waypoints": [
        {
         "x": 1287,
@@ -133512,7 +133495,15 @@
        "colonists": 0
       },
       "fuel": 280,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 66,
+     "equals": {
       "waypoints": [
        {
         "x": 1321,
@@ -133601,8 +133592,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133666,8 +133656,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133761,8 +133750,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133825,7 +133813,15 @@
        "colonists": 0
       },
       "fuel": 840,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 74,
+     "equals": {
       "waypoints": [
        {
         "x": 1353,
@@ -133893,8 +133889,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133944,8 +133939,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -133984,8 +133978,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134035,8 +134028,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134075,8 +134067,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134127,8 +134118,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134178,8 +134168,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134218,8 +134207,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134269,8 +134257,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134286,12 +134273,6 @@
         "count": 1
        }
       ],
-      "cargo": {
-       "ironium": 220,
-       "boranium": 382,
-       "germanium": 3,
-       "colonists": 0
-      },
       "fuel": 700,
       "battle_plan": 4,
       "waypoints": [
@@ -134308,6 +134289,20 @@
         }
        }
       ]
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 1,
+     "id": 85,
+     "equals": {
+      "cargo": {
+       "ironium": 220,
+       "boranium": 382,
+       "germanium": 3,
+       "colonists": 0
+      }
      },
      "year": 6,
      "sample": true
@@ -134361,8 +134356,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134401,8 +134395,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134441,8 +134434,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134481,8 +134473,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134521,8 +134512,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134561,8 +134551,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134613,8 +134602,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134664,8 +134652,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134727,7 +134714,15 @@
        "colonists": 0
       },
       "fuel": 1254,
-      "battle_plan": 0,
+      "battle_plan": 0
+     },
+     "year": 6
+    },
+    {
+     "kind": "fleet",
+     "owner": 2,
+     "id": 5,
+     "equals": {
       "waypoints": [
        {
         "x": 1284,
@@ -134806,8 +134801,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -134902,8 +134896,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135040,8 +135033,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135092,8 +135084,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135144,8 +135135,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135234,8 +135224,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135274,8 +135263,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135324,8 +135312,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135363,8 +135350,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135415,8 +135401,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135455,8 +135440,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135496,8 +135480,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135546,8 +135529,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135597,8 +135579,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135698,8 +135679,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135749,8 +135729,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet_gone",
@@ -135806,8 +135785,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135856,8 +135834,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135906,8 +135883,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -135956,8 +135932,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136006,8 +135981,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136056,8 +136030,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136096,8 +136069,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136159,8 +136131,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136210,8 +136181,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136261,8 +136231,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136312,8 +136281,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136363,8 +136331,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136414,8 +136381,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136505,8 +136471,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136545,8 +136510,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136596,8 +136560,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136647,8 +136610,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136698,8 +136660,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136749,8 +136710,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136801,8 +136761,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136852,8 +136811,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136903,8 +136861,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -136954,8 +136911,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137005,8 +136961,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137056,8 +137011,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137107,8 +137061,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137158,8 +137111,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137198,8 +137150,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137249,8 +137200,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137339,8 +137289,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137390,8 +137339,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137441,8 +137389,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137492,8 +137439,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137543,8 +137489,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137594,8 +137539,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137634,8 +137578,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137685,8 +137628,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137736,8 +137678,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137777,8 +137718,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137817,8 +137757,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137868,8 +137807,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137919,8 +137857,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -137970,8 +137907,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138021,8 +137957,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138072,8 +138007,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138123,8 +138057,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138174,8 +138107,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138225,8 +138157,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138266,8 +138197,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138307,8 +138237,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138359,8 +138288,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138399,8 +138327,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138439,8 +138366,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138479,8 +138405,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138519,8 +138444,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138559,8 +138483,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138599,8 +138522,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138639,8 +138561,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138679,8 +138600,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138719,8 +138639,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138759,8 +138678,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138799,8 +138717,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138839,8 +138756,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -138934,8 +138850,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -139025,8 +138940,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -139077,8 +138991,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -139128,8 +139041,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -139179,8 +139091,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "fleet",
@@ -139219,8 +139130,7 @@
        }
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "starbase_design",
@@ -139280,8 +139190,7 @@
       ],
       "mass": 630
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "starbase_design",
@@ -139335,8 +139244,7 @@
       ],
       "mass": 628
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "starbase_design",
@@ -139396,8 +139304,7 @@
       ],
       "mass": 1254
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "starbase_design",
@@ -139457,8 +139364,7 @@
       ],
       "mass": 2502
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139476,8 +139382,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139486,8 +139391,7 @@
       "population": 614,
       "excess": 73
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139504,8 +139408,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139533,8 +139436,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139550,8 +139452,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139575,8 +139476,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139598,8 +139498,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139621,8 +139520,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139638,8 +139536,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139657,8 +139554,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139680,8 +139576,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139703,8 +139598,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139721,8 +139615,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139739,8 +139632,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139757,8 +139649,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139767,8 +139658,7 @@
       "population": 1299,
       "excess": 13
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139801,8 +139691,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139824,8 +139713,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139843,8 +139731,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139866,8 +139753,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139884,8 +139770,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139912,8 +139797,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139932,8 +139816,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139954,8 +139837,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -139977,8 +139859,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140000,8 +139881,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140023,8 +139903,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140042,8 +139921,16 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 29,
+     "equals": {
+      "population": 21,
+      "excess": 2
+     },
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140053,15 +139940,19 @@
        9,
        23,
        7
-      ],
-      "population": 21,
-      "excess": 2
-     },
-     "tolerance": {
-      "surface_minerals": 1
+      ]
      },
      "year": 6,
      "sample": true
+    },
+    {
+     "kind": "planet",
+     "id": 30,
+     "equals": {
+      "population": 4129,
+      "excess": 21
+     },
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140071,12 +139962,7 @@
        818,
        406,
        19
-      ],
-      "population": 4129,
-      "excess": 21
-     },
-     "tolerance": {
-      "surface_minerals": 1
+      ]
      },
      "year": 6,
      "sample": true
@@ -140101,8 +139987,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140126,8 +140011,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140154,8 +140038,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140172,8 +140055,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140195,8 +140077,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140218,8 +140099,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140238,8 +140118,7 @@
       "population": 3407,
       "excess": 35
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140277,8 +140156,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140300,8 +140178,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140318,8 +140195,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140346,8 +140222,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140373,8 +140248,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140395,8 +140269,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140420,8 +140293,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140434,8 +140306,7 @@
       "defenses": 0,
       "leftover_to_research": false
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140444,8 +140315,7 @@
       "population": 192,
       "excess": 29
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140483,8 +140353,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140506,8 +140375,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140518,8 +140386,15 @@
        50,
        56
       ],
-      "population": 34,
       "excess": 96
+     },
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 49,
+     "equals": {
+      "population": 34
      },
      "year": 6,
      "sample": true
@@ -140559,8 +140434,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140579,8 +140453,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140605,8 +140478,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140629,8 +140501,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140648,8 +140519,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140664,8 +140534,7 @@
       "excess": 9,
       "mines": 10
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140682,8 +140551,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140700,8 +140568,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140726,8 +140593,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140744,8 +140610,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140765,8 +140630,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140787,8 +140651,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140805,8 +140668,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140830,8 +140692,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140856,8 +140717,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140873,8 +140733,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140901,8 +140760,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140929,8 +140787,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140949,8 +140806,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -140974,8 +140830,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141000,8 +140855,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141024,8 +140878,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141047,8 +140900,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141068,8 +140920,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141090,8 +140941,7 @@
       "factories": 587,
       "packet_destination": 5
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141124,8 +140974,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141145,8 +140994,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141163,8 +141011,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141175,17 +141022,21 @@
        51,
        63
       ],
-      "surface_minerals": [
-       1,
-       2193,
-       2135
-      ],
       "population": 3797,
       "excess": 81,
       "mines": 303
      },
-     "tolerance": {
-      "surface_minerals": 1
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 79,
+     "equals": {
+      "surface_minerals": [
+       1,
+       2193,
+       2135
+      ]
      },
      "year": 6,
      "sample": true
@@ -141210,8 +141061,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141233,8 +141083,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141259,8 +141108,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141284,8 +141132,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141301,17 +141148,21 @@
        50,
        56
       ],
-      "surface_minerals": [
-       209,
-       1,
-       157
-      ],
       "population": 8078,
       "excess": 0,
       "mines": 396
      },
-     "tolerance": {
-      "surface_minerals": 1
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 84,
+     "equals": {
+      "surface_minerals": [
+       209,
+       1,
+       157
+      ]
      },
      "year": 6,
      "sample": true
@@ -141325,17 +141176,21 @@
        9,
        58
       ],
-      "surface_minerals": [
-       1884,
-       0,
-       1233
-      ],
       "population": 3402,
       "excess": 90,
       "mines": 272
      },
-     "tolerance": {
-      "surface_minerals": 1
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 85,
+     "equals": {
+      "surface_minerals": [
+       1884,
+       0,
+       1233
+      ]
      },
      "year": 6,
      "sample": true
@@ -141362,8 +141217,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141378,8 +141232,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141397,8 +141250,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141423,8 +141275,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141442,8 +141293,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141469,8 +141319,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141488,8 +141337,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141512,8 +141360,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141544,8 +141391,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141569,8 +141415,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141595,8 +141440,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141614,8 +141458,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141634,8 +141477,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141652,8 +141494,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141669,8 +141510,7 @@
       "mines": 124,
       "factories": 154
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141718,8 +141558,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141741,8 +141580,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141761,8 +141599,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141786,8 +141623,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141809,8 +141645,16 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 106,
+     "equals": {
+      "population": 2174,
+      "excess": 10
+     },
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141820,12 +141664,7 @@
        381,
        165,
        1
-      ],
-      "population": 2174,
-      "excess": 10
-     },
-     "tolerance": {
-      "surface_minerals": 1
+      ]
      },
      "year": 6,
      "sample": true
@@ -141847,8 +141686,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141870,8 +141708,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141890,8 +141727,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141913,8 +141749,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141932,8 +141767,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141952,8 +141786,22 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
+    },
+    {
+     "kind": "planet",
+     "id": 114,
+     "equals": {
+      "surface_minerals": [
+       147,
+       100,
+       18
+      ]
+     },
+     "tolerance": {
+      "surface_minerals": 1
+     },
+     "year": 6
     },
     {
      "kind": "planet",
@@ -141968,15 +141816,7 @@
        53,
        17,
        5
-      ],
-      "surface_minerals": [
-       147,
-       100,
-       18
       ]
-     },
-     "tolerance": {
-      "surface_minerals": 1
      },
      "year": 6,
      "sample": true
@@ -141998,8 +141838,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142014,8 +141853,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142034,8 +141872,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142059,8 +141896,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142086,8 +141922,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142106,8 +141941,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142124,8 +141958,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142143,8 +141976,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142163,8 +141995,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142183,8 +142014,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "planet",
@@ -142203,8 +142033,7 @@
      "tolerance": {
       "surface_minerals": 1
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "player",
@@ -142220,8 +142049,7 @@
       },
       "research_field": "propulsion"
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "player",
@@ -142276,8 +142104,7 @@
        "biotechnology": 4062
       }
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "player",
@@ -142292,8 +142119,16 @@
        "biotechnology": 814
       }
      },
-     "year": 6,
-     "sample": true
+     "year": 6
+    },
+    {
+     "kind": "player",
+     "id": 5,
+     "equals": {
+      "research_field": "propulsion",
+      "research_next_field": "construction"
+     },
+     "year": 6
     },
     {
      "kind": "player",
@@ -142306,9 +142141,7 @@
        "construction": 0,
        "electronics": 0,
        "biotechnology": 0
-      },
-      "research_field": "propulsion",
-      "research_next_field": "construction"
+      }
      },
      "year": 6,
      "sample": true
@@ -142334,8 +142167,7 @@
        "biotechnology": 513
       }
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142348,8 +142180,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142362,8 +142193,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142376,8 +142206,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142390,8 +142219,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142404,8 +142232,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142418,8 +142245,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142462,8 +142288,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142476,8 +142301,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142490,8 +142314,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142520,8 +142343,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142534,8 +142356,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142548,8 +142369,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142573,8 +142393,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142592,8 +142411,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142636,8 +142454,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142650,8 +142467,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142664,8 +142480,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142694,8 +142509,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142708,8 +142522,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142722,8 +142535,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142752,8 +142564,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142771,8 +142582,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142785,8 +142595,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142804,8 +142613,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142818,8 +142626,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142832,8 +142639,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142846,8 +142652,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142859,8 +142664,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142873,8 +142677,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142887,8 +142690,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142912,8 +142714,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142926,8 +142727,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142940,8 +142740,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142969,8 +142768,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -142988,8 +142786,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143026,8 +142823,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143040,8 +142836,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143087,8 +142882,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143112,8 +142906,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143151,8 +142944,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143165,8 +142957,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143204,8 +142995,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143218,8 +143008,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143232,8 +143021,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143246,8 +143034,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143284,8 +143071,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143326,8 +143112,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143340,8 +143125,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143359,8 +143143,7 @@
        "kind": 1
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143373,8 +143156,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "production_queue",
@@ -143387,8 +143169,7 @@
        "kind": 2
       }
      ],
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143408,8 +143189,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143426,8 +143206,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143444,8 +143223,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143462,8 +143240,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143480,8 +143257,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143498,8 +143274,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143517,8 +143292,7 @@
        6
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143536,8 +143310,7 @@
        6
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143555,8 +143328,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143572,8 +143344,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143589,8 +143360,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143606,8 +143376,7 @@
        5
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "minefield",
@@ -143625,8 +143394,7 @@
        6
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "salvage_at",
@@ -143639,8 +143407,7 @@
        4
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "salvage_at",
@@ -143687,8 +143454,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143707,8 +143473,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143727,8 +143492,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143747,8 +143511,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143767,8 +143530,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143787,8 +143549,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143807,8 +143568,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143827,8 +143587,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143847,8 +143606,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143867,8 +143625,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143887,8 +143644,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143907,8 +143663,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143927,8 +143682,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143947,8 +143701,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143967,8 +143720,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -143987,8 +143739,7 @@
       ],
       "decay_class": 2
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144007,8 +143758,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144027,8 +143777,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144047,8 +143796,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144067,8 +143815,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144087,8 +143834,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144107,8 +143853,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144127,8 +143872,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144147,8 +143891,7 @@
       ],
       "decay_class": 0
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144167,8 +143910,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144187,8 +143929,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "salvage_at",
@@ -144201,8 +143942,7 @@
        4
       ]
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144221,8 +143961,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144241,8 +143980,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144261,8 +143999,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144281,8 +144018,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144301,8 +144037,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144321,8 +144056,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144341,8 +144075,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
@@ -144361,8 +144094,7 @@
       ],
       "decay_class": 3
      },
-     "year": 6,
-     "sample": true
+     "year": 6
     },
     {
      "kind": "object",
