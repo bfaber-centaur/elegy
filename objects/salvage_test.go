@@ -27,6 +27,23 @@ func TestPredictionSalvageDecay(t *testing.T) {
 	}
 }
 
+// E-8 (stars-elegy 96613bb, #190): unmarked salvage loses max(10, ⌊m/10⌋)
+// per non-empty mineral, CONFIRMED by prediction in 4 of 4 streams:
+// 250/50/30 became 225/40/20 and 60/0/0 became 50/0/0 (plain ⌊m/10⌋ would
+// give 225/45/27 and 54/0/0). The battle half is engine's
+// TestConfirmedE8SalvageBesideLyingSalvage.
+func TestConfirmedE8SalvageDecayFloor(t *testing.T) {
+	g := &engine.Game{Rules: engine.ElegyRules(), Salvage: []engine.Salvage{
+		{Owner: 0, Number: 0, Minerals: engine.Minerals{60, 0, 0}},
+		{Owner: 1, Number: 1, Minerals: engine.Minerals{250, 50, 30}},
+	}}
+	DecaySalvage(g)
+	if len(g.Salvage) != 2 || g.Salvage[0].Minerals != (engine.Minerals{50, 0, 0}) || g.Salvage[0].Fresh ||
+		g.Salvage[1].Minerals != (engine.Minerals{225, 40, 20}) || g.Salvage[1].Fresh {
+		t.Errorf("after decay: %+v, want 50/0/0 and 225/40/20, unmarked", g.Salvage)
+	}
+}
+
 // Mine-hit salvage joins the first object at the exact spot, whatever its
 // owner, and marks it; elsewhere a new object of the hit fleet's owner
 // takes a number from its packet pool (OBJECTS.md "Salvage", "Joining
