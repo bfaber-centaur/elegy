@@ -235,7 +235,15 @@ func (g *Game) loadPass(afterMovement bool) []Event {
 				events = append(events, ev)
 			}
 		case f.Task.Kind == TaskTransferFleet && afterMovement:
-			events = append(events, g.transferFleet(i, gone)...)
+			ev := g.transferFleet(i, gone)
+			events = append(events, ev...)
+			// A refused gift cancels the task, and a fleet at its last
+			// waypoint is told it has finished (MESSAGES.md 0x04e (a):
+			// "cancelled by any refusal message"). A fleet given away is
+			// the recipient's new fleet, with no message.
+			if len(ev) > 0 && ev[0].Kind == EventFleetGiftRefused {
+				events = append(events, g.taskEnded(f)...)
+			}
 		}
 	}
 	g.removeFleets(gone)
