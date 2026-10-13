@@ -12,12 +12,12 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 
 ## What we know
 
-- **MEASURED on main `bd5d67b` (#194) plus the messages comparator.**
-  - On the reference seed there are 22 deterministic discrepancies, all missing-mechanic field lines: Y4 planet 88's `packet_warp` (0 in Elegy, 8 in the original; economy) and 21 messages Elegy has no event for (below). Incorrect mechanic, state-import error, unsupported order and unresolved randomness are 0 there.
+- **MEASURED on main `f6beefa` plus the messages comparator.**
+  - On the reference seed there are 21 deterministic discrepancies, all missing-mechanic field lines: messages Elegy has no event for (below). #197 cleared Y4 planet 88's `packet_warp`. Incorrect mechanic, state-import error, unsupported order and unresolved randomness are 0 there.
   - Across the other seed variants there is one incorrect mechanic, an order refused only on variants 1 and 6 (below). It makes 2 ledger lines.
   - The restarts refuse no order, and no strict battle record fails.
   - 30 field lines are random-driven: each matches on some seed variant, not on the reference one.
-  - Everything in the chained run after its first year is a sample. With the restarts' stream-marked random outcomes, samples are 992 fields, 43 refused orders and 16 missed battle records.
+  - Everything in the chained run after its first year is a sample. With the restarts' stream-marked random outcomes, samples are 991 fields, 43 refused orders and 16 missed battle records.
 - #189 (lane A's fleet retargets) and #190 (economy's remote mining) cleared all 78 earlier deterministic lines. RG002-REPORT.md lists them.
 - Planet `packet_destination` and `packet_warp` and player `research_percent` are compared now (#194). A null `packet_destination` stays not compared (ELEGY CHOICE, RG002-REPORT.md).
 - **Messages are compared now** (PARITY-STATUS.md "Messages compared"). RG-002's 68 message lines: 32 match, 15 are samples, and 21 are missing mechanic for ids Elegy sends no event for: economy 10 (0x026, 0x050, 0x05f), lane D 9 (battle summaries) and lane A 2 (0x02e).
@@ -28,7 +28,6 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 
 ## What still matters
 
-- A missing mechanic. Y4 planet 88's starbase with a mass driver completes, and the original's file then has launch warp 8 where Elegy has 0. Economy infers that completing such a starbase sets the packet warp, from this one observation. Owner: economy.
 - Missing messages. Elegy has no event for overcrowding (0x026), a research level (0x050), a new component (0x05f), an unload of colonists (0x02e) or a per-player battle summary (0x095, 0x09f, 0x0a1, 0x116). Owners: economy, lane A and lane D. In other corpora, Elegy also sends no 0x04e after a refused gift at the last waypoint (WU-B1, WU-B2, WU-AICOMP3, WU-AICOMP4). Owner: lane A.
 - Those comparator gaps. Until they are closed, "no deterministic discrepancy" covers only what is compared.
 - Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby). Until then the restarts' random-driven lines and the chained years stay unresolved.
