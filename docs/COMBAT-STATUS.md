@@ -50,7 +50,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Starbase damage; no damage left over after a hit on a starbase; kept through the year | `starbaseDamage`, `finish`, `repair` | CONFIRMED in part (Space Station steps CB-011..015; the stop CB-052); the Death Star's 1500 armor MEASURED as consistent (CB-058: the hits fit 1126–1500); a 500th step, destroyed only at total ≥ armor, MEASURED (CB-056, 2 streams, stars-elegy b0ca924) | `TestConfirmedStarbaseDamageSteps`, `TestPredictionDeathStarDamageSteps`, `TestConfirmedBeamStopsAtStarbase`, `TestRG001StarbaseDamageKept` |
 | Starbase loss: the queue's ship items and non-automatic packet items removed, a starbase item restarts at 0%, planetary items kept (shared with the starbase design delete); AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `starbase_loss.go` `loseStarbase`, `emptyPlanet` | CONFIRMED (ship and planetary items CB-047, AR CB-041); packet items and the starbase restart BINARY-ONLY (PARITY.md "Queued ships after deleting the starbase design", stars-elegy ee47fff) | parity CB-047, `TestConfirmedBattleLossStripsQueue`, `TestPredictionAlternateRealityStarbaseLoss` |
 | Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each; overflow CB-040; fuel share CB-023; cargo share CB-058); numbering across two battles MEASURED (CB-058); empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestConfirmedSalvageOverflow`, `TestConfirmedCB058CargoShare`, `TestMeasuredCB058SalvageTwoPoints`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
-| Battle summaries: one per battle player, by the location's ships and design groups, each side's total and losses, and whether it was hit (stars-elegy MESSAGES.md "Battles and bombing", 0x07e, 0x091–0x0a8, 0x113–0x116) | `combat_summary.go` `battleSummary`, `summaries` (`EventBattleSummary`) | CONFIRMED for 0x07e, 0x091–0x0a1, 0x0a4, 0x0a6–0x0a8, 0x115 and 0x116; 0x0a2, 0x0a3, 0x0a5, 0x113 and 0x114 BINARY-ONLY; a "stack" as one player's ships of one design, whatever fleets hold them: MEASURED (CB-039, CB-048 sent the one-stack texts with many fleets a side); ASSUMPTIONS B1–B4 | `TestBattleSummaryRules`, `TestConfirmedBattleSummaryDesignGroups`, `TestBattleSummaryStarbase`, parity CB-048, CB-049, SC-036, RG-002 |
+| Battle summaries: one per player in P, by the location's ships and design groups, the recipient's forces against every other ship at the location, and whether each side took armor damage (stars-elegy MESSAGES.md "Battles and bombing", 0x07e, 0x091–0x0a8, 0x113–0x116) | `combat_summary.go` `battleSummary`, `summaries` (`EventBattleSummary`) | CONFIRMED for 0x07e, 0x091–0x0a4, 0x0a6–0x0a8 and 0x113–0x116 (0x0a2, 0x0a3, 0x113 and 0x114 by prediction, CB-059); 0x0a5 BINARY-ONLY; "hit" as armor damage only: CONFIRMED by prediction for one ship a side (CB-059 B1); the 2-player texts when two players fought, every other ship counted as the enemy's, the uninvolved starbase owner included and a bystander fleet's owner sent nothing: MEASURED (CB-059 B3); no summary when an AR starbase dies: MEASURED (CB-059 B4); a "stack" as one player's ships of one design: MEASURED (CB-039, CB-048); ASSUMPTION B2 (both sides wiped), and the named player as the highest-numbered other one | `TestBattleSummaryRules`, `TestConfirmedBattleSummaryDesignGroups`, `TestBattleSummaryStarbase`, `TestConfirmedCB059HitIsArmorDamage`, `TestMeasuredCB059ThirdPlayer`, parity CB-048, CB-049, SC-036, RG-002 |
 | Dump cargo (full amount; first salvage addition in deep space) | `setup` | CONFIRMED (CB-025) | `TestPredictionDumpCargo` |
 | Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024; the Ultra Station's and Death Star's docks, fleets −100 and the starbase −50: CB-056, stars-elegy b0ca924) | `TestConfirmedRepair`, `TestPredictionRepairOthers`, `TestPredictionRepairLargeDocks`, `TestRG001StarbaseDamageKept` |
 | Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
@@ -93,17 +93,12 @@ least its armor destroys it, MEASURED, now the rule in `starbaseDamage`);
 A12 held in one stream only and A13 held for Croby Sharmor (the Langston
 Shell is not observed), both CONFIRMED.
 
-Battle summaries (`combat_summary.go`) carry their own:
-- **B1.** A side was "hit" when any of its tokens took shield or armor
-  damage in a hit record (a 0-damage torpedo record is not a hit).
-- **B2.** In other 2-player battles, a single ship lost while the enemy
-  is wiped out too gets 0x09d ("Precedence" names 0x09d for both sides
-  wiped); a side that loses some but not all ships while a single enemy
-  ship dies gets 0x0a2.
-- **B3.** A 2-player battle is one whose player list P has 2 players.
-- **B4.** When an Alternate Reality starbase is destroyed, no summary is
-  sent: MESSAGES.md gives its owner 0x08d/0x08e and the others 0x144,
-  which Elegy does not send yet.
+Battle summaries (`combat_summary.go`) carry one of their own. CB-059
+settled the others (results below):
+- **B2.** When both sides of a 2-player battle are wiped out, each gets
+  0x09d ("Precedence" names 0x09d for both sides wiped), a single ship's
+  side too. NOT RUN: firing stops once one player has live tokens, so
+  fire alone cannot end a 2-player battle with both sides wiped.
 
 A6 (plan-0 X at the first location of a turn) is now
 COMBAT.md's chosen rule for Elegy (#38), so it is cited above rather than
@@ -168,7 +163,7 @@ for the gaps (G, S, B and N below) are lane F's queue:
 | Weapon (Elegy catalog: damage, range, kind) | Battle evidence | In Elegy's vectors | Case |
 |---|---|---|---|
 | Mini Gun (13, 2, gatling) | none | none | G3 |
-| Gatling Gun (31, 2, gatling) | CB-002 to CB-005: hits at distances 0–2, 3 from a station, deflector 90 | compared | G1 (check these records first) |
+| Gatling Gun (31, 2, gatling) | CB-002 to CB-006: hits at distances 0–2, 3 from a station, deflector 90 | compared | G1 (check these records first) |
 | Gatling Neutrino Cannon (80, 2, gatling) | CB-056, one stream: the shot goes on past a starbase, one hit per deflector | oracle only (`TestGatlingDeflectorPerTarget`) | G1 |
 | Big Mutha Cannon (204, 2, gatling) | none in battle (OT-6 counts it only in the score's ship power) | none | G2 |
 | Pulsed Sapper (82, 3, sapper) | CB-002, CB-049; RG-002 Y5 and the chained run's first year | compared (RG-002 Y3 and the chained run's later years are samples) | S3 |
@@ -276,7 +271,7 @@ LRT.
 | 1 | A Destroyer (Long Hump 6, one Alpha Torpedo, no computer) fires at a Battleship with six Jammer 50 and no shields: hit chance 35·(100−95)/100 = 1% | when the torpedo misses, one hit record with 0 hits and 1 miss, and no damage | CONFIRMED (268 misses, one record each, no change) | `TestConfirmedCB058ZeroHitTorpedoRecord` |
 | 2 | Three players, 100 one-ship fleets each (ids 0..99) at one deep-space point | quota 85; player 0's fleets 0 and 16..99 and players 1 and 2's 15..99 fight (255); all three get the left-out message | CONFIRMED by CB-042 (the same layout; not rerun) | `TestConfirmedCB042TokenCapThreePlayers` |
 | 3 | A fleet of 4 Large Freighters (2 Long Hump 6) with 1000 Fe, 700 Bo, 333 Ge, 500 kT colonists loses one freighter per kill event | cargo left 750/525/249/376, then 500/350/166/251, then 250/175/83/126, then none: each share truncated, the remainder 1 kT at a time to Fe, Bo, Ge, colonists | CONFIRMED (salvage 764/528/257 in every run; all cargo with the last ship would give 762/525/258) | `TestConfirmedCB058CargoShare` |
-| 4 | Player 0 destroys all of player 1's ships at two deep-space points in one turn, the second point's fleets earlier in the fleet table | the salvage at the point of player 0's lower fleet is player 1's number 0, the other number 1 (battles by each location's first fleet; lowest free number) | MEASURED, consistent with eaa474e (numbers 0 and 1 in every run; the numbers pushed before the run were for other victims); the battle order by first fleet BINARY-ONLY, since ascending y also fits; Q4b (the same layout with the y values swapped) is Elegy's PREDICTION that the first-fleet order holds, for lane F to run | `TestMeasuredCB058SalvageTwoPoints`, `TestPredictionCB058Q4bBattleOrderNotByY` |
+| 4 | Player 0 destroys all of player 1's ships at two deep-space points in one turn, the second point's fleets earlier in the fleet table | the salvage at the point of player 0's lower fleet is player 1's number 0, the other number 1 (battles by each location's first fleet; lowest free number) | MEASURED, consistent with eaa474e (numbers 0 and 1 in every run; the numbers pushed before the run were for other victims); the battle order by first fleet CONFIRMED by prediction by Q4b (the same layout with the y values swapped; CB-059, 8 of 8, below) | `TestMeasuredCB058SalvageTwoPoints`, `TestConfirmedCB058Q4bBattleOrderNotByY` |
 | 5 | An RS player's Rogue with 3 Langston Shell in slot 1 (a shield-or-armor slot); a Battleship with 3 Langston Shell in slot 2 (shield only); a Rogue with 3 Organic Armor in slot 1. Each has Trans-Galactic Drives in slot 0 | 645, 2195, 712; shields 525. Elegy halves by part kind, so the Shell counts whole in either slot. Halving by slot kind would give the first Rogue 547 | CONFIRMED (every hit replays only with 645, 2195 and 712; with 547, 2–4 hits per run fail) | `TestConfirmedCB058LangstonShellRegeneratingShields` |
 | 6 | A Death Star with 8 Heavy Blasters (range 3) | armor 1500; reach 4: a ship 4 squares away is a target, one 5 away is not | reach CONFIRMED (no shot at 5, a shot at 4); armor MEASURED as consistent (1126–1500) | `TestConfirmedCB058DeathStarReach` |
 
@@ -286,6 +281,35 @@ shows the halving goes by part kind, as Elegy has it. Q3's per-event
 shares were pushed before the run; its salvage total is eaa474e's rule
 applied after the run to the observed kill events (stars-elegy
 `experiments/cb058`).
+
+### CB-059 results
+
+Lane D's case specs B1–B4 and Q4b, run by lane F. Elegy's predictions
+were pushed before the runs: elegy 5d2450e for Q4b, and private
+apparatus 76789105 for the exact starts. Results and labels are from
+stars-elegy #184, merged as 3bd93e1 (PARITY.md "Battle summaries B1–B4 and the battle order
+(CB-059)", `experiments/cb059`), with 8 pinned streams per start. Each
+case is decided only by the streams whose record took its branch.
+
+| Case | Setup | Elegy predicted | Original | Label | Test |
+|---|---|---|---|---|---|
+| B1-S | One ship a side. Player 1's Laser does only shield damage to player 0's 4000-shield Battleship, which kills it | 0x093 / 0x094 (shield damage counts) | 0x091 / 0x092 (8 of 8) | prediction REFUTED; fixed: "hit" is armor damage, CONFIRMED by prediction | `TestConfirmedCB059HitIsArmorDamage` |
+| B1-M | As B1-Z with 800 shields and an Omega Torpedo: all-miss salvos do shield damage only | 0x093 / 0x094 | 0x091 / 0x092 (3 qualifying streams) | prediction REFUTED; fixed as B1-S | `TestConfirmedCB059HitIsArmorDamage` |
+| B1-Z | Player 1's Alpha Torpedo against jammers 95, unshielded: 0-hit records only | 0x091 / 0x092 | 0x091 / 0x092 (7 of 8; the eighth stream had one armor hit and gave 0x093 / 0x094) | CONFIRMED by prediction | `TestConfirmedCB059HitIsArmorDamage` |
+| B2b | Player 0's single ship dies after killing some of player 1's 8 (or 6) in two designs | 0x0a3 / 0x0a2 | 0x0a3 / 0x0a2 (8 of 8, 2 layouts) | CONFIRMED by prediction (was BINARY-ONLY) | `TestBattleSummaryRules` |
+| X | Player 0's single ship kills player 1's 4, losing nothing | 0x113 / 0x114 | 0x113 / 0x114 (8 of 8) | CONFIRMED by prediction (was BINARY-ONLY) | `TestBattleSummaryRules` |
+| B2a/c | Both sides wiped out | 0x09d each | not reachable by fire | NOT RUN (B2 stays an ASSUMPTION) | `TestBattleSummaryRules` |
+| B3-SB | Player 0's armed ship kills player 1's Scout at player 2's planet, whose unarmed starbase is not attacked; player 2 neutral | 0x0a8 / 0x0a6 / 0x0a8 (P has 3 players) | 0x115 / 0x0a1 / 0x115, each counting the other 2 ships as the enemy; player 2 named by players 0 and 1, player 1 by player 2 | prediction REFUTED; fixed, MEASURED: the 2-player texts when two players fought | `TestMeasuredCB059ThirdPlayer` |
+| B3-BY | As B3-SB in deep space with player 2's non-fighting Scout instead of the starbase | 0x0a0 / 0x0a1 / none | 0x115 / 0x0a1 / none; the bystander's Scout counted in both fighters' enemy totals | prediction REFUTED for player 0; fixed, MEASURED | `TestMeasuredCB059ThirdPlayer` |
+| B3-C | B3-BY without player 2 | 0x091 / 0x092 | 0x091 / 0x092 | CONFIRMED (control) | `TestBattleSummaryRules` |
+| B4 | An AR Orbital Fort destroyed (17 existing CB-041-sf streams) | no summary | none: 0x08e and 0x144 only; 0x09c / 0x09b in the 3 streams where the Fort survived | MEASURED | `TestBattleSummaryStarbase` |
+| Q4b | CB-058 Q4 with the y values swapped | salvage number 0 at fleet 1's point | number 0 there, and that battle first in the files (8 of 8) | CONFIRMED by prediction | `TestConfirmedCB058Q4bBattleOrderNotByY` |
+
+Elegy now counts every ship at the location, not only P's, as the
+recipient's enemy, and picks the text family by the number of players
+who fought (n). B1's armor-only rule is tested only with one ship a side;
+whether the one-stack texts (0x096–0x09a) use it is NOT RUN, and
+Elegy applies it there too (ASSUMPTION).
 
 ### Settled by current COMBAT.md
 

@@ -1,5 +1,7 @@
 package engine
 
+import "sort"
+
 // EventBattleSummary: Player's summary of a battle at Planet (id, or -1 in
 // deep space). Count is the BattleSummary; Axes holds the counts the
 // summary texts name (summaryAxes). One per battle player, in player order,
@@ -58,10 +60,10 @@ const (
 
 // The Axes of an EventBattleSummary, by index.
 const (
-	SummaryOther       = iota // the other player of a 2-player battle; the number of players otherwise
+	SummaryOther       = iota // the named other player of a 2-player battle; the number of players in P otherwise
 	SummaryTotal              // your ships (+1 for your starbase) at the location before the battle
 	SummaryLost               // your ships (+1 for your starbase) destroyed
-	SummaryOtherTotal         // the same for the other player, or for the others together
+	SummaryOtherTotal         // the same for every other ship at the location together
 	SummaryOtherLost          //
 	SummaryDesign             // your token's design (one-ship and one-stack battles), else -1
 	SummaryOtherDesign        // the other token's design, else -1
@@ -75,20 +77,32 @@ func (c summaryCounts) wiped() bool { return c.lost >= c.total }
 
 // battleSummary picks a player's summary (stars-elegy MESSAGES.md "Battles
 // and bombing" and its notes "Battle counts", "Exact-2 shortcuts",
-// "Precedence" and "0x07e vs 0x0a8"). players is the number of players in
-// the battle; ships and stacks count the whole location (a starbase is a
-// ship and a stack; summaries says what a stack is); hit and otherHit say
-// whether the two sides of a one-ship or one-stack battle took damage.
+// "Precedence" and "0x07e vs 0x0a8"). fought is the number of players
+// who fought (n, the size of Q); ships and stacks count the whole location
+// (a starbase is a ship and a stack; summaries says what a stack is); me
+// is the recipient's forces and other every other ship at the location;
+// hit and otherHit say whether the two sides of a one-ship or one-stack
+// battle took armor damage.
 //
-// ASSUMPTION B1: "hit" is taking shield or armor damage in a hit record.
-// ASSUMPTION B2: a one-ship side that loses its ship while the enemy is
-// wiped too gets SummaryWonWithLoss, as the "Precedence" note gives for
-// other 2-player battles; a side of several ships that loses some (not
-// all) while a single enemy ship dies gets SummaryKilledLoneWithLoss.
-// ASSUMPTION B3: a 2-player battle is one whose player list P has 2
-// players.
-func battleSummary(players, ships, stacks int, me, other summaryCounts, hit, otherHit bool) BattleSummary {
-	if players == 2 && (ships == 2 || stacks == 2) {
+// "Hit" is armor damage: shield damage alone, from beams or from torpedo
+// misses, and 0-hit records are not hits (CONFIRMED by prediction for one
+// ship a side, CB-059 B1-S, B1-M and B1-Z, stars-elegy #184). Its use in
+// the one-stack texts is NOT RUN.
+//
+// A 2-player battle is one in which two players fought (MEASURED, CB-059
+// B3: a third player's uninvolved starbase or non-fighting fleet at the
+// location left the 2-player texts in use, its ships counted as the
+// enemy's).
+//
+// A side of several ships that loses some (not all) while a single enemy
+// ship dies gets SummaryKilledLoneWithLoss (0x0a2; CONFIRMED by
+// prediction, CB-059 B2b). ASSUMPTION B2: when both sides are wiped out,
+// a one-ship side gets SummaryWonWithLoss, as the "Precedence" note gives
+// for other 2-player battles, and so does a side of several ships wiped
+// by a single ship that dies too. NOT RUN in CB-059: firing stops once one
+// player is left, so fire cannot wipe out both sides of a 2-player battle.
+func battleSummary(fought, ships, stacks int, me, other summaryCounts, hit, otherHit bool) BattleSummary {
+	if fought == 2 && (ships == 2 || stacks == 2) {
 		base := SummaryDuelWonUnhit
 		if ships != 2 {
 			base = SummaryStackWonUnhit
@@ -105,7 +119,7 @@ func battleSummary(players, ships, stacks int, me, other summaryCounts, hit, oth
 		}
 		return base + 4
 	}
-	if players != 2 {
+	if fought != 2 {
 		switch {
 		case other.wiped() && me.lost == 0:
 			return SummaryMultiWonNoLoss
@@ -164,11 +178,19 @@ func battleSummary(players, ships, stacks int, me, other summaryCounts, hit, oth
 // against 30 one-ship fleets, one design each) sent 0x098 and 0x099
 // (stars-elegy cb5/cb039, cb7/cb048; MESSAGES.md's "exactly 2 stacks"
 // read as 2 fleet stacks would give neither). A starbase is a stack of its
-// own. A group is hit when any of its tokens is (ASSUMPTION B1).
+// own. A group is hit when any of its tokens took armor damage.
 //
-// ASSUMPTION B4: when an Alternate Reality starbase is destroyed nobody
-// gets a summary (MESSAGES.md: its owner gets 0x08d or 0x08e and every
-// other participant 0x144, which Elegy does not send).
+// The players in P get a summary, an uninvolved starbase owner included;
+// a non-fighting fleet's owner, not in P, gets none. Each counts every
+// other ship at the location as the enemy's, a bystander's too, and a
+// 2-player summary names the highest-numbered other player with a ship or
+// starbase there (MEASURED, CB-059 B3: players 0 and 1 named player 2, and
+// player 2 named player 1; "highest-numbered" is an ASSUMPTION that fits
+// those two cases).
+//
+// When an Alternate Reality starbase is destroyed nobody gets a summary
+// (MEASURED, CB-059 B4 from 17 CB-041-sf streams: its owner got only
+// 0x08e and the attacker only 0x144, which Elegy does not send yet).
 func (b *battle) summaries(planetID int) []Event {
 	g := b.g
 	type group struct{ player, design int }
@@ -191,7 +213,7 @@ func (b *battle) summaries(planetID int) []Event {
 	}
 	hitToken := map[int]bool{}
 	for _, h := range b.hits {
-		if h.Shield > 0 || h.Armor > 0 {
+		if h.Armor > 0 {
 			hitToken[h.Target] = true
 		}
 	}
@@ -212,31 +234,35 @@ func (b *battle) summaries(planetID int) []Event {
 		hit[t.player] = hit[t.player] || hitToken[i]
 		design[t.player] = t.design
 	}
-	n := len(b.players)
+	var owners []int
+	for p := range total {
+		owners = append(owners, p)
+	}
+	sort.Ints(owners)
 	var events []Event
 	for _, p := range b.players {
 		me := summaryCounts{total[p], lost[p]}
 		var other summaryCounts
-		axes := make([]int, summaryAxes)
-		axes[SummaryOther] = n
 		q := -1
-		for _, r := range b.players {
+		for _, r := range owners {
 			if r != p {
 				other.total += total[r]
 				other.lost += lost[r]
 				q = r
 			}
 		}
+		axes := make([]int, summaryAxes)
+		axes[SummaryOther] = len(b.players)
 		axes[SummaryTotal], axes[SummaryLost] = me.total, me.lost
 		axes[SummaryOtherTotal], axes[SummaryOtherLost] = other.total, other.lost
 		axes[SummaryDesign], axes[SummaryOtherDesign] = -1, -1
-		if n == 2 {
+		if b.involved == 2 {
 			axes[SummaryOther] = q
 			if len(groups) == 2 {
 				axes[SummaryDesign], axes[SummaryOtherDesign] = design[p], design[q]
 			}
 		}
-		kind := battleSummary(n, ships, len(groups), me, other, hit[p], hit[q])
+		kind := battleSummary(b.involved, ships, len(groups), me, other, hit[p], hit[q])
 		events = append(events, Event{Kind: EventBattleSummary, Player: p, Planet: planetID, Fleet: -1, Count: int(kind), Axes: axes})
 	}
 	return events

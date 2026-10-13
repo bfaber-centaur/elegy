@@ -62,7 +62,8 @@ type battleSeen struct {
 }
 
 // battles fights every battle of the turn, location by location
-// (COMBAT.md "Where battles happen in the turn", BINARY-ONLY order).
+// (COMBAT.md "Where battles happen in the turn"; the order by first fleet
+// CONFIRMED by prediction, CB-059 Q4b).
 //
 // gained holds the players that gained tech this turn, from a battle or a
 // capture (TAKEOVER.md "Capture"). costLevels is each player's tech
