@@ -89,8 +89,9 @@ func TestConfirmedWK1TargetDiedInBattle(t *testing.T) {
 // (ASSUMPTION W10). The messages go out as the files are written, to the
 // follower's owner, and only for a follower that still exists. Several
 // followers of one gone fleet each get their own 0x028 (fleets 5 and 10,
-// 6 and 11): ASSUMPTION, since WK-1 had one follower per victim and
-// RG-003's five followers of one victim have no message expectations.
+// 6 and 11): CONFIRMED by prediction for a fleet destroyed in battle (WK-2,
+// stars-elegy d5b23e3, 3 of 3 streams; TestConfirmedWK2SeveralFollowersAndWaypoints),
+// BINARY-ONLY for the other removals these fleets stand for.
 func TestWK1GoneOwed(t *testing.T) {
 	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}},
 		Planets: []Planet{{ID: 7, Pos: Point{1150, 1150}}},
@@ -177,12 +178,14 @@ func TestMeasuredBattleRemovalNoStandIn(t *testing.T) {
 
 // TestConfirmedWK2SeveralFollowersAndWaypoints: stars-elegy PARITY.md
 // "Several followers, and waypoints 2 and up, aimed at a fleet destroyed
-// in battle (WK-2)", CONFIRMED by prediction, 3 of 3 streams. Player 1's
+// in battle (WK-2)", stars-elegy d5b23e3 (#207), CONFIRMED by
+// prediction, 3 of 3 streams. Player 1's
 // victims fly 20 ly south and die in deep space; player 0's followers are
 // far away. Each waypoint aimed at a victim becomes deep space where it
 // died, a waypoint between them is unchanged, and every such waypoint
 // owes its own 0x028 (A: three followers of one victim; B1: waypoints 1
-// and 3 on one victim; B2: waypoints 1 and 2 on two victims). The
+// and 3 on one victim; B2: waypoints 1 and 2 on two victims; B3:
+// waypoint 1 deep space, waypoint 2 on a victim). The
 // observed message sequence is MEASURED; it also follows victim id and
 // battle order, so the ordering rule is UNRESOLVED. Elegy's walk, fleets
 // then waypoints, gives the observed sequence, and the test pins it.
@@ -204,6 +207,7 @@ func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
 		{ID: 11, Waypoints: []Waypoint{chase(start, 2)}},                                           // A
 		{ID: 12, Waypoints: []Waypoint{chase(start, 2), {Pos: between, Warp: 1}, chase(start, 2)}}, // A and B1
 		{ID: 13, Waypoints: []Waypoint{chase(start, 2), chase(start2, 6)}},                         // B2
+		{ID: 14, Waypoints: []Waypoint{{Pos: between, Warp: 1}, chase(start2, 6)}},                 // B3
 	}
 	for _, f := range followers {
 		f.Owner, f.Pos, f.Stacks = 0, far, []Stack{{Design: 0, Count: 1}}
@@ -219,6 +223,7 @@ func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
 		11: {gone(died)},
 		12: {gone(died), {Pos: between, Warp: 1}, gone(died)},
 		13: {gone(died), gone(died2)},
+		14: {{Pos: between, Warp: 1}, gone(died2)},
 	}
 	for _, f := range r.Game.Fleets {
 		switch f.ID {
@@ -238,7 +243,7 @@ func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
 			got = append(got, e.Fleet)
 		}
 	}
-	if !slices.Equal(got, []int{10, 11, 12, 12, 13, 13}) {
-		t.Errorf("0x028 to fleets %v, want [10 11 12 12 13 13]", got)
+	if !slices.Equal(got, []int{10, 11, 12, 12, 13, 13, 14}) {
+		t.Errorf("0x028 to fleets %v, want [10 11 12 12 13 13 14]", got)
 	}
 }

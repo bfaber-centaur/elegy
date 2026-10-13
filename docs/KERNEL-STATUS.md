@@ -138,9 +138,12 @@ id and becomes a plain position there at the end-of-year waypoint check;
 either way the follower's owner gets 0x028 when the files are written
 (CONFIRMED by prediction for waypoint 1 aimed at a fleet the waypoint's
 owner destroyed, WK-1, stars-elegy 5962b72, PARITY.md "A waypoint aimed
-at a fleet destroyed in battle (WK-1)", 2 of 2 streams; waypoint 2 and
-up, waypoint 0, a kill by a third player and targets other than fleets
-NOT RUN; W10 below). A waypoint aimed at a mineral packet or
+at a fleet destroyed in battle (WK-1)", 2 of 2 streams; for waypoints 1
+to 3 and several followers of one victim, each waypoint on its own with
+one 0x028, WK-2, stars-elegy d5b23e3, 3 of 3 streams, the messages'
+order MEASURED and its rule UNRESOLVED; waypoint 0, a kill by a third
+player, targets other than fleets and the planet case at waypoints 2 and
+up NOT RUN; W10 below). A waypoint aimed at a mineral packet or
 salvage object (`TargetPacketObject`, named by the object's owner and
 number) follows a packet's move before fleets move, and one whose object
 is gone becomes a plain position at its last coordinates with no message;
@@ -449,7 +452,8 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   ORDERS.md "Targets that moved, died or were captured", BINARY-ONLY).
   Retargeted to the planet, the chasing fleet's owner gets 0x028 when the
   files are written (CONFIRMED by prediction for a fleet destroyed in
-  battle, WK-1; BINARY-ONLY for other removals); taken over by a stand-in
+  battle, WK-1, one per follower when several follow it, WK-2,
+  stars-elegy d5b23e3; BINARY-ONLY for other removals); taken over by a stand-in
   fleet, no 0x028 (assumed). A fleet destroyed in battle has no stand-in:
   the waypoint goes to the planet even when another fleet of its owner
   stays there (MEASURED, RG-003 2469: player 5's fleet 45 chasing fleet

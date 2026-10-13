@@ -105,10 +105,18 @@ func (g *Game) waypointCheck() {
 // victims in deep space 5 ly from a planet left deep space at their
 // position, not the nearest planet; victims that flew onto a planet and
 // died there left that planet, not where they started; one 0x028 per
-// follower. MEASURED for a target scrapped in deep space before movement
-// (WF-04: deep space with 0x028). Other losses are BINARY-ONLY; waypoint 2
-// and up, waypoint 0, a kill by a third player and targets other than
-// fleets are NOT RUN.
+// follower. CONFIRMED by prediction for waypoints 1 to 3 and several
+// followers of one victim (WK-2, stars-elegy d5b23e3, PARITY.md "Several
+// followers, and waypoints 2 and up, aimed at a fleet destroyed in battle
+// (WK-2)", 3 of 3 streams): each waypoint aimed at a victim is handled on
+// its own, becomes deep space where it died, and owes one 0x028; a
+// waypoint between two such is unchanged. The order of the 0x028
+// messages is MEASURED there (follower order, then waypoint order, which
+// Elegy's walk gives), but the rule behind it is UNRESOLVED: victim id
+// and battle order fit as well. MEASURED for a target scrapped in deep
+// space before movement (WF-04: deep space with 0x028). Other losses are
+// BINARY-ONLY; waypoint 0, a kill by a third player, targets other than
+// fleets and the planet case at waypoints 2 and up are NOT RUN.
 func (g *Game) targetGone(f *Fleet, wp *Waypoint) {
 	resolveGone(g, wp)
 	g.goneTargets = append(g.goneTargets, f.ID)
@@ -242,7 +250,9 @@ func (g *Game) chaseMerged(merged, follows map[int]int, rng Rand) {
 // follower, the waypoint the planet where the target died, after
 // movement); for the other removals BINARY-ONLY (ORDERS.md "The target is
 // gone"). Several followers of one removed fleet each owe their own
-// 0x028: ASSUMPTION (WK-1 had one follower per victim). ASSUMPTION W10: a
+// 0x028: CONFIRMED by prediction for a fleet destroyed in battle (WK-2,
+// stars-elegy d5b23e3, 3 of 3 streams), BINARY-ONLY for the other
+// removals. ASSUMPTION W10: a
 // waypoint taken over by a stand-in fleet owes no 0x028.
 func (g *Game) retargetRemoved(ids map[int]bool, standIns bool) {
 	order := g.fleetOrder()
