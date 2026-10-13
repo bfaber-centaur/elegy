@@ -149,6 +149,26 @@ func TestMeasuredCB058SalvageTwoPoints(t *testing.T) {
 	// at (200,200) and destroy them all: the salvage at (100,100), the
 	// location of player 0's fleet 1, is player 1's number 0, and the one
 	// at (200,200) number 1.
+	checkSalvageTwoPoints(t, Point{100, 100}, Point{200, 200})
+}
+
+func TestPredictionCB058Q4bBattleOrderNotByY(t *testing.T) {
+	// Q4b (lane D's case spec, pushed before any run): CB-058 Q4 with the
+	// two points' y swapped, so player 0's fleet 1 is at the point with
+	// the larger y. By first fleet (COMBAT.md "Where battles happen in the
+	// turn"), the salvage at fleet 1's point (100,300) is still player 1's
+	// number 0 and the one at (200,200) number 1; by ascending y it would
+	// be the other way round. PREDICTION.
+	checkSalvageTwoPoints(t, Point{100, 300}, Point{200, 200})
+}
+
+// checkSalvageTwoPoints runs CB-058 Q4's layout: player 0's fleet 1 and
+// player 1's freighter 2 at first, player 0's fleet 3 and freighter 4 at
+// second, with the second point's fleets earlier in the fleet table. Every
+// freighter dies; first's salvage must be player 1's number 0 and second's
+// number 1.
+func checkSalvageTwoPoints(t *testing.T, first, second Point) {
+	t.Helper()
 	sf := testDesign(Hull{Name: "Small Freighter", Armor: 25}, 10)
 	sf.Hull.Cost.Minerals = Minerals{4, 0, 5}
 	for seed := range int64(8) {
@@ -156,9 +176,10 @@ func TestMeasuredCB058SalvageTwoPoints(t *testing.T) {
 		// An invented beam reaching the whole board (range 9) kills
 		// every freighter before it can get away.
 		g.Designs[0].Slots = []Slot{{Part{Name: "Long Beam", Kind: PartBeam, Damage: 500, Range: 9, Initiative: 10}, 2}}
+		g.Fleets[0].Pos, g.Fleets[1].Pos = first, first
 		g.Fleets = append(g.Fleets,
-			Fleet{ID: 3, Owner: 0, Pos: Point{200, 200}, Stacks: []Stack{{Design: 0, Count: 6}}},
-			Fleet{ID: 4, Owner: 1, Pos: Point{200, 200}, Stacks: []Stack{{Design: 1, Count: 3}}})
+			Fleet{ID: 3, Owner: 0, Pos: second, Stacks: []Stack{{Design: 0, Count: 6}}},
+			Fleet{ID: 4, Owner: 1, Pos: second, Stacks: []Stack{{Design: 1, Count: 3}}})
 		// The second location listed first in the fleet table: the order
 		// is by first fleet, not by table position.
 		g.Fleets[0], g.Fleets[2] = g.Fleets[2], g.Fleets[0]
@@ -171,8 +192,8 @@ func TestMeasuredCB058SalvageTwoPoints(t *testing.T) {
 			}
 			at[s.Pos] = s.Number
 		}
-		if len(g.Salvage) != 2 || at[Point{100, 100}] != 0 || at[Point{200, 200}] != 1 {
-			t.Errorf("seed %d: salvage %+v, want number 0 at (100,100) and 1 at (200,200)", seed, g.Salvage)
+		if len(g.Salvage) != 2 || at[first] != 0 || at[second] != 1 {
+			t.Errorf("seed %d: salvage %+v, want number 0 at %v and 1 at %v", seed, g.Salvage, first, second)
 		}
 	}
 }
