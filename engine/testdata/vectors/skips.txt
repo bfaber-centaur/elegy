@@ -24,7 +24,6 @@
   10 client estimate status_tile population
  387 expectation battle
  374 expectation battle_actions
-  15 expectation battle_plan
    3 expectation design_gone
    9 expectation no_battle
    1 expectation no_new_fleets
@@ -47,7 +46,6 @@
   10 message 0x02f has no event mapping
    4 message 0x030 has no event mapping
    1 message 0x031 has no event mapping
-   5 message 0x03a has no event mapping
    1 message 0x040 has no event mapping
    1 message 0x051 has no event mapping
    1 message 0x053 has no event mapping
@@ -85,7 +83,6 @@
    2 message 0x0ea has no event mapping
    3 message 0x0ec has no event mapping
    1 message 0x0f2 has no event mapping
-  18 message 0x0f4 has no event mapping
    9 message 0x0ff has no event mapping
    2 message 0x109 has no event mapping
   10 message 0x10b has no event mapping
@@ -124,19 +121,18 @@
    2 message_sequence 0x004 colonists and player slots not compared
    4 message_sequence 0x05b salvage and fleet slots not compared
   16 message_sequence 0x08f and 0x090 bombing fleet not compared
+   1 message_sequence 0x0f4 field owner, type and centre not compared
    2 message_sequence entry 0x007 has no event mapping
    3 message_sequence entry 0x025 has no event mapping
-   5 message_sequence entry 0x03a has no event mapping
    8 message_sequence entry 0x07b has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
-   2 message_sequence entry 0x0f4 has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x156 has no event mapping
    1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
    2 planet field defenses null
    2 planet field environment_visible
-   6 planet field packet_destination null
+   6 planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
    1 planet field population null
    9 planet field population_estimate
    1 planet field starbase_design

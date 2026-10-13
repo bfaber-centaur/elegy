@@ -320,3 +320,21 @@ stars-elegy ORACLE.md (main `1d4c97b`, the `dump` notes) says: "The game omits a
 - **skips.txt:** "planet field defenses null" 121 → 2 (cb7/sc035 and tk3/tk201, both population null); "planet field excess null" 4 → 0; "planet field planetary_scanner null" 2 → 0. baseline.txt does not move.
 - **Corrected 2026-10-13:** this section first said every newly compared field matches. One does not. RG-001-2435 (`rg001.json`, the chained run) gains a clause in year 6, planet 41: "excess = 65, want 0". The case already failed there on population (2011, want 1912), so its baseline line does not move. The clause is downstream of that population divergence, not a counterexample to the ASSUMPTION (MEASURED). The y6 restart RG-001-Y6-2435 (`rg001-y6.json`) starts from the oracle's year-5 state for the planet (population 1665, carry 58). It compares the same expectation (population 1912 and the omitted block read as carry 0), and its reference seed matches it. The chained run reaches year 6 with a different population and keeps a carry of 65. The census and ledgers did not show the clause because RG-001's chained run has no ledger and was failing already.
 - **Ledgers:** RG-002 loses its 6 "not compared … planet field defenses null" lines (14 → 8): y2 planet 65, y3 planet 66 and y4 planet 41, in the chained run and in the restarts. RG-003 loses 16 (50 → 34): the same six plus y7 planet 49, y8 planet 46 and y10 planet 20. No line is added and no hand line moves.
+
+### Not-compared lines sorted by cause (main `1de8ab6`)
+
+The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32) were sorted by cause. This change fixes the comparator-side ones:
+- **`battle_plan` expectations** are compared now (vectors/README.md "battle_plan": every field of the plan in the slot, `attack_who` numbered as the state's battle_plans). The loader now keeps a state plan's name. The census drops "expectation battle_plan" (15). RG-003 y9's plan 5 matches, in the chained run and in the restart.
+- **0x039/0x03a** (one or more defenses built) map to EventBuilt of defenses, with the merge rule (MESSAGES.md 0x039, 0x03a, "Merging of build counts").
+- **0x0f4** (a starbase swept mines) maps to EventMinesSwept by a starbase. Its planet and amount slots are compared. The field owner, type and centre slots are not, because the event does not name the field.
+- **packet_destination/packet_warp null** is read as absent (vectors/README.md "initial_state": no destination, warp 4), but only when the planet still has a starbase. All 6 records so far are planets whose starbase was lost in the year. Elegy keeps the planet's settings there, and the restarts would miss. Whether the original cleared them or only does not write them for a planet with no starbase is UNRESOLVED, so those records stay skipped under a new reason.
+
+Left as they were, with the reason:
+- **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. So no mapping is added until the rule is settled. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.
+- **Engine-side:**
+  - 0x05b: the salvage and fleet slots are not compared, because EventFleetScrapped names neither the salvage object nor a fleet that still exists.
+  - 0x08f/0x090: EventBombed names the bomber, not its fleet.
+  - 0x0f4: as above, the event does not name the field.
+- **Slot meaning open:**
+  - 0x004 and 0x007 each hold 49 in the slot MESSAGES.md calls "player" (RG-003 y7 `[51 550 0 49]`, y12 `[49 49 600 0]`). That is not a player number.
+  - 0x007's colonists slot is the winner's landed troops, which no event carries.
