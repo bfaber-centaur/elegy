@@ -28,8 +28,17 @@ import (
 // passes, or a random one passes with fewer seeds. Run with -v to see the
 // per-corpus report, and with PARITY_BASELINE=write to rewrite the
 // baseline.
+//
+// testdata/vectors/skips.txt pins the census of skipped expectations by
+// reason. A skip never fails a case, so a mapping or comparator that
+// disappears would only turn its expectations back into skips; the test
+// fails when any count differs from the file, up or down, so every change
+// shows in the PR's diff. PARITY_BASELINE=write rewrites it too.
 
-const pvBaseline = "testdata/vectors/baseline.txt"
+const (
+	pvBaseline = "testdata/vectors/baseline.txt"
+	pvSkips    = "testdata/vectors/skips.txt"
+)
 
 func TestParityVectors(t *testing.T) {
 	var all []vectors.Result
@@ -98,6 +107,9 @@ func TestParityVectors(t *testing.T) {
 	}
 
 	if os.Getenv("PARITY_BASELINE") == "write" {
+		if err := os.WriteFile(pvSkips, []byte(formatSkipCensus(partial)), 0o644); err != nil {
+			t.Fatal(err)
+		}
 		f, err := os.Create(pvBaseline)
 		if err != nil {
 			t.Fatal(err)
@@ -125,6 +137,17 @@ func TestParityVectors(t *testing.T) {
 		w.Flush()
 		f.Close()
 		return
+	}
+	sb, err := os.ReadFile(pvSkips)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := parseSkipCensus(string(sb))
+	if err != nil {
+		t.Fatalf("%s: %v", pvSkips, err)
+	}
+	for _, d := range skipCensusDiff(want, partial) {
+		t.Errorf("%s (rewrite %s with PARITY_BASELINE=write if intended)", d, pvSkips)
 	}
 	b, err := os.ReadFile(pvBaseline)
 	if err != nil {
@@ -162,4 +185,52 @@ func TestParityVectors(t *testing.T) {
 			t.Errorf("baseline case %s passes with %d of %d seeds, was %d: %s %s", fields[0], got, vectors.Seeds, want, r.Status, r.Why)
 		}
 	}
+}
+
+// formatSkipCensus writes the skipped-expectation census: a comment
+// header, then one "count reason" line per reason, sorted by reason.
+func formatSkipCensus(census map[string]int) string {
+	var b strings.Builder
+	b.WriteString("# Skipped parity expectations by reason, from the reference seed\n")
+	b.WriteString("# (TestParityVectors). Any change to a count fails the test until this\n")
+	b.WriteString("# file is rewritten with PARITY_BASELINE=write.\n")
+	for _, why := range slices.Sorted(maps.Keys(census)) {
+		fmt.Fprintf(&b, "%4d %s\n", census[why], why)
+	}
+	return b.String()
+}
+
+// parseSkipCensus reads formatSkipCensus's output.
+func parseSkipCensus(s string) (map[string]int, error) {
+	census := map[string]int{}
+	for i, line := range strings.Split(s, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		n, why, ok := strings.Cut(line, " ")
+		count, err := strconv.Atoi(n)
+		if !ok || err != nil || count <= 0 || why == "" {
+			return nil, fmt.Errorf("line %d: %q is not \"count reason\"", i+1, line)
+		}
+		if _, dup := census[why]; dup {
+			return nil, fmt.Errorf("line %d: reason %q listed twice", i+1, why)
+		}
+		census[why] = count
+	}
+	return census, nil
+}
+
+// skipCensusDiff lists, sorted by reason, each reason whose count in got
+// differs from want, a reason missing from either side counting as 0.
+func skipCensusDiff(want, got map[string]int) []string {
+	reasons := maps.Clone(want)
+	maps.Copy(reasons, got)
+	var diffs []string
+	for _, why := range slices.Sorted(maps.Keys(reasons)) {
+		if w, g := want[why], got[why]; w != g {
+			diffs = append(diffs, fmt.Sprintf("skipped expectations %q: %d, was %d", why, g, w))
+		}
+	}
+	return diffs
 }
