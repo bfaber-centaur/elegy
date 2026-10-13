@@ -36,7 +36,7 @@ var rg002RandomDraws = regexp.MustCompile(`^random \(after \d+ draws in the year
 
 // rg002SampleDraws matches a sample's count of earlier draws, which
 // moves with any change to earlier years' draws.
-var rg002SampleDraws = regexp.MustCompile(`^sample \(after \d+ draws of earlier years\) `)
+var rg002SampleDraws = regexp.MustCompile(`^sample \((?:after \d+ draws of earlier years|flagged in the vector)\) `)
 
 // ledgerTB takes CheckBattleRecords' RG-002 failures and sample misses
 // as ledger lines, by key, with "", "sample" or "random-driven" (lane D's
@@ -94,7 +94,7 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 	l.TB.Helper()
 	msg := fmt.Sprintf(format, args...)
 	switch {
-	case strings.Contains(msg, ": sample (after "):
+	case strings.Contains(msg, ": sample (after "), strings.Contains(msg, ": sample (flagged in the vector) "):
 		l.take(msg, "sample")
 	case strings.Contains(msg, ": random (after "):
 		l.take(msg, "random-driven")
