@@ -4,7 +4,7 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## RG-002: full-order six-year regression
 
-Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages ("Messages compared" at the end), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
+Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages and `object`-form wormholes (the last two sections), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
 
 Bobby's five requirements, in order:
 
@@ -126,6 +126,15 @@ Elegy now sends each battle player its summary (`EventBattleSummary`, engine/com
 - **Other corpora:** every summary expectation outside RG-002 matches: CB-048 and CB-048-ctl (0x098, 0x099), CB-049 (0x09b, 0x09c) and SC-036 (0x0a4, 0x0a7). The parity baseline is unchanged. Every expectation of these ids in the corpora is "present"; none checks that a wrong id is absent, so `TestBattleSummaryRules` pins the choice among the ids.
 - **What a "stack" is.** MESSAGES.md's one-stack texts (0x096–0x09a) say "exactly 2 stacks". CB-039 (140 one-ship fleets a side) sent 0x09a, and CB-048 (80 ships in one fleet against 30 one-ship fleets) sent 0x098 and 0x099. So a stack there is one player's ships of one design, whatever fleets hold them (MEASURED). Elegy counts it that way; read as fleet stacks, CB-048 fails.
 
+### Object-form wormholes compared (after the final run)
+
+Measured on elegy main `9088500` (#198) plus the wormhole branch; counts re-measured on main `387c622` (#199, lane D's battle summaries) plus the wormhole branch.
+
+`object` expectations of kind `wormhole` are compared now (internal/vectors `wormholeFields`), with the fields the `wormhole` form already used plus `id` and `partner`, the other end's vector id.
+- **RG-002: 72 expectations, all marked sample by the vectors.** A wormhole end jiggles or jumps on draws every year (OBJECTS.md). All 72 miss, and they become 160 sample field lines: x (72), y (65), `years_since_jump` (13) and `known_to` (10). `partner`, `stability_class` and `destination_known_to` match in all 72. No deterministic line is added.
+- Counts after this, on main `387c622`: missing mechanic 12 (economy 10, lane A 2), incorrect mechanic 2 (orders), random-driven 30, not compared 204 (20 comparator gaps: 14 design reads and 6 player counts; 176 battle; 8 null), and samples 1146 fields (986 + 160), 43 orders and 16 battle records.
+- **Other corpora: RD-P20 and RD-P21.** Their 10 `object` wormhole expectations are year-end positions after a jiggle, which is draw-decided. Before stars-elegy #181 the vectors did not mark them as samples, so they missed on position (and RD-P21 on one `known_to`) and left the parity baseline. stars-elegy #181 (`b4c0086`) flags them `sample` (6 in rp20, 4 in rp21); with those two vectors re-synced, both pass and are back in the baseline. The re-synced files also carry the galaxy `size`, `bounds` and `density` fields; Elegy's vectors loader does not read them yet, so they change no result.
+
 ### Level-up and overcrowding messages (economy)
 
 Elegy now sends the three economy messages it had no event for (MESSAGES.md at stars-elegy b4c0086), and `pvMessages` maps them:
@@ -135,6 +144,6 @@ Elegy now sends the three economy messages it had no event for (MESSAGES.md at s
 - ASSUMPTION: a year that raises several fields announces them as if they rose in field order, so a part needing two of them is announced at the later field's level (MESSAGES.md "Research order" orders the messages but does not say which levels the part check sees).
 - ASSUMPTION: terraforming components are announced with 0x05f; MESSAGES.md excludes only hulls, planetary scanners and defenses.
 
-**RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 276, and samples 978 fields / 43 orders / 16 battle records.
+**RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 204, and samples 1138 fields / 43 orders / 16 battle records (on main `2ba78f1`, after the `object`-form wormholes).
 
 **Other corpora:** 31 cases join the parity baseline: KX-002 G1–G3, H4, N2, P1–P3 and R1–R4; KX-003 r2; KX-004 S4 and S8; KX-005 R1, R3 and T0–T2; PQ-001 C02, C03 and C10; RD-P15; RG-001 Y2–Y6; RG-002 Y6; and TK-203. Every case "Other corpora" above lists for 0x026, 0x050 or 0x05f now passes.
