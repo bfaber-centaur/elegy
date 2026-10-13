@@ -48,7 +48,7 @@ func TestLevelEventsAnnounceParts(t *testing.T) {
 		before := [NumFields]int{Energy: 9, Electronics: c.electronics}
 		g.Players[0].Research.Levels = before
 		g.Players[0].Research.Levels[Energy] = 10
-		events := g.levelEvents(0, before)
+		events := g.levelEvents(0, before, fieldOrder(before, g.Players[0].Research.Levels))
 		if got := levelMessages(events); !reflect.DeepEqual(got, c.want) {
 			t.Errorf("%s: %q, want %q", c.name, got, c.want)
 		}
@@ -71,41 +71,52 @@ func TestLevelEventsSeveralLevels(t *testing.T) {
 	g.Players[0].Research.Levels = before
 	g.Players[0].Research.Levels[Energy] = 4
 	want := []string{"level 0 3", "part 0 Cow-hide Shield", "level 0 4"}
-	if got := levelMessages(g.levelEvents(0, before)); !reflect.DeepEqual(got, want) {
+	if got := levelMessages(g.levelEvents(0, before, fieldOrder(before, g.Players[0].Research.Levels))); !reflect.DeepEqual(got, want) {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	if got := g.levelEvents(0, g.Players[0].Research.Levels); got != nil {
+	if got := g.levelEvents(0, g.Players[0].Research.Levels, nil); got != nil {
 		t.Errorf("no levels gained: %+v, want none", got)
 	}
 }
 
-// TestLevelEventsFieldOrder checks a year that raises energy 9 → 10 and
-// electronics 18 → 19: Battle Nexus needs both, so it is announced after
-// electronics 19, as if the fields rose in field order (ASSUMPTION,
-// MESSAGES.md "Research order").
-func TestLevelEventsFieldOrder(t *testing.T) {
+// TestLevelEventsChainOrder checks a year whose research levels biotech,
+// the current field, and whose leftover then levels weapons, the next
+// field: biotech's level comes first, then weapons', though weapons comes
+// first in field order (MEASURED, lane F's EM-1: RG-002 2468 gave biotech
+// 7, its parts, then weapons 8, its parts). Radiation Terraform ±7
+// (weapons 5, biotech 2) is announced at weapons 5 because biotech 2 came
+// first; in field order it would not be announced at all.
+func TestLevelEventsChainOrder(t *testing.T) {
+	r := pgRace()
+	s := ResearchState{Current: Biotech, Next: Weapons}
+	s.Levels = [NumFields]int{Weapons: 4, Biotech: 1}
+	// Biotech 2 then weapons 5, with nothing to spare for weapons 6.
+	bio := ResearchLevelCost(2, 5, r.ResearchCosts[Biotech], false)
+	weap := ResearchLevelCost(5, 6, r.ResearchCosts[Weapons], false)
+	after, gained := addResearch(s, r, bio+weap, false)
+	if !reflect.DeepEqual(gained, []int{Biotech, Weapons}) || after.Levels[Biotech] != 2 || after.Levels[Weapons] != 5 {
+		t.Fatalf("setup: gained %v, levels %v; want biotech then weapons, to 2 and 5", gained, after.Levels)
+	}
+	g := Game{Players: []Player{{Race: r, Research: after}}}
+	got := levelMessages(g.levelEvents(0, s.Levels, gained))
+	want := []string{"level 5 2", "level 1 5", "part 1 Black Cat Bomb", "part 1 Radiation Terraform ±7"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+// TestLevelEventsTerraformByOtherField checks that a terraforming part is
+// announced by its non-biotech field: Gravity Terraform ±7 (propulsion 5,
+// biotech 2) on propulsion 4 → 5 (MEASURED, EM-1: Gravity ±7 was announced
+// on propulsion 5).
+func TestLevelEventsTerraformByOtherField(t *testing.T) {
 	g := Game{Players: []Player{{Race: pgRace()}}}
-	before := [NumFields]int{Energy: 9, Electronics: 18}
+	before := [NumFields]int{Propulsion: 4, Biotech: 2}
 	g.Players[0].Research.Levels = before
-	g.Players[0].Research.Levels[Energy] = 10
-	g.Players[0].Research.Levels[Electronics] = 19
-	got := levelMessages(g.levelEvents(0, before))
-	if len(got) < 3 || !reflect.DeepEqual(got[:3], []string{"level 0 10", "part 0 Bear Neutrino Barrier", "part 0 Laser Battery"}) {
-		t.Fatalf("energy 10 messages %q", got)
-	}
-	nexus, elec := -1, -1
-	for i, m := range got {
-		switch m {
-		case "part 4 Battle Nexus":
-			nexus = i
-		case "level 4 19":
-			elec = i
-		case "part 0 Battle Nexus":
-			t.Errorf("Battle Nexus announced at energy 10: %q", got)
-		}
-	}
-	if elec < 0 || nexus < elec {
-		t.Errorf("Battle Nexus at %d, electronics 19 at %d: %q", nexus, elec, got)
+	g.Players[0].Research.Levels[Propulsion] = 5
+	got := levelMessages(g.levelEvents(0, before, []int{Propulsion}))
+	if len(got) == 0 || got[0] != "level 2 5" || !contains(got, "part 2 Gravity Terraform ±7") {
+		t.Errorf("got %q, want level 2 5 announcing Gravity Terraform ±7", got)
 	}
 }
 
@@ -131,7 +142,7 @@ func TestLevelEventsRaceParts(t *testing.T) {
 		before := [NumFields]int{Energy: 10, Propulsion: 11, Electronics: 11}
 		g.Players[0].Research.Levels = before
 		g.Players[0].Research.Levels[Energy] = 11
-		if got := levelMessages(g.levelEvents(0, before)); !reflect.DeepEqual(got, c.want) {
+		if got := levelMessages(g.levelEvents(0, before, fieldOrder(before, g.Players[0].Research.Levels))); !reflect.DeepEqual(got, c.want) {
 			t.Errorf("%s: %q, want %q", c.name, got, c.want)
 		}
 	}
@@ -229,5 +240,45 @@ func TestTurnLevelEventsAfterDrops(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("no energy 4 level-up for player 1 in %+v", r.Events)
+	}
+}
+
+// TestTurnLevelEventsChainOrder checks that a whole turn announces the
+// research step's levels in the order gained: biotech, the current field,
+// then weapons, which the leftover reaches (MEASURED, EM-1).
+func TestTurnLevelEventsChainOrder(t *testing.T) {
+	g := pgHomeworld()
+	pl := &g.Players[0]
+	pl.Research.Current, pl.Research.Next = Biotech, Weapons
+	pl.Research.Levels[Weapons], pl.Research.Levels[Biotech] = 4, 1
+	sum := pl.Research.levelSum()
+	pl.Research.Accumulated = [NumFields]int{
+		Biotech: ResearchLevelCost(2, sum, pl.Race.ResearchCosts[Biotech], false) - 1,
+		// Short of weapons 5 now; the leftover moved after biotech 2 covers
+		// it, though the level costs 10 more then.
+		Weapons: ResearchLevelCost(5, sum, pl.Race.ResearchCosts[Weapons], false) - 1,
+	}
+	r, err := GenerateTurn(withRules(g), nil, highRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, m := range levelMessages(r.Events) {
+		if m == "level 5 2" || m == "level 1 5" {
+			got = append(got, m)
+		}
+	}
+	if want := []string{"level 5 2", "level 1 5"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("level messages %q, want %q (levels now %v)", got, want, r.Game.Players[0].Research.Levels)
+	}
+}
+
+// TestFieldOrder checks the order LevelUpCheck's levels are announced in:
+// each field in turn, energy first, a field's levels together.
+func TestFieldOrder(t *testing.T) {
+	before := [NumFields]int{Energy: 3, Weapons: 1, Biotech: 2}
+	after := [NumFields]int{Energy: 4, Weapons: 3, Biotech: 2}
+	if got, want := fieldOrder(before, after), []int{Energy, Weapons, Weapons}; !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
 	}
 }

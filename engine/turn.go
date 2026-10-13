@@ -330,7 +330,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		pl := &g.Players[i]
 		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
-		events = append(events, g.levelEvents(i, before)...)
+		events = append(events, g.levelEvents(i, before, fieldOrder(before, pl.Research.Levels))...)
 	}
 	events = append(events, g.loadPass(false)...)
 
@@ -471,8 +471,9 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		pl := &g.Players[i]
 		spent[i] = researchSpent(pl.Research, pl.Race, research[i])
 		before := pl.Research.Levels
-		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
-		events = append(events, g.levelEvents(i, before)...)
+		var order []int
+		pl.Research, order = addResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
+		events = append(events, g.levelEvents(i, before, order)...)
 	}
 	events = append(events, g.stealResearch(spent)...)
 	// Research level-ups, then random events (KERNEL.md "Turn order"
@@ -553,7 +554,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		pl := &g.Players[i]
 		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
-		events = append(events, g.levelEvents(i, before)...)
+		events = append(events, g.levelEvents(i, before, fieldOrder(before, pl.Research.Levels))...)
 	}
 	events = withFinished(events, g.loadPass(true))
 	// Mine sweeping (step 7.1).
