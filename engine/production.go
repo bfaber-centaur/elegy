@@ -167,7 +167,7 @@ type Event struct {
 	Fleet  int // fleet id, or -1
 	Item   ItemKind
 	Count  int
-	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), a captured planet's former owner, or a built starbase's design slot (EventStarbaseBuilt from production)
+	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), a captured planet's former owner, or a built starbase's or ship's design slot (EventStarbaseBuilt or EventShipsBuilt from production)
 }
 
 // ProductionInput is everything one planet's production reads.
@@ -613,6 +613,11 @@ func (pr *production) launch(slot, n int) (refused bool) {
 	d, _ := pr.designOf(QueueItem{Kind: ItemShip, Slot: slot})
 	g := pr.g
 	ev, _ := g.Launch(pr.pi, d, n)
+	if len(ev) > 0 && ev[0].Kind == EventShipsBuilt {
+		// The build message names the owner's design slot (MESSAGES.md
+		// 0x0cd "Design slot", stars-elegy 898c526, MEASURED for 0x02f).
+		ev[0].Axes = []int{slot}
+	}
 	pr.events = append(pr.events, ev...)
 	if len(ev) == 1 && ev[0].Kind == EventPlansLost {
 		return true
