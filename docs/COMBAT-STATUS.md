@@ -287,7 +287,7 @@ applied after the run to the observed kill events (stars-elegy
 Lane D's case specs B1–B4 and Q4b, run by lane F. Elegy's predictions
 were pushed before the runs: elegy 5d2450e for Q4b, and private
 apparatus 76789105 for the exact starts. Results and labels are from
-stars-elegy #184 (PARITY.md "Battle summaries B1–B4 and the battle order
+stars-elegy #184, merged as 3bd93e1 (PARITY.md "Battle summaries B1–B4 and the battle order
 (CB-059)", `experiments/cb059`), with 8 pinned streams per start. Each
 case is decided only by the streams whose record took its branch.
 
