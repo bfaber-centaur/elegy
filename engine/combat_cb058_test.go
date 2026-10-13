@@ -251,7 +251,7 @@ func TestConfirmedCB058DeathStarReach(t *testing.T) {
 		e := tok(d, 1, 1, 1)
 		e.x, e.y = sb.x+c.x, sb.y
 		tb := newTestBattle(panicRand{}, d, &sb, e)
-		if got := len(tb.eligible(&sb, sb.weapons[0])) == 1; got != c.want {
+		if got := len(tb.inReach(&sb, sb.weapons[0], sb.primary)) == 1; got != c.want {
 			t.Errorf("ship %d squares away: in reach %v, want %v", c.x, got, c.want)
 		}
 	}
