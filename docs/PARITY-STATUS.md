@@ -381,6 +381,64 @@ stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`r
 - **Baseline:** RG-002-Y6-2468 and RG-003-Y6-2468 leave it. They passed only because every year-6 miss was a sample; with the three lines above strict, the reference seed fails them. This is the honest result of the rebuild, not a regression.
 - **Census:** "sample: one stream's random outcome" 2241 → 2001.
 
+### Order accounting (RG-002, RG-003, RG-004)
+
+Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
+
+Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P, objects not at the same place; O, the object belongs to another player; R, a value out of range (a ship count); H, the harness refusal of a waypoint_delete past the end of the fleet's list (ELEGY CHOICE, harness).
+
+**RG-002**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| total | 1867 | 37 | 0 |
+
+**RG-003**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| 7 | 311 | 22 (17/5/0/0/0) | 0 |
+| 8 | 301 | 18 (13/5/0/0/0) | 0 |
+| 9 | 298 | 26 (18/6/1/1/0) | 0 |
+| 10 | 308 | 35 (27/8/0/0/0) | 0 |
+| 11 | 335 | 39 (25/13/1/0/0) | 0 |
+| 12 | 311 | 43 (22/19/1/1/0) | 0 |
+| total | 3731 | 220 | 0 |
+
+**RG-004**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 158 | 0 | 0 |
+| 2 | 157 | 0 | 0 |
+| 3 | 190 | 6 (4/2/0/0/0) | 0 |
+| 4 | 162 | 7 (6/1/0/0/0) | 1 (1/0/0/0/0) |
+| 5 | 171 | 12 (8/2/2/0/0) | 1 (1/0/0/0/0) |
+| 6 | 173 | 13 (10/0/2/1/0) | 1 (1/0/0/0/0) |
+| 7 | 183 | 10 (5/2/2/0/1) | 1 (1/0/0/0/0) |
+| 8 | 161 | 8 (6/0/2/0/0) | 1 (1/0/0/0/0) |
+| 9 | 164 | 8 (4/2/2/0/0) | 1 (1/0/0/0/0) |
+| 10 | 173 | 8 (4/1/3/0/0) | 1 (1/0/0/0/0) |
+| 11 | 172 | 9 (5/0/4/0/0) | 1 (1/0/0/0/0) |
+| 12 | 185 | 12 (5/2/4/1/0) | 1 (1/0/0/0/0) |
+| total | 2049 | 93 | 9 |
+
+- **Chained runs:** every refusal is a sample line. It follows earlier divergence, because the order names an object that Elegy's diverged state no longer has, or has elsewhere. RG-002 has 37, RG-003 220 and RG-004 93.
+- **Restarts:** RG-002 and RG-003 refuse nothing. RG-004's 9 restart refusals are the lane A hand lines "empty design-slot delete refused", one in each restart from Y4 to Y12 (see the RG-004 section).
+- **RG-004 ledger:** 102 order lines (93 + 9), matching the steward's count.
+
 ### Planet records without installations block
 
 stars-elegy ORACLE.md (main `1d4c97b`, the `dump` notes) says: "The game omits a planet's 8-byte installations block when growth carry, mines, factories, defenses and the leftover-only box are all 0 and there is no scanner." The vector diff then writes null for `excess`, `mines`, `factories`, `defenses`, `planetary_scanner` and `leftover_to_research` where the start state had them. The comparator used to skip those fields as "planet field … null". It now reads them as 0, no scanner and false whenever the record has a population, and compares them. The sentence names all six fields (DOCUMENTED). Reading a missing block as those values is its converse, which is an ASSUMPTION: that the block is written whenever any of them is non-zero. Every field read this way matches except one (corrected below). A record whose population is also null stays skipped. The second ORACLE.md note ("Populations above 0 with no mines, factories, defenses or carry are written without an installations section") covers populated planets only, so it says nothing about such a record. Measured on elegy main `7c4f6b0` (#227):
