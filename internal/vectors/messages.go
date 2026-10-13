@@ -37,6 +37,7 @@ func pvMessageIDs() map[int]string {
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x07b: "EventTerraformed",
 		0x12a: "EventOrderClipped of an installation",
 		0x12f: "EventOrderClipped of terraforming",
 		0x083: "EventCometStrike, small",
@@ -250,6 +251,18 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					single[k] = j
 				}
 			}
+		case engine.EventTerraformed:
+			// MESSAGES.md 0x07b: planet, 1 up / 0 down, axis, hab value.
+			// The hab value is axis<<8 | the axis's new value (MEASURED
+			// from every 0x07b entry of the vectors; the table does not
+			// spell it out).
+			up := 0
+			if ev.Count > 0 {
+				up = 1
+			}
+			a := ev.Axes[0]
+			send(ev.Player, pvMsg{id: 0x07b, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{ev.Planet - 1, up, a, a<<8 | ev.Axes[1]}})
 		case engine.EventBattleSummary:
 			if ev.Count > 0 && ev.Count < len(pvSummaryIDs) {
 				send(ev.Player, pvMsg{id: pvSummaryIDs[ev.Count], known: []bool{}, why: "battle summary focus and slots"})

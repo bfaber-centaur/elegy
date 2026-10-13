@@ -1746,6 +1746,37 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 	}
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
+		if string(raw) == "null" && string(eq["population"]) != "null" {
+			// stars-elegy ORACLE.md (main 1d4c97b, the `dump` notes):
+			// "The game omits a planet's 8-byte installations block when
+			// growth carry, mines, factories, defenses and the
+			// leftover-only box are all 0 and there is no scanner." The
+			// vectors then write null for those fields where the start
+			// state had them. Reading a missing block as those zero
+			// values is the converse of that rule (ASSUMPTION: the block
+			// is written whenever any of them is non-zero). One field
+			// read this way misses: RG-001-2435 y6 planet 41 excess, on a
+			// population that already differs; the y6 restart, from the
+			// oracle's year-5 state, matches it (docs/PARITY-STATUS.md).
+			// The ORACLE.md note that pins this
+			// to populated planets ("Populations above 0 with no mines,
+			// factories, defenses or carry are written without an
+			// installations section") says nothing about a record whose
+			// population is null too, so that record stays skipped.
+			switch k {
+			case "excess", "mines", "factories", "defenses":
+				raw = json.RawMessage("0")
+			case "leftover_to_research":
+				raw = json.RawMessage("false")
+			case "planetary_scanner":
+				// null is no planetary scanner, here or as the start
+				// state's scanner index 31 (loadVector).
+				if p.HasScanner {
+					errs = append(errs, pvMismatch(k, "a scanner", "none"))
+				}
+				continue
+			}
+		}
 		if string(raw) == "null" && k != "environment" && k != "original_environment" && k != "starbase" {
 			// The vectors write null for a value the original's file
 			// does not hold, such as an unowned planet's population

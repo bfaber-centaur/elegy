@@ -59,7 +59,6 @@
    1 message 0x068 has no event mapping
    2 message 0x06a has no event mapping
    1 message 0x072 has no event mapping
-   9 message 0x07b has no event mapping
    1 message 0x08b has no event mapping
    2 message 0x0b8 has no event mapping
    1 message 0x0ba has no event mapping
@@ -126,17 +125,16 @@
    2 message_sequence entry 0x007 has no event mapping
    3 message_sequence entry 0x025 has no event mapping
    5 message_sequence entry 0x03a has no event mapping
-   8 message_sequence entry 0x07b has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
-   1 message_sequence entry 0x156 has no event mapping
+   1 message_sequence entry 0x12c has no event mapping
+   3 message_sequence entry 0x156 has no event mapping
+   2 message_sequence entry 0x15a has no event mapping
    1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
- 121 planet field defenses null
+   2 planet field defenses null
    2 planet field environment_visible
-   4 planet field excess null
    6 planet field packet_destination null
-   2 planet field planetary_scanner null
    1 planet field population null
    9 planet field population_estimate
    1 planet field starbase_design
