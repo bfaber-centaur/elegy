@@ -227,3 +227,32 @@ func TestScrapSalvageNumberInEvent(t *testing.T) {
 		t.Errorf("scrap events %v, want fleet %d [1|2 4 5 1] and fleet %d [1|2 8 2 2]", got, id, jd)
 	}
 }
+
+// fullObjects stands in for space objects at their object limit: no new
+// salvage has room (OBJECTS.md "Salvage", "Owner": a free object slot).
+type fullObjects struct{ SpaceObjects }
+
+func (fullObjects) SalvageNumber(*Game, int) (int, bool) { return 0, false }
+
+func (fullObjects) TraderBit(string) int { return -1 }
+
+// A deep-space scrap that makes no salvage, at the object limit, names
+// none in its event (Axes[0] −1), so 0x05b's salvage slot is not compared
+// rather than taken for salvage 0.
+func TestScrapNoRoomNamesNoSalvage(t *testing.T) {
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	l.planet(NoOwner, 0, 100)
+	fi := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1})
+	l.g.Planets = l.g.Planets[:0]
+	l.g.Fleets[fi].Pos, l.g.Fleets[fi].Number = Point{0, 0}, 4
+	l.g.Fleets[fi].Cargo = Cargo{Minerals: Minerals{100, 0, 0}}
+	l.g.Objects = fullObjects{}
+	ev := l.g.scrap(fi, &seqRand{}, map[int]bool{}, scrapYear{})
+	if len(ev) != 1 || ev[0].Kind != EventFleetScrapped || len(ev[0].Axes) != 4 || ev[0].Axes[0] != -1 || ev[0].Axes[1] != 4 {
+		t.Errorf("events %+v, want one scrap event with Axes [-1 4 …]", ev)
+	}
+	if len(l.g.Salvage) != 0 {
+		t.Errorf("salvage %+v, want none", l.g.Salvage)
+	}
+}
