@@ -42134,6 +42134,105 @@
      "year": 1
     },
     {
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": [
+      {
+       "id": 56,
+       "focus": 51,
+       "params": [
+        30,
+        51
+       ]
+      },
+      {
+       "id": 54,
+       "focus": 51,
+       "params": [
+        26,
+        51
+       ],
+       "sample": true
+      },
+      {
+       "id": 56,
+       "focus": 51,
+       "params": [
+        100,
+        51
+       ]
+      },
+      {
+       "id": 54,
+       "focus": 92,
+       "params": [
+        6,
+        92
+       ]
+      },
+      {
+       "id": 54,
+       "focus": 95,
+       "params": [
+        18,
+        95
+       ]
+      },
+      {
+       "id": 56,
+       "focus": 95,
+       "params": [
+        4,
+        95
+       ]
+      },
+      {
+       "id": 54,
+       "focus": 100,
+       "params": [
+        22,
+        100
+       ]
+      },
+      {
+       "id": 56,
+       "focus": 100,
+       "params": [
+        7,
+        100
+       ]
+      },
+      {
+       "id": 38,
+       "focus": 51,
+       "params": [
+        51,
+        227,
+        0
+       ]
+      },
+      {
+       "id": 38,
+       "focus": 92,
+       "params": [
+        92,
+        10,
+        0
+       ]
+      },
+      {
+       "id": 38,
+       "focus": 95,
+       "params": [
+        95,
+        7,
+        0
+       ]
+      }
+     ],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 0,
      "equals": {
@@ -42155,6 +42254,12 @@
      "seen_by": 0,
      "year": 1,
      "sample": true
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [],
+     "year": 1
     },
     {
      "kind": "player",
@@ -42183,6 +42288,12 @@
      "sample": true
     },
     {
+     "kind": "message_sequence",
+     "player": 2,
+     "messages": [],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 2,
      "equals": {
@@ -42204,6 +42315,12 @@
      "seen_by": 2,
      "year": 1,
      "sample": true
+    },
+    {
+     "kind": "message_sequence",
+     "player": 3,
+     "messages": [],
+     "year": 1
     },
     {
      "kind": "player",
@@ -42229,6 +42346,12 @@
      "sample": true
     },
     {
+     "kind": "message_sequence",
+     "player": 4,
+     "messages": [],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 4,
      "equals": {
@@ -42248,6 +42371,12 @@
       }
      },
      "seen_by": 4,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 5,
+     "messages": [],
      "year": 1
     },
     {
@@ -42273,6 +42402,12 @@
      "seen_by": 5,
      "year": 1,
      "sample": true
+    },
+    {
+     "kind": "message_sequence",
+     "player": 6,
+     "messages": [],
+     "year": 1
     },
     {
      "kind": "player",

@@ -141,6 +141,8 @@
      "ship_designs": 3,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 7
    }
   ],
@@ -1026,6 +1028,12 @@
        "biotechnology": 0
       }
      }
+    },
+    {
+     "year": 1,
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": []
     },
     {
      "year": 1,

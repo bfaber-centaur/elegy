@@ -331,6 +331,7 @@ vectors").
 
 | `salvage_at` | salvage at (`x`, `y`) | `minerals`; `observed: "none"` if there was none |
 | `message` | player `player` got message `message_id` | `present` |
+| `message_sequence` | every message player `player` got in the year, in `.M` order (`rg`, `kx001`–`kx005`, `pq`) | `messages`: per message `id`, `focus` and `params`; see "Message sequences" below |
 | `object` | a new or changed map object | the object, as in `initial_state.objects` |
 | `object_gone` | the object `subject` (`{kind, owner, id}`) no longer exists, e.g. a swept minefield | |
 | `minefield` | minefield `owner`/`id` | `x`, `y`, `mines`, `type`, `detonating`; `radius` when the case checks it |
@@ -340,6 +341,58 @@ vectors").
 | `no_battle` | no battle record was written | |
 | `client_estimate` | a value the original client shows on `screen` for `subject` after the year | `field` names the value; `equals` holds it as a number or a short value with its unit, never the client's sentence |
 | `sample` | a random outcome | see below |
+
+### Message sequences
+
+A `message_sequence` lists the messages a player found in its `.M` file for
+the year, in the order the file holds them, which is the order the year
+generated them (MESSAGES.md "How messages work", "Order"). Each entry is:
+
+- `id`: the message kind (MESSAGES.md "Catalogue");
+- `focus`: the focus word as stored (MESSAGES.md "How messages work",
+  focus codes): a planet number, a fleet id with bit 15 set, a battle id
+  with bit 14 set, a part code with bits 14 and 15 set, or a negative code
+  as a 16-bit value;
+- `params`: the slot values in stored order (the Slots column of
+  MESSAGES.md "Catalogue"; "Slot types"). A value is a number: a planet, fleet or player number, a design, a part,
+  a count, an amount or a location coordinate. No message text is stored.
+
+A computer player's file keeps only four kinds (MESSAGES.md "Computer
+players"), so its list is often empty; an empty list is an expectation
+too. The `message` expectations stay as they were; the sequence adds the
+order, repeats and slot values.
+
+**Order rule.** The entries without `sample` are exact: an implementation's
+sequence for that player and year must contain them, with the same `id`,
+`focus` and `params`, in the same relative order. An entry with `sample:
+true` was decided by that stream's draws: where it stands, whether it was
+sent and its values are one sample. When no entry carries `sample`, the
+list is the whole sequence and nothing else may be sent.
+
+An entry is a sample when:
+- the year had a battle and the entry's id is one the battle step sends
+  (Phase P6 in MESSAGES.md: 0x00e–0x022, 0x07e, 0x08d–0x08e, 0x091–0x0a8,
+  0x0ef–0x0f1, 0x0f9–0x0fa, 0x113–0x116, 0x13a–0x13b, 0x144, 0x180), or
+  the level-up 0x050 to a player who fought (a battle can give research);
+- the year had a battle and the entry's id is sent after the battles
+  (Phase P6a to P8a) and its focus is a fleet that fought or a planet where
+  a battle was;
+- in `rg`, it is not in a longest common subsequence of the gen stream's
+  sequence and an alternative stream's sequence for the same player
+  (sent, its values or its place differed);
+- in the single-stream `kx005` runs T1 and T2, it is the drift message
+  0x15c.
+
+In several-stream vectors (`kx004`, `kx005`, `pq` repeats), a sequence that
+differed between streams is listed once per stream with `stream`, as any
+other expectation.
+
+The repeated block of a year without orders (MESSAGES.md "Years without
+orders") was not seen in these corpora. Of the 1222 player files checked
+against the year before, 24 began with the previous year's block, and each
+of those blocks was one message the year sends again in its own place:
+0x03f for a planet still without a queue (23) and 0x036 for the same build
+(1).
 
 ### Tags
 
@@ -434,6 +487,9 @@ loss roll decided (a predicted ship range, the O-65 fleets of which only
 some arrive, the GT-003 W cases) carry `sample: true`, and so do message
 ids that only some of those fleets got. In `ob`, a PP terraforming step's
 size is a draw, so OB-029's `environment` expectations are samples.
+In `rp`, every year-end wormhole `object` (RD-P20, RD-P21) carries
+`sample: true`, as in RG-002: each end jiggles or jumps on its own draws
+every year (OBJECTS.md "Yearly movement").
 In `ob` and `wt`, these are samples too, because the original draws them
 (OBJECTS.md):
 - whether a player sees a wormhole, where the drawn jiggle (at most 17 ly
@@ -487,13 +543,23 @@ python3 tools/vectors/build.py fm2 ../stars-oracle-apparatus/evidence/fm2
 python3 tools/vectors/build.py wt  ../stars-oracle-apparatus/evidence/wt
 python3 tools/vectors/build.py cb  ../stars-oracle-apparatus/evidence/cb   # reads every cb* round
 python3 tools/vectors/build.py sc  ../stars-oracle-apparatus/evidence/sc
-python3 tools/vectors/build.py sl  ../stars-oracle-apparatus/evidence/sl   # also cb7, tk3
+python3 tools/vectors/build.py sl  ../stars-oracle-apparatus/evidence/sl
 python3 tools/vectors/build.py mf  ../stars-oracle-apparatus/evidence/mf
 python3 tools/vectors/build.py rp  ../stars-oracle-apparatus/evidence/rd
 python3 tools/vectors/build.py rw  ../stars-oracle-apparatus/evidence/rd
 python3 tools/vectors/build.py kx005 ../stars-oracle-apparatus/evidence/kx005
 python3 tools/vectors/build.py kx004 ../stars-oracle-apparatus/evidence/kx004   # also kx001..kx003
-python3 tools/vectors/build.py xf  ../stars-oracle-apparatus/evidence/xf    # also bp, tk5, wu
+python3 tools/vectors/build.py xf  ../stars-oracle-apparatus/evidence/xf
+python3 tools/vectors/build.py bp  ../stars-oracle-apparatus/evidence/bp    # likewise tk5, wu
+python3 tools/vectors/build.py cb7 ../stars-oracle-apparatus/evidence/cb7   # likewise tk3
+python3 tools/vectors/build.py gt  ../stars-oracle-apparatus/evidence/gt    # likewise es, fc, ob
+python3 tools/vectors/build.py fo  ../stars-oracle-apparatus/evidence/fo    # likewise tk2
+python3 tools/vectors/build.py cs  ../stars-oracle-apparatus/evidence/cs/cs-003
+python3 tools/vectors/build.py pg  ../stars-oracle-apparatus/evidence       # reads pq001, pg002, pg003
+python3 tools/vectors/build.py pq  ../stars-oracle-apparatus/evidence/pq001
+python3 tools/vectors/build.py rg001 ../stars-oracle-apparatus/evidence/rg001
+python3 tools/vectors/build.py rg002 <dir named rg002>                      # a link to evidence/rg002/run
+python3 tools/vectors/build.py co  <dir named co>                           # a link to evidence/fo (the co* runs)
 go test ./internal/vectors
 ```
 
@@ -550,6 +616,25 @@ moving fleet, the KX-005 drift, battles); their exact parts still count.
 The ones an implementer is most likely to want are FM-000..004 and
 TK-001..007 (round 1 prose and tables, which need a checker-output rerun
 or a hand conversion), KX-004 E0/E1, and BP-2.
+
+**Full rebuild (2026-10-13).** Every corpus with an `initial_state` was
+rebuilt from its raw evidence with the current builders, so each player now
+carries `default_queue` and `default_leftover_to_research`. The rebuild
+changed nothing else: each of the 384 rebuilt files equals its earlier
+version once those two keys are removed. 863 player records have an empty
+default queue; only TK-106, TK-107 and TK-108 give player 0 a queue and
+`default_leftover_to_research: true` (RG-001 and RG-002 already carried
+them). `ug` and `rw` were not changed (`ug` is new-game vectors; `rw` came
+out identical).
+
+**WT-001 player-0 wormhole bit (UNRESOLVED, 2026-10-13).** WT-001-G
+expects ends 2 and 3 known to players 0 and 1, and it is not flagged a
+sample. Player 1's bit is clear of the jiggle: its scouts sit 5 ly from
+each end against a 50 ly bound, and the jiggle moves an end at most 17 ly.
+Player 0 has no scanner close to either end, so there is no jiggle margin
+for its bit, and the run does not show how player 0 came to know them.
+Both streams agree. Until that is explained, player 0's bit on ends 2
+and 3 may be drawn rather than a rule.
 
 **Oracle runs not run.** Each PARITY section's "Not tested" list is the
 current record; the main ones are:

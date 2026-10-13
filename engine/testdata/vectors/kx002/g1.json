@@ -141,6 +141,8 @@
      "ship_designs": 3,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 7
    }
   ],
@@ -1029,6 +1031,74 @@
      "player": 0,
      "message_id": 325,
      "present": true,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": [
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 38,
+       "focus": 7,
+       "params": [
+        7,
+        101,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        3,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 49665,
+       "params": [
+        0,
+        4,
+        1
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      }
+     ],
      "year": 1
     },
     {
