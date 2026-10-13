@@ -272,6 +272,15 @@ Measured on elegy main `bd0ed07` (#231) plus this branch.
 - **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
 
+### Salvage and bombing message slots (lane D)
+
+Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
+
+- **0x05b** (a fleet scrapped in deep space): the salvage slot is now compared. `EventFleetScrapped` carries the new salvage's number (`Axes`), and the slot is its object id, 0x2000 + owner·512 + number (MESSAGES.md "Object ids in slots", MEASURED SV-1). When the minerals overflow into several objects the event names the first: ASSUMPTION (no run has overflowed a scrapped fleet's salvage). The fleet slot stays not compared: its owner bits are UNRESOLVED (the contradiction in MESSAGES.md). RG-002/RG-003 year 1's salvage 8192 matches in all 4 entries.
+- **0x08f / 0x090** (bombed empty): the fleet slot and 0x08f's fleet focus are now compared. `EventBombed` names the fleet whose plan started the pass (`Fleet`) and carries its number and the count of the bomber's fleets in orbit (`Axes`), saved at bombing time because the fleet can be gone by the end of the year (RG-002 year 4's was). All 16 sequence entries that skipped the slot match (RG-002 y4, RG-003 y4 and y10, chained and restart).
+  - With two or more of the bomber's fleets in orbit, the message is 0x17c/0x17d (MESSAGES.md, CONFIRMED tk2/tk121), with the fleet slot not compared. Which fleets count (all in orbit, or those with bombs) and which fleet 0x08f names when the pass was started by a fleet without bombs are ASSUMPTION: every vector case had one fleet in orbit. No vector names 0x17c or 0x17d.
+- Census: "0x05b salvage and fleet slots" (4) becomes "0x05b fleet slot" (4); "0x08f and 0x090 bombing fleet" (16) is gone.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".

@@ -121,7 +121,8 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	}
 	first := Minerals{30000, 0, 0}
 	rest := Minerals{left[Ironium] - 30000, left[Boranium], left[Germanium]}
-	g := l.turn(&seqRand{}).Game
+	r := l.turn(&seqRand{})
+	g := r.Game
 	if len(g.Salvage) != 2 {
 		t.Fatalf("salvage %+v, want two objects", g.Salvage)
 	}
@@ -137,6 +138,21 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	}
 	if a.Steps != 3000 || b.Steps != salvageTenths(rest) {
 		t.Errorf("steps %d and %d, want 3000 and %d", a.Steps, b.Steps, salvageTenths(rest))
+	}
+	// The scrap event names the first object's number (for 0x05b's
+	// salvage slot; ASSUMPTION: no run overflowed a scrapped fleet's
+	// salvage).
+	scrapped := 0
+	for _, e := range r.Events {
+		if e.Kind == EventFleetScrapped {
+			scrapped++
+			if !reflect.DeepEqual(e.Axes, []int{a.Number}) {
+				t.Errorf("scrap event %+v, want Axes [%d] (the first object)", e, a.Number)
+			}
+		}
+	}
+	if scrapped != 1 {
+		t.Errorf("%d scrap events, want 1", scrapped)
 	}
 }
 

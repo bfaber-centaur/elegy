@@ -7,7 +7,8 @@ const TaskScrap TaskKind = TaskRoute + 5
 // Scrap messages. Elegy's wording.
 const (
 	// EventFleetScrapped: Player's Fleet was scrapped at Planet (−1 in
-	// deep space).
+	// deep space); Axes = the number of the salvage it left in deep
+	// space (the first, if the minerals overflowed into several).
 	EventFleetScrapped EventKind = iota + EventPacketDesignSeen + 1
 	// EventScrapRecycled: ships scrapped at Player's Planet added Count
 	// resources to its production (Ultimate Recycling).
@@ -110,7 +111,9 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 	if pi < 0 {
 		if left != (Minerals{}) {
 			for i, m := range splitSalvage(left) {
-				g.newSalvage(f.Owner, f.Pos, m, i == 0)
+				if n, ok := g.newSalvage(f.Owner, f.Pos, m, i == 0); ok && i == 0 {
+					events[0].Axes = []int{n}
+				}
 			}
 		}
 		return events

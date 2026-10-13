@@ -233,9 +233,26 @@ func TestConfirmedFleetsBombAsOne(t *testing.T) {
 			l.fleet(0, pi, tt.first, Stack{Design: cherry, Count: 6})
 			l.fleet(0, pi, 1-tt.first, Stack{Design: cherry, Count: 4})
 		}
-		bombing(&l.g, panicRand{})
+		// A fleet of the bomber elsewhere is not in orbit, and another
+		// player's fleet in orbit (the owner's) is not the bomber's.
+		l.fleet(0, l.planet(0, 50, 100), 1, Stack{Design: cherry, Count: 1})
+		l.fleet(1, pi, 0, Stack{Design: cherry, Count: 1})
+		for i := range l.g.Fleets {
+			l.g.Fleets[i].Number = i + 3
+		}
+		ev := bombing(&l.g, panicRand{})
 		if got := l.g.Planets[pi].Population; got != 690 {
 			t.Errorf("%s: pop %d, want 690 (one pass of 10 Cherry)", tt.name, got)
+		}
+		// EventBombed names the fleet whose plan started the pass and
+		// counts the bomber's fleets in orbit (for 0x08f and 0x17c).
+		q := 1 - tt.first
+		if tt.laser {
+			q = 0
+		}
+		want := Event{Kind: EventBombed, Player: 0, Planet: l.g.Planets[pi].ID, Fleet: l.g.Fleets[q].ID, Count: 230, Axes: []int{q + 3, 2}}
+		if len(ev) == 0 || !reflect.DeepEqual(ev[0], want) {
+			t.Errorf("%s: events %+v, want first %+v", tt.name, ev, want)
 		}
 	}
 }

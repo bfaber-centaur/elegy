@@ -2,6 +2,7 @@ package vectors
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -54,6 +55,8 @@ func pvMessageIDs() map[int]string {
 		0x0f4: "EventMinesSwept by a starbase",
 		0x0be: "EventMinefieldSwept",
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
+		0x17c: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the bomber",
+		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -376,10 +379,15 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			send(ev.Player, m)
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
-				// The salvage object's id is not in the event, and the
-				// scrapped fleet is gone.
-				send(ev.Player, pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
-					why: "0x05b salvage and fleet slots"})
+				// Slots: the salvage's object id, 0x2000 + owner·512 +
+				// number (MESSAGES.md "Object ids in slots", MEASURED
+				// SV-1), then the fleet, whose owner bits are UNRESOLVED.
+				m := pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
+					why: "0x05b salvage and fleet slots"}
+				if len(ev.Axes) == 1 {
+					m.params[0], m.known[0], m.why = 1<<13|ev.Player<<9|ev.Axes[0], true, "0x05b fleet slot"
+				}
+				send(ev.Player, m)
 			}
 		case engine.EventMinesSwept:
 			// Slots: sweeper (fleet or planet), amount (two slots), the
@@ -432,11 +440,28 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			}
 		case engine.EventPlanetEmptied:
 			if i > 0 && events[i-1].Kind == engine.EventBombed && events[i-1].Planet == ev.Planet {
-				// EventBombed names the bomber, not its fleet.
-				send(events[i-1].Player, pvMsg{id: 0x08f, params: []int{0, ev.Planet - 1}, known: []bool{false, true},
-					why: "0x08f and 0x090 bombing fleet"})
-				send(ev.Player, pvMsg{id: 0x090, focus: ev.Planet - 1, focusKnown: true, params: []int{0, ev.Planet - 1}, known: []bool{false, true},
-					why: "0x08f and 0x090 bombing fleet"})
+				// The fleet whose plan started the pass, saved at bombing
+				// time (it can be gone by the end of the year). With more
+				// than one of the bomber's fleets in orbit the message is
+				// 0x17c/0x17d (MESSAGES.md 0x08f, 0x17c); which fleets
+				// count, and which one 0x17c names, are not in the spec.
+				b := events[i-1]
+				m := pvMsg{id: 0x08f, params: []int{0, ev.Planet - 1}, known: []bool{false, true}, why: "0x08f bombing fleet"}
+				if len(b.Axes) == 2 && b.Axes[1] > 1 {
+					m.id, m.why = 0x17c, "0x17c fleet slot"
+				} else if len(b.Axes) == 2 {
+					code := b.Player<<9 | (b.Axes[0] - 1)
+					m.params[0], m.known[0], m.why = code, true, ""
+					m.focus, m.focusKnown = pvFocusFleet|code, true
+				}
+				send(b.Player, m)
+				m.id, m.focus, m.focusKnown = m.id+1, ev.Planet-1, true
+				m.known = slices.Clone(m.known)
+				m.params = slices.Clone(m.params)
+				if m.why != "" {
+					m.why = fmt.Sprintf("0x%03x%s", m.id, m.why[5:])
+				}
+				send(ev.Player, m)
 			}
 		}
 	}

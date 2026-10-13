@@ -30,7 +30,7 @@ sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: y = 1625, want 1639
 sample | rg002 | RG-002-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002 | RG-002-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
+not compared | rg002 | RG-002-2463 y1 #403 | message_sequence | message_sequence 0x05b fleet slot not compared
 sample | rg002 | RG-002-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002 | RG-002-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -384,7 +384,6 @@ sample | rg002 | RG-002-2466 y4 #424 | player id=3 seen_by=3 | score_record.unar
 sample | rg002 | RG-002-2466 y4 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
 sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.resources = 10999, want 11016
 sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.score = 603, want 604
-not compared | rg002 | RG-002-2466 y4 #430 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[0] position = {1371 1309}, want {1369 1308}
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[1] = {{1367 1327} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1348 1358} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | x = 1371, want 1369
@@ -1016,7 +1015,7 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1
 sample | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #403 | message_sequence | message_sequence 0x05b fleet slot not compared
 sample | rg002-y1 | RG-002-Y1-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -1146,7 +1145,6 @@ sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: x = 1239, want 1
 sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: y = 1778, want 1789
 sample | rg002-y4 | RG-002-Y4-2466 y1 #420 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
 sample | rg002-y4 | RG-002-Y4-2466 y1 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #430 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #48 | fleet owner=1 id=49 | fleet gone (5/8 variants match)
 sample | rg002-y4 | RG-002-Y4-2466 y1 #76 | fleet owner=2 id=7 | cargo.germanium = 97, want 96
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | 0 waypoints after waypoint 0 [], want 1 (5/8 variants match)

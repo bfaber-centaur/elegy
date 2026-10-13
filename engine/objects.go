@@ -342,14 +342,14 @@ func (g *Game) dropShiplessFleets() {
 
 // newSalvage adds a deep-space salvage object of owner at pos holding m,
 // numbered from the owner's packet numbers (OBJECTS.md "Salvage",
-// "Owner"); fresh marks it to skip the next decay. With no room for it
-// (SpaceObjects.SalvageNumber) its minerals are lost (ASSUMPTION S1 of
-// package objects).
+// "Owner"), and returns its number; fresh marks it to skip the next
+// decay. With no room for it (SpaceObjects.SalvageNumber) its minerals
+// are lost (ASSUMPTION S1 of package objects).
 //
 // ASSUMPTION O14: in a game with no space objects (nil Game.Objects) the
 // number is the owner's lowest unused salvage number, with no object
 // limit.
-func (g *Game) newSalvage(owner int, pos Point, m Minerals, fresh bool) {
+func (g *Game) newSalvage(owner int, pos Point, m Minerals, fresh bool) (int, bool) {
 	n, ok := 0, true
 	if g.Objects != nil {
 		n, ok = g.Objects.SalvageNumber(g, owner)
@@ -365,9 +365,10 @@ func (g *Game) newSalvage(owner int, pos Point, m Minerals, fresh bool) {
 		}
 	}
 	if !ok {
-		return
+		return 0, false
 	}
 	g.Salvage = append(g.Salvage, Salvage{Pos: pos, Minerals: m, Owner: owner, Number: n, Fresh: fresh, Steps: salvageTenths(m)})
+	return n, true
 }
 
 // salvageTenths is a salvage object's size in 10 kT steps, Σ⌈m/10⌉.
