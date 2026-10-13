@@ -31,6 +31,7 @@ func ReadFile(path string) (*Vector, error) {
 	if err := json.Unmarshal(b, &v); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
+	pvMessageOrder(v.Cases)
 	v.corpus = filepath.Base(filepath.Dir(path))
 	v.path = v.corpus + "/" + filepath.Base(path)
 	return &v, nil
