@@ -196,11 +196,20 @@ func TestConfirmedMinefieldOnScannerlessPlanet(t *testing.T) {
 		sp := &Space{Minefields: []Minefield{
 			{Owner: 1, Number: 0, Pos: home, Count: 400},
 			{Owner: 1, Number: 1, Pos: at(1030, 1000), Count: 1600},
+			// MV-1 D1: 1 ly off-centre, containing the planet.
+			{Owner: 1, Number: 2, Pos: at(1001, 1000), Count: 400},
 		}}
 		sp.SeeObjects(l.g, l.g.ObjectScanners(), func(int) int { return 0 }, top{})
 		// Player 1, the fields' owner, has no viewer there.
-		if m := sp.Minefields; m[0].KnownBy(0) != colocation || m[1].KnownBy(0) || m[0].KnownBy(1) {
-			t.Errorf("colocation %v: fields %+v, want the centred one known to player 0 exactly with colocation, the other not", colocation, m)
+		if m := sp.Minefields; m[0].KnownBy(0) != colocation || m[1].KnownBy(0) || m[2].KnownBy(0) || m[0].KnownBy(1) {
+			t.Errorf("colocation %v: fields %+v, want the centred one known to player 0 exactly with colocation, the others not", colocation, m)
+		}
+		// The planet's ranges are 0, not 1: a field player 0 already
+		// knows, 1 ly off, is not in its sight this year (ASSUMPTION:
+		// MV-1 ran no known field near a scannerless planet).
+		known := &Space{Minefields: []Minefield{{Owner: 1, Number: 3, Pos: at(1001, 1000), Count: 400, Known: []bool{true}}}}
+		if got := known.SeeObjects(l.g, l.g.ObjectScanners(), func(int) int { return 0 }, top{}); got[0].Seen.Minefields != nil {
+			t.Errorf("colocation %v: a known field 1 ly off is in player 0's sight %v", colocation, got[0].Seen.Minefields)
 		}
 	}
 }
