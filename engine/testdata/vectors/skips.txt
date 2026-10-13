@@ -48,7 +48,6 @@
    1 message 0x053 has no event mapping
    1 message 0x054 has no event mapping
    3 message 0x058 has no event mapping
-   1 message 0x059 has no event mapping
    2 message 0x05a has no event mapping
    2 message 0x060 has no event mapping
    1 message 0x068 has no event mapping

@@ -7,16 +7,25 @@ const TaskScrap TaskKind = TaskRoute + 5
 // Scrap messages. Elegy's wording.
 const (
 	// EventFleetScrapped: Player's Fleet was scrapped at Planet (−1 in
-	// deep space). In deep space Axes = the number of the salvage it
-	// left (the first, if the minerals overflowed into several:
-	// ASSUMPTION, no run has overflowed; −1 for none), the fleet's
-	// number, its lowest ship-design slot and its count of designs,
-	// saved here because the fleet is gone by the end of the year (0x05b
-	// names the fleet by design and number, stars-elegy FS-1).
+	// deep space). Axes = the number of the salvage it left in deep
+	// space (the first, if the minerals overflowed into several:
+	// ASSUMPTION, no run has overflowed; −1 for none and at a planet),
+	// the fleet's number, its lowest ship-design slot and its count of
+	// designs, saved here because the fleet is gone by the end of the
+	// year (0x05b and 0x059 name the fleet by design and number,
+	// stars-elegy FS-1). At a planet a fifth axis says how it was
+	// recycled: ScrapAtStarbase and ScrapRecycled bits, 0 for the
+	// surface share.
 	EventFleetScrapped EventKind = iota + EventPacketDesignSeen + 1
 	// EventScrapRecycled: ships scrapped at Player's Planet added Count
 	// resources to its production (Ultimate Recycling).
 	EventScrapRecycled
+)
+
+// The recycling bits of EventFleetScrapped's fifth axis at a planet.
+const (
+	ScrapAtStarbase = 1 << iota // the planet has a starbase
+	ScrapRecycled               // its owner has Ultimate Recycling
 )
 
 // scrapYear collects what the year's scraps leave for production: the
@@ -90,12 +99,29 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		chance.addParts(g, d, s.Count)
 	}
 	pi := g.planetAt(f.Pos)
+	slot, designs := 0, 0
+	for _, s := range f.Stacks {
+		if s.Count > 0 {
+			if k := g.shipSlot(f.Owner, s.Design); designs == 0 || k < slot {
+				slot = k
+			}
+			designs++
+		}
+	}
 	events := []Event{{Kind: EventFleetScrapped, Player: f.Owner, Planet: -1, Fleet: f.ID}}
 	num, den := 1, 3
 	if pi >= 0 {
 		p := &g.Planets[pi]
 		events[0].Planet = p.ID
 		ur := p.Owner != NoOwner && g.Players[p.Owner].Race.LRT.UltimateRecycling
+		how := 0
+		if p.HasStarbase {
+			how |= ScrapAtStarbase
+		}
+		if ur {
+			how |= ScrapRecycled
+		}
+		events[0].Axes = []int{-1, f.Number, slot, designs, how}
 		switch {
 		case p.HasStarbase && ur:
 			num, den = 9, 10
@@ -113,15 +139,7 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		left[m] = cost.Minerals[m]*num/den + f.Cargo.Minerals[m]
 	}
 	if pi < 0 {
-		salvage, slot, designs := -1, 0, 0
-		for _, s := range f.Stacks {
-			if s.Count > 0 {
-				if k := g.shipSlot(f.Owner, s.Design); designs == 0 || k < slot {
-					slot = k
-				}
-				designs++
-			}
-		}
+		salvage := -1
 		if left != (Minerals{}) {
 			for i, m := range splitSalvage(left) {
 				if n, ok := g.newSalvage(f.Owner, f.Pos, m, i == 0); ok && i == 0 {

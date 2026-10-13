@@ -274,3 +274,38 @@ func TestScrapIgnoresEmptyStacks(t *testing.T) {
 		t.Errorf("events %+v, want one scrap event with Axes [_ 4 5 1]", ev)
 	}
 }
+
+// At a planet the scrap event names no salvage, the fleet's number,
+// design slot and count of designs (0x059's fleet slot, stars-elegy FS-1
+// p and q), and how the planet recycled it: the bits ScrapAtStarbase and
+// ScrapRecycled (Ultimate Recycling of the planet's owner), which choose
+// among 0x059, 0x05a, 0x05c and 0x05d (MESSAGES.md).
+func TestScrapAtPlanetEvent(t *testing.T) {
+	for _, tt := range []struct {
+		starbase, ur bool
+		how          int
+	}{
+		{false, false, 0},
+		{true, false, ScrapAtStarbase},
+		{false, true, ScrapRecycled},
+		{true, true, ScrapAtStarbase | ScrapRecycled},
+	} {
+		l := newTKLab(t, 3)
+		scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+		pi := l.planet(0, 0, 100)
+		if tt.starbase {
+			l.g.Planets[pi].HasStarbase = true
+			l.g.Planets[pi].StarbaseDesign = l.design("Orbital Fort")
+		}
+		l.g.Players[0].Race.LRT.UltimateRecycling = tt.ur
+		fi := l.fleet(1, pi, 0, Stack{Design: scout, Count: 1})
+		l.g.Fleets[fi].Number = 7
+		l.g.DesignSlots = []DesignSlot{{Owner: 1, Slot: 9, Design: scout}}
+		ev := l.g.scrap(fi, &seqRand{draws: []int{99, 99, 99, 99}}, map[int]bool{}, scrapYear{})
+		if len(ev) == 0 || ev[0].Kind != EventFleetScrapped || ev[0].Planet != l.g.Planets[pi].ID ||
+			!slices.Equal(ev[0].Axes, []int{-1, 7, 9, 1, tt.how}) {
+			t.Errorf("starbase %v, UR %v: events %+v, want a scrap event at planet %d with Axes [-1 7 9 1 %d]",
+				tt.starbase, tt.ur, ev, l.g.Planets[pi].ID, tt.how)
+		}
+	}
+}
