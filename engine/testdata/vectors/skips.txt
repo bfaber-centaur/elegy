@@ -26,7 +26,6 @@
  170 expectation battle_actions
   13 expectation battle_plan
    3 expectation design_gone
- 249 expectation message_sequence
    9 expectation no_battle
    1 expectation no_new_fleets
  192 expectation sample
@@ -127,6 +126,19 @@
    1 message 0x179 has no event mapping
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
+  13 message_sequence 0x050 slot 3 (field researched next) not compared
+   2 message_sequence 0x05b salvage and fleet slots not compared
+   2 message_sequence 0x05f part focus and slots (no category-mask table) not compared
+  12 message_sequence 0x08f and 0x090 bombing fleet not compared
+   3 message_sequence entry 0x025 has no event mapping
+   3 message_sequence entry 0x03a has no event mapping
+   8 message_sequence entry 0x07b has no event mapping
+   1 message_sequence entry 0x117 has no event mapping
+   1 message_sequence entry 0x136 has no event mapping
+   9 message_sequence entry 0x145 has no event mapping
+   1 message_sequence entry 0x156 has no event mapping
+  13 message_sequence entry 0x159 has no event mapping
+   1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
  109 planet field defenses null
    2 planet field environment_visible
