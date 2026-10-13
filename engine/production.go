@@ -484,7 +484,7 @@ func (pr *production) plain(i int, alch bool) bool {
 		}
 	}
 	built := 0
-	earlier, noDriver := false, false
+	earlier, noDriver, refused := false, false, false
 	for it.Count > 0 {
 		if !pr.affordable(c, it.Percent) {
 			l := pr.limiting(c, it.Percent)
@@ -503,8 +503,8 @@ func (pr *production) plain(i int, alch bool) bool {
 		it.Count--
 		built++
 		if it.Kind == ItemStarbase {
-			e, nd := pr.buildStarbase(it.Slot)
-			earlier, noDriver = e || earlier, nd || noDriver
+			e, nd, r := pr.buildStarbase(it.Slot)
+			earlier, noDriver, refused = e || earlier, nd || noDriver, r || refused
 			built = 0
 			var ok bool
 			if c, ok = pr.designCost(*it); !ok {
@@ -513,11 +513,19 @@ func (pr *production) plain(i int, alch bool) bool {
 		}
 	}
 	if it.Kind == ItemShip {
-		pr.launch(it.Slot, built)
+		refused = pr.launch(it.Slot, built)
 	} else {
 		pr.complete(it.Kind, built)
 	}
 	done := it.Count == 0
+	if refused && !done {
+		// The owner could not build the design (PRODUCTION-LAUNCH.md "Can
+		// the planet build it", stars-elegy 35c48f0, CONFIRMED by
+		// prediction in FB-1): an item with units left is emptied;
+		// production has stopped at it on the unit it could not afford,
+		// and drops it, with its progress, when it next reaches it.
+		it.Count = 0
+	}
 	if earlier {
 		pr.afterEarlierHull(i)
 	}
@@ -591,24 +599,30 @@ func (pr *production) launchPackets(k ItemKind, n int) {
 }
 
 // launch is a ship item's build event for the n ships it completed this
-// year (PRODUCTION-LAUNCH.md "When it happens": one event per item).
-func (pr *production) launch(slot, n int) {
+// year (PRODUCTION-LAUNCH.md "When it happens": one event per item). It
+// reports whether the owner could not build the design (plans lost).
+func (pr *production) launch(slot, n int) (refused bool) {
 	if n == 0 {
-		return
+		return false
 	}
 	d, _ := pr.designOf(QueueItem{Kind: ItemShip, Slot: slot})
 	g := pr.g
+	ev, _ := g.Launch(pr.pi, d, n)
+	pr.events = append(pr.events, ev...)
+	if len(ev) == 1 && ev[0].Kind == EventPlansLost {
+		return true
+	}
 	if i := g.designSlot(pr.planet.Owner, false, slot); i >= 0 {
 		g.DesignSlots[i].Built += n
 	}
-	ev, _ := g.Launch(pr.pi, d, n)
-	pr.events = append(pr.events, ev...)
+	return false
 }
 
 // buildStarbase completes one starbase unit and reports whether its hull
-// comes earlier in the hull list than the starbase it replaced, and
-// whether the planet had no mass driver and the built starbase has none.
-func (pr *production) buildStarbase(slot int) (earlier, noDriver bool) {
+// comes earlier in the hull list than the starbase it replaced, whether
+// the planet had no mass driver and the built starbase has none, and
+// whether the owner could not build the design.
+func (pr *production) buildStarbase(slot int) (earlier, noDriver, refused bool) {
 	g, p := pr.g, pr.planet
 	d, _ := pr.designOf(QueueItem{Kind: ItemStarbase, Slot: slot})
 	had, old := p.HasStarbase, p.StarbaseHull
@@ -618,17 +632,18 @@ func (pr *production) buildStarbase(slot int) (earlier, noDriver bool) {
 	}
 	ev := g.BuildStarbase(pr.pi, d)
 	if len(ev) == 0 {
-		return false, false // not built
+		return false, false, true
 	}
 	pr.events = append(pr.events, ev...)
 	_, _, hasDriver := DriverWarp(g.Designs[d])
-	return had && p.StarbaseHull < old, !hadDriver && !hasDriver
+	return had && p.StarbaseHull < old, !hadDriver && !hasDriver, false
 }
 
 // dropPacketItems removes the queued mineral packet items after index i,
 // silently, when a starbase without a mass driver is built where there was
-// none (PRODUCTION-LAUNCH.md "Starbases", BINARY-ONLY, stars-elegy 86ca470).
-// Auto Mineral Packets stays.
+// none (PRODUCTION-LAUNCH.md "Starbases", stars-elegy 35c48f0: CONFIRMED by
+// prediction in PD-1 for an Ironium item; mixed items BINARY-ONLY). Auto
+// Mineral Packets stays.
 func (pr *production) dropPacketItems(i int) {
 	q := pr.planet.Queue
 	out := append([]QueueItem(nil), q[:i+1]...)
