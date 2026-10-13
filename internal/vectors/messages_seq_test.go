@@ -16,10 +16,15 @@ func TestPvMessageList(t *testing.T) {
 		Fleets:  []engine.Fleet{{ID: 9, Owner: 1, Number: 4}},
 	}
 	g.Players[1].Race.LRT.GeneralizedResearch = true
-	part := -1
+	part, hull, defense := -1, -1, -1
 	for i, c := range engine.Components().Components {
-		if c.Name == "Cow-hide Shield" {
+		switch {
+		case c.Name == "Cow-hide Shield":
 			part = i
+		case c.Category == engine.CatHull && hull < 0:
+			hull = i
+		case c.Category == engine.CatPlanetary && pvPlanetaryIDs()[c.Name] == 0x145 && defense < 0:
+			defense = i
 		}
 	}
 	all := func(n int) []bool {
@@ -59,6 +64,10 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x159, focus: 0xfffe, focusKnown: true, params: []int{3, 116}, known: all(2)}}},
 		{"component", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: part}}, 2,
 			[]pvMsg{{id: 0x05f, params: []int{1, 0, 0}, known: []bool{true, false, false}, why: "0x05f part focus and slots (no category-mask table)"}}},
+		{"ship hull", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 3, Count: hull}}, 2,
+			[]pvMsg{{id: 0x078, params: []int{3, 0, 0}, known: []bool{true, false, false}, why: "0x078 part focus and slots (no category-mask table)"}}},
+		{"planetary defense", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 0, Count: defense}}, 2,
+			[]pvMsg{{id: 0x145, params: []int{0, 0, 0}, known: []bool{true, false, false}, why: "0x145 part focus and slots (no category-mask table)"}}},
 		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
 			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, false}, why: "0x05b salvage and fleet slots"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,
