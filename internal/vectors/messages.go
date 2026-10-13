@@ -28,6 +28,8 @@ func pvMessageIDs() map[int]string {
 		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
 		0x050: "EventLevelUp, a player without Generalized Research",
+		0x136: "EventLevelUp, a player with Generalized Research",
+		0x159: "EventResearchStolen",
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
@@ -175,8 +177,12 @@ func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
 				send(ev.Player, 0x12a)
 			}
 		case engine.EventLevelUp:
-			if ev.Player >= 0 && ev.Player < len(g.Players) && !g.Players[ev.Player].Race.LRT.GeneralizedResearch {
-				send(ev.Player, 0x050)
+			if ev.Player >= 0 && ev.Player < len(g.Players) {
+				if g.Players[ev.Player].Race.LRT.GeneralizedResearch {
+					send(ev.Player, 0x136)
+				} else {
+					send(ev.Player, 0x050)
+				}
 			}
 		case engine.EventPartAvailable:
 			cs := engine.Components().Components
@@ -187,6 +193,8 @@ func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
 					send(ev.Player, 0x05f)
 				}
 			}
+		case engine.EventResearchStolen:
+			send(ev.Player, 0x159)
 		case engine.EventColonistsBeamedDown:
 			send(ev.Player, 0x02e)
 		case engine.EventFleetScrapped:
