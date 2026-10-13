@@ -9,7 +9,7 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 - elegy main `5a735e1` (after #242). The RG vectors are stars-elegy main `104e8f5`'s, including #206's rebuilt year 6.
 - The combined run on that SHA is recorded in [docs/PARITY-STATUS.md](docs/PARITY-STATUS.md) "Current status".
   - `go test ./...` passes.
-  - The 24-case long-game matrix passes: 60 years with save and reload.
+  - The PR-subset long-game matrix passes: 24 games of 60 years, with replay and save/reload. The steward's full matrix is 64 cases at 150 years.
   - The three RG ledgers and `TestBattleRecords` match the run exactly.
 - Each corpus's ledger (`engine/testdata/vectors/rg/rg00N-ledger.txt`) is checked exactly. A PR that moves RG output regenerates it rather than editing it by hand:
   - `RG002_LEDGER=write go test ./internal/vectors -run 'TestRG00[234]Ledger'`
@@ -37,9 +37,8 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 - **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
 - **Not compared, by owner:**
   - lane D: 0x05b slots and the 0x08f/0x090 bombing fleet;
-  - lanes F and G: 0x0cd's id rule and a null `packet_destination` on a planet with no starbase;
+  - economy: a null `packet_destination` on a planet with no starbase (PK-1), 0x040 after it, and the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
   - lane A: the 0x004 slots and 0x007, with the invasion messages;
-  - unassigned: 0x040;
   - lane B: `design_gone`.
   - `alt_battle` is judged by the battle harness instead of the vectors comparator.
 
@@ -50,7 +49,8 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - 0x040 also needs the previous-planet rule that picks 0x040 or 0x023.
 - `design_gone` (RG-004, 2 lines) is harness work for lane B.
 - Random-driven lines stay open until the original's generator is in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby).
-- PK-1 decides whether a lost starbase clears the packet settings (UNRESOLVED). RG-002 and RG-003's packet `null` lines wait on it.
+- Economy's PK-1 decides whether a lost starbase clears the packet settings (UNRESOLVED). RG-002 and RG-003's packet `null` lines wait on it.
+- The parity case tally lists most RG cases as `fail`, although there are 0 deterministic misses. Restarts fail because no single seed matches all their random-driven expectations at once. Chained years after the first fail because they continue from a diverged year 1. PARITY-STATUS.md "Current status" has the per-seed check behind this.
 
 ## Best next move
 

@@ -6,9 +6,14 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-elegy main `104e8f5`'s, with #206's year-6 rebuild) is the result the three corpora rest on. Run on that SHA with no local change:
 - `go test ./...`: every package passes.
-- `go test ./regress -run TestLongGames`: 24 cases of 60 years with save and reload, 24 with no failure.
+- `go test ./regress -run TestLongGames`, the PR subset: 3 seeds × 2 rulesets × 4 opponent sets = 24 games of 60 years on a small map, each played three times (primary, replay, and reload after 23 years). 24 of 24 have no failure. This is not the steward's full matrix (64 cases at 150 years), so the two results are not interchangeable.
 - `TestRG002Ledger`, `TestRG003Ledger`, `TestRG004Ledger` and `TestBattleRecords` pass: every ledger matches the run exactly, with no UNCLASSIFIED line.
 - `TestParityVectors`, rg corpus: pass 0, measured pass 2, fail 48, random 13, random with the reference seed failing 9. baseline.txt keeps 17 RG entries: RG-002 and RG-003 chained year 1 and Y1 (`random 1` each), and RG-004's 12 restarts and chained year 1 (`random 1` to `random 7`).
+- **Why the failing cases fail, given 0 deterministic misses.** A case fails on a seed when any of its strict field expectations misses there, and it is listed `fail` when no seed matches all of them at once. Every RG-002, RG-003 and RG-004 case that fails (10, 22 and 11) fails for one of two reasons (per-seed check of every strict non-battle field expectation, all 8 seeds, main `5a735e1`):
+  - **Restarts (RG-002 Y2–Y6, RG-003 Y2–Y12):** every expectation that misses on any seed matches on at least one other seed. These cases have random-driven expectations only, and no single seed matches them all together. RG-004's restarts all pass on some seed.
+  - **Chained runs after year 1** (RG-002 years 2–6, RG-003 years 2–12, RG-004 years 2–12): these years continue from Elegy's own year-1 state, which already differs from the original's on the draws. Some strict expectations miss on all 8 seeds here: RG-002 5 in year 2 rising to 47 in year 6, RG-003 to 166 in year 12, RG-004 3 in year 2 to 48 in year 12. The ledger classes every chained difference after year 1 as a sample, as downstream of that divergence.
+  - Chained year 1 and every restart: no strict expectation misses on all 8 seeds.
+  - Battle records are not in this check. `TestBattleRecords` and the ledgers judge them, with no hand line.
 
 **Classification.** Each corpus has 0 deterministic misses: 0 incorrect-mechanic lines and 0 unresolved-randomness lines. Every compared difference from the original is a sample or random-driven (it matches on at least one seed variant). Ledger lines, chained run / restarts:
 
@@ -66,11 +71,11 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 | 0x05b salvage and fleet slots (EventFleetScrapped names neither) | 2 | 2 | 0 | lane D |
 | 0x08f/0x090 bombing fleet (EventBombed names the bomber) | 2 | 4 | 0 | lane D |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
-| planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | lanes F and G (oracle question; economy's PK-1 follows it) |
-| 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | lanes F and G |
+| planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
+| 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
 | 0x004 colonists and player slots | 0 | 2 | 0 | lane A, with the invasion messages |
 | 0x007 planet captured has no event mapping (message and sequence entry) | 0 | 4 | 24 | lane A, with the invasion messages |
-| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | unassigned (proposed: lane A, next to `EventPlanetEmptied`) |
+| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
 | total | 6 | 22 | 38 | |
