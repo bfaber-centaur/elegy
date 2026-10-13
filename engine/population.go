@@ -53,6 +53,20 @@ const EventOvercrowded EventKind = EventPartAvailable + 1
 // twin.
 const EventHostileShrink EventKind = EventMinefieldSwept + 1
 
+// Population growth's EventPlanetEmptied gives its cause in Count
+// (MESSAGES.md 0x023 and 0x040). Other causes leave Count 0.
+const (
+	// EmptiedLeft: the planet already had no colonists when growth ran
+	// (0x040).
+	EmptiedLeft = 1
+	// EmptiedDiedOut: growth took the population to 0 (0x023).
+	EmptiedDiedOut = 2
+	// EmptiedLeftShownDiedOut: EmptiedLeft, reported as died out (0x023)
+	// because the planet growth handled just before it shrank
+	// (Legacy.LostPlanetMessageCarry).
+	EmptiedLeftShownDiedOut = 3
+)
+
 // GrowPopulation advances one year of population growth (or death) on a
 // planet: pop in units, carry in hundredths of a unit (the persistent
 // excessPop byte), maxPop in units, growthRate G in percent (already doubled

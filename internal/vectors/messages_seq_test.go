@@ -127,6 +127,8 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x08c, focus: 4, focusKnown: true, params: []int{4, 8}, known: all(2)}}},
 		{"packet item cancelled", []engine.Event{{Kind: engine.EventPacketNoDriver, Player: 2, Planet: 5, Item: engine.ItemIroniumPacket, Count: 1}}, 2,
 			[]pvMsg{{id: 0x129, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
+		{"planet left", []engine.Event{{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5, Count: engine.EmptiedLeft}}, 2,
+			[]pvMsg{{id: 0x040, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"installation order cut", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x12a, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"terraform order cut", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemTerraform, Count: 0}}, 2,

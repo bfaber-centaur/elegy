@@ -180,19 +180,22 @@ func TestRulesetsCoexist(t *testing.T) {
 // still validate: here jrc3-faithful v1 and elegy v2 without the two
 // Cybertron switches, both v2s without the AI wormhole switch, and every
 // version before v4 without the bare-record switch, and every version
-// before v5 without the artifact switch.
+// before v5 without the artifact switch, and every version before v6
+// without the lost-planet message switch.
 func TestRulesetSavedBeforeSwitch(t *testing.T) {
 	for _, c := range []struct {
 		r    Ruleset
 		keys []string
 	}{
-		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
-		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
-		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech"}},
-		{elegyRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech"}},
-		{faithfulRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech"}},
-		{elegyRulesV4(), []string{"artifact_full_slower_tech"}},
-		{faithfulRulesV4(), []string{"artifact_full_slower_tech"}},
+		{faithfulRulesV1(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{elegyRulesV2(), []string{"cybertron_packet_mark_next_id", "cybertron_scanner_shot_overflow", "ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{faithfulRulesV2(), []string{"ai_wormhole_distance_wrap", "bare_record_drop", "artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{elegyRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{faithfulRulesV3(), []string{"bare_record_drop", "artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{elegyRulesV4(), []string{"artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{faithfulRulesV4(), []string{"artifact_full_slower_tech", "lost_planet_message_carry"}},
+		{elegyRulesV5(), []string{"lost_planet_message_carry"}},
+		{faithfulRulesV5(), []string{"lost_planet_message_carry"}},
 	} {
 		r := c.r
 		b, err := json.Marshal(r)
@@ -245,12 +248,20 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 			t.Errorf("%s v%d differs from v3 beyond bare_record_drop, on in v4 only", c.v4.ID, c.v4.Version)
 		}
 	}
-	for _, c := range []struct{ v5, v4 Ruleset }{{ElegyRules(), elegyRulesV4()}, {FaithfulRules(), faithfulRulesV4()}} {
+	for _, c := range []struct{ v5, v4 Ruleset }{{elegyRulesV5(), elegyRulesV4()}, {faithfulRulesV5(), faithfulRulesV4()}} {
 		v5 := c.v5
 		v5.Version = 4
 		v5.Legacy.ArtifactFullSlowerTech = false
 		if c.v5.Version != 5 || !c.v5.Legacy.ArtifactFullSlowerTech || c.v4.Legacy.ArtifactFullSlowerTech || v5 != c.v4 {
 			t.Errorf("%s v%d differs from v4 beyond artifact_full_slower_tech, on in v5 only", c.v5.ID, c.v5.Version)
+		}
+	}
+	for _, c := range []struct{ v6, v5 Ruleset }{{ElegyRules(), elegyRulesV5()}, {FaithfulRules(), faithfulRulesV5()}} {
+		v6 := c.v6
+		v6.Version = 5
+		v6.Legacy.LostPlanetMessageCarry = false
+		if c.v6.Version != 6 || !c.v6.Legacy.LostPlanetMessageCarry || c.v5.Legacy.LostPlanetMessageCarry || v6 != c.v5 {
+			t.Errorf("%s v%d differs from v5 beyond lost_planet_message_carry, on in v6 only", c.v6.ID, c.v6.Version)
 		}
 	}
 }

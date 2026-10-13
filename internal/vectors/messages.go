@@ -33,6 +33,10 @@ func pvMessageIDs() map[int]string {
 		0x03a: "EventBuilt of defenses, more than one (merge rule)",
 		0x03e: "EventQueueCompleted",
 		0x03f: "EventNoQueue",
+		0x023: "EventPlanetEmptied by growth, died out (or left, after a shrink)",
+		0x024: "EventPlanetEmptied by growth, died out, Alternate Reality",
+		0x040: "EventPlanetEmptied by growth, no colonists left",
+		0x041: "EventPlanetEmptied by growth, no colonists left, Alternate Reality",
 		0x04e: "EventFleetArrived",
 		0x050: "EventLevelUp, a player without Generalized Research",
 		0x078: "EventPartAvailable of a ship hull",
@@ -458,6 +462,19 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				send(ev.Player, atPlanet(0x083+ev.Count, ev.Planet))
 			}
 		case engine.EventPlanetEmptied:
+			// Growth's cause (MESSAGES.md 0x023, 0x040): an Alternate
+			// Reality owner gets the variants 0x024 and 0x041
+			// (BINARY-ONLY).
+			ar := 0
+			if ev.Player >= 0 && ev.Player < len(g.Players) && g.Players[ev.Player].Race.PRT == engine.PRTAlternateReality {
+				ar = 1
+			}
+			switch ev.Count {
+			case engine.EmptiedLeft:
+				send(ev.Player, atPlanet(0x040+ar, ev.Planet))
+			case engine.EmptiedDiedOut, engine.EmptiedLeftShownDiedOut:
+				send(ev.Player, atPlanet(0x023+ar, ev.Planet))
+			}
 			if i > 0 && events[i-1].Kind == engine.EventBombed && events[i-1].Planet == ev.Planet {
 				// The fleet whose plan started the pass, saved at bombing
 				// time (it can be gone by the end of the year). With more
