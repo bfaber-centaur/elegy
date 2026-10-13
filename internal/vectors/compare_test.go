@@ -519,6 +519,7 @@ func TestBattlePlanEquals(t *testing.T) {
 		{`{"attack_who": 5}`, "attack_who = 6, want 5"},
 		{`{"dump_cargo": false}`, "dump_cargo = true, want false"},
 		{`{"name": "P5"}`, `name = "Guard", want "P5"`},
+		{`{"name": "guard"}`, `name = "Guard", want "guard"`},
 		{`{"tactic": "4"}`, `tactic: malformed expectation "4"`},
 		{`{"dump_cargo": null}`, "dump_cargo: malformed expectation null"},
 		{`{"name": null}`, "name: malformed expectation null"},
