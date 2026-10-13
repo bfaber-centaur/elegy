@@ -135,6 +135,16 @@ Measured on elegy main `9088500` (#198) plus the wormhole branch; counts re-meas
 - Counts after this, on main `387c622`: missing mechanic 12 (economy 10, lane A 2), incorrect mechanic 2 (orders), random-driven 30, not compared 204 (20 comparator gaps: 14 design reads and 6 player counts; 176 battle; 8 null), and samples 1146 fields (986 + 160), 43 orders and 16 battle records.
 - **Other corpora: RD-P20 and RD-P21.** Their 10 `object` wormhole expectations are year-end positions after a jiggle, which is draw-decided. Before stars-elegy #181 the vectors did not mark them as samples, so they missed on position (and RD-P21 on one `known_to`) and left the parity baseline. stars-elegy #181 (`b4c0086`) flags them `sample` (6 in rp20, 4 in rp21); with those two vectors re-synced, both pass and are back in the baseline. The re-synced files also carry the galaxy `size`, `bounds` and `density` fields; Elegy's vectors loader does not read them yet, so they change no result.
 
+### Designs and player counts compared (after the final run)
+
+Measured on elegy main `2ba78f1` (#201) plus the design branch.
+
+- `design` and `starbase_design` expectations are compared with the design in the owner's ship or starbase slot at the end of the year (internal/vectors `designEquals`). The comparison covers the hull, the mass per ship, and the slots in hull-slot order, with null for an empty slot.
+- Player `counts` is compared with the numbers of ship and starbase designs the player holds.
+- **RG-002: all 20 lines match on the reference seed.** That is 6 design reads, 8 starbase designs (samples, all matching) and 6 counts.
+- Not compared is now 184: 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. No quantity Elegy models is left uncompared in RG-002.
+- **Other corpora:** the parity baseline is unchanged. TK-104-A and TK-105-A were skipped before ("design read needs the order layer's design source") and now fail on T-37 (lane A), so tk2 goes from fail 0 / skip 4 to fail 2 / skip 2. Stars-elegy PARITY.md T-37 (CONFIRMED) says the original removes LBU-17 and LBU-32 from designs after generation, at electronics 7. Elegy keeps them (lane A).
+
 ### Level-up and overcrowding messages (economy)
 
 Elegy now sends the three economy messages it had no event for (MESSAGES.md at stars-elegy b4c0086), and `pvMessages` maps them:
@@ -146,6 +156,6 @@ Elegy now sends the three economy messages it had no event for (MESSAGES.md at s
 - Not modelled: the level messages of a Mystery Trader reward (objects/ raises those levels directly, with no 0x050 or 0x05f) and of scrapping at a starbase (0x13d, then 0x050, before the production messages; Elegy gains no levels from scrapping). EM-1 places each in its own position; they are left for the objects and production owners.
 - The comparator checks only whether a player received an id (`pvMessages` is a set of player and id), not the order or the count, so the order above is pinned by engine tests (`TestLevelEventsChainOrder`, `TestTurnLevelEventsChainOrder`), not by the vectors. That is why field order also matched.
 
-**RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 204, and samples 1138 fields / 43 orders / 16 battle records (on main `2ba78f1`, after the `object`-form wormholes).
+**RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 184, and samples 1138 fields / 43 orders / 16 battle records (on main `1f03d6a`, after the `object`-form wormholes, designs and player counts).
 
 **Other corpora:** 31 cases join the parity baseline: KX-002 G1–G3, H4, N2, P1–P3 and R1–R4; KX-003 r2; KX-004 S4 and S8; KX-005 R1, R3 and T0–T2; PQ-001 C02, C03 and C10; RD-P15; RG-001 Y2–Y6; RG-002 Y6; and TK-203. Every case "Other corpora" above lists for 0x026, 0x050 or 0x05f now passes.
