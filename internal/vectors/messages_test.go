@@ -150,3 +150,133 @@ func TestPvSummaryIDs(t *testing.T) {
 		}
 	}
 }
+
+// TestPvMessageSeq pins the order of a player's messages: as the year
+// sends them, a removed message taken out of its place, each id once at
+// its first place (MESSAGES.md "Order"; build_kx.py `messages`).
+func TestPvMessageSeq(t *testing.T) {
+	g := &engine.Game{Planets: []engine.Planet{{ID: 5, Owner: 2}}}
+	built := func(planet int, item engine.ItemKind, n int) engine.Event {
+		return engine.Event{Kind: engine.EventBuilt, Player: 2, Planet: planet, Fleet: -1, Item: item, Count: n}
+	}
+	arrived := func(fleet int) engine.Event {
+		return engine.Event{Kind: engine.EventFleetArrived, Player: 2, Fleet: fleet}
+	}
+	scrapped := engine.Event{Kind: engine.EventFleetScrapped, Player: 2, Planet: -1}
+	comet := engine.Event{Kind: engine.EventCometStrike, Player: 2, Planet: 5}
+	for _, c := range []struct {
+		name   string
+		events []engine.Event
+		want   []int
+	}{
+		{"as sent", []engine.Event{scrapped, arrived(1), comet}, []int{0x05b, 0x04e, 0x083}},
+		{"each id once, at its first place", []engine.Event{arrived(1), scrapped, arrived(2)}, []int{0x04e, 0x05b}},
+		{"a fleet's earlier 0x04e removed", []engine.Event{arrived(1), scrapped, arrived(1)}, []int{0x05b, 0x04e}},
+		{"another fleet's 0x04e kept", []engine.Event{arrived(2), scrapped, arrived(1)}, []int{0x04e, 0x05b}},
+		{"a merged single moves to the count", []engine.Event{built(5, engine.ItemFactory, 1), scrapped, built(5, engine.ItemFactory, 1)}, []int{0x05b, 0x036}},
+		{"a single left in its place", []engine.Event{built(5, engine.ItemMine, 1), scrapped}, []int{0x037, 0x05b}},
+		{"a plural count not moved", []engine.Event{built(5, engine.ItemMine, 2), scrapped, built(5, engine.ItemMine, 3)}, []int{0x038, 0x05b}},
+		{"no recipient", []engine.Event{{Kind: engine.EventFleetArrived, Player: -1, Fleet: 1}, scrapped}, []int{0x05b}},
+	} {
+		if got := pvMessageSeq(g, c.events)[2]; !reflect.DeepEqual(got, c.want) {
+			t.Errorf("%s: %#x, want %#x", c.name, got, c.want)
+		}
+	}
+	// A no-recipient single is never placed, so a later single starts a
+	// new count.
+	if got := pvMessageSeq(g, []engine.Event{{Kind: engine.EventBuilt, Player: -1, Planet: 5, Item: engine.ItemFactory, Count: 1}, built(5, engine.ItemFactory, 1)}); !reflect.DeepEqual(got, map[int][]int{2: {0x035}}) {
+		t.Errorf("no-recipient single: %#x", got)
+	}
+}
+
+// TestMessageOrder pins the order check: each present message against the
+// nearest one listed before it that Elegy sends, samples kept apart.
+func TestMessageOrder(t *testing.T) {
+	i := func(n int) *int { return &n }
+	b := func(v bool) *bool { return &v }
+	msg := func(year, player, id int, present, sample bool) pvExpect {
+		return pvExpect{Kind: "message", Year: year, Player: i(player), MessageID: i(id), Present: b(present), Sample: sample}
+	}
+	cases := []pvCase{{Expect: []pvExpect{
+		msg(1, 0, 0x05b, true, false), // 0
+		msg(1, 1, 0x083, true, false), // 1: another player
+		msg(2, 0, 0x083, true, false), // 2: another year
+		msg(1, 0, 0x026, false, false),
+		{Kind: "planet", Year: 1},
+		msg(1, 0, 0x04e, true, false), // 5
+		msg(1, 0, 0x083, true, true),  // 6: a sample
+		msg(1, 0, 0x036, true, false), // 7
+	}}, {Expect: []pvExpect{msg(1, 0, 0x036, true, false)}}}
+	pvMessageOrder(cases)
+	ids := func(e pvExpect) []pvMessagePrior { return e.before }
+	for _, c := range []struct {
+		at   int
+		want []pvMessagePrior
+	}{
+		{0, nil}, {1, nil}, {2, nil}, {3, nil},
+		{5, []pvMessagePrior{{0x05b, false}}},
+		{6, []pvMessagePrior{{0x05b, false}, {0x04e, false}}},
+		{7, []pvMessagePrior{{0x05b, false}, {0x04e, false}, {0x083, true}}},
+	} {
+		if got := ids(cases[0].Expect[c.at]); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("before of %d: %v, want %v", c.at, got, c.want)
+		}
+	}
+	if got := cases[1].Expect[0].before; got != nil {
+		t.Errorf("another case's: %v", got)
+	}
+	e := cases[0].Expect
+	for _, c := range []struct {
+		name string
+		e    pvExpect
+		seq  []int
+		want string
+	}{
+		{"first listed", e[0], []int{0x04e, 0x05b}, ""},
+		{"in order", e[5], []int{0x05b, 0x04e}, ""},
+		{"out of order", e[5], []int{0x04e, 0x05b}, "message 0x04e to player 0 comes before 0x05b, want after"},
+		{"the nearest one decides", e[7], []int{0x05b, 0x04e, 0x036}, ""},
+		{"the nearest one out of order", e[7], []int{0x05b, 0x036, 0x04e}, "message 0x036 to player 0 comes before 0x04e, want after"},
+		{"one Elegy does not send is passed over", e[7], []int{0x036, 0x05b}, "message 0x036 to player 0 comes before 0x05b, want after"},
+		{"none sent before", e[7], []int{0x036}, ""},
+		{"a sample is passed over by an exact one", e[7], []int{0x05b, 0x04e, 0x036, 0x083}, ""},
+		{"a sample against the nearest", e[6], []int{0x05b, 0x083, 0x04e}, "message 0x083 to player 0 comes before 0x04e, want after"},
+	} {
+		if got := messageOrderCheck(c.e, c.seq); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+	// A repeated id is placed against the one before it, not itself.
+	twice := []pvCase{{Expect: []pvExpect{msg(1, 0, 0x05b, true, false), msg(1, 0, 0x04e, true, false), msg(1, 0, 0x04e, true, false)}}}
+	pvMessageOrder(twice)
+	if got := messageOrderCheck(twice[0].Expect[2], []int{0x05b, 0x04e}); got != "" {
+		t.Errorf("repeated id: %q", got)
+	}
+	if got := messageOrderCheck(twice[0].Expect[2], []int{0x04e, 0x05b}); got != "message 0x04e to player 0 comes before 0x05b, want after" {
+		t.Errorf("repeated id, out of order: %q", got)
+	}
+	// Through messageCheck: a present message out of order fails.
+	l := pvLoaded{events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0, Fleet: 1}, {Kind: engine.EventFleetScrapped, Player: 0, Planet: -1}}}}
+	if got := l.messageCheck(&engine.Game{}, e[5]); got != "message 0x04e to player 0 comes before 0x05b, want after" {
+		t.Errorf("messageCheck: %q", got)
+	}
+	if got := l.messageCheck(&engine.Game{}, e[0]); got != "" {
+		t.Errorf("messageCheck, first listed: %q", got)
+	}
+}
+
+// TestReadFileMessageOrder pins that ReadFile records the message order.
+func TestReadFileMessageOrder(t *testing.T) {
+	v, err := ReadFile("../../engine/testdata/vectors/rg/rg002.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range v.Cases {
+		for _, e := range c.Expect {
+			if len(e.before) > 0 {
+				return
+			}
+		}
+	}
+	t.Error("no message expectation has the ones listed before it")
+}
