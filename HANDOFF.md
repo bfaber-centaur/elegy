@@ -17,12 +17,12 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
   - Across the other seed variants there is one incorrect mechanic, an order refused only on variants 1 and 6 (below). It makes 2 ledger lines.
   - The restarts refuse no order, and no strict battle record fails.
   - 30 field lines are random-driven: each matches on some seed variant, not on the reference one.
-  - Everything in the chained run after its first year is a sample. With the restarts' stream-marked random outcomes, samples are 991 fields, 43 refused orders and 16 missed battle records.
+  - Everything in the chained run after its first year is a sample. With the restarts' stream-marked random outcomes, samples are 1151 fields, 43 refused orders and 16 missed battle records.
 - #189 (lane A's fleet retargets) and #190 (economy's remote mining) cleared all 78 earlier deterministic lines. RG002-REPORT.md lists them.
 - Planet `packet_destination` and `packet_warp` and player `research_percent` are compared now (#194). A null `packet_destination` stays not compared (ELEGY CHOICE, RG002-REPORT.md).
 - **Messages are compared now** (PARITY-STATUS.md "Messages compared"). RG-002's 68 message lines: 32 match, 15 are samples, and 21 are missing mechanic for ids Elegy sends no event for: economy 10 (0x026, 0x050, 0x05f), lane D 9 (battle summaries) and lane A 2 (0x02e).
-- **Not seen.** Of the 276 not-compared lines, 176 are battle expectations that `TestBattleRecords` compares record by record and 8 are null in the original's file. The other 92 are comparator gaps for quantities Elegy models, where a mismatch would go unseen:
-  - `object`-form wormholes (72);
+- **`object`-form wormholes are compared now.** All 72 are samples (a wormhole moves on draws every year), and all 72 miss on position, so they add 160 sample lines and no deterministic one.
+- **Not seen.** Of the 204 not-compared lines, 176 are battle expectations that `TestBattleRecords` compares record by record and 8 are null in the original's file. The other 20 are comparator gaps for quantities Elegy models, where a mismatch would go unseen:
   - design reads (14);
   - player counts (6).
 
@@ -37,4 +37,4 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 
 ## Best next move
 
-Compare the 72 `object`-form wormhole expectations. Only the `wormhole` expectation kind is compared now, so this is harness work in internal/vectors. Then rewrite the ledger and see what it exposes.
+Close the last 20 comparator gaps: the 14 design reads (`starbase_design` and "needs the order layer's design source") and the 6 player `counts`. Elegy models both, so this is harness work in internal/vectors. Then rewrite the ledger and see what it exposes.

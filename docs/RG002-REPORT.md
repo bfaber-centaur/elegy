@@ -46,10 +46,10 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
-| not compared | 276 | 0 | 0 |
-| sample | 991 | 43 | 16 |
+| not compared | 204 | 0 | 0 |
+| sample | 1151 | 43 | 16 |
 
-These counts include the message comparison added after the final run ("Messages" below). Samples total 1050: 991 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1034), and 16 battle records, checked by `TestBattleRecords`.
+These counts include the message and `object`-form wormhole comparisons added after the final run ("Not compared, by reason" below). Samples total 1210: 1151 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1194), and 16 battle records, checked by `TestBattleRecords`.
 
 The reference run of RG-002 has 21 deterministic field discrepancies, all messages Elegy sends no event for (missing mechanic: economy 10, lane D 9, lane A 2; "Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
@@ -122,13 +122,12 @@ Economy's change (a new starbase's mass driver sets the planet's packet speed to
 
 ## Not compared, by reason
 
-None of the 276 lines is an RG-002 mechanic Elegy is known to lack. Each falls in one of three groups.
+None of the 204 lines is an RG-002 mechanic Elegy is known to lack. Each falls in one of three groups.
 
 **1. The harness has no comparator, but Elegy models the quantity (lane B).**
 
 | Reason | Lines | What Elegy has |
 |---|---|---|
-| `object` wormhole (the whole-object form) | 72 | wormholes; only the `wormhole` expectation kind is compared, not `object` |
 | `starbase_design`, design reads ("needs the order layer's design source") | 14 | designs and design orders; the design read is not wired into the harness |
 | player `counts` | 6 | per-design counts |
 
@@ -136,11 +135,13 @@ None of the 276 lines is an RG-002 mechanic Elegy is known to lack. Each falls i
 
 **3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null. Keeping null `packet_destination` out of the comparison is an ELEGY CHOICE: null means the file holds no destination record, which is not the same claim as -1 ("none"), so it is not compared as -1. Reversible if stars-elegy documents null as "none".
 
-Group 1 is comparator work. Until it is done, a mismatch in those 92 lines would go unseen, so their count is the honest size of the gap.
+Group 1 is comparator work. Until it is done, a mismatch in those 20 lines would go unseen, so their count is the honest size of the gap.
 
 **Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. A malformed expected value fails the check rather than reading as absent, as for `starbase` (#191). That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 110 of them match on the reference seed. The other two were Y4 planet 88's `packet_warp`, a missing mechanic, and the same field in the chained run's year 4, a sample; the packet-warp fix cleared both.
 
 **Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
+
+**Closed after the final run: `object`-form wormholes.** The 72 `object` expectations of kind `wormhole` are compared now, with the fields the `wormhole` form already used plus `id` and `partner` (the other end's vector id). The vectors mark all 72 as samples: a wormhole end jiggles or jumps on draws every year (OBJECTS.md). All 72 miss, making 160 sample field lines: x (72), y (65), `years_since_jump` (13, a jump on one side and not the other) and `known_to` (10). `partner`, `stability_class` and `destination_known_to` match in all 72.
 
 ## Random-driven
 

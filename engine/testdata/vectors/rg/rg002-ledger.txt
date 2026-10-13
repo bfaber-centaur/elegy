@@ -19,12 +19,16 @@ sample | rg002 | RG-002-2463 y1 #245 | planet id=114 | environment = [53 17 9], 
 sample | rg002 | RG-002-2463 y1 #252 | planet id=120 | environment = [58 72 10], want [58 72 11]
 sample | rg002 | RG-002-2463 y1 #338 | salvage_at x=1364 y=1319 | salvage = [[86 71 44] [139 95 86]], want [169 104 106]
 sample | rg002 | RG-002-2463 y1 #339 | salvage_at x=1199 y=1324 | salvage = [], want [6 0 6]
-not compared | rg002 | RG-002-2463 y1 #373 | object | object wormhole
-not compared | rg002 | RG-002-2463 y1 #374 | object | object wormhole
-not compared | rg002 | RG-002-2463 y1 #375 | object | object wormhole
-not compared | rg002 | RG-002-2463 y1 #376 | object | object wormhole
-not compared | rg002 | RG-002-2463 y1 #377 | object | object wormhole
-not compared | rg002 | RG-002-2463 y1 #378 | object | object wormhole
+sample | rg002 | RG-002-2463 y1 #373 | object | wormhole: x = 1670, want 1675
+sample | rg002 | RG-002-2463 y1 #373 | object | wormhole: y = 1285, want 1286
+sample | rg002 | RG-002-2463 y1 #374 | object | wormhole: x = 1544, want 1532
+sample | rg002 | RG-002-2463 y1 #375 | object | wormhole: x = 1697, want 1676
+sample | rg002 | RG-002-2463 y1 #375 | object | wormhole: y = 1555, want 1541
+sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: x = 1048, want 1045
+sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: y = 1625, want 1639
+sample | rg002 | RG-002-2463 y1 #377 | object | wormhole: x = 1548, want 1535
+sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: x = 1238, want 1246
+sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: y = 1776, want 1767
 not compared | rg002 | RG-002-2463 y1 #379 | battle x=1199 y=1324 | expectation battle
 not compared | rg002 | RG-002-2463 y1 #380 | battle_actions x=1199 y=1324 | expectation battle_actions
 not compared | rg002 | RG-002-2463 y1 #381 | battle planet=37 x=1204 y=1566 | expectation battle
@@ -103,12 +107,18 @@ sample | rg002 | RG-002-2464 y2 #349 | salvage_at x=1364 y=1319 | salvage = [[76
 sample | rg002 | RG-002-2464 y2 #350 | salvage_at x=1367 y=1327 | salvage = [], want [18 16 8]
 sample | rg002 | RG-002-2464 y2 #351 | salvage_at x=1199 y=1324 | salvage = [], want [6 0 6]
 sample | rg002 | RG-002-2464 y2 #352 | salvage_at x=1411 y=1378 | salvage = [], want [6 0 6]
-not compared | rg002 | RG-002-2464 y2 #391 | object | object wormhole
-not compared | rg002 | RG-002-2464 y2 #392 | object | object wormhole
-not compared | rg002 | RG-002-2464 y2 #393 | object | object wormhole
-not compared | rg002 | RG-002-2464 y2 #394 | object | object wormhole
-not compared | rg002 | RG-002-2464 y2 #395 | object | object wormhole
-not compared | rg002 | RG-002-2464 y2 #396 | object | object wormhole
+sample | rg002 | RG-002-2464 y2 #391 | object | wormhole: x = 1674, want 1675
+sample | rg002 | RG-002-2464 y2 #391 | object | wormhole: y = 1276, want 1294
+sample | rg002 | RG-002-2464 y2 #392 | object | wormhole: x = 1555, want 1540
+sample | rg002 | RG-002-2464 y2 #392 | object | wormhole: y = 1676, want 1683
+sample | rg002 | RG-002-2464 y2 #393 | object | wormhole: x = 1708, want 1675
+sample | rg002 | RG-002-2464 y2 #393 | object | wormhole: y = 1564, want 1547
+sample | rg002 | RG-002-2464 y2 #394 | object | wormhole: x = 1037, want 1034
+sample | rg002 | RG-002-2464 y2 #394 | object | wormhole: y = 1627, want 1643
+sample | rg002 | RG-002-2464 y2 #395 | object | wormhole: x = 1541, want 1539
+sample | rg002 | RG-002-2464 y2 #395 | object | wormhole: y = 1457, want 1446
+sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: x = 1235, want 1258
+sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: y = 1783, want 1778
 not compared | rg002 | RG-002-2464 y2 #397 | battle planet=37 x=1204 y=1566 | expectation battle
 not compared | rg002 | RG-002-2464 y2 #398 | battle_actions x=1204 y=1566 | expectation battle_actions
 not compared | rg002 | RG-002-2464 y2 #399 | battle x=1208 y=1327 | expectation battle
@@ -229,12 +239,21 @@ sample | rg002 | RG-002-2465 y3 #346 | salvage_at x=1367 y=1327 | salvage = [], 
 sample | rg002 | RG-002-2465 y3 #347 | salvage_at x=1367 y=1327 | salvage = [], want [18 16 8]
 sample | rg002 | RG-002-2465 y3 #348 | salvage_at x=1241 y=1313 | salvage = [[76 21 45]], want [75 20 45]
 sample | rg002 | RG-002-2465 y3 #350 | salvage_at x=1411 y=1378 | salvage = [], want [6 0 6]
-not compared | rg002 | RG-002-2465 y3 #389 | object | object wormhole
-not compared | rg002 | RG-002-2465 y3 #390 | object | object wormhole
-not compared | rg002 | RG-002-2465 y3 #391 | object | object wormhole
-not compared | rg002 | RG-002-2465 y3 #392 | object | object wormhole
-not compared | rg002 | RG-002-2465 y3 #393 | object | object wormhole
-not compared | rg002 | RG-002-2465 y3 #394 | object | object wormhole
+sample | rg002 | RG-002-2465 y3 #389 | object | wormhole: x = 1686, want 1675
+sample | rg002 | RG-002-2465 y3 #389 | object | wormhole: y = 1271, want 1304
+sample | rg002 | RG-002-2465 y3 #390 | object | wormhole: x = 1564, want 1551
+sample | rg002 | RG-002-2465 y3 #390 | object | wormhole: y = 1680, want 1690
+sample | rg002 | RG-002-2465 y3 #391 | object | wormhole: known_to = [5], want [4]
+sample | rg002 | RG-002-2465 y3 #391 | object | wormhole: x = 1720, want 1591
+sample | rg002 | RG-002-2465 y3 #391 | object | wormhole: y = 1576, want 1018
+sample | rg002 | RG-002-2465 y3 #391 | object | wormhole: years_since_jump = 33, want 0
+sample | rg002 | RG-002-2465 y3 #392 | object | wormhole: x = 1047, want 1029
+sample | rg002 | RG-002-2465 y3 #392 | object | wormhole: y = 1635, want 1653
+sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: x = 1536, want 1411
+sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: y = 1465, want 1663
+sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: years_since_jump = 39, want 0
+sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: x = 1242, want 1249
+sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: y = 1783, want 1787
 not compared | rg002 | RG-002-2465 y3 #395 | battle planet=42 x=1227 y=1429 | expectation battle
 not compared | rg002 | RG-002-2465 y3 #396 | battle_actions x=1227 y=1429 | expectation battle_actions
 not compared | rg002 | RG-002-2465 y3 #397 | battle x=1241 y=1313 | expectation battle
@@ -398,12 +417,21 @@ sample | rg002 | RG-002-2466 y4 #329 | production_queue planet=101 | queue = [{8
 sample | rg002 | RG-002-2466 y4 #348 | minefield owner=6 id=0 | minefield: mines = 2644, want 2714
 sample | rg002 | RG-002-2466 y4 #349 | salvage_at x=1367 y=1327 | salvage = [], want [0 0 0]
 sample | rg002 | RG-002-2466 y4 #350 | salvage_at x=1241 y=1313 | salvage = [[76 21 45]], want [75 20 45]
-not compared | rg002 | RG-002-2466 y4 #388 | object | object wormhole
-not compared | rg002 | RG-002-2466 y4 #389 | object | object wormhole
-not compared | rg002 | RG-002-2466 y4 #390 | object | object wormhole
-not compared | rg002 | RG-002-2466 y4 #391 | object | object wormhole
-not compared | rg002 | RG-002-2466 y4 #392 | object | object wormhole
-not compared | rg002 | RG-002-2466 y4 #393 | object | object wormhole
+sample | rg002 | RG-002-2466 y4 #388 | object | wormhole: x = 1682, want 1666
+sample | rg002 | RG-002-2466 y4 #388 | object | wormhole: y = 1268, want 1313
+sample | rg002 | RG-002-2466 y4 #389 | object | wormhole: x = 1575, want 1540
+sample | rg002 | RG-002-2466 y4 #389 | object | wormhole: y = 1677, want 1702
+sample | rg002 | RG-002-2466 y4 #390 | object | wormhole: known_to = [5], want [4 5]
+sample | rg002 | RG-002-2466 y4 #390 | object | wormhole: x = 1731, want 1591
+sample | rg002 | RG-002-2466 y4 #390 | object | wormhole: y = 1588, want 1015
+sample | rg002 | RG-002-2466 y4 #390 | object | wormhole: years_since_jump = 34, want 1
+sample | rg002 | RG-002-2466 y4 #391 | object | wormhole: known_to = [5], want []
+sample | rg002 | RG-002-2466 y4 #391 | object | wormhole: x = 1057, want 1021
+sample | rg002 | RG-002-2466 y4 #391 | object | wormhole: y = 1640, want 1643
+sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: x = 1531, want 1408
+sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: y = 1463, want 1672
+sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: years_since_jump = 40, want 1
+sample | rg002 | RG-002-2466 y4 #393 | object | wormhole: x = 1234, want 1241
 not compared | rg002 | RG-002-2466 y4 #395 | battle planet=16 x=1101 y=1621 | expectation battle
 not compared | rg002 | RG-002-2466 y4 #396 | battle_actions x=1101 y=1621 | expectation battle_actions
 not compared | rg002 | RG-002-2466 y4 #397 | battle planet=26 x=1153 y=1609 | expectation battle
@@ -641,12 +669,24 @@ sample | rg002 | RG-002-2467 y5 #394 | minefield owner=6 id=0 | minefield: mines
 sample | rg002 | RG-002-2467 y5 #395 | salvage_at x=1335 y=1320 | salvage = [], want [9 8 4]
 sample | rg002 | RG-002-2467 y5 #396 | salvage_at x=1241 y=1313 | salvage = [[66 11 35]], want [65 10 35]
 sample | rg002 | RG-002-2467 y5 #423 | salvage_at x=1395 y=1292 | salvage = [], want [6 2 4]
-not compared | rg002 | RG-002-2467 y5 #433 | object | object wormhole
-not compared | rg002 | RG-002-2467 y5 #434 | object | object wormhole
-not compared | rg002 | RG-002-2467 y5 #435 | object | object wormhole
-not compared | rg002 | RG-002-2467 y5 #436 | object | object wormhole
-not compared | rg002 | RG-002-2467 y5 #437 | object | object wormhole
-not compared | rg002 | RG-002-2467 y5 #438 | object | object wormhole
+sample | rg002 | RG-002-2467 y5 #433 | object | wormhole: known_to = [4 5], want [3 5]
+sample | rg002 | RG-002-2467 y5 #433 | object | wormhole: x = 1584, want 1678
+sample | rg002 | RG-002-2467 y5 #433 | object | wormhole: y = 1116, want 1308
+sample | rg002 | RG-002-2467 y5 #433 | object | wormhole: years_since_jump = 0, want 67
+sample | rg002 | RG-002-2467 y5 #434 | object | wormhole: x = 1573, want 1543
+sample | rg002 | RG-002-2467 y5 #434 | object | wormhole: y = 1668, want 1695
+sample | rg002 | RG-002-2467 y5 #435 | object | wormhole: known_to = [5], want [4 5]
+sample | rg002 | RG-002-2467 y5 #435 | object | wormhole: x = 1726, want 1582
+sample | rg002 | RG-002-2467 y5 #435 | object | wormhole: y = 1580, want 1025
+sample | rg002 | RG-002-2467 y5 #435 | object | wormhole: years_since_jump = 35, want 2
+sample | rg002 | RG-002-2467 y5 #436 | object | wormhole: known_to = [5], want []
+sample | rg002 | RG-002-2467 y5 #436 | object | wormhole: x = 1062, want 1031
+sample | rg002 | RG-002-2467 y5 #436 | object | wormhole: y = 1651, want 1653
+sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: x = 1543, want 1410
+sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: y = 1452, want 1667
+sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: years_since_jump = 41, want 2
+sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: x = 1225, want 1246
+sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: y = 1782, want 1778
 not compared | rg002 | RG-002-2467 y5 #440 | battle planet=37 x=1204 y=1566 | expectation battle
 not compared | rg002 | RG-002-2467 y5 #441 | battle_actions x=1204 y=1566 | expectation battle_actions
 not compared | rg002 | RG-002-2467 y5 #442 | battle x=1262 y=1345 | expectation battle
@@ -926,12 +966,24 @@ sample | rg002 | RG-002-2468 y6 #395 | salvage_at x=1335 y=1320 | salvage = [], 
 sample | rg002 | RG-002-2468 y6 #396 | salvage_at x=1241 y=1313 | salvage = [[0 1 25] [6 0 6]], want [0 0 25]
 sample | rg002 | RG-002-2468 y6 #424 | salvage_at x=1395 y=1292 | salvage = [], want [6 2 4]
 sample | rg002 | RG-002-2468 y6 #425 | object | packet 5/27 missing
-not compared | rg002 | RG-002-2468 y6 #433 | object | object wormhole
-not compared | rg002 | RG-002-2468 y6 #434 | object | object wormhole
-not compared | rg002 | RG-002-2468 y6 #435 | object | object wormhole
-not compared | rg002 | RG-002-2468 y6 #436 | object | object wormhole
-not compared | rg002 | RG-002-2468 y6 #437 | object | object wormhole
-not compared | rg002 | RG-002-2468 y6 #438 | object | object wormhole
+sample | rg002 | RG-002-2468 y6 #433 | object | wormhole: known_to = [4 5], want [3 5]
+sample | rg002 | RG-002-2468 y6 #433 | object | wormhole: x = 1595, want 1667
+sample | rg002 | RG-002-2468 y6 #433 | object | wormhole: y = 1113, want 1312
+sample | rg002 | RG-002-2468 y6 #433 | object | wormhole: years_since_jump = 1, want 68
+sample | rg002 | RG-002-2468 y6 #434 | object | wormhole: x = 1580, want 1531
+sample | rg002 | RG-002-2468 y6 #434 | object | wormhole: y = 1656, want 1690
+sample | rg002 | RG-002-2468 y6 #435 | object | wormhole: known_to = [5], want [4 5]
+sample | rg002 | RG-002-2468 y6 #435 | object | wormhole: x = 1734, want 1571
+sample | rg002 | RG-002-2468 y6 #435 | object | wormhole: y = 1591, want 1036
+sample | rg002 | RG-002-2468 y6 #435 | object | wormhole: years_since_jump = 36, want 3
+sample | rg002 | RG-002-2468 y6 #436 | object | wormhole: known_to = [5], want []
+sample | rg002 | RG-002-2468 y6 #436 | object | wormhole: x = 1052, want 1031
+sample | rg002 | RG-002-2468 y6 #436 | object | wormhole: y = 1646, want 1650
+sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: x = 1546, want 1422
+sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: y = 1447, want 1666
+sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: years_since_jump = 42, want 3
+sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: x = 1235, want 1236
+sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: y = 1781, want 1769
 not compared | rg002 | RG-002-2468 y6 #440 | battle planet=16 x=1101 y=1621 | expectation battle
 not compared | rg002 | RG-002-2468 y6 #441 | battle_actions x=1101 y=1621 | expectation battle_actions
 not compared | rg002 | RG-002-2468 y6 #442 | battle planet=37 x=1204 y=1566 | expectation battle
@@ -1068,12 +1120,16 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #245 | planet id=114 | environment = [53 1
 sample | rg002-y1 | RG-002-Y1-2463 y1 #252 | planet id=120 | environment = [58 72 10], want [58 72 11]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #338 | salvage_at x=1364 y=1319 | salvage = [[86 71 44] [139 95 86]], want [169 104 106]
 sample | rg002-y1 | RG-002-Y1-2463 y1 #339 | salvage_at x=1199 y=1324 | salvage = [], want [6 0 6]
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #373 | object | object wormhole
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #374 | object | object wormhole
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #375 | object | object wormhole
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | object wormhole
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | object wormhole
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | object wormhole
+sample | rg002-y1 | RG-002-Y1-2463 y1 #373 | object | wormhole: x = 1670, want 1675
+sample | rg002-y1 | RG-002-Y1-2463 y1 #373 | object | wormhole: y = 1285, want 1286
+sample | rg002-y1 | RG-002-Y1-2463 y1 #374 | object | wormhole: x = 1544, want 1532
+sample | rg002-y1 | RG-002-Y1-2463 y1 #375 | object | wormhole: x = 1697, want 1676
+sample | rg002-y1 | RG-002-Y1-2463 y1 #375 | object | wormhole: y = 1555, want 1541
+sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: x = 1048, want 1045
+sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1639
+sample | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
+sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
+sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #379 | battle x=1199 y=1324 | expectation battle
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #380 | battle_actions x=1199 y=1324 | expectation battle_actions
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #381 | battle planet=37 x=1204 y=1566 | expectation battle
@@ -1133,12 +1189,18 @@ random-driven | rg002-y2 | RG-002-Y2-2464 y1 #301 | production_queue planet=41 |
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #315 | production_queue planet=71 | queue = [{8 1 37 14}], want [{8 1 40 14}] (7/8 variants match)
 sample | rg002-y2 | RG-002-Y2-2464 y1 #320 | production_queue planet=81 | queue = [{9 1 47 5}], want [{9 1 46 5}]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #322 | production_queue planet=91 | queue = [{8 1 53 7}], want [{8 1 52 7}]
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #391 | object | object wormhole
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #392 | object | object wormhole
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #393 | object | object wormhole
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #394 | object | object wormhole
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #395 | object | object wormhole
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | object wormhole
+sample | rg002-y2 | RG-002-Y2-2464 y1 #391 | object | wormhole: x = 1666, want 1675
+sample | rg002-y2 | RG-002-Y2-2464 y1 #391 | object | wormhole: y = 1281, want 1294
+sample | rg002-y2 | RG-002-Y2-2464 y1 #392 | object | wormhole: x = 1536, want 1540
+sample | rg002-y2 | RG-002-Y2-2464 y1 #392 | object | wormhole: y = 1675, want 1683
+sample | rg002-y2 | RG-002-Y2-2464 y1 #393 | object | wormhole: x = 1666, want 1675
+sample | rg002-y2 | RG-002-Y2-2464 y1 #393 | object | wormhole: y = 1550, want 1547
+sample | rg002-y2 | RG-002-Y2-2464 y1 #394 | object | wormhole: x = 1037, want 1034
+sample | rg002-y2 | RG-002-Y2-2464 y1 #394 | object | wormhole: y = 1642, want 1643
+sample | rg002-y2 | RG-002-Y2-2464 y1 #395 | object | wormhole: x = 1525, want 1539
+sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: x = 1612, want 1258
+sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: y = 1525, want 1778
+sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: years_since_jump = 0, want 33
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #397 | battle planet=37 x=1204 y=1566 | expectation battle
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #398 | battle_actions x=1204 y=1566 | expectation battle_actions
 not compared | rg002-y2 | RG-002-Y2-2464 y1 #399 | battle x=1208 y=1327 | expectation battle
@@ -1187,12 +1249,21 @@ sample | rg002-y3 | RG-002-Y3-2465 y1 #296 | production_queue planet=39 | queue 
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #299 | production_queue planet=42 | queue = [], want [{15 3 97 0}] (6/8 variants match)
 sample | rg002-y3 | RG-002-Y3-2465 y1 #317 | production_queue planet=79 | queue = [{8 1 74 13}], want [{8 1 73 13}]
 sample | rg002-y3 | RG-002-Y3-2465 y1 #330 | production_queue planet=105 | queue = [{2 3 59 0}], want [{2 3 39 0}]
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #389 | object | object wormhole
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #390 | object | object wormhole
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #391 | object | object wormhole
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #392 | object | object wormhole
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | object wormhole
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | object wormhole
+sample | rg002-y3 | RG-002-Y3-2465 y1 #389 | object | wormhole: x = 1682, want 1675
+sample | rg002-y3 | RG-002-Y3-2465 y1 #389 | object | wormhole: y = 1302, want 1304
+sample | rg002-y3 | RG-002-Y3-2465 y1 #390 | object | wormhole: x = 1541, want 1551
+sample | rg002-y3 | RG-002-Y3-2465 y1 #390 | object | wormhole: y = 1684, want 1690
+sample | rg002-y3 | RG-002-Y3-2465 y1 #391 | object | wormhole: known_to = [5], want [4]
+sample | rg002-y3 | RG-002-Y3-2465 y1 #391 | object | wormhole: x = 1677, want 1591
+sample | rg002-y3 | RG-002-Y3-2465 y1 #391 | object | wormhole: y = 1553, want 1018
+sample | rg002-y3 | RG-002-Y3-2465 y1 #391 | object | wormhole: years_since_jump = 33, want 0
+sample | rg002-y3 | RG-002-Y3-2465 y1 #392 | object | wormhole: x = 1031, want 1029
+sample | rg002-y3 | RG-002-Y3-2465 y1 #392 | object | wormhole: y = 1642, want 1653
+sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: x = 1527, want 1411
+sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: y = 1456, want 1663
+sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: years_since_jump = 39, want 0
+sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: x = 1263, want 1249
+sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: y = 1781, want 1787
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #395 | battle planet=42 x=1227 y=1429 | expectation battle
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #396 | battle_actions x=1227 y=1429 | expectation battle_actions
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #397 | battle x=1241 y=1313 | expectation battle
@@ -1236,12 +1307,18 @@ sample | rg002-y4 | RG-002-Y4-2466 y1 #323 | production_queue planet=85 | queue 
 sample | rg002-y4 | RG-002-Y4-2466 y1 #324 | production_queue planet=90 | queue = [{3 1 31 0} {7 1 0 0} {8 4 54 0}], want [{3 1 15 0} {7 1 0 0} {8 4 56 0}]
 sample | rg002-y4 | RG-002-Y4-2466 y1 #331 | production_queue planet=104 | queue = [{2 3 39 0}], want [{2 3 19 0}]
 sample | rg002-y4 | RG-002-Y4-2466 y1 #36 | fleet owner=1 id=36 | cargo.germanium = 0, want 1
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #388 | object | object wormhole
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #389 | object | object wormhole
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #390 | object | object wormhole
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #391 | object | object wormhole
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | object wormhole
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | object wormhole
+sample | rg002-y4 | RG-002-Y4-2466 y1 #388 | object | wormhole: x = 1680, want 1666
+sample | rg002-y4 | RG-002-Y4-2466 y1 #388 | object | wormhole: y = 1306, want 1313
+sample | rg002-y4 | RG-002-Y4-2466 y1 #389 | object | wormhole: x = 1556, want 1540
+sample | rg002-y4 | RG-002-Y4-2466 y1 #389 | object | wormhole: y = 1691, want 1702
+sample | rg002-y4 | RG-002-Y4-2466 y1 #390 | object | wormhole: x = 1592, want 1591
+sample | rg002-y4 | RG-002-Y4-2466 y1 #390 | object | wormhole: y = 1023, want 1015
+sample | rg002-y4 | RG-002-Y4-2466 y1 #391 | object | wormhole: x = 1020, want 1021
+sample | rg002-y4 | RG-002-Y4-2466 y1 #391 | object | wormhole: y = 1648, want 1643
+sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: x = 1420, want 1408
+sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: y = 1662, want 1672
+sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: x = 1239, want 1241
+sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: y = 1778, want 1789
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #395 | battle planet=16 x=1101 y=1621 | expectation battle
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #396 | battle_actions x=1101 y=1621 | expectation battle_actions
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #397 | battle planet=26 x=1153 y=1609 | expectation battle
@@ -1303,12 +1380,17 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #370 | production_queue planet=90 | queue 
 sample | rg002-y5 | RG-002-Y5-2467 y1 #379 | production_queue planet=105 | queue = [{2 1 19 0}], want [{2 1 39 0}]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #39 | fleet owner=1 id=40 | cargo.germanium = 2, want 3
 sample | rg002-y5 | RG-002-Y5-2467 y1 #423 | salvage_at x=1395 y=1292 | salvage = [], want [6 2 4]
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #433 | object | object wormhole
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #434 | object | object wormhole
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #435 | object | object wormhole
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #436 | object | object wormhole
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | object wormhole
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | object wormhole
+sample | rg002-y5 | RG-002-Y5-2467 y1 #433 | object | wormhole: x = 1677, want 1678
+sample | rg002-y5 | RG-002-Y5-2467 y1 #433 | object | wormhole: y = 1325, want 1308
+sample | rg002-y5 | RG-002-Y5-2467 y1 #434 | object | wormhole: x = 1549, want 1543
+sample | rg002-y5 | RG-002-Y5-2467 y1 #434 | object | wormhole: y = 1710, want 1695
+sample | rg002-y5 | RG-002-Y5-2467 y1 #435 | object | wormhole: x = 1593, want 1582
+sample | rg002-y5 | RG-002-Y5-2467 y1 #435 | object | wormhole: y = 1019, want 1025
+sample | rg002-y5 | RG-002-Y5-2467 y1 #436 | object | wormhole: x = 1011, want 1031
+sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: x = 1412, want 1410
+sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: y = 1665, want 1667
+sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: x = 1230, want 1246
+sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: y = 1783, want 1778
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #440 | battle planet=37 x=1204 y=1566 | expectation battle
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #441 | battle_actions x=1204 y=1566 | expectation battle_actions
 not compared | rg002-y5 | RG-002-Y5-2467 y1 #442 | battle x=1262 y=1345 | expectation battle
@@ -1347,12 +1429,18 @@ sample | rg002-y6 | RG-002-Y6-2468 y1 #364 | production_queue planet=85 | queue 
 sample | rg002-y6 | RG-002-Y6-2468 y1 #373 | production_queue planet=101 | queue = [{8 1 8 1} {8 2 0 6} {8 2 0 7}], want [{8 1 3 1} {8 2 0 6} {8 2 0 7}]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #374 | production_queue planet=102 | queue = [{8 1 99 14}], want [{8 1 93 14}]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #376 | production_queue planet=106 | queue = [{9 1 95 5}], want [{9 1 96 5}]
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #433 | object | object wormhole
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #434 | object | object wormhole
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #435 | object | object wormhole
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #436 | object | object wormhole
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | object wormhole
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | object wormhole
+sample | rg002-y6 | RG-002-Y6-2468 y1 #433 | object | wormhole: x = 1679, want 1667
+sample | rg002-y6 | RG-002-Y6-2468 y1 #433 | object | wormhole: y = 1309, want 1312
+sample | rg002-y6 | RG-002-Y6-2468 y1 #434 | object | wormhole: x = 1545, want 1531
+sample | rg002-y6 | RG-002-Y6-2468 y1 #434 | object | wormhole: y = 1701, want 1690
+sample | rg002-y6 | RG-002-Y6-2468 y1 #435 | object | wormhole: x = 1579, want 1571
+sample | rg002-y6 | RG-002-Y6-2468 y1 #435 | object | wormhole: y = 1024, want 1036
+sample | rg002-y6 | RG-002-Y6-2468 y1 #436 | object | wormhole: x = 1043, want 1031
+sample | rg002-y6 | RG-002-Y6-2468 y1 #436 | object | wormhole: y = 1646, want 1650
+sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: x = 1420, want 1422
+sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: y = 1668, want 1666
+sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: x = 1249, want 1236
+sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: y = 1766, want 1769
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #440 | battle planet=16 x=1101 y=1621 | expectation battle
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #441 | battle_actions x=1101 y=1621 | expectation battle_actions
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #442 | battle planet=37 x=1204 y=1566 | expectation battle
