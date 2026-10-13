@@ -6,7 +6,7 @@
 # were injected (stars-elegy experiments/rg003/README.md). Checked
 # exactly by internal/vectors TestRG003Ledger and, for the "battle" lines,
 # engine TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
-# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[23]Ledger'
+# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
 sample | rg003 | RG-003-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg003 | RG-003-2463 y1 #136 | planet id=9 | excess = 26, want 31

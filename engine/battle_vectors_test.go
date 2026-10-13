@@ -69,7 +69,7 @@ func TestBattleRecords(t *testing.T) {
 	for _, path := range engine.BattleRecordVectors(t) {
 		starts[path] = battleStarts(t, path)
 	}
-	// RG-002's and RG-003's records go to their ledgers
+	// RG-002's, RG-003's and RG-004's records go to their ledgers
 	// (battle_ledger_test.go).
 	l := &ledgerTB{TB: t, lines: map[string]string{}}
 	ungen := engine.CheckBattleRecords(l, starts, battleVariants(t))
@@ -105,12 +105,21 @@ func TestBattleRecords(t *testing.T) {
 	if checked != len(l.lines) {
 		t.Errorf("%d battle ledger lines taken, %d checked against a ledger", len(l.lines), checked)
 	}
-	checkRGBattleCoverage(t, l.lines, "rg002", rg002BattleRecords)
-	checkRGBattleCoverage(t, l.lines, "rg003", rg003BattleRecords)
+	for _, game := range games {
+		want, ok := rgBattleRecords[game]
+		if !ok {
+			t.Errorf("%s: no battle record count", game)
+		}
+		checkRGBattleCoverage(t, l.lines, game, want)
+	}
 }
 
+// rgBattleRecords is each representative game's number of battle records,
+// by chained run.
+var rgBattleRecords = map[string]int{"rg002": rg002BattleRecords, "rg003": rg003BattleRecords, "rg004": rg004BattleRecords}
+
 // checkRGBattleCoverage fails unless every battle record of the
-// representative game named by its chained run (rg002, rg003) has both its
+// representative game named by its chained run (rg002, rg003, rg004) has both its
 // expectations and at least one ledger line: the internal/vectors ledger
 // leaves the `battle` and `battle_actions` expectations to these lines,
 // so none may go unreported. want is the game's number of records.
@@ -149,6 +158,10 @@ const rg002BattleRecords = 88
 // rg003BattleRecords is the number of battle records in the RG-003
 // vectors: 102 in the chained run and 102 in the restarts.
 const rg003BattleRecords = 204
+
+// rg004BattleRecords is the number of battle records in the RG-004
+// vectors: 55 in the chained run and 55 in the restarts.
+const rg004BattleRecords = 110
 
 func TestBattleRecordHarness(t *testing.T) {
 	engine.CheckBattleRecordHarness(t, battleStarts(t, "cb/cb010.json")[1], battleStarts(t, "cs/cs003c.json")[1])

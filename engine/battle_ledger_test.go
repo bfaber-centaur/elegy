@@ -23,10 +23,12 @@ import (
 const rg002BattleLedger = "testdata/vectors/rg/rg002-ledger.txt"
 
 // rgBattleLedgers are the representative games' ledgers by chained run:
-// RG-003's records go to its own ledger, with RG-002's classes.
+// RG-003's and RG-004's records go to their own ledgers, with RG-002's
+// classes.
 var rgBattleLedgers = map[string]string{
 	"rg002": rg002BattleLedger,
 	"rg003": "testdata/vectors/rg/rg003-ledger.txt",
+	"rg004": "testdata/vectors/rg/rg004-ledger.txt",
 }
 
 // rgBattleLedger is the ledger of a battle ledger key: the one named by
@@ -37,9 +39,9 @@ func rgBattleLedger(key string) string {
 	return rgBattleLedgers[game]
 }
 
-// rg002BattleWhere parses CheckBattleRecords' locator for an RG-002 or
-// RG-003 record: vector, case, stream, x, y, year, then the message.
-var rg002BattleWhere = regexp.MustCompile(`^rg/(rg00[23][^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
+// rg002BattleWhere parses CheckBattleRecords' locator for an RG-002,
+// RG-003 or RG-004 record: vector, case, stream, x, y, year, then the message.
+var rg002BattleWhere = regexp.MustCompile(`^rg/(rg00[234][^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
 
 // rg002Pointer matches a printed pointer, which differs between runs.
 var rg002Pointer = regexp.MustCompile(`0x[0-9a-f]+`)

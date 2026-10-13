@@ -317,19 +317,57 @@ Counts are from the reference seed on main `217ab4b`.
   - Sample 1191 → 1197: the chained run's 0x036/0x038 counts in years 3, 4 and 6, which follow the factory and mine counts that already differ.
 
 
-### RG-003 wired (12 chained years)
+### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Its 13 files, every other `rg` vector file and the vectors README were copied verbatim from stars-elegy main `e3619ff` (#191, then #197). #197 only adds `start_sample` to every `battle` record (vectors README "`cases`"); Elegy does not read it yet, and the RG-001 and RG-002 results do not move. They have their own ledger, `engine/testdata/vectors/rg/rg003-ledger.txt`, which uses RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Measured on elegy main `245576b` (#226, after #223).
-- **Years 1–6 match RG-002 line for line.** The years-1-to-6 lines of the chained run (1000) and the six restarts' lines (33, 50, 60, 47, 52 and 41) are identical to RG-002's once the names are replaced. So are the baseline entries: RG-003-Y1-2463 random 1, RG-003-Y6-2468, RG-003-2463 random 1.
-- **Years 7–12, restarts: 8 hand lines**, each a miss on all 8 variants. Y9's plan 5 is the recorded order and is not compared (`battle_plan` is not compared yet):
-  - **incorrect mechanic [lane A], y7 and y8 (6 fleets):** waypoint 1 aims at a fleet (500002 in y7, 500092 in y8). The original keeps the planet (84, 95).
-  - **incorrect mechanic [lane A], y7:** planet 51's population is one unit short (15083, want 15084). The economy lane traced it to ground combat (the per-drop floor, GC-1), not growth.
-  - **Battles.** #223 cleared y8 (1571,1434), which now matches, and turned y11 (1323,1300) and y12 (1288,1347) into sample lines, because the vector flags those records ("Battle records the vector flags sample" above).
-    - **y12 is still a known deterministic gap owned by lane A:** token 0's damage is 281 against 235 (ship-move dilution). It reads as a sample only because the record is flagged. It is not noise.
-    - **unresolved randomness [lane D], y9:** Elegy fights a battle at (1388,1386) between players 3 and 6, and the year has no record there (#212's battle-set check). Lane D's diagnosis: in the original, player 1's minefield at (1385,1385) stopped player 6's fleet 2, which follows player 3's fleet 2, 3 ly short, so no battle took place. Elegy stops that fleet in about 4% of 200 seed variants, and variant 16 reproduces the record, but harness variants 1–7 all miss. The fleet's position and player 1's minefield are already sample lines, because the vector flags them. The battle ledger now accepts the `unresolved randomness [owner]: reason` class, as the vectors ledger does. (Superseded: `random-driven [lane D]` by oracle evidence in #229, then an ordinary sample through the vector's `alt_battle`; see "Battle records the vector flags sample".)
-- **Totals.**
-  - Ledger: 5756 samples, 107 matched, 50 not compared, 72 random-driven and 8 hand lines; 5337 lines are the chained run's. Y10's planet 22 alchemy line cleared with #224. The battle lines follow #212: one line per record, plus the battle-set check.
-  - The census (skips.txt) and the baseline grow only by RG-003's cases. Three RG-003 entries are `random 0`, the same form as the 3 already in the baseline.
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `0ca6c3b` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235 and #240 GC-1).
+
+**Totals (5943 lines).**
+
+| class | chained run | 12 restarts | total |
+|---|---:|---:|---:|
+| sample | 5289 | 452 | 5741 |
+| matched | 8 | 100 | 108 |
+| not compared | 11 | 11 | 22 |
+| random-driven | 0 | 72 | 72 |
+
+- **No deterministic hand lines remain.** Every compared difference in the restarts is random-driven (it matches on some seed variant) or a sample.
+- **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
+- **Restarts:** "matched" counts battle records.
+- **GC-1 (#240, `0ca6c3b`)** cleared the last hand line, y7 planet 51's population (15083 against 15084, the per-drop ground-combat floor), and the 11 chained sample lines that carried it forward (planet 51's population and excess in years 7–12).
+- **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
+- **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
+- **#238** compares the 0x0f4 slots, which removes the y11 restart's not-compared line.
+- **stars-elegy #203** adds an `alt_battle` expectation at RG-003 y9 (1388,1386), in the chained run and in the restart. The vectors comparator leaves it to the battle harness, so it stays 2 not-compared lines there. Lane D's #236 consumes it in the battle harness: the extra battle at (1388,1386) is now an ordinary sample, and its random-driven hand line is gone.
+
+"No deterministic hand lines" holds for compared fields only. The 22 not-compared lines stay unjudged, and the section below sorts them by cause and owner.
+
+### RG-004: a second game, 12 chained years
+
+RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a second representative game. Seven custom races (WM, SD, IT, JoaT, PP, IS, HE) are played by expert computer players. It runs 12 chained years, 2466 to 2477, after 65 unrecorded warm-up years, with no injected orders. Its 13 files are copied verbatim from stars-elegy main `f38c843` (#203). The ledger is `engine/testdata/vectors/rg/rg004-ledger.txt`, with RG-002's classes. `TestRG004Ledger` checks it, `TestBattleRecords` checks its 110 battle records (55 in the chained run, 55 in the restarts), and `RG002_LEDGER=write` rewrites it. Measured on elegy main `40b27ba`.
+
+**One harness change.** In year 7, player 6's order file deletes waypoint 1 of fleet 20. In the chained run, Elegy's fleet 20 has no waypoint 1 at that point. That used to stop the whole chained run ("order waypoint_delete index", 1447 not-compared lines). Now such a delete is recorded as a refused order, as an engine refusal is, and the year goes on (ELEGY CHOICE, harness). A delete of waypoint 0 still fails the load. The chained year-7 refusal is a sample, and no restart hits it. The same refusal changes RG-003's baseline: chained years 10–12 (2472–2474) used to stop on this load error with 2 of the 8 seeds and fail with the rest, which the baseline listed as `random 0`. They now fail with every seed, so those 3 entries leave the baseline. None of them passed before or passes now.
+
+**Totals (2928 lines).**
+
+| class | chained run | 12 restarts | total |
+|---|---:|---:|---:|
+| sample | 2542 | 263 | 2805 |
+| matched | 4 | 47 | 51 |
+| not compared | 19 | 19 | 38 |
+| random-driven | 1 | 17 | 18 |
+| incorrect mechanic | 0 | 16 | 16 |
+
+- **Battle records:** 51 matched, 63 samples and 2 random-driven. None is a hand line. Since #236, the y3 restart's extra battle at (1365,1400) is a sample, not random-driven, because the vector has an `alt_battle` there.
+- **Not compared (38):** 0x007 (24 lines: 14 message, 10 sequence entry) and 0x040 (8 lines) have no event mapping. Also 2 `alt_battle`, 2 `design_gone`, and 2 sequences of sample entries only.
+- **Baseline:** RG-004 adds 10 entries. Restarts Y1, Y2, Y3, Y5, Y7, Y8, Y9, Y11 and Y12 and chained year 1 (2466) pass with some seeds (`random k`). Restarts Y4, Y6 and Y10 fail on the hand lines below. Chained years 2–12 fail on samples.
+
+**Hand lines (16).** All are incorrect mechanic, each is in a restart, and the owner is in the last column.
+
+| year | object | lines | cause | owner |
+|---|---|---:|---|---|
+| y4–y12 | player 0's order: delete ship design slot 0 | 9 | Elegy refuses the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way. That the original accepts it is inferred. | lane A |
+| y4 | fleets 10 and 23 (player 6) | 5 | The original numbers the new fleets at planets 11 and 57 as 10 and 23. Elegy puts fleet 23 at planet 11 and has no fleet 10. Cause not traced. | lane A |
+| y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
 
 ### Planet records without installations block
 
@@ -340,7 +378,7 @@ stars-elegy ORACLE.md (main `1d4c97b`, the `dump` notes) says: "The game omits a
 
 ### Not-compared lines sorted by cause (main `1de8ab6`)
 
-The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32) were sorted by cause. This change fixes the comparator-side ones, except 0x0f4/0x0c2/0x0be, which lane D's #233 maps:
+The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32, on `1de8ab6` before RG-004) were sorted by cause. This change fixes the comparator-side ones, except 0x0f4/0x0c2/0x0be, which lane D's #233 maps:
 - **`battle_plan` expectations** are compared now (vectors/README.md "battle_plan": every field of the plan in the slot, `attack_who` numbered as the state's battle_plans). The loader now keeps a state plan's name. The census drops "expectation battle_plan" (15). RG-003 y9's plan 5 matches, in the chained run and in the restart.
 - **0x039/0x03a** (one or more defenses built) map to EventBuilt of defenses, with the merge rule (MESSAGES.md 0x039, 0x03a, "Merging of build counts").
 - **packet_destination/packet_warp null** is read as absent (vectors/README.md "initial_state": no destination, warp 4), but only when the planet still has a starbase. All 6 records so far are planets whose starbase was lost in the year. Elegy keeps the planet's settings there, and the restarts would miss. Whether the original cleared them or only does not write them for a planet with no starbase is UNRESOLVED, so those records stay skipped under a new reason.
