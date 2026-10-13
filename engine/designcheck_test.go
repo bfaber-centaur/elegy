@@ -291,3 +291,86 @@ func TestAssumptionDesignCheckAfterOrders(t *testing.T) {
 		t.Errorf("design cargo %d, want %d after the check", got.CargoCapacity, cs-100)
 	}
 }
+
+// TestConfirmedDesignCheckReceived: a design received with a fleet
+// transfer is not checked against the recipient's tech in the transfer
+// year or the next (CONFIRMED by prediction, stars-elegy #200, DC-2,
+// DC-5), while the recipient's own identical design loses the part; the
+// giver keeps its original in the transfer year (MEASURED, DC-5). ASSUMPTION
+// T15 (NOT RUN): the giver's original is still checked against the
+// giver's tech (here lowered before the second year), and the copy stays
+// exempt in the third year.
+func TestConfirmedDesignCheckReceived(t *testing.T) {
+	cat := Components()
+	c, _ := cat.Lookup("Possum Scanner")
+	p, err := c.Part()
+	if err != nil {
+		t.Fatal(err)
+	}
+	low := [NumFields]int{26, 26, 26, 26, p.TechReq[Electronics] - 1, 26}
+	l := newTKLab(t, 3)
+	l.g.Players[1].Research.Levels = low
+	l.g.Players[1].Relations[0] = RelationNeutral
+	pi := l.planet(0, 0, 1000)
+	scout := func() int {
+		return l.design("Scout", SlotFill{0, "Long Hump 6", 1}, SlotFill{1, "Possum Scanner", 1})
+	}
+	given, kept, own := scout(), scout(), scout()
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: given}, {Owner: 0, Slot: 1, Design: kept}, {Owner: 1, Slot: 0, Design: own}}
+	fi := l.fleet(0, pi, 0, Stack{Design: given, Count: 1})
+	l.g.Fleets[fi].Task = Task{Kind: TaskTransferFleet, Player: 1}
+	l.fleet(0, pi, 0, Stack{Design: kept, Count: 1})
+
+	has := func(g Game, d int) bool { return slices.Contains(slotNames(g.Designs[d]), "1 Possum Scanner") }
+	g := l.g
+	copyOf := -1
+	for year := 1; year <= 3; year++ {
+		if year == 2 {
+			// The giver loses the tech too: its original is checked.
+			g.Players[0].Research.Levels = low
+		}
+		r, err := GenerateTurn(withRules(g), nil, &seqRand{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		g = r.Game
+		if year == 1 {
+			for _, ds := range g.DesignSlots {
+				if ds.Owner == 1 && ds.Received {
+					copyOf = ds.Design
+				}
+			}
+			if copyOf < 0 {
+				t.Fatalf("no received slot after the transfer: %+v", g.DesignSlots)
+			}
+			if has(g, own) {
+				t.Errorf("year 1: the recipient's own design kept the Possum Scanner")
+			}
+		}
+		if !has(g, copyOf) {
+			t.Errorf("year %d: the received copy lost the Possum Scanner: %v", year, slotNames(g.Designs[copyOf]))
+		}
+		if wantGiver := year < 2; has(g, kept) != wantGiver {
+			t.Errorf("year %d: the giver's original kept the scanner %v, want %v", year, has(g, kept), wantGiver)
+		}
+	}
+}
+
+// TestDesignSlotReceivedCleared: a design order that replaces a received
+// slot's design clears the mark, so the new design is checked like any
+// other (ASSUMPTION T15).
+func TestDesignSlotReceivedCleared(t *testing.T) {
+	l := newTKLab(t, 3)
+	d := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: d, Received: true}}
+	g := withRules(l.g)
+	if err := (DesignOrder{Slot: 0, Name: "S", Hull: "Scout", Fills: []SlotFill{{0, "Long Hump 6", 1}}}).apply(&g, 0, &Applied{}); err != nil {
+		t.Fatal(err)
+	}
+	if g.DesignSlots[0].Received {
+		t.Error("the replaced slot is still marked received")
+	}
+	if !l.g.DesignSlots[0].Received {
+		t.Error("the game passed in was changed")
+	}
+}

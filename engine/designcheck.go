@@ -34,8 +34,15 @@ package engine
 // Legacy.KeepUnentitledParts, which governs only reading a design from a
 // design order (ReadDesign). Since tech levels never fall, a design made
 // by an order never has a part this check removes; the check matters for
-// designs given with a fleet transfer to a player with less tech, and for
 // designs written into a game from outside. The hull is not checked.
+//
+// A design received with a fleet transfer (DesignSlot.Received) is not
+// checked: CONFIRMED by prediction for the year of the transfer and the
+// year after (stars-elegy #200, T15 cases
+// DC-2 and DC-5: the recipient's copy kept an out-of-tech scanner while
+// the recipient's own design of it lost it); the giver keeps its own
+// design (MEASURED). Keeping the exemption in later years is ASSUMPTION
+// T15 (NOT RUN); the cause is unknown.
 //
 // ASSUMPTION T15 (NOT RUN): the check runs in KERNEL.md "Turn order"
 // step 1a.2, the ship-design housekeeping, with the tech from before the
@@ -43,12 +50,11 @@ package engine
 // slot is back-filled with the basic engine at the slot's capacity, as
 // ReadDesign does (the basic engine adds no fuel or cargo capacity);
 // fleets keep their fuel and cargo even above the new capacities; and a
-// design given with a fleet transfer is checked against the recipient's
-// tech.
+// received design stays exempt after the year following its transfer.
 func (g *Game) checkDesigns() {
 	cat := Components()
 	for _, ds := range g.DesignSlots {
-		if ds.Starbase || ds.Design < 0 || ds.Design >= len(g.Designs) || ds.Owner < 0 || ds.Owner >= len(g.Players) {
+		if ds.Starbase || ds.Received || ds.Design < 0 || ds.Design >= len(g.Designs) || ds.Owner < 0 || ds.Owner >= len(g.Players) {
 			continue
 		}
 		d, changed := cat.checkDesign(g.Designs[ds.Design], g.Players[ds.Owner].Research.Levels)

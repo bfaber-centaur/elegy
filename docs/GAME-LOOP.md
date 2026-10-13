@@ -172,7 +172,11 @@ The encoding is canonical: a game encodes to the same bytes every time,
 and a loaded game saves back byte for byte. `Hash` is the SHA-256 of
 those bytes. `Load` refuses an unknown format, another version, unknown
 fields, a state that fails `Check` and a level out of range (0..3 for a
-computer player, 0 for a human). Version 11 added the mineral packet or
+computer player, 0 for a human). Version 12 added the mark on a design
+slot that holds a design received with a fleet transfer
+(`engine.DesignSlot.Received`), which the year's design check skips; a
+version 11 save is refused because a received design would be checked.
+Version 11 added the mineral packet or
 salvage a fleet's waypoint 0 names (`engine.Fleet.Target0`), which a
 transport task waiting there loads from; a version 10 save is refused
 because a waiting fleet would load from a planet instead. Version 10 added a waypoint's object
