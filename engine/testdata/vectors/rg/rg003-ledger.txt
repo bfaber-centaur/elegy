@@ -5645,7 +5645,7 @@ incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002) where the origi
 sample | rg003-y7 | RG-003-Y7-2469 y1 #201 | planet id=16 | surface_minerals = [335 9 339], want [336 9 340]
 not compared | rg003-y7 | RG-003-Y7-2469 y1 #234 | planet id=49 | planet field excess null
 not compared | rg003-y7 | RG-003-Y7-2469 y1 #235 | planet id=49 | planet field defenses null
-incorrect mechanic [economy]: population one colonist unit short after growth | rg003-y7 | RG-003-Y7-2469 y1 #237 | planet id=51 | population = 15083, want 15084
+incorrect mechanic [lane A]: population one colonist unit short from ground combat (per-drop floor, GC-1) | rg003-y7 | RG-003-Y7-2469 y1 #237 | planet id=51 | population = 15083, want 15084
 sample | rg003-y7 | RG-003-Y7-2469 y1 #269 | planet id=83 | starbase = design 91 damage 33, want design 91 damage 31
 random-driven | rg003-y7 | RG-003-Y7-2469 y1 #271 | planet id=85 | surface_minerals = [1993 1 1344], want [1988 0 1341] (5/8 variants match)
 random-driven | rg003-y7 | RG-003-Y7-2469 y1 #276 | planet id=90 | surface_minerals = [824 716 2], want [823 714 2] (5/8 variants match)
