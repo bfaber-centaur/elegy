@@ -17,7 +17,9 @@ func TestPvMessageList(t *testing.T) {
 	}
 	g.Players[1].Race.LRT.GeneralizedResearch = true
 	part, hull, defense := -1, -1, -1
+	named := map[string]int{}
 	for i, c := range engine.Components().Components {
+		named[c.Name] = i
 		switch {
 		case c.Name == "Cow-hide Shield":
 			part = i
@@ -63,11 +65,26 @@ func TestPvMessageList(t *testing.T) {
 		{"research stolen", []engine.Event{{Kind: engine.EventResearchStolen, Player: 2, Planet: -1, Fleet: -1, Item: 3, Count: 116}}, 2,
 			[]pvMsg{{id: 0x159, focus: 0xfffe, focusKnown: true, params: []int{3, 116}, known: all(2)}}},
 		{"component", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: part}}, 2,
-			[]pvMsg{{id: 0x05f, params: []int{1, 0, 0}, known: []bool{true, false, false}, why: "0x05f part focus and slots (no category-mask table)"}}},
+			[]pvMsg{{id: 0x05f, focus: 0xC201, focusKnown: true, params: []int{1, 0x0004, 1}, known: all(3)}}},
+		// The part codes of MESSAGES.md's examples (stars-elegy a348c5d).
+		{"terraforming part", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 5, Count: named["Temp Terraform ±7"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xCD0D, focusKnown: true, params: []int{5, 0x2000, 13}, known: all(3)}}},
+		{"planetary scanner", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 4, Count: named["Scoper 220"]}}, 2,
+			[]pvMsg{{id: 0x157, focus: 0xCF03, focusKnown: true, params: []int{4, 0x8000, 3}, known: all(3)}}},
+		// BINARY-ONLY: no vector holds a beam, torpedo, mine layer or
+		// Genesis Device announcement; these rows pin MESSAGES.md's table.
+		{"Genesis Device", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 5, Count: named["Genesis Device"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xCF0E, focusKnown: true, params: []int{5, 0x8000, 14}, known: all(3)}}},
+		{"beam", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: named["Gatling Gun"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC408, focusKnown: true, params: []int{1, 0x0010, 8}, known: all(3)}}},
+		{"torpedo", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: named["Beta Torpedo"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC501, focusKnown: true, params: []int{1, 0x0020, 1}, known: all(3)}}},
+		{"mine layer", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 2, Count: named["Mine Dispenser 50"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC801, focusKnown: true, params: []int{2, 0x0100, 1}, known: all(3)}}},
 		{"ship hull", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 3, Count: hull}}, 2,
-			[]pvMsg{{id: 0x078, params: []int{3, 0, 0}, known: []bool{true, false, false}, why: "0x078 part focus and slots (no category-mask table)"}}},
+			[]pvMsg{{id: 0x078, focus: 0xFFFD, focusKnown: true, params: []int{3, 0x4000, 0}, known: all(3)}}},
 		{"planetary defense", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 0, Count: defense}}, 2,
-			[]pvMsg{{id: 0x145, params: []int{0, 0, 0}, known: []bool{true, false, false}, why: "0x145 part focus and slots (no category-mask table)"}}},
+			[]pvMsg{{id: 0x145, focus: 0xCF09, focusKnown: true, params: []int{0, 0x8000, 9}, known: all(3)}}},
 		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
 			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, false}, why: "0x05b salvage and fleet slots"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,

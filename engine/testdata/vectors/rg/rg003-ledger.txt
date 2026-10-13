@@ -212,7 +212,6 @@ sample | rg003 | RG-003-2465 y3 #394 | object | wormhole: x = 1242, want 1249
 sample | rg003 | RG-003-2465 y3 #394 | object | wormhole: y = 1783, want 1787
 sample | rg003 | RG-003-2465 y3 #415 | message_sequence | message 0x036 (focus 100, params [20 100]) = sent as 0x036 (focus 100, params [21 100])
 sample | rg003 | RG-003-2465 y3 #415 | message_sequence | message 0x038 (focus 100, params [6 100]) = sent as 0x038 (focus 100, params [4 100])
-not compared | rg003 | RG-003-2465 y3 #415 | message_sequence | message_sequence 0x05f part focus and slots (no category-mask table) not compared
 sample | rg003 | RG-003-2465 y3 #416 | player id=0 seen_by=0 | score_record.resources = 2522, want 2521
 sample | rg003 | RG-003-2465 y3 #420 | player id=2 seen_by=2 | score_record.escort_ships = 48, want 46
 sample | rg003 | RG-003-2465 y3 #420 | player id=2 seen_by=2 | score_record.resources = 4920, want 4717
@@ -5514,7 +5513,6 @@ sample | rg003-y3 | RG-003-Y3-2465 y1 #393 | object | wormhole: years_since_jump
 sample | rg003-y3 | RG-003-Y3-2465 y1 #394 | object | wormhole: x = 1263, want 1249
 sample | rg003-y3 | RG-003-Y3-2465 y1 #394 | object | wormhole: y = 1781, want 1787
 random-driven | rg003-y3 | RG-003-Y3-2465 y1 #415 | message_sequence | message 0x036 (focus 51, params [11 51]) = sent as 0x036 (focus 51, params [10 51]) (5/8 variants match)
-not compared | rg003-y3 | RG-003-Y3-2465 y1 #415 | message_sequence | message_sequence 0x05f part focus and slots (no category-mask table) not compared
 random-driven | rg003-y3 | RG-003-Y3-2465 y1 #416 | player id=0 seen_by=0 | score_record.resources = 2520, want 2521 (5/8 variants match)
 sample | rg003-y3 | RG-003-Y3-2465 y1 #418 | player id=1 seen_by=1 | score_record.planets = 56, want 55
 sample | rg003-y3 | RG-003-Y3-2465 y1 #418 | player id=1 seen_by=1 | score_record.resources = 15340, want 15309
