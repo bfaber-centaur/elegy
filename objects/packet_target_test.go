@@ -196,12 +196,26 @@ func TestSalvageTransportWithoutObjects(t *testing.T) {
 	fj := l.fleet(0, at(0, 510), "Freighter", 1)
 	l.g.Fleets[fj].Fuel = 500
 	l.g.Fleets[fj].Waypoints = []engine.Waypoint{{Pos: at(0, 500), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 0, Task: load}}
-	r, err := engine.GenerateTurn(withRules(*l.g), nil, top{})
+	var r engine.TurnResult
+	var err error
+	func() {
+		// The named salvage has no space objects to load it through, so
+		// it is no source (ASSUMPTION T5): no load is tried.
+		defer func() {
+			if p := recover(); p != nil {
+				t.Fatalf("a named salvage without space objects was loaded through them: %v", p)
+			}
+		}()
+		r, err = engine.GenerateTurn(withRules(*l.g), nil, top{})
+	}()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if g := r.Game.Fleets[0]; g.Pos != at(0, 500) {
-		t.Errorf("salvage fleet at %v, want at the salvage", g.Pos)
+	if g := r.Game.Fleets[0]; g.Pos != at(0, 500) || g.Cargo.Minerals[engine.Ironium] != 0 {
+		t.Errorf("salvage fleet at %v with %d ironium, want at the salvage with none loaded", g.Pos, g.Cargo.Minerals[engine.Ironium])
+	}
+	if len(r.Game.Salvage) != 1 || r.Game.Salvage[0].Minerals[engine.Ironium] == 0 {
+		t.Errorf("salvage %+v, want it kept, not emptied", r.Game.Salvage)
 	}
 	for _, e := range r.Events {
 		if e.Kind == engine.EventTransportNoHold {
