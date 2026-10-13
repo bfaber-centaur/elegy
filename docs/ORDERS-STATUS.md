@@ -37,7 +37,9 @@ and the design read are engine functions an order layer will call:
   cap instead (32767 kept, anything above becomes 32766);
   `Legacy.MergeOverflow` reproduces the original.
 - **Merge damage.** The dilution is reproduced (`Legacy.MergeDilution` is
-  on); switched off, the units are divided by the damaged ships.
+  on); switched off, the units are divided by the damaged ships. Ship
+  moves follow the same switch (MEASURED RG-003 2474, one ship move); the
+  merge order keeps its own rule (CONFIRMED CO-05).
 - **Design read.** ORDERS.md's chosen rule; `Legacy.KeepUnentitledParts`
   reproduces the original's keep-behavior.
 
