@@ -256,3 +256,21 @@ func TestScrapNoRoomNamesNoSalvage(t *testing.T) {
 		t.Errorf("salvage %+v, want none", l.g.Salvage)
 	}
 }
+
+// A stack with no ships left is not one of the scrapped fleet's designs:
+// 0x05b's fleet slot names the design with ships (here slot 5, not the
+// empty stack's slot 2), and the fleet counts one design.
+func TestScrapIgnoresEmptyStacks(t *testing.T) {
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	other := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	l.planet(NoOwner, 0, 100)
+	fi := l.fleet(1, 0, 0, Stack{Design: other, Count: 0}, Stack{Design: scout, Count: 1})
+	l.g.Planets = l.g.Planets[:0]
+	l.g.Fleets[fi].Pos, l.g.Fleets[fi].Number = Point{0, 0}, 4
+	l.g.DesignSlots = []DesignSlot{{Owner: 1, Slot: 5, Design: scout}, {Owner: 1, Slot: 2, Design: other}}
+	ev := l.g.scrap(fi, &seqRand{}, map[int]bool{}, scrapYear{})
+	if len(ev) != 1 || len(ev[0].Axes) != 4 || !slices.Equal(ev[0].Axes[1:], []int{4, 5, 1}) {
+		t.Errorf("events %+v, want one scrap event with Axes [_ 4 5 1]", ev)
+	}
+}
