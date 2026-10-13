@@ -2441,8 +2441,8 @@ sample | rg004 | year 11 | order | year 11 player 6 order 33 (QueueOrder): plane
 sample | rg004 | year 12 | order | year 12 player 0 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 0 order 6 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 4 order 3 (CargoOrder): cargo: fleet 400040 and planet 66: orders: the objects are not at the same place
-sample | rg004 | year 12 | order | year 12 player 6 order 1 (MoveShipsOrder): fleet 600065 has 0 ships of design 27, not 1: orders: a value is out of range
-sample | rg004 | year 12 | order | year 12 player 6 order 12 (CargoOrder): cargo: fleet 600071 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 12 | order | year 12 player 6 order 1 (MoveShipsOrder): fleet 600068 has 0 ships of design 27, not 1: orders: a value is out of range
+sample | rg004 | year 12 | order | year 12 player 6 order 12 (CargoOrder): cargo: fleet 600074 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 12 | order | year 12 player 6 order 14 (WaypointOrder): waypoint 0 fleet 300021: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 6 order 17 (WaypointOrder): waypoint 0 fleet 300021: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 6 order 33 (QueueOrder): planet 49: orders: the object belongs to another player
@@ -2455,7 +2455,7 @@ sample | rg004 | year 3 | order | year 3 player 6 order 16 (WaypointOrder): flee
 sample | rg004 | year 3 | order | year 3 player 6 order 21 (CargoOrder): cargo: fleet 600031 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 3 | order | year 3 player 6 order 24 (CargoOrder): cargo: fleet 600032 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 3 | order | year 3 player 6 order 33 (WaypointOrder): fleet 0: orders: no such object
-sample | rg004 | year 4 | order | year 4 player 6 order 11 (CargoOrder): cargo: fleet 600038 and planet 25: orders: the objects are not at the same place
+sample | rg004 | year 4 | order | year 4 player 6 order 11 (CargoOrder): cargo: fleet 600039 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 4 | order | year 4 player 6 order 13 (FleetPlanOrder): fleet 0: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 14 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 4 | order | year 4 player 6 order 18 (WaypointOrder): waypoint 0 fleet 300092: orders: no such object
@@ -2471,7 +2471,7 @@ sample | rg004 | year 5 | order | year 5 player 6 order 27 (WaypointOrder): wayp
 sample | rg004 | year 5 | order | year 5 player 6 order 36 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 5 | order | year 5 player 6 order 42 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 5 | order | year 5 player 6 order 6 (CargoOrder): cargo: fleet 600011 and planet 12: orders: the objects are not at the same place
-sample | rg004 | year 5 | order | year 5 player 6 order 9 (CargoOrder): cargo: fleet 600041 and planet 25: orders: the objects are not at the same place
+sample | rg004 | year 5 | order | year 5 player 6 order 9 (CargoOrder): cargo: fleet 600043 and planet 25: orders: the objects are not at the same place
 sample | rg004 | year 6 | order | year 6 player 0 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 6 | order | year 6 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 6 | order | year 6 player 3 order 10 (WaypointOrder): fleet 0: orders: no such object
@@ -2488,10 +2488,10 @@ sample | rg004 | year 7 | order | year 7 player 0 order 2 (WaypointOrder): fleet
 sample | rg004 | year 7 | order | year 7 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 3 order 12 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 7 | order | year 7 player 6 order 14 (CargoOrder): cargo: salvage 4 of player 3: orders: no such object
-sample | rg004 | year 7 | order | year 7 player 6 order 17 (CargoOrder): cargo: fleet 600049 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 7 | order | year 7 player 6 order 17 (CargoOrder): cargo: fleet 600051 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 7 | order | year 7 player 6 order 44 (QueueOrder): planet 18: orders: the object belongs to another player
 sample | rg004 | year 7 | order | year 7 player 6 order 48 (QueueOrder): planet 32: orders: the object belongs to another player
-sample | rg004 | year 7 | order | year 7 player 6 order 8 (CargoOrder): cargo: fleet 600038 and planet 4: orders: the objects are not at the same place
+sample | rg004 | year 7 | order | year 7 player 6 order 8 (CargoOrder): cargo: fleet 600039 and planet 4: orders: the objects are not at the same place
 sample | rg004 | year 7 | order | year 7 player 6 vector order 6 (waypoint_delete): waypoint 1 of fleet 20 past its 0 waypoints
 sample | rg004 | year 8 | order | year 8 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 8 | order | year 8 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
@@ -2505,8 +2505,8 @@ sample | rg004 | year 9 | order | year 9 player 0 order 5 (WaypointOrder): fleet
 sample | rg004 | year 9 | order | year 9 player 3 order 7 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 9 | order | year 9 player 6 order 25 (QueueOrder): planet 32: orders: the object belongs to another player
 sample | rg004 | year 9 | order | year 9 player 6 order 26 (QueueOrder): planet 18: orders: the object belongs to another player
-sample | rg004 | year 9 | order | year 9 player 6 order 5 (CargoOrder): cargo: fleet 600037 and planet 58: orders: the objects are not at the same place
-sample | rg004 | year 9 | order | year 9 player 6 order 8 (CargoOrder): cargo: fleet 600041 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 9 | order | year 9 player 6 order 5 (CargoOrder): cargo: fleet 600038 and planet 58: orders: the objects are not at the same place
+sample | rg004 | year 9 | order | year 9 player 6 order 8 (CargoOrder): cargo: fleet 600043 and planet 58: orders: the objects are not at the same place
 sample | rg004-y1 | RG-004-Y1-2466 y1 #136 | planet id=77 | original_environment = [45 49 67], want [45 50 67]
 sample | rg004-y1 | RG-004-Y1-2466 y1 #148 | planet id=88 | surface_minerals = [85 118 1], want [87 118 3]
 sample | rg004-y1 | RG-004-Y1-2466 y1 #18 | fleet owner=3 id=4 | fuel = 252, want 224
@@ -2687,11 +2687,6 @@ not compared | rg004-y4 | RG-004-Y4-2469 y1 #224 | message_sequence | message_se
 sample | rg004-y4 | RG-004-Y4-2469 y1 #23 | fleet owner=3 id=40 | fleet gone
 sample | rg004-y4 | RG-004-Y4-2469 y1 #231 | player id=3 seen_by=3 | score_record.unarmed_ships = 90, want 92
 sample | rg004-y4 | RG-004-Y4-2469 y1 #29 | fleet owner=3 id=93 | cargo.ironium = 32, want 31
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #43 | fleet owner=6 id=10 | fleet gone
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | orbiting = 11, want 57
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | waypoints[0] position = {1045 1237}, want {1265 1381}
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | x = 1045, want 1265
-incorrect mechanic [lane A]: new-fleet numbering: the original numbers the new fleets at planets 11 and 57 as 10 and 23; Elegy puts fleet 23 at planet 11 and has no fleet 10 (cause not traced) | rg004-y4 | RG-004-Y4-2469 y1 #55 | fleet owner=6 id=23 | y = 1237, want 1381
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | fuel = 151, want 176
 sample | rg004-y5 | RG-004-Y5-2470 y1 #20 | fleet owner=3 id=20 | orbiting = 64, want none

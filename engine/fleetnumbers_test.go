@@ -128,3 +128,43 @@ func TestBinaryOnlyMergedInOrdersFreesNumberInTurn(t *testing.T) {
 		t.Errorf("fleet numbers %v, want [2 1]: the merged fleet's 1 reused by the built ship", numbers)
 	}
 }
+
+func TestNewFleetTakesNoIDGoneThisYear(t *testing.T) {
+	// Fleet.ID is Elegy's own key (ELEGY CHOICE): a fleet made during a
+	// generation never takes the ID of a fleet that went away that year,
+	// which the year's events may still name. Fleet 2, the largest ID,
+	// is merged into fleet 1 while the orders are read, and the ship
+	// built this year takes number 2 (BINARY-ONLY, as above) but a new
+	// ID. RG-004-Y4-2469 (MEASURED): a ship move in player 6's orders
+	// empties the original's fleet 23, and the year's new fleets are its
+	// 10 and 23; with the ID reused, the parity harness took the new fleet
+	// 10 for the start fleet 23.
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	dock := l.design("Space Dock")
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: scout}, {Owner: 0, Starbase: true, Slot: 0, Design: dock}}
+	pi := l.planet(0, 0, 100000)
+	l.g.Planets[pi].HasStarbase, l.g.Planets[pi].StarbaseDesign = true, dock
+	l.g.Planets[pi].Surface = Minerals{10000, 10000, 10000}
+	l.g.Planets[pi].HasQueue, l.g.Planets[pi].Queue = true, []QueueItem{{Kind: ItemShip, Slot: 0, Count: 1}}
+	a := l.fleet(0, pi, 0, Stack{Design: scout, Count: 1})
+	b := l.fleet(0, pi, 0, Stack{Design: scout, Count: 1})
+	l.g.Fleets[a].Number, l.g.Fleets[b].Number = 1, 2
+	g := withRules(l.g)
+	gone := g.Fleets[b].ID
+	merge := MergeOrder{Into: g.Fleets[a].ID, From: []int{gone}}
+	r, err := GenerateTurn(g, []PlayerOrders{{Player: 0, GameID: g.ID, Year: g.Year, Orders: []Order{merge}}}, &seqRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got [][2]int
+	for _, f := range r.Game.Fleets {
+		got = append(got, [2]int{f.ID, f.Number})
+	}
+	if want := [][2]int{{g.Fleets[a].ID, 1}, {gone + 1, 2}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("fleets (ID, number) %v, want %v", got, want)
+	}
+	if r.Game.fleetIDs != 0 {
+		t.Error("the returned game still has the year's ID floor")
+	}
+}
