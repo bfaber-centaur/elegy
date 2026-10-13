@@ -49,6 +49,7 @@ func pvMessageIDs() map[int]string {
 		0x156: "EventClaimAdjusted",
 		0x15c: "EventOriginalDrift",
 		0x05b: "EventFleetScrapped in deep space",
+		0x059: "EventFleetScrapped at a planet without a starbase whose owner lacks Ultimate Recycling",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
 		0x0cd: "EventStarbaseBuilt",
@@ -464,6 +465,30 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 						m.params[1], m.known[1] = slot<<9|(number-1), true
 					}
 					m.why = strings.Join(why, ", ")
+				}
+				send(ev.Player, m)
+			} else if len(ev.Axes) == 5 && ev.Axes[4] == 0 {
+				// 0x059, scrap onto the surface of a planet without a
+				// starbase whose owner lacks Ultimate Recycling
+				// (MESSAGES.md, CONFIRMED tk2). Slots, by MESSAGES.md's
+				// slot column: fleet, kT (one slot), planet. The fleet is
+				// as in 0x05b (design·512 + number for a fleet of one
+				// design, CONFIRMED by prediction, stars-elegy FS-1 p and
+				// q). No public record gives the kT or planet values, so
+				// they are not compared. The original also sends 0x059
+				// on a colonization (cs/cs-003); Elegy does not, and no
+				// vector carries a colonization's 0x059 (one would fail
+				// as not sent).
+				number, slot, designs := ev.Axes[1], ev.Axes[2], ev.Axes[3]
+				m := pvMsg{id: 0x059, focus: ev.Planet - 1, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false},
+					why: "0x059 kT and planet slots"}
+				switch {
+				case designs != 1:
+					m.why += ", 0x059 fleet slot of a fleet of several designs"
+				case slot >= 16:
+					m.why += ", 0x059 fleet slot of a design with no slot"
+				default:
+					m.params[0], m.known[0] = slot<<9|(number-1), true
 				}
 				send(ev.Player, m)
 			}
