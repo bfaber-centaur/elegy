@@ -232,11 +232,12 @@ func TestAssumptionDesignCheckEachField(t *testing.T) {
 	}
 }
 
-// TestConfirmedDesignCheckBeforeLevelUp: the check uses the tech from
-// before the year's research: a part whose field rises to its level from
-// stored research at the step 2.4 level-up is still removed that year
-// (CONFIRMED by prediction, stars-elegy #200 DC-1).
-func TestConfirmedDesignCheckBeforeLevelUp(t *testing.T) {
+// TestAssumptionDesignCheckBeforeLevelUp: a part whose field rises to
+// its level from stored research at the step 2.4 level-up is still
+// removed that year (CONFIRMED by prediction, stars-elegy #200 DC-1); the
+// check runs ahead of that level-up, with the tech from before the year's
+// research (ASSUMPTION T15; DC-1, inferred).
+func TestAssumptionDesignCheckBeforeLevelUp(t *testing.T) {
 	l := newTKLab(t, 3)
 	l.g.Players[0].Research.Levels = [NumFields]int{26, 13, 26, 26, 26, 26} // Cherry needs weapons 14
 	l.g.Players[0].Research.Accumulated[Weapons] = 1 << 20
@@ -296,7 +297,8 @@ func TestAssumptionDesignCheckAfterOrders(t *testing.T) {
 // TestConfirmedDesignCheckReceived: a design received with a fleet
 // transfer is not checked against the recipient's tech in the transfer
 // year or the next (CONFIRMED by prediction, stars-elegy #200, DC-5;
-// DC-2 MEASURED), while the recipient's own identical design loses the part.
+// DC-2 MEASURED), while the recipient's own identical design loses the
+// part; the giver keeps its own copy (MEASURED, DC-2 and DC-5).
 // ASSUMPTION T15 (NOT RUN): the giver's original is still checked against
 // the giver's tech (here lowered before the second year), and the copy
 // stays exempt in the third year.
@@ -346,6 +348,9 @@ func TestConfirmedDesignCheckReceived(t *testing.T) {
 			if has(g, own) {
 				t.Errorf("year 1: the recipient's own design kept the Possum Scanner")
 			}
+			if d, ok := g.PlayerDesign(0, false, 0); !ok || d != given || !has(g, given) {
+				t.Errorf("year 1: the giver's slot 0 holds %d %v, want its own copy %d with the scanner", d, ok, given)
+			}
 		}
 		if !has(g, copyOf) {
 			t.Errorf("year %d: the received copy lost the Possum Scanner: %v", year, slotNames(g.Designs[copyOf]))
@@ -379,7 +384,8 @@ func TestDesignSlotReceivedCleared(t *testing.T) {
 // waypoint-0 load tasks, so a ship whose Super Cargo Pod is removed loads
 // nothing that year while a Cargo Pod ship on the same task loads; a ship
 // already holding more than the new capacity keeps its cargo (CONFIRMED
-// by prediction, stars-elegy #200 DC-6).
+// by prediction, stars-elegy #200 DC-6; the new capacity of 0 is
+// inferred there from the stripped design).
 func TestConfirmedDesignCheckBeforeLoads(t *testing.T) {
 	l := newTKLab(t, 3)
 	l.g.Players[0].Research.Levels = [NumFields]int{26, 26, 26, 8, 26, 26} // the Super Cargo Pod needs construction 9

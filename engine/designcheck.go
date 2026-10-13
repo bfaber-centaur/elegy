@@ -42,14 +42,19 @@ package engine
 // "The design check: timing, transfers, energy and loads", DC-5: the
 // recipient's copy kept an out-of-tech scanner while the recipient's own
 // design of it lost it; DC-2 MEASURED the same with the other player
-// receiving). Keeping the exemption in later years is ASSUMPTION T15
-// (NOT RUN); why the copy escapes is unknown.
+// receiving). The giver keeps its own copy (MEASURED, DC-2 and DC-5).
+// Keeping the exemption in later years is ASSUMPTION T15 (NOT RUN); why
+// the copy escapes is unknown.
 //
-// From the same cases, CONFIRMED by prediction: the check uses the tech
-// from before the year's research, a level-up from stored research
-// included (DC-1); an energy-gated part is checked like the others
-// (DC-3); the check runs before the waypoint-0 load tasks, and a fleet
-// keeps cargo above its design's new capacity (DC-6).
+// From the same cases, CONFIRMED by prediction: a part is removed in the
+// year its field levels up, whether the year starts with enough stored
+// research or reaches it through the year's research (DC-1); an
+// energy-gated part is checked like the others (DC-3); the check runs
+// before the waypoint-0 load tasks, and a fleet keeps cargo above its
+// design's new capacity (DC-6; that capacity is inferred from the
+// stripped design). That the check uses the tech from before the year's
+// research, ahead of the first level-up check, is ASSUMPTION T15 (DC-1,
+// inferred: the dumps show the level only at year end).
 //
 // ASSUMPTION T15 (NOT RUN): the check runs in KERNEL.md "Turn order"
 // step 1a.2, the ship-design housekeeping, after the year's orders;
