@@ -162,3 +162,13 @@ Elegy now sends the three economy messages it had no event for (MESSAGES.md at s
 **RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 184, and samples 1138 fields / 43 orders / 16 battle records (on main `1f03d6a`, after the `object`-form wormholes, designs and player counts).
 
 **Other corpora:** 31 cases join the parity baseline: KX-002 G1–G3, H4, N2, P1–P3 and R1–R4; KX-003 r2; KX-004 S4 and S8; KX-005 R1, R3 and T0–T2; PQ-001 C02, C03 and C10; RD-P15; RG-001 Y2–Y6; RG-002 Y6; and TK-203. Every case "Other corpora" above lists for 0x026, 0x050 or 0x05f now passes.
+
+### Production queue messages (economy)
+
+Measured on elegy main `217ab4b` plus this branch.
+
+- **0x03f** from `EventNoQueue`: production sends it to the owner of every owned planet with no production queue (MESSAGES.md 0x03f at stars-elegy d89b8a3, CONFIRMED). A planet with a queue gets none. A present but empty queue also gets none; that keeps the existing empty-queue rule in production.go, which is BINARY-ONLY.
+- **0x03e** from the existing `EventQueueCompleted` (MESSAGES.md 0x03e, CONFIRMED), now mapped.
+- A planet whose queue the harness cannot load runs with no queue. So for a player with such a planet, both ids are skipped ("a queue message from a production queue not loaded"), as the build messages already are. No current vector reaches this guard.
+- **Other corpora:** 339 expectations that were skipped as unmapped (0x03f 298, 0x03e 41) are compared now, and every one matches on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **RG-002:** it carries none of these ids, so the ledger is unchanged.

@@ -223,7 +223,7 @@ func TestCLIVector(t *testing.T) {
 		"vector PQ-001-C01: 2 years, seed variant 0\n",
 		"case PQ-001-C01 pass [CONFIRMED]\n",
 		"PQ-001-C01 y2 planet (id 7) mines: pass\n",
-		"PQ-001-C01 y1 message: skip: message 0x03e has no event mapping\n",
+		"PQ-001-C01 y1 message: pass\n",
 		"cases: pass 1, sample-only 0, fail 0, differs 0, skip 0\n",
 	} {
 		if !strings.Contains(text, want) {
