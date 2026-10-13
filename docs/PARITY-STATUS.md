@@ -27,6 +27,7 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | not compared | 1 / 1 | 7 / 7 | 19 / 19 |
 | total | 1312 | 5939 | 2893 |
 
+- Updated 2026-10-13 (FS-1 PR): 0x05b's fleet slot is now compared (design·512 + fleet number, stars-elegy FS-1, 28a3175) and matches in all 4 entries. The counts do not move: the same year-1 sequence entries stay not compared for 0x02e's mineral and location slots (lane A), which the ledger line now names. The not-compared row was "0x05b fleet slot … lane D".
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
 
@@ -75,7 +76,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 
 | cause | RG-002 | RG-003 | RG-004 | owner |
 |---|---:|---:|---:|---|
-| 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
+| 0x02e mineral and location slots (MESSAGES.md does not say which word of a planet location holds the planet), in the year-1 sequence entry that also holds 0x05b | 2 | 2 | 0 | lane A |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
 | 0x004 colonists and player slots | 0 | 2 | 0 | lane A, with the invasion messages |
@@ -367,6 +368,7 @@ Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
 - **0x08f / 0x090** (bombed empty): the fleet slot and 0x08f's fleet focus are now compared. `EventBombed` names the fleet whose plan started the pass (`Fleet`) and carries its number and the count of the bomber's fleets in orbit (`Axes`), saved at bombing time because the fleet can be gone by the end of the year (RG-002 year 4's was). All 16 sequence entries that skipped the slot match (RG-002 y4, RG-003 y4 and y10, chained and restart).
   - With two or more of the bomber's fleets in orbit, the message is 0x17c/0x17d (MESSAGES.md, CONFIRMED tk2/tk121), with the fleet slot not compared. Which fleets count (all in orbit, or those with bombs) and which fleet 0x08f names when the pass was started by a fleet without bombs are ASSUMPTION: every vector case had one fleet in orbit. No vector names 0x17c or 0x17d.
 - Census: "0x05b salvage and fleet slots" (4) becomes "0x05b fleet slot" (4); "0x08f and 0x090 bombing fleet" (16) is gone.
+- **Updated 2026-10-13 (FS-1):** 0x05b's fleet slot is compared too. For a fleet of one design it is design·512 + fleet number, the design being the fleet's ship-design slot (CONFIRMED by prediction, stars-elegy FS-1, 28a3175; the bits are not the owner). `EventFleetScrapped` carries the fleet's number, its lowest design slot and its count of designs. A fleet of several designs gave 0x2000 + 2·512 + 6 once (MEASURED); which design it names and what bit 13 means are not known, so that slot stays not compared ("0x05b fleet slot of a fleet of several designs"). RG-002/RG-003 year 1's fleet slot 6 (design 0) matches in all 4 entries. Census: "0x05b fleet slot" (4) becomes "0x02e mineral and location slots" (4), the next unknown slot in the same sequence entries.
 
 ### Deferred: client estimators (milestone 3)
 

@@ -36,9 +36,8 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - RG-004's random-driven lines have no named draw.
 - **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
 - **Not compared, by owner:**
-  - lane D: the 0x05b fleet slot, whose owner bits are UNRESOLVED (the salvage slot and the 0x08f/0x090 bombing fleet are compared since #247);
   - economy: 0x040 and the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
-  - lane A: the 0x004 slots and 0x007, with the invasion messages;
+  - lane A: the 0x004 slots and 0x007, with the invasion messages, and 0x02e's mineral and location slots (updated 2026-10-13: these 4 year-1 lines were listed as lane D's 0x05b fleet slot, compared since FS-1, stars-elegy 28a3175);
   - lane B: `design_gone`.
   - `alt_battle` is judged by the battle harness instead of the vectors comparator.
 

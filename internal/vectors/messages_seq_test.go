@@ -105,10 +105,18 @@ func TestPvMessageList(t *testing.T) {
 		{"terraform click up", []engine.Event{{Kind: engine.EventTerraformed, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 1, Axes: []int{2, 46}}}, 2,
 			[]pvMsg{{id: 0x07b, focus: 4, focusKnown: true, params: []int{4, 1, 2, 558}, known: all(4)}}},
 		// SV-1: player 1's salvage number 2 is 8706.
-		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{2}}}, 1,
-			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8706, 0}, known: []bool{true, false}, why: "0x05b fleet slot"}}},
-		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
-			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, false}, why: "0x05b salvage and fleet slots"}}},
+		// FS-1 case d: player 1's fleet 2 (number 3), design 3, salvage 2.
+		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{2, 3, 3, 1}}}, 1,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8706, 1538}, known: all(2)}}},
+		// FS-1 case m: design 15, the top slot.
+		{"scrapped in deep space, design 15", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{0, 9, 15, 1}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8192, 7688}, known: all(2)}}},
+		{"scrapped in deep space, several designs", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{1, 7, 2, 2}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8193, 0}, known: []bool{true, false}, why: "0x05b fleet slot of a fleet of several designs"}}},
+		{"scrapped in deep space, design with no slot", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{1, 7, 16, 1}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8193, 0}, known: []bool{true, false}, why: "0x05b fleet slot of a design with no slot"}}},
+		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{-1, 1, 0, 1}}}, 1,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, true}, why: "0x05b salvage slot (no salvage)"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,
 			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 0, 0, 0}, known: []bool{true, false, false, false}, why: "0x004 colonists and player slots"}}},
 		{"bombed empty, to the bomber", []engine.Event{{Kind: engine.EventBombed, Player: 1, Planet: 5, Fleet: 9, Axes: []int{4, 1}}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5}}, 1,
