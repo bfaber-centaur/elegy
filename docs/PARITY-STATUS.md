@@ -309,3 +309,9 @@ RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to
 - **Totals.**
   - Ledger: 5756 samples, 107 matched, 50 not compared, 72 random-driven and 8 hand lines; 5337 lines are the chained run's. Y10's planet 22 alchemy line cleared with #224. The battle lines follow #212: one line per record, plus the battle-set check.
   - The census (skips.txt) and the baseline grow only by RG-003's cases. Three RG-003 entries are `random 0`, the same form as the 3 already in the baseline.
+
+### Planet records without installations block
+
+A planet record whose growth carry, mines, factories and defenses are 0, with no planetary scanner and the leftover-only box clear, is written without its installations block (stars-elegy ORACLE.md, the `dump` notes). The vector diff then writes null for `excess`, `mines`, `factories`, `defenses`, `planetary_scanner` and `leftover_to_research` where the start state had them. The comparator used to skip those fields as "planet field … null". It now reads them as 0, no scanner and false whenever the record has a population, and compares them. A record whose population is also null is unchanged and still skipped. Measured on elegy main `7c4f6b0` (#227):
+- **skips.txt:** "planet field defenses null" 121 → 2 (cb7/sc035 and tk3/tk201, both population null); "planet field excess null" 4 → 0; "planet field planetary_scanner null" 2 → 0. Every newly compared field matches; baseline.txt does not move.
+- **Ledgers:** RG-002 loses its 6 "not compared … planet field defenses null" lines (14 → 8): y2 planet 65, y3 planet 66 and y4 planet 41, in the chained run and in the restarts. RG-003 loses 16 (50 → 34): the same six plus y7 planet 49, y8 planet 46 and y10 planet 20. No line is added and no hand line moves.

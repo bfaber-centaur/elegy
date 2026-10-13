@@ -1746,6 +1746,27 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 	}
 	for _, k := range pvKeys(eq) {
 		raw := eq[k]
+		if string(raw) == "null" && string(eq["population"]) != "null" {
+			// A planet record whose growth carry, mines, factories and
+			// defenses are 0, with no scanner and the leftover-only box
+			// clear, is written without its installations block
+			// (stars-elegy ORACLE.md, the `dump` notes), so the vectors
+			// write null for those fields where the start state had
+			// them. A record with no population at all is not this case.
+			switch k {
+			case "excess", "mines", "factories", "defenses":
+				raw = json.RawMessage("0")
+			case "leftover_to_research":
+				raw = json.RawMessage("false")
+			case "planetary_scanner":
+				// null is no planetary scanner, here or as the start
+				// state's scanner index 31 (loadVector).
+				if p.HasScanner {
+					errs = append(errs, pvMismatch(k, "a scanner", "none"))
+				}
+				continue
+			}
+		}
 		if string(raw) == "null" && k != "environment" && k != "original_environment" && k != "starbase" {
 			// The vectors write null for a value the original's file
 			// does not hold, such as an unowned planet's population

@@ -135,11 +135,9 @@
    1 message_sequence entry 0x156 has no event mapping
    1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
- 121 planet field defenses null
+   2 planet field defenses null
    2 planet field environment_visible
-   4 planet field excess null
    6 planet field packet_destination null
-   2 planet field planetary_scanner null
    1 planet field population null
    9 planet field population_estimate
    1 planet field starbase_design
