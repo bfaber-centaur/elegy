@@ -145,6 +145,8 @@
      "ship_designs": 3,
      "starbase_designs": 2
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 39
    },
    {
@@ -229,6 +231,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 108
    },
    {
@@ -313,6 +317,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 80
    }
   ],

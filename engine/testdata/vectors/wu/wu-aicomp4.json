@@ -9,6 +9,14 @@
   "year": 2400,
   "game": {
    "name": "AI01",
+   "size": "small",
+   "bounds": [
+    1000,
+    1000,
+    1800,
+    1800
+   ],
+   "density": "normal",
    "players": 7,
    "slower_tech": false,
    "random_events": true,
@@ -141,6 +149,8 @@
      "ship_designs": 3,
      "starbase_designs": 2
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 10
    },
    {
@@ -229,6 +239,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 64
    },
    {
@@ -317,6 +329,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 4
    },
    {
@@ -405,6 +419,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 5
    },
    {
@@ -494,6 +510,8 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 39
    },
    {
@@ -584,6 +602,8 @@
      "starbase_designs": 2
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 30
    },
    {
@@ -675,6 +695,8 @@
      "starbase_designs": 2
     },
     "computer": true,
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 63
    }
   ],

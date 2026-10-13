@@ -185,9 +185,18 @@ Measured on elegy main `133816c` (#207) plus the order branch.
   - RG-002's ledger is unchanged, so its per-lane count is 0.
 - **What the order check cannot see.** Only ids Elegy maps can be placed. The vectors also list an id only once, without its parameters, so the order among several messages of one id is not recorded. Which field's level-up comes first is one such order, which is why the economy section above pins it with engine tests. Comparing it against the original needs the vectors to carry each player's full message sequence with its parameters (lane F).
 
+### Vector re-sync from stars-elegy main (19896cd)
+
+Every corpus was copied verbatim from stars-elegy main `19896cd`. The only differences from the earlier copies are new fields: `default_queue` and `default_leftover_to_research` on 866 player records, 542 `message_sequence` expectations (MS-1, stars-elegy #186), and the galaxy `size`, `bounds` and `density` in `initial_state.game` (#180). Removing those fields, each file equals its earlier copy. Measured on elegy main `397cd2e` (#206) plus the re-sync.
+- **Default queues now load**, so a captured planet or new colony gets its owner's default queue in the harness:
+  - **TK-106-A2 joins the parity baseline.** War Monger keeps all five default items (stars-elegy PARITY.md T-26, CONFIRMED).
+  - **TK-108-A and TK-108-C leave it: incorrect mechanic (lane A).** T-26 says a Claim Adjuster owner skips items 4–5, the auto minimum and maximum terraform, and an Alternate Reality owner skips items 0–2 (auto mines, factories, defenses). These are item ids. `newColony` (engine/takeover.go) skips queue positions instead. TK-108's default queue is factories, mines, defenses, minimum terraform, maximum terraform, so Elegy drops only the maximum terraform (position 4) and keeps the minimum terraform: `queue = [... {16 2 0 0}], want [...]`.
+- **`message_sequence` is not compared yet** (the within-id comparator follows). In RG-002 it adds 84 not-compared ledger lines, one per player and year. The ledger's other lines are unchanged apart from their expectation numbers.
+- The galaxy fields are not read yet (lane A's clamp PR).
+
 ### Alchemy message (economy)
 
-Measured on elegy main `397cd2e` (#206) plus this branch.
+Measured on elegy main `3d33192` (#211) plus this branch.
 
 - **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
 - **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
