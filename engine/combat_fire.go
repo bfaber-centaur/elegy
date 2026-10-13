@@ -75,6 +75,23 @@ func (b *battle) eligible(t *token, w weaponSlot) []int {
 	return pick(t.secondary)
 }
 
+// gatlingTargets returns the targets of a gatling shot from token t's
+// weapon slot w, in token order: every live enemy in reach that matches
+// the primary or the secondary type. A primary-type target in reach does
+// not narrow the shot (CONFIRMED by prediction, CB-060 G1, 3 streams: with
+// primary "armed" and secondary "any", one shot hit an armed and an
+// unarmed stack). Leaving out a target that matches neither type is an
+// ASSUMPTION (NOT RUN).
+func (b *battle) gatlingTargets(t *token, w weaponSlot) []int {
+	var out []int
+	for j, e := range b.tokens {
+		if e.live() && b.attacks(t.player, e.player) && dist(t.x, t.y, e.x, e.y) <= w.reach && (e.matches(t.primary) || e.matches(t.secondary)) {
+			out = append(out, j)
+		}
+	}
+	return out
+}
+
 // choose returns the most attractive eligible target, the first in token
 // order on ties, or -1 when every score is 0.
 func (b *battle) choose(t *token, w weaponSlot) int {
@@ -159,7 +176,7 @@ func (b *battle) record(firer, target int, h BattleHit) {
 }
 
 // beam fires one beam slot, carrying damage to further targets after a
-// kill.
+// kill, or after a sapper strips a target's shields.
 func (b *battle) beam(fi int, w weaponSlot) {
 	t := b.tokens[fi]
 	p := w.part
@@ -183,22 +200,33 @@ func (b *battle) beam(fi int, w weaponSlot) {
 		if ok {
 			b.record(fi, ti, h)
 		}
-		if !e.dead || h.Leftover <= 0 {
+		// The rest carries on after a kill, and a sapper's after it strips
+		// the target's last shields (MEASURED, CB-060 S2, 5 streams: the
+		// carried amounts fit this rule with the shields in place of the
+		// armor).
+		left := 0
+		switch {
+		case p.Sapper && ok && e.shield == 0:
+			left = dp - h.Shield
+		case e.dead:
+			left = h.Leftover
+		}
+		if left <= 0 {
 			return
 		}
-		R = min(R-1, R*h.Leftover/dp)
+		R = min(R-1, R*left/dp)
 	}
 }
 
-// gatling hits every eligible target once, in token order, with no
-// dropoff and no carry.
+// gatling hits each of its targets (gatlingTargets) once, in token order,
+// with no dropoff and no carry.
 //
 // A starbase among the targets does not end the shot, unlike a beam's
 // (COMBAT.md "Gatling", CONFIRMED in one stream only, CB-056; stars-elegy
 // b0ca924).
 func (b *battle) gatling(fi int, w weaponSlot) {
 	t := b.tokens[fi]
-	for _, ti := range b.eligible(t, w) {
+	for _, ti := range b.gatlingTargets(t, w) {
 		e := b.tokens[ti]
 		if !e.live() {
 			continue
