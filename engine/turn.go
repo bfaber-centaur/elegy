@@ -119,9 +119,23 @@ type Game struct {
 	costLevels [][NumFields]int
 	// goneTargets is, during a generation, the fleets owed 0x028 for a
 	// waypoint whose target fleet went away (targetGone,
-	// retargetRemoved), sent when the files are written (fileRetarget).
-	// fileRetarget empties it; it is not saved.
-	goneTargets []int
+	// retargetRemoved), with that target, sent when the files are written
+	// (fileRetarget). fileRetarget empties it; it is not saved.
+	goneTargets []goneTarget
+	// removedFleets is, during a generation, the owner and number of each
+	// fleet removed since it began (removeFleetsAs), by fleet ID, so that
+	// 0x028 can name a gone target. It is nil outside that span and is
+	// not saved.
+	removedFleets map[int][2]int
+}
+
+// goneTarget is one 0x028 owed: the follower's fleet ID and the gone
+// target's owner and number (known false when the target was not
+// removed during this generation).
+type goneTarget struct {
+	fleet  int
+	target [2]int
+	known  bool
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -304,6 +318,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	}
 	g.costLevels = costLevels
 	g.fleetIDs = g.newFleetID() - 1
+	g.removedFleets = map[int][2]int{}
 
 	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
 	// whose draws are the first of the year, then each player's file in
@@ -637,7 +652,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
-	g.heldNumbers, g.costLevels, g.fleetIDs = nil, nil, 0
+	g.heldNumbers, g.costLevels, g.fleetIDs, g.removedFleets = nil, nil, 0, nil
 	g.dropBareRecords()
 	return TurnResult{
 		Game:   g,

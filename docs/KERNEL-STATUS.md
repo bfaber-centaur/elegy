@@ -135,7 +135,10 @@ else a plain position there (0x028) (`fileRetarget`, `targetGone`; W5
 below). A waypoint aimed at a fleet destroyed in battle becomes, at once,
 the planet where the fleet died (after movement), else keeps the stale
 id and becomes a plain position there at the end-of-year waypoint check;
-either way the follower's owner gets 0x028 when the files are written
+either way the follower's owner gets 0x028 when the files are written,
+naming the follower and the gone target (MESSAGES.md 0x028 slots; the
+target's owner and number are kept for fleets removed during the year,
+so a target removed in an earlier year leaves the slot unnamed)
 (CONFIRMED by prediction for waypoint 1 aimed at a fleet the waypoint's
 owner destroyed, WK-1, stars-elegy 5962b72, PARITY.md "A waypoint aimed
 at a fleet destroyed in battle (WK-1)", 2 of 2 streams; for waypoints 1

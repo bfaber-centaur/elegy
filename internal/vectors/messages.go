@@ -377,12 +377,15 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			send(ev.Player, m)
 		case engine.EventTargetGone:
 			// Slots: the follower, the gone target (MESSAGES.md 0x028;
-			// params MEASURED, WK-1). The event does not name the
-			// target, so its slot is not compared.
+			// params MEASURED, WK-1 and WK-2). The target slot is compared
+			// when the event names the target (a fleet removed that year).
 			m := pvMsg{id: 0x028, params: make([]int, 2), known: make([]bool, 2), why: "0x028 fleet gone by the end of the year"}
 			if code, ok := fleet(ev.Fleet); ok {
 				m = pvMsg{id: 0x028, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, 0},
 					known: []bool{true, false}, why: "0x028 target slot"}
+				if len(ev.Axes) == 2 {
+					m.params[1], m.known[1] = ev.Axes[0]<<9|(ev.Axes[1]-1), true
+				}
 			}
 			send(ev.Player, m)
 		case engine.EventFleetScrapped:

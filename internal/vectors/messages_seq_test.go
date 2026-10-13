@@ -132,6 +132,10 @@ func TestPvMessageList(t *testing.T) {
 		{"colonists beamed down", []engine.Event{{Kind: engine.EventColonistsBeamedDown, Player: 1, Planet: 5, Fleet: 9, Count: 70000}}, 1,
 			[]pvMsg{{id: 0x02e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 70000 - 65536, 1, 0, 0, 0},
 				known: []bool{true, true, true, false, false, false}, why: "0x02e mineral and location slots"}}},
+		{"target gone, named", []engine.Event{{Kind: engine.EventTargetGone, Player: 1, Planet: -1, Fleet: 9, Axes: []int{2, 6}}}, 1,
+			[]pvMsg{{id: 0x028, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 2<<9 | 5}, known: all(2), why: "0x028 target slot"}}},
+		{"target gone, unnamed", []engine.Event{{Kind: engine.EventTargetGone, Player: 1, Planet: -1, Fleet: 9}}, 1,
+			[]pvMsg{{id: 0x028, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 0}, known: []bool{true, false}, why: "0x028 target slot"}}},
 		{"colonists beamed down, fleet gone", []engine.Event{{Kind: engine.EventColonistsBeamedDown, Player: 1, Planet: 5, Fleet: 8, Count: 50}}, 1,
 			[]pvMsg{{id: 0x02e, params: make([]int, 6), known: make([]bool, 6), why: "0x02e fleet gone by the end of the year"}}},
 		// MESSAGES.md "Sweep slots" with SW-1's fields: player 1's

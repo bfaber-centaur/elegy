@@ -96,10 +96,10 @@ func TestWK1GoneOwed(t *testing.T) {
 	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}},
 		Planets: []Planet{{ID: 7, Pos: Point{1150, 1150}}},
 		Fleets: []Fleet{
-			{ID: 1, Owner: 1, Pos: Point{1150, 1150}}, // removed at planet 7
-			{ID: 2, Owner: 1, Pos: Point{1190, 1100}}, // removed in deep space
-			{ID: 3, Owner: 1, Pos: Point{1120, 1100}}, // removed; fleet 4 stands in
-			{ID: 4, Owner: 1, Pos: Point{1120, 1100}}, // the stand-in
+			{ID: 1, Number: 1, Owner: 1, Pos: Point{1150, 1150}}, // removed at planet 7
+			{ID: 2, Number: 2, Owner: 1, Pos: Point{1190, 1100}}, // removed in deep space
+			{ID: 3, Number: 3, Owner: 1, Pos: Point{1120, 1100}}, // removed; fleet 4 stands in
+			{ID: 4, Owner: 1, Pos: Point{1120, 1100}},            // the stand-in
 			{ID: 5, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1140, 1140}, Target: TargetFleet, ID: 1}}},
 			{ID: 6, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1180, 1100}, Target: TargetFleet, ID: 2}}},
 			{ID: 7, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1110, 1100}, Target: TargetFleet, ID: 3}}},
@@ -107,13 +107,23 @@ func TestWK1GoneOwed(t *testing.T) {
 			// Second followers of fleets 1 and 2, kept: each owes its own 0x028.
 			{ID: 10, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1140, 1140}, Target: TargetFleet, ID: 1}}},
 			{ID: 11, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1180, 1100}, Target: TargetFleet, ID: 2}}},
+			// Aimed at fleet 97, gone before this generation (a stale id):
+			// the waypoint check owes 0x028 with the target unnamed.
+			{ID: 12, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1300, 1300}, Target: TargetFleet, ID: 97}}},
 		}}
+	// During a generation (removedFleets set), each 0x028 also names the
+	// gone target's owner and number. Fleet 98 stands for one removed
+	// earlier in the year whose follower no check has reached yet.
+	g.removedFleets = map[int][2]int{98: {1, 98}}
 	g.removeFleets(map[int]bool{1: true, 2: true, 3: true})
 	g.waypointCheck()
 	g.removeFleets(map[int]bool{8: true})
 	// A waypoint the file check itself finds aimed at a gone fleet, at
 	// the planet: the planet, and 0x028 then.
 	g.Fleets = append(g.Fleets, Fleet{ID: 9, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1150, 1150}, Target: TargetFleet, ID: 98}}})
+	// The same for a fleet gone before the generation (stale id 96): no
+	// target named.
+	g.Fleets = append(g.Fleets, Fleet{ID: 13, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1300, 1300}, Target: TargetFleet, ID: 96}}})
 	want := map[int]Waypoint{
 		5:  {Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7},
 		6:  {Pos: Point{1180, 1100}},
@@ -129,17 +139,29 @@ func TestWK1GoneOwed(t *testing.T) {
 	}
 	// Player 0 sees the stand-in, so its waypoint keeps it.
 	ev := g.fileRetarget([]PlayerView{{Player: 0, Fleets: []FleetSighting{{Fleet: 4, Owner: 1}}}, {Player: 1}})
-	var got []int
+	var got [][3]int
 	for _, e := range ev {
 		if e.Kind != EventTargetGone || e.Player != 0 {
 			t.Errorf("event %+v, want player 0's 0x028", e)
+			continue
 		}
-		got = append(got, e.Fleet)
+		if e.Fleet == 12 || e.Fleet == 13 {
+			if e.Axes != nil {
+				t.Errorf("fleet %d's 0x028 names target %v, want none (gone before the generation)", e.Fleet, e.Axes)
+			}
+			got = append(got, [3]int{e.Fleet, -1, -1})
+			continue
+		}
+		if len(e.Axes) != 2 {
+			t.Errorf("event %+v, want its target named", e)
+			continue
+		}
+		got = append(got, [3]int{e.Fleet, e.Axes[0], e.Axes[1]})
 	}
-	if !slices.Equal(got, []int{5, 10, 6, 11, 9}) {
-		t.Errorf("0x028 to fleets %v, want [5 10 6 11 9]", got)
+	if want := [][3]int{{5, 1, 1}, {10, 1, 1}, {6, 1, 2}, {11, 1, 2}, {12, -1, -1}, {9, 1, 98}, {13, -1, -1}}; !slices.Equal(got, want) {
+		t.Errorf("0x028 (follower, target owner, number) %v, want %v", got, want)
 	}
-	if w := g.Fleets[len(g.Fleets)-1].Waypoints; len(w) != 1 || w[0] != want9 {
+	if w := g.Fleets[len(g.Fleets)-2].Waypoints; len(w) != 1 || w[0] != want9 {
 		t.Errorf("fleet 9: waypoints %v, want %v", w, want9)
 	}
 	if g.goneTargets != nil {
@@ -213,6 +235,13 @@ func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
 		f.Owner, f.Pos, f.Stacks = 0, far, []Stack{{Design: 0, Count: 1}}
 		g.Fleets = append(g.Fleets, f)
 	}
+	victim := map[int][2]int{}
+	for i, f := range g.Fleets {
+		if f.ID == 2 || f.ID == 6 {
+			g.Fleets[i].Number = f.ID
+			victim[f.ID] = [2]int{f.Owner, f.ID}
+		}
+	}
 	r, err := GenerateTurn(withRules(g), nil, rand.New(rand.NewSource(7)))
 	if err != nil {
 		t.Fatal(err)
@@ -234,16 +263,28 @@ func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
 			t.Errorf("fleet %d: waypoints %+v, want %+v", f.ID, f.Waypoints, w)
 		}
 	}
-	var got []int
+	// Each 0x028 names the follower and the gone target (MESSAGES.md
+	// 0x028; WK-2's pairs, as (15,515) then (15,516) for one follower of
+	// two victims).
+	type pair struct {
+		follower int
+		target   [2]int
+	}
+	var got []pair
 	for _, e := range r.Events {
 		if e.Kind == EventTargetGone {
-			if e.Player != 0 {
-				t.Errorf("0x028 %+v, want player 0's", e)
+			if e.Player != 0 || len(e.Axes) != 2 {
+				t.Errorf("0x028 %+v, want player 0's naming its target", e)
+				continue
 			}
-			got = append(got, e.Fleet)
+			got = append(got, pair{e.Fleet, [2]int{e.Axes[0], e.Axes[1]}})
 		}
 	}
-	if !slices.Equal(got, []int{10, 11, 12, 12, 13, 13, 14}) {
-		t.Errorf("0x028 to fleets %v, want [10 11 12 12 13 13 14]", got)
+	v2, v6 := victim[2], victim[6]
+	if v2 == v6 {
+		t.Fatalf("victims share owner and number %v", v2)
+	}
+	if want := []pair{{10, v2}, {11, v2}, {12, v2}, {12, v2}, {13, v2}, {13, v6}, {14, v6}}; !slices.Equal(got, want) {
+		t.Errorf("0x028 (follower, target) %v, want %v", got, want)
 	}
 }

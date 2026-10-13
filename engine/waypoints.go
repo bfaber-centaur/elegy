@@ -118,8 +118,9 @@ func (g *Game) waypointCheck() {
 // BINARY-ONLY; waypoint 0, a kill by a third player, targets other than
 // fleets and the planet case at waypoints 2 and up are NOT RUN.
 func (g *Game) targetGone(f *Fleet, wp *Waypoint) {
+	t, ok := g.removedFleets[wp.ID]
 	resolveGone(g, wp)
-	g.goneTargets = append(g.goneTargets, f.ID)
+	g.goneTargets = append(g.goneTargets, goneTarget{f.ID, t, ok})
 }
 
 // resolveGone makes wp, aimed at a fleet that no longer exists, the
@@ -273,7 +274,7 @@ func (g *Game) retargetRemoved(ids map[int]bool, standIns bool) {
 				retarget(TargetFleet, g.Fleets[fi].ID)
 			} else if pi := g.planetAt(gone.Pos); pi >= 0 {
 				retarget(TargetPlanet, g.Planets[pi].ID)
-				g.goneTargets = append(g.goneTargets, g.Fleets[i].ID)
+				g.goneTargets = append(g.goneTargets, goneTarget{g.Fleets[i].ID, [2]int{gone.Owner, gone.Number}, true})
 			}
 		}
 	}
@@ -444,7 +445,7 @@ func (g *Game) transferFleet(fi int, gone map[int]bool) []Event {
 const patrolRadius = 50
 
 const (
-	EventTargetGone      EventKind = iota + EventRemoteMineDeepSpace + 1 // Fleet: a waypoint's target fleet is gone; it goes to the last position (0x028)
+	EventTargetGone      EventKind = iota + EventRemoteMineDeepSpace + 1 // Fleet: a waypoint's target fleet is gone; it goes to the last position (0x028). Axes: the gone target's owner and number, when it was removed this year
 	EventTargetAtPlanet                                                  // Fleet, Planet: a target fleet out of sight at a planet; the waypoint goes to the planet (0x029)
 	EventTargetOutOfView                                                 // Fleet: a target fleet out of sight in deep space; the waypoint goes to its position (0x02a)
 )
@@ -468,9 +469,13 @@ func (g *Game) fileRetarget(views []PlayerView) []Event {
 	var events []Event
 	// The year's 0x028 owed by targetGone and retargetRemoved, in the
 	// order they were owed, to the follower's owner now.
-	for _, id := range g.goneTargets {
-		if fi := g.fleetIndex(id); fi >= 0 {
-			events = append(events, g.fleetEvent(&g.Fleets[fi], EventTargetGone, 0))
+	for _, o := range g.goneTargets {
+		if fi := g.fleetIndex(o.fleet); fi >= 0 {
+			ev := g.fleetEvent(&g.Fleets[fi], EventTargetGone, 0)
+			if o.known {
+				ev.Axes = []int{o.target[0], o.target[1]}
+			}
+			events = append(events, ev)
 		}
 	}
 	g.goneTargets = nil
@@ -484,8 +489,13 @@ func (g *Game) fileRetarget(views []PlayerView) []Event {
 			}
 			t := g.fleetIndex(wp.ID)
 			if t < 0 {
+				gone, ok := g.removedFleets[wp.ID]
 				resolveGone(g, wp)
-				events = append(events, g.fleetEvent(f, EventTargetGone, 0))
+				ev := g.fleetEvent(f, EventTargetGone, 0)
+				if ok {
+					ev.Axes = []int{gone[0], gone[1]}
+				}
+				events = append(events, ev)
 				continue
 			}
 			if g.Fleets[t].Owner == f.Owner {
