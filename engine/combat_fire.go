@@ -92,9 +92,12 @@ func (b *battle) gatlingTargets(t *token, w weaponSlot) []int {
 //
 // A pulsed sapper whose only primary-type ("armed") target in reach was
 // an unshielded starbase, scoring 0, fired at a shielded secondary-type
-// ("any") stack instead (MEASURED, RG-003 year 8, one battle). That the
-// same holds for a torpedo whose every primary-type target scores 0 is an
-// ASSUMPTION (NOT RUN).
+// ("any") stack instead (MEASURED, RG-003 year 8, one battle; CONFIRMED by
+// prediction, CB-062 Z1b with control Z1c, 6 of 6 streams, stars-elegy
+// #194 head 188ee81). Only a sapper can score 0 against a live target: a
+// beam scores at least 1, and a torpedo's accuracy after jamming is at
+// least 1 with eff > 0, so the fallback cannot arise for beams or
+// torpedoes (CB-062 Z2).
 func (b *battle) choose(t *token, w weaponSlot) int {
 	for _, tt := range []TargetType{t.primary, t.secondary} {
 		best, bestScore := -1, 0

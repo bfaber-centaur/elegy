@@ -14,7 +14,9 @@ func TestMeasuredRG003SapperSkipsUnshieldedPrimary(t *testing.T) {
 	// instead (shield damage 800). A target scoring 0 is never chosen, and
 	// with no primary-type target scoring above 0 the secondary type is
 	// used. MEASURED (one battle; with this rule its 63 recorded hits
-	// replay). A shielded starbase is still the sapper's target.
+	// replay), then CONFIRMED by prediction (CB-062 Z1b, control Z1c,
+	// 6 of 6 streams, stars-elegy #194 head 188ee81). A shielded starbase
+	// is still the sapper's target.
 	armed := testDesign(tFrigate, 10, Slot{tLaser, 1})
 	shielded := testDesign(Hull{Armor: 1000}, 10, Slot{Part{Name: "Shield", Kind: PartShield, Shield: 200}, 1})
 	d := []Design{testDesign(tFrigate, 10, Slot{tSapper, 2}), armed, shielded}
