@@ -40680,7 +40680,8 @@
       }
      ],
      "year": 1,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -40876,7 +40877,8 @@
       }
      ],
      "year": 1,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -41084,7 +41086,8 @@
       }
      ],
      "year": 1,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -41587,7 +41590,8 @@
        "fleet": 9
       }
      ],
-     "year": 1
+     "year": 1,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -41799,7 +41803,8 @@
        "planet": 84
       }
      ],
-     "year": 1
+     "year": 1,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
