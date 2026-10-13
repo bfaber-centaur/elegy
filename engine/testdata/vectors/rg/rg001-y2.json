@@ -20676,6 +20676,86 @@
      "year": 1
     },
     {
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": [
+      {
+       "id": 63,
+       "focus": 51,
+       "params": [
+        51
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        0,
+        185
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        1,
+        26
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        2,
+        125
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        3,
+        26
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        4,
+        26
+       ]
+      },
+      {
+       "id": 345,
+       "focus": 65534,
+       "params": [
+        5,
+        54
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        2,
+        1,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 50688,
+       "params": [
+        1,
+        64,
+        0
+       ]
+      }
+     ],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 0,
      "equals": {
@@ -20693,6 +20773,12 @@
       }
      },
      "seen_by": 0,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [],
      "year": 1
     },
     {
@@ -20717,6 +20803,12 @@
      "sample": true
     },
     {
+     "kind": "message_sequence",
+     "player": 2,
+     "messages": [],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 2,
      "equals": {
@@ -20734,6 +20826,12 @@
       }
      },
      "seen_by": 2,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 3,
+     "messages": [],
      "year": 1
     },
     {
@@ -20757,6 +20855,12 @@
      "year": 1
     },
     {
+     "kind": "message_sequence",
+     "player": 4,
+     "messages": [],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 4,
      "equals": {
@@ -20774,6 +20878,12 @@
       }
      },
      "seen_by": 4,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 5,
+     "messages": [],
      "year": 1
     },
     {
@@ -20801,6 +20911,21 @@
      "player": 6,
      "message_id": 143,
      "present": true,
+     "year": 1
+    },
+    {
+     "kind": "message_sequence",
+     "player": 6,
+     "messages": [
+      {
+       "id": 143,
+       "focus": 35843,
+       "params": [
+        3075,
+        37
+       ]
+      }
+     ],
      "year": 1
     },
     {

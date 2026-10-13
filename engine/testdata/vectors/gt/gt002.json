@@ -10,6 +10,13 @@
   "game": {
    "name": "GT",
    "size": "medium",
+   "bounds": [
+    1000,
+    1000,
+    2200,
+    2200
+   ],
+   "density": "normal",
    "players": 2,
    "slower_tech": false,
    "random_events": false,
@@ -134,6 +141,8 @@
      "ship_designs": 7,
      "starbase_designs": 9
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 142
    },
    {
@@ -213,6 +222,8 @@
      "ship_designs": 3,
      "starbase_designs": 9
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 70
    }
   ],

@@ -141,6 +141,8 @@
      "ship_designs": 3,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 7
    }
   ],
@@ -1018,6 +1020,28 @@
      "player": 0,
      "message_id": 62,
      "present": true
+    },
+    {
+     "year": 1,
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": [
+      {
+       "id": 54,
+       "focus": 7,
+       "params": [
+        5,
+        7
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      }
+     ]
     }
    ]
   },
