@@ -385,6 +385,8 @@ func TestLoadRejects(t *testing.T) {
 		"version 10":    strings.Replace(string(b), fmt.Sprintf(`"version": %d`, SaveVersion), `"version": 10`, 1),
 		"human level":   regexp.MustCompile(`("Computer": false,\s*"Level": )0`).ReplaceAllString(string(b), "${1}2"),
 		"unknown field": strings.Replace(string(b), `"seed"`, `"extra": 1, "seed"`, 1),
+		"no size":       regexp.MustCompile(`"Size": \d+,\s*`).ReplaceAllString(string(b), ""),
+		"size 5":        regexp.MustCompile(`("Size": )\d+`).ReplaceAllString(string(b), "${1}5"),
 	} {
 		if _, err := Load(strings.NewReader(doc)); !errors.Is(err, ErrSave) {
 			t.Errorf("%s: err = %v, want ErrSave", name, err)

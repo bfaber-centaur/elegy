@@ -18,6 +18,9 @@ func Check(g engine.Game) []string {
 	bad := func(format string, a ...any) { out = append(out, fmt.Sprintf(format, a...)) }
 	np := len(g.Players)
 	validOwner := func(o int) bool { return o >= 0 && o < np }
+	if g.Size < 0 || g.Size > 4 {
+		bad("universe size %d is not 0 (tiny) .. 4 (huge)", g.Size)
+	}
 
 	planetIDs := map[int]bool{}
 	for i, p := range g.Planets {

@@ -31,7 +31,8 @@ func ns1Task() engine.Task {
 	return k
 }
 
-// Waypoint 0 names the object (A3–A6, B1, B2; CONFIRMED by prediction):
+// Waypoint 0 names the object (A3–A6, B1, B2, NS-2 N and F; CONFIRMED by
+// prediction):
 // before movement the fleet loads the object's 100 kT boranium and no
 // ironium from the planet, gets 0x04e and no 0x11e, and stays. The
 // object, emptied before movement, is gone at the end of the year
@@ -51,6 +52,11 @@ func TestNS1WaypointZeroNamed(t *testing.T) {
 		{"A6 player 1's packet over player 1's planet", 1, nil, &Packet{Owner: 1, Number: 0, Pos: at(100, 0), Target: 7, Warp: 5, Cargo: boranium}},
 		{"B1 own packet 40 ly out", 0, nil, &Packet{Owner: 0, Number: 0, Pos: at(140, 0), Target: 7, Warp: 5, Cargo: boranium}},
 		{"B2 player 1's packet 40 ly out", 1, nil, &Packet{Owner: 1, Number: 0, Pos: at(140, 0), Target: 7, Warp: 5, Cargo: boranium}},
+		// NS-2 N and F (stars-elegy f5bffd8, PARITY.md "A named packet at
+		// other distances and after movement (NS-2)"; CONFIRMED by
+		// prediction).
+		{"NS-2 N own packet 10 ly out", 0, nil, &Packet{Owner: 0, Number: 0, Pos: at(110, 0), Target: 7, Warp: 5, Cargo: boranium}},
+		{"NS-2 F own packet 150 ly out", 0, nil, &Packet{Owner: 0, Number: 0, Pos: at(250, 0), Target: 7, Warp: 5, Cargo: boranium}},
 	} {
 		l, fi := ns1Lab(t, c.planetOwner)
 		f := &l.g.Fleets[fi]
@@ -164,5 +170,35 @@ func TestNS1NamedObjectKept(t *testing.T) {
 	g = turn(t, *l.g, top{})
 	if got := g.Fleets[0]; got.Pos == at(100, 0) || got.Target0 != nil {
 		t.Errorf("setting off: fleet at %v target %v, want moved with no named object", got.Pos, got.Target0)
+	}
+}
+
+// Waypoint 1 names a packet 20 ly ahead (NS-2 P1 and P1-F, stars-elegy
+// f5bffd8; MEASURED): the packet moves 25 ly before the fleets and the
+// waypoint follows it. At warp 5 the fleet falls short and loads nothing
+// (P1); at warp 9 it reaches the packet's new position and loads its 100
+// kT boranium after movement, and the emptied packet stays (P1-F).
+func TestNS2AfterMovement(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		warp  int
+		pos   engine.Point
+		cargo engine.Minerals
+		left  engine.Minerals
+	}{
+		{"P1 short", 5, at(125, 0), engine.Minerals{}, engine.Minerals{0, 100, 0}},
+		{"P1-F reached", 9, at(145, 0), engine.Minerals{0, 100, 0}, engine.Minerals{}},
+	} {
+		l, fi := ns1Lab(t, 0)
+		space(*l.g).Packets = []Packet{{Owner: 0, Number: 0, Pos: at(120, 0), Target: 7, Warp: 5, Cargo: engine.Minerals{0, 100, 0}}}
+		l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: at(120, 0), Warp: c.warp, Target: engine.TargetPacketObject, Owner: 0, ID: 0, Task: ns1Task()}}
+		g := turn(t, *l.g, top{})
+		got := g.Fleets[0]
+		if got.Pos != c.pos || got.Cargo.Minerals != c.cargo {
+			t.Errorf("%s: fleet at %v cargo %v, want at %v with %v", c.name, got.Pos, got.Cargo.Minerals, c.pos, c.cargo)
+		}
+		if ps := space(g).Packets; len(ps) != 1 || ps[0].Pos != at(145, 0) || ps[0].Cargo != c.left {
+			t.Errorf("%s: packets %v, want one at (145, 0) holding %v", c.name, ps, c.left)
+		}
 	}
 }
