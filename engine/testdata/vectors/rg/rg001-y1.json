@@ -20095,7 +20095,8 @@
       }
      ],
      "year": 1,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",

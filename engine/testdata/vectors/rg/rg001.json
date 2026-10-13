@@ -30850,7 +30850,8 @@
       }
      ],
      "year": 1,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -38249,7 +38250,8 @@
       }
      ],
      "year": 2,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -45785,7 +45787,8 @@
       }
      ],
      "year": 3,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -60310,7 +60313,8 @@
       }
      ],
      "year": 5,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -60558,7 +60562,8 @@
       }
      ],
      "year": 5,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -67934,7 +67939,8 @@
       }
      ],
      "year": 6,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -68256,7 +68262,8 @@
       }
      ],
      "year": 6,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
@@ -68452,7 +68459,8 @@
       }
      ],
      "year": 6,
-     "sample": true
+     "sample": true,
+     "start_sample": false
     },
     {
      "kind": "battle_actions",
