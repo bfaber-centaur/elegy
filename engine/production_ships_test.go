@@ -424,6 +424,10 @@ func TestCanBuildDesign(t *testing.T) {
 	}{
 		{"all allowed", "Scout", []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}, Race{}, 26, true},
 		{"part above tech", "Scout", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}, Race{}, 0, false},
+		// Long Hump 6 needs propulsion 3: one level short is refused, the
+		// level itself builds.
+		{"part one level short", "Scout", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}, Race{}, 2, false},
+		{"part at its level", "Scout", []SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}}, Race{}, 3, true},
 		{"part forbidden to the race", "Scout", []SlotFill{{Slot: 0, Part: "Fuel Mizer", Count: 1}}, Race{}, 26, false},
 		{"part allowed by an LRT", "Scout", []SlotFill{{Slot: 0, Part: "Fuel Mizer", Count: 1}}, Race{LRT: LRTs{ImprovedFuelEfficiency: true}}, 26, true},
 		{"Mystery Trader part not owned", "Scout", []SlotFill{{Slot: 0, Part: "Enigma Pulsar", Count: 1}}, Race{}, 26, false},
