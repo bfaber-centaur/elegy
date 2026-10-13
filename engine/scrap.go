@@ -7,9 +7,12 @@ const TaskScrap TaskKind = TaskRoute + 5
 // Scrap messages. Elegy's wording.
 const (
 	// EventFleetScrapped: Player's Fleet was scrapped at Planet (−1 in
-	// deep space); Axes = the number of the salvage it left in deep
-	// space (the first, if the minerals overflowed into several:
-	// ASSUMPTION, no run has overflowed).
+	// deep space). In deep space Axes = the number of the salvage it
+	// left (the first, if the minerals overflowed into several:
+	// ASSUMPTION, no run has overflowed; −1 for none), the fleet's
+	// number, its lowest ship-design slot and its count of designs,
+	// saved here because the fleet is gone by the end of the year (0x05b
+	// names the fleet by design and number, stars-elegy FS-1).
 	EventFleetScrapped EventKind = iota + EventPacketDesignSeen + 1
 	// EventScrapRecycled: ships scrapped at Player's Planet added Count
 	// resources to its production (Ultimate Recycling).
@@ -110,13 +113,23 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		left[m] = cost.Minerals[m]*num/den + f.Cargo.Minerals[m]
 	}
 	if pi < 0 {
+		salvage, slot, designs := -1, 0, 0
+		for _, s := range f.Stacks {
+			if s.Count > 0 {
+				if k := g.shipSlot(f.Owner, s.Design); designs == 0 || k < slot {
+					slot = k
+				}
+				designs++
+			}
+		}
 		if left != (Minerals{}) {
 			for i, m := range splitSalvage(left) {
 				if n, ok := g.newSalvage(f.Owner, f.Pos, m, i == 0); ok && i == 0 {
-					events[0].Axes = []int{n}
+					salvage = n
 				}
 			}
 		}
+		events[0].Axes = []int{salvage, f.Number, slot, designs}
 		return events
 	}
 	p := &g.Planets[pi]

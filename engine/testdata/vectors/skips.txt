@@ -110,7 +110,7 @@
    1 message 0x179 has no event mapping
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
-   4 message_sequence 0x05b fleet slot not compared
+   4 message_sequence 0x02e mineral and location slots not compared
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping

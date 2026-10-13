@@ -2,6 +2,7 @@ package engine
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -146,8 +147,8 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	for _, e := range r.Events {
 		if e.Kind == EventFleetScrapped {
 			scrapped++
-			if !reflect.DeepEqual(e.Axes, []int{a.Number}) {
-				t.Errorf("scrap event %+v, want Axes [%d] (the first object)", e, a.Number)
+			if len(e.Axes) != 4 || e.Axes[0] != a.Number {
+				t.Errorf("scrap event %+v, want Axes[0] %d (the first object)", e, a.Number)
 			}
 		}
 	}
@@ -181,40 +182,95 @@ func TestSplitSalvage(t *testing.T) {
 // The scrap event names the salvage number the owner's pool gives, not a
 // fixed one: with player 1's salvage 0 lying elsewhere, the new object
 // takes 1 (ASSUMPTION O14 in a game with no space objects; the packet pool
-// itself is objects' TestConfirmedE8SalvageNumbersWithAGap) and 0x05b's
-// salvage slot reads 0x2000 + 512 + 1.
+// itself is objects' TestScrapSalvageSharesThePacketPool). It also names
+// the fleet's number, its lowest ship-design slot and its count of
+// designs, for 0x05b's fleet slot, design·512 + number (stars-elegy FS-1):
+// player 1's fleet 4 of design slot 5 here, and a fleet of slots 2 and 7.
 func TestScrapSalvageNumberInEvent(t *testing.T) {
 	l := newTKLab(t, 3)
 	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	other := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
 	pi := l.planet(NoOwner, 0, 100)
 	l.g.Planets[pi].Pos = Point{500, 500}
 	fi := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1})
+	fj := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1}, Stack{Design: other, Count: 1})
 	l.g.Planets = l.g.Planets[:0]
-	l.g.Fleets[fi].Task = Task{Kind: TaskScrap}
+	l.g.Fleets[fi].Number, l.g.Fleets[fi].Task = 4, Task{Kind: TaskScrap}
+	l.g.Fleets[fj].Number, l.g.Fleets[fj].Task = 8, Task{Kind: TaskScrap}
+	l.g.Fleets[fj].Pos = Point{100, 100}
+	l.g.DesignSlots = []DesignSlot{{Owner: 1, Slot: 5, Design: scout}, {Owner: 1, Slot: 2, Design: other}}
 	l.g.Salvage = []Salvage{
 		{Pos: Point{300, 300}, Owner: 1, Number: 0, Minerals: Minerals{100, 0, 0}},
 		{Pos: Point{300, 300}, Owner: 0, Number: 1, Minerals: Minerals{100, 0, 0}},
 	}
 	r := l.turn(&seqRand{})
-	var made *Salvage
-	for i, s := range r.Game.Salvage {
-		if s.Fresh {
-			made = &r.Game.Salvage[i]
+	var made []int
+	for _, s := range r.Game.Salvage {
+		if s.Fresh && s.Owner == 1 {
+			made = append(made, s.Number)
 		}
 	}
-	if len(r.Game.Salvage) != 3 || made == nil || made.Owner != 1 || made.Number != 1 {
-		t.Fatalf("salvage %+v, want a new fresh object, player 1's number 1", r.Game.Salvage)
+	slices.Sort(made)
+	if len(r.Game.Salvage) != 4 || !slices.Equal(made, []int{1, 2}) {
+		t.Fatalf("salvage %+v, want two new objects, player 1's numbers 1 and 2", r.Game.Salvage)
 	}
-	scrapped := 0
+	got := map[int][]int{}
 	for _, e := range r.Events {
 		if e.Kind == EventFleetScrapped {
-			scrapped++
-			if !reflect.DeepEqual(e.Axes, []int{1}) {
-				t.Errorf("scrap event %+v, want Axes [1]", e)
-			}
+			got[e.Fleet] = e.Axes
 		}
 	}
-	if scrapped != 1 {
-		t.Errorf("%d scrap events, want 1", scrapped)
+	id, jd := l.g.Fleets[fi].ID, l.g.Fleets[fj].ID
+	if len(got) != 2 || len(got[id]) != 4 || len(got[jd]) != 4 ||
+		!slices.Equal(got[id][1:], []int{4, 5, 1}) || !slices.Equal(got[jd][1:], []int{8, 2, 2}) ||
+		!slices.Equal([]int{min(got[id][0], got[jd][0]), max(got[id][0], got[jd][0])}, []int{1, 2}) {
+		t.Errorf("scrap events %v, want fleet %d [1|2 4 5 1] and fleet %d [1|2 8 2 2]", got, id, jd)
+	}
+}
+
+// fullObjects stands in for space objects at their object limit: no new
+// salvage has room (OBJECTS.md "Salvage", "Owner": a free object slot).
+type fullObjects struct{ SpaceObjects }
+
+func (fullObjects) SalvageNumber(*Game, int) (int, bool) { return 0, false }
+
+func (fullObjects) TraderBit(string) int { return -1 }
+
+// A deep-space scrap that makes no salvage, at the object limit, names
+// none in its event (Axes[0] −1), so 0x05b's salvage slot is not compared
+// rather than taken for salvage 0.
+func TestScrapNoRoomNamesNoSalvage(t *testing.T) {
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	l.planet(NoOwner, 0, 100)
+	fi := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1})
+	l.g.Planets = l.g.Planets[:0]
+	l.g.Fleets[fi].Pos, l.g.Fleets[fi].Number = Point{0, 0}, 4
+	l.g.Fleets[fi].Cargo = Cargo{Minerals: Minerals{100, 0, 0}}
+	l.g.Objects = fullObjects{}
+	ev := l.g.scrap(fi, &seqRand{}, map[int]bool{}, scrapYear{})
+	if len(ev) != 1 || ev[0].Kind != EventFleetScrapped || len(ev[0].Axes) != 4 || ev[0].Axes[0] != -1 || ev[0].Axes[1] != 4 {
+		t.Errorf("events %+v, want one scrap event with Axes [-1 4 …]", ev)
+	}
+	if len(l.g.Salvage) != 0 {
+		t.Errorf("salvage %+v, want none", l.g.Salvage)
+	}
+}
+
+// A stack with no ships left is not one of the scrapped fleet's designs:
+// 0x05b's fleet slot names the design with ships (here slot 5, not the
+// empty stack's slot 2), and the fleet counts one design.
+func TestScrapIgnoresEmptyStacks(t *testing.T) {
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	other := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	l.planet(NoOwner, 0, 100)
+	fi := l.fleet(1, 0, 0, Stack{Design: other, Count: 0}, Stack{Design: scout, Count: 1})
+	l.g.Planets = l.g.Planets[:0]
+	l.g.Fleets[fi].Pos, l.g.Fleets[fi].Number = Point{0, 0}, 4
+	l.g.DesignSlots = []DesignSlot{{Owner: 1, Slot: 5, Design: scout}, {Owner: 1, Slot: 2, Design: other}}
+	ev := l.g.scrap(fi, &seqRand{}, map[int]bool{}, scrapYear{})
+	if len(ev) != 1 || len(ev[0].Axes) != 4 || !slices.Equal(ev[0].Axes[1:], []int{4, 5, 1}) {
+		t.Errorf("events %+v, want one scrap event with Axes [_ 4 5 1]", ev)
 	}
 }

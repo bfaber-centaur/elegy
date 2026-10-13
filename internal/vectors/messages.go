@@ -423,13 +423,34 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				// Slots: the salvage's object id, 0x2000 + owner·512 +
 				// number, its number from the owner's pool shared with
 				// packets (MESSAGES.md "Object ids in slots", MEASURED
-				// SV-1), then the fleet, not compared: whether its slot
-				// carries the owner bits is UNRESOLVED (the MESSAGES.md
-				// contradiction, #204).
+				// SV-1), then the fleet: for a fleet of one design,
+				// design·512 + fleet number, the design being its
+				// ship-design slot (CONFIRMED by prediction, stars-elegy
+				// FS-1). A fleet of several designs gave 0x2000 + design
+				// ·512 + number once (MEASURED, FS-1; bit 13's meaning and
+				// which design is named are not known), so its slot is
+				// not compared.
 				m := pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
 					why: "0x05b salvage and fleet slots"}
-				if len(ev.Axes) == 1 {
-					m.params[0], m.known[0], m.why = 1<<13|ev.Player<<9|ev.Axes[0], true, "0x05b fleet slot"
+				if len(ev.Axes) == 4 {
+					salvage, number, slot, designs := ev.Axes[0], ev.Axes[1], ev.Axes[2], ev.Axes[3]
+					var why []string
+					if salvage >= 0 {
+						m.params[0], m.known[0] = 1<<13|ev.Player<<9|salvage, true
+					} else {
+						why = append(why, "0x05b salvage slot (no salvage)")
+					}
+					switch {
+					case designs != 1:
+						why = append(why, "0x05b fleet slot of a fleet of several designs")
+					case slot >= 16:
+						// A design with no slot of the owner (a state
+						// built without design orders).
+						why = append(why, "0x05b fleet slot of a design with no slot")
+					default:
+						m.params[1], m.known[1] = slot<<9|(number-1), true
+					}
+					m.why = strings.Join(why, ", ")
 				}
 				send(ev.Player, m)
 			}
