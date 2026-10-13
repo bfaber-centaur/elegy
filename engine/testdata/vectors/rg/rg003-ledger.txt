@@ -4984,18 +4984,18 @@ sample | rg003 | RG-003-2474 y12 #97 | fleet owner=1 id=94 | waypoints[0] positi
 sample | rg003 | RG-003-2474 y12 #97 | fleet owner=1 id=94 | x = 1637, want 1356
 sample | rg003 | RG-003-2474 y12 #97 | fleet owner=1 id=94 | y = 1335, want 1614
 sample | rg003 | RG-003-2474 y12 #99 | fleet owner=1 id=95 | cargo.ironium = 123, want 122
-sample | rg003 | year 10 | order | year 10 player 1 order 1 (MoveShipsOrder): move ships: fleet 600168 is not with fleet 600087: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 1 order 1 (MoveShipsOrder): move ships: fleet 600171 is not with fleet 600089: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 1 order 105 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 107 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 109 (WaypointOrder): waypoint 0 fleet 500094: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 110 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 111 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 112 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 10 | order | year 10 player 1 order 2 (MoveShipsOrder): move ships: fleet 600170 is not with fleet 600078: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 1 order 2 (MoveShipsOrder): move ships: fleet 600173 is not with fleet 600080: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 1 order 27 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 3 (MoveShipsOrder): fleet 0: orders: no such object
-sample | rg003 | year 10 | order | year 10 player 1 order 44 (CargoOrder): cargo: fleet 600128 and planet 73: orders: the objects are not at the same place
-sample | rg003 | year 10 | order | year 10 player 1 order 48 (CargoOrder): cargo: fleet 600172 and planet 79: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 1 order 44 (CargoOrder): cargo: fleet 600130 and planet 73: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 1 order 48 (CargoOrder): cargo: fleet 600175 and planet 79: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 1 order 50 (FleetPlanOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 51 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 52 (FleetPlanOrder): fleet 0: orders: no such object
@@ -5008,25 +5008,25 @@ sample | rg003 | year 10 | order | year 10 player 1 order 60 (WaypointOrder): wa
 sample | rg003 | year 10 | order | year 10 player 1 order 61 (WaypointOrder): waypoint 0 fleet 500094: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 78 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 1 order 97 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
-sample | rg003 | year 10 | order | year 10 player 2 order 1 (MoveShipsOrder): move ships: fleet 600157 is not with fleet 600153: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 2 order 1 (MoveShipsOrder): move ships: fleet 600160 is not with fleet 600156: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 2 order 12 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 2 order 14 (WaypointOrder): waypoint 0 fleet 300013: orders: no such object
-sample | rg003 | year 10 | order | year 10 player 5 order 1 (MoveShipsOrder): move ships: fleet 600061 is not with fleet 600178: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 5 order 1 (MoveShipsOrder): move ships: fleet 600063 is not with fleet 600181: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 5 order 2 (MoveShipsOrder): fleet 0: orders: no such object
-sample | rg003 | year 10 | order | year 10 player 5 order 3 (MoveShipsOrder): move ships: fleet 600162 is not with fleet 600144: orders: the objects are not at the same place
-sample | rg003 | year 10 | order | year 10 player 5 order 6 (CargoOrder): cargo: fleet 600176 and planet 87: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 5 order 3 (MoveShipsOrder): move ships: fleet 600165 is not with fleet 600147: orders: the objects are not at the same place
+sample | rg003 | year 10 | order | year 10 player 5 order 6 (CargoOrder): cargo: fleet 600179 and planet 87: orders: the objects are not at the same place
 sample | rg003 | year 10 | order | year 10 player 6 order 10 (WaypointOrder): waypoint 0 fleet 500008: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 6 order 11 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 6 order 13 (WaypointOrder): waypoint 0 fleet 500008: orders: no such object
 sample | rg003 | year 10 | order | year 10 player 6 order 9 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 1 order 1 (MoveShipsOrder): move ships: fleet 100033 is not with fleet 600030: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 1 order 1 (MoveShipsOrder): move ships: fleet 100033 is not with fleet 600032: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 1 order 119 (WaypointOrder): waypoint 0 fleet 600005: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 120 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 130 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 1 order 2 (MoveShipsOrder): move ships: fleet 600197 is not with fleet 600078: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 1 order 2 (MoveShipsOrder): move ships: fleet 600200 is not with fleet 600080: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 1 order 3 (MoveShipsOrder): fleet 0: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 1 order 45 (CargoOrder): cargo: fleet 600170 and planet 55: orders: the objects are not at the same place
-sample | rg003 | year 11 | order | year 11 player 1 order 52 (CargoOrder): cargo: fleet 600116 and planet 80: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 1 order 45 (CargoOrder): cargo: fleet 600173 and planet 55: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 1 order 52 (CargoOrder): cargo: fleet 600118 and planet 80: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 1 order 62 (FleetPlanOrder): fleet 0: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 63 (CargoOrder): fleet 0: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 64 (WaypointOrder): fleet 0: orders: no such object
@@ -5035,20 +5035,20 @@ sample | rg003 | year 11 | order | year 11 player 1 order 69 (WaypointOrder): wa
 sample | rg003 | year 11 | order | year 11 player 1 order 70 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 72 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 1 order 92 (WaypointOrder): waypoint 0 fleet 500008: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 2 order 1 (MoveShipsOrder): move ships: fleet 600155 is not with fleet 600184: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 2 order 1 (MoveShipsOrder): move ships: fleet 600158 is not with fleet 600187: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 2 order 13 (WaypointOrder): waypoint 0 fleet 100097: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 2 order 2 (MoveShipsOrder): move ships: fleet 600156 is not with fleet 600184: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 2 order 2 (MoveShipsOrder): move ships: fleet 600159 is not with fleet 600187: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 2 order 24 (WaypointOrder): waypoint 0 fleet 100097: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 2 order 27 (WaypointOrder): waypoint 0 fleet 300013: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 2 order 28 (WaypointOrder): waypoint 0 fleet 100064: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 2 order 3 (MoveShipsOrder): move ships: fleet 600158 is not with fleet 600184: orders: the objects are not at the same place
-sample | rg003 | year 11 | order | year 11 player 2 order 5 (MoveShipsOrder): move ships: fleet 600190 is not with fleet 600186: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 2 order 3 (MoveShipsOrder): move ships: fleet 600161 is not with fleet 600187: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 2 order 5 (MoveShipsOrder): move ships: fleet 600193 is not with fleet 600189: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 3 order 5 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 11 | order | year 11 player 5 order 1 (MoveShipsOrder): move ships: fleet 600177 is not with fleet 600199: orders: the objects are not at the same place
-sample | rg003 | year 11 | order | year 11 player 5 order 18 (CargoOrder): cargo: fleet 600061 and planet 92: orders: the objects are not at the same place
-sample | rg003 | year 11 | order | year 11 player 5 order 2 (MoveShipsOrder): move ships: fleet 600120 is not with fleet 600179: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 5 order 1 (MoveShipsOrder): move ships: fleet 600180 is not with fleet 600202: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 5 order 18 (CargoOrder): cargo: fleet 600063 and planet 92: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 5 order 2 (MoveShipsOrder): move ships: fleet 600122 is not with fleet 600182: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 5 order 24 (QueueOrder): planet 9: orders: the object belongs to another player
-sample | rg003 | year 11 | order | year 11 player 5 order 3 (MoveShipsOrder): move ships: fleet 600163 is not with fleet 600162: orders: the objects are not at the same place
+sample | rg003 | year 11 | order | year 11 player 5 order 3 (MoveShipsOrder): move ships: fleet 600166 is not with fleet 600165: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 5 order 6 (CargoOrder): cargo: fleet 500010 and planet 87: orders: the objects are not at the same place
 sample | rg003 | year 11 | order | year 11 player 6 order 13 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 6 order 14 (WaypointOrder): waypoint 0 fleet 100075: orders: no such object
@@ -5058,45 +5058,45 @@ sample | rg003 | year 11 | order | year 11 player 6 order 17 (WaypointOrder): wa
 sample | rg003 | year 11 | order | year 11 player 6 order 19 (WaypointOrder): waypoint 0 fleet 100075: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 6 order 21 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 11 | order | year 11 player 6 order 22 (WaypointOrder): waypoint 0 fleet 300004: orders: no such object
-sample | rg003 | year 12 | order | year 12 player 1 order 1 (MoveShipsOrder): move ships: fleet 600207 is not with fleet 600078: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 1 (MoveShipsOrder): move ships: fleet 600210 is not with fleet 600080: orders: the objects are not at the same place
 sample | rg003 | year 12 | order | year 12 player 1 order 101 (WaypointOrder): waypoint 0 fleet 200018: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 110 (WaypointOrder): waypoint 0 fleet 600005: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 115 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 118 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 124 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
-sample | rg003 | year 12 | order | year 12 player 1 order 2 (MoveShipsOrder): move ships: fleet 600219 is not with fleet 600093: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 21 (CargoOrder): cargo: fleet 600167 and planet 14: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 28 (CargoOrder): cargo: fleet 600181 and planet 63: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 3 (MoveShipsOrder): move ships: fleet 600220 is not with fleet 600173: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 4 (MoveShipsOrder): move ships: fleet 600089 is not with fleet 100035: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 56 (CargoOrder): cargo: fleet 600197 and planet 72: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 59 (CargoOrder): cargo: fleet 600221 and planet 81: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 1 order 62 (CargoOrder): cargo: fleet 600222 and planet 86: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 2 (MoveShipsOrder): move ships: fleet 600222 is not with fleet 600095: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 21 (CargoOrder): cargo: fleet 600170 and planet 14: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 28 (CargoOrder): cargo: fleet 600184 and planet 63: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 3 (MoveShipsOrder): move ships: fleet 600223 is not with fleet 600176: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 4 (MoveShipsOrder): move ships: fleet 600091 is not with fleet 100035: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 56 (CargoOrder): cargo: fleet 600200 and planet 72: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 59 (CargoOrder): cargo: fleet 600224 and planet 81: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 1 order 62 (CargoOrder): cargo: fleet 600225 and planet 86: orders: the objects are not at the same place
 sample | rg003 | year 12 | order | year 12 player 1 order 68 (WaypointOrder): waypoint 0 fleet 200018: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 70 (WaypointOrder): waypoint 0 fleet 200018: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 71 (WaypointOrder): waypoint 0 fleet 600005: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 72 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 1 order 79 (WaypointOrder): waypoint 0 fleet 200018: orders: no such object
-sample | rg003 | year 12 | order | year 12 player 2 order 1 (MoveShipsOrder): move ships: fleet 600072 is not with fleet 600185: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 1 (MoveShipsOrder): move ships: fleet 600074 is not with fleet 600188: orders: the objects are not at the same place
 sample | rg003 | year 12 | order | year 12 player 2 order 14 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 15 (WaypointOrder): waypoint 0 fleet 300002: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 17 (WaypointOrder): waypoint 0 fleet 600007: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 19 (WaypointOrder): waypoint 0 fleet 300014: orders: no such object
-sample | rg003 | year 12 | order | year 12 player 2 order 2 (MoveShipsOrder): move ships: fleet 600155 is not with fleet 600185: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 2 (MoveShipsOrder): move ships: fleet 600158 is not with fleet 600188: orders: the objects are not at the same place
 sample | rg003 | year 12 | order | year 12 player 2 order 20 (WaypointOrder): waypoint 0 fleet 600007: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 21 (WaypointOrder): waypoint 0 fleet 600007: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 22 (WaypointOrder): waypoint 0 fleet 300014: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 23 (WaypointOrder): waypoint 0 fleet 600007: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 2 order 24 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 12 | order | year 12 player 2 order 3 (MoveShipsOrder): move ships: fleet 600156 is not with fleet 600185: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 2 order 4 (MoveShipsOrder): move ships: fleet 600158 is not with fleet 600185: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 2 order 6 (MoveShipsOrder): move ships: fleet 600191 is not with fleet 600208: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 2 order 7 (MoveShipsOrder): move ships: fleet 600193 is not with fleet 600208: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 5 order 1 (MoveShipsOrder): fleet 600178 has 0 ships of design 27, not 3: orders: a value is out of range
-sample | rg003 | year 12 | order | year 12 player 5 order 2 (MoveShipsOrder): move ships: fleet 600165 is not with fleet 600105: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 5 order 3 (MoveShipsOrder): move ships: fleet 600144 is not with fleet 500002: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 5 order 4 (MoveShipsOrder): move ships: fleet 600162 is not with fleet 500002: orders: the objects are not at the same place
-sample | rg003 | year 12 | order | year 12 player 5 order 8 (CargoOrder): cargo: fleet 600120 and planet 92: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 3 (MoveShipsOrder): move ships: fleet 600159 is not with fleet 600188: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 4 (MoveShipsOrder): move ships: fleet 600161 is not with fleet 600188: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 6 (MoveShipsOrder): move ships: fleet 600194 is not with fleet 600211: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 2 order 7 (MoveShipsOrder): move ships: fleet 600196 is not with fleet 600211: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 5 order 1 (MoveShipsOrder): fleet 600181 has 0 ships of design 27, not 3: orders: a value is out of range
+sample | rg003 | year 12 | order | year 12 player 5 order 2 (MoveShipsOrder): move ships: fleet 600168 is not with fleet 600107: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 5 order 3 (MoveShipsOrder): move ships: fleet 600147 is not with fleet 500002: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 5 order 4 (MoveShipsOrder): move ships: fleet 600165 is not with fleet 500002: orders: the objects are not at the same place
+sample | rg003 | year 12 | order | year 12 player 5 order 8 (CargoOrder): cargo: fleet 600122 and planet 92: orders: the objects are not at the same place
 sample | rg003 | year 12 | order | year 12 player 6 order 11 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 6 order 13 (WaypointOrder): waypoint 0 fleet 100064: orders: no such object
 sample | rg003 | year 12 | order | year 12 player 6 order 18 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
@@ -5115,7 +5115,7 @@ sample | rg003 | year 4 | order | year 4 player 1 order 53 (WaypointOrder): wayp
 sample | rg003 | year 4 | order | year 4 player 2 order 13 (CargoOrder): cargo: fleet 200010 and salvage 0: orders: the objects are not at the same place
 sample | rg003 | year 5 | order | year 5 player 2 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 5 | order | year 5 player 2 order 25 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600027 and planet 8: orders: the objects are not at the same place
+sample | rg003 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600029 and planet 8: orders: the objects are not at the same place
 sample | rg003 | year 5 | order | year 5 player 3 order 9 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 5 | order | year 5 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 5 | order | year 5 player 5 order 31 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
@@ -5134,12 +5134,12 @@ sample | rg003 | year 6 | order | year 6 player 2 order 17 (WaypointOrder): wayp
 sample | rg003 | year 6 | order | year 6 player 3 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 6 | order | year 6 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 6 | order | year 6 player 5 order 17 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
-sample | rg003 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600061 is not with fleet 600049: orders: the objects are not at the same place
+sample | rg003 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600063 is not with fleet 600051: orders: the objects are not at the same place
 sample | rg003 | year 6 | order | year 6 player 5 order 45 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
 sample | rg003 | year 6 | order | year 6 player 6 order 11 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg003 | year 6 | order | year 6 player 6 order 12 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
-sample | rg003 | year 7 | order | year 7 player 1 order 2 (MoveShipsOrder): move ships: fleet 600116 is not with fleet 600078: orders: the objects are not at the same place
-sample | rg003 | year 7 | order | year 7 player 1 order 36 (CargoOrder): cargo: fleet 600117 and planet 76: orders: the objects are not at the same place
+sample | rg003 | year 7 | order | year 7 player 1 order 2 (MoveShipsOrder): move ships: fleet 600118 is not with fleet 600080: orders: the objects are not at the same place
+sample | rg003 | year 7 | order | year 7 player 1 order 36 (CargoOrder): cargo: fleet 600119 and planet 76: orders: the objects are not at the same place
 sample | rg003 | year 7 | order | year 7 player 1 order 42 (WaypointOrder): waypoint 0 fleet 600003: orders: no such object
 sample | rg003 | year 7 | order | year 7 player 1 order 43 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg003 | year 7 | order | year 7 player 1 order 44 (WaypointOrder): waypoint 0 fleet 600006: orders: no such object
@@ -5154,15 +5154,15 @@ sample | rg003 | year 7 | order | year 7 player 1 order 89 (WaypointOrder): wayp
 sample | rg003 | year 7 | order | year 7 player 1 order 92 (WaypointOrder): waypoint 0 fleet 600006: orders: no such object
 sample | rg003 | year 7 | order | year 7 player 2 order 1 (MoveShipsOrder): fleet 0: orders: no such object
 sample | rg003 | year 7 | order | year 7 player 2 order 18 (WaypointOrder): waypoint 0 fleet 100064: orders: no such object
-sample | rg003 | year 7 | order | year 7 player 2 order 8 (CargoOrder): cargo: fleet 600085 and salvage 0: orders: the objects are not at the same place
-sample | rg003 | year 7 | order | year 7 player 2 order 9 (CargoOrder): cargo: fleet 600085 and salvage 0: orders: the objects are not at the same place
+sample | rg003 | year 7 | order | year 7 player 2 order 8 (CargoOrder): cargo: fleet 600087 and salvage 0: orders: the objects are not at the same place
+sample | rg003 | year 7 | order | year 7 player 2 order 9 (CargoOrder): cargo: fleet 600087 and salvage 0: orders: the objects are not at the same place
 sample | rg003 | year 7 | order | year 7 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 7 | order | year 7 player 5 order 1 (MoveShipsOrder): move ships: fleet 600126 is not with fleet 600104: orders: the objects are not at the same place
+sample | rg003 | year 7 | order | year 7 player 5 order 1 (MoveShipsOrder): move ships: fleet 600128 is not with fleet 600106: orders: the objects are not at the same place
 sample | rg003 | year 7 | order | year 7 player 5 order 10 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
 sample | rg003 | year 7 | order | year 7 player 5 order 36 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 1 order 28 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 8 | order | year 8 player 1 order 33 (CargoOrder): cargo: fleet 600138 and planet 73: orders: the objects are not at the same place
-sample | rg003 | year 8 | order | year 8 player 1 order 36 (CargoOrder): cargo: fleet 600116 and planet 80: orders: the objects are not at the same place
+sample | rg003 | year 8 | order | year 8 player 1 order 33 (CargoOrder): cargo: fleet 600141 and planet 73: orders: the objects are not at the same place
+sample | rg003 | year 8 | order | year 8 player 1 order 36 (CargoOrder): cargo: fleet 600118 and planet 80: orders: the objects are not at the same place
 sample | rg003 | year 8 | order | year 8 player 1 order 45 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 1 order 67 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 1 order 87 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
@@ -5171,10 +5171,10 @@ sample | rg003 | year 8 | order | year 8 player 2 order 26 (WaypointOrder): wayp
 sample | rg003 | year 8 | order | year 8 player 3 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 3 order 4 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 4 order 1 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 8 | order | year 8 player 5 order 1 (MoveShipsOrder): move ships: fleet 600144 is not with fleet 600107: orders: the objects are not at the same place
+sample | rg003 | year 8 | order | year 8 player 5 order 1 (MoveShipsOrder): move ships: fleet 600147 is not with fleet 600109: orders: the objects are not at the same place
 sample | rg003 | year 8 | order | year 8 player 5 order 11 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
-sample | rg003 | year 8 | order | year 8 player 5 order 21 (CargoOrder): cargo: fleet 600126 and planet 87: orders: the objects are not at the same place
-sample | rg003 | year 8 | order | year 8 player 5 order 24 (CargoOrder): cargo: fleet 600141 and planet 92: orders: the objects are not at the same place
+sample | rg003 | year 8 | order | year 8 player 5 order 21 (CargoOrder): cargo: fleet 600128 and planet 87: orders: the objects are not at the same place
+sample | rg003 | year 8 | order | year 8 player 5 order 24 (CargoOrder): cargo: fleet 600144 and planet 92: orders: the objects are not at the same place
 sample | rg003 | year 8 | order | year 8 player 5 order 39 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 6 order 20 (WaypointOrder): waypoint 0 fleet 100064: orders: no such object
 sample | rg003 | year 8 | order | year 8 player 6 order 23 (WaypointOrder): waypoint 0 fleet 100064: orders: no such object
@@ -5189,17 +5189,17 @@ sample | rg003 | year 9 | order | year 9 player 1 order 73 (WaypointOrder): wayp
 sample | rg003 | year 9 | order | year 9 player 1 order 74 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 1 order 77 (WaypointOrder): waypoint 0 fleet 500093: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 1 order 81 (WaypointOrder): waypoint 0 fleet 500001: orders: no such object
-sample | rg003 | year 9 | order | year 9 player 2 order 1 (MoveShipsOrder): move ships: fleet 600155 is not with fleet 600153: orders: the objects are not at the same place
+sample | rg003 | year 9 | order | year 9 player 2 order 1 (MoveShipsOrder): move ships: fleet 600158 is not with fleet 600156: orders: the objects are not at the same place
 sample | rg003 | year 9 | order | year 9 player 2 order 18 (WaypointOrder): waypoint 0 fleet 600015: orders: no such object
-sample | rg003 | year 9 | order | year 9 player 2 order 2 (MoveShipsOrder): move ships: fleet 600156 is not with fleet 600153: orders: the objects are not at the same place
+sample | rg003 | year 9 | order | year 9 player 2 order 2 (MoveShipsOrder): move ships: fleet 600159 is not with fleet 600156: orders: the objects are not at the same place
 sample | rg003 | year 9 | order | year 9 player 2 order 20 (WaypointOrder): waypoint 0 fleet 600015: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 2 order 9 (CargoOrder): cargo: salvage 0 of player 2: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 9 | order | year 9 player 5 order 1 (MoveShipsOrder): move ships: fleet 600144 is not with fleet 600061: orders: the objects are not at the same place
-sample | rg003 | year 9 | order | year 9 player 5 order 2 (MoveShipsOrder): move ships: fleet 600163 is not with fleet 600105: orders: the objects are not at the same place
-sample | rg003 | year 9 | order | year 9 player 5 order 23 (CargoOrder): cargo: fleet 600147 and planet 92: orders: the objects are not at the same place
+sample | rg003 | year 9 | order | year 9 player 5 order 1 (MoveShipsOrder): move ships: fleet 600147 is not with fleet 600063: orders: the objects are not at the same place
+sample | rg003 | year 9 | order | year 9 player 5 order 2 (MoveShipsOrder): move ships: fleet 600166 is not with fleet 600107: orders: the objects are not at the same place
+sample | rg003 | year 9 | order | year 9 player 5 order 23 (CargoOrder): cargo: fleet 600150 and planet 92: orders: the objects are not at the same place
 sample | rg003 | year 9 | order | year 9 player 5 order 25 (WaypointOrder): fleet 0: orders: no such object
-sample | rg003 | year 9 | order | year 9 player 5 order 3 (MoveShipsOrder): fleet 600049 has 1 ships of design 34, not 2: orders: a value is out of range
+sample | rg003 | year 9 | order | year 9 player 5 order 3 (MoveShipsOrder): fleet 600051 has 1 ships of design 34, not 2: orders: a value is out of range
 sample | rg003 | year 9 | order | year 9 player 5 order 35 (WaypointOrder): fleet 0: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 6 order 18 (WaypointOrder): waypoint 0 fleet 300005: orders: no such object
 sample | rg003 | year 9 | order | year 9 player 6 order 22 (WaypointOrder): waypoint 0 fleet 300005: orders: no such object

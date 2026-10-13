@@ -976,7 +976,7 @@ sample | rg002 | year 4 | order | year 4 player 1 order 53 (WaypointOrder): wayp
 sample | rg002 | year 4 | order | year 4 player 2 order 13 (CargoOrder): cargo: fleet 200010 and salvage 0: orders: the objects are not at the same place
 sample | rg002 | year 5 | order | year 5 player 2 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 2 order 25 (WaypointOrder): fleet 0: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600027 and planet 8: orders: the objects are not at the same place
+sample | rg002 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600029 and planet 8: orders: the objects are not at the same place
 sample | rg002 | year 5 | order | year 5 player 3 order 9 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 5 order 31 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
@@ -995,7 +995,7 @@ sample | rg002 | year 6 | order | year 6 player 2 order 17 (WaypointOrder): wayp
 sample | rg002 | year 6 | order | year 6 player 3 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 5 order 17 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
-sample | rg002 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600061 is not with fleet 600049: orders: the objects are not at the same place
+sample | rg002 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600063 is not with fleet 600051: orders: the objects are not at the same place
 sample | rg002 | year 6 | order | year 6 player 5 order 45 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 11 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 12 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object

@@ -107,6 +107,11 @@ type Game struct {
 	// that goes away keeps its number until the year's files are written
 	// (holdFleetNumbers). It is nil outside that span and is not saved.
 	heldNumbers map[[2]int]bool
+	// fleetIDs is, during a generation, the largest Fleet.ID the year
+	// started with, so that a fleet made this year never takes the ID of
+	// one that went away this year, which the year's events may still
+	// name (newFleetID). It is 0 outside that span and is not saved.
+	fleetIDs int
 	// costLevels is, during a generation, each player's tech levels from
 	// before the year's research, which price the year's designs
 	// (battle.costLevels, colonize). It is nil outside that span and is
@@ -298,6 +303,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		costLevels[i] = p.Research.Levels
 	}
 	g.costLevels = costLevels
+	g.fleetIDs = g.newFleetID() - 1
 
 	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
 	// whose draws are the first of the year, then each player's file in
@@ -631,7 +637,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
-	g.heldNumbers, g.costLevels = nil, nil
+	g.heldNumbers, g.costLevels, g.fleetIDs = nil, nil, 0
 	g.dropBareRecords()
 	return TurnResult{
 		Game:   g,

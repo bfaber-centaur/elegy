@@ -637,8 +637,13 @@ func TestPredictionDesignOrders(t *testing.T) {
 	if errs, _ := apply(g, 0, DesignOrder{Slot: 0, Name: "D2", Hull: "Scout", Fills: []SlotFill{{Slot: 0, Part: "Quick Jump 5", Count: 1}}}); errs[0] == nil {
 		t.Error("replacing a design in use: want refused")
 	}
-	errs, _ = apply(g, 0, DeleteDesignOrder{Slot: 0}, DeleteDesignOrder{Starbase: true, Slot: 0}, DeleteDesignOrder{Slot: 5})
-	if errs[0] != nil || errs[1] != nil || !errors.Is(errs[2], ErrNoSuchObject) {
+	// An empty slot's delete is accepted and changes nothing (MEASURED
+	// RG-004, the original's acceptance inferred); a slot outside the
+	// range is refused.
+	errs, _ = apply(g, 0, DeleteDesignOrder{Slot: 0}, DeleteDesignOrder{Starbase: true, Slot: 0}, DeleteDesignOrder{Slot: 5},
+		DeleteDesignOrder{Slot: 16}, DeleteDesignOrder{Starbase: true, Slot: 10}, DeleteDesignOrder{Slot: -1})
+	if errs[0] != nil || errs[1] != nil || errs[2] != nil ||
+		!errors.Is(errs[3], ErrOutOfRange) || !errors.Is(errs[4], ErrOutOfRange) || !errors.Is(errs[5], ErrOutOfRange) {
 		t.Fatalf("errors %v", errs)
 	}
 	if _, ok := g.PlayerDesign(0, false, 0); ok || g.Planets[0].HasStarbase || g.Planets[0].Population != 50 {
@@ -852,5 +857,23 @@ func TestDefaultQueueOrder(t *testing.T) {
 	}
 	if len(g.Players[0].DefaultQueue) != 2 {
 		t.Errorf("a refused record changed the default queue: %+v", g.Players[0].DefaultQueue)
+	}
+}
+
+func TestMeasuredDeleteEmptyDesignSlot(t *testing.T) {
+	// RG-004 2469–2477 (MEASURED): player 0's computer player deletes
+	// ship slot 0, empty since 2469, every year; the original's state is
+	// unchanged. Elegy accepts the order and changes nothing (that the
+	// original accepts it is inferred).
+	g, before := ordersGame(), ordersGame()
+	if _, ok := g.PlayerDesign(0, false, 7); ok {
+		t.Fatal("slot 7 is not empty")
+	}
+	errs, _ := apply(g, 0, DeleteDesignOrder{Slot: 7})
+	if errs[0] != nil {
+		t.Fatalf("delete of an empty slot: %v, want accepted", errs[0])
+	}
+	if !reflect.DeepEqual(g, before) {
+		t.Error("delete of an empty slot changed the game")
 	}
 }
