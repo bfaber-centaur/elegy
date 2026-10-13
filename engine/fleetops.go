@@ -31,8 +31,8 @@ const (
 	// chosen rule).
 	mergeTaskDamaged
 	// mergeOrderDamaged divides by the damaged ships, rounding down,
-	// floor(Σ(D·units)/ΣD): the merge order and ship moves (ORDERS.md
-	// "Merge order", CONFIRMED CO-05, CO-05b, CO-05c).
+	// floor(Σ(D·units)/ΣD): the merge order (ORDERS.md "Merge order",
+	// CONFIRMED CO-05, CO-05b, CO-05c). Ship moves use the task's rule.
 	mergeOrderDamaged
 )
 
