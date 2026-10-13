@@ -124,16 +124,21 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 // the unresolved randomness class with its owner and reason
 // ("unresolved randomness [lane D]: reason"), as internal/vectors
 // rg002UnresolvedClass: a miss on every harness variant that a named
-// random outcome explains.
+// random outcome explains. A battle line may also be hand-classed
+// "random-driven [owner]: evidence" when oracle evidence, not the harness
+// variants, shows the original's own streams differ there (RG-003-Y9's
+// battle at (1388,1386), stars-elegy #201).
 func rg002BattleHand(class string) bool {
 	for _, h := range []string{"missing mechanic", "incorrect mechanic", "state-import error"} {
 		if rest, ok := strings.CutPrefix(class, h+" ["); ok && strings.HasSuffix(rest, "]") && len(rest) > 1 {
 			return true
 		}
 	}
-	if rest, ok := strings.CutPrefix(class, "unresolved randomness ["); ok {
-		owner, reason, ok := strings.Cut(rest, "]: ")
-		return ok && owner != "" && strings.TrimSpace(reason) != ""
+	for _, h := range []string{"unresolved randomness [", "random-driven ["} {
+		if rest, ok := strings.CutPrefix(class, h); ok {
+			owner, reason, ok := strings.Cut(rest, "]: ")
+			return ok && owner != "" && strings.TrimSpace(reason) != ""
+		}
 	}
 	return false
 }
@@ -255,6 +260,9 @@ func TestCheckBattleLedger(t *testing.T) {
 		{"unresolved randomness [lane D]", false},
 		{"unresolved randomness [lane D]:  ", false},
 		{"unresolved randomness []: a mine stop", false},
+		{"random-driven [lane D]: the oracle fought here in 3 of 4 streams", true},
+		{"random-driven [lane D]", false},
+		{"random-driven []: 3 of 4 streams", false},
 		{"random-driven", false},
 		{"sample", false},
 	} {
