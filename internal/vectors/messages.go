@@ -28,10 +28,13 @@ func pvMessageIDs() map[int]string {
 		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
 		0x050: "EventLevelUp, a player without Generalized Research",
+		0x078: "EventPartAvailable of a ship hull",
+		0x145: "EventPartAvailable of a planetary defense",
+		0x157: "EventPartAvailable of a planetary scanner",
 		0x136: "EventLevelUp, a player with Generalized Research",
 		0x159: "EventResearchStolen",
 		0x05b: "EventFleetScrapped in deep space",
-		0x05f: "EventPartAvailable of a component, not a hull, planetary scanner or defense",
+		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
 		0x12a: "EventOrderClipped of an installation",
 		0x12f: "EventOrderClipped of terraforming",
@@ -46,6 +49,20 @@ func pvMessageIDs() map[int]string {
 		if k != int(engine.SummaryNone) {
 			ids[id] = "EventBattleSummary " + fmt.Sprint(engine.BattleSummary(k))
 		}
+	}
+	return ids
+}
+
+// pvPlanetaryIDs is the level-up message id of each planetary scanner
+// (0x157) and planetary defense (0x145), by name.
+func pvPlanetaryIDs() map[string]int {
+	ids := map[string]int{}
+	cat := engine.Components()
+	for _, s := range cat.PlanetScanners() {
+		ids[s.Name] = 0x157
+	}
+	for _, d := range cat.Defenses() {
+		ids[d.Name] = 0x145
 	}
 	return ids
 }
@@ -187,9 +204,17 @@ func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
 		case engine.EventPartAvailable:
 			cs := engine.Components().Components
 			if ev.Count >= 0 && ev.Count < len(cs) {
-				switch cs[ev.Count].Category {
-				case engine.CatHull, engine.CatStarbaseHull, engine.CatPlanetary:
+				c := cs[ev.Count]
+				switch {
+				case c.Category == engine.CatHull:
+					send(ev.Player, 0x078)
+				case c.Category == engine.CatStarbaseHull:
+					// 0x0d0, BINARY-ONLY: not mapped.
+				case c.Category == engine.CatPlanetary && pvPlanetaryIDs()[c.Name] != 0:
+					send(ev.Player, pvPlanetaryIDs()[c.Name])
 				default:
+					// Every other part, the Genesis Device included
+					// (MESSAGES.md at stars-elegy f2778b3).
 					send(ev.Player, 0x05f)
 				}
 			}

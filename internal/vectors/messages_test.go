@@ -70,10 +70,11 @@ func TestPvMessages(t *testing.T) {
 		{"level up, player not in the game", []engine.Event{{Kind: engine.EventLevelUp, Player: 3, Planet: -1, Fleet: -1, Count: 3}}, nil},
 		{"component", []engine.Event{part("Cow-hide Shield")}, [][2]int{{2, 0x05f}}},
 		{"terraforming component", []engine.Event{part("Total Terraform ±5")}, [][2]int{{2, 0x05f}}},
-		{"ship hull (0x078)", []engine.Event{part("Medium Freighter")}, nil},
-		{"starbase hull (0x0d0)", []engine.Event{part("Space Dock")}, nil},
-		{"planetary scanner (0x157)", []engine.Event{part("Viewer 90")}, nil},
-		{"planetary defense (0x145)", []engine.Event{part("Laser Battery")}, nil},
+		{"ship hull", []engine.Event{part("Medium Freighter")}, [][2]int{{2, 0x078}}},
+		{"starbase hull (0x0d0, not mapped)", []engine.Event{part("Space Dock")}, nil},
+		{"planetary scanner", []engine.Event{part("Viewer 90")}, [][2]int{{2, 0x157}}},
+		{"planetary defense", []engine.Event{part("Laser Battery")}, [][2]int{{2, 0x145}}},
+		{"Genesis Device", []engine.Event{part("Genesis Device")}, [][2]int{{2, 0x05f}}},
 		{"component not in the catalog", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Count: -1}}, nil},
 		{"component past the catalog", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Count: len(engine.Components().Components)}}, nil},
 		{"no recipient", []engine.Event{{Kind: engine.EventFleetArrived, Player: -1}}, nil},
@@ -102,10 +103,22 @@ func TestPvMessages(t *testing.T) {
 
 // TestMessageCheck pins the message expectation check.
 func TestMessageCheck(t *testing.T) {
+	comp := func(name string) int {
+		for k, c := range engine.Components().Components {
+			if c.Name == name {
+				return k
+			}
+		}
+		t.Fatalf("no component %q", name)
+		return 0
+	}
 	l := pvLoaded{
 		g:      engine.Game{Players: []engine.Player{{}, {Computer: true}, {}}},
 		queued: map[int]bool{2: true},
-		events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 2}, {Kind: engine.EventAlchemy, Player: 0, Planet: 3, Item: engine.ItemMineralAlchemy, Count: 1}, {Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 4}, {Kind: engine.EventOrderClipped, Player: 0, Planet: 3, Item: engine.ItemTerraform, Count: 0}, {Kind: engine.EventResearchStolen, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 12}, {Kind: engine.EventLevelUp, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 4}, {Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Item: engine.ItemKind(1), Count: 6}}},
+		events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 2}, {Kind: engine.EventAlchemy, Player: 0, Planet: 3, Item: engine.ItemMineralAlchemy, Count: 1}, {Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 4}, {Kind: engine.EventOrderClipped, Player: 0, Planet: 3, Item: engine.ItemTerraform, Count: 0}, {Kind: engine.EventResearchStolen, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 12}, {Kind: engine.EventLevelUp, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 4}, {Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Item: engine.ItemKind(1), Count: 6},
+			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Destroyer")},
+			{Kind: engine.EventPartAvailable, Player: 2, Planet: -1, Fleet: -1, Count: comp("Laser Battery")},
+			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Scoper 150")}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -135,6 +148,12 @@ func TestMessageCheck(t *testing.T) {
 		{"research stolen, not sent", msg(2, 0x159, true, 1), "message 0x159 to player 2 present = false, want true"},
 		{"level up, Generalized Research", msg(0, 0x136, true, 1), ""},
 		{"level up, Generalized Research, not sent", msg(2, 0x136, true, 1), "message 0x136 to player 2 present = false, want true"},
+		{"ship hull", msg(0, 0x078, true, 1), ""},
+		{"ship hull, not sent", msg(2, 0x078, true, 1), "message 0x078 to player 2 present = false, want true"},
+		{"planetary defense", msg(2, 0x145, true, 1), ""},
+		{"planetary defense, not sent", msg(0, 0x145, true, 1), "message 0x145 to player 0 present = false, want true"},
+		{"planetary scanner", msg(0, 0x157, true, 1), ""},
+		{"planetary scanner, not sent", msg(2, 0x157, true, 1), "message 0x157 to player 2 present = false, want true"},
 		{"no queue, not sent", msg(0, 0x03f, true, 1), "message 0x03f to player 0 present = false, want true"},
 		{"queue not loaded, no queue", msg(2, 0x03f, true, 1), "skip: a queue message from a production queue not loaded"},
 		{"queue not loaded, queue completed", msg(2, 0x03e, false, 1), "skip: a queue message from a production queue not loaded"},

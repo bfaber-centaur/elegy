@@ -1,5 +1,10 @@
 package engine
 
+import (
+	"sort"
+	"sync"
+)
+
 // Research fields, in field order.
 const (
 	Energy = iota
@@ -389,8 +394,9 @@ func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Ev
 	for _, f := range gained {
 		levels[f]++
 		events = append(events, Event{Kind: EventLevelUp, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: levels[f]})
-		for i, c := range cat.Components {
-			if c.TechReq[f] != levels[f] {
+		for _, i := range announceOrder() {
+			c := cat.Components[i]
+			if c.TechReq[f] != levels[f] || unannounced(pl.Race, c) {
 				continue
 			}
 			if ok, err := c.Buildable(pl.Race, levels, trader[c.Name]); err != nil || !ok {
@@ -400,6 +406,54 @@ func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Ev
 		}
 	}
 	return events
+}
+
+// announceCategories is the order in which a level's components are
+// announced after its level message (MESSAGES.md "Order of the component
+// messages within one level", stars-elegy f2778b3): BINARY-ONLY as a
+// whole; the pairs that met in one observed level are MEASURED (KX-003,
+// KX-005, RG-001), and they put every 0x05f category seen before ship
+// hulls and planetary items.
+var announceCategories = []string{
+	CatEngine, CatScanner, CatShield, CatArmor, CatBeam, CatTorpedo, CatBomb,
+	CatMiningRobot, CatMineLayer, CatOrbital,
+	CatStarbaseHull,
+	CatElectrical, CatMechanical, CatTerraform,
+	CatHull,
+	CatPlanetary,
+}
+
+// announceOrder is the catalog's component indices in announcement
+// order: by category (announceCategories), then by the item's index in
+// its category (BINARY-ONLY, MEASURED only for ship hulls: RG-001 2434,
+// Medium Freighter then Destroyer). Planetary items so run scanners,
+// defenses, then the Genesis Device.
+var announceOrder = sync.OnceValue(func() []int {
+	cs := Components().Components
+	rank := map[string]int{}
+	for r, c := range announceCategories {
+		rank[c] = r
+	}
+	order := make([]int, len(cs))
+	for i := range order {
+		order[i] = i
+	}
+	sort.SliceStable(order, func(a, b int) bool {
+		ca, cb := cs[order[a]], cs[order[b]]
+		if rank[ca.Category] != rank[cb.Category] {
+			return rank[ca.Category] < rank[cb.Category]
+		}
+		return ca.Index < cb.Index
+	})
+	return order
+})
+
+// unannounced reports a component a race may use but is never told
+// about: a Total Terraforming race gets no message for Gravity, Temp or
+// Radiation Terraform ±3 (terraforming indices 8, 12 and 16; MESSAGES.md
+// at stars-elegy f2778b3, BINARY-ONLY).
+func unannounced(race Race, c Component) bool {
+	return race.LRT.TotalTerraforming && c.Category == CatTerraform && (c.Index == 8 || c.Index == 12 || c.Index == 16)
 }
 
 // fieldOrder is the levels gained from before to after, in field order:
