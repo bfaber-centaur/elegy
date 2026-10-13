@@ -2,6 +2,7 @@ package engine
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -159,6 +160,14 @@ func TestConfirmedTransferFleet(t *testing.T) {
 	if len(ev) != 2 || ev[0].Kind != EventFleetGiven || ev[1].Kind != EventFleetReceived || ev[1].Player != 1 {
 		t.Errorf("events %v", ev)
 	}
+	// ASSUMPTION: a gift at the giver's last waypoint sends the giver no
+	// 0x04e; the fleet is the recipient's now.
+	g = transferGame()
+	g.Fleets[0].Waypoints = nil
+	ev = g.loadPass(true)
+	if len(ev) != 2 || ev[0].Kind != EventFleetGiven || ev[1].Kind != EventFleetReceived {
+		t.Errorf("gift at the last waypoint: events %v, want given and received only", ev)
+	}
 
 	// ASSUMPTION W2: a slot of the recipient's holding the same design
 	// entry matches, and no slot is added.
@@ -174,7 +183,10 @@ func TestConfirmedTransferFleetRefused(t *testing.T) {
 	// ORDERS.md "Transfer fleet": refused when the recipient treats the
 	// giver as an enemy or the fleet carries colonists (CONFIRMED), or the
 	// recipient is not a live player (BINARY-ONLY). The task is cleared
-	// and the fleet keeps its owner (MEASURED, WU-B2).
+	// and the fleet keeps its owner (MEASURED, WU-B2). At its last
+	// waypoint the refusal is followed by 0x04e (MESSAGES.md 0x04e (a),
+	// CONFIRMED; WU-B1, WU-B2, WU-AICOMP3, WU-AICOMP4); with a waypoint
+	// still ahead it is not.
 	tests := []struct {
 		name string
 		edit func(*Game)
@@ -191,12 +203,22 @@ func TestConfirmedTransferFleetRefused(t *testing.T) {
 	}
 	for _, tt := range tests {
 		g := transferGame()
+		g.Fleets[0].Waypoints = nil
 		tt.edit(&g)
 		ev := g.loadPass(true)
-		f := g.Fleets[0]
-		if f.ID != 1 || f.Owner != 0 || f.Task != (Task{}) || len(ev) == 0 || ev[0].Kind != EventFleetGiftRefused || GiftRefusal(ev[0].Count) != tt.why {
-			t.Errorf("%s: fleet %+v events %v", tt.name, f, ev)
+		if len(ev) > 0 && ev[0].Kind == EventFleetGiftRefused && GiftRefusal(ev[0].Count) == GiftNoRoom {
+			ev = slices.Delete(ev, 1, 2) // the recipient's 0x14a
 		}
+		f := g.Fleets[0]
+		if f.ID != 1 || f.Owner != 0 || f.Task != (Task{}) || len(ev) != 2 || ev[0].Kind != EventFleetGiftRefused || GiftRefusal(ev[0].Count) != tt.why ||
+			ev[1].Kind != EventFleetArrived || ev[1].Fleet != 1 || ev[1].Player != 0 {
+			t.Errorf("%s: fleet %+v events %v, want the refusal then 0x04e", tt.name, f, ev)
+		}
+	}
+	g := transferGame()
+	g.Players[1].Dead = true
+	if ev := g.loadPass(true); len(ev) != 1 || ev[0].Kind != EventFleetGiftRefused {
+		t.Errorf("waypoint ahead: events %v, want the refusal only", ev)
 	}
 }
 

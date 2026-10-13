@@ -90,6 +90,7 @@ The harness now compares `message` expectations (vectors/README.md "message": pl
 - 0x004 from `EventDropRepelled`, sent to the planet's owner;
 - 0x035–0x038 from `EventBuilt` of factories or mines, with MESSAGES.md's merge rule for build counts;
 - 0x04e from `EventFleetArrived`;
+- 0x02e from `EventColonistsBeamedDown` (added later; see below);
 - 0x05b from `EventFleetScrapped` in deep space;
 - 0x083–0x086 from `EventCometStrike`, by size;
 - 0x08f and 0x090 from `EventBombed` followed by `EventPlanetEmptied`.
@@ -102,7 +103,7 @@ Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0
 - 21 are new missing-mechanic lines. Each fails on every seed variant:
   - **economy, 10 lines:** 0x026 overcrowding (7: each restart and the chained run's first year), 0x050 research level gained (2: Y2, Y3) and 0x05f component available (1: Y3);
   - **lane D, 9 lines:** no per-player battle summary: 0x095 (4), 0x116 (3), 0x09f (1) and 0x0a1 (1);
-  - **lane A, 2 lines:** 0x02e, colonists beamed down by an unload task (Y1 and the chained year 1).
+  - **lane A, 2 lines:** 0x02e, colonists beamed down by an unload task (Y1 and the chained year 1). Cleared since: an unload task that drops colonists on the fleet owner's own planet sends `EventColonistsBeamedDown`, and both lines match on the reference seed.
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
@@ -118,7 +119,7 @@ The other classes stay 0. The 21 missing-mechanic field lines are the message li
 - 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
 - 0x026: also in KX-002 G1 and KX-005 T0–T2.
 - RG-002: Y1, Y6, and the chained 2463 and 2468.
-- **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sends no `EventFleetArrived` after the refusal.
+- **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sent no `EventFleetArrived` after the refusal. Cleared since: a refused gift ends the task, and a fleet with no waypoints ahead gets `EventFleetArrived` after the refusal; a fleet given away gets none. The four cases are back in the baseline.
 
 ### Battle summaries (lane D)
 

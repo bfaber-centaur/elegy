@@ -19,7 +19,7 @@ func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
 		0x026: "EventOvercrowded",
-		0x02e: "none: no event for colonists beamed down by an unload task",
+		0x02e: "EventColonistsBeamedDown",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
 		0x037: "EventBuilt of mines, one in all (merge rule)",
@@ -176,6 +176,8 @@ func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
 					send(ev.Player, 0x05f)
 				}
 			}
+		case engine.EventColonistsBeamedDown:
+			send(ev.Player, 0x02e)
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
 				send(ev.Player, 0x05b)
