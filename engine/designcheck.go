@@ -37,20 +37,27 @@ package engine
 // designs written into a game from outside. The hull is not checked.
 //
 // A design received with a fleet transfer (DesignSlot.Received) is not
-// checked: CONFIRMED by prediction for the year of the transfer and the
-// year after (stars-elegy #200, T15 cases
-// DC-2 and DC-5: the recipient's copy kept an out-of-tech scanner while
-// the recipient's own design of it lost it); the giver keeps its own
-// design (MEASURED). Keeping the exemption in later years is ASSUMPTION
-// T15 (NOT RUN); the cause is unknown.
+// checked, whichever player receives it: CONFIRMED by prediction for the
+// year of the transfer and the year after (stars-elegy #200, PARITY.md
+// "The design check: timing, transfers, energy and loads", DC-5: the
+// recipient's copy kept an out-of-tech scanner while the recipient's own
+// design of it lost it; DC-2 MEASURED the same with the other player
+// receiving). Keeping the exemption in later years is ASSUMPTION T15
+// (NOT RUN); why the copy escapes is unknown.
+//
+// From the same cases, CONFIRMED by prediction: the check uses the tech
+// from before the year's research, a level-up from stored research
+// included (DC-1); an energy-gated part is checked like the others
+// (DC-3); the check runs before the waypoint-0 load tasks, and a fleet
+// keeps cargo above its design's new capacity (DC-6).
 //
 // ASSUMPTION T15 (NOT RUN): the check runs in KERNEL.md "Turn order"
-// step 1a.2, the ship-design housekeeping, with the tech from before the
-// year's research; starbase designs are not checked; an emptied engine
-// slot is back-filled with the basic engine at the slot's capacity, as
-// ReadDesign does (the basic engine adds no fuel or cargo capacity);
-// fleets keep their fuel and cargo even above the new capacities; and a
-// received design stays exempt after the year following its transfer.
+// step 1a.2, the ship-design housekeeping, after the year's orders;
+// starbase designs are not checked; an emptied engine slot is back-filled
+// with the basic engine at the slot's capacity, as ReadDesign does (the
+// basic engine adds no fuel or cargo capacity); fleets keep their fuel
+// even above the new capacity; and a received design stays exempt after
+// the year following its transfer.
 func (g *Game) checkDesigns() {
 	cat := Components()
 	for _, ds := range g.DesignSlots {

@@ -116,7 +116,8 @@ func TestMeasuredDesignCheckShipsAct(t *testing.T) {
 // engine slot gets the basic engine at the slot's capacity, a misslotted
 // part is removed with no mass change, a lesser-racial-trait part is
 // checked like any other, starbase designs and other owners' designs are
-// left alone, and fleets keep fuel and cargo.
+// left alone, and fleets keep fuel and cargo (cargo above the new
+// capacity is CONFIRMED by prediction, stars-elegy #200 DC-6).
 func TestAssumptionDesignCheck(t *testing.T) {
 	cat := Components()
 	l := newTKLab(t, 3)
@@ -231,11 +232,11 @@ func TestAssumptionDesignCheckEachField(t *testing.T) {
 	}
 }
 
-// TestAssumptionDesignCheckBeforeLevelUp: the check runs at step 1a.2,
-// before the year's first level-up check (step 2.4): a part whose field
-// rises to its level at step 2.4 is still removed that year (ASSUMPTION
-// T15).
-func TestAssumptionDesignCheckBeforeLevelUp(t *testing.T) {
+// TestConfirmedDesignCheckBeforeLevelUp: the check uses the tech from
+// before the year's research: a part whose field rises to its level from
+// stored research at the step 2.4 level-up is still removed that year
+// (CONFIRMED by prediction, stars-elegy #200 DC-1).
+func TestConfirmedDesignCheckBeforeLevelUp(t *testing.T) {
 	l := newTKLab(t, 3)
 	l.g.Players[0].Research.Levels = [NumFields]int{26, 13, 26, 26, 26, 26} // Cherry needs weapons 14
 	l.g.Players[0].Research.Accumulated[Weapons] = 1 << 20
@@ -294,12 +295,11 @@ func TestAssumptionDesignCheckAfterOrders(t *testing.T) {
 
 // TestConfirmedDesignCheckReceived: a design received with a fleet
 // transfer is not checked against the recipient's tech in the transfer
-// year or the next (CONFIRMED by prediction, stars-elegy #200, DC-2,
-// DC-5), while the recipient's own identical design loses the part; the
-// giver keeps its original in the transfer year (MEASURED, DC-5). ASSUMPTION
-// T15 (NOT RUN): the giver's original is still checked against the
-// giver's tech (here lowered before the second year), and the copy stays
-// exempt in the third year.
+// year or the next (CONFIRMED by prediction, stars-elegy #200, DC-5;
+// DC-2 MEASURED), while the recipient's own identical design loses the part.
+// ASSUMPTION T15 (NOT RUN): the giver's original is still checked against
+// the giver's tech (here lowered before the second year), and the copy
+// stays exempt in the third year.
 func TestConfirmedDesignCheckReceived(t *testing.T) {
 	cat := Components()
 	c, _ := cat.Lookup("Possum Scanner")
@@ -372,5 +372,57 @@ func TestDesignSlotReceivedCleared(t *testing.T) {
 	}
 	if !l.g.DesignSlots[0].Received {
 		t.Error("the game passed in was changed")
+	}
+}
+
+// TestConfirmedDesignCheckBeforeLoads: the check runs before the
+// waypoint-0 load tasks, so a ship whose Super Cargo Pod is removed loads
+// nothing that year while a Cargo Pod ship on the same task loads; a ship
+// already holding more than the new capacity keeps its cargo (CONFIRMED
+// by prediction, stars-elegy #200 DC-6).
+func TestConfirmedDesignCheckBeforeLoads(t *testing.T) {
+	l := newTKLab(t, 3)
+	l.g.Players[0].Research.Levels = [NumFields]int{26, 26, 26, 8, 26, 26} // the Super Cargo Pod needs construction 9
+	pi := l.planet(0, 0, 100000)
+	l.g.Planets[pi].Surface = Minerals{1000, 0, 0}
+	super := l.design("Scout", SlotFill{0, "Long Hump 6", 1}, SlotFill{2, "Super Cargo Pod", 1})
+	plain := l.design("Scout", SlotFill{0, "Long Hump 6", 1}, SlotFill{2, "Cargo Pod", 1})
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: super}, {Owner: 0, Slot: 1, Design: plain}}
+	load := Task{Kind: TaskTransport}
+	load.Transport[Ironium] = Transport{Action: LoadAll}
+	p := l.g.Planets[pi]
+	var fleets []int
+	for _, d := range []int{super, plain, super} {
+		fi := l.fleet(0, pi, 0, Stack{Design: d, Count: 1})
+		l.g.Fleets[fi].Waypoints = []Waypoint{{Pos: p.Pos, Target: TargetPlanet, ID: p.ID, Task: load}}
+		l.g.Fleets[fi].Task = load
+		fleets = append(fleets, fi)
+	}
+	l.g.Fleets[fleets[2]].Cargo.Minerals[Ironium] = 80
+	if l.g.Designs[super].CargoCapacity == 0 || l.g.Designs[plain].CargoCapacity == 0 {
+		t.Fatal("a pod adds no cargo capacity")
+	}
+	r := l.turn(&seqRand{})
+	cargo := func(fi int) int {
+		id := l.g.Fleets[fi].ID
+		for _, f := range r.Game.Fleets {
+			if f.ID == id {
+				return f.Cargo.Minerals[Ironium]
+			}
+		}
+		t.Fatalf("fleet %d is gone", id)
+		return 0
+	}
+	if c := r.Game.Designs[super].CargoCapacity; c != 0 {
+		t.Fatalf("design cargo capacity %d, want 0 with the pod removed", c)
+	}
+	if got := cargo(fleets[0]); got != 0 {
+		t.Errorf("Super Cargo Pod ship loaded %d, want 0", got)
+	}
+	if got := cargo(fleets[1]); got == 0 {
+		t.Error("Cargo Pod ship loaded 0, want a load")
+	}
+	if got := cargo(fleets[2]); got != 80 {
+		t.Errorf("Super Cargo Pod ship holding 80 kT has %d, want 80 kept", got)
 	}
 }
