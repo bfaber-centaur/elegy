@@ -294,14 +294,15 @@ func TestMeasuredCB059ThirdPlayer(t *testing.T) {
 }
 
 func TestConfirmedPQ1SummaryPlayerCountIsN(t *testing.T) {
-	// PQ-1b (CONFIRMED by prediction, 6 of 6 streams; stars-elegy CB-061,
-	// pending): players 0, 1 and 2 fought at player 3's planet, whose
+	// CB-061 PQ-1b (CONFIRMED by prediction, 6 of 6 streams; stars-elegy
+	// 19896cd): players 0, 1 and 2 fought at player 3's planet, whose
 	// unarmed starbase took no part. All four got one 0x0a8 with races
 	// count 3, the number who fought (n), not the 4 in P. Its other counts
 	// (MEASURED, read after the run): your losses, your ships, everyone
 	// else's losses, everyone else's ships; P0 1,2,0,5; P1 and P2
 	// 0,2,1,5; P3 0,1,1,6, its starbase its own ship and among everyone
-	// else's for the fighters.
+	// else's for the fighters. In the deep-space control (CONFIRMED by
+	// prediction) player 3 was absent: the fighters got 3, totals 2 and 4.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)}
 	g := &Game{Rules: ElegyRules(), Players: make([]Player, 4), Designs: d}
 	g.Planets = []Planet{{ID: 5, Owner: 3, Pos: Point{100, 100}, HasStarbase: true, StarbaseDesign: 1}}
@@ -330,6 +331,20 @@ func TestConfirmedPQ1SummaryPlayerCountIsN(t *testing.T) {
 	for _, e := range ev {
 		if BattleSummary(e.Count) != SummaryMultiOneSideNoLoss || !reflect.DeepEqual(e.Axes[:SummaryDesign], want[e.Player]) {
 			t.Errorf("player %d: summary %d, axes %v; want %d (0x0a8), %v", e.Player, e.Count, e.Axes[:SummaryDesign], SummaryMultiOneSideNoLoss, want[e.Player])
+		}
+	}
+	// The control: no planet, P is the three who fought.
+	g.Planets = nil
+	b.loc.planet, b.players = -1, []int{0, 1, 2}
+	b.tokens = b.tokens[:3]
+	ev = b.summaries(-1)
+	want = map[int][]int{0: {3, 2, 1, 4, 0}, 1: {3, 2, 0, 4, 1}, 2: {3, 2, 0, 4, 1}}
+	if len(ev) != 3 {
+		t.Fatalf("control: summaries %+v, want 3", ev)
+	}
+	for _, e := range ev {
+		if BattleSummary(e.Count) != SummaryMultiOneSideNoLoss || !reflect.DeepEqual(e.Axes[:SummaryDesign], want[e.Player]) {
+			t.Errorf("control: player %d: summary %d, axes %v; want %d (0x0a8), %v", e.Player, e.Count, e.Axes[:SummaryDesign], SummaryMultiOneSideNoLoss, want[e.Player])
 		}
 	}
 }

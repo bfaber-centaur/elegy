@@ -253,9 +253,9 @@ func (b *battle) summaries(planetID int) []Event {
 		}
 		axes := make([]int, summaryAxes)
 		// The races count is the number who fought, not the recipients
-		// (CONFIRMED by prediction, PQ-1b, 6 of 6 streams: three fought at
-		// a fourth player's planet whose unarmed starbase took no part, and
-		// all four got 0x0a8 with 3).
+		// (CONFIRMED by prediction, CB-061 PQ-1b, stars-elegy 19896cd, 6 of
+		// 6 streams: three fought at a fourth player's planet whose unarmed
+		// starbase took no part, and all four got 0x0a8 with 3).
 		axes[SummaryOther] = b.involved
 		axes[SummaryTotal], axes[SummaryLost] = me.total, me.lost
 		axes[SummaryOtherTotal], axes[SummaryOtherLost] = other.total, other.lost
