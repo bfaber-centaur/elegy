@@ -380,8 +380,11 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
 				// Slots: the salvage's object id, 0x2000 + owner·512 +
-				// number (MESSAGES.md "Object ids in slots", MEASURED
-				// SV-1), then the fleet, whose owner bits are UNRESOLVED.
+				// number, its number from the owner's pool shared with
+				// packets (MESSAGES.md "Object ids in slots", MEASURED
+				// SV-1), then the fleet, not compared: whether its slot
+				// carries the owner bits is UNRESOLVED (the MESSAGES.md
+				// contradiction, #204).
 				m := pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
 					why: "0x05b salvage and fleet slots"}
 				if len(ev.Axes) == 1 {
@@ -443,8 +446,10 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				// The fleet whose plan started the pass, saved at bombing
 				// time (it can be gone by the end of the year). With more
 				// than one of the bomber's fleets in orbit the message is
-				// 0x17c/0x17d (MESSAGES.md 0x08f, 0x17c); which fleets
-				// count, and which one 0x17c names, are not in the spec.
+				// 0x17c/0x17d (MESSAGES.md 0x08f, 0x17c; CONFIRMED
+				// tk2/tk121). Which fleets count (all in orbit, or those
+				// with bombs) and which fleet the message names when the
+				// pass was started by one without bombs: ASSUMPTION.
 				b := events[i-1]
 				m := pvMsg{id: 0x08f, params: []int{0, ev.Planet - 1}, known: []bool{false, true}, why: "0x08f bombing fleet"}
 				if len(b.Axes) == 2 && b.Axes[1] > 1 {

@@ -8,7 +8,8 @@ const TaskScrap TaskKind = TaskRoute + 5
 const (
 	// EventFleetScrapped: Player's Fleet was scrapped at Planet (−1 in
 	// deep space); Axes = the number of the salvage it left in deep
-	// space (the first, if the minerals overflowed into several).
+	// space (the first, if the minerals overflowed into several:
+	// ASSUMPTION, no run has overflowed).
 	EventFleetScrapped EventKind = iota + EventPacketDesignSeen + 1
 	// EventScrapRecycled: ships scrapped at Player's Planet added Count
 	// resources to its production (Ultimate Recycling).
