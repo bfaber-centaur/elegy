@@ -288,10 +288,16 @@ func TestFieldOrder(t *testing.T) {
 
 // TestLevelEventsAnnounceOrder checks the order of a level's component
 // messages (MESSAGES.md "Order of the component messages within one
-// level" at stars-elegy f2778b3).
+// level" at stars-elegy f5bffd8).
 func TestLevelEventsAnnounceOrder(t *testing.T) {
-	tt := pgRace()
+	joat := pgRace()
+	joat.PRT = PRTJackOfAllTrades
+	tt := joat
 	tt.LRT.TotalTerraforming = true
+	isb := pgRace()
+	isb.PRT = PRTInnerStrength
+	isb.LRT.ImprovedStarbases = true
+	aoC := [NumFields]int{Energy: 1, Weapons: 1, Propulsion: 1, Construction: 10, Electronics: 10}
 	for _, c := range []struct {
 		name   string
 		race   Race
@@ -306,11 +312,21 @@ func TestLevelEventsAnnounceOrder(t *testing.T) {
 		// index order.
 		{"construction 3", pgRace(), [NumFields]int{Construction: 2}, Construction,
 			[]string{"level 3 3", "part 3 Crobmnium", "part 3 Cargo Pod", "part 3 Medium Freighter", "part 3 Destroyer"}},
-		{"biotech 1", pgRace(), [NumFields]int{Energy: 1, Weapons: 1, Propulsion: 1}, Biotech,
+		// CONFIRMED by prediction, AO-1 (a) (stars-elegy f5bffd8): JOAT,
+		// energy 4 → 5: scanners in index order, electrical, terraforming,
+		// then the planetary scanner before the planetary defense.
+		{"AO-1 (a)", joat, [NumFields]int{Energy: 4, Electronics: 16, Biotech: 7}, Energy,
+			[]string{"level 0 5", "part 0 Dolphin Scanner", "part 0 Cheetah Scanner", "part 0 Battle Super Computer", "part 0 Temp Terraform ±7", "part 0 Snooper 500X", "part 0 Missile Battery"}},
+		// CONFIRMED by prediction, AO-1 (b): IS with ISB, construction
+		// 3 → 4: shield, mining robot, starbase hull, then ship hulls.
+		{"AO-1 (b)", isb, [NumFields]int{Energy: 7, Electronics: 2, Construction: 3}, Construction,
+			[]string{"level 3 4", "part 3 Croby Sharmor", "part 3 Robo-Miner", "part 3 Space Dock", "part 3 Privateer", "part 3 Fuel Transport"}},
+		// CONFIRMED by prediction, AO-1 (c) and its control: a Total
+		// Terraforming race is not told about the single-axis ±3
+		// terraforms (BINARY-ONLY beyond these starts).
+		{"AO-1 (c) control", joat, aoC, Biotech,
 			[]string{"level 5 1", "part 5 Gravity Terraform ±3", "part 5 Temp Terraform ±3", "part 5 Radiation Terraform ±3"}},
-		// BINARY-ONLY: a Total Terraforming race is not told about the
-		// single-axis ±3 terraforms.
-		{"biotech 1, Total Terraforming", tt, [NumFields]int{Energy: 1, Weapons: 1, Propulsion: 1}, Biotech,
+		{"AO-1 (c), Total Terraforming", tt, aoC, Biotech,
 			[]string{"level 5 1"}},
 	} {
 		g := Game{Players: []Player{{Race: c.race}}}
@@ -322,9 +338,9 @@ func TestLevelEventsAnnounceOrder(t *testing.T) {
 	}
 }
 
-// TestAnnounceOrder pins the BINARY-ONLY parts of the order (MESSAGES.md
-// at stars-elegy f2778b3): starbase hulls after orbital parts and before
-// electrical parts; electrical, mechanical, then terraforming parts,
+// TestAnnounceOrder pins the placements AO-1 did not run, BINARY-ONLY
+// (MESSAGES.md at stars-elegy f5bffd8): starbase hulls after orbital
+// parts and before electrical parts; electrical, mechanical, then terraforming parts,
 // before the ship hulls; planetary scanners, then defenses, then the Genesis
 // Device, after the ship hulls; index order within a category.
 func TestAnnounceOrder(t *testing.T) {
