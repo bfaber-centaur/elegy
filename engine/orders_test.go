@@ -459,7 +459,7 @@ func TestConfirmedManualTransfersToOthers(t *testing.T) {
 	if f := g.Fleets[3]; f.Cargo != (Cargo{Minerals: Minerals{0, 5, 0}, Colonists: 5}) {
 		t.Errorf("giver's cargo %+v", f.Cargo)
 	}
-	if !reflect.DeepEqual(a.drops, []drop{{planet: 1, player: 0, troops: 10}}) {
+	if !reflect.DeepEqual(a.drops, []drop{{planet: 1, player: 0, troops: 10, fleet: 1}}) {
 		t.Errorf("drops %+v, want 10 onto planet 2", a.drops)
 	}
 	if len(a.Events) != 1 || a.Events[0].Kind != EventColonistsLostGiven || a.Events[0].Count != 25 {

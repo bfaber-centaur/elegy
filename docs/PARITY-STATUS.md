@@ -23,11 +23,12 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 |
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
-| sample | 1024 / 199 | 5291 / 451 | 2523 / 263 |
-| not compared | 2 / 2 | 9 / 9 | 19 / 19 |
-| total | 1314 | 5943 | 2893 |
+| sample | 1024 / 199 | 5291 / 451 | 2531 / 263 |
+| not compared | 2 / 2 | 6 / 6 | 7 / 7 |
+| total | 1314 | 5937 | 2877 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
+- Updated 2026-10-13 (lane A, invasion messages): 0x004's slots and 0x007 are now compared (section "Invasion messages"). RG-003 loses 3 not-compared lines in the chained run and 3 in the restarts, which all match. RG-004 loses 12 and 12: the restarts' 0x007 match, and the chained run gains 8 sample lines (years 3, 4, 8, 9, 10, after the year-1 divergence). The rows were "not compared 2 / 2 | 9 / 9 | 19 / 19", "sample 1024 / 199 | 5291 / 451 | 2523 / 263" and the totals 1314, 5943, 2893.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -45,6 +46,8 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
 
 Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
+
+Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones are samples.
 
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
@@ -76,14 +79,12 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
-| 0x004 colonists and player slots | 0 | 2 | 0 | lane A, with the invasion messages |
-| 0x007 planet captured has no event mapping (message and sequence entry) | 0 | 4 | 24 | lane A, with the invasion messages |
 | 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 4 | 18 | 38 | |
+| total | 4 | 12 | 14 | |
 
-- stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. The mapping is still missing.
+- stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 24) are gone.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
 
 ## RG-002: full-order six-year regression
@@ -365,6 +366,20 @@ Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
   - With two or more of the bomber's fleets in orbit, the message is 0x17c/0x17d (MESSAGES.md, CONFIRMED tk2/tk121), with the fleet slot not compared. Which fleets count (all in orbit, or those with bombs) and which fleet 0x08f names when the pass was started by a fleet without bombs are ASSUMPTION: every vector case had one fleet in orbit. No vector names 0x17c or 0x17d.
 - Census: "0x05b salvage and fleet slots" (4) becomes "0x05b fleet slot" (4); "0x08f and 0x090 bombing fleet" (16) is gone.
 
+### Invasion messages (lane A)
+
+Measured on elegy main `fb3835b` (#249).
+
+- **Mapped** by MESSAGES.md "Invasion slots" (stars-elegy #204, e1b2ad9; MEASURED: TK-301, TK-302, GC-1, RG-003, RG-004):
+  - **0x004** keeps its trigger (`EventDropRepelled`, to the planet's owner) and now compares every slot: planet, troops (two slots), attacker + 0x30. Troops are what the attacker dropped there that year, which the event already counted.
+  - **0x00c** to the winner (former owner + 0x20, planet) and **0x007** to the former owner (winner + 0x30, planet, troops in two slots), from the new `EventPlanetCaptured` (kind 99). Its troops are everything the winner dropped there that year (GC-1: 560 for 395 + 165).
+  - The player flags 0x30 and 0x20 are MEASURED values; reading them as article flags over the player number is BINARY-ONLY, and the 0x0f mask is inferred.
+- **Order.** A fleet whose unload task dropped colonists on another player's planet is told it has finished (0x04e) after every drop of the phase is resolved. MEASURED, one run each: in TK-501 and WU-CAP that fleet's 0x04e came after the capture's 0x00c, while in TK-201 the mineral unloads' 0x04e came before the capture. Inferred: that the drop is what decides it. TK-201, TK-501 and WU-CAP pin it: without the hold, TK-501 and WU-CAP fail on order once 0x00c is compared; holding every 0x04e back fails TK-201.
+- **Other corpora:** 14 expectations that were skipped are now compared (0x007 6, 0x00c 4, and the `message_sequence` skips of 0x004's slots 2 and 0x007 2). Every per-corpus tally and the parity baseline are unchanged.
+- **RG-003:** the six "not compared" lines go: y7's 0x004 [51, 550, 0, 49] and y12's 0x007 [49, 49, 600, 0] match, in the chained run and the restarts.
+- **RG-004:** the 24 "not compared" 0x007 lines go. The 12 in the restarts (years 2, 3, 4, 5, 8, 9, 10) match. Of the 12 in the chained run, 6 match (y2 #233 #234, y3 #241, y5 #226 #227, y9 #231) and 6 become samples, from the chained state after the year-1 divergence: y3 #242 (sent, want not sent), y4 #223, y8 #238 and #239, y9 #232, y10 #241 (not sent). Two more sample lines are y4 #224's two 0x007 sequence entries (not sent), which no earlier line named (the entry's 0x040 stays not compared). 8 sample lines in all.
+- **Census:** skips.txt loses "message 0x007 has no event mapping" (20), "message 0x00c has no event mapping" (4), "message_sequence 0x004 colonists and player slots not compared" (2) and "message_sequence entry 0x007 has no event mapping" (12). No case changes status; the chained RG-004 cases that already failed (2468, 2469, 2473, 2474, 2475) list the new sample differences. baseline.txt is unchanged.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
@@ -397,7 +412,7 @@ Counts are from the reference seed on main `217ab4b`.
   - 0x05f's part focus and category-mask slots, because only terraform's mask (0x2000, EM-1) is published;
   - the bombing fleet of 0x08f and 0x090;
   - 0x05b's salvage and fleet slots;
-  - 0x004's colonists and player slots;
+  - 0x004's colonists and player slots (compared since; see "Invasion messages");
   - 0x02e's mineral and location slots, because MESSAGES.md does not say which word of a planet location holds the planet;
   - a battle summary's focus and slots;
   - 0x04e's and 0x02e's fleet when the fleet is gone by the end of the year.

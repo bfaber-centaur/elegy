@@ -110,7 +110,15 @@ func TestPvMessageList(t *testing.T) {
 		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
 			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, false}, why: "0x05b salvage and fleet slots"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,
-			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 0, 0, 0}, known: []bool{true, false, false, false}, why: "0x004 colonists and player slots"}}},
+			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 3, 0, 0x31}, known: all(4)}}},
+		// MESSAGES.md "Invasion slots": RG-003-Y7-2469's 0x004 is [51, 550, 0, 49].
+		{"repelled, long troops", []engine.Event{{Kind: engine.EventDropRepelled, Player: 3, Planet: 5, Count: 70000}}, 2,
+			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1, 0x33}, known: all(4)}}},
+		{"captured, to the winner", []engine.Event{{Kind: engine.EventPlanetCaptured, Player: 1, Planet: 5, Fleet: -1, Count: 600, Axes: []int{2}}}, 1,
+			[]pvMsg{{id: 0x00c, focus: 4, focusKnown: true, params: []int{0x22, 4}, known: all(2)}}},
+		// RG-003-Y12-2474's 0x007 is [49, 49, 600, 0].
+		{"captured, to the former owner", []engine.Event{{Kind: engine.EventPlanetCaptured, Player: 1, Planet: 5, Fleet: -1, Count: 70000, Axes: []int{2}}}, 2,
+			[]pvMsg{{id: 0x007, focus: 4, focusKnown: true, params: []int{0x31, 4, 70000 - 65536, 1}, known: all(4)}}},
 		{"bombed empty, to the bomber", []engine.Event{{Kind: engine.EventBombed, Player: 1, Planet: 5, Fleet: 9, Axes: []int{4, 1}}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5}}, 1,
 			[]pvMsg{{id: 0x08f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 4}, known: all(2)}}},
 		{"bombed empty, to the owner", []engine.Event{{Kind: engine.EventBombed, Player: 1, Planet: 5, Fleet: 9, Axes: []int{4, 1}}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5}}, 2,

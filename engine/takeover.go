@@ -15,10 +15,17 @@ const (
 	EventBombed         EventKind = iota + EventBattleTech + 1 // Player = bomber, Planet, Fleet = the fleet whose plan started the pass, Count = population killed (units), Axes = that fleet's number and the bomber's fleets in orbit
 	EventPlanetEmptied                                         // Player = the old owner, Planet
 	EventColonized                                             // Player = the new owner, Planet, Count = population landed (units)
-	EventDropRepelled                                          // Player = attacker, Planet, Count = troops lost (units)
+	EventDropRepelled                                          // Player = attacker, Planet, Count = troops the attacker dropped there this year (units)
 	EventDropRefused                                           // Player, Fleet, Planet: the colonists stay aboard
 	EventColonizeFailed                                        // Player, Fleet, Planet (or -1)
 )
+
+// EventPlanetCaptured is a capture by ground combat (MESSAGES.md 0x007
+// and 0x00c): Player = the winner, Planet, Count = the troops the winner
+// dropped there this year (units), Axes[0] = the former owner. It comes
+// after the planet's EventPlanetEmptied and before the winner's
+// EventColonized.
+const EventPlanetCaptured EventKind = EventClaimAdjusted + 1
 
 // Load messages (KERNEL.md "Other movement rules"; MESSAGES.md). Elegy's
 // wording.
@@ -405,6 +412,7 @@ func (g *Game) firstStarbaseDesign(player int) (int, bool) {
 // drop is colonists queued to land on a planet (planet index).
 type drop struct {
 	planet, player, troops int
+	fleet                  int // the dropping fleet's id
 }
 
 // phaseStart records which planets are owned at the start of a waypoint
@@ -1029,7 +1037,7 @@ func (g *Game) dropColonists(f *Fleet, pi, amount int, owned []bool, queue *[]dr
 		g.Players[f.Owner].Race.PRT == PRTAlternateReality:
 		return []Event{{Kind: EventDropRefused, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: amount}}
 	}
-	*queue = append(*queue, drop{pi, f.Owner, amount})
+	*queue = append(*queue, drop{pi, f.Owner, amount, f.ID})
 	f.Cargo.Colonists -= amount
 	return nil
 }
@@ -1082,7 +1090,7 @@ func (g *Game) colonize(f *Fleet, queue *[]drop) (ev Event, ok bool) {
 	for m := range NumMinerals {
 		p.Surface[m] += 3*C[m]/4 + f.Cargo.Minerals[m]
 	}
-	*queue = append(*queue, drop{pi, f.Owner, f.Cargo.Colonists})
+	*queue = append(*queue, drop{pi, f.Owner, f.Cargo.Colonists, f.ID})
 	return Event{}, true
 }
 
@@ -1179,7 +1187,7 @@ func (g *Game) resolveDrops(pi int, drops []drop, rng Rand, gained map[int]bool)
 			}
 		}
 	}
-	D, captured := 0, false
+	D, captured, old := 0, false, p.Owner
 	var oldLevels [NumFields]int
 	if p.Owner != NoOwner {
 		D = p.Population
@@ -1209,6 +1217,9 @@ func (g *Game) resolveDrops(pi int, drops []drop, rng Rand, gained map[int]bool)
 		land = max(1, land*(best-second)/best)
 	}
 	repelled(w)
+	if captured {
+		events = append(events, Event{Kind: EventPlanetCaptured, Player: w, Planet: p.ID, Fleet: -1, Count: troops[w], Axes: []int{old}})
+	}
 	events = append(events, g.newColony(pi, w, land))
 	if captured {
 		events = append(events, techAttempt(g, rng, w, oldLevels, traderChances{}, gained)...)

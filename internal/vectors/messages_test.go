@@ -35,6 +35,7 @@ func TestPvMessages(t *testing.T) {
 		{"repelled: to the planet's owner, not the attacker", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5}}, [][2]int{{2, 0x004}}},
 		{"repelled at an emptied planet", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 6}}, nil},
 		{"repelled at a planet not in the game", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 7}}, nil},
+		{"captured: 0x00c to the winner, 0x007 to the former owner", []engine.Event{{Kind: engine.EventPlanetCaptured, Player: 1, Planet: 5, Fleet: -1, Count: 6, Axes: []int{2}}}, [][2]int{{1, 0x00c}, {2, 0x007}}},
 		{"one factory", []engine.Event{built(5, engine.ItemFactory, 1)}, [][2]int{{2, 0x035}}},
 		{"factories", []engine.Event{built(5, engine.ItemFactory, 3)}, [][2]int{{2, 0x036}}},
 		{"one mine", []engine.Event{built(5, engine.ItemMine, 1)}, [][2]int{{2, 0x037}}},

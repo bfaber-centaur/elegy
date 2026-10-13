@@ -6,7 +6,7 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 
 ## State
 
-- elegy main `5a735e1` (after #242). The RG vectors are stars-elegy main `104e8f5`'s, including #206's rebuilt year 6.
+- elegy main `5a735e1` (after #242). Updated 2026-10-13: #247 (bombing fleet) and lane A's invasion messages (0x004 slots, 0x007, 0x00c) have since moved the not-compared and sample counts below; PARITY-STATUS.md "Current status" carries the dated notes. The RG vectors are stars-elegy main `104e8f5`'s, including #206's rebuilt year 6.
 - The combined run on that SHA is recorded in [docs/PARITY-STATUS.md](docs/PARITY-STATUS.md) "Current status".
   - `go test ./...` passes.
   - The PR-subset long-game matrix passes: 24 games of 60 years, with replay and save/reload. The steward's full matrix is 64 cases at 150 years.
@@ -22,9 +22,10 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - Every compared difference is a sample, or random-driven: it matches on at least one of the 8 seed variants.
   - The chained runs diverge in year 1 and are samples after it.
   - Ledger lines (chained / restarts):
-    - RG-002: matched 8 / 44, random-driven 0 / 35, sample 1024 / 199, not compared 3 / 3.
-    - RG-003: matched 8 / 100, random-driven 0 / 75, sample 5291 / 451, not compared 11 / 11.
-    - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2523 / 263, not compared 19 / 19.
+    - RG-002: matched 8 / 44, random-driven 0 / 35, sample 1024 / 199, not compared 2 / 2.
+    - RG-003: matched 8 / 100, random-driven 0 / 75, sample 5291 / 451, not compared 6 / 6.
+    - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2531 / 263, not compared 7 / 7.
+    - Updated 2026-10-13: these were RG-002 not compared 3 / 3, RG-003 11 / 11, RG-004 sample 2523 / 263 and not compared 19 / 19 before #247 and the invasion messages.
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - RG-002 has 1867 orders, of which 37 are refused in the chained run.
   - RG-003 has 3731, with 220 refused in the chained run.
@@ -38,14 +39,12 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 - **Not compared, by owner:**
   - lane D: the 0x05b fleet slot, whose owner bits are UNRESOLVED (the salvage slot and the 0x08f/0x090 bombing fleet are compared since #247);
   - economy: a null `packet_destination` on a planet with no starbase (PK-1), 0x040 after it, and the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
-  - lane A: the 0x004 slots and 0x007, with the invasion messages;
   - lane B: `design_gone`.
   - `alt_battle` is judged by the battle harness instead of the vectors comparator.
 
 ## What still matters
 
-- The not-compared lines are unjudged, not matched. RG-004's 24 0x007 lines and 8 0x040 lines are the largest group.
-  - stars-elegy MESSAGES.md "Invasion slots" now documents the 0x004 and 0x007 slots.
+- The not-compared lines are unjudged, not matched. RG-004's 8 0x040 lines are now the largest group (updated 2026-10-13: its 24 0x007 lines are compared since the invasion messages).
   - 0x040 also needs the previous-planet rule that picks 0x040 or 0x023.
 - `design_gone` (RG-004, 2 lines) is harness work for lane B.
 - Random-driven lines stay open until the original's generator is in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby).
@@ -54,4 +53,4 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 
 ## Best next move
 
-Map 0x007 (and 0x004's slots) from Elegy's capture events, following MESSAGES.md "Invasion slots". That turns RG-004's largest not-compared group into compared lines. Then regenerate the ledgers and baseline and classify whatever it exposes.
+Updated 2026-10-13: the invasion messages are mapped (0x004's slots, 0x007, 0x00c); the restarts' messages match and the chained ones are samples. The largest not-compared group left is RG-004's 0x040 (economy, after PK-1, with the previous-planet rule).

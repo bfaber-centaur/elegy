@@ -284,7 +284,7 @@ func (g *Game) giveToPlanet(f *Fleet, pi int, amounts [NumCargo + 1]int, a *Appl
 		if p.Owner == NoOwner || g.hasStarbase(pi) {
 			a.Events = append(a.Events, Event{Kind: EventColonistsLostGiven, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: n})
 		} else {
-			a.drops = append(a.drops, drop{planet: pi, player: f.Owner, troops: n})
+			a.drops = append(a.drops, drop{planet: pi, player: f.Owner, troops: n, fleet: f.ID})
 		}
 	}
 	if any {

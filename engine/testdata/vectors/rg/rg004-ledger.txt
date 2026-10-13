@@ -61,8 +61,6 @@ sample | rg004 | RG-004-2467 y2 #222 | player id=0 seen_by=0 | score_record.scor
 sample | rg004 | RG-004-2467 y2 #222 | player id=0 seen_by=0 | score_record.tech_level_sum = 35, want 36
 sample | rg004 | RG-004-2467 y2 #228 | player id=3 seen_by=3 | score_record.escort_ships = 29, want 28
 sample | rg004 | RG-004-2467 y2 #23 | fleet_gone owner=3 id=85 | fleet still exists
-not compared | rg004 | RG-004-2467 y2 #233 | message | message 0x007 has no event mapping
-not compared | rg004 | RG-004-2467 y2 #234 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004 | RG-004-2467 y2 #235 | player id=6 seen_by=6 | score_record.escort_ships = 29, want 30
 sample | rg004 | RG-004-2467 y2 #235 | player id=6 seen_by=6 | score_record.score = 247, want 248
 sample | rg004 | RG-004-2467 y2 #235 | player id=6 seen_by=6 | score_record.unarmed_ships = 20, want 19
@@ -154,8 +152,7 @@ sample | rg004 | RG-004-2468 y3 #236 | player id=3 seen_by=3 | score_record.plan
 sample | rg004 | RG-004-2468 y3 #236 | player id=3 seen_by=3 | score_record.resources = 1910, want 1904
 sample | rg004 | RG-004-2468 y3 #236 | player id=3 seen_by=3 | score_record.score = 179, want 176
 sample | rg004 | RG-004-2468 y3 #236 | player id=3 seen_by=3 | score_record.unarmed_ships = 89, want 90
-not compared | rg004 | RG-004-2468 y3 #241 | message | message 0x007 has no event mapping
-not compared | rg004 | RG-004-2468 y3 #242 | message_sequence | message_sequence entry 0x007 has no event mapping
+sample | rg004 | RG-004-2468 y3 #242 | message_sequence | message 0x007 (focus 48, params [51 48 114 0]) = sent, want not sent
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.planets = 37, want 38
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.resources = 1526, want 1477
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.score = 251, want 250
@@ -280,7 +277,9 @@ sample | rg004 | RG-004-2469 y4 #211 | object | wormhole: x = 1486, want 1106
 sample | rg004 | RG-004-2469 y4 #211 | object | wormhole: y = 1199, want 1339
 sample | rg004 | RG-004-2469 y4 #211 | object | wormhole: years_since_jump = 27, want 0
 not compared | rg004 | RG-004-2469 y4 #222 | message | message 0x040 has no event mapping
-not compared | rg004 | RG-004-2469 y4 #223 | message | message 0x007 has no event mapping
+sample | rg004 | RG-004-2469 y4 #223 | message | message 0x007 to player 0 present = false, want true
+sample | rg004 | RG-004-2469 y4 #224 | message_sequence | message 0x007 (focus 17, params [54 17 169 0]) = not sent
+sample | rg004 | RG-004-2469 y4 #224 | message_sequence | message 0x007 (focus 31, params [54 31 205 0]) = not sent
 not compared | rg004 | RG-004-2469 y4 #224 | message_sequence | message_sequence entry 0x040 has no event mapping
 sample | rg004 | RG-004-2469 y4 #225 | player id=0 seen_by=0 | score_record.planets = 50, want 48
 sample | rg004 | RG-004-2469 y4 #225 | player id=0 seen_by=0 | score_record.resources = 132, want 130
@@ -479,8 +478,6 @@ sample | rg004 | RG-004-2470 y5 #216 | object | wormhole: years_since_jump = 28,
 sample | rg004 | RG-004-2470 y5 #217 | object_gone subject={"kind":"packet","owner":4,"id":2} | packet still exists
 sample | rg004 | RG-004-2470 y5 #22 | fleet owner=3 id=30 | waypoints[0] position = {1309 1403}, want {1311 1403}
 sample | rg004 | RG-004-2470 y5 #22 | fleet owner=3 id=30 | waypoints[1] = {{1376 1069} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1401 1083} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-not compared | rg004 | RG-004-2470 y5 #226 | message | message 0x007 has no event mapping
-not compared | rg004 | RG-004-2470 y5 #227 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004 | RG-004-2470 y5 #228 | player id=0 seen_by=0 | score_record.planets = 48, want 46
 sample | rg004 | RG-004-2470 y5 #228 | player id=0 seen_by=0 | score_record.resources = 135, want 133
 sample | rg004 | RG-004-2470 y5 #228 | player id=0 seen_by=0 | score_record.score = 112, want 115
@@ -1157,8 +1154,8 @@ sample | rg004 | RG-004-2473 y8 #233 | player id=3 seen_by=3 | score_record.scor
 sample | rg004 | RG-004-2473 y8 #233 | player id=3 seen_by=3 | score_record.unarmed_ships = 110, want 96
 sample | rg004 | RG-004-2473 y8 #235 | player id=4 seen_by=4 | score_record.escort_ships = 4, want 3
 sample | rg004 | RG-004-2473 y8 #235 | player id=4 seen_by=4 | score_record.score = 234, want 232
-not compared | rg004 | RG-004-2473 y8 #238 | message | message 0x007 has no event mapping
-not compared | rg004 | RG-004-2473 y8 #239 | message_sequence | message_sequence entry 0x007 has no event mapping
+sample | rg004 | RG-004-2473 y8 #238 | message | message 0x007 to player 6 present = false, want true
+sample | rg004 | RG-004-2473 y8 #239 | message_sequence | message 0x007 (focus 48, params [51 48 114 0]) = not sent
 sample | rg004 | RG-004-2473 y8 #24 | fleet owner=3 id=94 | fleet gone
 sample | rg004 | RG-004-2473 y8 #240 | player id=6 seen_by=6 | score_record.escort_ships = 39, want 37
 sample | rg004 | RG-004-2473 y8 #240 | player id=6 seen_by=6 | score_record.planets = 38, want 40
@@ -1377,8 +1374,7 @@ sample | rg004 | RG-004-2474 y9 #222 | object | wormhole: known_to = [3 4], want
 sample | rg004 | RG-004-2474 y9 #222 | object | wormhole: x = 1458, want 1110
 sample | rg004 | RG-004-2474 y9 #222 | object | wormhole: y = 1205, want 1349
 sample | rg004 | RG-004-2474 y9 #222 | object | wormhole: years_since_jump = 32, want 5
-not compared | rg004 | RG-004-2474 y9 #231 | message | message 0x007 has no event mapping
-not compared | rg004 | RG-004-2474 y9 #232 | message_sequence | message_sequence entry 0x007 has no event mapping
+sample | rg004 | RG-004-2474 y9 #232 | message_sequence | message 0x007 (focus 13, params [54 13 56 0]) = not sent
 sample | rg004 | RG-004-2474 y9 #233 | player id=0 seen_by=0 | score_record.planets = 49, want 46
 sample | rg004 | RG-004-2474 y9 #233 | player id=0 seen_by=0 | score_record.resources = 160, want 157
 sample | rg004 | RG-004-2474 y9 #233 | player id=0 seen_by=0 | score_record.score = 113, want 115
@@ -1653,7 +1649,7 @@ sample | rg004 | RG-004-2475 y10 #236 | player id=0 seen_by=0 | score_record.una
 sample | rg004 | RG-004-2475 y10 #238 | player id=1 seen_by=1 | score_record.rank = 5, want 4
 sample | rg004 | RG-004-2475 y10 #240 | player id=2 seen_by=2 | score_record.rank = 3, want 2
 sample | rg004 | RG-004-2475 y10 #240 | player id=2 seen_by=2 | score_record.resources = 3064, want 3065
-not compared | rg004 | RG-004-2475 y10 #241 | message | message 0x007 has no event mapping
+sample | rg004 | RG-004-2475 y10 #241 | message | message 0x007 to player 3 present = false, want true
 not compared | rg004 | RG-004-2475 y10 #242 | message_sequence | message_sequence of sample entries only
 sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.escort_ships = 26, want 29
 sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.planets = 2, want 1
@@ -2533,7 +2529,6 @@ sample | rg004-y10 | RG-004-Y10-2475 y1 #225 | object | wormhole: x = 1610, want
 sample | rg004-y10 | RG-004-Y10-2475 y1 #225 | object | wormhole: y = 1576, want 1571
 sample | rg004-y10 | RG-004-Y10-2475 y1 #226 | object | wormhole: x = 1107, want 1120
 sample | rg004-y10 | RG-004-Y10-2475 y1 #226 | object | wormhole: y = 1357, want 1339
-not compared | rg004-y10 | RG-004-Y10-2475 y1 #241 | message | message 0x007 has no event mapping
 not compared | rg004-y10 | RG-004-Y10-2475 y1 #242 | message_sequence | message_sequence of sample entries only
 sample | rg004-y10 | RG-004-Y10-2475 y1 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 96, want 95
 sample | rg004-y10 | RG-004-Y10-2475 y1 #249 | player id=6 seen_by=6 | score_record.score = 300, want 303
@@ -2595,8 +2590,6 @@ sample | rg004-y2 | RG-004-Y2-2467 y1 #222 | player id=0 seen_by=0 | score_recor
 sample | rg004-y2 | RG-004-Y2-2467 y1 #228 | player id=3 seen_by=3 | score_record.escort_ships = 29, want 28
 sample | rg004-y2 | RG-004-Y2-2467 y1 #228 | player id=3 seen_by=3 | score_record.unarmed_ships = 91, want 90
 sample | rg004-y2 | RG-004-Y2-2467 y1 #23 | fleet_gone owner=3 id=85 | fleet still exists
-not compared | rg004-y2 | RG-004-Y2-2467 y1 #233 | message | message 0x007 has no event mapping
-not compared | rg004-y2 | RG-004-Y2-2467 y1 #234 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004-y2 | RG-004-Y2-2467 y1 #235 | player id=6 seen_by=6 | score_record.escort_ships = 29, want 30
 sample | rg004-y2 | RG-004-Y2-2467 y1 #235 | player id=6 seen_by=6 | score_record.score = 246, want 248
 sample | rg004-y2 | RG-004-Y2-2467 y1 #235 | player id=6 seen_by=6 | score_record.victory_conditions_met = [highest_score_after_years], want [highest_score_after_years lead_over_second_percent]
@@ -2638,8 +2631,6 @@ not compared | rg004-y3 | RG-004-Y3-2468 y1 #228 | message | message 0x040 has n
 not compared | rg004-y3 | RG-004-Y3-2468 y1 #229 | message_sequence | message_sequence entry 0x040 has no event mapping
 sample | rg004-y3 | RG-004-Y3-2468 y1 #230 | player id=0 seen_by=0 | score_record.score = 121, want 120
 sample | rg004-y3 | RG-004-Y3-2468 y1 #236 | player id=3 seen_by=3 | score_record.unarmed_ships = 89, want 90
-not compared | rg004-y3 | RG-004-Y3-2468 y1 #241 | message | message 0x007 has no event mapping
-not compared | rg004-y3 | RG-004-Y3-2468 y1 #242 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004-y3 | RG-004-Y3-2468 y1 #243 | player id=6 seen_by=6 | score_record.escort_ships = 32, want 31
 sample | rg004-y3 | RG-004-Y3-2468 y1 #243 | player id=6 seen_by=6 | score_record.score = 252, want 250
 not compared | rg004-y3 | RG-004-Y3-2468 y1 #244 | alt_battle x=1365 y=1400 | expectation alt_battle
@@ -2671,7 +2662,6 @@ sample | rg004-y4 | RG-004-Y4-2469 y1 #211 | object | wormhole: x = 1484, want 1
 sample | rg004-y4 | RG-004-Y4-2469 y1 #211 | object | wormhole: y = 1243, want 1339
 sample | rg004-y4 | RG-004-Y4-2469 y1 #211 | object | wormhole: years_since_jump = 27, want 0
 not compared | rg004-y4 | RG-004-Y4-2469 y1 #222 | message | message 0x040 has no event mapping
-not compared | rg004-y4 | RG-004-Y4-2469 y1 #223 | message | message 0x007 has no event mapping
 not compared | rg004-y4 | RG-004-Y4-2469 y1 #224 | message_sequence | message_sequence entry 0x040 has no event mapping
 sample | rg004-y4 | RG-004-Y4-2469 y1 #23 | fleet owner=3 id=40 | fleet gone
 sample | rg004-y4 | RG-004-Y4-2469 y1 #231 | player id=3 seen_by=3 | score_record.unarmed_ships = 90, want 92
@@ -2696,8 +2686,6 @@ sample | rg004-y5 | RG-004-Y5-2470 y1 #216 | object | wormhole: x = 1107, want 1
 sample | rg004-y5 | RG-004-Y5-2470 y1 #216 | object | wormhole: y = 1348, want 1350
 sample | rg004-y5 | RG-004-Y5-2470 y1 #217 | object_gone subject={"kind":"packet","owner":4,"id":2} | packet still exists
 sample | rg004-y5 | RG-004-Y5-2470 y1 #22 | fleet owner=3 id=30 | waypoints[1] = {{1411 1081} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1401 1083} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-not compared | rg004-y5 | RG-004-Y5-2470 y1 #226 | message | message 0x007 has no event mapping
-not compared | rg004-y5 | RG-004-Y5-2470 y1 #227 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004-y5 | RG-004-Y5-2470 y1 #234 | player id=3 seen_by=3 | score_record.unarmed_ships = 91, want 94
 sample | rg004-y5 | RG-004-Y5-2470 y1 #236 | player id=4 seen_by=4 | score_record.escort_ships = 2, want 1
 sample | rg004-y5 | RG-004-Y5-2470 y1 #236 | player id=4 seen_by=4 | score_record.score = 221, want 219
@@ -2755,8 +2743,6 @@ sample | rg004-y8 | RG-004-Y8-2473 y1 #216 | object | wormhole: y = 1591, want 1
 sample | rg004-y8 | RG-004-Y8-2473 y1 #217 | object | wormhole: x = 1122, want 1118
 sample | rg004-y8 | RG-004-Y8-2473 y1 #217 | object | wormhole: y = 1335, want 1345
 sample | rg004-y8 | RG-004-Y8-2473 y1 #233 | player id=3 seen_by=3 | score_record.unarmed_ships = 94, want 96
-not compared | rg004-y8 | RG-004-Y8-2473 y1 #238 | message | message 0x007 has no event mapping
-not compared | rg004-y8 | RG-004-Y8-2473 y1 #239 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004-y8 | RG-004-Y8-2473 y1 #25 | fleet owner=3 id=94 | waypoints[1] = {{1405 1090} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 6 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004-y8 | RG-004-Y8-2473 y1 #35 | fleet owner=6 id=1 | fuel = 1680, want 1380
 sample | rg004-y8 | RG-004-Y8-2473 y1 #35 | fleet owner=6 id=1 | waypoints[0] position = {1360 1363}, want {1353 1343}
@@ -2780,8 +2766,6 @@ sample | rg004-y9 | RG-004-Y9-2474 y1 #221 | object | wormhole: x = 1580, want 1
 sample | rg004-y9 | RG-004-Y9-2474 y1 #221 | object | wormhole: y = 1580, want 1576
 sample | rg004-y9 | RG-004-Y9-2474 y1 #222 | object | wormhole: x = 1114, want 1110
 sample | rg004-y9 | RG-004-Y9-2474 y1 #222 | object | wormhole: y = 1334, want 1349
-not compared | rg004-y9 | RG-004-Y9-2474 y1 #231 | message | message 0x007 has no event mapping
-not compared | rg004-y9 | RG-004-Y9-2474 y1 #232 | message_sequence | message_sequence entry 0x007 has no event mapping
 sample | rg004-y9 | RG-004-Y9-2474 y1 #239 | player id=3 seen_by=3 | score_record.unarmed_ships = 95, want 94
 sample | rg004-y9 | RG-004-Y9-2474 y1 #38 | fleet owner=6 id=1 | fuel = 1680, want 1380
 sample | rg004-y9 | RG-004-Y9-2474 y1 #38 | fleet owner=6 id=1 | waypoints[0] position = {1351 1368}, want {1351 1366}

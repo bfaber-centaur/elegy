@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -286,7 +287,7 @@ func TestConfirmedGroundCombat(t *testing.T) {
 	}
 	for _, tt := range tests {
 		l, pi := groundLab(t, tt.energy, tt.pop, tt.defs)
-		l.g.resolveQueue([]drop{{pi, 0, tt.troops}}, &seqRand{}, map[int]bool{})
+		l.g.resolveQueue([]drop{{pi, 0, tt.troops, -1}}, &seqRand{}, map[int]bool{})
 		p := l.g.Planets[pi]
 		if p.Owner != tt.wantOwner || p.Population != tt.wantPop {
 			t.Errorf("%s: owner %d pop %d, want %d and %d", tt.name, p.Owner, p.Population, tt.wantOwner, tt.wantPop)
@@ -310,25 +311,51 @@ func TestConfirmedGroundCombatGC1(t *testing.T) {
 	// landed and lost counts are inferred from the year-end population
 	// and carry, through the growth rule, because 0x007 does not report
 	// the landed count (stars-elegy PARITY.md GC-1).
+	//
+	// The messages (MESSAGES.md "Invasion slots", MEASURED): 0x007 and
+	// 0x004 name the 560 player 0 dropped, so the capture's
+	// EventPlanetCaptured and the repulse's EventDropRepelled count 560.
+	// The capture event names the former owner and comes after the
+	// planet is emptied and before the winner's colony.
 	for _, tt := range []struct {
 		name        string
 		pop         int
 		drops       []int
 		owner, want int
+		kinds       []EventKind
 	}{
-		{"C, 395 first", 329, []int{395, 165}, 0, 164},
-		{"C2, 165 first", 329, []int{165, 395}, 0, 164},
-		{"R, 395 first", 600, []int{395, 165}, 1, 134},
+		{"C, 395 first", 329, []int{395, 165}, 0, 164, []EventKind{EventPlanetEmptied, EventPlanetCaptured, EventColonized}},
+		{"C2, 165 first", 329, []int{165, 395}, 0, 164, []EventKind{EventPlanetEmptied, EventPlanetCaptured, EventColonized}},
+		{"R, 395 first", 600, []int{395, 165}, 1, 134, []EventKind{EventDropRepelled}},
 	} {
 		l, pi := groundLab(t, 26, tt.pop, 10)
 		var q []drop
 		for _, n := range tt.drops {
-			q = append(q, drop{pi, 0, n})
+			q = append(q, drop{pi, 0, n, -1})
 		}
-		l.g.resolveQueue(q, &seqRand{}, map[int]bool{})
+		ev := l.g.resolveQueue(q, &seqRand{}, map[int]bool{})
 		p := l.g.Planets[pi]
 		if p.Owner != tt.owner || p.Population != tt.want {
 			t.Errorf("%s: owner %d pop %d, want %d and %d", tt.name, p.Owner, p.Population, tt.owner, tt.want)
+		}
+		var kinds []EventKind
+		for _, e := range ev {
+			if e.Kind == EventPlanetEmptied || e.Kind == EventPlanetCaptured || e.Kind == EventColonized || e.Kind == EventDropRepelled {
+				kinds = append(kinds, e.Kind)
+			}
+			switch e.Kind {
+			case EventPlanetCaptured:
+				if e.Player != 0 || e.Planet != p.ID || e.Count != 560 || !reflect.DeepEqual(e.Axes, []int{1}) {
+					t.Errorf("%s: capture %+v, want player 0, planet %d, 560, former owner 1", tt.name, e, p.ID)
+				}
+			case EventDropRepelled:
+				if e.Player != 0 || e.Count != 560 {
+					t.Errorf("%s: repulse %+v, want player 0 and 560", tt.name, e)
+				}
+			}
+		}
+		if !reflect.DeepEqual(kinds, tt.kinds) {
+			t.Errorf("%s: events %v, want %v", tt.name, kinds, tt.kinds)
 		}
 	}
 }
@@ -349,7 +376,7 @@ func TestMeasuredGroundCombatPerDrop(t *testing.T) {
 		l, pi := groundLab(t, 26, 15542, 10)
 		var q []drop
 		for _, n := range tt.drops {
-			q = append(q, drop{pi, 0, n})
+			q = append(q, drop{pi, 0, n, -1})
 		}
 		l.g.resolveQueue(q, panicRand{}, map[int]bool{})
 		p := l.g.Planets[pi]
@@ -375,7 +402,7 @@ func TestConfirmedSeveralPlayersDrop(t *testing.T) {
 	for _, tt := range tests {
 		l := newTKLab(t, 3)
 		pi := l.planet(NoOwner, 0, 0)
-		l.g.resolveQueue([]drop{{pi, 0, tt.p0}, {pi, 1, tt.p1}}, panicRand{}, map[int]bool{})
+		l.g.resolveQueue([]drop{{pi, 0, tt.p0, -1}, {pi, 1, tt.p1, -1}}, panicRand{}, map[int]bool{})
 		p := l.g.Planets[pi]
 		if p.Owner != tt.wantOwner || p.Population != tt.wantPop {
 			t.Errorf("%s: owner %d pop %d, want %d and %d", tt.name, p.Owner, p.Population, tt.wantOwner, tt.wantPop)
@@ -697,7 +724,7 @@ func TestPredictionGroundStrengthTraits(t *testing.T) {
 	// Reality drops refused (TAKEOVER.md, BINARY-ONLY).
 	l, pi := groundLab(t, 3, 100, 0)
 	l.g.Players[0].Race.PRT = PRTWarMonger
-	l.g.resolveQueue([]drop{{pi, 0, 100}}, &seqRand{}, map[int]bool{})
+	l.g.resolveQueue([]drop{{pi, 0, 100, -1}}, &seqRand{}, map[int]bool{})
 	// Strength 165 vs 100: lands 100·65/165 = 39.
 	if p := l.g.Planets[pi]; p.Owner != 0 || p.Population != 39 {
 		t.Errorf("War Monger: owner %d pop %d, want 0 and 39", p.Owner, p.Population)
@@ -705,7 +732,7 @@ func TestPredictionGroundStrengthTraits(t *testing.T) {
 
 	l, pi = groundLab(t, 3, 100, 0)
 	l.g.Players[1].Race.PRT = PRTInnerStrength
-	l.g.resolveQueue([]drop{{pi, 0, 100}}, &seqRand{}, map[int]bool{})
+	l.g.resolveQueue([]drop{{pi, 0, 100, -1}}, &seqRand{}, map[int]bool{})
 	// D = 200 > 110: the planet loses ⌊100·110/200⌋ = 55.
 	if p := l.g.Planets[pi]; p.Owner != 1 || p.Population != 45 {
 		t.Errorf("Inner Strength: owner %d pop %d, want 1 and 45", p.Owner, p.Population)
@@ -735,20 +762,20 @@ func TestPredictionCaptureTech(t *testing.T) {
 	draws = append(draws, Energy, Weapons) // energy: 0 < 3, gained
 	rng := &seqRand{draws: draws}
 	gained := map[int]bool{}
-	ev := l.g.resolveQueue([]drop{{pi, 0, 100}}, rng, gained)
+	ev := l.g.resolveQueue([]drop{{pi, 0, 100, -1}}, rng, gained)
 	if !gained[0] || len(rng.draws) != 1 || l.g.Players[0].Research.Accumulated[Energy] == 0 {
 		t.Errorf("capture should gain energy research: gained %v, draws left %v, events %v", gained, rng.draws, ev)
 	}
 
 	l, pi = groundLab(t, 3, 100, 0)
-	l.g.resolveQueue([]drop{{pi, 0, 100}}, panicRand{}, map[int]bool{0: true})
+	l.g.resolveQueue([]drop{{pi, 0, 100, -1}}, panicRand{}, map[int]bool{0: true})
 	if l.g.Planets[pi].Owner != 0 {
 		t.Errorf("capture failed")
 	}
 
 	l = newTKLab(t, 3)
 	pi = l.planet(NoOwner, 0, 0)
-	l.g.resolveQueue([]drop{{pi, 0, 25}}, panicRand{}, map[int]bool{})
+	l.g.resolveQueue([]drop{{pi, 0, 25, -1}}, panicRand{}, map[int]bool{})
 	if l.g.Planets[pi].Owner != 0 {
 		t.Errorf("colonization failed")
 	}
@@ -1104,5 +1131,40 @@ func TestConfirmedLoadedEmptyPlanetLost(t *testing.T) {
 	}
 	if p := r.Game.Planets[kept]; p.Owner != 0 || p.Defenses != 10 {
 		t.Errorf("planet with colonists %+v; want kept", p)
+	}
+}
+
+func TestMeasuredDropFinishedAfterDrops(t *testing.T) {
+	// MESSAGES.md 0x04e (a), with the vectors' message order (MEASURED,
+	// one run each): in TK-501 and WU-CAP the fleet whose unload task
+	// dropped colonists on an enemy planet got its 0x04e after the
+	// capture's 0x00c; in TK-201 fleets unloading minerals got theirs
+	// before it.
+	// Fleet 1 drops 20 colonists on player 1's planet of 100; fleet 2,
+	// later in fleet order, unloads ironium at its owner's planet. That
+	// the drop is what holds the message back is inferred.
+	l := newTKLab(t, 3)
+	enemy := l.planet(1, 0, 100)
+	own := l.planet(0, 100, 100)
+	ship := l.colonyShip()
+	fi := l.fleet(0, enemy, 0, Stack{Design: ship, Count: 1})
+	l.g.Fleets[fi].Cargo.Colonists = 20
+	l.g.Fleets[fi].Task = unloadColonists
+	fj := l.fleet(0, own, 0, Stack{Design: ship, Count: 1})
+	l.g.Fleets[fj].Cargo.Minerals[Ironium] = 10
+	l.g.Fleets[fj].Task = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}}}
+	r := l.turn(&seqRand{})
+	var got []string
+	for _, e := range r.Events {
+		switch e.Kind {
+		case EventFleetArrived:
+			got = append(got, fmt.Sprint("finished ", e.Fleet))
+		case EventPlanetCaptured, EventDropRepelled:
+			got = append(got, fmt.Sprint("drop ", e.Planet))
+		}
+	}
+	want := []string{"finished 2", "drop 0", "finished 1"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("events %v, want %v", got, want)
 	}
 }
