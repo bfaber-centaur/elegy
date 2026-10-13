@@ -32,6 +32,11 @@ type DesignSlot struct {
 	Created  int
 	Picture  int
 	Built    int
+	// Received marks a slot that holds a design copied to this player
+	// with a fleet transfer (transferFleet). The design check leaves it
+	// alone (checkDesigns). A design order that replaces the slot's
+	// design clears it.
+	Received bool
 }
 
 // designPictures is the number of pictures per hull (AI.md "Picture":
@@ -166,6 +171,7 @@ func (o DesignOrder) apply(g *Game, player int, _ *Applied) error {
 		}
 		g.DesignSlots = append([]DesignSlot(nil), g.DesignSlots...)
 		g.DesignSlots[i].Created, g.DesignSlots[i].Picture, g.DesignSlots[i].Built = g.Year, o.Picture, 0
+		g.DesignSlots[i].Received = false
 		if g.designShared(old, i) {
 			// A design index another slot also names (a state built
 			// without design orders) is not overwritten under it.

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -408,6 +409,33 @@ func TestDesignYearAndPictureSaved(t *testing.T) {
 	}
 	if len(diffs) != 1 || !strings.Contains(diffs[0], "Picture") {
 		t.Fatalf("Diff: %v", diffs)
+	}
+}
+
+// TestDesignReceivedSaved: the mark on a design slot holding a design
+// received with a fleet transfer survives a save and load, and the hash
+// covers it, so the design check still skips the slot after a load
+// (SaveVersion 12).
+func TestDesignReceivedSaved(t *testing.T) {
+	g := newSmoke(t, smokeSeed)
+	slots := append([]engine.DesignSlot(nil), g.State.DesignSlots...)
+	i := slices.IndexFunc(slots, func(s engine.DesignSlot) bool { return !s.Starbase })
+	h1, _ := g.Hash()
+	slots[i].Received = true
+	g.State.DesignSlots = slots
+	if h2, _ := g.Hash(); h2 == h1 {
+		t.Fatal("the hash does not cover the received mark")
+	}
+	var buf bytes.Buffer
+	if err := g.Save(&buf); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(&buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !loaded.State.DesignSlots[i].Received {
+		t.Fatal("the received mark was lost across a save and load")
 	}
 }
 

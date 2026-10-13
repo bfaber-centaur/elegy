@@ -33,6 +33,7 @@ func TestPartsReaders(t *testing.T) {
 		"engine/launch.go:StarbaseReplacementCost": true, // cost
 		"engine/orders_design.go:fitFills":         true, // a hull's slots
 		"engine/fleetops.go:readDesign":            true, // builds the design
+		"engine/designcheck.go:checkDesign":        true, // rebuilds the stored design, misslotted parts kept
 		"engine/combat_token.go:tokenValues":       true, // battleDesign's copy; armor from the full design
 		"objects/minefields.go:designArmor":        true, // armor
 		"objects/trader.go:sameLoadout":            true, // the design's identity

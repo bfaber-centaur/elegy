@@ -351,7 +351,7 @@ func (g *Game) transferFleet(fi int, gone map[int]bool) []Event {
 	for k, d := range need {
 		g.Designs = append(g.Designs, g.Designs[d])
 		copied[d] = len(g.Designs) - 1
-		g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: to, Slot: free[k], Design: copied[d]})
+		g.DesignSlots = append(g.DesignSlots, DesignSlot{Owner: to, Slot: free[k], Design: copied[d], Received: true})
 	}
 	nf := Fleet{ID: g.newFleetID(), Number: g.lowestFreeFleetNumber(to), Owner: to, Pos: f.Pos,
 		Fuel: f.Fuel, Cargo: f.Cargo}
