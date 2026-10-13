@@ -277,18 +277,29 @@ func TestScrapIgnoresEmptyStacks(t *testing.T) {
 
 // At a planet the scrap event names no salvage, the fleet's number,
 // design slot and count of designs (0x059's fleet slot, stars-elegy FS-1
-// p and q), and how the planet recycled it: the bits ScrapAtStarbase and
-// ScrapRecycled (Ultimate Recycling of the planet's owner), which choose
-// among 0x059, 0x05a, 0x05c and 0x05d (MESSAGES.md).
+// p and q), how the planet recycled it (the bits ScrapAtStarbase and
+// ScrapRecycled, Ultimate Recycling of the planet's owner), the planet's
+// owner, and whether the starbase's tech roll gave that owner a
+// technology. These choose among 0x059, 0x05a, 0x05c and 0x05d and the
+// planet owner's 0x140–0x143 or 0x13c–0x13f (MESSAGES.md). Player 1's
+// fleet scraps at player 0's planet, player 0 at tech 0 so that the roll
+// (50 or more, no Trader part, then field 2) gains a level.
 func TestScrapAtPlanetEvent(t *testing.T) {
+	gain := []int{99}
+	for range traderTries {
+		gain = append(gain, 0)
+	}
+	gain = append(gain, 2)
 	for _, tt := range []struct {
 		starbase, ur bool
-		how          int
+		draws        []int
+		how, tech    int
 	}{
-		{false, false, 0},
-		{true, false, ScrapAtStarbase},
-		{false, true, ScrapRecycled},
-		{true, true, ScrapAtStarbase | ScrapRecycled},
+		{false, false, gain, 0, 0},
+		{true, false, []int{0}, ScrapAtStarbase, 0},
+		{true, false, gain, ScrapAtStarbase, 1},
+		{false, true, gain, ScrapRecycled, 0},
+		{true, true, gain, ScrapAtStarbase | ScrapRecycled, 1},
 	} {
 		l := newTKLab(t, 3)
 		scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
@@ -298,14 +309,24 @@ func TestScrapAtPlanetEvent(t *testing.T) {
 			l.g.Planets[pi].StarbaseDesign = l.design("Orbital Fort")
 		}
 		l.g.Players[0].Race.LRT.UltimateRecycling = tt.ur
+		l.g.Players[0].Research.Levels = [NumFields]int{}
 		fi := l.fleet(1, pi, 0, Stack{Design: scout, Count: 1})
 		l.g.Fleets[fi].Number = 7
 		l.g.DesignSlots = []DesignSlot{{Owner: 1, Slot: 9, Design: scout}}
-		ev := l.g.scrap(fi, &seqRand{draws: []int{99, 99, 99, 99}}, map[int]bool{}, scrapYear{})
-		if len(ev) == 0 || ev[0].Kind != EventFleetScrapped || ev[0].Planet != l.g.Planets[pi].ID ||
-			!slices.Equal(ev[0].Axes, []int{-1, 7, 9, 1, tt.how}) {
-			t.Errorf("starbase %v, UR %v: events %+v, want a scrap event at planet %d with Axes [-1 7 9 1 %d]",
-				tt.starbase, tt.ur, ev, l.g.Planets[pi].ID, tt.how)
+		ev := l.g.scrap(fi, &seqRand{draws: slices.Clone(tt.draws)}, map[int]bool{}, scrapYear{})
+		want := []int{-1, 7, 9, 1, tt.how, 0, tt.tech}
+		if len(ev) != 1+tt.tech || ev[0].Kind != EventFleetScrapped || ev[0].Planet != l.g.Planets[pi].ID || !slices.Equal(ev[0].Axes, want) {
+			t.Errorf("starbase %v, UR %v: events %+v, want a scrap event at planet %d with Axes %v and %d more",
+				tt.starbase, tt.ur, ev, l.g.Planets[pi].ID, want, tt.tech)
 		}
+	}
+	// An unowned planet: NoOwner, and no tech roll.
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	pi := l.planet(NoOwner, 0, 100)
+	fi := l.fleet(1, pi, 0, Stack{Design: scout, Count: 1})
+	ev := l.g.scrap(fi, &seqRand{}, map[int]bool{}, scrapYear{})
+	if len(ev) != 1 || len(ev[0].Axes) != 7 || ev[0].Axes[4] != 0 || ev[0].Axes[5] != NoOwner || ev[0].Axes[6] != 0 {
+		t.Errorf("unowned planet: events %+v, want Axes [… 0 %d 0]", ev, NoOwner)
 	}
 }

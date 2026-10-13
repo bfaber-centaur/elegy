@@ -13,9 +13,11 @@ const (
 	// the fleet's number, its lowest ship-design slot and its count of
 	// designs, saved here because the fleet is gone by the end of the
 	// year (0x05b and 0x059 name the fleet by design and number,
-	// stars-elegy FS-1). At a planet a fifth axis says how it was
-	// recycled: ScrapAtStarbase and ScrapRecycled bits, 0 for the
-	// surface share.
+	// stars-elegy FS-1). At a planet three more axes follow: how it was
+	// recycled (ScrapAtStarbase and ScrapRecycled bits, 0 for the surface
+	// share), the planet's owner at the scrap (NoOwner for none) and 1
+	// when the scrap gave that owner a technology (the starbase's tech
+	// roll), else 0.
 	EventFleetScrapped EventKind = iota + EventPacketDesignSeen + 1
 	// EventScrapRecycled: ships scrapped at Player's Planet added Count
 	// resources to its production (Ultimate Recycling).
@@ -121,7 +123,7 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		if ur {
 			how |= ScrapRecycled
 		}
-		events[0].Axes = []int{-1, f.Number, slot, designs, how}
+		events[0].Axes = []int{-1, f.Number, slot, designs, how, p.Owner, 0}
 		switch {
 		case p.HasStarbase && ur:
 			num, den = 9, 10
@@ -158,7 +160,10 @@ func (g *Game) scrap(fi int, rng Rand, gained map[int]bool, recycled scrapYear) 
 		p.Population += f.Cargo.Colonists
 	}
 	if p.HasStarbase && p.Owner != NoOwner {
-		events = append(events, techAttempt(g, rng, p.Owner, seen, chance, gained)...)
+		if tech := techAttempt(g, rng, p.Owner, seen, chance, gained); len(tech) > 0 {
+			events[0].Axes[6] = 1
+			events = append(events, tech...)
+		}
 	}
 	return events
 }
