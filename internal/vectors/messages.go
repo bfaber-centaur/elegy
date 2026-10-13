@@ -45,6 +45,7 @@ func pvMessageIDs() map[int]string {
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
 		0x07b: "EventTerraformed",
+		0x129: "EventPacketNoDriver",
 		0x12a: "EventOrderClipped of an installation",
 		0x12f: "EventOrderClipped of terraforming",
 		0x083: "EventCometStrike, small",
@@ -306,6 +307,10 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			send(ev.Player, atPlanet(0x03e, ev.Planet))
 		case engine.EventNoQueue:
 			send(ev.Player, atPlanet(0x03f, ev.Planet))
+		case engine.EventPacketNoDriver:
+			// MESSAGES.md 0x129, one per packet item removed (CONFIRMED
+			// for no driver, GAP-001 A3): planet.
+			send(ev.Player, atPlanet(0x129, ev.Planet))
 		case engine.EventAlchemy:
 			send(ev.Player, pvMsg{id: 0x08c, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count}})
 		case engine.EventOrderClipped:

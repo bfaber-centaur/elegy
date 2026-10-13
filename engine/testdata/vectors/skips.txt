@@ -88,7 +88,6 @@
    1 message 0x10f has no event mapping
   17 message 0x117 has no event mapping
    3 message 0x127 has no event mapping
-   1 message 0x129 has no event mapping
    2 message 0x12c has no event mapping
    3 message 0x12d has no event mapping
    6 message 0x139 has no event mapping
@@ -129,7 +128,6 @@
    9 planet field defense_estimate
    2 planet field defenses null
    2 planet field environment_visible
-   6 planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
    1 planet field population null
    9 planet field population_estimate
    1 planet field starbase_design

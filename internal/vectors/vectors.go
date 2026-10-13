@@ -1784,14 +1784,14 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			// packet_destination or packet_warp, and absent means no
 			// destination and warp 4. The vector diff writes null where
 			// the start state had them. Every such record so far is a
-			// planet whose starbase was lost in the year, and whether the
-			// original cleared the settings or only does not write them
-			// for a planet with no starbase is UNRESOLVED, so a planet
-			// left with no starbase is not compared.
-			if !p.HasStarbase {
-				skipped("planet field " + k + " null with no starbase (cleared or not written: UNRESOLVED)")
-				continue
-			}
+			// planet whose starbase was lost in the year (stars-elegy
+			// PRODUCTION-LAUNCH.md "A starbase destroyed in battle",
+			// e1b2ad9, MEASURED PK-1: the file then holds neither).
+			// Elegy clears them with the starbase (loseStarbase, ELEGY
+			// CHOICE matching PK-1), so they compare as no destination
+			// and warp 4 with or without a starbase. Whether the original
+			// clears them or only does not write them is UNRESOLVED; no
+			// record tells the two apart.
 			raw = json.RawMessage("-1")
 			if k == "packet_warp" {
 				raw = json.RawMessage("4")
@@ -1906,7 +1906,7 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 		case "packet_destination":
 			// The mass driver's target planet, -1 for none (vectors/README.md
 			// "planet_settings"). A null, where the original's file holds no
-			// value, is not compared (above): ELEGY CHOICE. Malformed
+			// value, reads as -1 (above, PK-1). Malformed
 			// expected data fails the check, never reads as absent.
 			var want int
 			if json.Unmarshal(raw, &want) != nil {
