@@ -132,8 +132,21 @@ type pvMsg struct {
 const (
 	pvFocusFleet    = 0x8000
 	pvFocusResearch = 0x10000 - 2
+	pvFocusDesign   = 0x10000 - 3
 	pvFocusObject   = 0x10000 - 6
 )
+
+// pvCategoryBits is each component category's bit number b in a part
+// announcement's category mask 1<<b (MESSAGES.md "Slots and focus of the
+// component announcements" at stars-elegy a348c5d).
+func pvCategoryBits() map[string]int {
+	return map[string]int{
+		engine.CatEngine: 0, engine.CatScanner: 1, engine.CatShield: 2, engine.CatArmor: 3,
+		engine.CatBeam: 4, engine.CatTorpedo: 5, engine.CatBomb: 6, engine.CatMiningRobot: 7,
+		engine.CatMineLayer: 8, engine.CatOrbital: 9, engine.CatStarbaseHull: 10, engine.CatElectrical: 11,
+		engine.CatMechanical: 12, engine.CatTerraform: 13, engine.CatHull: 14, engine.CatPlanetary: 15,
+	}
+}
 
 // pvMessageList is each player's messages of the year, by the ids
 // pvMessageIDs maps, in the order the original's message file would hold
@@ -279,29 +292,35 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					params: []int{ev.Count, int(ev.Item), ev.Axes[0]}, known: []bool{true, true, true}})
 			}
 		case engine.EventPartAvailable:
-			// A part announcement's slots are field, then the part's
-			// category mask and item; its focus is the part code
-			// (MESSAGES.md 0x05f, 0x078, 0x145, 0x157). The category
-			// masks have no public table but terraform's 0x2000 (EM-1),
-			// so only the field is compared.
-			announce := func(id int) pvMsg {
-				return pvMsg{id: id, params: []int{int(ev.Item), 0, 0}, known: []bool{true, false, false},
-					why: fmt.Sprintf("0x%03x part focus and slots (no category-mask table)", id)}
+			// A part announcement's slots are field, the category mask
+			// 1<<b and the item's index in its category; the focus is
+			// the part code 0xC000 | b<<8 | index, or −3 for a ship hull
+			// (MESSAGES.md "Slots and focus of the component
+			// announcements" at stars-elegy a348c5d: MEASURED for the
+			// categories the vectors hold, BINARY-ONLY for beams,
+			// torpedoes, mine layers and the Genesis Device).
+			announce := func(id int, c engine.Component) pvMsg {
+				b := pvCategoryBits()[c.Category]
+				focus := 0xc000 | b<<8 | c.Index
+				if c.Category == engine.CatHull {
+					focus = pvFocusDesign
+				}
+				return pvMsg{id: id, focus: focus, focusKnown: true, params: []int{int(ev.Item), 1 << b, c.Index}}
 			}
 			cs := engine.Components().Components
 			if ev.Count >= 0 && ev.Count < len(cs) {
 				c := cs[ev.Count]
 				switch {
 				case c.Category == engine.CatHull:
-					send(ev.Player, announce(0x078))
+					send(ev.Player, announce(0x078, c))
 				case c.Category == engine.CatStarbaseHull:
 					// 0x0d0, BINARY-ONLY: not mapped.
 				case c.Category == engine.CatPlanetary && pvPlanetaryIDs()[c.Name] != 0:
-					send(ev.Player, announce(pvPlanetaryIDs()[c.Name]))
+					send(ev.Player, announce(pvPlanetaryIDs()[c.Name], c))
 				default:
 					// Every other part, the Genesis Device included
 					// (MESSAGES.md at stars-elegy f2778b3).
-					send(ev.Player, announce(0x05f))
+					send(ev.Player, announce(0x05f, c))
 				}
 			}
 		case engine.EventResearchStolen:
