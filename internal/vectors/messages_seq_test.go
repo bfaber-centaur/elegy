@@ -337,3 +337,33 @@ func TestSequenceCheckClaimAdjuster(t *testing.T) {
 		}
 	}
 }
+
+// TestSequenceCheckScrapDesign pins 0x05b's fleet slot through the
+// sequence comparator with a design other than 0 (stars-elegy FS-1 case d,
+// player 1's fleet 2 of design 3: 1538 = 3·512 + 2), which no RG vector
+// has: every RG scrap is design 0.
+func TestSequenceCheckScrapDesign(t *testing.T) {
+	l := pvLoaded{
+		g:      engine.Game{Players: []engine.Player{{}, {}}},
+		events: [][]engine.Event{nil, {{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{1, 3, 3, 1}}}},
+	}
+	i := func(n int) *int { return &n }
+	seq := func(params ...int) pvExpect {
+		return pvExpect{Kind: "message_sequence", Year: 1, Player: i(1), Messages: []pvSeqEntry{{ID: 0x05b, Focus: 0xfffa, Params: params}}}
+	}
+	for _, c := range []struct {
+		name   string
+		params []int
+		want   string
+	}{
+		{"design 3", []int{8705, 1538}, ""},
+		{"owner bits instead", []int{8705, 512 + 2},
+			"message 0x05b (focus 65530, params [8705 514]) = sent as 0x05b (focus 65530, params [8705 1538]); message 0x05b (focus 65530, params [8705 1538]) = sent, want not sent"},
+		{"no design bits", []int{8705, 2},
+			"message 0x05b (focus 65530, params [8705 2]) = sent as 0x05b (focus 65530, params [8705 1538]); message 0x05b (focus 65530, params [8705 1538]) = sent, want not sent"},
+	} {
+		if got := l.sequenceCheck(&l.g, seq(c.params...)); got != c.want {
+			t.Errorf("%s:\n got %q\nwant %q", c.name, got, c.want)
+		}
+	}
+}
