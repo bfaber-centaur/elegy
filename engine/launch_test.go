@@ -321,6 +321,63 @@ func TestConfirmedStarbaseKeepsDamage(t *testing.T) {
 	}
 }
 
+func TestStarbaseDriverSetsPacketSpeed(t *testing.T) {
+	// PRODUCTION-LAUNCH.md "Starbases", mass driver (stars-elegy a1c4c91,
+	// BINARY-ONLY, stars-elegy 86ca470): a starbase with a mass driver built
+	// where there was none sets the planet's packet speed to Dw + t,
+	// whatever it was set to, and keeps the destination; one without a
+	// driver clears the destination and speed; a planet that had a driver
+	// keeps its settings.
+	c := Components()
+	sb := func(parts ...string) Design {
+		var fills []SlotFill
+		for i, name := range parts {
+			fills = append(fills, SlotFill{Slot: 10 * i, Part: name, Count: 1})
+		}
+		d, err := c.NewDesign("SB", "Space Station", fills)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	two7, one5, none := sb("Mass Driver 7", "Mass Driver 7"), sb("Mass Driver 5"), sb()
+	for _, tt := range []struct {
+		name      string
+		old       *Design
+		speed     int
+		new       Design
+		wantSpeed int
+	}{
+		// RG-002 Y4 planet 88 (MEASURED, consistent: one observation,
+		// stars-elegy 6880639).
+		{"no starbase, two Mass Driver 7s, unset", nil, 0, two7, 8},
+		{"no starbase, set above", nil, 12, two7, 8},
+		{"driverless starbase replaced", &none, 6, two7, 8},
+		{"one Mass Driver 5", nil, 0, one5, 5},
+		{"had a driver: kept", &one5, 12, two7, 12},
+		{"had a driver, unset: kept", &one5, 0, two7, 0},
+		{"no driver where none stood: cleared", nil, 9, none, 0},
+		{"driverless replaced by driverless: cleared", &none, 9, none, 0},
+		{"had a driver, new has none: kept", &one5, 9, none, 9},
+	} {
+		g := launchGame(t)
+		g.Players[0].Race.PRT = PRTPacketPhysics // mass drivers are PP-only
+		p := &g.Planets[0]
+		p.HasStarbase, p.PacketSpeed = false, tt.speed
+		p.HasPacketDest, p.PacketDest = true, 2
+		if tt.old != nil {
+			g.Designs = append(g.Designs, *tt.old)
+			p.HasStarbase, p.StarbaseDesign = true, len(g.Designs)-1
+		}
+		g.Designs = append(g.Designs, tt.new)
+		g.BuildStarbase(0, len(g.Designs)-1)
+		cleared := tt.wantSpeed == 0 && tt.speed != 0
+		if p.StarbaseDesign != len(g.Designs)-1 || p.PacketSpeed != tt.wantSpeed || p.HasPacketDest == cleared || !cleared && p.PacketDest != 2 {
+			t.Errorf("%s: design %d, packet speed %d, destination %v (%d); want speed %d, destination cleared %v", tt.name, p.StarbaseDesign, p.PacketSpeed, p.HasPacketDest, p.PacketDest, tt.wantSpeed, cleared)
+		}
+	}
+}
+
 func TestPredictionJoinTakesSlotPlace(t *testing.T) {
 	// PRODUCTION-LAUNCH.md (BINARY-ONLY): at the fleet limit, ships of
 	// a design the fleet lacks take their design slot's place.

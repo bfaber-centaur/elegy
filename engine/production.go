@@ -484,7 +484,7 @@ func (pr *production) plain(i int, alch bool) bool {
 		}
 	}
 	built := 0
-	earlier := false
+	earlier, noDriver := false, false
 	for it.Count > 0 {
 		if !pr.affordable(c, it.Percent) {
 			l := pr.limiting(c, it.Percent)
@@ -503,7 +503,8 @@ func (pr *production) plain(i int, alch bool) bool {
 		it.Count--
 		built++
 		if it.Kind == ItemStarbase {
-			earlier = pr.buildStarbase(it.Slot) || earlier
+			e, nd := pr.buildStarbase(it.Slot)
+			earlier, noDriver = e || earlier, nd || noDriver
 			built = 0
 			var ok bool
 			if c, ok = pr.designCost(*it); !ok {
@@ -519,6 +520,9 @@ func (pr *production) plain(i int, alch bool) bool {
 	done := it.Count == 0
 	if earlier {
 		pr.afterEarlierHull(i)
+	}
+	if noDriver {
+		pr.dropPacketItems(i)
 	}
 	return done
 }
@@ -602,13 +606,39 @@ func (pr *production) launch(slot, n int) {
 }
 
 // buildStarbase completes one starbase unit and reports whether its hull
-// comes earlier in the hull list than the starbase it replaced.
-func (pr *production) buildStarbase(slot int) bool {
+// comes earlier in the hull list than the starbase it replaced, and
+// whether the planet had no mass driver and the built starbase has none.
+func (pr *production) buildStarbase(slot int) (earlier, noDriver bool) {
 	g, p := pr.g, pr.planet
 	d, _ := pr.designOf(QueueItem{Kind: ItemStarbase, Slot: slot})
 	had, old := p.HasStarbase, p.StarbaseHull
-	pr.events = append(pr.events, g.BuildStarbase(pr.pi, d)...)
-	return had && p.StarbaseDesign == d && p.StarbaseHull < old
+	hadDriver := false
+	if had && p.StarbaseDesign >= 0 && p.StarbaseDesign < len(g.Designs) {
+		_, _, hadDriver = DriverWarp(g.Designs[p.StarbaseDesign])
+	}
+	ev := g.BuildStarbase(pr.pi, d)
+	if len(ev) == 0 {
+		return false, false // not built
+	}
+	pr.events = append(pr.events, ev...)
+	_, _, hasDriver := DriverWarp(g.Designs[d])
+	return had && p.StarbaseHull < old, !hadDriver && !hasDriver
+}
+
+// dropPacketItems removes the queued mineral packet items after index i,
+// silently, when a starbase without a mass driver is built where there was
+// none (PRODUCTION-LAUNCH.md "Starbases", BINARY-ONLY, stars-elegy 86ca470).
+// Auto Mineral Packets stays.
+func (pr *production) dropPacketItems(i int) {
+	q := pr.planet.Queue
+	out := append([]QueueItem(nil), q[:i+1]...)
+	for _, it := range q[i+1:] {
+		if it.Kind.packet() && it.Kind != ItemAutoPackets {
+			continue
+		}
+		out = append(out, it)
+	}
+	pr.planet.Queue = out
 }
 
 // afterEarlierHull is the queue change when a new starbase's hull comes

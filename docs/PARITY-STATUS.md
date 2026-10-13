@@ -4,7 +4,7 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## RG-002: full-order six-year regression
 
-Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then the harness compares messages** ("Messages compared" at the end), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
+Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages ("Messages compared" at the end), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
 
 Bobby's five requirements, in order:
 
@@ -83,7 +83,7 @@ The 160 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
 
 ### Messages compared (after the final run)
 
-Measured on elegy main `bd5d67b` (#194) plus the messages-comparator branch.
+Measured on elegy main `f6beefa` (#194 and economy's packet-warp fix #197) plus the messages-comparator branch.
 
 The harness now compares `message` expectations (vectors/README.md "message": player `player` got message `message_id`, `present`). Elegy's events carry no message id, so internal/vectors `pvMessages` maps each year's events to the ids stars-elegy MESSAGES.md gives them:
 - 0x004 from `EventDropRepelled`, sent to the planet's owner;
@@ -105,13 +105,13 @@ Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| missing mechanic | 22 | 0 | 0 |
+| missing mechanic | 21 | 0 | 0 |
 | incorrect mechanic | 0 | 2 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 276 | 0 | 0 |
-| sample | 992 | 43 | 16 |
+| sample | 991 | 43 | 16 |
 
-The other classes stay 0. The 22 missing-mechanic field lines are the 21 message lines and Y4 planet 88's `packet_warp`. The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 176 results on the 22 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,792 samples.
+The other classes stay 0. The 21 missing-mechanic field lines are the message lines; #197 cleared Y4 planet 88's `packet_warp` and its chained sample. The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 168 results on the 21 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,784 samples.
 
 **Other corpora.** Comparing messages takes 38 cases out of the parity baseline (`engine/testdata/vectors/baseline.txt`). Every one is a known gap above, except one new finding:
 - 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
