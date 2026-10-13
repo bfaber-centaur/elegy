@@ -40,6 +40,8 @@ func pvMessageIDs() map[int]string {
 		0x157: "EventPartAvailable of a planetary scanner",
 		0x136: "EventLevelUp, a player with Generalized Research",
 		0x159: "EventResearchStolen",
+		0x156: "EventClaimAdjusted",
+		0x15c: "EventOriginalDrift",
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
@@ -297,6 +299,12 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// after, each a 32-bit count in two 16-bit slots as in 0x026.
 			old, now := ev.Count, ev.Axes[0]
 			send(ev.Player, pvMsg{id: 0x025, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, old & 0xffff, old >> 16, now & 0xffff, now >> 16}})
+		case engine.EventClaimAdjusted:
+			// MESSAGES.md 0x156: planet, percent.
+			send(ev.Player, pvMsg{id: 0x156, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count}})
+		case engine.EventOriginalDrift:
+			// MESSAGES.md 0x15c: planet, hab (the axis).
+			send(ev.Player, pvMsg{id: 0x15c, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Axes[0]}})
 		case engine.EventQueueCompleted:
 			send(ev.Player, atPlanet(0x03e, ev.Planet))
 		case engine.EventNoQueue:
@@ -668,12 +676,27 @@ func (l *pvLoaded) sequenceCheck(g *engine.Game, e pvExpect) string {
 			skip = why
 		}
 	}
+	// A Claim Adjuster planet's 0x156 percent is measured after its 0x15c
+	// drift (MESSAGES.md P7 order; KERNEL.md "Terraforming" → Claim
+	// Adjuster), a draw, so a 0x156 is a sample when the record's drift
+	// there is a sample or Elegy's run drew a drift there.
+	drifted := map[int]bool{}
+	for _, w := range e.Messages {
+		if w.ID == 0x15c && w.Sample {
+			drifted[w.Focus] = true
+		}
+	}
+	for _, m := range got {
+		if m.id == 0x15c {
+			drifted[m.focus] = true
+		}
+	}
 	samples := false
 	var want []pvSeqEntry
 	for _, w := range e.Messages {
 		_, mapped := ids[w.ID]
 		switch {
-		case w.Sample:
+		case w.Sample, w.ID == 0x156 && drifted[w.Focus]:
 			samples = true
 		case !mapped:
 			skipOnce(fmt.Sprintf("message_sequence entry 0x%03x has no event mapping", w.ID))

@@ -56,6 +56,11 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x025, focus: 4, focusKnown: true, params: []int{4, 9101, 0, 8928, 0}, known: all(5)}}},
 		{"hostile shrink, long counts", []engine.Event{{Kind: engine.EventHostileShrink, Player: 2, Planet: 5, Fleet: -1, Count: 70000, Axes: []int{65000}}}, 2,
 			[]pvMsg{{id: 0x025, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1, 65000, 0}, known: all(5)}}},
+		// MESSAGES.md 0x156 (planet, percent) and 0x15c (planet, axis).
+		{"claim adjusted", []engine.Event{{Kind: engine.EventClaimAdjusted, Player: 2, Planet: 5, Fleet: -1, Count: 91}}, 2,
+			[]pvMsg{{id: 0x156, focus: 4, focusKnown: true, params: []int{4, 91}, known: all(2)}}},
+		{"original drift", []engine.Event{{Kind: engine.EventOriginalDrift, Player: 2, Planet: 5, Fleet: -1, Axes: []int{2}}}, 2,
+			[]pvMsg{{id: 0x15c, focus: 4, focusKnown: true, params: []int{4, 2}, known: all(2)}}},
 		{"no queue", []engine.Event{{Kind: engine.EventNoQueue, Player: 2, Planet: 5}}, 2,
 			[]pvMsg{{id: 0x03f, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"queue completed", []engine.Event{{Kind: engine.EventQueueCompleted, Player: 2, Planet: 5}}, 2,
@@ -269,4 +274,52 @@ func TestReadFileSequence(t *testing.T) {
 		}
 	}
 	t.Error("no message_sequence for player 0 in year 1")
+}
+
+// TestSequenceCheckClaimAdjuster pins the drift rule for 0x156: its
+// percent is compared unless the record's 0x15c drift on that planet is a
+// sample or Elegy's run drew a drift there (MESSAGES.md 0x156, 0x15c and
+// the P7 order). Such a 0x156 counts as a sample, so a sequence holding
+// one allows extra messages, as any sample does.
+func TestSequenceCheckClaimAdjuster(t *testing.T) {
+	adjusted := func(planet, pct int) engine.Event {
+		return engine.Event{Kind: engine.EventClaimAdjusted, Player: 0, Planet: planet, Fleet: -1, Count: pct}
+	}
+	drift := engine.Event{Kind: engine.EventOriginalDrift, Player: 0, Planet: 6, Fleet: -1, Axes: []int{1}}
+	i := func(n int) *int { return &n }
+	seq := func(ms ...pvSeqEntry) pvExpect {
+		return pvExpect{Kind: "message_sequence", Year: 1, Player: i(0), Messages: ms}
+	}
+	m := func(id, focus int, params ...int) pvSeqEntry { return pvSeqEntry{ID: id, Focus: focus, Params: params} }
+	sample := func(w pvSeqEntry) pvSeqEntry { w.Sample = true; return w }
+	for _, c := range []struct {
+		name   string
+		events []engine.Event
+		e      pvExpect
+		want   string
+	}{
+		{"drift and percents match", []engine.Event{adjusted(5, 91), drift, adjusted(6, 92)},
+			seq(m(0x156, 4, 4, 91), m(0x15c, 5, 5, 1), m(0x156, 5, 5, 92)), ""},
+		{"percent differs", []engine.Event{adjusted(5, 91), adjusted(6, 91)},
+			seq(m(0x156, 4, 4, 90), m(0x156, 5, 5, 91)),
+			"message 0x156 (focus 4, params [4 90]) = sent as 0x156 (focus 4, params [4 91]); message 0x156 (focus 4, params [4 91]) = sent, want not sent"},
+		{"drift axis differs", []engine.Event{adjusted(5, 91), drift, adjusted(6, 92)},
+			seq(m(0x156, 4, 4, 91), m(0x15c, 5, 5, 2), m(0x156, 5, 5, 92)),
+			"message 0x15c (focus 5, params [5 2]) = sent as 0x15c (focus 5, params [5 1])"},
+		{"drift not sent", []engine.Event{adjusted(5, 91), adjusted(6, 91)},
+			seq(m(0x156, 4, 4, 91), m(0x15c, 5, 5, 1), m(0x156, 5, 5, 92)),
+			"message 0x15c (focus 5, params [5 1]) = not sent; message 0x156 (focus 5, params [5 92]) = sent as 0x156 (focus 5, params [5 91]); message 0x156 (focus 5, params [5 91]) = sent, want not sent"},
+		{"the record's drift a sample", []engine.Event{adjusted(5, 91), adjusted(6, 91)},
+			seq(m(0x156, 4, 4, 91), sample(m(0x15c, 5, 5, 1)), m(0x156, 5, 5, 92)), ""},
+		{"Elegy drew a drift", []engine.Event{adjusted(5, 91), drift, adjusted(6, 92)},
+			seq(m(0x156, 4, 4, 91), m(0x156, 5, 5, 91)), ""},
+		{"another planet's drift", []engine.Event{adjusted(5, 92), drift, adjusted(6, 92)},
+			seq(m(0x156, 4, 4, 91), m(0x156, 5, 5, 91)),
+			"message 0x156 (focus 4, params [4 91]) = sent as 0x156 (focus 4, params [4 92])"},
+	} {
+		l := pvLoaded{g: engine.Game{Players: []engine.Player{{}}}, events: [][]engine.Event{nil, c.events}}
+		if got := l.sequenceCheck(&l.g, c.e); got != c.want {
+			t.Errorf("%s:\n got %q\nwant %q", c.name, got, c.want)
+		}
+	}
 }
