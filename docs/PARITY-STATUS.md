@@ -24,11 +24,12 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
 | sample | 1024 / 199 | 5291 / 451 | 2531 / 263 |
-| not compared | 2 / 2 | 6 / 6 | 7 / 7 |
-| total | 1314 | 5937 | 2877 |
+| not compared | 1 / 1 | 4 / 4 | 7 / 7 |
+| total | 1312 | 5933 | 2877 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
-- Updated 2026-10-13 (lane A, invasion messages): 0x004's slots and 0x007 are now compared (section "Invasion messages"). RG-003 loses 3 not-compared lines in the chained run and 3 in the restarts, which all match. RG-004 loses 12 and 12: the restarts' 0x007 match, and the chained run gains 8 sample lines (years 3, 4, 8, 9, 10, after the year-1 divergence). The rows were "not compared 2 / 2 | 9 / 9 | 19 / 19", "sample 1024 / 199 | 5291 / 451 | 2523 / 263" and the totals 1314, 5943, 2893.
+- Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
+- Updated 2026-10-13 (lane A, invasion messages): 0x004's slots and 0x007 are now compared (section "Invasion messages"). RG-003 loses 3 not-compared lines in the chained run and 3 in the restarts, which all match. RG-004 loses 12 and 12: the restarts' 0x007 match, and the chained run gains 8 sample lines (years 3, 4, 8, 9, 10, after the year-1 divergence). The rows were "not compared 1 / 1 | 7 / 7 | 19 / 19", "sample 1024 / 199 | 5291 / 451 | 2523 / 263" and the totals 1312, 5939, 2893.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -46,6 +47,8 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
 
 Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
+
+Not recomputed for #248 (2026-10-13): #248 compares the null `packet_destination` entries counted here as not compared (RG-002 2, RG-003 4). Lane B will refresh this table.
 
 Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones are samples.
 
@@ -77,12 +80,11 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 |---|---:|---:|---:|---|
 | 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
-| planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
-| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
+| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy (next PR) |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 4 | 12 | 14 | |
+| total | 2 | 8 | 14 | |
 
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 24) are gone.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
@@ -145,6 +147,7 @@ The 160 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
 - `packet_destination` is the target planet id, or -1 for none (vectors/README.md "planet_settings").
 - `packet_warp` below 5 means unset on both sides (vectors/README.md "initial_state"; OBJECTS.md "Launch"), so 0 and 4 count as equal and 5 does not.
 - **ELEGY CHOICE: a null `packet_destination` stays not compared.** The vectors write null where the original's file holds no destination record, which is not the same claim as "no destination" (-1). Comparing null as -1 would read an absent record as a value. So the 2 null lines stay in the "null in the original's file" group, as `defenses` null does. Reversible if stars-elegy documents null as "none".
+  - Superseded by #248: a null now compares as no destination, warp 4 (PK-1).
 
 ### The run on main `8426a6a`
 
@@ -368,7 +371,7 @@ Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
 
 ### Invasion messages (lane A)
 
-Measured on elegy main `fb3835b` (#249).
+Measured on elegy main `c3e53c2` (#248).
 
 - **Mapped** by MESSAGES.md "Invasion slots" (stars-elegy #204, e1b2ad9; MEASURED: TK-301, TK-302, GC-1, RG-003, RG-004):
   - **0x004** keeps its trigger (`EventDropRepelled`, to the planet's owner) and now compares every slot: planet, troops (two slots), attacker + 0x30. Troops are what the attacker dropped there that year, which the event already counted.
@@ -412,7 +415,7 @@ Counts are from the reference seed on main `217ab4b`.
   - 0x05f's part focus and category-mask slots, because only terraform's mask (0x2000, EM-1) is published;
   - the bombing fleet of 0x08f and 0x090;
   - 0x05b's salvage and fleet slots;
-  - 0x004's colonists and player slots (compared since; see "Invasion messages");
+  - 0x004's colonists and player slots;
   - 0x02e's mineral and location slots, because MESSAGES.md does not say which word of a planet location holds the planet;
   - a battle summary's focus and slots;
   - 0x04e's and 0x02e's fleet when the fleet is gone by the end of the year.
@@ -582,6 +585,7 @@ The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32, on `1de8ab6` before
 - **`battle_plan` expectations** are compared now (vectors/README.md "battle_plan": every field of the plan in the slot, `attack_who` numbered as the state's battle_plans). The loader now keeps a state plan's name. The census drops "expectation battle_plan" (15). RG-003 y9's plan 5 matches, in the chained run and in the restart.
 - **0x039/0x03a** (one or more defenses built) map to EventBuilt of defenses, with the merge rule (MESSAGES.md 0x039, 0x03a, "Merging of build counts").
 - **packet_destination/packet_warp null** is read as absent (vectors/README.md "initial_state": no destination, warp 4), but only when the planet still has a starbase. All 6 records so far are planets whose starbase was lost in the year. Elegy keeps the planet's settings there, and the restarts would miss. Whether the original cleared them or only does not write them for a planet with no starbase is UNRESOLVED, so those records stay skipped under a new reason.
+  - Superseded by #248: Elegy clears the settings with a lost starbase (ELEGY CHOICE matching PK-1), and the 6 records compare and match.
 
 Left as they were, with the reason:
 - **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. No mapping is added until lanes F and G settle the rule. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.

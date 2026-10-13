@@ -179,8 +179,8 @@ func TestStarbase(t *testing.T) {
 // TestPacketSettings pins the planet's mass-driver comparison
 // (vectors/README.md): the destination planet or -1 for none, a warp
 // below 5 read as unset, and a null read as absent (no destination, warp
-// 4) unless the planet has no starbase (UNRESOLVED: cleared or not
-// written).
+// 4), with or without a starbase (PK-1: Elegy clears the settings with
+// the starbase).
 func TestPacketSettings(t *testing.T) {
 	var l pvLoaded
 	p := engine.Planet{HasPacketDest: true, PacketDest: 4, PacketSpeed: 8}
@@ -188,7 +188,8 @@ func TestPacketSettings(t *testing.T) {
 	pvWant(t, "destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": 4}`), nil), "packet_destination = 3, want 4", "")
 	pvWant(t, "none wanted", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "packet_destination = 3, want -1", "")
 	pvWant(t, "warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 9}`), nil), "packet_warp = 8, want 9", "")
-	pvWant(t, "null, no starbase", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null, "packet_warp": null}`), nil), "", "planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)")
+	pvWant(t, "null destination, settings kept", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null}`), nil), "packet_destination = 3, want -1", "")
+	pvWant(t, "null warp, warp kept", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": null}`), nil), "packet_warp = 8, want 4", "")
 	sb := p
 	sb.HasStarbase = true
 	pvWant(t, "null destination, starbase", l.planetEquals(nil, &sb, pvEq(t, `{"packet_destination": null}`), nil), "packet_destination = 3, want -1", "")
@@ -203,6 +204,7 @@ func TestPacketSettings(t *testing.T) {
 	}
 	p = engine.Planet{}
 	pvWant(t, "no destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "", "")
+	pvWant(t, "null, no settings", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null, "packet_warp": null}`), nil), "", "")
 	pvWant(t, "unset warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 4}`), nil), "", "")
 	pvWant(t, "warp set, unset in Elegy", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 8}`), nil), "packet_warp = 0, want 8", "")
 	p.PacketSpeed = 5
