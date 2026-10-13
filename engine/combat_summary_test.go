@@ -293,12 +293,15 @@ func TestMeasuredCB059ThirdPlayer(t *testing.T) {
 	}
 }
 
-func TestAssumptionSummaryPlayerCountIsP(t *testing.T) {
-	// NOT RUN (an ASSUMPTION): the multi-player texts give the number of
-	// players in P, not the number who fought. Players 0, 1 and 2 fought
-	// (n = 3) at player 3's planet, whose starbase was not attacked, so P
-	// has 4. CB-059 B3 is the 2-player form of this layout; the oracle
-	// spec is /mnt/project-files/combat/p-vs-q-count.md.
+func TestConfirmedPQ1SummaryPlayerCountIsN(t *testing.T) {
+	// PQ-1b (CONFIRMED by prediction, 6 of 6 streams; stars-elegy CB-061,
+	// pending): players 0, 1 and 2 fought at player 3's planet, whose
+	// unarmed starbase took no part. All four got one 0x0a8 with races
+	// count 3, the number who fought (n), not the 4 in P. Its other counts
+	// (MEASURED, read after the run): your losses, your ships, everyone
+	// else's losses, everyone else's ships; P0 1,2,0,5; P1 and P2
+	// 0,2,1,5; P3 0,1,1,6, its starbase its own ship and among everyone
+	// else's for the fighters.
 	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)}
 	g := &Game{Rules: ElegyRules(), Players: make([]Player, 4), Designs: d}
 	g.Planets = []Planet{{ID: 5, Owner: 3, Pos: Point{100, 100}, HasStarbase: true, StarbaseDesign: 1}}
@@ -318,10 +321,15 @@ func TestAssumptionSummaryPlayerCountIsP(t *testing.T) {
 	if len(ev) != 4 {
 		t.Fatalf("summaries %+v, want one for each of the 4 players in P", ev)
 	}
+	want := map[int][]int{ // races, your ships, your losses, others' ships, others' losses
+		0: {3, 2, 1, 5, 0},
+		1: {3, 2, 0, 5, 1},
+		2: {3, 2, 0, 5, 1},
+		3: {3, 1, 0, 6, 1},
+	}
 	for _, e := range ev {
-		// Player 0 lost one of 2, the others nothing: 0x0a8 for everyone.
-		if e.Axes[SummaryOther] != 4 || BattleSummary(e.Count) != SummaryMultiOneSideNoLoss {
-			t.Errorf("player %d: summary %d, player count %d; want %d (0x0a8), 4 (P), not 3 (who fought)", e.Player, e.Count, e.Axes[SummaryOther], SummaryMultiOneSideNoLoss)
+		if BattleSummary(e.Count) != SummaryMultiOneSideNoLoss || !reflect.DeepEqual(e.Axes[:SummaryDesign], want[e.Player]) {
+			t.Errorf("player %d: summary %d, axes %v; want %d (0x0a8), %v", e.Player, e.Count, e.Axes[:SummaryDesign], SummaryMultiOneSideNoLoss, want[e.Player])
 		}
 	}
 }

@@ -60,7 +60,7 @@ const (
 
 // The Axes of an EventBattleSummary, by index.
 const (
-	SummaryOther       = iota // the named other player of a 2-player battle; the number of players in P otherwise
+	SummaryOther       = iota // the named other player of a 2-player battle; the number of players who fought (n) otherwise
 	SummaryTotal              // your ships (+1 for your starbase) at the location before the battle
 	SummaryLost               // your ships (+1 for your starbase) destroyed
 	SummaryOtherTotal         // the same for every other ship at the location together
@@ -252,7 +252,11 @@ func (b *battle) summaries(planetID int) []Event {
 			}
 		}
 		axes := make([]int, summaryAxes)
-		axes[SummaryOther] = len(b.players)
+		// The races count is the number who fought, not the recipients
+		// (CONFIRMED by prediction, PQ-1b, 6 of 6 streams: three fought at
+		// a fourth player's planet whose unarmed starbase took no part, and
+		// all four got 0x0a8 with 3).
+		axes[SummaryOther] = b.involved
 		axes[SummaryTotal], axes[SummaryLost] = me.total, me.lost
 		axes[SummaryOtherTotal], axes[SummaryOtherLost] = other.total, other.lost
 		axes[SummaryDesign], axes[SummaryOtherDesign] = -1, -1
