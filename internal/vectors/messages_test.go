@@ -10,6 +10,9 @@ import (
 // TestPvMessages pins the event to message id mapping (MESSAGES.md).
 func TestPvMessages(t *testing.T) {
 	g := &engine.Game{Planets: []engine.Planet{{ID: 5, Owner: 2}, {ID: 6, Owner: engine.NoOwner}}}
+	summary := func(player int, k engine.BattleSummary) engine.Event {
+		return engine.Event{Kind: engine.EventBattleSummary, Player: player, Planet: -1, Fleet: -1, Count: int(k)}
+	}
 	built := func(planet int, item engine.ItemKind, n int) engine.Event {
 		return engine.Event{Kind: engine.EventBuilt, Player: 2, Planet: planet, Fleet: -1, Item: item, Count: n}
 	}
@@ -44,6 +47,17 @@ func TestPvMessages(t *testing.T) {
 		{"emptied, not by bombing", []engine.Event{{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 6}}, nil},
 		{"emptied after another planet's bombing", []engine.Event{{Kind: engine.EventBombed, Player: 4, Planet: 5}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 6}}, nil},
 		{"no recipient", []engine.Event{{Kind: engine.EventFleetArrived, Player: -1}}, nil},
+		{"duel won unhit", []engine.Event{summary(0, engine.SummaryDuelWonUnhit)}, [][2]int{{0, 0x091}}},
+		{"both survived", []engine.Event{summary(1, engine.SummaryDuelBothSurvived)}, [][2]int{{1, 0x095}}},
+		{"stacks both survived", []engine.Event{summary(1, engine.SummaryStackBothSurvived)}, [][2]int{{1, 0x09a}}},
+		{"won with no loss", []engine.Event{summary(1, engine.SummaryWonNoLoss)}, [][2]int{{1, 0x09b}}},
+		{"lone ship lost some kills", []engine.Event{summary(1, engine.SummaryLoneLostSomeKills)}, [][2]int{{1, 0x0a3}}},
+		{"multi won no loss", []engine.Event{summary(2, engine.SummaryMultiWonNoLoss)}, [][2]int{{2, 0x0a4}}},
+		{"multi one side no loss", []engine.Event{summary(2, engine.SummaryMultiOneSideNoLoss)}, [][2]int{{2, 0x0a8}}},
+		{"multi mixed", []engine.Event{summary(2, engine.SummaryMultiMixed)}, [][2]int{{2, 0x07e}}},
+		{"lone ship won all", []engine.Event{summary(0, engine.SummaryLoneWonAll)}, [][2]int{{0, 0x113}}},
+		{"lone enemy survived", []engine.Event{summary(0, engine.SummaryLoneEnemySurvived)}, [][2]int{{0, 0x116}}},
+		{"no summary", []engine.Event{summary(0, engine.SummaryNone)}, nil},
 	} {
 		got := pvMessages(g, c.events)
 		want := map[[2]int]bool{}
@@ -94,5 +108,22 @@ func TestMessageCheck(t *testing.T) {
 	// Through pvCheck, as a vector's expectation.
 	if got := l.pvCheck(g, msg(0, 0x026, true, 1)); got != "message 0x026 to player 0 present = false, want true" {
 		t.Errorf("pvCheck: %q", got)
+	}
+}
+
+// Every battle summary has its own message id, the last one included.
+func TestPvSummaryIDs(t *testing.T) {
+	if len(pvSummaryIDs) != int(engine.SummaryLoneEnemySurvived)+1 {
+		t.Fatalf("%d ids for %d summaries", len(pvSummaryIDs), int(engine.SummaryLoneEnemySurvived)+1)
+	}
+	seen := map[int]bool{}
+	for k, id := range pvSummaryIDs[1:] {
+		if seen[id] {
+			t.Errorf("summary %d: id 0x%03x repeated", k+1, id)
+		}
+		seen[id] = true
+		if _, ok := pvMessageIDs()[id]; !ok {
+			t.Errorf("summary %d: id 0x%03x not compared", k+1, id)
+		}
 	}
 }
