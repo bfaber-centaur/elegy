@@ -167,7 +167,7 @@ type Event struct {
 	Fleet  int // fleet id, or -1
 	Item   ItemKind
 	Count  int
-	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), or a built starbase's design slot (EventStarbaseBuilt from production)
+	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), a captured planet's former owner, or a built starbase's design slot (EventStarbaseBuilt from production)
 }
 
 // ProductionInput is everything one planet's production reads.

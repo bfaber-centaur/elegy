@@ -28,7 +28,7 @@ func TestScrapSalvageSharesThePacketPool(t *testing.T) {
 		t.Fatalf("salvage %+v, want player 0's number 1", r.Game.Salvage)
 	}
 	i := slices.IndexFunc(r.Events, func(e engine.Event) bool { return e.Kind == engine.EventFleetScrapped })
-	if i < 0 || !slices.Equal(r.Events[i].Axes, []int{1}) {
-		t.Errorf("scrap event %v, want Axes [1]", r.Events)
+	if i < 0 || len(r.Events[i].Axes) != 4 || r.Events[i].Axes[0] != 1 {
+		t.Errorf("scrap event %v, want salvage 1 in Axes[0]", r.Events)
 	}
 }

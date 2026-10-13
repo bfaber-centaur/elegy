@@ -21,6 +21,8 @@ import (
 func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
+		0x007: "EventPlanetCaptured, to the former owner",
+		0x00c: "EventPlanetCaptured, to the winner",
 		0x025: "EventHostileShrink",
 		0x026: "EventOvercrowded",
 		0x028: "EventTargetGone",
@@ -73,6 +75,14 @@ func pvMessageIDs() map[int]string {
 	}
 	return ids
 }
+
+// The player slots of the invasion messages (MESSAGES.md "Invasion
+// slots"): the player number plus 0x30 in 0x004 and 0x007, plus 0x20 in
+// 0x00c (MEASURED; the high bits are article flags, BINARY-ONLY).
+const (
+	pvInvasionPlayer = 0x30
+	pvCapturedPlayer = 0x20
+)
 
 // pvPlanetaryIDs is the level-up message id of each planetary scanner
 // (0x157) and planetary defense (0x145), by name.
@@ -239,9 +249,20 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// defender is read as the planet's owner at the end of the
 			// year (ASSUMPTION: the event does not name it), so a planet
 			// captured later in the same year credits its new owner.
+			// Slots: planet, troops dropped (two slots), attacker + 0x30
+			// (MESSAGES.md "Invasion slots", MEASURED).
 			send(owner(ev.Planet), pvMsg{id: 0x004, focus: ev.Planet - 1, focusKnown: true,
-				params: []int{ev.Planet - 1, 0, 0, 0}, known: []bool{true, false, false, false},
-				why: "0x004 colonists and player slots"})
+				params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16, pvInvasionPlayer + ev.Player}})
+		case engine.EventPlanetCaptured:
+			// 0x00c to the winner, then 0x007 to the former owner
+			// (MESSAGES.md "Invasion slots", MEASURED). 0x00c: former
+			// owner + 0x20, planet; 0x007: winner + 0x30, planet, troops
+			// the winner dropped (two slots).
+			old := ev.Axes[0]
+			send(ev.Player, pvMsg{id: 0x00c, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{pvCapturedPlayer + old, ev.Planet - 1}})
+			send(old, pvMsg{id: 0x007, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{pvInvasionPlayer + ev.Player, ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventBuilt:
 			one, more := 0, 0
 			switch ev.Item {
@@ -413,13 +434,34 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				// Slots: the salvage's object id, 0x2000 + owner·512 +
 				// number, its number from the owner's pool shared with
 				// packets (MESSAGES.md "Object ids in slots", MEASURED
-				// SV-1), then the fleet, not compared: whether its slot
-				// carries the owner bits is UNRESOLVED (the MESSAGES.md
-				// contradiction, #204).
+				// SV-1), then the fleet: for a fleet of one design,
+				// design·512 + fleet number, the design being its
+				// ship-design slot (CONFIRMED by prediction, stars-elegy
+				// FS-1). A fleet of several designs gave 0x2000 + design
+				// ·512 + number once (MEASURED, FS-1; bit 13's meaning and
+				// which design is named are not known), so its slot is
+				// not compared.
 				m := pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
 					why: "0x05b salvage and fleet slots"}
-				if len(ev.Axes) == 1 {
-					m.params[0], m.known[0], m.why = 1<<13|ev.Player<<9|ev.Axes[0], true, "0x05b fleet slot"
+				if len(ev.Axes) == 4 {
+					salvage, number, slot, designs := ev.Axes[0], ev.Axes[1], ev.Axes[2], ev.Axes[3]
+					var why []string
+					if salvage >= 0 {
+						m.params[0], m.known[0] = 1<<13|ev.Player<<9|salvage, true
+					} else {
+						why = append(why, "0x05b salvage slot (no salvage)")
+					}
+					switch {
+					case designs != 1:
+						why = append(why, "0x05b fleet slot of a fleet of several designs")
+					case slot >= 16:
+						// A design with no slot of the owner (a state
+						// built without design orders).
+						why = append(why, "0x05b fleet slot of a design with no slot")
+					default:
+						m.params[1], m.known[1] = slot<<9|(number-1), true
+					}
+					m.why = strings.Join(why, ", ")
 				}
 				send(ev.Player, m)
 			}

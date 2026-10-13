@@ -110,12 +110,28 @@ func TestPvMessageList(t *testing.T) {
 		{"terraform click up", []engine.Event{{Kind: engine.EventTerraformed, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 1, Axes: []int{2, 46}}}, 2,
 			[]pvMsg{{id: 0x07b, focus: 4, focusKnown: true, params: []int{4, 1, 2, 558}, known: all(4)}}},
 		// SV-1: player 1's salvage number 2 is 8706.
-		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{2}}}, 1,
-			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8706, 0}, known: []bool{true, false}, why: "0x05b fleet slot"}}},
-		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
-			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, false}, why: "0x05b salvage and fleet slots"}}},
+		// FS-1 case d: player 1's fleet 2 (number 3), design 3, salvage 2.
+		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{2, 3, 3, 1}}}, 1,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8706, 1538}, known: all(2)}}},
+		// FS-1 case m: design 15, the top slot.
+		{"scrapped in deep space, design 15", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{0, 9, 15, 1}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8192, 7688}, known: all(2)}}},
+		{"scrapped in deep space, several designs", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{1, 7, 2, 2}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8193, 0}, known: []bool{true, false}, why: "0x05b fleet slot of a fleet of several designs"}}},
+		{"scrapped in deep space, design with no slot", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{1, 7, 16, 1}}}, 0,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8193, 0}, known: []bool{true, false}, why: "0x05b fleet slot of a design with no slot"}}},
+		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{-1, 1, 0, 1}}}, 1,
+			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, true}, why: "0x05b salvage slot (no salvage)"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,
-			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 0, 0, 0}, known: []bool{true, false, false, false}, why: "0x004 colonists and player slots"}}},
+			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 3, 0, 0x31}, known: all(4)}}},
+		// MESSAGES.md "Invasion slots": RG-003-Y7-2469's 0x004 is [51, 550, 0, 49].
+		{"repelled, long troops", []engine.Event{{Kind: engine.EventDropRepelled, Player: 3, Planet: 5, Count: 70000}}, 2,
+			[]pvMsg{{id: 0x004, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1, 0x33}, known: all(4)}}},
+		{"captured, to the winner", []engine.Event{{Kind: engine.EventPlanetCaptured, Player: 1, Planet: 5, Fleet: -1, Count: 600, Axes: []int{2}}}, 1,
+			[]pvMsg{{id: 0x00c, focus: 4, focusKnown: true, params: []int{0x22, 4}, known: all(2)}}},
+		// RG-003-Y12-2474's 0x007 is [49, 49, 600, 0].
+		{"captured, to the former owner", []engine.Event{{Kind: engine.EventPlanetCaptured, Player: 1, Planet: 5, Fleet: -1, Count: 70000, Axes: []int{2}}}, 2,
+			[]pvMsg{{id: 0x007, focus: 4, focusKnown: true, params: []int{0x31, 4, 70000 - 65536, 1}, known: all(4)}}},
 		{"bombed empty, to the bomber", []engine.Event{{Kind: engine.EventBombed, Player: 1, Planet: 5, Fleet: 9, Axes: []int{4, 1}}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5}}, 1,
 			[]pvMsg{{id: 0x08f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 4}, known: all(2)}}},
 		{"bombed empty, to the owner", []engine.Event{{Kind: engine.EventBombed, Player: 1, Planet: 5, Fleet: 9, Axes: []int{4, 1}}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5}}, 2,
@@ -332,6 +348,36 @@ func TestSequenceCheckClaimAdjuster(t *testing.T) {
 	} {
 		l := pvLoaded{g: engine.Game{Players: []engine.Player{{}}}, events: [][]engine.Event{nil, c.events}}
 		if got := l.sequenceCheck(&l.g, c.e); got != c.want {
+			t.Errorf("%s:\n got %q\nwant %q", c.name, got, c.want)
+		}
+	}
+}
+
+// TestSequenceCheckScrapDesign pins 0x05b's fleet slot through the
+// sequence comparator with a design other than 0 (stars-elegy FS-1 case d,
+// player 1's fleet 2 of design 3: 1538 = 3·512 + 2), which no RG vector
+// has: every RG scrap is design 0.
+func TestSequenceCheckScrapDesign(t *testing.T) {
+	l := pvLoaded{
+		g:      engine.Game{Players: []engine.Player{{}, {}}},
+		events: [][]engine.Event{nil, {{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{1, 3, 3, 1}}}},
+	}
+	i := func(n int) *int { return &n }
+	seq := func(params ...int) pvExpect {
+		return pvExpect{Kind: "message_sequence", Year: 1, Player: i(1), Messages: []pvSeqEntry{{ID: 0x05b, Focus: 0xfffa, Params: params}}}
+	}
+	for _, c := range []struct {
+		name   string
+		params []int
+		want   string
+	}{
+		{"design 3", []int{8705, 1538}, ""},
+		{"owner bits instead", []int{8705, 512 + 2},
+			"message 0x05b (focus 65530, params [8705 514]) = sent as 0x05b (focus 65530, params [8705 1538]); message 0x05b (focus 65530, params [8705 1538]) = sent, want not sent"},
+		{"no design bits", []int{8705, 2},
+			"message 0x05b (focus 65530, params [8705 2]) = sent as 0x05b (focus 65530, params [8705 1538]); message 0x05b (focus 65530, params [8705 1538]) = sent, want not sent"},
+	} {
+		if got := l.sequenceCheck(&l.g, seq(c.params...)); got != c.want {
 			t.Errorf("%s:\n got %q\nwant %q", c.name, got, c.want)
 		}
 	}
