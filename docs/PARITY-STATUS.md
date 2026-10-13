@@ -185,7 +185,7 @@ Measured on elegy main `133816c` (#207) plus the order branch.
 - **Result: one order mismatch, draw-dependent.** Over the 8 seed variants of every corpus there are 1534 order comparisons: the seven RG-002 vectors 554, KX-002 232, KX-005 200, PQ-001 104, MF 104, CB7 68, SL 56, GT 40, WU 40, KX-003 32, KX-004 32, and KX-001, RD-P, TK-203, XF 16 each, TK5 8. 728 of them place a 0x050 or 0x05f and 772 a 0x03e or 0x03f. Of the corpora outside build_kx's, only TK-203's order is in question, so the ASSUMPTION above matters only there.
   - **TK-203 (random 6 of 8, was pass):** the vector lists player 1's 0x050 before 0x03f, with no stream label and no sample flag. On seed variants 0 and 6 Elegy sends 0x050 after 0x03f. Elegy's level comes from scrapping at the starbase only when the tech attempt succeeds (`techAttempt`, a draw; TAKEOVER.md scrapping, "as in battle", COMBAT.md "Tech from battle"). When the attempt fails, the level comes from the research step after production. The original's attempt is a draw too: it gave the level in 8 of the 12 cycle settings (TAKEOVER.md, CONFIRMED TK-203). So in the original, too, the place of 0x050 depends on draws. tk3 is not a build_kx vector: its unlabelled list merges 12 streams, so its order is the ASSUMPTION case above. This is a flagging question for lane F (mark TK-203's 0x050 a sample, or compare its order only through MS-1's per-stream `message_sequence`), not an Elegy mechanic.
   - RG-002's ledger is unchanged, so its per-lane count is 0.
-- **What the order check cannot see.** Only ids Elegy maps can be placed. The vectors also list an id only once, without its parameters, so the order among several messages of one id is not recorded. Which field's level-up comes first is one such order, which is why the economy section above pins it with engine tests. Comparing it against the original needs the vectors to carry each player's full message sequence with its parameters (lane F).
+- **What the order check cannot see.** Only ids Elegy maps can be placed. The vectors also list an id only once, without its parameters, so the order among several messages of one id is not recorded. Which field's level-up comes first is one such order, which is why the economy section above pins it with engine tests. MS-1's `message_sequence` now carries that sequence; see "Message sequences compared" below.
 
 ### Vector re-sync from stars-elegy main (19896cd)
 
@@ -193,7 +193,7 @@ Every corpus was copied verbatim from stars-elegy main `19896cd`. The only diffe
 - **Default queues now load**, so a captured planet or new colony gets its owner's default queue in the harness:
   - **TK-106-A2 joins the parity baseline.** War Monger keeps all five default items (stars-elegy PARITY.md T-26, CONFIRMED).
   - **TK-108-A and TK-108-C leave it: incorrect mechanic (lane A).** T-26 says a Claim Adjuster owner skips items 4–5, the auto minimum and maximum terraform, and an Alternate Reality owner skips items 0–2 (auto mines, factories, defenses). These are item ids. `newColony` (engine/takeover.go) skips queue positions instead. TK-108's default queue is factories, mines, defenses, minimum terraform, maximum terraform, so Elegy drops only the maximum terraform (position 4) and keeps the minimum terraform: `queue = [... {16 2 0 0}], want [...]`.
-- **`message_sequence` is not compared yet** (the within-id comparator follows). In RG-002 it adds 84 not-compared ledger lines, one per player and year. The ledger's other lines are unchanged apart from their expectation numbers.
+- **`message_sequence` was not compared yet** (compared since; see "Message sequences compared"). In RG-002 it adds 84 not-compared ledger lines, one per player and year. The ledger's other lines are unchanged apart from their expectation numbers.
 - The galaxy fields are not read yet (lane A's clamp PR).
 
 ### Alchemy message (economy)
@@ -264,3 +264,33 @@ The economy area's 69 `client_estimate` expectations stay skipped, by the coordi
 | 15 | research_dialog: resources_needed 4, annual_resources_from_all_planets 3, estimated_time_to_completion 3, next_year_projected_research_budget 3, next_field_choice_after_the_year 1, total_resources_spent_on_research_last_year 1 |
 
 Counts are from the reference seed on main `217ab4b`.
+
+### Message sequences compared
+
+`message_sequence` (vectors README.md "Message sequences", MS-1) is now compared: each player's messages of the year, in file order, with focus and slot values. Measured on elegy main `426bb35` (#216) plus #214 and this change.
+- **The rule (vectors README.md, order rule).**
+  - The entries without `sample` must all be sent, in the same relative order, with the same focus and slots.
+  - When no entry is a sample, nothing else may be sent.
+  - A sample entry is not compared.
+- **What Elegy can compare.**
+  - Only the ids Elegy maps (`pvMessageIDs`). An entry of another id makes the expectation a skip, named by its first such id ("message_sequence entry 0x07b has no event mapping"), and any mismatch is still reported.
+  - Slots follow MESSAGES.md "Catalogue" in stored order. A colonist amount takes two slots, low word then high word.
+  - Planets are the vector's planet numbers. A fleet is `owner << 9 | number` (ORACLE.md, "Fleet parameters are object ids"), and its focus sets bit 15.
+  - A computer player keeps only 0x007, 0x023, 0x040 and 0x08f (MESSAGES.md "Computer players"). The one setting that keeps everything is read as unused (ASSUMPTION).
+- **Slots Elegy's events do not carry.** These are skipped by name, and the rest of the message is still compared:
+  - 0x050's third slot, the field researched next;
+  - 0x05f's part focus and category-mask slots, because only terraform's mask (0x2000, EM-1) is published;
+  - the bombing fleet of 0x08f and 0x090;
+  - 0x05b's salvage and fleet slots;
+  - 0x004's colonists and player slots;
+  - 0x02e's mineral and location slots, because MESSAGES.md does not say which word of a planet location holds the planet;
+  - a battle summary's focus and slots;
+  - 0x04e's and 0x02e's fleet when the fleet is gone by the end of the year.
+- **Result.**
+  - Of the 249 sequences in the reference streams, 183 are compared and 66 are skipped by named reason (engine/testdata/vectors/skips.txt).
+  - The parity baseline does not move. The new mismatches are all in RG cases that already fail.
+- **RG-002 ledger:**
+  - Not compared 268 → 190: 84 lines become 6, the 0x05b, 0x05f and 0x08f slots, each in the chained run and its restart. Y1's 0x02e (#213) matches with its fleet and amount.
+  - Random-driven 30 → 31: Y3's 0x036 count, 11 against Elegy's 10 (5 of 8 variants match).
+  - Sample 1191 → 1197: the chained run's 0x036/0x038 counts in years 3, 4 and 6, which follow the factory and mine counts that already differ.
+
