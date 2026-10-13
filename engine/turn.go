@@ -473,7 +473,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		pl := &g.Players[i]
 		spent[i] = researchSpent(pl.Research, pl.Race, research[i])
 		before := pl.Research.Levels
-		var order []int
+		var order []levelGain
 		pl.Research, order = addResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
 		events = append(events, g.levelEvents(i, before, order)...)
 	}

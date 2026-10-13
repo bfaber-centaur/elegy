@@ -5641,7 +5641,7 @@ sample | rg003-y6 | RG-003-Y6-2468 y1 #438 | object | wormhole: x = 1249, want 1
 sample | rg003-y6 | RG-003-Y6-2468 y1 #438 | object | wormhole: y = 1766, want 1769
 sample | rg003-y6 | RG-003-Y6-2468 y1 #469 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
 sample | rg003-y6 | RG-003-Y6-2468 y1 #77 | fleet owner=1 id=85 | cargo.germanium = 2, want 3
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y7 | RG-003-Y7-2469 y1 #144 | fleet owner=5 id=45 | waypoints[1] = {{1513 1113} 4 2 500002 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1513 1113} 4 1 84 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002) where the original keeps the planet (84) | rg003-y7 | RG-003-Y7-2469 y1 #144 | fleet owner=5 id=45 | waypoints[1] = {{1513 1113} 4 2 500002 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1513 1113} 4 1 84 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003-y7 | RG-003-Y7-2469 y1 #201 | planet id=16 | surface_minerals = [335 9 339], want [336 9 340]
 not compared | rg003-y7 | RG-003-Y7-2469 y1 #234 | planet id=49 | planet field excess null
 not compared | rg003-y7 | RG-003-Y7-2469 y1 #235 | planet id=49 | planet field defenses null
@@ -5683,6 +5683,7 @@ not compared | rg003-y8 | RG-003-Y8-2470 y1 #250 | planet id=46 | planet field d
 sample | rg003-y8 | RG-003-Y8-2470 y1 #280 | planet id=75 | surface_minerals = [13 347 1824], want [13 347 1825]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #291 | planet id=85 | surface_minerals = [2095 0 1448], want [2092 1 1447]
 not compared | rg003-y8 | RG-003-Y8-2470 y1 #301 | planet id=94 | planet field packet_destination null
+sample | rg003-y8 | RG-003-Y8-2470 y1 #302 | planet id=94 | surface_minerals = [75 211 134], want [48 176 82]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #316 | planet id=107 | surface_minerals = [195 262 0], want [196 263 0]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #336 | player id=1 | research_accumulated.construction = 9200, want 9202
 sample | rg003-y8 | RG-003-Y8-2470 y1 #336 | player id=1 | tech.energy = 6, want 7
@@ -5694,6 +5695,7 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #393 | production_queue planet=85 | queue 
 sample | rg003-y8 | RG-003-Y8-2470 y1 #402 | production_queue planet=101 | queue = [{8 2 52 6} {8 2 0 7}], want [{8 2 50 6} {8 2 0 7}]
 random-driven | rg003-y8 | RG-003-Y8-2470 y1 #403 | production_queue planet=102 | queue = [{8 1 57 11}], want [{8 1 58 11}] (2/8 variants match)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #406 | production_queue planet=107 | queue = [{8 2 13 0}], want [{8 2 11 0}]
+random-driven | rg003-y8 | RG-003-Y8-2470 y1 #422 | minefield owner=5 id=0 | minefield: mines = 1152, want 1752 (3/8 variants match)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #472 | object | wormhole: x = 1671, want 1678
 sample | rg003-y8 | RG-003-Y8-2470 y1 #472 | object | wormhole: y = 1316, want 1312
 sample | rg003-y8 | RG-003-Y8-2470 y1 #473 | object | wormhole: x = 1532, want 1512
@@ -5713,15 +5715,16 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #507 | player id=1 seen_by=1 | score_recor
 sample | rg003-y8 | RG-003-Y8-2470 y1 #509 | player id=2 seen_by=2 | score_record.score = 336, want 339
 sample | rg003-y8 | RG-003-Y8-2470 y1 #509 | player id=2 seen_by=2 | score_record.tech_level_sum = 58, want 59
 sample | rg003-y8 | RG-003-Y8-2470 y1 #513 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+sample | rg003-y8 | RG-003-Y8-2470 y1 #515 | player id=5 seen_by=5 | score_record.unarmed_ships = 62, want 66
 sample | rg003-y8 | RG-003-Y8-2470 y1 #68 | fleet owner=1 id=68 | cargo.ironium = 327, want 328
 sample | rg003-y8 | RG-003-Y8-2470 y1 #75 | fleet owner=1 id=75 | cargo.ironium = 500, want 501
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y8 | RG-003-Y8-2470 y1 #81 | fleet owner=1 id=81 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y8 | RG-003-Y8-2470 y1 #82 | fleet owner=1 id=82 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y8 | RG-003-Y8-2470 y1 #84 | fleet owner=1 id=84 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y8 | RG-003-Y8-2470 y1 #86 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 4 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #81 | fleet owner=1 id=81 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #82 | fleet owner=1 id=82 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #84 | fleet owner=1 id=84 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #86 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 4 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #92 | fleet owner=1 id=90 | cargo.germanium = 21, want 20
 sample | rg003-y8 | RG-003-Y8-2470 y1 #92 | fleet owner=1 id=90 | cargo.ironium = 146, want 147
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002, 500075) where the original keeps the planet (84, 95) | rg003-y8 | RG-003-Y8-2470 y1 #93 | fleet owner=1 id=91 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #93 | fleet owner=1 id=91 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 sample | rg003-y9 | RG-003-Y9-2471 y1 #104 | fleet owner=2 id=2 | cargo.germanium = 71, want 72
 sample | rg003-y9 | RG-003-Y9-2471 y1 #104 | fleet owner=2 id=2 | cargo.ironium = 115, want 116
 sample | rg003-y9 | RG-003-Y9-2471 y1 #105 | fleet owner=2 id=5 | fleet gone
@@ -5919,7 +5922,7 @@ matched | rg003-y10 | RG-003-Y10-2472 y1 | battle record (1763,1147) | matched: 
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1101,1621) | matched: 2 tokens, players and planet; 0 of 4 hits compared and 4 conditioned; 8 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1278,1370) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 24 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1313,1412) | matched: 2 tokens, players and planet; 1 of 1 hits compared; 14 moves allowed
-incorrect mechanic [lane D] | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1323,1300) | tokens: Elegy has no battle here
+sample | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1323,1300) | sample missed: tokens: Elegy has no battle here
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1342,1272) | matched: 3 tokens, players and planet; 0 of 10 hits compared and 10 conditioned; 6 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1364,1319) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 2 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1523,1298) | matched: 32 tokens, players and planet; 0 of 33 hits compared and 33 conditioned; 237 moves allowed
@@ -5927,7 +5930,7 @@ matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1571,1434) | matched: 
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1101,1621) | matched: 2 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 8 moves allowed
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1204,1566) | matched: 3 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 13 moves allowed
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1227,1429) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 8 moves allowed
-incorrect mechanic [lane A] | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1288,1347) | tokens: token 0: Elegy {Owner:1 Kind:ships Design:14 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:159 Shield:0 Ships:6 Damage:{Units:281 Pct:84} Fleet:0x? Planet:<nil>}, record {Owner:1 Kind:ships Design:14 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:159 Shield:0 Ships:6 Damage:{Units:235 Pct:84} Fleet:0x? Planet:<nil>}
+sample | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1288,1347) | sample missed: tokens: token 0: Elegy {Owner:1 Kind:ships Design:14 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:159 Shield:0 Ships:6 Damage:{Units:281 Pct:84} Fleet:0x? Planet:<nil>}, record {Owner:1 Kind:ships Design:14 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:159 Shield:0 Ships:6 Damage:{Units:235 Pct:84} Fleet:0x? Planet:<nil>}
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1296,1388) | matched: 2 tokens, players and planet; 1 of 1 hits compared; 14 moves allowed
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1346,1290) | matched: 6 tokens, players and planet; 0 of 31 hits compared and 31 conditioned; 14 moves allowed
 matched | rg003-y12 | RG-003-Y12-2474 y1 | battle record (1364,1319) | matched: 2 tokens, players and planet; 0 of 18 hits compared and 18 conditioned; 1 moves allowed
@@ -5986,7 +5989,7 @@ matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1266,1400) | matched: 6 
 matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1364,1378) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
 matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1523,1298) | matched: 32 tokens, players and planet; 0 of 12 hits compared and 12 conditioned; 234 moves allowed
 matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1569,1096) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
-incorrect mechanic [lane D] | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1571,1434) | hits: salvo 27: no numbers of hits fit the record: round 6 hit 3 (after an answered draw): Elegy token 1 hits 4: kills 0, shield 2, damage {21 100}; record token 1 hits 4: kills 0, shield 7, damage {22 100}
+matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1571,1434) | matched: 8 tokens, players and planet; 0 of 63 hits compared and 63 conditioned; 33 moves allowed
 matched | rg003-y8 | RG-003-Y8-2470 y1 | battle record (1763,1147) | matched: 3 tokens, players and planet; 12 of 12 hits compared; 24 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1153,1609) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1266,1400) | matched: 7 tokens, players and planet; 0 of 74 hits compared and 74 conditioned; 53 moves allowed

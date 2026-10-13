@@ -122,11 +122,9 @@
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
    2 message_sequence 0x004 colonists and player slots not compared
-  32 message_sequence 0x050 slot 3 (field researched next) not compared
    4 message_sequence 0x05b salvage and fleet slots not compared
-   4 message_sequence 0x05f part focus and slots (no category-mask table) not compared
+  34 message_sequence 0x05f part focus and slots (no category-mask table) not compared
   16 message_sequence 0x08f and 0x090 bombing fleet not compared
-   1 message_sequence 0x136 slot 3 (field researched next) not compared
    2 message_sequence entry 0x007 has no event mapping
    3 message_sequence entry 0x025 has no event mapping
    5 message_sequence entry 0x03a has no event mapping
@@ -149,7 +147,7 @@
    1 player field relations
    1 player field ship_design_count
  291 player not in the state
-1853 sample: one stream's random outcome
+1855 sample: one stream's random outcome
    1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
   10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
    3 score_record: Super Stealth research stealing

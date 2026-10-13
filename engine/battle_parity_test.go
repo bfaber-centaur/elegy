@@ -90,6 +90,7 @@ type pvBattleExpect struct {
 	Actions []pvBattleAction `json:"actions"`
 	Players []int            `json:"players"`
 	Planet  *int             `json:"planet"`
+	Sample  bool             `json:"sample"`
 }
 
 // pvRecordedBattle is one battle record: its tokens and actions.
@@ -102,6 +103,9 @@ type pvRecordedBattle struct {
 	hasActions             bool
 	players                []int // the record's players, as a set
 	planet                 *int  // the vector planet the battle is at, or nil
+	// flagged: the vector marks the record sample (it differed in
+	// another of the original's random streams)
+	flagged bool
 }
 
 // BattleStart is the game a vector's year's battles start from: the game
@@ -123,6 +127,9 @@ type BattleStart struct {
 	// differs from its record after such draws may be decided by them
 	// (CheckBattleRecords).
 	InYear int
+	// Unflagged has CheckBattleRecords treat the year's records as if the
+	// vector flagged none of them sample (for harness tests).
+	Unflagged bool
 }
 
 // BattleVariants gives a vector's years generated with seed variant k
@@ -191,6 +198,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 					out[name] = append(out[name], pvRecordedBattle{vector: name, caseID: c.ID, stream: e.Stream, year: e.Year, x: e.X, y: e.Y})
 				}
 				r := &out[name][i]
+				r.flagged = r.flagged || e.Sample
 				if e.Kind == "battle" {
 					r.tokens, r.players, r.planet = e.Tokens, e.Players, e.Planet
 				} else {
@@ -1103,6 +1111,14 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 					t.Logf("%s: random (after %d draws in the year; %d of %d other variants match): %s", where, l.InYear, hit, vs.N-1, why)
 					continue
 				}
+			}
+			// A record the vector itself flags sample differed between the
+			// original's own random streams: a miss is a sample, never a
+			// parity failure. An unflagged record stays strict.
+			if why := o.sampleMiss(); why != "" && r.flagged && !l.Unflagged {
+				c.samples++
+				t.Logf("%s: sample (flagged in the vector) missed: %s", where, why)
+				continue
 			}
 			switch {
 			case o.built:
