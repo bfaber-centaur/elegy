@@ -82,6 +82,12 @@ const (
 	TargetFleet
 )
 
+// ObjectRef names a salvage object or mineral packet by its owner and
+// number, as a waypoint's TargetPacketObject does.
+type ObjectRef struct {
+	Owner, Number int
+}
+
 // Waypoint is a fleet destination. Fleet.Waypoints[0] is the current
 // destination; the fleet's own position is not stored as a waypoint.
 type Waypoint struct {
@@ -116,6 +122,14 @@ type Fleet struct {
 	// MEASURED WU-ROUTE), and takes up the task of the waypoint it
 	// arrives at.
 	Task Task
+	// Target0 is the salvage object or mineral packet the original's
+	// waypoint 0 names, or nil: set when the fleet arrives at a waypoint
+	// naming one, or by a waypoint order, and cleared when the fleet
+	// sets off (ASSUMPTION T14). A transport task loads from it
+	// (namedSource; ORDERS.md "Salvage and mineral packet targets",
+	// stars-elegy a1b3651, NS-1). Other targets of waypoint 0 are not
+	// kept.
+	Target0 *ObjectRef
 	// Heading and HeadingWarp are the direction of this year's last
 	// movement step (halved until each component fits in ±127) and its
 	// warp, as other players see them (SCANNING.md "Heading"). Both are
@@ -375,8 +389,9 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 // messages, stars-elegy 9c1e2bc).
 func (g *Game) arrive(f *Fleet) []Event {
 	reached := f.Waypoints[0]
-	if g.reached != nil {
-		g.reached[f.ID] = reached
+	f.Target0 = nil
+	if reached.Target == TargetPacketObject {
+		f.Target0 = &ObjectRef{Owner: reached.Owner, Number: reached.ID}
 	}
 	f.Task = reached.Task
 	f.Waypoints = f.Waypoints[1:]
@@ -531,6 +546,9 @@ func (g *Game) moveAll(rng Rand) (events []Event, gated map[int]bool) {
 			events = append(events, g.fleetEvent(f, EventEngineStall, 0))
 			continue
 		}
+		// Setting off, the fleet's position is no longer the object its
+		// waypoint 0 named (ASSUMPTION T14); arriving sets it anew.
+		f.Target0 = nil
 		events = append(events, g.arColonistLoss(f)...)
 		if gate {
 			events = append(events, g.stargate(i, rng, gated)...)

@@ -118,3 +118,45 @@ func TestWaypointOrderPacketObjectTargets(t *testing.T) {
 		}
 	}
 }
+
+// A waypoint order's waypoint-0 target (Fleet.Target0): with Retarget0
+// it replaces the fleet's, a nil one clearing it; without, the fleet keeps
+// its own. A Target0 without Retarget0, an owner who is not a player or a
+// negative number rejects the order; a missing object does not (W9).
+func TestWaypointOrderTarget0(t *testing.T) {
+	kept := &engine.ObjectRef{Owner: 1, Number: 5}
+	for _, tt := range []struct {
+		name  string
+		order engine.WaypointOrder
+		want  *engine.ObjectRef
+		err   error
+	}{
+		{"kept without Retarget0", engine.WaypointOrder{Fleet: 1}, kept, nil},
+		{"replaced", engine.WaypointOrder{Fleet: 1, Retarget0: true, Target0: &engine.ObjectRef{Owner: 0, Number: 2}}, &engine.ObjectRef{Owner: 0, Number: 2}, nil},
+		{"cleared", engine.WaypointOrder{Fleet: 1, Retarget0: true}, nil, nil},
+		{"missing object, W9", engine.WaypointOrder{Fleet: 1, Retarget0: true, Target0: &engine.ObjectRef{Owner: 1, Number: 99}}, &engine.ObjectRef{Owner: 1, Number: 99}, nil},
+		{"Target0 without Retarget0", engine.WaypointOrder{Fleet: 1, Target0: &engine.ObjectRef{Owner: 0, Number: 2}}, kept, engine.ErrOutOfRange},
+		{"owner not a player", engine.WaypointOrder{Fleet: 1, Retarget0: true, Target0: &engine.ObjectRef{Owner: 2, Number: 0}}, kept, engine.ErrOutOfRange},
+		{"negative owner", engine.WaypointOrder{Fleet: 1, Retarget0: true, Target0: &engine.ObjectRef{Owner: -1, Number: 0}}, kept, engine.ErrOutOfRange},
+		{"negative number", engine.WaypointOrder{Fleet: 1, Retarget0: true, Target0: &engine.ObjectRef{Owner: 1, Number: -1}}, kept, engine.ErrOutOfRange},
+	} {
+		g := engine.Game{
+			ID: 7, Year: 2410, Size: 1,
+			Players: []engine.Player{{}, {}},
+			Fleets:  []engine.Fleet{{ID: 1, Owner: 0, Pos: engine.Point{X: 1100, Y: 1100}, Target0: &engine.ObjectRef{Owner: 1, Number: 5}}},
+		}
+		a := engine.ApplyOrders(&g, []engine.PlayerOrders{{Player: 0, GameID: 7, Year: 2410, Orders: []engine.Order{tt.order}}}, []int{0})
+		var err error
+		for _, r := range a.Results {
+			if r.Err != nil {
+				err = r.Err
+			}
+		}
+		if !errors.Is(err, tt.err) && !(err == nil && tt.err == nil) {
+			t.Errorf("%s: error %v, want %v", tt.name, err, tt.err)
+		}
+		if got := g.Fleets[0].Target0; (got == nil) != (tt.want == nil) || got != nil && *got != *tt.want {
+			t.Errorf("%s: target %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}

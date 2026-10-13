@@ -1078,3 +1078,44 @@ func TestWaypointPacketObject(t *testing.T) {
 		t.Errorf("without an id: %q", why)
 	}
 }
+
+// TestLoadTarget0 checks waypoint 0's packet or salvage target
+// (engine.Fleet.Target0): a start's waypoint 0 sets it, and a
+// waypoint_change at index 0 replaces it, a planet target clearing it.
+func TestLoadTarget0(t *testing.T) {
+	v, err := ReadFile(testVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner, id := 1, 4
+	w := &v.InitialState.Fleets[0].Waypoints[0]
+	w.Target.Kind, w.Target.Owner, w.Target.ID = "packet_object", &owner, &id
+	l, err := loadVector(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fl := v.InitialState.Fleets[0]
+	f := l.fleetAt(&l.g, fl.Owner, fl.ID)
+	if f == nil || f.Target0 == nil || *f.Target0 != (engine.ObjectRef{Owner: 1, Number: 4}) {
+		t.Errorf("start: target %v, want packet 1/4", f.Target0)
+	}
+	for _, c := range []struct {
+		target string
+		want   *engine.ObjectRef
+	}{
+		{`{"kind": "packet_object", "owner": 0, "id": 2}`, &engine.ObjectRef{Owner: 0, Number: 2}},
+		{`{"kind": "planet", "id": 7}`, nil},
+	} {
+		blocks := []pvOrderBlock{{Year: 1, Player: fl.Owner, Orders: []json.RawMessage{
+			json.RawMessage(fmt.Sprintf(`{"kind": "waypoint_change", "fleet": %d, "index": 0, "waypoint": {"x": %d, "y": %d, "warp": 0, "target": %s, "task": {"kind": "none"}}}`, fl.ID, fl.X, fl.Y, c.target)),
+		}}}
+		files, why := l.orders(blocks, 1, &l.g)
+		if why != "" || len(files) != 1 || len(files[0].Orders) != 1 {
+			t.Fatalf("%s: orders %+v, skip %q", c.target, files, why)
+		}
+		o, ok := files[0].Orders[0].(engine.WaypointOrder)
+		if !ok || !o.Retarget0 || (o.Target0 == nil) != (c.want == nil) || o.Target0 != nil && *o.Target0 != *c.want {
+			t.Errorf("%s: order %+v, want Retarget0 with %v", c.target, files[0].Orders[0], c.want)
+		}
+	}
+}
