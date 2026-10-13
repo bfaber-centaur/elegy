@@ -43,6 +43,7 @@ func TestMeasuredCO07bDeleteStarbaseStripsQueue(t *testing.T) {
 	sb, _ := g.PlayerDesign(0, true, 0)
 	g.Planets[0].HasStarbase, g.Planets[0].StarbaseDesign, g.Planets[0].StarbaseHull = true, sb, 1
 	g.Planets[0].StarbaseDock, g.Planets[0].StarbaseDamage = true, 30
+	g.Planets[0].HasPacketDest, g.Planets[0].PacketDest, g.Planets[0].PacketSpeed = true, 2, 9
 	g.Planets[0].HasQueue, g.Planets[0].Queue = true, lossQueue()
 	g.Planets[1].HasQueue, g.Planets[1].Queue = true, lossQueue() // player 1's: untouched
 	if errs, _ := apply(g, 0, DeleteDesignOrder{Starbase: true, Slot: 0}); errs[0] != nil {
@@ -50,6 +51,11 @@ func TestMeasuredCO07bDeleteStarbaseStripsQueue(t *testing.T) {
 	}
 	if p := g.Planets[0]; p.HasStarbase || p.StarbaseHull != 0 || p.StarbaseDock || p.StarbaseDamage != 0 || !p.HasQueue || !reflect.DeepEqual(p.Queue, lossStripped()) {
 		t.Errorf("planet 1: starbase %v, queue %v %+v, want stripped %+v", p.HasStarbase, p.HasQueue, p.Queue, lossStripped())
+	}
+	// The packet settings go with the starbase (ASSUMPTION for a design
+	// delete; PK-1 measured a battle loss).
+	if p := g.Planets[0]; p.HasPacketDest || p.PacketDest != 0 || p.PacketSpeed != 0 {
+		t.Errorf("planet 1: packet settings %v %d warp %d, want none", p.HasPacketDest, p.PacketDest, p.PacketSpeed)
 	}
 	if !reflect.DeepEqual(g.Planets[1].Queue, lossQueue()) {
 		t.Errorf("player 1's queue %+v changed", g.Planets[1].Queue)
@@ -76,10 +82,21 @@ func TestConfirmedBattleLossStripsQueue(t *testing.T) {
 	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 1, 0, 1, -1, 0
 	sb.dead = true
 	tb := newTestBattle(panicRand{}, d, &sb)
-	tb.g.Planets = []Planet{{Owner: 1, HasStarbase: true, StarbaseHull: 1, StarbaseDock: true, StarbaseDamage: 30, HasQueue: true, Queue: lossQueue()}}
+	tb.g.Planets = []Planet{{Owner: 1, HasStarbase: true, StarbaseHull: 1, StarbaseDock: true, StarbaseDamage: 30, HasQueue: true, Queue: lossQueue(),
+		HasPacketDest: true, PacketDest: 17, PacketSpeed: 9}, {HasPacketDest: true, PacketDest: 17, PacketSpeed: 9}}
 	tb.loc.planet = 0
 	tb.finish()
 	if p := tb.g.Planets[0]; p.HasStarbase || p.StarbaseHull != 0 || p.StarbaseDock || p.StarbaseDamage != 0 || !reflect.DeepEqual(p.Queue, lossStripped()) {
 		t.Errorf("starbase %v, queue %+v, want stripped %+v", p.HasStarbase, p.Queue, lossStripped())
+	}
+	// PK-1 (stars-elegy PRODUCTION-LAUNCH.md "A starbase destroyed in
+	// battle", e1b2ad9): after the year the planet has no packet
+	// destination or speed (ELEGY CHOICE: cleared at destruction).
+	// Another planet's settings stay.
+	if p := tb.g.Planets[0]; p.HasPacketDest || p.PacketDest != 0 || p.PacketSpeed != 0 {
+		t.Errorf("packet settings %v %d warp %d, want none", p.HasPacketDest, p.PacketDest, p.PacketSpeed)
+	}
+	if p := tb.g.Planets[1]; !p.HasPacketDest || p.PacketDest != 17 || p.PacketSpeed != 9 {
+		t.Errorf("another planet's packet settings %v %d warp %d, want kept", p.HasPacketDest, p.PacketDest, p.PacketSpeed)
 	}
 }

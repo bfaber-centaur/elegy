@@ -524,7 +524,6 @@ sample | rg003 | RG-003-2467 y5 #263 | planet id=79 | surface_minerals = [1 2059
 sample | rg003 | RG-003-2467 y5 #264 | planet id=80 | surface_minerals = [179 2776 112], want [178 2774 112]
 sample | rg003 | RG-003-2467 y5 #267 | planet id=83 | surface_minerals = [31453 29457 23824], want [31455 29456 23825]
 sample | rg003 | RG-003-2467 y5 #268 | planet id=84 | factories = 771, want 772
-not compared | rg003 | RG-003-2467 y5 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003 | RG-003-2467 y5 #272 | planet id=87 | surface_minerals = [66 190 151], want [66 191 154]
 sample | rg003 | RG-003-2467 y5 #273 | planet id=88 | surface_minerals = [322 523 96], want [325 524 97]
 sample | rg003 | RG-003-2467 y5 #276 | planet id=91 | factories = 327, want 338
@@ -1537,7 +1536,7 @@ sample | rg003 | RG-003-2470 y8 #284 | planet id=79 | population = 3966, want 36
 sample | rg003 | RG-003-2470 y8 #284 | planet id=79 | surface_minerals = [0 2435 2452], want [0 2427 2440]
 sample | rg003 | RG-003-2470 y8 #286 | planet id=81 | surface_minerals = [804 816 0], want [803 816 2]
 sample | rg003 | RG-003-2470 y8 #287 | planet id=82 | surface_minerals = [239 374 1], want [241 375 0]
-sample | rg003 | RG-003-2470 y8 #289 | planet id=84 | packet_warp = 10, want 7
+sample | rg003 | RG-003-2470 y8 #289 | planet id=84 | packet_warp = 0, want 7
 sample | rg003 | RG-003-2470 y8 #289 | planet id=84 | starbase = none, want design 95 damage 0
 sample | rg003 | RG-003-2470 y8 #289 | planet id=84 | surface_minerals = [285 1 558], want [294 5 567]
 sample | rg003 | RG-003-2470 y8 #291 | planet id=85 | surface_minerals = [2097 0 1449], want [2092 1 1447]
@@ -1556,7 +1555,6 @@ sample | rg003 | RG-003-2470 y8 #299 | planet id=92 | surface_minerals = [94 195
 sample | rg003 | RG-003-2470 y8 #3 | fleet owner=1 id=1 | cargo.boranium = 337, want 335
 sample | rg003 | RG-003-2470 y8 #3 | fleet owner=1 id=1 | cargo.germanium = 2, want 1
 sample | rg003 | RG-003-2470 y8 #300 | planet id=93 | surface_minerals = [1 1027 768], want [1 1026 765]
-not compared | rg003 | RG-003-2470 y8 #301 | planet id=94 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003 | RG-003-2470 y8 #302 | planet id=94 | surface_minerals = [49 175 84], want [48 176 82]
 sample | rg003 | RG-003-2470 y8 #304 | planet id=96 | surface_minerals = [1 545 402], want [1 547 403]
 sample | rg003 | RG-003-2470 y8 #305 | planet id=97 | surface_minerals = [1 293 210], want [2 291 206]
@@ -5531,7 +5529,6 @@ sample | rg003-y5 | RG-003-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [
 sample | rg003-y5 | RG-003-Y5-2467 y1 #234 | planet id=51 | factories = 312, want 313
 sample | rg003-y5 | RG-003-Y5-2467 y1 #234 | planet id=51 | surface_minerals = [1225 875 3], want [1224 875 0]
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #249 | planet id=66 | surface_minerals = [622 1311 20], want [620 1310 20] (3/8 variants match)
-not compared | rg003-y5 | RG-003-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #275 | planet id=90 | surface_minerals = [882 665 1], want [882 667 1] (6/8 variants match)
 sample | rg003-y5 | RG-003-Y5-2467 y1 #290 | planet id=104 | surface_minerals = [706 0 3], want [705 0 3]
 sample | rg003-y5 | RG-003-Y5-2467 y1 #293 | planet id=106 | surface_minerals = [353 175 3], want [353 176 3]
@@ -5637,7 +5634,6 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #245 | planet id=42 | starbase = design 10
 random-driven | rg003-y8 | RG-003-Y8-2470 y1 #247 | planet id=44 | surface_minerals = [11 285 1], want [12 287 2] (6/8 variants match)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #280 | planet id=75 | surface_minerals = [13 347 1824], want [13 347 1825]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #291 | planet id=85 | surface_minerals = [2095 0 1448], want [2092 1 1447]
-not compared | rg003-y8 | RG-003-Y8-2470 y1 #301 | planet id=94 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #302 | planet id=94 | surface_minerals = [75 211 134], want [48 176 82]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #316 | planet id=107 | surface_minerals = [195 262 0], want [196 263 0]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #336 | player id=1 | research_accumulated.construction = 9200, want 9202
