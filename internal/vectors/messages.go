@@ -55,6 +55,12 @@ func pvMessageIDs() map[int]string {
 		0x141: "EventFleetScrapped at a starbase whose owner lacks Ultimate Recycling, to the planet's owner, when it gave no technology",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x02f: "EventShipsBuilt, one ship, no route",
+		0x030: "EventShipsBuilt, several ships, no route",
+		0x031: "EventShipsBuilt then EventFleetRouted, one ship",
+		0x032: "EventShipsBuilt then EventFleetRouted, several ships",
+		0x033: "EventShipsBuilt then EventFleetNotRouted, one ship",
+		0x034: "EventShipsBuilt then EventFleetNotRouted, several ships",
 		0x0ba: "EventShipsLostFleetLimit",
 		0x0cd: "EventStarbaseBuilt",
 		0x07b: "EventTerraformed",
@@ -248,6 +254,7 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 	}
 	single := map[built]int{} // pending single-unit message: its index in msgs
 	arrived := map[int]int{}  // a fleet's 0x04e: its index in msgs
+	launched := map[int]int{} // a new fleet's build message: its index in msgs
 	for i, ev := range events {
 		switch ev.Kind {
 		case engine.EventDropRepelled:
@@ -295,6 +302,49 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				if j := send(ev.Player, atPlanet(one, ev.Planet)); j >= 0 {
 					single[k] = j
 				}
+			}
+		case engine.EventShipsBuilt:
+			// MESSAGES.md 0x02f/0x030: a new fleet of one or several
+			// ships; slots planet, (count,) design, focus the new fleet
+			// (CONFIRMED CB-047, CB round 6). The design is owner·32 +
+			// the ship design slot (MEASURED, "Design slot"). A route leg
+			// that follows turns it into 0x031–0x034.
+			if len(ev.Axes) != 1 {
+				continue
+			}
+			params := []int{ev.Planet - 1, ev.Player*32 + ev.Axes[0]}
+			id := 0x02f
+			if ev.Count > 1 {
+				params = []int{ev.Planet - 1, ev.Count, ev.Player*32 + ev.Axes[0]}
+				id = 0x030
+			}
+			m := pvMsg{id: id, params: params, why: fmt.Sprintf("0x%03x new fleet gone by the end of the year", id)}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.focus, m.focusKnown, m.why = pvFocusFleet|code, true, ""
+			}
+			if j := send(ev.Player, m); j >= 0 {
+				launched[ev.Fleet] = j
+			}
+		case engine.EventFleetRouted, engine.EventFleetNotRouted:
+			// MESSAGES.md 0x031/0x032 (routed, CONFIRMED SL round 1) and
+			// 0x033/0x034 (no warp with fuel, BINARY-ONLY): the build
+			// message with the route target as its last slot.
+			// Only the leg Launch gives it: a later route task for the
+			// same fleet in the year (routeTask) is not a build message.
+			j, ok := launched[ev.Fleet]
+			if !ok {
+				continue
+			}
+			delete(launched, ev.Fleet)
+			m := &msgs[j].pvMsg
+			m.id += 2
+			if ev.Kind == engine.EventFleetNotRouted {
+				m.id += 2
+			}
+			m.params = append(m.params, ev.Planet-1)
+			m.known = append(m.known, true)
+			if m.why != "" {
+				m.why = fmt.Sprintf("0x%03x new fleet gone by the end of the year", m.id)
 			}
 		case engine.EventShipsJoinedFleet:
 			// MESSAGES.md 0x139: at the 512-fleet limit the new ships

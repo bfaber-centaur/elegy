@@ -36,6 +36,12 @@ func TestPvMessageList(t *testing.T) {
 		}
 		return k
 	}
+	sb := func(fleet, n int) engine.Event {
+		return engine.Event{Kind: engine.EventShipsBuilt, Player: 1, Planet: 5, Fleet: fleet, Count: n, Axes: []int{2}}
+	}
+	route := func(k engine.EventKind, fleet int) engine.Event {
+		return engine.Event{Kind: k, Player: 1, Planet: 7, Fleet: fleet, Count: 6}
+	}
 	for _, c := range []struct {
 		name   string
 		events []engine.Event
@@ -76,6 +82,29 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x04e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3}, known: all(1)}}},
 		{"fleet finished, then gone", []engine.Event{{Kind: engine.EventFleetArrived, Player: 1, Fleet: 8}}, 1,
 			[]pvMsg{{id: 0x04e, params: []int{0}, known: []bool{false}, why: "0x04e fleet gone by the end of the year"}}},
+		// MESSAGES.md 0x02f–0x034: planet, (count,) design as owner·32 +
+		// slot, (route target); focus the new fleet.
+		{"one ship built", []engine.Event{sb(9, 1)}, 1,
+			[]pvMsg{{id: 0x02f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34}, known: all(2)}}},
+		{"several ships built", []engine.Event{sb(9, 3)}, 1,
+			[]pvMsg{{id: 0x030, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34}, known: all(3)}}},
+		{"one ship routed", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 9)}, 1,
+			[]pvMsg{{id: 0x031, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"several ships routed", []engine.Event{sb(9, 3), route(engine.EventFleetRouted, 9)}, 1,
+			[]pvMsg{{id: 0x032, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34, 6}, known: all(4)}}},
+		{"one ship not routed", []engine.Event{sb(9, 1), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x033, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"several ships not routed", []engine.Event{sb(9, 3), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x034, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34, 6}, known: all(4)}}},
+		{"ship built, fleet gone", []engine.Event{sb(8, 1)}, 1,
+			[]pvMsg{{id: 0x02f, params: []int{4, 34}, known: all(2), why: "0x02f new fleet gone by the end of the year"}}},
+		{"ship routed, fleet gone", []engine.Event{sb(8, 1), route(engine.EventFleetRouted, 8)}, 1,
+			[]pvMsg{{id: 0x031, params: []int{4, 34, 6}, known: all(3), why: "0x031 new fleet gone by the end of the year"}}},
+		{"ship routed, then routed again on arrival", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 9), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x031, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"ships built, no slot", []engine.Event{{Kind: engine.EventShipsBuilt, Player: 1, Planet: 5, Fleet: 9, Count: 1}}, 1, nil},
+		{"route leg of another fleet", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 7)}, 1,
+			[]pvMsg{{id: 0x02f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34}, known: all(2)}}},
 		// MESSAGES.md 0x139 (planet, count, design, fleet; focus the
 		// fleet) and 0x0ba (planet, count, design), BINARY-ONLY slots.
 		{"ships joined at the fleet limit", []engine.Event{{Kind: engine.EventShipsJoinedFleet, Player: 1, Planet: 5, Fleet: 9, Count: 3}}, 1,
