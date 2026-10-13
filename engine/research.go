@@ -101,10 +101,22 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 	return s
 }
 
-// addResearch is AddResearch, also returning the field of each level
-// gained, in the order gained.
-func addResearch(s ResearchState, race Race, resources int, slowerTech bool) (ResearchState, []int) {
-	var gained []int
+// levelGain is one level gained: its field, and the field researched
+// next as the level message names it (MESSAGES.md 0x050, third slot), or
+// -1 for the player's current field once the levels are applied.
+type levelGain struct {
+	field, next int
+}
+
+// addResearch is AddResearch, also returning each level gained, in the
+// order gained. A level's next field is the current field right after
+// it, once a level in the current field has applied the next-field
+// choice (MESSAGES.md 0x050 at stars-elegy e3619ff, CONFIRMED: the chosen
+// next field if the leveled field was the current one and the choice is
+// not "same field", "lowest field" picking the first lowest; otherwise
+// the current field).
+func addResearch(s ResearchState, race Race, resources int, slowerTech bool) (ResearchState, []levelGain) {
+	var gained []levelGain
 	scale := 1
 	if slowerTech {
 		scale = 2
@@ -144,7 +156,7 @@ func addResearch(s ResearchState, race Race, resources int, slowerTech bool) (Re
 		}
 		s.Accumulated[field] -= cost
 		s.Levels[field]++
-		gained = append(gained, field)
+		gained = append(gained, levelGain{field, s.Current})
 		return true
 	}
 	levelUp := func(field int) bool {
@@ -238,6 +250,7 @@ func addResearch(s ResearchState, race Race, resources int, slowerTech bool) (Re
 			if step(f) {
 				changed = true
 				switchField()
+				gained[len(gained)-1].next = s.Current
 			}
 		}
 	}
@@ -355,8 +368,9 @@ func (g *Game) stealResearch(spent [][NumFields]int) []Event {
 // Research level-up messages.
 const (
 	// EventLevelUp: Player gained a level in field Item (a field index,
-	// not an item kind); Count is the new level (MESSAGES.md 0x050, or
-	// 0x136 for a Generalized Research player).
+	// not an item kind); Count is the new level; Axes[0] is the field
+	// researched next (MESSAGES.md 0x050, or 0x136 for a Generalized
+	// Research player).
 	EventLevelUp EventKind = EventBattleSummary + 1 + iota
 	// EventPartAvailable: that level made a component available to
 	// Player; Item is the field, Count the component's position in
@@ -385,15 +399,19 @@ const (
 // Terraforming components are announced like other parts, by any field
 // (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at stars-elegy d89b8a3,
 // MEASURED: Gravity ±7 on propulsion 5, Radiation ±7 on weapons 5).
-func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Event {
+func (g *Game) levelEvents(player int, before [NumFields]int, gained []levelGain) []Event {
 	pl := &g.Players[player]
 	cat := Components()
 	trader := g.traderItems(player)
 	levels := before
 	var events []Event
-	for _, f := range gained {
+	for _, l := range gained {
+		f, next := l.field, l.next
+		if next < 0 {
+			next = pl.Research.Current
+		}
 		levels[f]++
-		events = append(events, Event{Kind: EventLevelUp, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: levels[f]})
+		events = append(events, Event{Kind: EventLevelUp, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: levels[f], Axes: []int{next}})
 		for _, i := range announceOrder() {
 			c := cat.Components[i]
 			if c.TechReq[f] != levels[f] || unannounced(pl.Race, c) {
@@ -460,11 +478,11 @@ func unannounced(race Race, c Component) bool {
 
 // fieldOrder is the levels gained from before to after, in field order:
 // the order of LevelUpCheck, which raises each field in turn.
-func fieldOrder(before, after [NumFields]int) []int {
-	var gained []int
+func fieldOrder(before, after [NumFields]int) []levelGain {
+	var gained []levelGain
 	for f := range NumFields {
 		for range after[f] - before[f] {
-			gained = append(gained, f)
+			gained = append(gained, levelGain{f, -1})
 		}
 	}
 	return gained
