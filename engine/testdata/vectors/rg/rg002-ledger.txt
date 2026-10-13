@@ -45,7 +45,6 @@ not compared | rg002 | RG-002-2463 y1 #391 | battle planet=86 x=1523 y=1298 | ex
 not compared | rg002 | RG-002-2463 y1 #392 | battle_actions x=1523 y=1298 | expectation battle_actions
 not compared | rg002 | RG-002-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002 | RG-002-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
-missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002 | RG-002-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
 sample | rg002 | RG-002-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002 | RG-002-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -1113,7 +1112,6 @@ not compared | rg002-y1 | RG-002-Y1-2463 y1 #391 | battle planet=86 x=1523 y=129
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #392 | battle_actions x=1523 y=1298 | expectation battle_actions
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
-missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002-y1 | RG-002-Y1-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
 sample | rg002-y1 | RG-002-Y1-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
