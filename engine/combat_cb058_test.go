@@ -142,23 +142,24 @@ func TestMeasuredCB058SalvageTwoPoints(t *testing.T) {
 	// battle's deep-space salvage takes its owner's lowest free number
 	// (OBJECTS.md "Salvage", "Owner"). MEASURED (CB-058, 6 runs),
 	// consistent with eaa474e: the numbers pushed before the run were for
-	// other victims, so this is not CONFIRMED by prediction. The
-	// battle order by first fleet stays BINARY-ONLY: CB-058's first-fleet
-	// point also had the smaller y, so ascending y fits as well. Player
-	// 0's fleets 1 and 3 attack player 1's freighters 2 at (100,100) and 4
-	// at (200,200) and destroy them all: the salvage at (100,100), the
-	// location of player 0's fleet 1, is player 1's number 0, and the one
-	// at (200,200) number 1.
+	// other victims, so this is not CONFIRMED by prediction. CB-058's
+	// first-fleet point also had the smaller y; Q4b below separates the
+	// two orders. Player 0's fleets 1 and 3 attack player 1's freighters 2
+	// at (100,100) and 4 at (200,200) and destroy them all: the salvage at
+	// (100,100), the location of player 0's fleet 1, is player 1's number
+	// 0, and the one at (200,200) number 1.
 	checkSalvageTwoPoints(t, Point{100, 100}, Point{200, 200})
 }
 
-func TestPredictionCB058Q4bBattleOrderNotByY(t *testing.T) {
-	// Q4b (lane D's case spec, pushed before any run): CB-058 Q4 with the
-	// two points' y swapped, so player 0's fleet 1 is at the point with
-	// the larger y. By first fleet (COMBAT.md "Where battles happen in the
-	// turn"), the salvage at fleet 1's point (100,300) is still player 1's
-	// number 0 and the one at (200,200) number 1; by ascending y it would
-	// be the other way round. PREDICTION.
+func TestConfirmedCB058Q4bBattleOrderNotByY(t *testing.T) {
+	// Q4b: CB-058 Q4 with the two points' y swapped, so player 0's fleet 1
+	// is at the point with the larger y. By first fleet (COMBAT.md "Where
+	// battles happen in the turn"), the salvage at fleet 1's point
+	// (100,300) is player 1's number 0 and the one at (200,200) number 1;
+	// by ascending y it would be the other way round. CONFIRMED by
+	// prediction (pushed in 5d2450e; CB-059, 8 of 8 streams, stars-elegy
+	// #184): number 0 at fleet 1's point, and its battle first in the
+	// files.
 	checkSalvageTwoPoints(t, Point{100, 300}, Point{200, 200})
 }
 
