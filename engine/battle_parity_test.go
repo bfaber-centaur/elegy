@@ -1219,8 +1219,27 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		other = *r.planet + 1
 	}
 	planet.planet = &other
-	if o := compareBattle(&l, planet); !strings.HasPrefix(o.tokens, "planet: ") {
-		t.Errorf("a changed planet was not noticed: %+v", o)
+	if o, want := compareBattle(&l, planet), fmt.Sprintf("planet: the record's planet %d is not in Elegy's game", other); o.tokens != want {
+		t.Errorf("a record planet not in the game: %q, want %q", o.tokens, want)
+	}
+	// Both planets exist but differ: CS-003-C's battle at planet 5 with
+	// the record naming planet 4.
+	var at5 pvRecordedBattle
+	for _, x := range records["cs/cs003c.json"] {
+		if x.planet != nil && *x.planet == 5 {
+			at5 = x
+		}
+	}
+	if at5.planet == nil {
+		t.Fatal("no CS-003-C battle at planet 5")
+	}
+	if o := compareBattle(&lb, at5); strings.HasPrefix(o.tokens, "planet: ") {
+		t.Fatalf("CS-003-C at planet 5: %q, want its planet to match", o.tokens)
+	}
+	four := 4
+	at5.planet = &four
+	if o, want := compareBattle(&lb, at5), fmt.Sprintf("planet: Elegy %d, record %d", lb.Planets[5], lb.Planets[4]); o.tokens != want {
+		t.Errorf("a record naming another planet in the game: %q, want %q", o.tokens, want)
 	}
 	// A battle Elegy fights where the year has no record fails.
 	var rest []pvRecordedBattle
