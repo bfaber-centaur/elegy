@@ -2,6 +2,87 @@
 
 Elegy's end-to-end results against the original, one entry per full-order regression. The behavioral record these rest on is stars-elegy `docs/PARITY.md`. Other elegy docs mean that file when they cite "docs/PARITY.md".
 
+## Current status: RG-002, RG-003 and RG-004 on main `5a735e1`
+
+The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-elegy main `104e8f5`'s, with #206's year-6 rebuild) is the result the three corpora rest on. Run on that SHA with no local change:
+- `go test ./...`: every package passes.
+- `go test ./regress -run TestLongGames`, the PR subset: 3 seeds × 2 rulesets × 4 opponent sets = 24 games of 60 years on a small map, each played three times (primary, replay, and reload after 23 years). 24 of 24 have no failure. This is not the steward's full matrix (64 cases at 150 years), so the two results are not interchangeable.
+- `TestRG002Ledger`, `TestRG003Ledger`, `TestRG004Ledger` and `TestBattleRecords` pass: every ledger matches the run exactly, with no UNCLASSIFIED line.
+- `TestParityVectors`, rg corpus: pass 0, measured pass 2, fail 48, random 13, random with the reference seed failing 9. baseline.txt keeps 17 RG entries: RG-002 and RG-003 chained year 1 and Y1 (`random 1` each), and RG-004's 12 restarts and chained year 1 (`random 1` to `random 7`).
+- **Why the failing cases fail, given 0 deterministic misses.** A case fails on a seed when any of its strict field expectations misses there, and it is listed `fail` when no seed matches all of them at once. Every RG-002, RG-003 and RG-004 case that fails (10, 22 and 11) fails for one of two reasons (per-seed check of every strict non-battle field expectation, all 8 seeds, main `5a735e1`):
+  - **Restarts (RG-002 Y2–Y6, RG-003 Y2–Y12):** every expectation that misses on any seed matches on at least one other seed. These cases have random-driven expectations only, and no single seed matches them all together. RG-004's restarts all pass on some seed.
+  - **Chained runs after year 1** (RG-002 years 2–6, RG-003 years 2–12, RG-004 years 2–12): these years continue from Elegy's own year-1 state, which already differs from the original's on the draws. Some strict expectations miss on all 8 seeds here: RG-002 5 in year 2 rising to 47 in year 6, RG-003 to 166 in year 12, RG-004 3 in year 2 to 48 in year 12. The ledger classes every chained difference after year 1 as a sample, as downstream of that divergence.
+  - Chained year 1 and every restart: no strict expectation misses on all 8 seeds.
+  - Battle records are not in this check. `TestBattleRecords` and the ledgers judge them, with no hand line.
+
+**Classification.** Each corpus has 0 deterministic misses: 0 incorrect-mechanic lines and 0 unresolved-randomness lines. Every compared difference from the original is a sample or random-driven (it matches on at least one seed variant). Ledger lines, chained run / restarts:
+
+| class | RG-002 | RG-003 | RG-004 |
+|---|---|---|---|
+| matched | 8 / 44 | 8 / 100 | 4 / 47 |
+| strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 |
+| random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
+| of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
+| sample | 1024 / 199 | 5291 / 451 | 2523 / 263 |
+| not compared | 3 / 3 | 11 / 11 | 19 / 19 |
+| total | 1316 | 5947 | 2893 |
+
+- "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
+- Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
+- The chained runs diverge in year 1, and the ledger classes every later chained difference as a sample. RG-004's one chained random-driven line is in year 1.
+
+Field expectations (one per compared field; battle records are in `TestBattleRecords`), reference seed:
+
+| corpus | run | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
+|---|---|---:|---:|---:|---:|---:|---:|
+| RG-002 | chained | 355 | 0 | 0 | 1662 | 562 | 2 |
+| RG-002 | restarts | 2224 | 25 | 0 | 185 | 144 | 3 |
+| RG-003 | chained | 355 | 0 | 0 | 3106 | 2196 | 8 |
+| RG-003 | restarts | 4823 | 59 | 0 | 452 | 320 | 11 |
+| RG-004 | chained | 197 | 1 | 0 | 1724 | 890 | 19 |
+| RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
+
+"Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
+
+**Open owners (random-driven lines with a named draw).** RG-002 and RG-003 share them. Each has 3 lines, all in the Y6 restart (section "RG-002 and RG-003 year 6 rebuilt"):
+
+| line | owner | draw |
+|---|---|---|
+| fleet 6/12, waypoint 1 | lane D | combat draws: the target, player 3's fleet 2, dies in Elegy's battle at (1296,1356) on 6 of 8 seeds |
+| planet 102, surface minerals | economy | mining's +1 draw on germanium (54 kT on seed 0, 53 kT on seed 7) |
+| planet 102, production queue | economy | the same germanium draw (53 kT gives 93%, 54 kT gives 99%) |
+
+The other random-driven lines have no named draw. They match on some seed variant, so they are not counted as misses. Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
+
+**Order accounting.** Every recorded order is loaded. Each is accepted, or refused and recorded as an `order` ledger line. No RG vector has a load error. Per-year tables are in "Order accounting" below.
+
+| corpus | orders | refused, chained run (all samples) | refused, restarts |
+|---|---:|---:|---:|
+| RG-002 | 1867 | 37 | 0 |
+| RG-003 | 3731 | 220 | 0 |
+| RG-004 | 2049 | 84 | 0 |
+
+RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 0, years 4–12) are gone since lane A's #244, which accepts the delete.
+
+**Not compared, by owner.**
+
+| cause | RG-002 | RG-003 | RG-004 | owner |
+|---|---:|---:|---:|---|
+| 0x05b salvage and fleet slots (EventFleetScrapped names neither) | 2 | 2 | 0 | lane D |
+| 0x08f/0x090 bombing fleet (EventBombed names the bomber) | 2 | 4 | 0 | lane D |
+| `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
+| planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
+| 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
+| 0x004 colonists and player slots | 0 | 2 | 0 | lane A, with the invasion messages |
+| 0x007 planet captured has no event mapping (message and sequence entry) | 0 | 4 | 24 | lane A, with the invasion messages |
+| 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
+| `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
+| message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
+| total | 6 | 22 | 38 | |
+
+- stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. The mapping is still missing.
+- 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
+
 ## RG-002: full-order six-year regression
 
 Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages and `object`-form wormholes (the last two sections), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
@@ -330,7 +411,7 @@ Counts are from the reference seed on main `217ab4b`.
 
 RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `896a546` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235, #240 GC-1 and #239) with the year-6 rebuild below.
 
-**Totals (5946 lines).**
+**Totals (5947 lines).** Corrected 2026-10-13: this heading said "5946 lines"; the table below sums to 5947.
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
@@ -397,10 +478,24 @@ stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`r
 - **Samples:** two new sample lines in the restart (planets 29 and 79, surface minerals) and two in the chained run (planets 29 and 85).
 - **Baseline:** RG-002-Y6-2468 and RG-003-Y6-2468 leave it. They passed only because every year-6 miss was a sample; with the three lines above strict, the reference seed fails them. This is the honest result of the rebuild, not a regression.
 - **Census:** "sample: one stream's random outcome" 2241 → 2001.
+- **Before and after, per expectation.** [DA1-Y6-RECLASS.tsv](DA1-Y6-RECLASS.tsv) lists every non-battle year-6 expectation of the four rebuilt vectors with its class under the old vector and the new one: the vector's flag (sample or strict) and Elegy's result on the reference seed, or k of 8 seeds for random-driven. The Y6 restart (`rg002-y6.json`; `rg003-y6.json` is identical):
+
+  | old class | new class | expectations |
+  |---|---|---:|
+  | sample, matched | strict, matched | 385 |
+  | sample, missed | strict, matched | 6 |
+  | sample, missed | strict, random-driven (1/8, 2/8) | 3 |
+  | sample, matched | sample, matched | 34 |
+  | sample, missed | sample, matched | 1 |
+  | sample, missed | sample, missed | 14 |
+  | strict, matched | strict, matched | 15 |
+  | absent | sample, matched / missed | 8 / 9 |
+
+  In the chained runs, year 6 gains 47 strict expectations that miss on all 8 seeds, but the ledger classes every chained year after the first as a sample, so they stay samples there (the file's header says so).
 
 ### Order accounting (RG-002, RG-003, RG-004)
 
-Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
+Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed on main `5a735e1`. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
 
 Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P, objects not at the same place; O, the object belongs to another player; R, a value out of range (a ship count); H, the harness refusal of a waypoint_delete past the end of the fleet's list (ELEGY CHOICE, harness).
 
@@ -441,20 +536,20 @@ Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P,
 | 1 | 158 | 0 | 0 |
 | 2 | 157 | 0 | 0 |
 | 3 | 190 | 6 (4/2/0/0/0) | 0 |
-| 4 | 162 | 7 (6/1/0/0/0) | 1 (1/0/0/0/0) |
-| 5 | 171 | 12 (8/2/2/0/0) | 1 (1/0/0/0/0) |
-| 6 | 173 | 13 (10/0/2/1/0) | 1 (1/0/0/0/0) |
-| 7 | 183 | 10 (5/2/2/0/1) | 1 (1/0/0/0/0) |
-| 8 | 161 | 8 (6/0/2/0/0) | 1 (1/0/0/0/0) |
-| 9 | 164 | 8 (4/2/2/0/0) | 1 (1/0/0/0/0) |
-| 10 | 173 | 8 (4/1/3/0/0) | 1 (1/0/0/0/0) |
-| 11 | 172 | 9 (5/0/4/0/0) | 1 (1/0/0/0/0) |
-| 12 | 185 | 12 (5/2/4/1/0) | 1 (1/0/0/0/0) |
-| total | 2049 | 93 | 9 |
+| 4 | 162 | 6 (5/1/0/0/0) | 0 |
+| 5 | 171 | 11 (7/2/2/0/0) | 0 |
+| 6 | 173 | 12 (9/0/2/1/0) | 0 |
+| 7 | 183 | 9 (4/2/2/0/1) | 0 |
+| 8 | 161 | 7 (5/0/2/0/0) | 0 |
+| 9 | 164 | 7 (3/2/2/0/0) | 0 |
+| 10 | 173 | 7 (3/1/3/0/0) | 0 |
+| 11 | 172 | 8 (4/0/4/0/0) | 0 |
+| 12 | 185 | 11 (4/2/4/1/0) | 0 |
+| total | 2049 | 84 | 0 |
 
-- **Chained runs:** every refusal is a sample line. It follows earlier divergence, because the order names an object that Elegy's diverged state no longer has, or has elsewhere. RG-002 has 37, RG-003 220 and RG-004 93.
-- **Restarts:** RG-002 and RG-003 refuse nothing. RG-004's 9 restart refusals are the lane A hand lines "empty design-slot delete refused", one in each restart from Y4 to Y12 (see the RG-004 section).
-- **RG-004 ledger:** 102 order lines (93 + 9), matching the steward's count.
+- **Chained runs:** every refusal is a sample line. It follows earlier divergence, because the order names an object that Elegy's diverged state no longer has, or has elsewhere. RG-002 has 37, RG-003 220 and RG-004 84.
+- **Restarts:** no corpus refuses an order in a restart.
+- **Updated 2026-10-13 (main `5a735e1`):** this section first gave RG-004 93 chained and 9 restart refusals (102 order lines), the 9 restart ones being "the lane A hand lines 'empty design-slot delete refused', one in each restart from Y4 to Y12". Lane A's #244 accepts a delete of an empty design slot, which removes those 9 and the same order's 9 chained refusals (one N a year, years 4–12). RG-004 now has 84 order lines, all chained samples.
 
 ### Planet records without installations block
 

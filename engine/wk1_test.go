@@ -89,8 +89,9 @@ func TestConfirmedWK1TargetDiedInBattle(t *testing.T) {
 // (ASSUMPTION W10). The messages go out as the files are written, to the
 // follower's owner, and only for a follower that still exists. Several
 // followers of one gone fleet each get their own 0x028 (fleets 5 and 10,
-// 6 and 11): ASSUMPTION, since WK-1 had one follower per victim and
-// RG-003's five followers of one victim have no message expectations.
+// 6 and 11): CONFIRMED by prediction for a fleet destroyed in battle (WK-2,
+// stars-elegy d5b23e3, 3 of 3 streams; TestConfirmedWK2SeveralFollowersAndWaypoints),
+// BINARY-ONLY for the other removals these fleets stand for.
 func TestWK1GoneOwed(t *testing.T) {
 	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}},
 		Planets: []Planet{{ID: 7, Pos: Point{1150, 1150}}},
@@ -172,5 +173,77 @@ func TestMeasuredBattleRemovalNoStandIn(t *testing.T) {
 		if len(g.goneTargets) != owed {
 			t.Errorf("battle %v: owed %v, want %d", battle, g.goneTargets, owed)
 		}
+	}
+}
+
+// TestConfirmedWK2SeveralFollowersAndWaypoints: stars-elegy PARITY.md
+// "Several followers, and waypoints 2 and up, aimed at a fleet destroyed
+// in battle (WK-2)", stars-elegy d5b23e3 (#207), CONFIRMED by
+// prediction, 3 of 3 streams. Player 1's
+// victims fly 20 ly south and die in deep space; player 0's followers are
+// far away. Each waypoint aimed at a victim becomes deep space where it
+// died, a waypoint between them is unchanged, and every such waypoint
+// owes its own 0x028 (A: three followers of one victim; B1: waypoints 1
+// and 3 on one victim; B2: waypoints 1 and 2 on two victims; B3:
+// waypoint 1 deep space, waypoint 2 on a victim). The
+// observed message sequence is MEASURED; it also follows victim id and
+// battle order, so the ordering rule is UNRESOLVED. Elegy's walk, fleets
+// then waypoints, gives the observed sequence, and the test pins it.
+func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
+	died, start := Point{1100, 1100}, Point{1100, 1080}
+	died2, start2 := Point{1300, 1100}, Point{1300, 1080}
+	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
+	g := combatLabGame(prey, 6, 3)
+	g.Fleets[1].Pos = start
+	g.Fleets[1].Waypoints = []Waypoint{{Pos: died, Warp: 9}}
+	g.Fleets = append(g.Fleets,
+		Fleet{ID: 5, Owner: 0, Pos: died2, Stacks: []Stack{{Design: 0, Count: 6}}},
+		Fleet{ID: 6, Owner: 1, Pos: start2, Stacks: []Stack{{Design: 1, Count: 3}}, Waypoints: []Waypoint{{Pos: died2, Warp: 9}}},
+	)
+	far, between := Point{1200, 1300}, Point{1250, 1250}
+	chase := func(at Point, id int) Waypoint { return Waypoint{Pos: at, Warp: 1, Target: TargetFleet, ID: id} }
+	followers := []Fleet{
+		{ID: 10, Waypoints: []Waypoint{chase(start, 2)}},                                           // A
+		{ID: 11, Waypoints: []Waypoint{chase(start, 2)}},                                           // A
+		{ID: 12, Waypoints: []Waypoint{chase(start, 2), {Pos: between, Warp: 1}, chase(start, 2)}}, // A and B1
+		{ID: 13, Waypoints: []Waypoint{chase(start, 2), chase(start2, 6)}},                         // B2
+		{ID: 14, Waypoints: []Waypoint{{Pos: between, Warp: 1}, chase(start2, 6)}},                 // B3
+	}
+	for _, f := range followers {
+		f.Owner, f.Pos, f.Stacks = 0, far, []Stack{{Design: 0, Count: 1}}
+		g.Fleets = append(g.Fleets, f)
+	}
+	r, err := GenerateTurn(withRules(g), nil, rand.New(rand.NewSource(7)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gone := func(at Point) Waypoint { return Waypoint{Pos: at, Warp: 1} }
+	want := map[int][]Waypoint{
+		10: {gone(died)},
+		11: {gone(died)},
+		12: {gone(died), {Pos: between, Warp: 1}, gone(died)},
+		13: {gone(died), gone(died2)},
+		14: {{Pos: between, Warp: 1}, gone(died2)},
+	}
+	for _, f := range r.Game.Fleets {
+		switch f.ID {
+		case 2, 6:
+			t.Fatalf("victim %d survived", f.ID)
+		}
+		if w, ok := want[f.ID]; ok && !slices.Equal(f.Waypoints, w) {
+			t.Errorf("fleet %d: waypoints %+v, want %+v", f.ID, f.Waypoints, w)
+		}
+	}
+	var got []int
+	for _, e := range r.Events {
+		if e.Kind == EventTargetGone {
+			if e.Player != 0 {
+				t.Errorf("0x028 %+v, want player 0's", e)
+			}
+			got = append(got, e.Fleet)
+		}
+	}
+	if !slices.Equal(got, []int{10, 11, 12, 12, 13, 13, 14}) {
+		t.Errorf("0x028 to fleets %v, want [10 11 12 12 13 13 14]", got)
 	}
 }
