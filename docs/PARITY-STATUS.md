@@ -257,12 +257,12 @@ Measured on elegy main `97ac630` (#217) plus this branch.
 
 ### Mine-sweep messages (lane D)
 
-Measured on elegy main `33b91e3` (#229) plus this branch.
+Measured on elegy main `bd0ed07` (#231) plus this branch.
 
 - **Mapped** from Elegy's existing sweep step (objects `Sweep`, OBJECTS.md "Sweeping"), by MESSAGES.md at stars-elegy 1d4c97b:
   - **0x0f4**: a starbase swept mines. `EventMinesSwept` with a planet, to its owner (CONFIRMED ob/ob007, mf/mf01).
   - **0x0c2**: a fleet swept mines. `EventMinesSwept` with a fleet, to its owner (CONFIRMED ob/ob010, cs).
-  - **0x0be**: someone swept your field. The new `EventMinefieldSwept` (kind 95) goes to the field's owner right after each sweeper's event, one per sweeper per field (CONFIRMED ob/ob010, cs, mf/mf01).
+  - **0x0be**: someone swept your field. The new `EventMinefieldSwept` (kind 96) goes to the field's owner right after each sweeper's event, one per sweeper per field (CONFIRMED ob/ob010, cs, mf/mf01).
 - **Slots.** The sweeper (planet or fleet) and the amount are compared. The player slot's flags, the field type value and the location encoding have no public table, so the field owner, type and centre slots (and 0x0be's field object) are not compared.
 - **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
