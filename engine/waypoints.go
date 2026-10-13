@@ -18,8 +18,8 @@ const (
 // and 7a.2 (ORDERS.md "Targets that moved, died or were captured",
 // CONFIRMED): a waypoint aimed at a fleet that still exists takes the
 // fleet's current position, whoever owns it now; a waypoint aimed at a
-// fleet that no longer exists becomes a plain go-to at its last
-// coordinates. A planet target never moves.
+// fleet that no longer exists is resolved by targetGone. A planet target
+// never moves.
 //
 // Each check first clamps every fleet's position, which is its waypoint
 // 0, into the galaxy box, each axis on its own, with no message and no
@@ -63,7 +63,7 @@ func (g *Game) waypointCheck() {
 				if t := g.fleetIndex(wp.ID); t >= 0 {
 					wp.Pos = g.Fleets[t].Pos
 				} else {
-					wp.Target, wp.ID = TargetSpace, 0
+					g.targetGone(&g.Fleets[i], wp)
 				}
 			case TargetPacketObject:
 				if p, ok := g.packetObjectPos(wp.Owner, wp.ID); ok {
@@ -81,6 +81,45 @@ func (g *Game) waypointCheck() {
 				}
 			}
 		}
+	}
+}
+
+// targetGone resolves wp, a waypoint of f aimed at a fleet that no longer
+// exists (ORDERS.md "Targets that moved, died or were captured", "The
+// target is gone"): it becomes the planet that stands exactly at its
+// coordinates, else deep space there, and f's owner is owed 0x028, sent
+// when the files are written (fileRetarget; MESSAGES.md 0x028, phase
+// P8a). The coordinates are the target's last position: every waypoint
+// check, and the settlement after movement (settleWaypoints), copies the
+// target's position.
+//
+// A fleet destroyed in battle, or removed any other way, is resolved
+// earlier, as it is removed (retargetRemoved); this is the rule for a
+// waypoint left aimed at a removed fleet's id with nothing there, and for
+// the file check.
+//
+// CONFIRMED by prediction for waypoint 1 aimed at a fleet the waypoint's
+// owner destroyed in battle (WK-1, stars-elegy 5962b72, PARITY.md "A
+// waypoint aimed at a fleet destroyed in battle (WK-1)", 2 of 2 streams):
+// victims orbiting a planet left that planet;
+// victims in deep space 5 ly from a planet left deep space at their
+// position, not the nearest planet; victims that flew onto a planet and
+// died there left that planet, not where they started; one 0x028 per
+// follower. MEASURED for a target scrapped in deep space before movement
+// (WF-04: deep space with 0x028). Other losses are BINARY-ONLY; waypoint 2
+// and up, waypoint 0, a kill by a third player and targets other than
+// fleets are NOT RUN.
+func (g *Game) targetGone(f *Fleet, wp *Waypoint) {
+	resolveGone(g, wp)
+	g.goneTargets = append(g.goneTargets, f.ID)
+}
+
+// resolveGone makes wp, aimed at a fleet that no longer exists, the
+// planet standing exactly at its coordinates, else deep space there.
+func resolveGone(g *Game, wp *Waypoint) {
+	wp.Target, wp.ID = TargetSpace, 0
+	if pi := g.planetAt(wp.Pos); pi >= 0 {
+		wp.Target, wp.ID = TargetPlanet, g.Planets[pi].ID
 	}
 }
 
@@ -181,11 +220,32 @@ func (g *Game) chaseMerged(merged, follows map[int]int, rng Rand) {
 // planet was taken. The spec's "the replaying player's own fleets
 // preferred" is the merge case, where that player owns the removed fleet.
 //
+// A fleet destroyed in battle has no stand-in (standIns false): MEASURED
+// in RG-003 (stars-elegy b0f7dfa), year 7 (2469): player 5's fleet 15
+// died in battle at planet 83, where player 5's fleet 1 stayed (MEASURED
+// at the end of the year), and player 5's fleet 45, whose waypoint chased
+// fleet 15, came back aimed at planet 83, not fleet 1; in year 8 (2470)
+// player 1's five fleets chasing player 5's fleet 71, which died at
+// planet 94 where player 5's fleet 74 had orbited, came back aimed at
+// planet 94 (the vectors' planet numbers). WK-1 (CONFIRMED by
+// prediction) had no surviving fleet of the victims' owner. Other
+// removals keep W10.
+//
 // With nothing there the waypoint keeps the removed fleet's id, so the
-// "target gone" rule makes it deep space at its last position, with 0x028
-// when the files are written (MEASURED WF-04: a target scrapped in deep
-// space). Deep space is the spec's third case either way.
-func (g *Game) retargetRemoved(ids map[int]bool) {
+// "target gone" rule (targetGone) makes it deep space at its last
+// position at the next waypoint check, with 0x028 when the files are
+// written (MEASURED WF-04: a target scrapped in deep space). Deep space is
+// the spec's third case either way.
+//
+// Retargeted to the planet, the chasing fleet's owner is owed 0x028 too,
+// sent when the files are written (fileRetarget): CONFIRMED by prediction
+// for a target destroyed in battle (WK-1, 2 of 2 streams: one 0x028 per
+// follower, the waypoint the planet where the target died, after
+// movement); for the other removals BINARY-ONLY (ORDERS.md "The target is
+// gone"). Several followers of one removed fleet each owe their own
+// 0x028: ASSUMPTION (WK-1 had one follower per victim). ASSUMPTION W10: a
+// waypoint taken over by a stand-in fleet owes no 0x028.
+func (g *Game) retargetRemoved(ids map[int]bool, standIns bool) {
 	order := g.fleetOrder()
 	for _, i := range order {
 		if ids[g.Fleets[i].ID] {
@@ -200,10 +260,11 @@ func (g *Game) retargetRemoved(ids map[int]bool) {
 			retarget := func(kind TargetKind, id int) {
 				wp.Pos, wp.Target, wp.ID = gone.Pos, kind, id
 			}
-			if fi := g.standIn(order, ids, gone, i); fi >= 0 {
+			if fi := g.standIn(order, ids, gone, i); standIns && fi >= 0 {
 				retarget(TargetFleet, g.Fleets[fi].ID)
 			} else if pi := g.planetAt(gone.Pos); pi >= 0 {
 				retarget(TargetPlanet, g.Planets[pi].ID)
+				g.goneTargets = append(g.goneTargets, g.Fleets[i].ID)
 			}
 		}
 	}
@@ -396,6 +457,14 @@ const (
 // scrapped before movement became space at its last position with 0x028.
 func (g *Game) fileRetarget(views []PlayerView) []Event {
 	var events []Event
+	// The year's 0x028 owed by targetGone and retargetRemoved, in the
+	// order they were owed, to the follower's owner now.
+	for _, id := range g.goneTargets {
+		if fi := g.fleetIndex(id); fi >= 0 {
+			events = append(events, g.fleetEvent(&g.Fleets[fi], EventTargetGone, 0))
+		}
+	}
+	g.goneTargets = nil
 	for i := range g.Fleets {
 		f := &g.Fleets[i]
 		var seen map[int]bool
@@ -406,7 +475,7 @@ func (g *Game) fileRetarget(views []PlayerView) []Event {
 			}
 			t := g.fleetIndex(wp.ID)
 			if t < 0 {
-				wp.Target, wp.ID = TargetSpace, 0
+				resolveGone(g, wp)
 				events = append(events, g.fleetEvent(f, EventTargetGone, 0))
 				continue
 			}

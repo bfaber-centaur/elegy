@@ -20,6 +20,7 @@ func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
 		0x026: "EventOvercrowded",
+		0x028: "EventTargetGone",
 		0x02e: "EventColonistsBeamedDown",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
@@ -39,6 +40,7 @@ func pvMessageIDs() map[int]string {
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x07b: "EventTerraformed",
 		0x12a: "EventOrderClipped of an installation",
 		0x12f: "EventOrderClipped of terraforming",
 		0x083: "EventCometStrike, small",
@@ -251,6 +253,18 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					single[k] = j
 				}
 			}
+		case engine.EventTerraformed:
+			// MESSAGES.md 0x07b: planet, 1 up / 0 down, axis, hab value.
+			// The hab value is axis<<8 | the axis's new value (MEASURED
+			// from every 0x07b entry of the vectors; the table does not
+			// spell it out).
+			up := 0
+			if ev.Count > 0 {
+				up = 1
+			}
+			a := ev.Axes[0]
+			send(ev.Player, pvMsg{id: 0x07b, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{ev.Planet - 1, up, a, a<<8 | ev.Axes[1]}})
 		case engine.EventBattleSummary:
 			if ev.Count > 0 && ev.Count < len(pvSummaryIDs) {
 				send(ev.Player, pvMsg{id: pvSummaryIDs[ev.Count], known: []bool{}, why: "battle summary focus and slots"})
@@ -338,6 +352,16 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			if code, ok := fleet(ev.Fleet); ok {
 				m = pvMsg{id: 0x02e, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0},
 					known: []bool{true, true, true, false, false, false}, why: "0x02e mineral and location slots"}
+			}
+			send(ev.Player, m)
+		case engine.EventTargetGone:
+			// Slots: the follower, the gone target (MESSAGES.md 0x028;
+			// params MEASURED, WK-1). The event does not name the
+			// target, so its slot is not compared.
+			m := pvMsg{id: 0x028, params: make([]int, 2), known: make([]bool, 2), why: "0x028 fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m = pvMsg{id: 0x028, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, 0},
+					known: []bool{true, false}, why: "0x028 target slot"}
 			}
 			send(ev.Player, m)
 		case engine.EventFleetScrapped:

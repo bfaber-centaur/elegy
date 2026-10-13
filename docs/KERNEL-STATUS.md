@@ -130,8 +130,17 @@ MEASURED WU-ROUTE). As the year's files are written, a waypoint aimed
 at another player's fleet, friend or enemy, keeps it while its owner
 sees it; one out of sight becomes a plain position at the fleet's actual
 position (0x02a), or its planet when at one (0x029), and one whose
-target is gone a plain position at its last coordinates (0x028)
-(`fileRetarget`; W5 below). A waypoint aimed at a mineral packet or
+target is gone the planet standing exactly at its last coordinates,
+else a plain position there (0x028) (`fileRetarget`, `targetGone`; W5
+below). A waypoint aimed at a fleet destroyed in battle becomes, at once,
+the planet where the fleet died (after movement), else keeps the stale
+id and becomes a plain position there at the end-of-year waypoint check;
+either way the follower's owner gets 0x028 when the files are written
+(CONFIRMED by prediction for waypoint 1 aimed at a fleet the waypoint's
+owner destroyed, WK-1, stars-elegy 5962b72, PARITY.md "A waypoint aimed
+at a fleet destroyed in battle (WK-1)", 2 of 2 streams; waypoint 2 and
+up, waypoint 0, a kill by a third player and targets other than fleets
+NOT RUN; W10 below). A waypoint aimed at a mineral packet or
 salvage object (`TargetPacketObject`, named by the object's owner and
 number) follows a packet's move before fleets move, and one whose object
 is gone becomes a plain position at its last coordinates with no message;
@@ -438,6 +447,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   position, else to the planet there; with neither the waypoint keeps the
   stale id and the "target gone" rule applies (`retargetRemoved`;
   ORDERS.md "Targets that moved, died or were captured", BINARY-ONLY).
+  Retargeted to the planet, the chasing fleet's owner gets 0x028 when the
+  files are written (CONFIRMED by prediction for a fleet destroyed in
+  battle, WK-1; BINARY-ONLY for other removals); taken over by a stand-in
+  fleet, no 0x028 (assumed). A fleet destroyed in battle has no stand-in:
+  the waypoint goes to the planet even when another fleet of its owner
+  stays there (MEASURED, RG-003 2469: player 5's fleet 45 chasing fleet
+  15, which died at planet 83 where fleet 1 stayed; 2470 fits).
   MEASURED in RG-002 Y3 and Y4 (lane B's triage, 8 of 8 seeds): waypoints
   chasing a fleet removed at planet 79, and one destroyed in battle at
   planet 51, came back aimed at the planet. In Y4 two of the chasing

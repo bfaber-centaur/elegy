@@ -66,6 +66,7 @@ func TestPvMessages(t *testing.T) {
 		{"defense order removed", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemDefenses, Count: 0}}, [][2]int{{2, 0x12a}}},
 		{"terraform order reduced", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 2}}, [][2]int{{2, 0x12f}}},
 		{"overcrowded", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Fleet: -1, Count: 30}}, [][2]int{{2, 0x026}}},
+		{"target gone", []engine.Event{{Kind: engine.EventTargetGone, Player: 1, Planet: -1, Fleet: 4}}, [][2]int{{1, 0x028}}},
 		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Count: 3, Axes: []int{3}}}, [][2]int{{2, 0x050}}},
 		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Planet: -1, Fleet: -1, Count: 3, Axes: []int{3}}}, [][2]int{{1, 0x136}}},
 		{"research stolen", []engine.Event{{Kind: engine.EventResearchStolen, Player: 2, Planet: -1, Fleet: -1, Item: engine.ItemKind(3), Count: 40}}, [][2]int{{2, 0x159}}},
@@ -121,7 +122,8 @@ func TestMessageCheck(t *testing.T) {
 		events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 2}, {Kind: engine.EventAlchemy, Player: 0, Planet: 3, Item: engine.ItemMineralAlchemy, Count: 1}, {Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 4}, {Kind: engine.EventOrderClipped, Player: 0, Planet: 3, Item: engine.ItemTerraform, Count: 0}, {Kind: engine.EventResearchStolen, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 12}, {Kind: engine.EventLevelUp, Player: 0, Planet: -1, Fleet: -1, Item: engine.ItemKind(2), Count: 4, Axes: []int{3}}, {Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Item: engine.ItemKind(1), Count: 6, Axes: []int{3}},
 			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Destroyer")},
 			{Kind: engine.EventPartAvailable, Player: 2, Planet: -1, Fleet: -1, Count: comp("Laser Battery")},
-			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Scoper 150")}}},
+			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Scoper 150")},
+			{Kind: engine.EventTerraformed, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 1, Axes: []int{0, 51}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -145,6 +147,8 @@ func TestMessageCheck(t *testing.T) {
 		{"alchemy, not sent", msg(2, 0x08c, true, 1), "message 0x08c to player 2 present = false, want true"},
 		{"installation order reduced", msg(2, 0x12a, true, 1), ""},
 		{"installation order reduced, not sent", msg(0, 0x12a, true, 1), "message 0x12a to player 0 present = false, want true"},
+		{"terraform click", msg(2, 0x07b, true, 1), ""},
+		{"terraform click, not sent", msg(0, 0x07b, true, 1), "message 0x07b to player 0 present = false, want true"},
 		{"terraform order reduced", msg(0, 0x12f, true, 1), ""},
 		{"terraform order reduced, not sent", msg(2, 0x12f, true, 1), "message 0x12f to player 2 present = false, want true"},
 		{"research stolen", msg(0, 0x159, true, 1), ""},

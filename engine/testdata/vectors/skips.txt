@@ -57,7 +57,6 @@
    1 message 0x068 has no event mapping
    2 message 0x06a has no event mapping
    1 message 0x072 has no event mapping
-   9 message 0x07b has no event mapping
    1 message 0x08b has no event mapping
    2 message 0x0b8 has no event mapping
    1 message 0x0ba has no event mapping
@@ -124,11 +123,12 @@
   16 message_sequence 0x08f and 0x090 bombing fleet not compared
    2 message_sequence entry 0x007 has no event mapping
    3 message_sequence entry 0x025 has no event mapping
-   8 message_sequence entry 0x07b has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
    2 message_sequence entry 0x0f4 has no event mapping
    1 message_sequence entry 0x117 has no event mapping
-   1 message_sequence entry 0x156 has no event mapping
+   1 message_sequence entry 0x12c has no event mapping
+   3 message_sequence entry 0x156 has no event mapping
+   2 message_sequence entry 0x15a has no event mapping
    1 message_sequence entry 0x182 has no event mapping
    9 planet field defense_estimate
    2 planet field defenses null
@@ -141,7 +141,7 @@
    1 player field relations
    1 player field ship_design_count
  291 player not in the state
-1855 sample: one stream's random outcome
+1854 sample: one stream's random outcome
    1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
   10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
    3 score_record: Super Stealth research stealing
