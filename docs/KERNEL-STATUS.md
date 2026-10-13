@@ -134,14 +134,20 @@ a new object that takes the freed number is followed instead. While the
 object exists the target is kept as the files are written, seen or not
 (`waypointCheck`; ORDERS.md "Salvage and mineral packet targets",
 stars-elegy f2f9794, BINARY-ONLY; the keeping also MEASURED in RG-002).
-A fleet that reaches a waypoint aimed at a packet with a transport task
-has the task cancelled (`EventTransportNoHold`, 0x11e;
-`cancelPacketTransport`, BINARY-ONLY); aimed at salvage the task runs.
-The original cancels it in the load pass after movement, the first to
-read it, so Elegy cancels at the arrival. Not modelled: the same cancel
-before movement for a waypoint 0 still aimed at a packet (Elegy keeps no
-waypoint-0 target), and 0x11e for minefield, wormhole and Trader
-targets. At the end of the turn, a patrol fleet
+A transport task at a packet loads minerals from it, whoever owns it,
+and the emptied packet flies on; there is no 0x11e (`loadPacket`;
+ORDERS.md "Salvage and mineral packet targets", "Arrival", stars-elegy
+a1c4c91: MEASURED for an own packet, ET-2, and CONFIRMED by prediction
+for another player's, ET-2c). Only a fleet that reached a waypoint naming
+the packet this year loads from it, and from that packet only, found by
+owner and number; likewise a named salvage object (`namedSource`,
+T5 in TAKEOVER-STATUS.md for the cases Elegy cannot name). Two of those
+are INCORRECT against NS-1 (stars-elegy a1b3651): a waypoint 0 naming
+salvage or a packet loads from it before movement, over a planet and
+from a packet 40 ly away (CONFIRMED by prediction), where Elegy takes
+the planet or nothing; the NS-1 PR fixes them. Not
+modelled: 0x11e for minefield, wormhole and Trader targets, and the load
+message 0x02b. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and

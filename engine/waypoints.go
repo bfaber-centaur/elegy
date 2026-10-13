@@ -457,35 +457,9 @@ func (g *Game) packetObjectPos(owner, number int) (Point, bool) {
 	return Point{}, false
 }
 
-// EventTransportNoHold: Player's Fleet reached a waypoint aimed at a
-// mineral packet with a transport task, and the task was cancelled because
-// a packet holds no cargo (MESSAGES.md 0x11e). Elegy's wording.
+// EventTransportNoHold: Player's Fleet reached a waypoint aimed at an
+// object that holds no cargo with a transport task, and the task was
+// cancelled (MESSAGES.md 0x11e: a minefield, a wormhole or the Trader,
+// stars-elegy a1c4c91). Elegy's wording. Not sent yet: those targets are
+// not modelled. A packet holds cargo (loadPacket).
 const EventTransportNoHold EventKind = EventArtifactFound + 1
-
-// cancelPacketTransport cancels the transport task of fleet f, which has
-// just reached waypoint reached, when that waypoint is aimed at a mineral
-// packet (ORDERS.md "Salvage and mineral packet targets", "Arrival",
-// stars-elegy f2f9794, BINARY-ONLY; MESSAGES.md 0x11e). Salvage holds
-// cargo, so a transport task aimed at salvage runs.
-//
-// The original cancels the task in the load pass after movement (MESSAGES.md
-// 0x11e, phase P6c), the first pass to read it after the arrival, so
-// cancelling at the arrival is the same outcome. Not modelled: the same
-// cancel in the pass before movement (P2) for a waypoint 0 still aimed at
-// a packet, because Elegy does not keep waypoint 0's target, and for
-// minefield, wormhole and Trader targets, which 0x11e also names.
-func (g *Game) cancelPacketTransport(f *Fleet, reached Waypoint) []Event {
-	if reached.Target != TargetPacketObject || f.Task.Kind != TaskTransport || g.Objects == nil {
-		return nil
-	}
-	// Salvage and packets share each owner's numbers, so salvage is not
-	// found here.
-	if _, ok := g.Objects.PacketPos(reached.Owner, reached.ID); !ok {
-		return nil
-	}
-	f.Task = Task{}
-	// At the last waypoint 0x04e (a) follows the refusal. UNRESOLVED: an
-	// oracle run contradicts the 0x11e cancel for an own packet (write-up
-	// pending in stars-elegy); lane A owns the fix.
-	return append([]Event{g.fleetEvent(f, EventTransportNoHold, 0)}, g.taskEnded(f)...)
-}

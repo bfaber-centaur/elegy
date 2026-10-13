@@ -65,10 +65,35 @@ var pvSummaryIDs = func() []int {
 // for the ids pvMessageIDs maps. g is the game at the end of the year.
 func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 	got := map[[2]int]bool{}
-	send := func(player, id int) {
-		if player >= 0 {
+	for player, ids := range pvMessageSeq(g, events) {
+		for _, id := range ids {
 			got[[2]int{player, id}] = true
 		}
+	}
+	return got
+}
+
+// pvMessageSeq is each player's messages of the year, by the ids
+// pvMessageIDs maps, in the order the original's message file would hold
+// them: MESSAGES.md "Order", messages are appended as the year generates
+// them, and a step that deletes an earlier message (a fleet's earlier
+// 0x04e, a planet's single-unit build count) removes it from its place.
+// Each id is listed once, at its first place, as the vectors list them
+// (stars-elegy tools/vectors/build_kx.py `messages`). Elegy's events are
+// read as being in the year's order (ASSUMPTION: engine.GenerateTurn
+// appends them as the turn runs). g is the game at the end of the year.
+func pvMessageSeq(g *engine.Game, events []engine.Event) map[int][]int {
+	type msg struct {
+		player, id int
+		gone       bool
+	}
+	var msgs []msg
+	send := func(player, id int) int {
+		if player < 0 {
+			return -1
+		}
+		msgs = append(msgs, msg{player: player, id: id})
+		return len(msgs) - 1
 	}
 	owner := func(planet int) int {
 		for i := range g.Planets {
@@ -85,7 +110,8 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 		planet int
 		item   engine.ItemKind
 	}
-	single := map[built]int{} // pending single-unit message: its player, or absent
+	single := map[built]int{} // pending single-unit message: its index in msgs
+	arrived := map[int]int{}  // a fleet's 0x04e: its index in msgs
 	for i, ev := range events {
 		switch ev.Kind {
 		case engine.EventDropRepelled:
@@ -95,33 +121,43 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 			// captured later in the same year credits its new owner.
 			send(owner(ev.Planet), 0x004)
 		case engine.EventBuilt:
-			more := 0
+			one, more := 0, 0
 			switch ev.Item {
 			case engine.ItemFactory:
-				more = 0x036
+				one, more = 0x035, 0x036
 			case engine.ItemMine:
-				more = 0x038
+				one, more = 0x037, 0x038
 			default:
 				continue
 			}
 			k := built{ev.Planet, ev.Item}
 			n := ev.Count
-			if _, ok := single[k]; ok {
+			if j, ok := single[k]; ok {
 				n++
+				msgs[j].gone = true
 				delete(single, k)
 			}
 			switch {
 			case n > 1:
 				send(ev.Player, more)
 			case n == 1:
-				single[k] = ev.Player
+				if j := send(ev.Player, one); j >= 0 {
+					single[k] = j
+				}
 			}
 		case engine.EventBattleSummary:
 			if ev.Count > 0 && ev.Count < len(pvSummaryIDs) {
 				send(ev.Player, pvSummaryIDs[ev.Count])
 			}
 		case engine.EventFleetArrived:
-			send(ev.Player, 0x04e)
+			// MESSAGES.md 0x04e: an earlier copy for the same fleet is
+			// removed first.
+			if j, ok := arrived[ev.Fleet]; ok {
+				msgs[j].gone = true
+			}
+			if j := send(ev.Player, 0x04e); j >= 0 {
+				arrived[ev.Fleet] = j
+			}
 		case engine.EventOvercrowded:
 			send(ev.Player, 0x026)
 		case engine.EventQueueCompleted:
@@ -158,14 +194,67 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 			}
 		}
 	}
-	for k, player := range single {
-		id := 0x035
-		if k.item == engine.ItemMine {
-			id = 0x037
+	seq := map[int][]int{}
+	seen := map[[2]int]bool{}
+	for _, m := range msgs {
+		if k := [2]int{m.player, m.id}; !m.gone && !seen[k] {
+			seen[k] = true
+			seq[m.player] = append(seq[m.player], m.id)
 		}
-		send(player, id)
 	}
-	return got
+	return seq
+}
+
+// pvMessagePrior is a message expectation listed before another of the
+// same player and year in a case.
+type pvMessagePrior struct {
+	id     int
+	sample bool
+}
+
+// pvMessageOrder records, on each present message expectation, the
+// present ones listed before it for the same player and year in its case.
+// The vectors list a player's message ids in the order of their first
+// place in the year's message file (stars-elegy tools/vectors/build_kx.py
+// `messages`, which the observed-state builders share; ASSUMPTION for a
+// vector not built that way: vectors/README.md does not state the order).
+func pvMessageOrder(cases []pvCase) {
+	for c := range cases {
+		prior := map[[2]int][]pvMessagePrior{}
+		for i := range cases[c].Expect {
+			e := &cases[c].Expect[i]
+			if e.Kind != "message" || e.Player == nil || e.MessageID == nil || e.Present == nil || !*e.Present {
+				continue
+			}
+			k := [2]int{e.Year, *e.Player}
+			e.before = prior[k]
+			prior[k] = append(prior[k][:len(prior[k]):len(prior[k])], pvMessagePrior{*e.MessageID, e.Sample})
+		}
+	}
+}
+
+// messageOrderCheck compares a present message's place in the player's
+// year with the nearest message listed before it that Elegy also sends:
+// that one must come first. A message that is not a sample is placed
+// against the nearest one that is not a sample either, so an order that
+// draws decide stays a sample.
+func messageOrderCheck(e pvExpect, seq []int) string {
+	at := map[int]int{}
+	for i, id := range seq {
+		at[id] = i
+	}
+	for i := len(e.before) - 1; i >= 0; i-- {
+		p := e.before[i]
+		j, ok := at[p.id]
+		if !ok || p.id == *e.MessageID || (p.sample && !e.Sample) {
+			continue
+		}
+		if j > at[*e.MessageID] {
+			return fmt.Sprintf("message 0x%03x to player %d comes before 0x%03x, want after", *e.MessageID, *e.Player, p.id)
+		}
+		return ""
+	}
+	return ""
 }
 
 // messageCheck compares a message expectation with the year's events.
@@ -190,9 +279,16 @@ func (l *pvLoaded) messageCheck(g *engine.Game, e pvExpect) string {
 	if e.Year >= len(l.events) {
 		return "skip: no events for the year"
 	}
-	got := pvMessages(g, l.events[e.Year])[[2]int{player, id}]
+	seq := pvMessageSeq(g, l.events[e.Year])[player]
+	got := false
+	for _, s := range seq {
+		got = got || s == id
+	}
 	if got != *e.Present {
 		return fmt.Sprintf("message 0x%03x to player %d present = %v, want %v", id, player, got, *e.Present)
+	}
+	if got {
+		return messageOrderCheck(e, seq)
 	}
 	return ""
 }

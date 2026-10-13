@@ -484,14 +484,25 @@ func (g *Game) removeFleets(ids map[int]bool) {
 // left. loaded settles each action; a task left with no action is no
 // task, as after unloads.
 //
-// Away from a planet the loads come from salvage (ASSUMPTION T5, see
-// loadSalvage). Deep space with no salvage, and another player's planet,
-// are not sources (noSource).
+// A fleet that reached a waypoint aimed at a mineral packet or salvage
+// this year loads from that object only (namedSource). Otherwise, away
+// from a planet the loads come from salvage (ASSUMPTION T5, see
+// loadSalvage), never from a packet. Deep space with no salvage, and
+// another player's planet, are not sources (noSource).
 func (g *Game) load(f *Fleet, after bool) []Event {
+	if named, si, cargo := g.namedSource(f); named {
+		switch {
+		case si >= 0:
+			return g.loadSalvage(f, after, si)
+		case cargo != nil:
+			return g.loadPacket(f, after, cargo)
+		}
+		return g.noSource(f, after, -1)
+	}
 	pi := g.planetAt(f.Pos)
 	switch {
 	case pi < 0 && g.salvageAt(f.Pos) >= 0:
-		return g.loadSalvage(f, after)
+		return g.loadSalvage(f, after, g.salvageAt(f.Pos))
 	case pi < 0:
 		return g.noSource(f, after, -1)
 	case g.Planets[pi].Owner != f.Owner:
@@ -729,8 +740,8 @@ func (g *Game) salvageAt(pos Point) int {
 // salvage; ASSUMPTION T6: for colonists it is a source holding none, so
 // their actions settle as at a planet with no population. An emptied
 // object stays until the next decay.
-func (g *Game) loadSalvage(f *Fleet, after bool) []Event {
-	sv := &g.Salvage[g.salvageAt(f.Pos)]
+func (g *Game) loadSalvage(f *Fleet, after bool, si int) []Event {
+	sv := &g.Salvage[si]
 	capacity := g.cargoCapacity(f)
 	free := capacity - f.Cargo.mass()
 	for c := range NumCargo {
@@ -749,6 +760,96 @@ func (g *Game) loadSalvage(f *Fleet, after bool) []Event {
 			f.Cargo.Minerals[c] += amount
 			free -= amount
 			avail = sv.Minerals[c]
+		}
+		t.loaded(capacity, *held(f, c), avail, free)
+	}
+	return g.settled(f, after, -1)
+}
+
+// namedSource is the object f's transport task loads from when the
+// waypoint f reached this year names a mineral packet or salvage
+// (Waypoint.Target TargetPacketObject): the original looks the object up
+// by owner and number (ORDERS.md "Salvage and mineral packet targets",
+// "Arrival", stars-elegy a1c4c91, BINARY-ONLY). named is false for any
+// other fleet. Otherwise si is the salvage's index, or cargo the packet's
+// cargo; with neither, the object is gone and there is no source. Salvage
+// does not move, so the fleet is at it.
+//
+// T5, the cases Elegy does not know the target for, with their labels
+// against NS-1 (stars-elegy a1b3651, PARITY.md "A transport task whose
+// waypoint names a packet or salvage (NS-1)", ORDERS.md "Clarified
+// 2026-10-13"):
+//   - INCORRECT: waypoint 0's target is not kept from one year to the
+//     next, so the load pass before movement, and the one after movement
+//     for a fleet that did not arrive this year (a "set amount" or "wait
+//     for" still waiting), take a fleet as at a plain position: a planet
+//     first, else the first salvage there, in object order, and never a
+//     packet. NS-1 A3–A6 (CONFIRMED by prediction): a waypoint 0 naming
+//     salvage or a packet over a planet loads from that object before
+//     movement, never from the planet. The NS-1 PR fixes this.
+//   - ASSUMPTION: a waypoint at a plain position or a planet that happens
+//     to share a packet's position does not load from the packet.
+//   - A named packet or salvage is the source even at a planet: CONFIRMED
+//     by prediction for waypoint 0 (NS-1 A3–A6), MEASURED on arrival at
+//     salvage (NS-1 A1, A2).
+//   - INCORRECT: a named packet no longer at the fleet's position is no
+//     source (one launched this year flies on after movement, KERNEL.md
+//     step 5.1, and can leave a fleet that reached it). NS-1 B1, B2
+//     (CONFIRMED by prediction): a waypoint 0 naming a packet 40 ly away
+//     loads from it before movement; other distances, and the pass after
+//     movement, are NOT RUN. The NS-1 PR fixes this.
+//   - ASSUMPTION: without space objects (Game.Objects nil) a named object
+//     is no source.
+func (g *Game) namedSource(f *Fleet) (named bool, si int, cargo *Minerals) {
+	wp, ok := g.reached[f.ID]
+	if !ok || wp.Target != TargetPacketObject {
+		return false, -1, nil
+	}
+	for i, s := range g.Salvage {
+		if s.Owner == wp.Owner && s.Number == wp.ID {
+			if g.Objects == nil {
+				return true, -1, nil
+			}
+			return true, i, nil
+		}
+	}
+	if g.Objects != nil {
+		if c, pos := g.Objects.PacketCargo(wp.Owner, wp.ID); c != nil && pos == f.Pos {
+			return true, -1, c
+		}
+	}
+	return true, -1, nil
+}
+
+// loadPacket runs a transport task's loads from the mineral packet the
+// fleet's reached waypoint names (namedSource), whoever owns the packet: the usual load amount capped
+// by what it holds, minerals in order, the actions settling as at a
+// planet (ORDERS.md "Salvage and mineral packet targets", "Arrival",
+// stars-elegy a1c4c91; PARITY.md "A transport task aimed at a packet
+// (ET-2)": MEASURED for an own packet, CONFIRMED by prediction for
+// another player's, ET-2c; the owner never checked is BINARY-ONLY).
+// Colonists cannot be loaded from a packet; as for salvage (ASSUMPTION
+// T6) their actions settle as at a source holding none. An emptied packet
+// stays and flies on. The load message (0x02b) is not modelled.
+func (g *Game) loadPacket(f *Fleet, after bool, cargo *Minerals) []Event {
+	capacity := g.cargoCapacity(f)
+	free := capacity - f.Cargo.mass()
+	for c := range NumCargo {
+		t := &f.Task.Transport[c]
+		avail := 0
+		if c < NumMinerals {
+			avail = cargo[c]
+		}
+		want, ok := t.loadWant(capacity, *held(f, c), free, avail)
+		if !ok {
+			continue
+		}
+		if c < NumMinerals {
+			amount := max(0, min(want, cargo[c]))
+			cargo[c] -= amount
+			f.Cargo.Minerals[c] += amount
+			free -= amount
+			avail = cargo[c]
 		}
 		t.loaded(capacity, *held(f, c), avail, free)
 	}

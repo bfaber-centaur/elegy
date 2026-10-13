@@ -375,6 +375,9 @@ func (g *Game) fleetEvent(f *Fleet, kind EventKind, count int) Event {
 // messages, stars-elegy 9c1e2bc).
 func (g *Game) arrive(f *Fleet) []Event {
 	reached := f.Waypoints[0]
+	if g.reached != nil {
+		g.reached[f.ID] = reached
+	}
 	f.Task = reached.Task
 	f.Waypoints = f.Waypoints[1:]
 	if n := len(f.Waypoints); f.Repeat && reached.Task.Kind != TaskPatrol && n > 0 && f.Waypoints[n-1].Pos != reached.Pos {
@@ -926,7 +929,6 @@ func (g *Game) settleWaypoints(order []int) []Event {
 		if len(f.Waypoints) > 0 && g.destination(f.Waypoints[0]) == f.Pos {
 			reached := f.Waypoints[0]
 			events = append(events, g.arrive(f)...)
-			events = append(events, g.cancelPacketTransport(f, reached)...)
 			if reached.Target == TargetWormhole && g.Objects != nil {
 				events = append(events, g.transit(i, reached.ID)...)
 			}

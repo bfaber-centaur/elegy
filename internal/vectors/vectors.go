@@ -278,6 +278,9 @@ type pvExpect struct {
 	Player    *int  `json:"player"`
 	MessageID *int  `json:"message_id"`
 	Present   *bool `json:"present"`
+	// before lists the present message expectations of the same player
+	// and year listed before this one in its case (pvMessageOrder).
+	before []pvMessagePrior
 }
 
 // pvMaps maps vector ids to Elegy's: EndID a wormhole end id to its
