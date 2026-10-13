@@ -174,3 +174,71 @@ func TestMeasuredBattleRemovalNoStandIn(t *testing.T) {
 		}
 	}
 }
+
+// TestConfirmedWK2SeveralFollowersAndWaypoints: stars-elegy PARITY.md
+// "Several followers, and waypoints 2 and up, aimed at a fleet destroyed
+// in battle (WK-2)", CONFIRMED by prediction, 3 of 3 streams. Player 1's
+// victims fly 20 ly south and die in deep space; player 0's followers are
+// far away. Each waypoint aimed at a victim becomes deep space where it
+// died, a waypoint between them is unchanged, and every such waypoint
+// owes its own 0x028 (A: three followers of one victim; B1: waypoints 1
+// and 3 on one victim; B2: waypoints 1 and 2 on two victims). The
+// observed message sequence is MEASURED; it also follows victim id and
+// battle order, so the ordering rule is UNRESOLVED. Elegy's walk, fleets
+// then waypoints, gives the observed sequence, and the test pins it.
+func TestConfirmedWK2SeveralFollowersAndWaypoints(t *testing.T) {
+	died, start := Point{1100, 1100}, Point{1100, 1080}
+	died2, start2 := Point{1300, 1100}, Point{1300, 1080}
+	prey := testDesign(tFrigate, 20, Slot{tLaser, 1})
+	g := combatLabGame(prey, 6, 3)
+	g.Fleets[1].Pos = start
+	g.Fleets[1].Waypoints = []Waypoint{{Pos: died, Warp: 9}}
+	g.Fleets = append(g.Fleets,
+		Fleet{ID: 5, Owner: 0, Pos: died2, Stacks: []Stack{{Design: 0, Count: 6}}},
+		Fleet{ID: 6, Owner: 1, Pos: start2, Stacks: []Stack{{Design: 1, Count: 3}}, Waypoints: []Waypoint{{Pos: died2, Warp: 9}}},
+	)
+	far, between := Point{1200, 1300}, Point{1250, 1250}
+	chase := func(at Point, id int) Waypoint { return Waypoint{Pos: at, Warp: 1, Target: TargetFleet, ID: id} }
+	followers := []Fleet{
+		{ID: 10, Waypoints: []Waypoint{chase(start, 2)}},                                           // A
+		{ID: 11, Waypoints: []Waypoint{chase(start, 2)}},                                           // A
+		{ID: 12, Waypoints: []Waypoint{chase(start, 2), {Pos: between, Warp: 1}, chase(start, 2)}}, // A and B1
+		{ID: 13, Waypoints: []Waypoint{chase(start, 2), chase(start2, 6)}},                         // B2
+	}
+	for _, f := range followers {
+		f.Owner, f.Pos, f.Stacks = 0, far, []Stack{{Design: 0, Count: 1}}
+		g.Fleets = append(g.Fleets, f)
+	}
+	r, err := GenerateTurn(withRules(g), nil, rand.New(rand.NewSource(7)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	gone := func(at Point) Waypoint { return Waypoint{Pos: at, Warp: 1} }
+	want := map[int][]Waypoint{
+		10: {gone(died)},
+		11: {gone(died)},
+		12: {gone(died), {Pos: between, Warp: 1}, gone(died)},
+		13: {gone(died), gone(died2)},
+	}
+	for _, f := range r.Game.Fleets {
+		switch f.ID {
+		case 2, 6:
+			t.Fatalf("victim %d survived", f.ID)
+		}
+		if w, ok := want[f.ID]; ok && !slices.Equal(f.Waypoints, w) {
+			t.Errorf("fleet %d: waypoints %+v, want %+v", f.ID, f.Waypoints, w)
+		}
+	}
+	var got []int
+	for _, e := range r.Events {
+		if e.Kind == EventTargetGone {
+			if e.Player != 0 {
+				t.Errorf("0x028 %+v, want player 0's", e)
+			}
+			got = append(got, e.Fleet)
+		}
+	}
+	if !slices.Equal(got, []int{10, 11, 12, 12, 13, 13}) {
+		t.Errorf("0x028 to fleets %v, want [10 11 12 12 13 13]", got)
+	}
+}
