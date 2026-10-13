@@ -43,8 +43,9 @@ func TestConfirmedTerraformItemClipAndClicks(t *testing.T) {
 	}
 	// One 0x07b per click, gravity down to 59 then 58 (MESSAGES.md 0x07b,
 	// KX-002 T1: params [7 0 0 59] and [7 0 0 58]).
-	if len(ev) < 3 || ev[0].Kind != engine.EventOrderClipped || ev[0].Count != 3 {
-		t.Fatalf("events %+v", ev)
+	// Exactly the clip and two clicks: no batch EventBuilt of ItemTerraform.
+	if len(ev) != 3 || ev[0].Kind != engine.EventOrderClipped || ev[0].Count != 3 {
+		t.Fatalf("events %+v, want the clip and two clicks", ev)
 	}
 	for i, v := range []int{59, 58} {
 		e := ev[1+i]
