@@ -242,3 +242,19 @@ func TestPredictionProductionEdgeCases(t *testing.T) {
 		t.Errorf("zero resources: research %d events %v queue %v", r, ev, zero.Queue)
 	}
 }
+
+// TestAutoAlchemyLastNothingLeft: Auto Alchemy as the last item leaves a
+// Mineral Alchemy ×1 partial at the front even when its whole units use
+// every resource (stars-elegy PARITY.md "Production queue" rules: the
+// partial is unconditional). MEASURED once, RG-003 2472 planet 22 (an MA
+// race, rate 25): 0 resources left became Mineral Alchemy @3%, the
+// partial-percentage formula's value for 0 at rate 25. Here 250 resources
+// buy exactly 10 units at rate 25.
+func TestAutoAlchemyLastNothingLeft(t *testing.T) {
+	runPQ(t, pqCase{name: "MA rate 25", pop: 2500, defenses: 10, minerals: Minerals{100, 100, 100},
+		queue:        []QueueItem{q(ItemAutoAlchemy, 1, 0)},
+		wantDefenses: 10, wantMinerals: Minerals{110, 110, 110},
+		wantQueue: []QueueItem{q(ItemMineralAlchemy, 1, 3), q(ItemAutoAlchemy, 1, 0)}, wantResearch: 0,
+		wantEvents: []EventKind{EventAlchemy},
+		race:       func(r *Race) { r.LRT.MineralAlchemy = true }})
+}
