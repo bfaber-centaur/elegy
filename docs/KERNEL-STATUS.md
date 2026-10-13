@@ -146,7 +146,18 @@ to 3 and several followers of one victim, each waypoint on its own with
 one 0x028, WK-2, stars-elegy d5b23e3, 3 of 3 streams, the messages'
 order MEASURED and its rule UNRESOLVED; waypoint 0, a kill by a third
 player, targets other than fleets and the planet case at waypoints 2 and
-up NOT RUN; W10 below). A waypoint aimed at a mineral packet or
+up NOT RUN; W10 below). A waypoint aimed at a fleet destroyed during
+movement (by mines; also warp-10 losses and a stargate, which leave the
+fleet with no ships until it is removed) keeps the coordinates it held
+before movement, the target's start position: chasers head there, a
+chaser that reaches it completes its waypoint, and one that does not is
+left, after the year, with a plain position there and 0x028
+(`destroyedMoving`; ORDERS.md "Target destroyed during movement",
+stars-elegy #198 de1bd6f: the destination CONFIRMED by prediction Z-MD-1,
+Z-MD-3 for targets destroyed by mines, the waypoint afterwards and the
+0x028 MEASURED; other causes of death, waypoints after the first and a
+target that dies after some of its chasers' rounds NOT RUN, ASSUMPTION;
+`TestConfirmedChaseTargetDestroyedByMines`). A waypoint aimed at a mineral packet or
 salvage object (`TargetPacketObject`, named by the object's owner and
 number) follows a packet's move before fleets move, and one whose object
 is gone becomes a plain position at its last coordinates with no message;
