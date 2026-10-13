@@ -136,6 +136,21 @@ combat function; the tests added for this pass (rows above, and
 `TestPredictionMineDamageLateFleets` in `objects`) pin the late values of
 each rule from COMBAT.md and OBJECTS.md.
 
+**RG-002 (measured 2026-10-13 on 387c622).** The same coverage, run over
+`TestBattleRecords` with only RG-002's records loaded, now reaches starbase
+damage (`starbaseDamage` 100%), a starbase loss (`loseStarbase` 80%) and
+minefield hits (`MineDamage` 83%, `MinesLost` 67%, `PayingField` 100%,
+`ApplyHit` 82%). The other gaps remain: `gatling` 0%, and `capTokens`
+31% (no RG-002 battle reaches the token cap; the largest has 35 tokens).
+Beyond the RG-001 parts above, RG-002's battle records have the Delta Torpedo, Yakimora
+Light Phaser, Phaser Bazooka, Pulsed Sapper, Mass Driver 7, Energy
+Capacitor, Bear Neutrino Barrier, Croby Sharmor and Organic Armor, on
+hulls including the Cruiser, Rogue, Privateer and Meta Morph. Their
+starbases include an Ultra Station (Y4) and a Death Star (Y6). No record has a Battle Nexus, Blasters,
+Disruptors, Pulverizers, a Gatling, the Big Mutha Cannon or the Syncro
+Sapper. Those values stay pinned by the CB cases (CB-056 to CB-058), not
+by a representative game. Every RG-002 restart battle record matches (RG002-REPORT.md).
+
 Oracle questions for a late-game run (RG-002 or a CB case); CB-056
 answered all seven (below):
 
@@ -225,7 +240,7 @@ LRT.
 | 1 | A Destroyer (Long Hump 6, one Alpha Torpedo, no computer) fires at a Battleship with six Jammer 50 and no shields: hit chance 35·(100−95)/100 = 1% | when the torpedo misses, one hit record with 0 hits and 1 miss, and no damage | CONFIRMED (268 misses, one record each, no change) | `TestConfirmedCB058ZeroHitTorpedoRecord` |
 | 2 | Three players, 100 one-ship fleets each (ids 0..99) at one deep-space point | quota 85; player 0's fleets 0 and 16..99 and players 1 and 2's 15..99 fight (255); all three get the left-out message | CONFIRMED by CB-042 (the same layout; not rerun) | `TestConfirmedCB042TokenCapThreePlayers` |
 | 3 | A fleet of 4 Large Freighters (2 Long Hump 6) with 1000 Fe, 700 Bo, 333 Ge, 500 kT colonists loses one freighter per kill event | cargo left 750/525/249/376, then 500/350/166/251, then 250/175/83/126, then none: each share truncated, the remainder 1 kT at a time to Fe, Bo, Ge, colonists | CONFIRMED (salvage 764/528/257 in every run; all cargo with the last ship would give 762/525/258) | `TestConfirmedCB058CargoShare` |
-| 4 | Player 0 destroys all of player 1's ships at two deep-space points in one turn, the second point's fleets earlier in the fleet table | the salvage at the point of player 0's lower fleet is player 1's number 0, the other number 1 (battles by each location's first fleet; lowest free number) | MEASURED, consistent with eaa474e (numbers 0 and 1 in every run; the numbers pushed before the run were for other victims); the battle order by first fleet BINARY-ONLY, since ascending y also fits | `TestMeasuredCB058SalvageTwoPoints` |
+| 4 | Player 0 destroys all of player 1's ships at two deep-space points in one turn, the second point's fleets earlier in the fleet table | the salvage at the point of player 0's lower fleet is player 1's number 0, the other number 1 (battles by each location's first fleet; lowest free number) | MEASURED, consistent with eaa474e (numbers 0 and 1 in every run; the numbers pushed before the run were for other victims); the battle order by first fleet BINARY-ONLY, since ascending y also fits; Q4b (the same layout with the y values swapped) is Elegy's PREDICTION that the first-fleet order holds, for lane F to run | `TestMeasuredCB058SalvageTwoPoints`, `TestPredictionCB058Q4bBattleOrderNotByY` |
 | 5 | An RS player's Rogue with 3 Langston Shell in slot 1 (a shield-or-armor slot); a Battleship with 3 Langston Shell in slot 2 (shield only); a Rogue with 3 Organic Armor in slot 1. Each has Trans-Galactic Drives in slot 0 | 645, 2195, 712; shields 525. Elegy halves by part kind, so the Shell counts whole in either slot. Halving by slot kind would give the first Rogue 547 | CONFIRMED (every hit replays only with 645, 2195 and 712; with 547, 2–4 hits per run fail) | `TestConfirmedCB058LangstonShellRegeneratingShields` |
 | 6 | A Death Star with 8 Heavy Blasters (range 3) | armor 1500; reach 4: a ship 4 squares away is a target, one 5 away is not | reach CONFIRMED (no shot at 5, a shot at 4); armor MEASURED as consistent (1126–1500) | `TestConfirmedCB058DeathStarReach` |
 
