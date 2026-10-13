@@ -302,6 +302,8 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	// Elegy equivalent.
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
+	// Step 1a.2: the design check (checkDesigns; position ASSUMPTION T15).
+	g.checkDesigns()
 	g.holdFleetNumbers()
 	// Step 1a.3: the waypoint check, then following fleets (KERNEL.md
 	// "Turn order", order BINARY-ONLY, corrected in stars-elegy 33eeb4a).

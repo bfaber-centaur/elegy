@@ -80,7 +80,9 @@ Not modelled: the rebirth itself. GAP-001 MEASURED a new environment and new con
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
 file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); step
-1a.3: the waypoint check, which clamps every fleet's position into the
+1a.2: the design check, which empties ship-design slots whose part the
+owner lacks the tech for (TAKEOVER-STATUS.md, T-37; its place in step
+1a.2 is ASSUMPTION T15); step 1a.3: the waypoint check, which clamps every fleet's position into the
 galaxy box (below), then retargets waypoints, a follower's
 waypoint 0 included, aimed at a fleet merged away during the replay
 (ORDERS-STATUS.md), then following fleets (KERNEL.md as corrected in

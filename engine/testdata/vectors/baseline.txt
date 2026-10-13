@@ -1069,6 +1069,8 @@ SL-starbases random 7
 TK-101-A
 TK-102-A
 TK-103-A
+TK-104-A
+TK-105-A
 TK-106-A
 TK-106-A2
 TK-106-B
