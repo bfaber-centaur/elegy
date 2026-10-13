@@ -564,3 +564,25 @@ func TestConfirmedFB1RefusedDesigns(t *testing.T) {
 		t.Errorf("c: spent %v, starbase %d, queue %+v", got, p.StarbaseDesign, p.Queue)
 	}
 }
+
+func TestMeasuredStarbaseBuiltNamesDesignSlot(t *testing.T) {
+	// MESSAGES.md 0x0cd "Design slot" (stars-elegy 898c526, MEASURED
+	// SL-12): the message names the owner's starbase design slot, so the
+	// event carries the slot (5), not the design index (3).
+	g := shipyard(t)
+	g.DesignSlots[2].Slot = 5 // the Orbital Fort
+	p := &g.Planets[0]
+	race, levels := g.Players[0].Race, g.Players[0].Research.Levels
+	fort, _ := StarbaseReplacementCost(g.Designs[3], g.Designs[2], race, levels)
+	p.HasQueue, p.Queue = true, []QueueItem{{Kind: ItemStarbase, Slot: 5, Count: 1}}
+	_, ev := shipyardRun(g, 0, fort.Resources)
+	var got []Event
+	for _, e := range ev {
+		if e.Kind == EventStarbaseBuilt {
+			got = append(got, e)
+		}
+	}
+	if p.StarbaseDesign != 3 || len(got) != 1 || len(got[0].Axes) != 1 || got[0].Axes[0] != 5 || got[0].Planet != p.ID || got[0].Player != 0 {
+		t.Errorf("starbase %d, events %+v; want design 3 and one EventStarbaseBuilt naming slot 5", p.StarbaseDesign, got)
+	}
+}

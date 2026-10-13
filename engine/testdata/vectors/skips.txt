@@ -67,7 +67,6 @@
    1 message 0x0c9 has no event mapping
   11 message 0x0ca has no event mapping
    1 message 0x0cb has no event mapping
-   7 message 0x0cd has no event mapping
    2 message 0x0de has no event mapping
    2 message 0x0e2 has no event mapping
    2 message 0x0e3 has no event mapping
@@ -110,8 +109,7 @@
    1 message 0x179 has no event mapping
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
-   4 message_sequence 0x05b fleet slot not compared
-   2 message_sequence entry 0x0cd has no event mapping
+   4 message_sequence 0x02e mineral and location slots not compared
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping
    2 message_sequence entry 0x12d has no event mapping

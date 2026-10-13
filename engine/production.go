@@ -167,7 +167,7 @@ type Event struct {
 	Fleet  int // fleet id, or -1
 	Item   ItemKind
 	Count  int
-	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), or a captured planet's former owner
+	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, a gone target's owner and number (EventTargetGone), a captured planet's former owner, or a built starbase's design slot (EventStarbaseBuilt from production)
 }
 
 // ProductionInput is everything one planet's production reads.
@@ -639,6 +639,9 @@ func (pr *production) buildStarbase(slot int) (earlier, noDriver, refused bool) 
 	if len(ev) == 0 {
 		return false, false, true
 	}
+	// The starbase message names the owner's design slot (MESSAGES.md
+	// 0x0cd "Design slot", stars-elegy 898c526, MEASURED).
+	ev[0].Axes = []int{slot}
 	pr.events = append(pr.events, ev...)
 	_, _, hasDriver := DriverWarp(g.Designs[d])
 	return had && p.StarbaseHull < old, !hadDriver && !hasDriver, false
