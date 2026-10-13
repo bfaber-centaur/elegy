@@ -296,7 +296,7 @@ func TestAssumptionDesignCheckAfterOrders(t *testing.T) {
 
 // TestConfirmedDesignCheckReceived: a design received with a fleet
 // transfer is not checked against the recipient's tech in the transfer
-// year or the next (CONFIRMED by prediction, stars-elegy #200, DC-5;
+// year or the next (CONFIRMED by prediction, stars-elegy #200 at 1d4c97b, DC-5;
 // DC-2 MEASURED), while the recipient's own identical design loses the
 // part; the giver keeps its own copy (MEASURED, DC-2 and DC-5).
 // ASSUMPTION T15 (NOT RUN): the giver's original is still checked against
