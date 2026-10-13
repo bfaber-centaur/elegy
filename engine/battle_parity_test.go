@@ -91,6 +91,10 @@ type pvBattleExpect struct {
 	Players []int            `json:"players"`
 	Planet  *int             `json:"planet"`
 	Sample  bool             `json:"sample"`
+	// StartSample is a battle record's `start_sample` (rg only): false
+	// when the original's alternative streams all had the same start
+	// tokens, their order and start squares aside (vectors README).
+	StartSample *bool `json:"start_sample"`
 }
 
 // pvRecordedBattle is one battle record: its tokens and actions.
@@ -106,6 +110,16 @@ type pvRecordedBattle struct {
 	// flagged: the vector marks the record sample (it differed in
 	// another of the original's random streams)
 	flagged bool
+	// startExact: the vector says its start tokens were the same in
+	// every stream (start_sample false); only their order and start
+	// squares were drawn.
+	startExact bool
+}
+
+// takeTokens gives r the token list of the stream-less record from, with
+// what goes with it: the players, the planet and start_sample.
+func (r *pvRecordedBattle) takeTokens(from pvRecordedBattle) {
+	r.tokens, r.players, r.planet, r.startExact = from.tokens, from.players, from.planet, from.startExact
 }
 
 // BattleStart is the game a vector's year's battles start from: the game
@@ -153,6 +167,10 @@ type pvBattleOutcome struct {
 	draws                    bool   // stopped at a round where Elegy would draw
 	salvos                   int    // torpedo salvos answered from the record
 	built                    bool   // a token's fleet is not in Elegy's game
+	// startGap: the start tokens differ in more than their start
+	// squares (a token missing or extra, another field, no battle, other
+	// players or planet).
+	startGap bool
 	// moves checked (pvCheckMove), those on a square Elegy's rule allows,
 	// those not checked because Elegy's square scores would draw, and the
 	// first move Elegy's rule does not allow.
@@ -201,6 +219,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 				r.flagged = r.flagged || e.Sample
 				if e.Kind == "battle" {
 					r.tokens, r.players, r.planet = e.Tokens, e.Players, e.Planet
+					r.startExact = e.StartSample != nil && !*e.StartSample
 				} else {
 					r.actions, r.hasActions = e.Actions, true
 				}
@@ -212,7 +231,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 				r := &out[name][i]
 				if r.tokens == nil {
 					if j, ok := at[fmt.Sprintf(" %d %d", r.x, r.y)]; ok {
-						r.tokens, r.players, r.planet = out[name][j].tokens, out[name][j].players, out[name][j].planet
+						r.takeTokens(out[name][j])
 					}
 				}
 			}
@@ -315,8 +334,9 @@ func pvRecordCapacitor(c int) int {
 }
 
 // matchTokens puts b's tokens in the record's order and compares their
-// values. It returns the first difference, or "".
-func (l *BattleStart) matchTokens(b *battle, rec []pvBattleToken) string {
+// values, start squares only when squares is set. It returns the first
+// difference, or "".
+func (l *BattleStart) matchTokens(b *battle, rec []pvBattleToken, squares bool) string {
 	g := b.g
 	key := func(owner int, starbase bool, slot, obj int) string {
 		return fmt.Sprintf("%d %t %d %d", owner, starbase, slot, obj)
@@ -362,6 +382,9 @@ func (l *BattleStart) matchTokens(b *battle, rec []pvBattleToken) string {
 			StartSquare: [2]int{t.x, t.y}, Initiative: t.initiative, Jammer: t.jammer,
 			Computer: t.computer, Capacitor: pvRecordCapacitor(t.capacitor), Deflector: t.deflector,
 			Mass: t.mass, Shield: t.shield, Ships: t.ships, Damage: pvRecordDamage(t.dmg),
+		}
+		if !squares {
+			got.StartSquare = r.StartSquare
 		}
 		if got != r {
 			return fmt.Sprintf("token %d: Elegy %+v, record %+v", i, got, r)
@@ -745,6 +768,12 @@ const pvSalvoBudget = 20000
 // buildBattle builds Elegy's battle for record r from a fresh copy of the
 // battle-phase game, its tokens in the record's order.
 func (l *BattleStart) buildBattle(r pvRecordedBattle) (*battle, string) {
+	return l.buildBattleSquares(r, true)
+}
+
+// buildBattleSquares is buildBattle, comparing the tokens' start squares
+// only when squares is set.
+func (l *BattleStart) buildBattleSquares(r pvRecordedBattle, squares bool) (*battle, string) {
 	g := withRules(l.Game.clone()) // the battle changes fleets and planets
 	b, ok := setupBattle(&g, l.CostLevels, r.x, r.y)
 	if !ok {
@@ -769,7 +798,38 @@ func (l *BattleStart) buildBattle(r pvRecordedBattle) (*battle, string) {
 	if (mine == nil) != (want == nil) || mine != nil && *mine != *want {
 		return b, fmt.Sprintf("planet: Elegy %s, record %s", pvPlanetString(mine), pvPlanetString(want))
 	}
-	return b, l.matchTokens(b, r.tokens)
+	return b, l.matchTokens(b, r.tokens, squares)
+}
+
+// How a restart's miss that no seed variant explains is taken.
+const (
+	pvStrict        = iota // a failure, as for any record
+	pvFlaggedSample        // a sample: the vector flags the record
+	pvStartGap             // a failure: start tokens the vector says were not drawn
+)
+
+// flaggedMiss classes a restart's miss on record r that no other seed
+// variant matches. A record the vector flags sample differed between the
+// original's own random streams, so a miss is a sample, not a parity
+// failure; an unflagged record stays strict. With start_sample false only
+// the token order and start squares were drawn, so start tokens that
+// differ in anything else are a gap, not a sample.
+func flaggedMiss(r pvRecordedBattle, l *BattleStart, o pvBattleOutcome) int {
+	switch {
+	case !r.flagged || l.Unflagged:
+		return pvStrict
+	case r.startExact && o.startGap:
+		return pvStartGap
+	}
+	return pvFlaggedSample
+}
+
+// startGap reports whether Elegy's start tokens for record r differ in
+// more than their start squares: no battle, other players or planet, a
+// token missing or extra, or any other token field.
+func (l *BattleStart) startGap(r pvRecordedBattle) bool {
+	_, why := l.buildBattleSquares(r, false)
+	return why != ""
 }
 
 // sameSet reports whether a and b hold the same numbers.
@@ -807,7 +867,7 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 		if rt.Kind == "ships" && rt.Fleet != nil {
 			if _, ok := l.Fleets[[2]int{rt.Owner, *rt.Fleet}]; !ok {
 				// The record names a fleet Elegy's game does not have.
-				out.built = true
+				out.built, out.startGap = true, true
 				return out
 			}
 		}
@@ -816,6 +876,7 @@ func compareBattle(l *BattleStart, r pvRecordedBattle) pvBattleOutcome {
 	b, why := build()
 	if why != "" {
 		out.tokens = why
+		out.startGap = l.startGap(r)
 		return out
 	}
 	if !r.hasActions {
@@ -1115,10 +1176,19 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 			// A record the vector itself flags sample differed between the
 			// original's own random streams: a miss is a sample, never a
 			// parity failure. An unflagged record stays strict.
-			if why := o.sampleMiss(); why != "" && r.flagged && !l.Unflagged {
-				c.samples++
-				t.Logf("%s: sample (flagged in the vector) missed: %s", where, why)
-				continue
+			if why := o.sampleMiss(); why != "" {
+				switch flaggedMiss(r, &l, o) {
+				case pvStartGap:
+					if o.built {
+						c.built++
+					}
+					t.Errorf("%s: start tokens differ though the record's start is the same in every stream (start_sample false): %s", where, why)
+					continue
+				case pvFlaggedSample:
+					c.samples++
+					t.Logf("%s: sample (flagged in the vector) missed: %s", where, why)
+					continue
+				}
 			}
 			switch {
 			case o.built:
@@ -1357,6 +1427,76 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}
 	if !answered {
 		t.Error("no CS-003-C torpedo battle replayed whole with its salvos answered")
+	}
+	checkStartSample(t, l, r)
+}
+
+// checkStartSample checks the start_sample rule on CB-010's battle at
+// 1060 (r, which matches in full): which token differences are a start
+// gap, and how flaggedMiss classes a restart's miss.
+func checkStartSample(t *testing.T, l BattleStart, r pvRecordedBattle) {
+	retoken := func(edit func(*pvBattleToken)) pvRecordedBattle {
+		x := r
+		x.tokens = append([]pvBattleToken(nil), r.tokens...)
+		edit(&x.tokens[0])
+		return x
+	}
+	for _, c := range []struct {
+		name string
+		r    pvRecordedBattle
+		gap  bool
+	}{
+		{"start square", retoken(func(k *pvBattleToken) { k.StartSquare[0] = (k.StartSquare[0] + 1) % boardSize }), false},
+		{"damage", retoken(func(k *pvBattleToken) { k.Damage.Units++ }), true},
+		{"ships", retoken(func(k *pvBattleToken) { k.Ships++ }), true},
+		{"design", retoken(func(k *pvBattleToken) { k.Design += 3 }), true},
+		{"a token missing", func() pvRecordedBattle { x := r; x.tokens = r.tokens[1:]; return x }(), true},
+		{"no battle", func() pvRecordedBattle { x := r; x.x++; return x }(), true},
+		{"a fleet not in the game", retoken(func(k *pvBattleToken) {
+			missing := 0
+			for key := range l.Fleets {
+				missing = max(missing, key[1]+1)
+			}
+			k.Fleet = &missing
+		}), true},
+	} {
+		o := compareBattle(&l, c.r)
+		if o.tokens == "" && !o.built {
+			t.Errorf("start_sample, %s: no token difference noticed", c.name)
+		}
+		if o.startGap != c.gap {
+			t.Errorf("start_sample, %s: start gap %t, want %t (%s)", c.name, o.startGap, c.gap, o.tokens)
+		}
+	}
+	// A stream's record takes start_sample with the stream-less token list.
+	var streamed pvRecordedBattle
+	streamed.takeTokens(pvRecordedBattle{tokens: r.tokens, startExact: true})
+	if !streamed.startExact || len(streamed.tokens) != len(r.tokens) {
+		t.Errorf("takeTokens: %+v, want the token list and start_sample", streamed)
+	}
+	gap := compareBattle(&l, retoken(func(k *pvBattleToken) { k.Damage.Units++ }))
+	square := compareBattle(&l, retoken(func(k *pvBattleToken) { k.StartSquare[0] = (k.StartSquare[0] + 1) % boardSize }))
+	unflagged := l
+	unflagged.Unflagged = true
+	for _, c := range []struct {
+		name                string
+		flagged, startExact bool
+		l                   *BattleStart
+		o                   pvBattleOutcome
+		want                int
+	}{
+		{"unflagged", false, true, &l, gap, pvStrict},
+		{"flagged, Unflagged set", true, true, &unflagged, gap, pvStrict},
+		{"start_sample false, a start gap", true, true, &l, gap, pvStartGap},
+		{"start_sample false, squares only", true, true, &l, square, pvFlaggedSample},
+		{"start_sample false, hits", true, true, &l, pvBattleOutcome{stop: "hit 1"}, pvFlaggedSample},
+		{"start_sample true or absent, a start gap", true, false, &l, gap, pvFlaggedSample},
+	} {
+		x := r
+		x.flagged, x.startExact = c.flagged, c.startExact
+		if got := flaggedMiss(x, c.l, c.o); got != c.want {
+			t.Errorf("flaggedMiss, %s: %d, want %d", c.name, got, c.want)
+		}
 	}
 }
 

@@ -35,12 +35,24 @@ func (pr *production) autoTerraformUnits(k ItemKind, count int) int {
 		pr.in.GrownPop-p.Population, Habitability(pr.in.Colony.Race, p.Env))
 }
 
+// EventTerraformed: one completed terraform unit of Player's Planet moved
+// axis Axes[0] by Count (+1 or −1) to Axes[1] (MESSAGES.md 0x07b at
+// stars-elegy de1bd6f, CONFIRMED KX-002: one message per click, none for a
+// unit with no useful axis).
+const EventTerraformed EventKind = EventColonistsBeamedDown + 1
+
 // terraformUnits applies n completed Terraform Environment units, one
-// click each.
+// click each, with an EventTerraformed per click that moved an axis.
 func (pr *production) terraformUnits(n int) {
 	reach := pr.reach()
 	for range n {
-		pr.g.Terraform.Improve(pr.planet, pr.in.Colony.Race, reach)
+		before := pr.planet.Env
+		a := pr.g.Terraform.Improve(pr.planet, pr.in.Colony.Race, reach)
+		if a < 0 {
+			continue
+		}
+		ev := Event{Kind: EventTerraformed, Player: pr.planet.Owner, Planet: pr.planet.ID, Fleet: -1, Item: ItemTerraform,
+			Count: pr.planet.Env[a] - before[a], Axes: []int{a, pr.planet.Env[a]}}
+		pr.events = append(pr.events, ev)
 	}
-	pr.event(EventBuilt, ItemTerraform, n)
 }
