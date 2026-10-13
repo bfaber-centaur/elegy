@@ -1394,9 +1394,11 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		t.Errorf("every battle recorded: %q, want none", set.errs)
 	}
 	// An alt_battle of the same players there makes it a sample; one of
-	// other players, or of another year or place, does not.
+	// other players (even as many of them), or of an earlier or later
+	// year or another place, does not.
 	fought := elegyBattles(&l)[Point{X: r.x, Y: r.y}]
 	alt := pvAltBattle{year: 1, at: Point{X: r.x, Y: r.y}, players: []int{fought[1], fought[0]}}
+	outsider := slices.Max(fought) + 1
 	for _, c := range []struct {
 		name   string
 		alt    pvAltBattle
@@ -1404,7 +1406,9 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 	}{
 		{"same players, listed in another order", alt, true},
 		{"other players", pvAltBattle{year: 1, at: alt.at, players: []int{fought[0]}}, false},
-		{"another year", pvAltBattle{year: 2, at: alt.at, players: alt.players}, false},
+		{"as many players, one of them not fighting there", pvAltBattle{year: 1, at: alt.at, players: []int{fought[0], outsider}}, false},
+		{"a later year", pvAltBattle{year: 2, at: alt.at, players: alt.players}, false},
+		{"an earlier year", pvAltBattle{year: 0, at: alt.at, players: alt.players}, false},
 		{"another place", pvAltBattle{year: 1, at: Point{X: r.x + 1, Y: r.y}, players: alt.players}, false},
 	} {
 		set = &recordTBInternal{TB: t}
