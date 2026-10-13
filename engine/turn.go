@@ -351,10 +351,28 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	gained := map[int]bool{}
 	// Scraps (TaskScrap) run in their place among these tasks.
 	recycled := scrapYear{}
+	// A fleet whose unload dropped colonists on another player's planet
+	// is told it has finished its orders (0x04e) after every drop is
+	// resolved. MEASURED, one run each: in TK-501 and WU-CAP that fleet's
+	// 0x04e came after the capture's 0x00c (in TK-501 after the last
+	// planet's drop message too), while in TK-201 the mineral unloads'
+	// 0x04e came before the capture. Inferred: that the drop decides it.
 	queue, ev := g.unloadTasks(g.phaseStart(), nil, func(i int) []Event { return g.scrap(i, rng, gained, recycled) })
-	events = append(events, ev...)
+	dropped := map[int]bool{}
+	for _, d := range queue {
+		dropped[d.fleet] = true
+	}
+	var finished []Event
+	for _, e := range ev {
+		if e.Kind == EventFleetArrived && dropped[e.Fleet] {
+			finished = append(finished, e)
+		} else {
+			events = append(events, e)
+		}
+	}
 	queue = append(append([]drop(nil), applied.drops...), queue...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
+	events = append(events, finished...)
 	// The first research level-up check (KERNEL.md "Turn order" step 2.4).
 	for i := range g.Players {
 		pl := &g.Players[i]
@@ -469,6 +487,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	// Growth (step 4a) comes after every planet's production, with the
 	// environment production terraformed (KERNEL.md "Turn order";
 	// MEASURED KX-002 T1, T2).
+	shrank := false // the planet growth handled last shrank
 	for i := range g.Planets {
 		p := &g.Planets[i]
 		if !grows[i] {
@@ -478,7 +497,16 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 				// lost (MESSAGES.md 0x040, CONFIRMED mg/mg002;
 				// TAKEOVER.md "Unload and load amounts", CONFIRMED
 				// TK-201 G; stars-elegy d4eafd9).
-				events = append(events, g.emptyPlanet(i))
+				// The message is 0x023 instead when the planet growth
+				// handled last shrank (MESSAGES.md "0x040 vs 0x023",
+				// LEGACY BUG, CONFIRMED MG-002; Legacy.LostPlanetMessageCarry).
+				// Planets growth skips do not change that (ASSUMPTION).
+				ev := g.emptyPlanet(i)
+				ev.Count = EmptiedLeft
+				if shrank && g.Rules.Legacy.LostPlanetMessageCarry {
+					ev.Count = EmptiedLeftShownDiedOut
+				}
+				events = append(events, ev)
 			}
 			continue
 		}
@@ -486,11 +514,14 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		col := NewColony(p, player)
 		was := p.Population
 		p.Population, p.GrowthCarry = GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
+		shrank = p.Population < was
 		switch {
 		case p.Population <= 0:
 			// A planet whose population dies out is emptied
 			// (TAKEOVER.md "Capture").
-			events = append(events, g.emptyPlanet(i))
+			ev := g.emptyPlanet(i)
+			ev.Count = EmptiedDiedOut
+			events = append(events, ev)
 		case p.Population < was && col.Hab >= 0:
 			events = append(events, Event{Kind: EventOvercrowded, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: was - p.Population})
 		case p.Population < was:

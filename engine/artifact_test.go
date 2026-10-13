@@ -23,7 +23,7 @@ func TestConfirmedArtifactColony(t *testing.T) {
 	l, pi := artifactLab(t)
 	before := l.g.Players[0].Research.Accumulated
 	rng := &scriptRand{draws: []int{Propulsion, 222}}
-	ev := l.g.resolveQueue([]drop{{pi, 0, 25}}, rng, map[int]bool{})
+	ev := l.g.resolveQueue([]drop{{pi, 0, 25, -1}}, rng, map[int]bool{})
 	want := Event{Kind: EventArtifactFound, Player: 0, Planet: l.g.Planets[pi].ID, Fleet: -1, Item: ItemKind(Propulsion), Count: 322}
 	if rng.calls != 2 || len(ev) == 0 || !reflect.DeepEqual(ev[len(ev)-1], want) {
 		t.Fatalf("%d draws, events %+v; want 2 draws ending in %+v", rng.calls, ev, want)
@@ -40,7 +40,7 @@ func TestMeasuredArtifactScaledBelow1000(t *testing.T) {
 	// 50. ASSUMPTION A1: the scaling truncates (100 + 99 → 99).
 	for _, c := range []struct{ units, draw, want int }{{5, 300, 200}, {5, 0, 50}, {5, 99, 99}, {10, 0, 100}, {9, 1, 90}} {
 		l, pi := artifactLab(t)
-		ev := l.g.resolveQueue([]drop{{pi, 0, c.units}}, &scriptRand{draws: []int{Energy, c.draw}}, map[int]bool{})
+		ev := l.g.resolveQueue([]drop{{pi, 0, c.units, -1}}, &scriptRand{draws: []int{Energy, c.draw}}, map[int]bool{})
 		if e := ev[len(ev)-1]; e.Kind != EventArtifactFound || e.Count != c.want || l.g.Players[0].Research.Accumulated[Energy] != c.want {
 			t.Errorf("%d00 colonists, draw %d: %+v, energy %d; want %d", c.units, c.draw, e, l.g.Players[0].Research.Accumulated[Energy], c.want)
 		}
@@ -56,7 +56,7 @@ func TestConfirmedArtifactCaptureAndDefender(t *testing.T) {
 	// Player 0 already gained this year, so the capture's tech attempt
 	// makes no draws; the artifact's are the only two.
 	rng := &scriptRand{draws: []int{Electronics, 0}}
-	ev := l.g.resolveQueue([]drop{{pi, 0, 300}}, rng, map[int]bool{0: true})
+	ev := l.g.resolveQueue([]drop{{pi, 0, 300, -1}}, rng, map[int]bool{0: true})
 	if e := ev[len(ev)-1]; l.g.Planets[pi].Owner != 0 || rng.calls != 2 || e.Kind != EventArtifactFound || e.Player != 0 || e.Item != ItemKind(Electronics) || e.Count != 100 {
 		t.Errorf("capture: owner %d, %d draws, last event %+v; want player 0's 100 electronics", l.g.Planets[pi].Owner, rng.calls, e)
 	}
@@ -64,7 +64,7 @@ func TestConfirmedArtifactCaptureAndDefender(t *testing.T) {
 	l, pi = groundLab(t, 3, 100, 0)
 	l.g.RandomEvents, l.g.Planets[pi].Artifact = true, true
 	rng = &scriptRand{draws: []int{Biotech, 300}}
-	ev = l.g.resolveQueue([]drop{{pi, 0, 10}}, rng, map[int]bool{})
+	ev = l.g.resolveQueue([]drop{{pi, 0, 10, -1}}, rng, map[int]bool{})
 	if e := ev[len(ev)-1]; l.g.Planets[pi].Owner != 1 || l.g.Planets[pi].Artifact || e.Kind != EventArtifactFound || e.Player != 1 || e.Count != 400 || l.g.Players[1].Research.Accumulated[Biotech] != 400 {
 		t.Errorf("defender: owner %d, artifact %v, last event %+v; want player 1's 400 biotechnology", l.g.Planets[pi].Owner, l.g.Planets[pi].Artifact, e)
 	}
@@ -76,13 +76,13 @@ func TestArtifactKept(t *testing.T) {
 	// and nothing is drawn.
 	l, pi := artifactLab(t)
 	l.g.RandomEvents = false
-	l.g.resolveQueue([]drop{{pi, 0, 25}}, panicRand{}, map[int]bool{})
+	l.g.resolveQueue([]drop{{pi, 0, 25, -1}}, panicRand{}, map[int]bool{})
 	if p := l.g.Planets[pi]; p.Owner != 0 || !p.Artifact {
 		t.Errorf("random events off: owner %d, artifact %v; want 0 and kept", p.Owner, p.Artifact)
 	}
 
 	l, pi = artifactLab(t)
-	l.g.resolveQueue([]drop{{pi, 0, 25}, {pi, 1, 25}}, panicRand{}, map[int]bool{})
+	l.g.resolveQueue([]drop{{pi, 0, 25, -1}, {pi, 1, 25, -1}}, panicRand{}, map[int]bool{})
 	if p := l.g.Planets[pi]; p.Owner != NoOwner || !p.Artifact {
 		t.Errorf("tie: owner %d, artifact %v; want unowned and kept", p.Owner, p.Artifact)
 	}
@@ -94,7 +94,7 @@ func TestMeasuredArtifactNotHalvedBySlowerTech(t *testing.T) {
 	for _, r := range []Ruleset{ElegyRules(), FaithfulRules()} {
 		l, pi := artifactLab(t)
 		l.g.Rules, l.g.SlowerTech = r, true
-		l.g.resolveQueue([]drop{{pi, 0, 25}}, &scriptRand{draws: []int{Weapons, 200}}, map[int]bool{})
+		l.g.resolveQueue([]drop{{pi, 0, 25, -1}}, &scriptRand{draws: []int{Weapons, 200}}, map[int]bool{})
 		if got := l.g.Players[0].Research.Accumulated[Weapons]; got != 300 {
 			t.Errorf("%s: weapons %d, want 300", r.ID, got)
 		}
@@ -112,7 +112,7 @@ func TestElegyChoiceArtifactHalvedSwitchOff(t *testing.T) {
 		l, pi := artifactLab(t)
 		l.g.Rules.Legacy.ArtifactFullSlowerTech = false
 		l.g.SlowerTech = c.slower
-		ev := l.g.resolveQueue([]drop{{pi, 0, 25}}, &scriptRand{draws: []int{Weapons, 201}}, map[int]bool{})
+		ev := l.g.resolveQueue([]drop{{pi, 0, 25, -1}}, &scriptRand{draws: []int{Weapons, 201}}, map[int]bool{})
 		if got := l.g.Players[0].Research.Accumulated[Weapons]; got != c.want || ev[len(ev)-1].Count != 301 {
 			t.Errorf("slower tech %v: weapons %d, message %d; want %d and 301", c.slower, got, ev[len(ev)-1].Count, c.want)
 		}
