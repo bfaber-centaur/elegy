@@ -1,0 +1,151 @@
+# Skipped parity expectations by reason, from the reference seed
+# (TestParityVectors). Any change to a count fails the test until this
+# file is rewritten with PARITY_BASELINE=write.
+   3 Super Stealth research stealing
+  24 a computer player's planned orders (not in the vector)
+  21 client estimate fleet_summary_report eta
+  39 client estimate fleet_waypoints distance
+  39 client estimate fleet_waypoints travel_time
+  10 client estimate planet_summary_report mining_rate
+  10 client estimate planet_summary_report value
+   5 client estimate production_dialog completion
+  19 client estimate production_tile completion
+   3 client estimate research_dialog annual_resources_from_all_planets
+   3 client estimate research_dialog estimated_time_to_completion
+   1 client estimate research_dialog next_field_choice_after_the_year
+   3 client estimate research_dialog next_year_projected_research_budget
+   4 client estimate research_dialog resources_needed
+   1 client estimate research_dialog total_resources_spent_on_research_last_year
+   7 client estimate ship_designer battle_movement
+   7 client estimate ship_designer cloaking
+   7 client estimate ship_designer jamming
+   7 client estimate ship_designer mass
+   2 client estimate ship_designer scanner
+  10 client estimate status_tile population
+ 183 expectation battle
+ 170 expectation battle_actions
+  13 expectation battle_plan
+   3 expectation design_gone
+ 249 expectation message_sequence
+   9 expectation no_battle
+   1 expectation no_new_fleets
+ 192 expectation sample
+   1 expectation starbase_design_gone
+   7 fleet field heading
+   3 fleet field mass_shown
+  15 fleet-to-fleet transport
+  15 fleet-to-fleet transport (target)
+   1 message 0x000 has no event mapping
+   3 message 0x002 has no event mapping
+   1 message 0x003 has no event mapping
+   4 message 0x007 has no event mapping
+   4 message 0x00c has no event mapping
+   4 message 0x025 has no event mapping
+   1 message 0x02a has no event mapping
+   1 message 0x02b has no event mapping
+   1 message 0x02c has no event mapping
+   3 message 0x02d has no event mapping
+  10 message 0x02f has no event mapping
+   4 message 0x030 has no event mapping
+   1 message 0x031 has no event mapping
+   3 message 0x03a has no event mapping
+   1 message 0x040 has no event mapping
+   1 message 0x051 has no event mapping
+   1 message 0x053 has no event mapping
+   1 message 0x054 has no event mapping
+   3 message 0x058 has no event mapping
+   1 message 0x059 has no event mapping
+   2 message 0x05a has no event mapping
+   2 message 0x060 has no event mapping
+   1 message 0x068 has no event mapping
+   2 message 0x06a has no event mapping
+   1 message 0x072 has no event mapping
+   4 message 0x078 has no event mapping
+   9 message 0x07b has no event mapping
+   1 message 0x08b has no event mapping
+   2 message 0x0b8 has no event mapping
+   1 message 0x0ba has no event mapping
+   2 message 0x0bb has no event mapping
+   2 message 0x0bc has no event mapping
+  14 message 0x0be has no event mapping
+   5 message 0x0c3 has no event mapping
+   5 message 0x0c4 has no event mapping
+   1 message 0x0c5 has no event mapping
+  11 message 0x0c6 has no event mapping
+   1 message 0x0c7 has no event mapping
+   1 message 0x0c9 has no event mapping
+  11 message 0x0ca has no event mapping
+   1 message 0x0cb has no event mapping
+   5 message 0x0cd has no event mapping
+   2 message 0x0de has no event mapping
+   2 message 0x0e2 has no event mapping
+   2 message 0x0e3 has no event mapping
+   2 message 0x0e5 has no event mapping
+   2 message 0x0e6 has no event mapping
+   2 message 0x0e7 has no event mapping
+   3 message 0x0e9 has no event mapping
+   2 message 0x0ea has no event mapping
+   3 message 0x0ec has no event mapping
+   1 message 0x0f2 has no event mapping
+  14 message 0x0f4 has no event mapping
+   9 message 0x0ff has no event mapping
+   2 message 0x109 has no event mapping
+  10 message 0x10b has no event mapping
+   1 message 0x10c has no event mapping
+   1 message 0x10f has no event mapping
+  17 message 0x117 has no event mapping
+   3 message 0x127 has no event mapping
+   1 message 0x129 has no event mapping
+   2 message 0x12c has no event mapping
+   3 message 0x12d has no event mapping
+   1 message 0x136 has no event mapping
+   6 message 0x139 has no event mapping
+   1 message 0x140 has no event mapping
+   2 message 0x141 has no event mapping
+  17 message 0x145 has no event mapping
+   1 message 0x147 has no event mapping
+   1 message 0x149 has no event mapping
+   3 message 0x14c has no event mapping
+   1 message 0x14d has no event mapping
+   1 message 0x14e has no event mapping
+   1 message 0x150 has no event mapping
+   5 message 0x156 has no event mapping
+   2 message 0x157 has no event mapping
+  20 message 0x159 has no event mapping
+   4 message 0x15a has no event mapping
+   2 message 0x15c has no event mapping
+   2 message 0x15e has no event mapping
+   3 message 0x160 has no event mapping
+   1 message 0x162 has no event mapping
+   3 message 0x163 has no event mapping
+   1 message 0x165 has no event mapping
+   1 message 0x169 has no event mapping
+   1 message 0x16a has no event mapping
+   1 message 0x16f has no event mapping
+   1 message 0x173 has no event mapping
+   1 message 0x174 has no event mapping
+   1 message 0x179 has no event mapping
+   3 message 0x17e has no event mapping
+  13 message 0x182 has no event mapping
+   9 planet field defense_estimate
+ 109 planet field defenses null
+   2 planet field environment_visible
+   2 planet field packet_destination null
+   2 planet field planetary_scanner null
+   1 planet field population null
+   9 planet field population_estimate
+   1 planet field starbase_design
+   5 player field mystery_trader_items
+   1 player field relations
+   1 player field ship_design_count
+ 291 player not in the state
+ 863 sample: one stream's random outcome
+   1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
+  10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
+   3 score_record: Super Stealth research stealing
+   5 score_record: a computer player's planned orders (not in the vector)
+5129 stream (another oracle random stream)
+   8 transport fuel
+   4 view of a design
+  96 view of a other_players
+  56 view of a player
