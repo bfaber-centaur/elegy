@@ -132,11 +132,31 @@ type ObjectScanner struct {
 
 // ObjectScanners lists every player's viewing objects (SCANNING.md
 // "Scanner ranges").
+//
+// With Legacy.Colocation a planet with no scanner is also a viewer, with
+// ranges 0, so it sees what sits at its exact position: a minefield
+// centred on it becomes known to its owner (CONFIRMED by prediction,
+// stars-elegy 898c526 MV-1: player 0 at tech 3 with electronics 0,
+// standard fields, one year, one planet per case; MEASURED in RG-004
+// restarts Y6 and Y10). A field merely containing such a planet is not
+// seen (MV-1 at d² 1 and 1280; RG-002/RG-003: player 3's field 2 around
+// player 6's planet 6 stayed unknown to player 6). Packets and salvage at
+// d² 0 are ASSUMPTION (NOT RUN).
 func (g *Game) ObjectScanners() []ObjectScanner {
 	var out []ObjectScanner
 	for v := range g.Players {
 		for _, s := range g.scanners(v) {
 			out = append(out, ObjectScanner{Player: v, Pos: s.pos, R: s.R, P: s.P, Fleet: s.fleet})
+		}
+		if !g.Rules.Legacy.Colocation {
+			continue
+		}
+		for i := range g.Planets {
+			if p := &g.Planets[i]; p.Owner == v {
+				if _, _, ok := g.planetScan(p); !ok {
+					out = append(out, ObjectScanner{Player: v, Pos: p.Pos})
+				}
+			}
 		}
 	}
 	return out

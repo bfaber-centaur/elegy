@@ -182,3 +182,25 @@ func TestElegyDecisionKnownCopyOnWrite(t *testing.T) {
 		t.Errorf("clone %v, original %v", c.Minefields[0].Known, sp.Minefields[0].Known)
 	}
 }
+
+// A planet with no scanner sees a minefield centred exactly on it, but not
+// one that merely contains it (engine.Game.ObjectScanners; CONFIRMED by
+// prediction, stars-elegy 898c526 MV-1; MEASURED in RG-004 restarts Y6
+// and Y10 and, for the containing field, RG-002/RG-003).
+func TestConfirmedMinefieldOnScannerlessPlanet(t *testing.T) {
+	for _, colocation := range []bool{true, false} {
+		l := newLab(t)
+		l.g.Rules.Legacy.Colocation = colocation
+		home := at(1000, 1000)
+		l.g.Planets = []engine.Planet{{ID: 1, Pos: home, Owner: 0, Population: 1000}}
+		sp := &Space{Minefields: []Minefield{
+			{Owner: 1, Number: 0, Pos: home, Count: 400},
+			{Owner: 1, Number: 1, Pos: at(1030, 1000), Count: 1600},
+		}}
+		sp.SeeObjects(l.g, l.g.ObjectScanners(), func(int) int { return 0 }, top{})
+		// Player 1, the fields' owner, has no viewer there.
+		if m := sp.Minefields; m[0].KnownBy(0) != colocation || m[1].KnownBy(0) || m[0].KnownBy(1) {
+			t.Errorf("colocation %v: fields %+v, want the centred one known to player 0 exactly with colocation, the other not", colocation, m)
+		}
+	}
+}
