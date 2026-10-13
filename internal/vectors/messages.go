@@ -268,15 +268,14 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 		case engine.EventLevelUp:
 			if ev.Player >= 0 && ev.Player < len(g.Players) {
 				// 0x136 is 0x050 for a Generalized Research player, with
-				// the same slots (MESSAGES.md "0x050 vs 0x136"). The third
-				// slot, the field researched next, is not in the event.
+				// the same slots (MESSAGES.md "0x050 vs 0x136"): level,
+				// field, and the field researched next (Axes[0]).
 				id := 0x050
 				if g.Players[ev.Player].Race.LRT.GeneralizedResearch {
 					id = 0x136
 				}
 				send(ev.Player, pvMsg{id: id, focus: pvFocusResearch, focusKnown: true,
-					params: []int{ev.Count, int(ev.Item), 0}, known: []bool{true, true, false},
-					why: fmt.Sprintf("0x%03x slot 3 (field researched next)", id)})
+					params: []int{ev.Count, int(ev.Item), ev.Axes[0]}, known: []bool{true, true, true}})
 			}
 		case engine.EventPartAvailable:
 			// A part announcement's slots are field, then the part's

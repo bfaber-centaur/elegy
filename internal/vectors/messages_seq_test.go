@@ -56,10 +56,10 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x04e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3}, known: all(1)}}},
 		{"fleet finished, then gone", []engine.Event{{Kind: engine.EventFleetArrived, Player: 1, Fleet: 8}}, 1,
 			[]pvMsg{{id: 0x04e, params: []int{0}, known: []bool{false}, why: "0x04e fleet gone by the end of the year"}}},
-		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Item: 4, Count: 7}}, 2,
-			[]pvMsg{{id: 0x050, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 0}, known: []bool{true, true, false}, why: "0x050 slot 3 (field researched next)"}}},
-		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Item: 4, Count: 7}}, 1,
-			[]pvMsg{{id: 0x136, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 0}, known: []bool{true, true, false}, why: "0x136 slot 3 (field researched next)"}}},
+		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Item: 4, Count: 7, Axes: []int{3}}}, 2,
+			[]pvMsg{{id: 0x050, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 3}, known: all(3)}}},
+		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Item: 4, Count: 7, Axes: []int{3}}}, 1,
+			[]pvMsg{{id: 0x136, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 3}, known: all(3)}}},
 		{"research stolen", []engine.Event{{Kind: engine.EventResearchStolen, Player: 2, Planet: -1, Fleet: -1, Item: 3, Count: 116}}, 2,
 			[]pvMsg{{id: 0x159, focus: 0xfffe, focusKnown: true, params: []int{3, 116}, known: all(2)}}},
 		{"component", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: part}}, 2,
@@ -116,7 +116,7 @@ func TestSequenceCheck(t *testing.T) {
 		ordered: map[int]bool{3: true},
 		events: [][]engine.Event{nil, {
 			built(0, 8, 2), noQueue(0, 6), noQueue(0, 7),
-			{Kind: engine.EventLevelUp, Player: 0, Item: 2, Count: 5},
+			{Kind: engine.EventLevelUp, Player: 0, Item: 2, Count: 5, Axes: []int{3}},
 			built(2, 5, 3), noQueue(2, 5), {Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Count: 12},
 			noQueue(3, 5), {Kind: engine.EventBombed, Player: 3, Planet: 9}, {Kind: engine.EventPlanetEmptied, Player: 0, Planet: 9},
 		}},
@@ -141,32 +141,34 @@ func TestSequenceCheck(t *testing.T) {
 		e    pvExpect
 		want string
 	}{
-		{"whole sequence", seq(0, whole...), "skip: message_sequence 0x050 slot 3 (field researched next) not compared"},
-		{"slots compared before the unknown one", seq(0, b36, q5, q6, m(0x050, 0xfffe, 5, 1, 3), empt),
-			"message 0x050 (focus 65534, params [5 1 3]) = sent as 0x050 (focus 65534, params [5 2 ?]); message 0x050 (focus 65534, params [5 2 ?]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
+		{"whole sequence", seq(0, whole...), "skip: message_sequence 0x08f and 0x090 bombing fleet not compared"},
+		{"slots compared beside the unknown one", seq(0, b36, q5, q6, lv, m(0x090, 8, 77, 9)),
+			"message 0x090 (focus 8, params [77 9]) = sent as 0x090 (focus 8, params [? 8]); message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
+		{"next field compared", seq(0, b36, q5, q6, m(0x050, 0xfffe, 5, 2, 4), empt),
+			"message 0x050 (focus 65534, params [5 2 4]) = sent as 0x050 (focus 65534, params [5 2 3]); message 0x050 (focus 65534, params [5 2 3]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"out of order", seq(0, b36, q6, q5, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"other count", seq(0, m(0x036, 7, 3, 7), q5, q6, lv, empt),
-			"message 0x036 (focus 7, params [3 7]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x036 (focus 7, params [3 7]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"other focus", seq(0, m(0x036, 6, 2, 7), q5, q6, lv, empt),
-			"message 0x036 (focus 6, params [2 7]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x036 (focus 6, params [2 7]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"other slot count", seq(0, m(0x036, 7, 2, 7, 0), q5, q6, lv, empt),
-			"message 0x036 (focus 7, params [2 7 0]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x036 (focus 7, params [2 7 0]) = sent as 0x036 (focus 7, params [2 7]); message 0x036 (focus 7, params [2 7]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"repeat not sent", seq(0, b36, q5, q5, q6, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent as 0x03f (focus 6, params [6])\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x03f (focus 5, params [5]) = sent as 0x03f (focus 6, params [6])\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"not sent", seq(0, b36, m(0x02e, 7, 1), q5, q6, lv, empt),
-			"message 0x02e (focus 7, params [1]) = not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x02e (focus 7, params [1]) = not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"extra, none a sample", seq(0, b36, q6, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence 0x050 slot 3 (field researched next) not compared"},
-		{"extra allowed beside a sample", seq(0, b36, sample(m(0x0a1, 0, 1)), q6, lv, empt), "skip: message_sequence 0x050 slot 3 (field researched next) not compared"},
-		{"a sample is not compared", seq(0, b36, sample(m(0x03f, 9, 9)), q5, q6, lv, empt), "skip: message_sequence 0x050 slot 3 (field researched next) not compared"},
-		{"a sample's order is not compared", seq(0, sample(q6), b36, q5, lv, empt), "skip: message_sequence 0x050 slot 3 (field researched next) not compared"},
+			"message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence 0x08f and 0x090 bombing fleet not compared"},
+		{"extra allowed beside a sample", seq(0, b36, sample(m(0x0a1, 0, 1)), q6, lv, empt), "skip: message_sequence 0x08f and 0x090 bombing fleet not compared"},
+		{"a sample is not compared", seq(0, b36, sample(m(0x03f, 9, 9)), q5, q6, lv, empt), "skip: message_sequence 0x08f and 0x090 bombing fleet not compared"},
+		{"a sample's order is not compared", seq(0, sample(q6), b36, q5, lv, empt), "skip: message_sequence 0x08f and 0x090 bombing fleet not compared"},
 		{"samples only", seq(0, sample(b36)), "skip: message_sequence of sample entries only"},
 		{"unmapped entry", seq(0, m(0x07b, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x07b has no event mapping"},
 		{"unmapped entry, mismatch", seq(0, m(0x07b, 7, 7, 8), b36, q6, q5, lv, empt),
 			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x07b has no event mapping"},
 		{"empty list, messages sent", seq(0),
-			"message 0x036 (focus 7, params [2 7]) = sent, want not sent; message 0x03f (focus 5, params [5]) = sent, want not sent; message 0x03f (focus 6, params [6]) = sent, want not sent; message 0x050 (focus 65534, params [5 2 ?]) = sent, want not sent; message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
+			"message 0x036 (focus 7, params [2 7]) = sent, want not sent; message 0x03f (focus 5, params [5]) = sent, want not sent; message 0x03f (focus 6, params [6]) = sent, want not sent; message 0x050 (focus 65534, params [5 2 3]) = sent, want not sent; message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
 		{"queue not loaded", seq(2, m(0x036, 4, 3, 4), m(0x03f, 4, 4), m(0x026, 4, 4, 12, 0)), "skip: message_sequence entry from a production queue not loaded"},
 		{"queue not loaded, other message missing", seq(2, m(0x036, 4, 3, 4), m(0x026, 4, 4, 11, 0)),
 			"message 0x026 (focus 4, params [4 11 0]) = sent as 0x026 (focus 4, params [4 12 0]); message 0x026 (focus 4, params [4 12 0]) = sent, want not sent\nalso skipped: message_sequence entry from a production queue not loaded"},
@@ -182,7 +184,7 @@ func TestSequenceCheck(t *testing.T) {
 		}
 	}
 	// Through pvCheck, as a vector's expectation.
-	if got := l.pvCheck(g, seq(0, whole...)); got != "skip: message_sequence 0x050 slot 3 (field researched next) not compared" {
+	if got := l.pvCheck(g, seq(0, whole...)); got != "skip: message_sequence 0x08f and 0x090 bombing fleet not compared" {
 		t.Errorf("pvCheck: %q", got)
 	}
 }
