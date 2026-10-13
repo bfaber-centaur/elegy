@@ -849,6 +849,12 @@ func TestDefaultQueue(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		// Start from players without default queue settings (the vector
+		// carries them since stars-elegy's full rebuild).
+		for i := range v.InitialState.Players {
+			v.InitialState.Players[i].DefaultQueue = nil
+			v.InitialState.Players[i].DefaultLeftoverToResearch = nil
+		}
 		edit(&v.InitialState.Players[0])
 		return loadVector(v)
 	}

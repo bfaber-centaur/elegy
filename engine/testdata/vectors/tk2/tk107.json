@@ -149,6 +149,34 @@
      "ship_designs": 14,
      "starbase_designs": 1
     },
+    "default_queue": [
+     {
+      "id": 1,
+      "count": 10,
+      "kind": 1
+     },
+     {
+      "id": 0,
+      "count": 5,
+      "kind": 1
+     },
+     {
+      "id": 2,
+      "count": 3,
+      "kind": 1
+     },
+     {
+      "id": 4,
+      "count": 2,
+      "kind": 1
+     },
+     {
+      "id": 5,
+      "count": 1,
+      "kind": 1
+     }
+    ],
+    "default_leftover_to_research": true,
     "homeworld": 17
    },
    {
@@ -226,6 +254,8 @@
      "ship_designs": 6,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 8
    }
   ],

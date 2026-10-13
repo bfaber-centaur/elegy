@@ -137,6 +137,8 @@
      "ship_designs": 1,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 17
    },
    {
@@ -214,6 +216,8 @@
      "ship_designs": 1,
      "starbase_designs": 1
     },
+    "default_queue": [],
+    "default_leftover_to_research": false,
     "homeworld": 8
    }
   ],
@@ -1783,6 +1787,281 @@
      "year": 1
     },
     {
+     "kind": "message_sequence",
+     "player": 0,
+     "messages": [
+      {
+       "id": 123,
+       "focus": 0,
+       "params": [
+        0,
+        0,
+        1,
+        315
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 0,
+       "params": [
+        0
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        1,
+        315
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        1,
+        314
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        1,
+        313
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        2,
+        569
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        2,
+        568
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 1,
+       "params": [
+        1,
+        0,
+        2,
+        567
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 1,
+       "params": [
+        1
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 2,
+       "params": [
+        2
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 3,
+       "params": [
+        3,
+        0,
+        1,
+        341
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 3,
+       "params": [
+        3
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        1,
+        315
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        2,
+        571
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        1,
+        314
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        1,
+        313
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        2,
+        570
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 9,
+       "params": [
+        9,
+        0,
+        2,
+        569
+       ]
+      },
+      {
+       "id": 62,
+       "focus": 9,
+       "params": [
+        9
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 15,
+       "params": [
+        15
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 17,
+       "params": [
+        17
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 19,
+       "params": [
+        19
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 21,
+       "params": [
+        21
+       ]
+      },
+      {
+       "id": 38,
+       "focus": 9,
+       "params": [
+        9,
+        333,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 15,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 21,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1
+    },
+    {
      "kind": "player",
      "id": 0,
      "equals": {
@@ -1993,6 +2272,211 @@
      "stream": "cycles 10500"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 10500"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -2113,6 +2597,219 @@
      "stream": "cycles 1135"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 13,
+       "params": [
+        13,
+        2
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 1135"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -2216,6 +2913,211 @@
      "tolerance": {
       "surface_minerals": 1
      },
+     "year": 1,
+     "stream": "cycles 11500"
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
      "year": 1,
      "stream": "cycles 11500"
     },
@@ -2350,6 +3252,235 @@
      "stream": "cycles 1165"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 4,
+       "params": [
+        4,
+        1
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 6,
+       "params": [
+        6,
+        0
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 14,
+       "params": [
+        14,
+        1
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 1165"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -2453,6 +3584,211 @@
      "tolerance": {
       "surface_minerals": 1
      },
+     "year": 1,
+     "stream": "cycles 1190"
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
      "year": 1,
      "stream": "cycles 1190"
     },
@@ -2577,6 +3913,219 @@
      "stream": "cycles 1210"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 6,
+       "params": [
+        6,
+        2
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 1210"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -2693,6 +4242,219 @@
      "player": 1,
      "message_id": 348,
      "present": true,
+     "year": 1,
+     "stream": "cycles 1490"
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 4,
+       "params": [
+        4,
+        2
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
      "year": 1,
      "stream": "cycles 1490"
     },
@@ -2804,6 +4566,211 @@
      "stream": "cycles 1985"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 1985"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -2920,6 +4887,219 @@
      "player": 1,
      "message_id": 348,
      "present": true,
+     "year": 1,
+     "stream": "cycles 2190"
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 5,
+       "params": [
+        5,
+        1
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
      "year": 1,
      "stream": "cycles 2190"
     },
@@ -3044,6 +5224,219 @@
      "stream": "cycles 35000"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 14,
+       "params": [
+        14,
+        2
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 35000"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -3164,6 +5557,219 @@
      "stream": "cycles 3700"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 348,
+       "focus": 14,
+       "params": [
+        14,
+        1
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        92
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 3700"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -3271,6 +5877,211 @@
      "stream": "cycles 5200"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 5200"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -3378,6 +6189,211 @@
      "stream": "cycles 6000"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 6000"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -3485,6 +6501,211 @@
      "stream": "cycles 880"
     },
     {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
+     "year": 1,
+     "stream": "cycles 880"
+    },
+    {
      "kind": "planet",
      "id": 4,
      "equals": {
@@ -3588,6 +6809,211 @@
      "tolerance": {
       "surface_minerals": 1
      },
+     "year": 1,
+     "stream": "cycles 930"
+    },
+    {
+     "kind": "message_sequence",
+     "player": 1,
+     "messages": [
+      {
+       "id": 78,
+       "focus": 33283,
+       "params": [
+        515
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 4,
+       "params": [
+        4
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        59
+       ]
+      },
+      {
+       "id": 123,
+       "focus": 5,
+       "params": [
+        5,
+        0,
+        0,
+        58
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 6,
+       "params": [
+        6
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 7,
+       "params": [
+        7
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 8,
+       "params": [
+        8
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 13,
+       "params": [
+        13
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 14,
+       "params": [
+        14
+       ]
+      },
+      {
+       "id": 63,
+       "focus": 16,
+       "params": [
+        16
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        4,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 80,
+       "focus": 65534,
+       "params": [
+        5,
+        0,
+        0
+       ]
+      },
+      {
+       "id": 95,
+       "focus": 52493,
+       "params": [
+        0,
+        8192,
+        13
+       ]
+      },
+      {
+       "id": 325,
+       "focus": 53002,
+       "params": [
+        0,
+        32768,
+        10
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 4,
+       "params": [
+        4,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 5,
+       "params": [
+        5,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 6,
+       "params": [
+        6,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 7,
+       "params": [
+        7,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 13,
+       "params": [
+        13,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 14,
+       "params": [
+        14,
+        91
+       ]
+      },
+      {
+       "id": 342,
+       "focus": 16,
+       "params": [
+        16,
+        91
+       ]
+      },
+      {
+       "id": 301,
+       "focus": 33280,
+       "params": [
+        512,
+        8,
+        100
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33281,
+       "params": [
+        513,
+        15,
+        72,
+        70
+       ]
+      },
+      {
+       "id": 346,
+       "focus": 33283,
+       "params": [
+        515,
+        21,
+        72,
+        70
+       ]
+      }
+     ],
      "year": 1,
      "stream": "cycles 930"
     }
