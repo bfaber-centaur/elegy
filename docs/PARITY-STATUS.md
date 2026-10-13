@@ -347,27 +347,32 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 
 **One harness change.** In year 7, player 6's order file deletes waypoint 1 of fleet 20. In the chained run, Elegy's fleet 20 has no waypoint 1 at that point. That used to stop the whole chained run ("order waypoint_delete index", 1447 not-compared lines). Now such a delete is recorded as a refused order, as an engine refusal is, and the year goes on (ELEGY CHOICE, harness). A delete of waypoint 0 still fails the load. The chained year-7 refusal is a sample, and no restart hits it. The same refusal changes RG-003's baseline: chained years 10–12 (2472–2474) used to stop on this load error with 2 of the 8 seeds and fail with the rest, which the baseline listed as `random 0`. They now fail with every seed, so those 3 entries leave the baseline. None of them passed before or passes now.
 
-**Totals (2928 lines).**
+**Totals (2893 lines, main `513a146` plus lane D's #242).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 2542 | 263 | 2805 |
+| sample | 2523 | 263 | 2786 |
 | matched | 4 | 47 | 51 |
 | not compared | 19 | 19 | 38 |
 | random-driven | 1 | 17 | 18 |
-| incorrect mechanic | 0 | 16 | 16 |
+| incorrect mechanic | 0 | 0 | 0 |
 
 - **Battle records:** 51 matched, 63 samples and 2 random-driven. None is a hand line. Since #236, the y3 restart's extra battle at (1365,1400) is a sample, not random-driven, because the vector has an `alt_battle` there.
 - **Not compared (38):** 0x007 (24 lines: 14 message, 10 sequence entry) and 0x040 (8 lines) have no event mapping. Also 2 `alt_battle`, 2 `design_gone`, and 2 sequences of sample entries only.
-- **Baseline:** RG-004 adds 10 entries. Restarts Y1, Y2, Y3, Y5, Y7, Y8, Y9, Y11 and Y12 and chained year 1 (2466) pass with some seeds (`random k`). Restarts Y4, Y6 and Y10 fail on the hand lines below. Chained years 2–12 fail on samples.
+- **Baseline:** RG-004 has 13 entries. All 12 restarts and chained year 1 (2466) pass with some seeds (`random k`; Y6 with 1 of 8, Y10 with 7 of 8, Y4 with 5 of 8). Chained years 2–12 fail on samples.
 
-**Hand lines (16).** All are incorrect mechanic, each is in a restart, and the owner is in the last column.
+**Hand lines: 0 deterministic.** The 16 incorrect-mechanic lines first found, all in restarts, are cleared: lane A's 14 by #244, lane D's 2 by #242.
 
 | year | object | lines | cause | owner |
 |---|---|---:|---|---|
 | y4–y12 | player 0's order: delete ship design slot 0 | 9 | Cleared (lane A): Elegy refused the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way (MEASURED). Elegy now accepts a delete of an empty slot and changes nothing. That the original accepts it is inferred. | lane A |
 | y4 | fleets 10 and 23 (player 6) | 5 | Cleared (lane A): Elegy's fleet numbers matched; its internal fleet key did not. A ship move in the orders empties start fleet 23, and the new fleet 10 at planet 11 took that fleet's internal id, so the harness read it as fleet 23. Elegy no longer reuses, within a year, the id of a fleet that went away that year (ELEGY CHOICE; KERNEL-STATUS.md). | lane A |
-| y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
+| y6, y10 | player 6's minefields 2 and 3 | 2 | Cleared (lane D): `known_to` lacked player 0. Each field is centred on a player 0 planet with no scanner, which now sees it (co-location; see below). | lane D |
+
+**Resolved: a minefield laid on a planet with no scanner (lane D).** Two hand lines were player 6's minefields 2 (restart Y6) and 3 (restart Y10): the original added player 0 to `known_to` and Elegy did not. Each field was laid that year by a player 6 fleet in orbit, so its centre is exactly the position of a player 0 planet with no planetary scanner (planet 47 at (1208,1314) in Y6, planet 23 at (1118,1277) in Y10). No other player 0 viewer was within range.
+- **Reading.** Under the co-location rule (SCANNING.md "Co-location", LEGACY BUG, `Legacy.Colocation`), every test passes at distance 0. Elegy now treats an owned planet with no scanner as a viewer with ranges 0 for space objects, so it sees a minefield centred on it. The restart results are MEASURED. The mechanism is CONFIRMED by prediction (stars-elegy `898c526`, MV-1: player 0 at tech 3 with electronics 0, standard fields, one year, one planet per case): with no fleet anywhere near, a field centred exactly on the planet was seen, and fields at d² 1 and 1280 containing it were not. So it is co-location, not sight of the laying fleet.
+- **Not seen when merely inside.** RG-002 and RG-003 hold the counter-case. Player 3's field 2 contains player 6's scannerless planet 6 at d² 1280. In 15 restarts (RG-002 Y1–Y6, RG-003 Y1–Y9) it was unknown to player 6 at the start of the year and stayed unknown (MEASURED; SCANNING.md already says planets do not get the inside rule). In RG-003 Y10 player 6 learns it because its fleet 13 ends the year inside the field, 22 ly from the centre (the fleet inside rule).
+- **Effect.** Both hand lines go, and so do 10 chained sample lines on the same fields. Restarts Y6 and Y10 now pass with some seeds (baseline `random 1` and `random 7`). No RG-002 or RG-003 line moves. Packets, salvage and wormholes at a scannerless planet's exact position would also be seen; MV-1 did not run them and no vector has one (ASSUMPTION).
 
 ### RG-002 and RG-003 year 6 rebuilt (stars-elegy #206, DA-1)
 
