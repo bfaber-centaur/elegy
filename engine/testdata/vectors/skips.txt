@@ -63,7 +63,6 @@
    4 message 0x078 has no event mapping
    9 message 0x07b has no event mapping
    1 message 0x08b has no event mapping
-  27 message 0x08c has no event mapping
    2 message 0x0b8 has no event mapping
    1 message 0x0ba has no event mapping
    2 message 0x0bb has no event mapping
@@ -97,10 +96,8 @@
   17 message 0x117 has no event mapping
    3 message 0x127 has no event mapping
    1 message 0x129 has no event mapping
-   4 message 0x12a has no event mapping
    2 message 0x12c has no event mapping
    3 message 0x12d has no event mapping
-   2 message 0x12f has no event mapping
    1 message 0x136 has no event mapping
    6 message 0x139 has no event mapping
    1 message 0x140 has no event mapping
@@ -138,7 +135,6 @@
    1 planet field population null
    9 planet field population_estimate
    1 planet field starbase_design
-   2 player default queue settings
    5 player field mystery_trader_items
    1 player field relations
    1 player field ship_design_count
