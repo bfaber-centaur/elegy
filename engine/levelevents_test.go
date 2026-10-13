@@ -31,7 +31,8 @@ func levelMessages(events []Event) []string {
 
 // TestLevelEventsAnnounceParts checks the level-up messages (MESSAGES.md
 // 0x050 and 0x05f at stars-elegy b4c0086) for energy 9 → 10: the level,
-// then the components whose energy requirement is 10, in catalog order.
+// then the components whose energy requirement is 10, in announcement
+// order (TestLevelEventsAnnounceOrder).
 // Battle Nexus (energy 10, electronics 19) is announced only once
 // electronics is 19 (MEASURED KX-005 R1: not announced at electronics
 // below 19).
@@ -282,5 +283,100 @@ func TestFieldOrder(t *testing.T) {
 	after := [NumFields]int{Energy: 4, Weapons: 3, Biotech: 2}
 	if got, want := fieldOrder(before, after), []int{Energy, Weapons, Weapons}; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+// TestLevelEventsAnnounceOrder checks the order of a level's component
+// messages (MESSAGES.md "Order of the component messages within one
+// level" at stars-elegy f5bffd8).
+func TestLevelEventsAnnounceOrder(t *testing.T) {
+	joat := pgRace()
+	joat.PRT = PRTJackOfAllTrades
+	tt := joat
+	tt.LRT.TotalTerraforming = true
+	isb := pgRace()
+	isb.PRT = PRTInnerStrength
+	isb.LRT.ImprovedStarbases = true
+	aoC := [NumFields]int{Energy: 1, Weapons: 1, Propulsion: 1, Construction: 10, Electronics: 10}
+	for _, c := range []struct {
+		name   string
+		race   Race
+		before [NumFields]int
+		field  int
+		want   []string
+	}{
+		// MEASURED, KX-005 R1: shield, terraforming, then 0x145.
+		{"energy 10", pgRace(), [NumFields]int{Energy: 9, Electronics: 18, Biotech: 3}, Energy,
+			[]string{"level 0 10", "part 0 Bear Neutrino Barrier", "part 0 Temp Terraform ±11", "part 0 Laser Battery"}},
+		// MEASURED, RG-001 2434: armor, mechanical, then ship hulls in
+		// index order.
+		{"construction 3", pgRace(), [NumFields]int{Construction: 2}, Construction,
+			[]string{"level 3 3", "part 3 Crobmnium", "part 3 Cargo Pod", "part 3 Medium Freighter", "part 3 Destroyer"}},
+		// CONFIRMED by prediction, AO-1 (a) (stars-elegy f5bffd8): JOAT,
+		// energy 4 → 5: scanners in index order, electrical, terraforming,
+		// then the planetary scanner before the planetary defense.
+		{"AO-1 (a)", joat, [NumFields]int{Energy: 4, Electronics: 16, Biotech: 7}, Energy,
+			[]string{"level 0 5", "part 0 Dolphin Scanner", "part 0 Cheetah Scanner", "part 0 Battle Super Computer", "part 0 Temp Terraform ±7", "part 0 Snooper 500X", "part 0 Missile Battery"}},
+		// CONFIRMED by prediction, AO-1 (b): IS with ISB, construction
+		// 3 → 4: shield, mining robot, starbase hull, then ship hulls.
+		{"AO-1 (b)", isb, [NumFields]int{Energy: 7, Electronics: 2, Construction: 3}, Construction,
+			[]string{"level 3 4", "part 3 Croby Sharmor", "part 3 Robo-Miner", "part 3 Space Dock", "part 3 Privateer", "part 3 Fuel Transport"}},
+		// CONFIRMED by prediction, AO-1 (c) and its control: a Total
+		// Terraforming race is not told about the single-axis ±3
+		// terraforms (BINARY-ONLY beyond these starts).
+		{"AO-1 (c) control", joat, aoC, Biotech,
+			[]string{"level 5 1", "part 5 Gravity Terraform ±3", "part 5 Temp Terraform ±3", "part 5 Radiation Terraform ±3"}},
+		{"AO-1 (c), Total Terraforming", tt, aoC, Biotech,
+			[]string{"level 5 1"}},
+		// The skip is only for terraforming parts: a Total Terraforming
+		// race is told about another category's index 8 part (Gatling
+		// Gun, beam index 8; MESSAGES.md names only the ±3 terraforms). The
+		// M-80 Bomb is the level's other part.
+		{"Total Terraforming, weapons 11", tt, [NumFields]int{Weapons: 10}, Weapons,
+			[]string{"level 1 11", "part 1 Gatling Gun", "part 1 M-80 Bomb"}},
+	} {
+		g := Game{Players: []Player{{Race: c.race}}}
+		g.Players[0].Research.Levels = c.before
+		g.Players[0].Research.Levels[c.field]++
+		if got := levelMessages(g.levelEvents(0, c.before, fieldOrder(c.before, g.Players[0].Research.Levels))); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+// TestAnnounceOrder pins the placements AO-1 did not run, BINARY-ONLY
+// (MESSAGES.md at stars-elegy f5bffd8): starbase hulls after orbital
+// parts and before electrical parts; electrical, mechanical, then terraforming parts,
+// before the ship hulls; planetary scanners, then defenses, then the Genesis
+// Device, after the ship hulls; index order within a category.
+func TestAnnounceOrder(t *testing.T) {
+	cs := Components().Components
+	order := announceOrder()
+	if len(order) != len(cs) {
+		t.Fatalf("%d components in the order, want %d", len(order), len(cs))
+	}
+	at := map[string]int{}
+	for k, i := range order {
+		at[cs[i].Name] = k
+	}
+	for _, pair := range [][2]string{
+		{"Ultra Driver 13", "Orbital Fort"},
+		{"Death Star", "Transport Cloaking"},
+		{"Retro Bomb", "Robo-Midget Miner"},
+		{"Orbital Fort", "Space Dock"},
+		{"Multi Function Pod", "Cargo Pod"},
+		{"Cargo Pod", "Total Terraform ±3"},
+		{"Total Terraform ±3", "Small Freighter"},
+		{"Lady Finger Bomb", "Robo-Midget Miner"},
+		{"Small Freighter", "Medium Freighter"},
+		{"Super Freighter", "Viewer 50"},
+		{"Snooper 620X", "SDI"},
+		{"Neutron Shield", "Genesis Device"},
+	} {
+		a, okA := at[pair[0]]
+		b, okB := at[pair[1]]
+		if !okA || !okB || a >= b {
+			t.Errorf("%s at %d (%v), %s at %d (%v): want the first before the second", pair[0], a, okA, pair[1], b, okB)
+		}
 	}
 }
