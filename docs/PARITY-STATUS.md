@@ -232,7 +232,7 @@ Measured on elegy main `426bb35` (#216) plus this branch.
 
 ### Component messages within a level (economy)
 
-Measured on elegy main `426bb35` plus #217 and this branch.
+Measured on elegy main `97ac630` (#217) plus this branch.
 
 - **Order.** After a level message, Elegy now announces that level's components in the order of MESSAGES.md "Order of the component messages within one level" (stars-elegy f2778b3). The order is: engines, scanners, shields, armor, beam weapons, torpedoes, bombs, mining robots, mine layers and orbital parts; then starbase hulls; then electrical, mechanical and terraforming parts; then ship hulls; then planetary scanners, planetary defenses and the Genesis Device. Within each category, items go in index order. It used to be catalog order (`announceOrder`, engine/research.go).
   - The category order is BINARY-ONLY as a whole. The pairs observed in one level are MEASURED (KX-005 R1, KX-003 r2, KX-005 T0, RG-001 2432–2435), and `TestLevelEventsAnnounceOrder` pins two of them: energy 10 and construction 3.
@@ -240,7 +240,7 @@ Measured on elegy main `426bb35` plus #217 and this branch.
   - A Total Terraforming race is not told about Gravity, Temp or Radiation Terraform ±3 (BINARY-ONLY, `unannounced`). This is the one exception to "one message per part the race may use".
   - `TestAnnounceOrder` pins the BINARY-ONLY placements, so a change to them is visible.
 - **Mapped:** 0x078 for a ship hull, 0x145 for a planetary defense, and 0x157 for a planetary scanner. The Genesis Device now sends 0x05f. Starbase hulls (0x0d0, BINARY-ONLY) stay unmapped, and no vector expectation names that id.
-- **Other corpora:** 23 expectations that were skipped as unmapped (0x145 17, 0x078 4, 0x157 2) are now compared, and all match on the reference seed. The order check makes 2094 comparisons over the 8 seed variants, up from 1910 with #217. 184 of them have 0x078, 0x145 or 0x157 on one side, and every one holds. That includes the KX-003 r2, KX-005 T0–T2 and RG-001 Y4 orders that failed under catalog order.
+- **Other corpora:** 23 expectations that were skipped as unmapped (0x145 17, 0x078 4, 0x157 2) are now compared, and all match on the reference seed. The order check makes 2094 comparisons over the 8 seed variants, up from 1910 on main. 184 of them have 0x078, 0x145 or 0x157 on one side, and every one holds. That includes the KX-003 r2, KX-005 T0–T2 and RG-001 Y4 orders that failed under catalog order.
 - Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged. No compared expectation is decided by a BINARY-ONLY sentence alone: no vector has a starbase hull, a Genesis Device or a Total Terraforming race's ±3 announcement.
 
 ### Deferred: client estimators (milestone 3)
