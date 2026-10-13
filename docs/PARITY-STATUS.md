@@ -4,7 +4,7 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## RG-002: full-order six-year regression
 
-Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
+Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages ("Messages compared" at the end), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
 
 Bobby's five requirements, in order:
 
@@ -80,3 +80,42 @@ The 160 are where a mismatch could still go unseen (RG002-REPORT.md "Not compare
   - **How to read it.** A case passes on a variant only when every compared expectation matches, including every draw-decided one. "0 of 8" for Y2–Y5 does not mean a deterministic failure: every field that fails, on every variant, is random-driven or a sample (point 4). Each variant misses a different few draw-decided fields, so no single variant gets them all.
   - The chained years 2–6 are samples. RG-002-2468 passing on 6 seeds is a sample result, not replay parity.
   - Exact random outcomes need the original's generator in the harness (SPRINT.md P1-1).
+
+### Messages compared (after the final run)
+
+Measured on elegy main `f6beefa` (#194 and economy's packet-warp fix #197) plus the messages-comparator branch.
+
+The harness now compares `message` expectations (vectors/README.md "message": player `player` got message `message_id`, `present`). Elegy's events carry no message id, so internal/vectors `pvMessages` maps each year's events to the ids stars-elegy MESSAGES.md gives them:
+- 0x004 from `EventDropRepelled`, sent to the planet's owner;
+- 0x035–0x038 from `EventBuilt` of factories or mines, with MESSAGES.md's merge rule for build counts;
+- 0x04e from `EventFleetArrived`;
+- 0x05b from `EventFleetScrapped` in deep space;
+- 0x083–0x086 from `EventCometStrike`, by size;
+- 0x08f and 0x090 from `EventBombed` followed by `EventPlanetEmptied`.
+
+Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0x0a1 and 0x116. They are compared too, so each one the original sends is a mismatch. Every other id is skipped ("message 0x… has no event mapping"), so an id joins the comparison only with its mapping.
+
+**RG-002's 68 message lines:**
+- 32 match on the reference seed: 0x004 (2), 0x036 (12), 0x038 (12), 0x04e (2), 0x05b (2) and 0x08f (2).
+- 15 are samples: 14 in the chained run's years 2–6, and Y2's huge comet (0x086).
+- 21 are new missing-mechanic lines. Each fails on every seed variant:
+  - **economy, 10 lines:** 0x026 overcrowding (7: each restart and the chained run's first year), 0x050 research level gained (2: Y2, Y3) and 0x05f component available (1: Y3);
+  - **lane D, 9 lines:** no per-player battle summary: 0x095 (4), 0x116 (3), 0x09f (1) and 0x0a1 (1);
+  - **lane A, 2 lines:** 0x02e, colonists beamed down by an unload task (Y1 and the chained year 1).
+
+| Class | Fields | Orders | Battle records |
+|---|---|---|---|
+| missing mechanic | 21 | 0 | 0 |
+| incorrect mechanic | 0 | 2 | 0 |
+| random-driven | 30 | 0 | 0 |
+| not compared | 276 | 0 | 0 |
+| sample | 991 | 43 | 16 |
+
+The other classes stay 0. The 21 missing-mechanic field lines are the message lines; #197 cleared Y4 planet 88's `packet_warp` and its chained sample. The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 168 results on the 21 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,784 samples.
+
+**Other corpora.** Comparing messages takes 38 cases out of the parity baseline (`engine/testdata/vectors/baseline.txt`). Every one is a known gap above, except one new finding:
+- 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
+- 0x026: also in KX-002 G1 and KX-005 T0–T2.
+- RG-002: Y1, Y6, and the chained 2463 and 2468.
+- **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sends no `EventFleetArrived` after the refusal.
+

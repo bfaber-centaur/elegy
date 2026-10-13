@@ -41,17 +41,17 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
 | incorrect mechanic | 0 | 2 | 0 |
-| missing mechanic | 0 | 0 | 0 |
+| missing mechanic | 21 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
-| not compared | 344 | 0 | 0 |
-| sample | 976 | 43 | 16 |
+| not compared | 276 | 0 | 0 |
+| sample | 991 | 43 | 16 |
 
-Samples total 1035: 976 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1019), and 16 battle records, checked by `TestBattleRecords`.
+These counts include the message comparison added after the final run ("Messages" below). Samples total 1050: 991 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1034), and 16 battle records, checked by `TestBattleRecords`.
 
-The reference run of RG-002 has no deterministic field discrepancy. The last one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below). Every field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+The reference run of RG-002 has 21 deterministic field discrepancies, all messages Elegy sends no event for (missing mechanic: economy 10, lane D 9, lane A 2; "Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
@@ -122,14 +122,13 @@ Economy's change (a new starbase's mass driver sets the planet's packet speed to
 
 ## Not compared, by reason
 
-None of the 344 lines is an RG-002 mechanic Elegy is known to lack. Each falls in one of three groups.
+None of the 276 lines is an RG-002 mechanic Elegy is known to lack. Each falls in one of three groups.
 
 **1. The harness has no comparator, but Elegy models the quantity (lane B).**
 
 | Reason | Lines | What Elegy has |
 |---|---|---|
 | `object` wormhole (the whole-object form) | 72 | wormholes; only the `wormhole` expectation kind is compared, not `object` |
-| `message` | 68 | turn events; there is no event-to-message mapping in the harness |
 | `starbase_design`, design reads ("needs the order layer's design source") | 14 | designs and design orders; the design read is not wired into the harness |
 | player `counts` | 6 | per-design counts |
 
@@ -137,9 +136,11 @@ None of the 344 lines is an RG-002 mechanic Elegy is known to lack. Each falls i
 
 **3. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null. Keeping null `packet_destination` out of the comparison is an ELEGY CHOICE: null means the file holds no destination record, which is not the same claim as -1 ("none"), so it is not compared as -1. Reversible if stars-elegy documents null as "none".
 
-Group 1 is comparator work. Until it is done, a mismatch in those 160 lines would go unseen, so their count is the honest size of the gap.
+Group 1 is comparator work. Until it is done, a mismatch in those 92 lines would go unseen, so their count is the honest size of the gap.
 
 **Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. A malformed expected value fails the check rather than reading as absent, as for `starbase` (#191). That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 110 of them match on the reference seed. The other two were Y4 planet 88's `packet_warp`, a missing mechanic, and the same field in the chained run's year 4, a sample; the packet-warp fix cleared both.
+
+**Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
 
 ## Random-driven
 
