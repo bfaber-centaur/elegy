@@ -319,20 +319,20 @@ Counts are from the reference seed on main `217ab4b`.
 
 ### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `0ca6c3b` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235 and #240 GC-1).
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `896a546` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235, #240 GC-1 and #239) with the year-6 rebuild below.
 
-**Totals (5943 lines).**
+**Totals (5946 lines).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 5289 | 452 | 5741 |
+| sample | 5291 | 451 | 5742 |
 | matched | 8 | 100 | 108 |
 | not compared | 11 | 11 | 22 |
-| random-driven | 0 | 72 | 72 |
+| random-driven | 0 | 75 | 75 |
 
 - **No deterministic hand lines remain.** Every compared difference in the restarts is random-driven (it matches on some seed variant) or a sample.
 - **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
-- **Restarts:** "matched" counts battle records.
+- **Restarts:** "matched" counts battle records. Three random-driven lines carry their draw (Y6 restart, "RG-002 and RG-003 year 6 rebuilt" below).
 - **GC-1 (#240, `0ca6c3b`)** cleared the last hand line, y7 planet 51's population (15083 against 15084, the per-drop ground-combat floor), and the 11 chained sample lines that carried it forward (planet 51's population and excess in years 7–12).
 - **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
 - **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
