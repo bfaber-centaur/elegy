@@ -51,7 +51,7 @@ const EventOvercrowded EventKind = EventPartAvailable + 1
 // to Axes[0] and did not die out (MESSAGES.md 0x025 at stars-elegy
 // de1bd6f, CONFIRMED cb5/cb037-owner, ob/ob007). It is 0x026's hostile
 // twin.
-const EventHostileShrink EventKind = EventTerraformed + 1
+const EventHostileShrink EventKind = EventMinefieldSwept + 1
 
 // GrowPopulation advances one year of population growth (or death) on a
 // planet: pop in units, carry in hundredths of a unit (the persistent
