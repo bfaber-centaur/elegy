@@ -39,7 +39,10 @@ func TestPvMessages(t *testing.T) {
 		{"factories", []engine.Event{built(5, engine.ItemFactory, 3)}, [][2]int{{2, 0x036}}},
 		{"one mine", []engine.Event{built(5, engine.ItemMine, 1)}, [][2]int{{2, 0x037}}},
 		{"mines", []engine.Event{built(5, engine.ItemMine, 2)}, [][2]int{{2, 0x038}}},
-		{"defenses not mapped", []engine.Event{built(5, engine.ItemDefenses, 2)}, nil},
+		{"one defense", []engine.Event{built(5, engine.ItemDefenses, 1)}, [][2]int{{2, 0x039}}},
+		{"defenses", []engine.Event{built(5, engine.ItemDefenses, 2)}, [][2]int{{2, 0x03a}}},
+		{"1 then 1 defenses", []engine.Event{built(5, engine.ItemDefenses, 1), built(5, engine.ItemDefenses, 1)}, [][2]int{{2, 0x03a}}},
+		{"a mine and a defense", []engine.Event{built(5, engine.ItemMine, 1), built(5, engine.ItemDefenses, 1)}, [][2]int{{2, 0x037}, {2, 0x039}}},
 		// MG-002: 1 then 1 gave one 0x036; 2 then 1 gave 0x036 then 0x035;
 		// 1 then 4 gave one 0x036.
 		{"1 then 1", []engine.Event{built(5, engine.ItemFactory, 1), built(5, engine.ItemFactory, 1)}, [][2]int{{2, 0x036}}},
