@@ -56,7 +56,6 @@
    1 message 0x072 has no event mapping
    1 message 0x08b has no event mapping
    2 message 0x0b8 has no event mapping
-   1 message 0x0ba has no event mapping
    2 message 0x0bb has no event mapping
    2 message 0x0bc has no event mapping
    5 message 0x0c3 has no event mapping
@@ -86,7 +85,6 @@
    3 message 0x127 has no event mapping
    2 message 0x12c has no event mapping
    3 message 0x12d has no event mapping
-   6 message 0x139 has no event mapping
    1 message 0x140 has no event mapping
    2 message 0x141 has no event mapping
    1 message 0x147 has no event mapping

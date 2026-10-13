@@ -76,6 +76,14 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x04e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3}, known: all(1)}}},
 		{"fleet finished, then gone", []engine.Event{{Kind: engine.EventFleetArrived, Player: 1, Fleet: 8}}, 1,
 			[]pvMsg{{id: 0x04e, params: []int{0}, known: []bool{false}, why: "0x04e fleet gone by the end of the year"}}},
+		// MESSAGES.md 0x139 (planet, count, design, fleet; focus the
+		// fleet) and 0x0ba (planet, count, design), BINARY-ONLY slots.
+		{"ships joined at the fleet limit", []engine.Event{{Kind: engine.EventShipsJoinedFleet, Player: 1, Planet: 5, Fleet: 9, Count: 3}}, 1,
+			[]pvMsg{{id: 0x139, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 0, 1<<9 | 3}, known: []bool{true, true, false, true}, why: "0x139 design slot"}}},
+		{"ships joined at the fleet limit, fleet gone", []engine.Event{{Kind: engine.EventShipsJoinedFleet, Player: 1, Planet: 5, Fleet: 8, Count: 3}}, 1,
+			[]pvMsg{{id: 0x139, params: []int{4, 3, 0, 0}, known: []bool{true, true, false, false}, why: "0x139 design slot; fleet gone by the end of the year"}}},
+		{"ships lost at the fleet limit", []engine.Event{{Kind: engine.EventShipsLostFleetLimit, Player: 2, Planet: 5, Fleet: -1, Count: 2}}, 2,
+			[]pvMsg{{id: 0x0ba, focus: 4, focusKnown: true, params: []int{4, 2, 0}, known: []bool{true, true, false}, why: "0x0ba design slot"}}},
 		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Item: 4, Count: 7, Axes: []int{3}}}, 2,
 			[]pvMsg{{id: 0x050, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 3}, known: all(3)}}},
 		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Item: 4, Count: 7, Axes: []int{3}}}, 1,

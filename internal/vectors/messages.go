@@ -51,9 +51,11 @@ func pvMessageIDs() map[int]string {
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x0ba: "EventShipsLostFleetLimit",
 		0x0cd: "EventStarbaseBuilt",
 		0x07b: "EventTerraformed",
 		0x129: "EventPacketNoDriver",
+		0x139: "EventShipsJoinedFleet",
 		0x12a: "EventOrderClipped of an installation",
 		0x12f: "EventOrderClipped of terraforming",
 		0x083: "EventCometStrike, small",
@@ -290,6 +292,25 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					single[k] = j
 				}
 			}
+		case engine.EventShipsJoinedFleet:
+			// MESSAGES.md 0x139: at the 512-fleet limit the new ships
+			// join an own fleet at the planet. Slots planet, count,
+			// design, fleet; focus the fleet (BINARY-ONLY). The design
+			// slot is not compared.
+			m := pvMsg{id: 0x139, params: []int{ev.Planet - 1, ev.Count, 0, 0}, known: []bool{true, true, false, false},
+				why: "0x139 design slot; fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m = pvMsg{id: 0x139, focus: pvFocusFleet | code, focusKnown: true, params: []int{ev.Planet - 1, ev.Count, 0, code},
+					known: []bool{true, true, false, true}, why: "0x139 design slot"}
+			}
+			send(ev.Player, m)
+		case engine.EventShipsLostFleetLimit:
+			// MESSAGES.md 0x0ba: at the 512-fleet limit with no own fleet
+			// at the planet able to take them, the ships are lost. Slots
+			// planet, count, design (BINARY-ONLY); the design slot is not
+			// compared.
+			send(ev.Player, pvMsg{id: 0x0ba, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count, 0},
+				known: []bool{true, true, false}, why: "0x0ba design slot"})
 		case engine.EventStarbaseBuilt:
 			// MESSAGES.md 0x0cd: a starbase built gives 0x0cd whatever
 			// its dock, MEASURED for Orbital Fort, Space Dock, Space

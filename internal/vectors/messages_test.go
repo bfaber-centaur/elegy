@@ -142,7 +142,9 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventPacketNoDriver, Player: 0, Planet: 3, Fleet: -1, Item: engine.ItemIroniumPacket, Count: 1},
 			{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 5, Fleet: -1, Count: engine.EmptiedLeft},
 			{Kind: engine.EventPlanetEmptied, Player: 0, Planet: 3, Fleet: -1, Count: engine.EmptiedDiedOut},
-			{Kind: engine.EventStarbaseBuilt, Player: 0, Planet: 3, Fleet: -1, Axes: []int{0}}}},
+			{Kind: engine.EventStarbaseBuilt, Player: 0, Planet: 3, Fleet: -1, Axes: []int{0}},
+			{Kind: engine.EventShipsJoinedFleet, Player: 2, Planet: 5, Fleet: -1, Count: 1},
+			{Kind: engine.EventShipsLostFleetLimit, Player: 0, Planet: 3, Fleet: -1, Count: 1}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -174,6 +176,10 @@ func TestMessageCheck(t *testing.T) {
 		{"planet died out, not sent", msg(2, 0x023, true, 1), "message 0x023 to player 2 present = false, want true"},
 		{"starbase built", msg(0, 0x0cd, true, 1), ""},
 		{"starbase built, not sent", msg(2, 0x0cd, true, 1), "message 0x0cd to player 2 present = false, want true"},
+		{"ships joined at the fleet limit", msg(2, 0x139, true, 1), ""},
+		{"ships joined at the fleet limit, not sent", msg(0, 0x139, true, 1), "message 0x139 to player 0 present = false, want true"},
+		{"ships lost at the fleet limit", msg(0, 0x0ba, true, 1), ""},
+		{"ships lost at the fleet limit, not sent", msg(2, 0x0ba, true, 1), "message 0x0ba to player 2 present = false, want true"},
 		{"claim adjusted", msg(2, 0x156, true, 1), ""},
 		{"claim adjusted, not sent", msg(0, 0x156, true, 1), "message 0x156 to player 0 present = false, want true"},
 		{"original drift", msg(2, 0x15c, true, 1), ""},
