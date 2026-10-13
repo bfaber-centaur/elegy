@@ -61,6 +61,11 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x156, focus: 4, focusKnown: true, params: []int{4, 91}, known: all(2)}}},
 		{"original drift", []engine.Event{{Kind: engine.EventOriginalDrift, Player: 2, Planet: 5, Fleet: -1, Axes: []int{2}}}, 2,
 			[]pvMsg{{id: 0x15c, focus: 4, focusKnown: true, params: []int{4, 2}, known: all(2)}}},
+		// MESSAGES.md 0x0cd (planet, owner·32 + 16 + starbase slot): SL-12's
+		// player 1 Ultra Station in slot 2 gave 50.
+		{"starbase built", []engine.Event{{Kind: engine.EventStarbaseBuilt, Player: 1, Planet: 5, Fleet: -1, Count: engine.DockUnlimited, Axes: []int{2}}}, 1,
+			[]pvMsg{{id: 0x0cd, focus: 4, focusKnown: true, params: []int{4, 50}, known: all(2)}}},
+		{"starbase built, no slot", []engine.Event{{Kind: engine.EventStarbaseBuilt, Player: 1, Planet: 5, Fleet: -1}}, 1, nil},
 		{"no queue", []engine.Event{{Kind: engine.EventNoQueue, Player: 2, Planet: 5}}, 2,
 			[]pvMsg{{id: 0x03f, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"queue completed", []engine.Event{{Kind: engine.EventQueueCompleted, Player: 2, Planet: 5}}, 2,
