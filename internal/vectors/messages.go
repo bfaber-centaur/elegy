@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // Message comparison (vectors/README.md "message": player `player` got
@@ -372,30 +373,49 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			}
 		case engine.EventMinesSwept:
 			// Slots: sweeper (fleet or planet), amount (two slots), the
-			// field's owner, type and centre (MESSAGES.md 0x0c2, 0x0f4).
-			// The player slot's flags and the type and location codes
-			// have no public table, so only the sweeper and amount are
-			// compared.
+			// field's owner, type and centre (MESSAGES.md "Sweep slots",
+			// MEASURED SW-1). The owner is the plain player number; that
+			// it never carries a flag is UNRESOLVED.
 			swept := []int{0, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0, 0}
 			known := []bool{true, true, true, false, false, false, false}
+			why := "field owner, type and location slots"
+			if f, ok := sweptField(ev); ok {
+				copy(swept[3:], []int{f.owner, f.kind, f.x, f.y})
+				copy(known[3:], []bool{true, true, true, true})
+				why = ""
+				if ev.Planet >= 0 && f.kind == int(objects.SpeedBump) {
+					// 0x0f4 with a speed bump is NOT RUN.
+					known[4] = false
+					why = "speed bump type slot (NOT RUN)"
+				}
+			}
 			if ev.Planet >= 0 {
 				swept[0] = ev.Planet - 1
 				send(ev.Player, pvMsg{id: 0x0f4, focus: ev.Planet - 1, focusKnown: true, params: swept, known: known,
-					why: "0x0f4 field owner, type and location slots"})
+					why: whyNot(0x0f4, why)})
 			} else if code, ok := fleet(ev.Fleet); ok {
 				swept[0] = code
 				send(ev.Player, pvMsg{id: 0x0c2, focus: pvFocusFleet | code, focusKnown: true, params: swept, known: known,
-					why: "0x0c2 field owner, type and location slots"})
+					why: whyNot(0x0c2, why)})
 			} else {
 				send(ev.Player, pvMsg{id: 0x0c2, params: swept, known: make([]bool, len(swept)),
 					why: "0x0c2 fleet gone by the end of the year"})
 			}
 		case engine.EventMinefieldSwept:
-			// Slots: the field (an object id), amount (two slots), type
-			// and centre (MESSAGES.md 0x0be); the focus is the field.
-			send(ev.Player, pvMsg{id: 0x0be, focus: pvFocusObject, focusKnown: true,
-				params: []int{0, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0}, known: []bool{false, true, true, false, false, false},
-				why: "0x0be field, type and location slots"})
+			// Slots: the field's object id (owner·512 + number), amount
+			// (two slots), type and centre (MESSAGES.md "Sweep slots",
+			// "Object ids in slots"; MEASURED SW-1); the focus is the
+			// field.
+			params := []int{0, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0}
+			known := []bool{false, true, true, false, false, false}
+			why := "0x0be field, type and location slots"
+			if f, ok := sweptField(ev); ok {
+				params[0] = f.owner<<9 | f.number
+				copy(params[3:], []int{f.kind, f.x, f.y})
+				known = []bool{true, true, true, true, true, true}
+				why = ""
+			}
+			send(ev.Player, pvMsg{id: 0x0be, focus: pvFocusObject, focusKnown: true, params: params, known: known, why: why})
 		case engine.EventCometStrike:
 			if ev.Count >= 0 && ev.Count < 4 {
 				send(ev.Player, atPlanet(0x083+ev.Count, ev.Planet))
@@ -668,4 +688,25 @@ func pvSeqMiss(got []pvMsg, used []bool, pos int, w pvSeqEntry) string {
 		}
 	}
 	return fmt.Sprintf("message %v = not sent", w)
+}
+
+// pvSweptField is the swept field an EventMinesSwept or
+// EventMinefieldSwept names in Axes.
+type pvSweptField struct{ owner, kind, x, y, number int }
+
+func sweptField(ev engine.Event) (pvSweptField, bool) {
+	if len(ev.Axes) != 5 {
+		return pvSweptField{}, false
+	}
+	a := ev.Axes
+	return pvSweptField{owner: a[0], kind: a[1], x: a[2], y: a[3], number: a[4]}, true
+}
+
+// whyNot prefixes a not-compared reason with the message id; an empty
+// reason stays empty.
+func whyNot(id int, why string) string {
+	if why == "" {
+		return ""
+	}
+	return fmt.Sprintf("0x%03x %s", id, why)
 }

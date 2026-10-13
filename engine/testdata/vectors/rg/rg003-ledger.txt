@@ -5342,7 +5342,6 @@ sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: y = 1778, want
 sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: years_since_jump = 42, want 0
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.boranium = 140, want 141
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.ironium = 378, want 379
-not compared | rg003-y11 | RG-003-Y11-2473 y1 #535 | message_sequence | message_sequence 0x0f4 field owner, type and location slots not compared
 sample | rg003-y11 | RG-003-Y11-2473 y1 #542 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 18
 sample | rg003-y11 | RG-003-Y11-2473 y1 #546 | player id=5 seen_by=5 | score_record.unarmed_ships = 69, want 70
 random-driven | rg003-y11 | RG-003-Y11-2473 y1 #78 | fleet owner=1 id=77 | waypoints[0] position = {1339 1443}, want {1342 1445} (7/8 variants match)
