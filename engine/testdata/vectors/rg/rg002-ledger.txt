@@ -530,7 +530,7 @@ sample | rg002 | RG-002-2467 y5 #263 | planet id=79 | surface_minerals = [1 2059
 sample | rg002 | RG-002-2467 y5 #264 | planet id=80 | surface_minerals = [179 2776 112], want [178 2774 112]
 sample | rg002 | RG-002-2467 y5 #267 | planet id=83 | surface_minerals = [31453 29457 23824], want [31455 29456 23825]
 sample | rg002 | RG-002-2467 y5 #268 | planet id=84 | factories = 771, want 772
-not compared | rg002 | RG-002-2467 y5 #268 | planet id=84 | planet field packet_destination null
+not compared | rg002 | RG-002-2467 y5 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg002 | RG-002-2467 y5 #272 | planet id=87 | surface_minerals = [66 190 151], want [66 191 154]
 sample | rg002 | RG-002-2467 y5 #273 | planet id=88 | surface_minerals = [322 523 96], want [325 524 97]
 sample | rg002 | RG-002-2467 y5 #276 | planet id=91 | factories = 327, want 338
@@ -1162,7 +1162,7 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [
 sample | rg002-y5 | RG-002-Y5-2467 y1 #234 | planet id=51 | factories = 312, want 313
 sample | rg002-y5 | RG-002-Y5-2467 y1 #234 | planet id=51 | surface_minerals = [1225 875 3], want [1224 875 0]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #249 | planet id=66 | surface_minerals = [622 1311 20], want [620 1310 20] (3/8 variants match)
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #275 | planet id=90 | surface_minerals = [882 665 1], want [882 667 1] (6/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #290 | planet id=104 | surface_minerals = [706 0 3], want [705 0 3]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #293 | planet id=106 | surface_minerals = [353 175 3], want [353 176 3]

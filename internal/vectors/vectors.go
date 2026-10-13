@@ -216,8 +216,9 @@ type pvPart struct {
 
 type pvBattlePlan struct {
 	Owner, Slot, Tactic, Primary, Secondary int
-	AttackWho                               int  `json:"attack_who"`
-	DumpCargo                               bool `json:"dump_cargo"`
+	AttackWho                               int    `json:"attack_who"`
+	DumpCargo                               bool   `json:"dump_cargo"`
+	Name                                    string `json:"name"`
 }
 
 type pvFleet struct {
@@ -359,18 +360,19 @@ func pvLeftoverSpend() map[string]int {
 
 func (p *pvBattlePlan) UnmarshalJSON(b []byte) error {
 	var q struct {
-		Owner     int  `json:"owner"`
-		Slot      int  `json:"slot"`
-		Tactic    int  `json:"tactic"`
-		Primary   int  `json:"primary"`
-		Secondary int  `json:"secondary"`
-		AttackWho int  `json:"attack_who"`
-		DumpCargo bool `json:"dump_cargo"`
+		Owner     int    `json:"owner"`
+		Slot      int    `json:"slot"`
+		Tactic    int    `json:"tactic"`
+		Primary   int    `json:"primary"`
+		Secondary int    `json:"secondary"`
+		AttackWho int    `json:"attack_who"`
+		DumpCargo bool   `json:"dump_cargo"`
+		Name      string `json:"name"`
 	}
 	if err := json.Unmarshal(b, &q); err != nil {
 		return err
 	}
-	*p = pvBattlePlan{q.Owner, q.Slot, q.Tactic, q.Primary, q.Secondary, q.AttackWho, q.DumpCargo}
+	*p = pvBattlePlan{q.Owner, q.Slot, q.Tactic, q.Primary, q.Secondary, q.AttackWho, q.DumpCargo, q.Name}
 	return nil
 }
 
@@ -744,13 +746,7 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 		for len(pl.Plans) <= bp.Slot {
 			pl.Plans = append(pl.Plans, engine.BattlePlan{})
 		}
-		plan := engine.BattlePlan{Tactic: engine.Tactic(bp.Tactic), Primary: engine.TargetType(bp.Primary), Secondary: engine.TargetType(bp.Secondary), DumpCargo: bp.DumpCargo}
-		if bp.AttackWho >= int(engine.AttackPlayer) {
-			plan.Attack, plan.Player = engine.AttackPlayer, bp.AttackWho-int(engine.AttackPlayer)
-		} else {
-			plan.Attack = engine.AttackWho(bp.AttackWho)
-		}
-		pl.Plans[bp.Slot] = plan
+		pl.Plans[bp.Slot] = pvPlan(bp.Name, bp.Tactic, bp.Primary, bp.Secondary, bp.AttackWho, bp.DumpCargo)
 	}
 
 	for _, p := range s.Planets {
@@ -1306,6 +1302,11 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 			return "skip: " + pvPlannedWhy
 		}
 		return designEquals(g, *e.Owner, *e.Slot, e.Kind == "starbase_design", eq)
+	case "battle_plan":
+		if l.planned(*e.Owner) {
+			return "skip: " + pvPlannedWhy
+		}
+		return battlePlanEquals(g, *e.Owner, *e.Slot, eq)
 	case "message":
 		return l.messageCheck(g, e)
 	case "message_sequence":
@@ -1777,6 +1778,25 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 				continue
 			}
 		}
+		if string(raw) == "null" && (k == "packet_destination" || k == "packet_warp") {
+			// vectors/README.md "initial_state": a planet whose
+			// mass-driver settings are the default has no
+			// packet_destination or packet_warp, and absent means no
+			// destination and warp 4. The vector diff writes null where
+			// the start state had them. Every such record so far is a
+			// planet whose starbase was lost in the year, and whether the
+			// original cleared the settings or only does not write them
+			// for a planet with no starbase is UNRESOLVED, so a planet
+			// left with no starbase is not compared.
+			if !p.HasStarbase {
+				skipped("planet field " + k + " null with no starbase (cleared or not written: UNRESOLVED)")
+				continue
+			}
+			raw = json.RawMessage("-1")
+			if k == "packet_warp" {
+				raw = json.RawMessage("4")
+			}
+		}
 		if string(raw) == "null" && k != "environment" && k != "original_environment" && k != "starbase" {
 			// The vectors write null for a value the original's file
 			// does not hold, such as an unowned planet's population
@@ -2149,6 +2169,59 @@ func designEquals(g *engine.Game, owner, slot int, starbase bool, eq map[string]
 		default:
 			if skip == "" {
 				skip = "design field " + k
+			}
+		}
+	}
+	return pvResult(errs, skip)
+}
+
+// battlePlanEquals compares player owner's battle plan in slot with an
+// expectation's fields at the end of the year (vectors/README.md
+// "battle_plan": `name`, `tactic`, `primary`, `secondary`, `attack_who`,
+// `dump_cargo`, numbered as the state's battle_plans). Malformed expected
+// data fails the check.
+func battlePlanEquals(g *engine.Game, owner, slot int, eq map[string]json.RawMessage) string {
+	if owner < 0 || owner >= len(g.Players) {
+		return "skip: player not in the state"
+	}
+	plans := g.Players[owner].Plans
+	if slot < 0 || slot >= len(plans) {
+		return fmt.Sprintf("no battle plan in slot %d of player %d", slot, owner)
+	}
+	bp := plans[slot]
+	attack := int(bp.Attack)
+	if bp.Attack == engine.AttackPlayer {
+		attack += bp.Player
+	}
+	ints := map[string]int{"tactic": int(bp.Tactic), "primary": int(bp.Primary), "secondary": int(bp.Secondary), "attack_who": attack}
+	var errs []string
+	skip := ""
+	for _, k := range pvKeys(eq) {
+		switch k {
+		case "tactic", "primary", "secondary", "attack_who":
+			var want int
+			if string(eq[k]) == "null" || json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+			} else if ints[k] != want {
+				errs = append(errs, pvMismatch(k, ints[k], want))
+			}
+		case "dump_cargo":
+			var want bool
+			if json.Unmarshal(eq[k], &want) != nil || string(eq[k]) == "null" {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+			} else if bp.DumpCargo != want {
+				errs = append(errs, pvMismatch(k, bp.DumpCargo, want))
+			}
+		case "name":
+			var want string
+			if json.Unmarshal(eq[k], &want) != nil || string(eq[k]) == "null" {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+			} else if bp.Name != want {
+				errs = append(errs, pvMismatch(k, fmt.Sprintf("%q", bp.Name), fmt.Sprintf("%q", want)))
+			}
+		default:
+			if skip == "" {
+				skip = "battle plan field " + k
 			}
 		}
 	}

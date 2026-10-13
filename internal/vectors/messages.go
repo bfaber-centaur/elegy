@@ -27,6 +27,8 @@ func pvMessageIDs() map[int]string {
 		0x036: "EventBuilt of factories, more than one (merge rule)",
 		0x037: "EventBuilt of mines, one in all (merge rule)",
 		0x038: "EventBuilt of mines, more than one (merge rule)",
+		0x039: "EventBuilt of defenses, one in all (merge rule)",
+		0x03a: "EventBuilt of defenses, more than one (merge rule)",
 		0x03e: "EventQueueCompleted",
 		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
@@ -235,6 +237,8 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				one, more = 0x035, 0x036
 			case engine.ItemMine:
 				one, more = 0x037, 0x038
+			case engine.ItemDefenses:
+				one, more = 0x039, 0x03a
 			default:
 				continue
 			}

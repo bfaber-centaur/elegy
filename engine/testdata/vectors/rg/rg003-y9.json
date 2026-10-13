@@ -48280,6 +48280,17 @@
      "seen_by": 6,
      "year": 1,
      "sample": true
+    },
+    {
+     "kind": "alt_battle",
+     "x": 1388,
+     "y": 1386,
+     "players": [
+      3,
+      6
+     ],
+     "year": 1,
+     "sample": true
     }
    ]
   }

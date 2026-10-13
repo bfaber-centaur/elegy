@@ -177,8 +177,10 @@ func TestStarbase(t *testing.T) {
 }
 
 // TestPacketSettings pins the planet's mass-driver comparison
-// (vectors/README.md): the destination planet or -1 for none, a null
-// not compared (ELEGY CHOICE), and a warp below 5 read as unset.
+// (vectors/README.md): the destination planet or -1 for none, a warp
+// below 5 read as unset, and a null read as absent (no destination, warp
+// 4) unless the planet has no starbase (UNRESOLVED: cleared or not
+// written).
 func TestPacketSettings(t *testing.T) {
 	var l pvLoaded
 	p := engine.Planet{HasPacketDest: true, PacketDest: 4, PacketSpeed: 8}
@@ -186,7 +188,13 @@ func TestPacketSettings(t *testing.T) {
 	pvWant(t, "destination", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": 4}`), nil), "packet_destination = 3, want 4", "")
 	pvWant(t, "none wanted", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": -1}`), nil), "packet_destination = 3, want -1", "")
 	pvWant(t, "warp", l.planetEquals(nil, &p, pvEq(t, `{"packet_warp": 9}`), nil), "packet_warp = 8, want 9", "")
-	pvWant(t, "null", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null}`), nil), "", "planet field packet_destination null")
+	pvWant(t, "null, no starbase", l.planetEquals(nil, &p, pvEq(t, `{"packet_destination": null, "packet_warp": null}`), nil), "", "planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)")
+	sb := p
+	sb.HasStarbase = true
+	pvWant(t, "null destination, starbase", l.planetEquals(nil, &sb, pvEq(t, `{"packet_destination": null}`), nil), "packet_destination = 3, want -1", "")
+	pvWant(t, "null warp, starbase", l.planetEquals(nil, &sb, pvEq(t, `{"packet_warp": null}`), nil), "packet_warp = 8, want 4", "")
+	sb.HasPacketDest, sb.PacketSpeed = false, 0
+	pvWant(t, "null as default, starbase", l.planetEquals(nil, &sb, pvEq(t, `{"packet_destination": null, "packet_warp": null}`), nil), "", "")
 	// Malformed expected data fails the check, never reads as absent.
 	for _, k := range []string{"packet_destination", "packet_warp"} {
 		for _, raw := range []string{`"8"`, `true`, `8.5`} {
@@ -493,4 +501,32 @@ func TestDefaultQueueExpectation(t *testing.T) {
 	pvWant(t, "design item", l.playerEquals(g, 0, pvEq(t, `{"default_queue": [{"kind": 2, "id": 0, "count": 1}]}`), nil), "", "default queue with a design item")
 	g.Players[0].DefaultQueue = nil
 	pvWant(t, "empty", l.playerEquals(g, 0, pvEq(t, `{"default_queue": []}`), nil), "", "")
+}
+
+// TestBattlePlanEquals pins the battle_plan expectation (vectors/README.md
+// "battle_plan"): every field of the plan in the slot, attack_who
+// numbered as the state's battle_plans, a missing plan a mismatch, and
+// malformed expected data a failure.
+func TestBattlePlanEquals(t *testing.T) {
+	g := &engine.Game{Players: make([]engine.Player, 2)}
+	g.Players[0].Plans = []engine.BattlePlan{{}, pvPlan("Guard", 4, 2, 1, 6, true)}
+	all := `{"tactic": 4, "primary": 2, "secondary": 1, "attack_who": 6, "dump_cargo": true, "name": "Guard"}`
+	pvWant(t, "match", battlePlanEquals(g, 0, 1, pvEq(t, all)), "", "")
+	for _, c := range []struct{ eq, want string }{
+		{`{"tactic": 3}`, "tactic = 4, want 3"},
+		{`{"primary": 3}`, "primary = 2, want 3"},
+		{`{"secondary": 0}`, "secondary = 1, want 0"},
+		{`{"attack_who": 5}`, "attack_who = 6, want 5"},
+		{`{"dump_cargo": false}`, "dump_cargo = true, want false"},
+		{`{"name": "P5"}`, `name = "Guard", want "P5"`},
+		{`{"name": "guard"}`, `name = "Guard", want "guard"`},
+		{`{"tactic": "4"}`, `tactic: malformed expectation "4"`},
+		{`{"dump_cargo": null}`, "dump_cargo: malformed expectation null"},
+		{`{"name": null}`, "name: malformed expectation null"},
+	} {
+		pvWant(t, c.eq, battlePlanEquals(g, 0, 1, pvEq(t, c.eq)), c.want, "")
+	}
+	pvWant(t, "no plan", battlePlanEquals(g, 0, 2, pvEq(t, all)), "no battle plan in slot 2 of player 0", "")
+	pvWant(t, "other player", battlePlanEquals(g, 1, 1, pvEq(t, all)), "no battle plan in slot 1 of player 1", "")
+	pvWant(t, "unknown field", battlePlanEquals(g, 0, 1, pvEq(t, `{"colour": 1}`)), "", "battle plan field colour")
 }

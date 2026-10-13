@@ -46,6 +46,8 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x035, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"merged count", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 1}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
+		{"defenses", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemDefenses, Count: 20}}, 2,
+			[]pvMsg{{id: 0x03a, focus: 4, focusKnown: true, params: []int{20, 4}, known: all(2)}}},
 		{"overcrowded, long amount", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Count: 70000}}, 2,
 			[]pvMsg{{id: 0x026, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1}, known: all(3)}}},
 		// MESSAGES.md 0x025: each count in two 16-bit slots, as KX-004

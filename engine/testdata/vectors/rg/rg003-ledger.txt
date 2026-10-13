@@ -525,7 +525,7 @@ sample | rg003 | RG-003-2467 y5 #263 | planet id=79 | surface_minerals = [1 2059
 sample | rg003 | RG-003-2467 y5 #264 | planet id=80 | surface_minerals = [179 2776 112], want [178 2774 112]
 sample | rg003 | RG-003-2467 y5 #267 | planet id=83 | surface_minerals = [31453 29457 23824], want [31455 29456 23825]
 sample | rg003 | RG-003-2467 y5 #268 | planet id=84 | factories = 771, want 772
-not compared | rg003 | RG-003-2467 y5 #268 | planet id=84 | planet field packet_destination null
+not compared | rg003 | RG-003-2467 y5 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003 | RG-003-2467 y5 #272 | planet id=87 | surface_minerals = [66 190 151], want [66 191 154]
 sample | rg003 | RG-003-2467 y5 #273 | planet id=88 | surface_minerals = [322 523 96], want [325 524 97]
 sample | rg003 | RG-003-2467 y5 #276 | planet id=91 | factories = 327, want 338
@@ -1558,7 +1558,7 @@ sample | rg003 | RG-003-2470 y8 #299 | planet id=92 | surface_minerals = [94 195
 sample | rg003 | RG-003-2470 y8 #3 | fleet owner=1 id=1 | cargo.boranium = 337, want 335
 sample | rg003 | RG-003-2470 y8 #3 | fleet owner=1 id=1 | cargo.germanium = 2, want 1
 sample | rg003 | RG-003-2470 y8 #300 | planet id=93 | surface_minerals = [1 1027 768], want [1 1026 765]
-not compared | rg003 | RG-003-2470 y8 #301 | planet id=94 | planet field packet_destination null
+not compared | rg003 | RG-003-2470 y8 #301 | planet id=94 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003 | RG-003-2470 y8 #302 | planet id=94 | surface_minerals = [49 175 84], want [48 176 82]
 sample | rg003 | RG-003-2470 y8 #304 | planet id=96 | surface_minerals = [1 545 402], want [1 547 403]
 sample | rg003 | RG-003-2470 y8 #305 | planet id=97 | surface_minerals = [1 293 210], want [2 291 206]
@@ -2011,7 +2011,6 @@ sample | rg003 | RG-003-2471 y9 #207 | fleet owner=6 id=17 | orbiting = 35, want
 sample | rg003 | RG-003-2471 y9 #207 | fleet owner=6 id=17 | waypoints[0] position = {1197 1362}, want {1210 1328}
 sample | rg003 | RG-003-2471 y9 #207 | fleet owner=6 id=17 | x = 1197, want 1210
 sample | rg003 | RG-003-2471 y9 #207 | fleet owner=6 id=17 | y = 1362, want 1328
-not compared | rg003 | RG-003-2471 y9 #208 | battle_plan owner=0 slot=5 | expectation battle_plan
 sample | rg003 | RG-003-2471 y9 #209 | planet id=0 | surface_minerals = [176 1 27], want [176 1 24]
 sample | rg003 | RG-003-2471 y9 #210 | planet id=1 | environment = [59 27 33], want [59 26 33]
 sample | rg003 | RG-003-2471 y9 #211 | planet id=2 | surface_minerals = [268 184 217], want [270 185 218]
@@ -2318,6 +2317,7 @@ sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.plan
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.resources = 9012, want 9039
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.score = 602, want 603
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.unarmed_ships = 18, want 16
+not compared | rg003 | RG-003-2471 y9 #522 | alt_battle x=1388 y=1386 | expectation alt_battle
 sample | rg003 | RG-003-2471 y9 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg003 | RG-003-2471 y9 #53 | fleet owner=1 id=52 | cargo.ironium = 293, want 295
 sample | rg003 | RG-003-2471 y9 #54 | fleet owner=1 id=54 | cargo.ironium = 91, want 90
@@ -4848,9 +4848,7 @@ sample | rg003 | RG-003-2474 y12 #54 | fleet owner=1 id=52 | fuel = 250, want 24
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.boranium = 293, want 289
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.germanium = 14, want 16
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.ironium = 393, want 395
-not compared | rg003 | RG-003-2474 y12 #556 | message | message 0x03a has no event mapping
 sample | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 to player 0 present = false, want true
-not compared | rg003 | RG-003-2474 y12 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003 | RG-003-2474 y12 #565 | player id=0 seen_by=0 | score_record.resources = 3157, want 3156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.escort_ships = 149, want 156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.resources = 24202, want 23712
@@ -5396,8 +5394,6 @@ sample | rg003-y12 | RG-003-Y12-2474 y1 #529 | object | wormhole: y = 1068, want
 random-driven | rg003-y12 | RG-003-Y12-2474 y1 #53 | fleet owner=1 id=51 | cargo.ironium = 119, want 118 (2/8 variants match)
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.boranium = 288, want 289
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.ironium = 396, want 395
-not compared | rg003-y12 | RG-003-Y12-2474 y1 #556 | message | message 0x03a has no event mapping
-not compared | rg003-y12 | RG-003-Y12-2474 y1 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.score = 1246, want 1244
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.tech_level_sum = 60, want 59
 not compared | rg003-y12 | RG-003-Y12-2474 y1 #568 | message | message 0x007 has no event mapping
@@ -5549,7 +5545,7 @@ sample | rg003-y5 | RG-003-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [
 sample | rg003-y5 | RG-003-Y5-2467 y1 #234 | planet id=51 | factories = 312, want 313
 sample | rg003-y5 | RG-003-Y5-2467 y1 #234 | planet id=51 | surface_minerals = [1225 875 3], want [1224 875 0]
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #249 | planet id=66 | surface_minerals = [622 1311 20], want [620 1310 20] (3/8 variants match)
-not compared | rg003-y5 | RG-003-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null
+not compared | rg003-y5 | RG-003-Y5-2467 y1 #268 | planet id=84 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #275 | planet id=90 | surface_minerals = [882 665 1], want [882 667 1] (6/8 variants match)
 sample | rg003-y5 | RG-003-Y5-2467 y1 #290 | planet id=104 | surface_minerals = [706 0 3], want [705 0 3]
 sample | rg003-y5 | RG-003-Y5-2467 y1 #293 | planet id=106 | surface_minerals = [353 175 3], want [353 176 3]
@@ -5654,7 +5650,7 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #245 | planet id=42 | starbase = design 10
 random-driven | rg003-y8 | RG-003-Y8-2470 y1 #247 | planet id=44 | surface_minerals = [11 285 1], want [12 287 2] (6/8 variants match)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #280 | planet id=75 | surface_minerals = [13 347 1824], want [13 347 1825]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #291 | planet id=85 | surface_minerals = [2095 0 1448], want [2092 1 1447]
-not compared | rg003-y8 | RG-003-Y8-2470 y1 #301 | planet id=94 | planet field packet_destination null
+not compared | rg003-y8 | RG-003-Y8-2470 y1 #301 | planet id=94 | planet field packet_destination null with no starbase (cleared or not written: UNRESOLVED)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #302 | planet id=94 | surface_minerals = [75 211 134], want [48 176 82]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #316 | planet id=107 | surface_minerals = [195 262 0], want [196 263 0]
 sample | rg003-y8 | RG-003-Y8-2470 y1 #336 | player id=1 | research_accumulated.construction = 9200, want 9202
@@ -5703,7 +5699,6 @@ sample | rg003-y9 | RG-003-Y9-2471 y1 #137 | fleet_gone owner=4 id=0 | fleet sti
 sample | rg003-y9 | RG-003-Y9-2471 y1 #193 | fleet owner=6 id=2 | waypoints[0] position = {1388 1386}, want {1385 1385}
 sample | rg003-y9 | RG-003-Y9-2471 y1 #193 | fleet owner=6 id=2 | x = 1388, want 1385
 sample | rg003-y9 | RG-003-Y9-2471 y1 #193 | fleet owner=6 id=2 | y = 1386, want 1385
-not compared | rg003-y9 | RG-003-Y9-2471 y1 #208 | battle_plan owner=0 slot=5 | expectation battle_plan
 sample | rg003-y9 | RG-003-Y9-2471 y1 #247 | planet id=37 | surface_minerals = [596 14 727], want [598 14 728]
 sample | rg003-y9 | RG-003-Y9-2471 y1 #261 | planet id=49 | surface_minerals = [850 443 241], want [819 435 224]
 sample | rg003-y9 | RG-003-Y9-2471 y1 #28 | fleet owner=1 id=27 | cargo.boranium = 328, want 327
@@ -5744,6 +5739,7 @@ sample | rg003-y9 | RG-003-Y9-2471 y1 #481 | object | wormhole: y = 1775, want 1
 sample | rg003-y9 | RG-003-Y9-2471 y1 #511 | player id=1 seen_by=1 | score_record.escort_ships = 129, want 130
 sample | rg003-y9 | RG-003-Y9-2471 y1 #513 | player id=2 seen_by=2 | score_record.escort_ships = 44, want 47
 sample | rg003-y9 | RG-003-Y9-2471 y1 #517 | player id=4 seen_by=4 | score_record.unarmed_ships = 3, want 2
+not compared | rg003-y9 | RG-003-Y9-2471 y1 #522 | alt_battle x=1388 y=1386 | expectation alt_battle
 sample | rg003-y9 | RG-003-Y9-2471 y1 #64 | fleet owner=1 id=64 | cargo.ironium = 480, want 481
 sample | rg003-y9 | RG-003-Y9-2471 y1 #72 | fleet owner=1 id=74 | fleet gone
 sample | rg003-y9 | RG-003-Y9-2471 y1 #80 | fleet owner=1 id=82 | waypoints[0] position = {1560 1453}, want {1556 1461}
@@ -5962,7 +5958,7 @@ matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1153,1609) | matched: 2 
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1266,1400) | matched: 7 tokens, players and planet; 0 of 74 hits compared and 74 conditioned; 53 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1293,1597) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1329,1244) | matched: 3 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 6 moves allowed
-random-driven [lane D]: oracle fought here in 3 of 4 streams; only the recorded stream stopped 6/2 (stars-elegy 045bc90) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
+sample | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | sample missed: battle set: Elegy fights here (players [3 6]), the record has no battle
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1402,1704) | matched: 5 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 14 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1423,1158) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 3 hits compared and 3 conditioned; 8 moves allowed
