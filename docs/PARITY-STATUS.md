@@ -212,6 +212,14 @@ Measured on elegy main `3d33192` (#211) plus #209 and this branch.
 - **Order:** the order check makes 1694 comparisons over the 8 seed variants, up from 1662 with #209. The 32 new ones place a 0x036 (16) or 0x038 (8) after a 0x12a, and a 0x03e (8) after a 0x12f. Every one holds: no per-corpus tally changes.
 - **RG-002:** it carries neither id, so the ledger is unchanged.
 
+### Default queue settings (economy)
+
+Measured on elegy main `3d33192` (#211) plus #209 and this branch.
+
+- With #211's re-sync, 9 of the 11 "player default queue settings" skips are compared (section "Vector re-sync" above).
+- The other 2 were one RG-001 planet that was owned at the start of the year and had no owner at its end, counted in two cases. A planet left with no owner takes no default (Elegy clears its queue and setting when it empties, engine `emptyPlanet`), so the harness now compares its queue and `leftover_to_research` as it does an unchanged owner's. Both expectations match on every seed variant.
+- No skip of this kind is left. Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
