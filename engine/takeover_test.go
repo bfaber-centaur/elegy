@@ -745,7 +745,10 @@ func TestPredictionEmptiedPlanet(t *testing.T) {
 		t.Errorf("CA lost planet env %v, want the original 50/50/50", env)
 	}
 
-	queue := []QueueItem{q(ItemMine, 1, 0), q(ItemFactory, 2, 0), q(ItemDefenses, 3, 0), q(ItemMine, 4, 0), q(ItemFactory, 5, 0), q(ItemDefenses, 6, 0), q(ItemMine, 7, 0)}
+	// T-26 (CONFIRMED): Alternate Reality skips items 0–2 and Claim
+	// Adjuster items 4–5 by item, not by queue position; the plain mine
+	// first shifts every auto item one place on.
+	queue := []QueueItem{q(ItemMine, 1, 0), q(ItemAutoMines, 2, 0), q(ItemAutoFactories, 3, 0), q(ItemAutoDefenses, 4, 0), q(ItemAutoAlchemy, 5, 0), q(ItemAutoMinTerraform, 6, 0), q(ItemAutoMaxTerraform, 7, 0), q(ItemFactory, 8, 0)}
 	counts := func(items []QueueItem) []int {
 		var c []int
 		for _, it := range items {
@@ -757,9 +760,9 @@ func TestPredictionEmptiedPlanet(t *testing.T) {
 		prt  PRT
 		want []int
 	}{
-		{PRTJackOfAllTrades, []int{1, 2, 3, 4, 5, 6, 7}},
-		{PRTAlternateReality, []int{4, 5, 6, 7}},
-		{PRTClaimAdjuster, []int{1, 2, 3, 4, 7}},
+		{PRTJackOfAllTrades, []int{1, 2, 3, 4, 5, 6, 7, 8}},
+		{PRTAlternateReality, []int{1, 5, 6, 7, 8}},
+		{PRTClaimAdjuster, []int{1, 2, 3, 4, 5, 8}},
 	} {
 		l = newTKLab(t, 3)
 		l.g.Players[0].Race.PRT = tt.prt
@@ -785,7 +788,7 @@ func TestMeasuredEmptyDefaultQueueNoQueue(t *testing.T) {
 		queue []QueueItem
 	}{
 		{PRTJackOfAllTrades, nil},
-		{PRTAlternateReality, []QueueItem{{Kind: ItemMine, Count: 1}, {Kind: ItemFactory, Count: 2}, {Kind: ItemDefenses, Count: 3}}},
+		{PRTAlternateReality, []QueueItem{{Kind: ItemAutoMines, Count: 1}, {Kind: ItemAutoFactories, Count: 2}, {Kind: ItemAutoDefenses, Count: 3}}},
 	} {
 		l := newTKLab(t, 3)
 		l.g.Players[0].Race.PRT = tt.prt
