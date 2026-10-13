@@ -29,6 +29,8 @@ func pvMessageIDs() map[int]string {
 		0x03f: "EventNoQueue",
 		0x04e: "EventFleetArrived",
 		0x050: "EventLevelUp, a player without Generalized Research",
+		0x136: "EventLevelUp, a player with Generalized Research",
+		0x159: "EventResearchStolen",
 		0x05b: "EventFleetScrapped in deep space",
 		0x05f: "EventPartAvailable of a component, not a hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
@@ -247,12 +249,17 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				send(ev.Player, atPlanet(0x12a, ev.Planet))
 			}
 		case engine.EventLevelUp:
-			if ev.Player >= 0 && ev.Player < len(g.Players) && !g.Players[ev.Player].Race.LRT.GeneralizedResearch {
-				// The third slot, the field researched next, is not
-				// in the event.
-				send(ev.Player, pvMsg{id: 0x050, focus: pvFocusResearch, focusKnown: true,
+			if ev.Player >= 0 && ev.Player < len(g.Players) {
+				// 0x136 is 0x050 for a Generalized Research player, with
+				// the same slots (MESSAGES.md "0x050 vs 0x136"). The third
+				// slot, the field researched next, is not in the event.
+				id := 0x050
+				if g.Players[ev.Player].Race.LRT.GeneralizedResearch {
+					id = 0x136
+				}
+				send(ev.Player, pvMsg{id: id, focus: pvFocusResearch, focusKnown: true,
 					params: []int{ev.Count, int(ev.Item), 0}, known: []bool{true, true, false},
-					why: "0x050 slot 3 (field researched next)"})
+					why: fmt.Sprintf("0x%03x slot 3 (field researched next)", id)})
 			}
 		case engine.EventPartAvailable:
 			cs := engine.Components().Components
@@ -267,6 +274,9 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 						why: "0x05f part focus and slots (no category-mask table)"})
 				}
 			}
+		case engine.EventResearchStolen:
+			// Slots: field, research added (MESSAGES.md 0x159).
+			send(ev.Player, pvMsg{id: 0x159, focus: pvFocusResearch, focusKnown: true, params: []int{int(ev.Item), ev.Count}})
 		case engine.EventColonistsBeamedDown:
 			// Slots: fleet, amount (two slots), mineral, location (two
 			// slots). Which word of a planet location holds the planet

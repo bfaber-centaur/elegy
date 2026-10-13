@@ -15,6 +15,7 @@ func TestPvMessageList(t *testing.T) {
 		Players: make([]engine.Player, 3),
 		Fleets:  []engine.Fleet{{ID: 9, Owner: 1, Number: 4}},
 	}
+	g.Players[1].Race.LRT.GeneralizedResearch = true
 	part := -1
 	for i, c := range engine.Components().Components {
 		if c.Name == "Cow-hide Shield" {
@@ -52,6 +53,10 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x04e, params: []int{0}, known: []bool{false}, why: "0x04e fleet gone by the end of the year"}}},
 		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Item: 4, Count: 7}}, 2,
 			[]pvMsg{{id: 0x050, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 0}, known: []bool{true, true, false}, why: "0x050 slot 3 (field researched next)"}}},
+		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Item: 4, Count: 7}}, 1,
+			[]pvMsg{{id: 0x136, focus: 0xfffe, focusKnown: true, params: []int{7, 4, 0}, known: []bool{true, true, false}, why: "0x136 slot 3 (field researched next)"}}},
+		{"research stolen", []engine.Event{{Kind: engine.EventResearchStolen, Player: 2, Planet: -1, Fleet: -1, Item: 3, Count: 116}}, 2,
+			[]pvMsg{{id: 0x159, focus: 0xfffe, focusKnown: true, params: []int{3, 116}, known: all(2)}}},
 		{"component", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: part}}, 2,
 			[]pvMsg{{id: 0x05f, params: []int{1, 0, 0}, known: []bool{true, false, false}, why: "0x05f part focus and slots (no category-mask table)"}}},
 		{"scrapped in deep space", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9}}, 1,
