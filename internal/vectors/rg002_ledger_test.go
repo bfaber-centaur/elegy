@@ -67,7 +67,8 @@ var rg002Vectors = []string{"rg002", "rg002-y1", "rg002-y2", "rg002-y3", "rg002-
 
 // rgLedger is one representative game's discrepancy ledger: its file,
 // header, chained run and the runs it covers. RG-003 (RG-002 continued to
-// 12 years, vectors README.md "rg") has its own, with RG-002's classes.
+// 12 years) and RG-004 (a second game, 12 years) have their own, with
+// RG-002's classes (vectors README.md "rg").
 type rgLedger struct {
 	path, header, chained string
 	vectors               []string
@@ -77,6 +78,7 @@ type rgLedger struct {
 var rgLedgers = map[string]rgLedger{
 	"rg002": {rg002Ledger, rg002LedgerHeader, "rg002", rg002Vectors},
 	"rg003": {"../../engine/testdata/vectors/rg/rg003-ledger.txt", rg003LedgerHeader, "rg003", rgRuns("rg003", 12)},
+	"rg004": {"../../engine/testdata/vectors/rg/rg004-ledger.txt", rg004LedgerHeader, "rg004", rgRuns("rg004", 12)},
 }
 
 // rgRuns is a chained run and its restarts, years 1 to n.
@@ -432,7 +434,13 @@ func TestRG002Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg002"]) }
 // TestRG003Ledger checks RG-003's ledger as TestRG002Ledger does RG-002's.
 func TestRG003Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg003"]) }
 
+// TestRG004Ledger checks RG-004's ledger as TestRG002Ledger does RG-002's.
+func TestRG004Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg004"]) }
+
 func testRGLedger(t *testing.T, lg rgLedger) {
+	if lg.path == "" || len(lg.vectors) == 0 {
+		t.Fatal("no ledger for this game in rgLedgers")
+	}
 	ledger := readLedger(t, lg.path)
 	battles := readBattleLines(t, lg.path)
 	write := checkLedger(t, rg002Lines(t, lg), ledger)
@@ -516,7 +524,20 @@ const rg003LedgerHeader = `# RG-003 discrepancy ledger: every difference of the 
 # were injected (stars-elegy experiments/rg003/README.md). Checked
 # exactly by internal/vectors TestRG003Ledger and, for the "battle" lines,
 # engine TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
-# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[23]Ledger'
+# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
+# ./internal/vectors, then classify every UNCLASSIFIED line by hand.
+`
+
+const rg004LedgerHeader = `# RG-004 discrepancy ledger: every difference of the reference run (seed
+# variant 0, every recorded order loaded) from the original, one per line:
+# class | vector | case and year | object | detail
+# RG-004 is a second representative game (vectors README.md "rg"): seven
+# custom races played by expert computer players, 12 chained years (2466
+# to 2477) after 65 unrecorded warm-up years, with no injected orders
+# (stars-elegy experiments/rg004/README.md). Checked exactly by
+# internal/vectors TestRG004Ledger and, for the "battle" lines, engine
+# TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
+# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
 `
 

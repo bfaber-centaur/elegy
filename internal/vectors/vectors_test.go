@@ -306,13 +306,22 @@ func TestOrdersWaypointRefusals(t *testing.T) {
 	for _, c := range []struct{ order, why string }{
 		{`{"kind": "waypoint_add", "fleet": 0, "index": 0, "waypoint": {"x": 0, "y": 0, "warp": 5, "target": {"kind": "planet", "id": 1}, "task": {"kind": "none"}}}`, "order waypoint_add before the fleet's position"},
 		{`{"kind": "waypoint_delete", "fleet": 0, "index": 0}`, "order waypoint_delete index"},
-		{`{"kind": "waypoint_delete", "fleet": 0, "index": 1}`, "order waypoint_delete index"},
 	} {
 		if _, why := l.orders(testBlock(t, c.order), 1, &l.g); why != c.why {
 			t.Errorf("%s: why %q, want %q", c.order, why, c.why)
 		}
 	}
-	files, why := l.orders(testBlock(t, `{"kind": "waypoint_delete", "fleet": 40, "index": 1}`), 1, &l.g)
+	// A delete past the end of the fleet's waypoints is refused and
+	// recorded; the year's other orders still load.
+	files, why := l.orders(testBlock(t, `{"kind": "waypoint_delete", "fleet": 0, "index": 1}`), 1, &l.g)
+	if why != "" || len(files) != 1 || len(files[0].Orders) != 0 {
+		t.Errorf("delete past the end: %+v, %q; want no order and no why", files, why)
+	}
+	if want := []string{"year 1 player 0 vector order 0 (waypoint_delete): waypoint 1 of fleet 0 past its 0 waypoints"}; !reflect.DeepEqual(l.rejected, want) {
+		t.Errorf("delete past the end recorded %q, want %q", l.rejected, want)
+	}
+	l.rejected = nil
+	files, why = l.orders(testBlock(t, `{"kind": "waypoint_delete", "fleet": 40, "index": 1}`), 1, &l.g)
 	if why != "" || !reflect.DeepEqual(files[0].Orders, []engine.Order{engine.WaypointOrder{}}) {
 		t.Errorf("delete for a missing fleet: %+v, %q; want an order for fleet 0", files, why)
 	}

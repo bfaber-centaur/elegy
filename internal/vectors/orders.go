@@ -106,7 +106,7 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 		// them: the vector gives one waypoint per order, and each order
 		// applies on top of the ones before it.
 		route := map[int]engine.WaypointOrder{}
-		for _, raw := range b.Orders {
+		for n, raw := range b.Orders {
 			var o pvOrder
 			if err := json.Unmarshal(raw, &o); err != nil {
 				return nil, "order " + err.Error()
@@ -264,8 +264,17 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 					w = engine.WaypointOrder{Fleet: fleet, Task: f.Task, Waypoints: append([]engine.Waypoint(nil), f.Waypoints...)}
 				}
 				k := o.Index - 1
-				if k < 0 || k >= len(w.Waypoints) {
+				if k < 0 {
 					return nil, "order waypoint_delete index"
+				}
+				if k >= len(w.Waypoints) {
+					// The original's order names a waypoint past the end of
+					// the fleet's list in Elegy's state, as a chained run
+					// that has diverged can give: the order is refused and
+					// recorded like an engine refusal, and the year goes on
+					// (Elegy choice, harness).
+					l.rejected = append(l.rejected, fmt.Sprintf("year %d player %d vector order %d (waypoint_delete): waypoint %d of fleet %d past its %d waypoints", y, b.Player, n, o.Index, o.Fleet, len(w.Waypoints)))
+					continue
 				}
 				w.Waypoints = slices.Delete(append([]engine.Waypoint(nil), w.Waypoints...), k, k+1)
 				route[fleet] = w
