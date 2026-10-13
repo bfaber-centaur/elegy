@@ -1263,8 +1263,11 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 			return l.scoreRecordCheck(g, e, eq["score_record"])
 		}
 		return l.playerEquals(g, *e.ID, eq, l.playerUnsure(g, *e.ID))
-	case "design":
-		return l.designEquals(g, *e.Owner, *e.Slot, eq)
+	case "design", "starbase_design":
+		if l.planned(*e.Owner) {
+			return "skip: " + pvPlannedWhy
+		}
+		return designEquals(g, *e.Owner, *e.Slot, e.Kind == "starbase_design", eq)
 	case "message":
 		return l.messageCheck(g, e)
 	}
@@ -1954,6 +1957,33 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 			if got := g.Players[id].DefaultLeftoverOnly; got != want {
 				errs = append(errs, pvMismatch(k, got, want))
 			}
+		case "counts":
+			// The player's numbers of ship and starbase designs.
+			var want map[string]int
+			if json.Unmarshal(eq[k], &want) != nil || len(want) == 0 {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+				continue
+			}
+			got := map[string]int{"ship_designs": 0, "starbase_designs": 0}
+			for _, s := range g.DesignSlots {
+				switch {
+				case s.Owner != id:
+				case s.Starbase:
+					got["starbase_designs"]++
+				default:
+					got["ship_designs"]++
+				}
+			}
+			for _, c := range pvKeys(want) {
+				n, ok := got[c]
+				if !ok {
+					skipped("player counts " + c)
+					continue
+				}
+				if n != want[c] {
+					errs = append(errs, pvMismatch(k+" "+c, n, want[c]))
+				}
+			}
 		case "race":
 			var q pvRace
 			if err := json.Unmarshal(eq[k], &q); err != nil {
@@ -1989,10 +2019,81 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 	return pvResult(errs, skip)
 }
 
-// designEquals checks a design after the design read (Catalog.ReadDesign)
-// with the owner's race and levels.
-func (l *pvLoaded) designEquals(g *engine.Game, owner, slot int, eq map[string]json.RawMessage) string {
-	return "skip: design read needs the order layer's design source"
+// designEquals checks the design in owner's ship (or starbase) design
+// slot at the end of the year (README.md "design"): its hull, its mass
+// per ship, and its slots in hull-slot order, null for an empty one.
+// Malformed expected data fails the check.
+func designEquals(g *engine.Game, owner, slot int, starbase bool, eq map[string]json.RawMessage) string {
+	var d *engine.Design
+	for _, s := range g.DesignSlots {
+		if s.Owner == owner && s.Slot == slot && s.Starbase == starbase {
+			d = &g.Designs[s.Design]
+		}
+	}
+	if d == nil {
+		return fmt.Sprintf("no design in slot %d of player %d", slot, owner)
+	}
+	var errs []string
+	skip := ""
+	for _, k := range pvKeys(eq) {
+		switch k {
+		case "hull":
+			var want string
+			if json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("hull: malformed expectation %s", eq[k]))
+			} else if d.Hull.Name != want {
+				errs = append(errs, pvMismatch(k, d.Hull.Name, want))
+			}
+		case "mass":
+			var want int
+			if string(eq[k]) == "null" || json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("mass: malformed expectation %s", eq[k]))
+			} else if d.Mass != want {
+				errs = append(errs, pvMismatch(k, d.Mass, want))
+			}
+		case "slots":
+			var want []*pvPart
+			if json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("slots: malformed expectation %s", eq[k]))
+				continue
+			}
+			if len(d.SlotPos) != len(d.Slots) {
+				if skip == "" {
+					skip = "design slots without hull-slot positions"
+				}
+				continue
+			}
+			got := make([]*pvPart, len(want))
+			for i, s := range d.Slots {
+				p := d.SlotPos[i]
+				if p >= len(got) {
+					got = append(got, make([]*pvPart, p+1-len(got))...)
+				}
+				got[p] = &pvPart{Count: s.Count, Part: s.Part.Name}
+			}
+			if g, w := pvSlotsText(got), pvSlotsText(want); g != w {
+				errs = append(errs, pvMismatch(k, g, w))
+			}
+		default:
+			if skip == "" {
+				skip = "design field " + k
+			}
+		}
+	}
+	return pvResult(errs, skip)
+}
+
+// pvSlotsText writes design slots as "count part" per hull slot, "-" for
+// an empty one.
+func pvSlotsText(slots []*pvPart) string {
+	out := make([]string, len(slots))
+	for i, s := range slots {
+		out[i] = "-"
+		if s != nil {
+			out[i] = fmt.Sprintf("%d %s", s.Count, s.Part)
+		}
+	}
+	return "[" + strings.Join(out, ", ") + "]"
 }
 
 func pvPtr(p *int) any {

@@ -4,7 +4,7 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## RG-002: full-order six-year regression
 
-Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages ("Messages compared" at the end), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
+Measured on elegy main `8426a6a` plus this branch, which adds docs, the variant-refusal test change (internal/vectors tests and two ledger lines) and economy's comparator for planet `packet_destination` and `packet_warp` and player `research_percent` (internal/vectors). Main `8426a6a` carries #191, #193, #192 and #195. That is the final run Bobby's report rests on. **Since then** #197 cleared point 3's `packet_warp` line, and the harness compares messages and `object`-form wormholes (the last two sections), which adds 21 missing-mechanic message lines to point 3 and changes the counts below it. Vectors: stars-elegy `vectors/rg/rg002*.json` (the chained 2463→2468 and each year's restart, Y1..Y6), synced unchanged. Details and the line-by-line breakdown are in [RG002-REPORT.md](RG002-REPORT.md). The ledger is [`engine/testdata/vectors/rg/rg002-ledger.txt`](../engine/testdata/vectors/rg/rg002-ledger.txt).
 
 Bobby's five requirements, in order:
 
@@ -111,11 +111,37 @@ Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0
 | not compared | 276 | 0 | 0 |
 | sample | 991 | 43 | 16 |
 
-The other classes stay 0. The 21 missing-mechanic field lines are the message lines; #197 cleared Y4 planet 88's `packet_warp` and its chained sample. The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 168 results on the 21 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,784 samples.
+The other classes stay 0. The 21 missing-mechanic field lines are the message lines; #197 cleared Y4 planet 88's `packet_warp` and its chained sample. Lane D's battle summaries have since cleared 9 of them ("Battle summaries" below). The 276 not-compared lines are 92 comparator gaps (72 `object`-form wormholes, 14 design reads, 6 player counts), 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. The scratch check of all 56 variant runs finds no unclassified failing field: 168 results on the 21 missing-mechanic lines (8 each), 94 random-driven, 157 that match on the reference seed, and 10,784 samples.
 
 **Other corpora.** Comparing messages takes 38 cases out of the parity baseline (`engine/testdata/vectors/baseline.txt`). Every one is a known gap above, except one new finding:
 - 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
 - 0x026: also in KX-002 G1 and KX-005 T0–T2.
 - RG-002: Y1, Y6, and the chained 2463 and 2468.
 - **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sends no `EventFleetArrived` after the refusal.
+
+### Battle summaries (lane D)
+
+Elegy now sends each battle player its summary (`EventBattleSummary`, engine/combat_summary.go), and `pvMessages` maps it to MESSAGES.md's 0x07e, 0x091–0x0a8 and 0x113–0x116. All of those ids are compared now.
+- **RG-002:** lane D's 9 missing-mechanic lines match on the reference seed (0x095 ×4, 0x116 ×3, 0x09f, 0x0a1), and so do the 5 summary samples of the chained run's years 2–6. No new line appears. The ledger is missing mechanic 13 (economy 10, lane A 2, Y4 planet 88's `packet_warp`), incorrect mechanic 2 (orders), random-driven 30, not compared 276, and samples 987 fields / 43 orders / 16 battle records.
+- **Other corpora:** every summary expectation outside RG-002 matches: CB-048 and CB-048-ctl (0x098, 0x099), CB-049 (0x09b, 0x09c) and SC-036 (0x0a4, 0x0a7). The parity baseline is unchanged. Every expectation of these ids in the corpora is "present"; none checks that a wrong id is absent, so `TestBattleSummaryRules` pins the choice among the ids.
+- **What a "stack" is.** MESSAGES.md's one-stack texts (0x096–0x09a) say "exactly 2 stacks". CB-039 (140 one-ship fleets a side) sent 0x09a, and CB-048 (80 ships in one fleet against 30 one-ship fleets) sent 0x098 and 0x099. So a stack there is one player's ships of one design, whatever fleets hold them (MEASURED). Elegy counts it that way; read as fleet stacks, CB-048 fails.
+
+### Object-form wormholes compared (after the final run)
+
+Measured on elegy main `9088500` (#198) plus the wormhole branch; counts re-measured on main `387c622` (#199, lane D's battle summaries) plus the wormhole branch.
+
+`object` expectations of kind `wormhole` are compared now (internal/vectors `wormholeFields`), with the fields the `wormhole` form already used plus `id` and `partner`, the other end's vector id.
+- **RG-002: 72 expectations, all marked sample by the vectors.** A wormhole end jiggles or jumps on draws every year (OBJECTS.md). All 72 miss, and they become 160 sample field lines: x (72), y (65), `years_since_jump` (13) and `known_to` (10). `partner`, `stability_class` and `destination_known_to` match in all 72. No deterministic line is added.
+- Counts after this, on main `387c622`: missing mechanic 12 (economy 10, lane A 2), incorrect mechanic 2 (orders), random-driven 30, not compared 204 (20 comparator gaps: 14 design reads and 6 player counts; 176 battle; 8 null), and samples 1146 fields (986 + 160), 43 orders and 16 battle records.
+- **Other corpora: RD-P20 and RD-P21.** Their 10 `object` wormhole expectations are year-end positions after a jiggle, which is draw-decided. Before stars-elegy #181 the vectors did not mark them as samples, so they missed on position (and RD-P21 on one `known_to`) and left the parity baseline. stars-elegy #181 (`b4c0086`) flags them `sample` (6 in rp20, 4 in rp21); with those two vectors re-synced, both pass and are back in the baseline. The re-synced files also carry the galaxy `size`, `bounds` and `density` fields; Elegy's vectors loader does not read them yet, so they change no result.
+
+### Designs and player counts compared (after the final run)
+
+Measured on elegy main `2ba78f1` (#201) plus the design branch.
+
+- `design` and `starbase_design` expectations are compared with the design in the owner's ship or starbase slot at the end of the year (internal/vectors `designEquals`). The comparison covers the hull, the mass per ship, and the slots in hull-slot order, with null for an empty slot.
+- Player `counts` is compared with the numbers of ship and starbase designs the player holds.
+- **RG-002: all 20 lines match on the reference seed.** That is 6 design reads, 8 starbase designs (samples, all matching) and 6 counts.
+- Not compared is now 184: 176 battle expectations that `TestBattleRecords` compares, and 8 nulls. No quantity Elegy models is left uncompared in RG-002.
+- **Other corpora:** the parity baseline is unchanged. TK-104-A and TK-105-A were skipped before ("design read needs the order layer's design source") and now fail on T-37 (lane A), so tk2 goes from fail 0 / skip 4 to fail 2 / skip 2. Stars-elegy PARITY.md T-37 (CONFIRMED) says the original removes LBU-17 and LBU-32 from designs after generation, at electronics 7. Elegy keeps them (lane A).
 
