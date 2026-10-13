@@ -71,8 +71,16 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x05f, focus: 0xCD0D, focusKnown: true, params: []int{5, 0x2000, 13}, known: all(3)}}},
 		{"planetary scanner", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 4, Count: named["Scoper 220"]}}, 2,
 			[]pvMsg{{id: 0x157, focus: 0xCF03, focusKnown: true, params: []int{4, 0x8000, 3}, known: all(3)}}},
+		// BINARY-ONLY: no vector holds a beam, torpedo, mine layer or
+		// Genesis Device announcement; these rows pin MESSAGES.md's table.
 		{"Genesis Device", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 5, Count: named["Genesis Device"]}}, 2,
 			[]pvMsg{{id: 0x05f, focus: 0xCF0E, focusKnown: true, params: []int{5, 0x8000, 14}, known: all(3)}}},
+		{"beam", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: named["Gatling Gun"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC408, focusKnown: true, params: []int{1, 0x0010, 8}, known: all(3)}}},
+		{"torpedo", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 1, Count: named["Beta Torpedo"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC501, focusKnown: true, params: []int{1, 0x0020, 1}, known: all(3)}}},
+		{"mine layer", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 2, Count: named["Mine Dispenser 50"]}}, 2,
+			[]pvMsg{{id: 0x05f, focus: 0xC801, focusKnown: true, params: []int{2, 0x0100, 1}, known: all(3)}}},
 		{"ship hull", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 3, Count: hull}}, 2,
 			[]pvMsg{{id: 0x078, focus: 0xFFFD, focusKnown: true, params: []int{3, 0x4000, 0}, known: all(3)}}},
 		{"planetary defense", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Item: 0, Count: defense}}, 2,
