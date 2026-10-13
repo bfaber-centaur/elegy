@@ -88,6 +88,10 @@ func TestSalvageWaypointInTurn(t *testing.T) {
 // the packet is not told anything more.
 func TestPacketTransportLoadsInTurn(t *testing.T) {
 	l := newLab(t)
+	// A large galaxy, 1000..2600, with the layout moved inside it.
+	l.g.Size = 3
+	at := func(dx, dy int) engine.Point { return engine.Point{X: 1100 + dx, Y: 1700 + dy} }
+	origin := at(0, 0)
 	l.g.Planets = []engine.Planet{{ID: 7, Pos: at(900, 0), Owner: engine.NoOwner}}
 	l.g.Objects = &Space{Packets: []Packet{
 		{Owner: 1, Number: 2, Pos: origin, Target: 7, Warp: 10, Cargo: engine.Minerals{100, 0, 0}},
@@ -189,6 +193,9 @@ func TestPacketTransportLoadsInTurn(t *testing.T) {
 // space objects' rules.)
 func TestSalvageTransportWithoutObjects(t *testing.T) {
 	l := newLab(t)
+	// A large galaxy, 1000..2600, with the layout moved inside it.
+	l.g.Size = 3
+	at := func(dx, dy int) engine.Point { return engine.Point{X: 1100 + dx, Y: 1700 + dy} }
 	l.g.Objects = nil
 	l.g.Salvage = []engine.Salvage{{Pos: at(0, 500), Owner: 1, Number: 0, Minerals: engine.Minerals{60, 0, 0}, Steps: 6, Fresh: true}}
 	load := engine.Task{Kind: engine.TaskTransport}
@@ -274,8 +281,12 @@ func TestPacketTransportNamedSource(t *testing.T) {
 			named(1, 2, task(0, engine.SetAmount, 50)), engine.Minerals{30, 0, 0}, []engine.Minerals{{}}, nil, engine.SetAmount, nil},
 		// A packet launched this year waits at the origin until after
 		// movement, then flies on: the fleet that reached it there still
-		// loads from it, wherever it is (ASSUMPTION T5: NS-1 B1, B2 loaded
-		// a packet 40 ly away before movement; after movement NOT RUN).
+		// loads from it, wherever it is (ASSUMPTION T5: NS-1 and NS-2
+		// loaded a packet 10, 40 and 150 ly away before movement; a load
+		// after movement at a distance is UNRESOLVED). This state may be
+		// unreachable from legal orders: a waypoint cannot name a packet
+		// launched this year, and NS-2's attempt (P1, a crafted unmoved
+		// packet) saw the packet move before the fleets.
 		{"named packet gone on", []Packet{{Owner: 1, Number: 2, Pos: at(100, 0), Target: 7, Warp: 10, New: true, Cargo: engine.Minerals{100, 0, 0}}}, nil, false,
 			engine.Waypoint{Pos: at(100, 0), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 2, Task: loadIronium}, engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, nil, engine.TransportNone, nil},
 		// "set waypoint to 10" from 30 kT: 20 load, the packet holds 10, met.

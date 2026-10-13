@@ -30,6 +30,8 @@ type tkLab struct {
 func newTKLab(t *testing.T, energy int) *tkLab {
 	l := &tkLab{t: t}
 	l.g.Rules = ElegyRules()
+	// A small galaxy, 1000..1800, holds the lab's row of planets.
+	l.g.Size = 1
 	for range 2 {
 		pl := Player{Race: tkRace(), Research: ResearchState{Current: Biotech, Next: NextSameField}}
 		pl.Relations = []Relation{RelationEnemy, RelationEnemy}
@@ -44,11 +46,11 @@ func newTKLab(t *testing.T, energy int) *tkLab {
 	return l
 }
 
-// planet adds a planet of owner at x with population pop and returns its
-// index.
+// planet adds a planet of owner x ly along the lab's row, inside the
+// galaxy box, with population pop and returns its index.
 func (l *tkLab) planet(owner, x, pop int) int {
 	l.g.Planets = append(l.g.Planets, Planet{
-		ID: len(l.g.Planets), Pos: Point{x, 0}, Owner: owner, Population: pop,
+		ID: len(l.g.Planets), Pos: Point{1100 + x, 1100}, Owner: owner, Population: pop,
 		Env: [3]int{50, 50, 50}, OrigEnv: [3]int{50, 50, 50},
 	})
 	return len(l.g.Planets) - 1

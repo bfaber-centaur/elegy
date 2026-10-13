@@ -28,6 +28,9 @@ type Vector struct {
 	Random       string   `json:"random"`
 	InitialState pvState  `json:"initial_state"`
 	Cases        []pvCase `json:"cases"`
+	// NewGame is a new-game vector's settings (FORMAT.md "new_game"),
+	// which newgame's tests generate; such a vector has no starting state.
+	NewGame json.RawMessage `json:"new_game"`
 	// Orders are the orders players submitted (FORMAT.md "orders").
 	Orders []pvOrderBlock `json:"orders"`
 	// RandomStart is where each stream's years started (streams.go;
@@ -55,6 +58,7 @@ type pvState struct {
 
 type pvGame struct {
 	Size         string `json:"size"`
+	Bounds       []int  `json:"bounds"`
 	RandomEvents bool   `json:"random_events"`
 	SlowerTech   bool   `json:"slower_tech"`
 	PublicScores bool   `json:"public_scores"`
@@ -65,6 +69,25 @@ type pvGame struct {
 		Value   int   `json:"value"`
 		Enabled *bool `json:"enabled"`
 	} `json:"victory_conditions"`
+}
+
+// size is the game's universe size. A missing or unknown size is an
+// error, not tiny: the waypoint check clamps fleet positions into the
+// galaxy box, 1000..1000+(size+1)·400 on each axis (ORDERS.md "Outside
+// the galaxy"), so a wrong size moves fleets. Bounds, when the vector has
+// them, must be that box.
+func (gm pvGame) size() (int, error) {
+	n, ok := map[string]int{"tiny": 0, "small": 1, "medium": 2, "large": 3, "huge": 4}[gm.Size]
+	if !ok {
+		return 0, fmt.Errorf("game: universe size %q is not tiny, small, medium, large or huge", gm.Size)
+	}
+	if gm.Bounds != nil {
+		hi := 1000 + (n+1)*400
+		if !slices.Equal(gm.Bounds, []int{1000, 1000, hi, hi}) {
+			return 0, fmt.Errorf("game: bounds %v, want [1000 1000 %d %d] for a %s universe", gm.Bounds, hi, hi, gm.Size)
+		}
+	}
+	return n, nil
 }
 
 // victory converts the vector's victory conditions to the new-game
@@ -555,7 +578,11 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 			return nil, err
 		}
 	}
-	g.Size = map[string]int{"tiny": 0, "small": 1, "medium": 2, "large": 3, "huge": 4}[s.Game.Size]
+	if v.NewGame == nil || len(s.Players) > 0 {
+		if g.Size, err = s.Game.size(); err != nil {
+			return nil, err
+		}
+	}
 	g.PlanetScanners = cat.PlanetScanners()
 	g.Defenses = cat.Defenses()
 

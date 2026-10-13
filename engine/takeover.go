@@ -803,9 +803,12 @@ func (g *Game) loadSalvage(f *Fleet, after bool, si int) []Event {
 //     player's planet, which gives nothing) and on arrival (MEASURED, NS-1
 //     A1, A2, salvage over a planet; ET-2, ET-2c, packets).
 //   - A named packet away from the fleet is still the source: CONFIRMED by
-//     prediction for a packet 40 ly away before movement (NS-1 B1, B2).
-//     Other distances, and the pass after movement, are NOT RUN; Elegy
-//     loads at any distance (ASSUMPTION). Salvage does not move.
+//     prediction before movement for a packet 10, 40 and 150 ly away
+//     (NS-1 B1, B2; NS-2 N, F); larger distances are NOT RUN. After
+//     movement at a distance is UNRESOLVED and may be unreachable from
+//     legal orders: the waypoint follows the packet, so the fleet reached
+//     it or fell short and loaded nothing (NS-2 P1, P1-F, MEASURED).
+//     Elegy loads at any distance (ASSUMPTION). Salvage does not move.
 //   - ASSUMPTION: a waypoint at a plain position or a planet that happens
 //     to share a packet's position does not load from the packet.
 //   - ASSUMPTION: without space objects (Game.Objects nil) a named object
