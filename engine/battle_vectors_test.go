@@ -82,7 +82,44 @@ func TestBattleRecords(t *testing.T) {
 		ledger = readBattleLedger(t)
 	}
 	checkBattleLedger(t, l.lines, ledger)
+	checkRG002BattleCoverage(t, l.lines)
 }
+
+// checkRG002BattleCoverage fails unless every RG-002 battle record has
+// both its expectations and at least one ledger line: the internal/vectors
+// ledger leaves the `battle` and `battle_actions` expectations to these
+// lines, so none may go unreported.
+func checkRG002BattleCoverage(t *testing.T, lines map[string]string) {
+	covered := map[string]bool{}
+	for k := range lines {
+		parts := strings.SplitN(k, " | ", 4)
+		covered[strings.Join(parts[:3], " | ")] = true
+	}
+	n := 0
+	for _, path := range engine.BattleRecordVectors(t) {
+		vector, ok := strings.CutPrefix(strings.TrimSuffix(path, ".json"), "rg/")
+		if !ok || !strings.HasPrefix(vector, "rg002") {
+			continue
+		}
+		for k, lacks := range engine.BattleRecordKeys(t, path) {
+			n++
+			if lacks != "" {
+				t.Errorf("RG-002 battle record %s %s: %s", vector, k, lacks)
+			}
+			if !covered[vector+" | "+k] {
+				t.Errorf("RG-002 battle record %s %s has no ledger line", vector, k)
+			}
+		}
+	}
+	if n != rg002BattleRecords {
+		t.Errorf("%d RG-002 battle records, want %d", n, rg002BattleRecords)
+	}
+}
+
+// rg002BattleRecords is the number of battle records in the RG-002
+// vectors: 44 in the chained run and 44 in the restarts, each a `battle`
+// and a `battle_actions` expectation.
+const rg002BattleRecords = 88
 
 func TestBattleRecordHarness(t *testing.T) {
 	engine.CheckBattleRecordHarness(t, battleStarts(t, "cb/cb010.json")[1], battleStarts(t, "cs/cs003c.json")[1])

@@ -1,9 +1,10 @@
 # RG-002 discrepancy ledger: every difference of the reference run (seed
-# variant 0, every recorded order loaded) from the original, one per line:
+# variant 0, every recorded order loaded) from the original, one per line,
+# and one line for each battle record, matched or not:
 # class | vector | case and year | object | detail
 # Checked exactly by internal/vectors TestRG002Ledger and, for the
-# "battle" lines, engine TestBattleRecords; see rg002_ledger_test.go for
-# the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
+# "battle record" lines, engine TestBattleRecords; see rg002_ledger_test.go
+# for the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
 #
 # Order coverage (lane F, at stars-elegy fe0ccc5): the 42 order files hold
@@ -29,22 +30,6 @@ sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: y = 1625, want 1639
 sample | rg002 | RG-002-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002 | RG-002-2463 y1 #379 | battle x=1199 y=1324 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #380 | battle_actions x=1199 y=1324 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #381 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #382 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #383 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #384 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #385 | battle x=1364 y=1319 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #386 | battle_actions x=1364 y=1319 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #387 | battle x=1426 y=1398 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #388 | battle_actions x=1426 y=1398 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #389 | battle planet=84 x=1518 y=1414 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #390 | battle_actions x=1518 y=1414 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #391 | battle planet=86 x=1523 y=1298 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #392 | battle_actions x=1523 y=1298 | expectation battle_actions
-not compared | rg002 | RG-002-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002 | RG-002-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
 not compared | rg002 | RG-002-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
 sample | rg002 | RG-002-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
@@ -112,20 +97,6 @@ sample | rg002 | RG-002-2464 y2 #395 | object | wormhole: x = 1541, want 1539
 sample | rg002 | RG-002-2464 y2 #395 | object | wormhole: y = 1457, want 1446
 sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: x = 1235, want 1258
 sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: y = 1783, want 1778
-not compared | rg002 | RG-002-2464 y2 #397 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #398 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #399 | battle x=1208 y=1327 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #400 | battle_actions x=1208 y=1327 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #401 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #402 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #403 | battle x=1350 y=1306 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #404 | battle_actions x=1350 y=1306 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #405 | battle x=1367 y=1327 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #406 | battle_actions x=1367 y=1327 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #407 | battle x=1411 y=1378 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #408 | battle_actions x=1411 y=1378 | expectation battle_actions
-not compared | rg002 | RG-002-2464 y2 #409 | battle planet=83 x=1513 y=1113 | expectation battle
-not compared | rg002 | RG-002-2464 y2 #410 | battle_actions x=1513 y=1113 | expectation battle_actions
 sample | rg002 | RG-002-2464 y2 #415 | message | message 0x086 to player 0 present = false, want true
 sample | rg002 | RG-002-2464 y2 #422 | player id=2 seen_by=2 | score_record.escort_ships = 52, want 50
 sample | rg002 | RG-002-2464 y2 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 21
@@ -244,20 +215,6 @@ sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: y = 1465, want 1663
 sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: years_since_jump = 39, want 0
 sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: x = 1242, want 1249
 sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: y = 1783, want 1787
-not compared | rg002 | RG-002-2465 y3 #395 | battle planet=42 x=1227 y=1429 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #396 | battle_actions x=1227 y=1429 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #397 | battle x=1241 y=1313 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #398 | battle_actions x=1241 y=1313 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #399 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #400 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #401 | battle x=1348 y=1275 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #402 | battle_actions x=1348 y=1275 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #403 | battle x=1367 y=1327 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #404 | battle_actions x=1367 y=1327 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #405 | battle x=1386 y=1352 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #406 | battle_actions x=1386 y=1352 | expectation battle_actions
-not compared | rg002 | RG-002-2465 y3 #407 | battle planet=79 x=1481 y=1304 | expectation battle
-not compared | rg002 | RG-002-2465 y3 #408 | battle_actions x=1481 y=1304 | expectation battle_actions
 sample | rg002 | RG-002-2465 y3 #415 | message_sequence | message 0x036 (focus 100, params [20 100]) = sent as 0x036 (focus 100, params [21 100])
 sample | rg002 | RG-002-2465 y3 #415 | message_sequence | message 0x038 (focus 100, params [6 100]) = sent as 0x038 (focus 100, params [4 100])
 not compared | rg002 | RG-002-2465 y3 #415 | message_sequence | message_sequence 0x05f part focus and slots (no category-mask table) not compared
@@ -421,22 +378,6 @@ sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: x = 1531, want 1408
 sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: y = 1463, want 1672
 sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: years_since_jump = 40, want 1
 sample | rg002 | RG-002-2466 y4 #393 | object | wormhole: x = 1234, want 1241
-not compared | rg002 | RG-002-2466 y4 #395 | battle planet=16 x=1101 y=1621 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #396 | battle_actions x=1101 y=1621 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #397 | battle planet=26 x=1153 y=1609 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #398 | battle_actions x=1153 y=1609 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #399 | battle x=1247 y=1340 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #400 | battle_actions x=1247 y=1340 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #401 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #402 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #403 | battle planet=55 x=1319 y=1308 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #404 | battle_actions x=1319 y=1308 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #405 | battle planet=86 x=1523 y=1298 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #406 | battle_actions x=1523 y=1298 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #407 | battle x=1569 y=1096 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #408 | battle_actions x=1569 y=1096 | expectation battle_actions
-not compared | rg002 | RG-002-2466 y4 #409 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002 | RG-002-2466 y4 #410 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002 | RG-002-2466 y4 #417 | message_sequence | message 0x036 (focus 100, params [22 100]) = sent as 0x036 (focus 100, params [21 100])
 sample | rg002 | RG-002-2466 y4 #417 | message_sequence | message 0x038 (focus 100, params [4 100]) = sent as 0x038 (focus 100, params [6 100])
 sample | rg002 | RG-002-2466 y4 #420 | player id=1 seen_by=1 | score_record.resources = 16180, want 16183
@@ -674,16 +615,6 @@ sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: y = 1452, want 1667
 sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: years_since_jump = 41, want 2
 sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: x = 1225, want 1246
 sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: y = 1782, want 1778
-not compared | rg002 | RG-002-2467 y5 #440 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002 | RG-002-2467 y5 #441 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002 | RG-002-2467 y5 #442 | battle x=1262 y=1345 | expectation battle
-not compared | rg002 | RG-002-2467 y5 #443 | battle_actions x=1262 y=1345 | expectation battle_actions
-not compared | rg002 | RG-002-2467 y5 #444 | battle x=1335 y=1320 | expectation battle
-not compared | rg002 | RG-002-2467 y5 #445 | battle_actions x=1335 y=1320 | expectation battle_actions
-not compared | rg002 | RG-002-2467 y5 #446 | battle x=1395 y=1292 | expectation battle
-not compared | rg002 | RG-002-2467 y5 #447 | battle_actions x=1395 y=1292 | expectation battle_actions
-not compared | rg002 | RG-002-2467 y5 #448 | battle planet=84 x=1518 y=1414 | expectation battle
-not compared | rg002 | RG-002-2467 y5 #449 | battle_actions x=1518 y=1414 | expectation battle_actions
 sample | rg002 | RG-002-2467 y5 #456 | player id=1 seen_by=1 | score_record.resources = 17123, want 17130
 sample | rg002 | RG-002-2467 y5 #456 | player id=1 seen_by=1 | score_record.score = 953, want 954
 sample | rg002 | RG-002-2467 y5 #458 | player id=2 seen_by=2 | score_record.escort_ships = 50, want 52
@@ -966,24 +897,6 @@ sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: y = 1447, want 1666
 sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: years_since_jump = 42, want 3
 sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: x = 1235, want 1236
 sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: y = 1781, want 1769
-not compared | rg002 | RG-002-2468 y6 #440 | battle planet=16 x=1101 y=1621 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #441 | battle_actions x=1101 y=1621 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #442 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #443 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #444 | battle x=1241 y=1313 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #445 | battle_actions x=1241 y=1313 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #446 | battle planet=46 x=1246 y=1498 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #447 | battle_actions x=1246 y=1498 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #448 | battle planet=49 x=1266 y=1400 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #449 | battle_actions x=1266 y=1400 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #450 | battle x=1296 y=1356 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #451 | battle_actions x=1296 y=1356 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #452 | battle planet=74 x=1423 y=1158 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #453 | battle_actions x=1423 y=1158 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #454 | battle x=1569 y=1096 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #455 | battle_actions x=1569 y=1096 | expectation battle_actions
-not compared | rg002 | RG-002-2468 y6 #456 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002 | RG-002-2468 y6 #457 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002 | RG-002-2468 y6 #462 | message_sequence | message 0x036 (focus 100, params [23 100]) = sent as 0x036 (focus 100, params [24 100])
 sample | rg002 | RG-002-2468 y6 #462 | message_sequence | message 0x038 (focus 100, params [8 100]) = sent as 0x038 (focus 100, params [6 100])
 sample | rg002 | RG-002-2468 y6 #463 | player id=0 seen_by=0 | score_record.resources = 2698, want 2697
@@ -1105,22 +1018,6 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1
 sample | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #379 | battle x=1199 y=1324 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #380 | battle_actions x=1199 y=1324 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #381 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #382 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #383 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #384 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #385 | battle x=1364 y=1319 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #386 | battle_actions x=1364 y=1319 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #387 | battle x=1426 y=1398 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #388 | battle_actions x=1426 y=1398 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #389 | battle planet=84 x=1518 y=1414 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #390 | battle_actions x=1518 y=1414 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #391 | battle planet=86 x=1523 y=1298 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #392 | battle_actions x=1523 y=1298 | expectation battle_actions
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
 sample | rg002-y1 | RG-002-Y1-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
@@ -1168,20 +1065,6 @@ sample | rg002-y2 | RG-002-Y2-2464 y1 #395 | object | wormhole: x = 1525, want 1
 sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: x = 1612, want 1258
 sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: y = 1525, want 1778
 sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: years_since_jump = 0, want 33
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #397 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #398 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #399 | battle x=1208 y=1327 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #400 | battle_actions x=1208 y=1327 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #401 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #402 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #403 | battle x=1350 y=1306 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #404 | battle_actions x=1350 y=1306 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #405 | battle x=1367 y=1327 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #406 | battle_actions x=1367 y=1327 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #407 | battle x=1411 y=1378 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #408 | battle_actions x=1411 y=1378 | expectation battle_actions
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #409 | battle planet=83 x=1513 y=1113 | expectation battle
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #410 | battle_actions x=1513 y=1113 | expectation battle_actions
 sample | rg002-y2 | RG-002-Y2-2464 y1 #415 | message | message 0x086 to player 0 present = false, want true
 sample | rg002-y2 | RG-002-Y2-2464 y1 #418 | player id=0 seen_by=0 | score_record.resources = 2481, want 2482
 sample | rg002-y2 | RG-002-Y2-2464 y1 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 21
@@ -1228,20 +1111,6 @@ sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: y = 1456, want 1
 sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: years_since_jump = 39, want 0
 sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: x = 1263, want 1249
 sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: y = 1781, want 1787
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #395 | battle planet=42 x=1227 y=1429 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #396 | battle_actions x=1227 y=1429 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #397 | battle x=1241 y=1313 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #398 | battle_actions x=1241 y=1313 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #399 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #400 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #401 | battle x=1348 y=1275 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #402 | battle_actions x=1348 y=1275 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #403 | battle x=1367 y=1327 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #404 | battle_actions x=1367 y=1327 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #405 | battle x=1386 y=1352 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #406 | battle_actions x=1386 y=1352 | expectation battle_actions
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #407 | battle planet=79 x=1481 y=1304 | expectation battle
-not compared | rg002-y3 | RG-002-Y3-2465 y1 #408 | battle_actions x=1481 y=1304 | expectation battle_actions
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #415 | message_sequence | message 0x036 (focus 51, params [11 51]) = sent as 0x036 (focus 51, params [10 51]) (5/8 variants match)
 not compared | rg002-y3 | RG-002-Y3-2465 y1 #415 | message_sequence | message_sequence 0x05f part focus and slots (no category-mask table) not compared
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=0 seen_by=0 | score_record.resources = 2520, want 2521 (5/8 variants match)
@@ -1281,22 +1150,6 @@ sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: x = 1420, want 1
 sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: y = 1662, want 1672
 sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: x = 1239, want 1241
 sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: y = 1778, want 1789
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #395 | battle planet=16 x=1101 y=1621 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #396 | battle_actions x=1101 y=1621 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #397 | battle planet=26 x=1153 y=1609 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #398 | battle_actions x=1153 y=1609 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #399 | battle x=1247 y=1340 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #400 | battle_actions x=1247 y=1340 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #401 | battle planet=51 x=1293 y=1597 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #402 | battle_actions x=1293 y=1597 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #403 | battle planet=55 x=1319 y=1308 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #404 | battle_actions x=1319 y=1308 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #405 | battle planet=86 x=1523 y=1298 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #406 | battle_actions x=1523 y=1298 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #407 | battle x=1569 y=1096 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #408 | battle_actions x=1569 y=1096 | expectation battle_actions
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #409 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002-y4 | RG-002-Y4-2466 y1 #410 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002-y4 | RG-002-Y4-2466 y1 #420 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
 sample | rg002-y4 | RG-002-Y4-2466 y1 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #430 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
@@ -1349,16 +1202,6 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: x = 1412, want 1
 sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: y = 1665, want 1667
 sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: x = 1230, want 1246
 sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: y = 1783, want 1778
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #440 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #441 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #442 | battle x=1262 y=1345 | expectation battle
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #443 | battle_actions x=1262 y=1345 | expectation battle_actions
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #444 | battle x=1335 y=1320 | expectation battle
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #445 | battle_actions x=1335 y=1320 | expectation battle_actions
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #446 | battle x=1395 y=1292 | expectation battle
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #447 | battle_actions x=1395 y=1292 | expectation battle_actions
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #448 | battle planet=84 x=1518 y=1414 | expectation battle
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #449 | battle_actions x=1518 y=1414 | expectation battle_actions
 sample | rg002-y5 | RG-002-Y5-2467 y1 #454 | player id=0 seen_by=0 | score_record.resources = 2622, want 2623
 sample | rg002-y5 | RG-002-Y5-2467 y1 #460 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
 sample | rg002-y5 | RG-002-Y5-2467 y1 #464 | player id=5 seen_by=5 | score_record.unarmed_ships = 49, want 48
@@ -1394,39 +1237,99 @@ sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: x = 1420, want 1
 sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: y = 1668, want 1666
 sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: x = 1249, want 1236
 sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: y = 1766, want 1769
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #440 | battle planet=16 x=1101 y=1621 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #441 | battle_actions x=1101 y=1621 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #442 | battle planet=37 x=1204 y=1566 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #443 | battle_actions x=1204 y=1566 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #444 | battle x=1241 y=1313 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #445 | battle_actions x=1241 y=1313 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #446 | battle planet=46 x=1246 y=1498 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #447 | battle_actions x=1246 y=1498 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #448 | battle planet=49 x=1266 y=1400 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #449 | battle_actions x=1266 y=1400 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #450 | battle x=1296 y=1356 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #451 | battle_actions x=1296 y=1356 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #452 | battle planet=74 x=1423 y=1158 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #453 | battle_actions x=1423 y=1158 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #454 | battle x=1569 y=1096 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #455 | battle_actions x=1569 y=1096 | expectation battle_actions
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #456 | battle planet=100 x=1633 y=1380 | expectation battle
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #457 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002-y6 | RG-002-Y6-2468 y1 #469 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
 sample | rg002-y6 | RG-002-Y6-2468 y1 #77 | fleet owner=1 id=85 | cargo.germanium = 2, want 3
+matched | rg002 | RG-002-2463 y1 | battle record (1199,1324) | matched: 2 tokens, players and planet; 3 of 3 hits compared; 14 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1293,1597) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 14 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1364,1319) | matched: 5 tokens, players and planet; 0 of 83 hits compared and 83 conditioned; 26 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1426,1398) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1523,1298) | matched: 35 tokens, players and planet; 0 of 12 hits compared and 12 conditioned; 34 moves allowed
+matched | rg002 | RG-002-2463 y1 | battle record (1633,1380) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 5 moves allowed
+sample | rg002 | RG-002-2464 y2 | battle record (1204,1566) | sample matched
+sample | rg002 | RG-002-2464 y2 | battle record (1208,1327) | sample matched
 sample | rg002 | RG-002-2464 y2 | battle record (1293,1597) | sample missed: tokens: token 2: Elegy {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:91 Pct:100} Fleet:<nil> Planet:0x?}, record {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:0 Pct:0} Fleet:<nil> Planet:0x?}
+sample | rg002 | RG-002-2464 y2 | battle record (1350,1306) | sample matched
+sample | rg002 | RG-002-2464 y2 | battle record (1364,1319) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg002 | RG-002-2464 y2 | battle record (1367,1327) | sample missed: tokens: Elegy has no battle here
 sample | rg002 | RG-002-2464 y2 | battle record (1411,1378) | sample missed: tokens: Elegy has no battle here
+sample | rg002 | RG-002-2464 y2 | battle record (1513,1113) | sample matched
+sample | rg002 | RG-002-2465 y3 | battle record (1227,1429) | sample matched
+sample | rg002 | RG-002-2465 y3 | battle record (1241,1313) | sample matched
 sample | rg002 | RG-002-2465 y3 | battle record (1293,1597) | sample missed: tokens: token 2: Elegy {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:91 Pct:100} Fleet:<nil> Planet:0x?}, record {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:30 Pct:100} Fleet:<nil> Planet:0x?}
 sample | rg002 | RG-002-2465 y3 | battle record (1348,1275) | sample missed: tokens: token 0: Elegy {Owner:2 Kind:ships Design:10 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:167 Shield:0 Ships:3 Damage:{Units:0 Pct:0} Fleet:0x? Planet:<nil>}, record {Owner:2 Kind:ships Design:10 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:167 Shield:0 Ships:4 Damage:{Units:0 Pct:0} Fleet:0x? Planet:<nil>}
+sample | rg002 | RG-002-2465 y3 | battle record (1365,1319) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg002 | RG-002-2465 y3 | battle record (1367,1327) | sample missed: tokens: Elegy has no battle here
 sample | rg002 | RG-002-2465 y3 | battle record (1386,1352) | sample missed: tokens: Elegy has no battle here
+sample | rg002 | RG-002-2465 y3 | battle record (1481,1304) | sample matched
+sample | rg002 | RG-002-2466 y4 | battle record (1101,1621) | sample matched
+sample | rg002 | RG-002-2466 y4 | battle record (1153,1609) | sample matched
 sample | rg002 | RG-002-2466 y4 | battle record (1247,1340) | sample missed: tokens: a recorded fleet is not in Elegy's game
+sample | rg002 | RG-002-2466 y4 | battle record (1293,1597) | sample matched
+sample | rg002 | RG-002-2466 y4 | battle record (1319,1308) | sample matched
+sample | rg002 | RG-002-2466 y4 | battle record (1364,1319) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg002 | RG-002-2466 y4 | battle record (1523,1298) | sample missed: tokens: token 17: Elegy {Owner:1 Kind:ships Design:12 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:484 Shield:0 Ships:1 Damage:{Units:485 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:1 Kind:ships Design:12 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:484 Shield:0 Ships:1 Damage:{Units:478 Pct:100} Fleet:0x? Planet:<nil>}
+sample | rg002 | RG-002-2466 y4 | battle record (1569,1096) | sample matched
+sample | rg002 | RG-002-2466 y4 | battle record (1633,1380) | sample matched
+sample | rg002 | RG-002-2467 y5 | battle record (1204,1566) | sample matched
 sample | rg002 | RG-002-2467 y5 | battle record (1262,1345) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg002 | RG-002-2467 y5 | battle record (1335,1320) | sample missed: tokens: Elegy has no battle here
+sample | rg002 | RG-002-2467 y5 | battle record (1336,1317) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg002 | RG-002-2467 y5 | battle record (1395,1292) | sample missed: tokens: Elegy has no battle here
+sample | rg002 | RG-002-2467 y5 | battle record (1518,1414) | sample matched
+sample | rg002 | RG-002-2468 y6 | battle record (1101,1621) | sample matched
+sample | rg002 | RG-002-2468 y6 | battle record (1204,1566) | sample matched
 sample | rg002 | RG-002-2468 y6 | battle record (1241,1313) | sample missed: tokens: token 1: Elegy {Owner:2 Kind:ships Design:8 StartSquare:[8 8] Initiative:5 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:727 Shield:252 Ships:1 Damage:{Units:0 Pct:0} Fleet:0x? Planet:<nil>}, record {Owner:2 Kind:ships Design:8 StartSquare:[8 8] Initiative:5 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:440 Shield:252 Ships:1 Damage:{Units:0 Pct:0} Fleet:0x? Planet:<nil>}
+sample | rg002 | RG-002-2468 y6 | battle record (1246,1498) | sample matched
 sample | rg002 | RG-002-2468 y6 | battle record (1266,1400) | sample missed: tokens: token 1: Elegy {Owner:1 Kind:ships Design:13 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:579 Shield:480 Ships:1 Damage:{Units:0 Pct:0} Fleet:0x? Planet:<nil>}, record {Owner:1 Kind:ships Design:13 StartSquare:[4 1] Initiative:3 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:579 Shield:480 Ships:1 Damage:{Units:5 Pct:100} Fleet:0x? Planet:<nil>}
 sample | rg002 | RG-002-2468 y6 | battle record (1296,1356) | sample missed: tokens: a recorded fleet is not in Elegy's game
+sample | rg002 | RG-002-2468 y6 | battle record (1311,1324) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
+sample | rg002 | RG-002-2468 y6 | battle record (1423,1158) | sample matched
 sample | rg002 | RG-002-2468 y6 | battle record (1569,1096) | sample missed: tokens: a recorded fleet is not in Elegy's game
+sample | rg002 | RG-002-2468 y6 | battle record (1633,1380) | sample matched
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1199,1324) | matched: 2 tokens, players and planet; 3 of 3 hits compared; 14 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1293,1597) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 14 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1364,1319) | matched: 5 tokens, players and planet; 0 of 83 hits compared and 83 conditioned; 26 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1426,1398) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1523,1298) | matched: 35 tokens, players and planet; 0 of 12 hits compared and 12 conditioned; 34 moves allowed
+matched | rg002-y1 | RG-002-Y1-2463 y1 | battle record (1633,1380) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 5 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 8 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1208,1327) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1293,1597) | matched: 3 tokens, players and planet; 0 of 11 hits compared and 11 conditioned; 5 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1350,1306) | matched: 2 tokens, players and planet; 0 of 42 hits compared and 42 conditioned; 2 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1367,1327) | matched: 2 tokens, players and planet; 0 of 19 hits compared and 19 conditioned; 11 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1411,1378) | matched: 2 tokens, players and planet; 2 of 2 hits compared; 14 moves allowed
+matched | rg002-y2 | RG-002-Y2-2464 y1 | battle record (1513,1113) | matched: 5 tokens, players and planet; 0 of 108 hits compared and 108 conditioned; 16 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1227,1429) | matched: 2 tokens, players and planet; 0 of 4 hits compared and 4 conditioned; 4 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1241,1313) | matched: 3 tokens, players and planet; 0 of 58 hits compared and 58 conditioned; 23 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1293,1597) | matched: 4 tokens, players and planet; 18 of 18 hits compared; 22 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1348,1275) | matched: 3 tokens, players and planet; 0 of 13 hits compared and 13 conditioned; 4 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1367,1327) | matched: 5 tokens, players and planet; 0 of 47 hits compared and 47 conditioned; 16 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1386,1352) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y3 | RG-002-Y3-2465 y1 | battle record (1481,1304) | matched: 3 tokens, players and planet; 1 of 1 hits compared; 10 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1101,1621) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1153,1609) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 8 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1247,1340) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 24 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1293,1597) | matched: 3 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 10 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1319,1308) | matched: 2 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 6 moves allowed
+random-driven | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1362,1284) | random, 5 of 7 other variants match: battle set: Elegy fights here (players [1 2]), the record has no battle
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1523,1298) | matched: 33 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 0 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1569,1096) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y4 | RG-002-Y4-2466 y1 | battle record (1633,1380) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 4 moves allowed
+matched | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 3 hits compared and 3 conditioned; 8 moves allowed
+matched | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1262,1345) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1335,1320) | matched: 2 tokens, players and planet; 0 of 24 hits compared and 24 conditioned; 13 moves allowed
+matched | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1395,1292) | matched: 2 tokens, players and planet; 1 of 1 hits compared; 14 moves allowed
+matched | rg002-y5 | RG-002-Y5-2467 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 13 hits compared and 13 conditioned; 8 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1101,1621) | matched: 3 tokens, players and planet; 0 of 10 hits compared and 10 conditioned; 13 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1241,1313) | matched: 7 tokens, players and planet; 0 of 56 hits compared and 56 conditioned; 47 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1246,1498) | matched: 3 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 14 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1266,1400) | matched: 3 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 14 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1296,1356) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1423,1158) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 8 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1569,1096) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 16 moves allowed
+matched | rg002-y6 | RG-002-Y6-2468 y1 | battle record (1633,1380) | matched: 2 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 8 moves allowed
