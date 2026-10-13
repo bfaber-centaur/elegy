@@ -144,7 +144,11 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventPlanetEmptied, Player: 0, Planet: 3, Fleet: -1, Count: engine.EmptiedDiedOut},
 			{Kind: engine.EventStarbaseBuilt, Player: 0, Planet: 3, Fleet: -1, Axes: []int{0}},
 			{Kind: engine.EventShipsJoinedFleet, Player: 2, Planet: 5, Fleet: -1, Count: 1},
-			{Kind: engine.EventShipsLostFleetLimit, Player: 0, Planet: 3, Fleet: -1, Count: 1}}},
+			{Kind: engine.EventShipsLostFleetLimit, Player: 0, Planet: 3, Fleet: -1, Count: 1},
+			{Kind: engine.EventShipsBuilt, Player: 2, Planet: 5, Fleet: -1, Count: 1, Axes: []int{0}},
+			{Kind: engine.EventShipsBuilt, Player: 0, Planet: 3, Fleet: -1, Count: 2, Axes: []int{0}},
+			{Kind: engine.EventShipsBuilt, Player: 2, Planet: 5, Fleet: 40, Count: 1, Axes: []int{1}},
+			{Kind: engine.EventFleetRouted, Player: 2, Planet: 3, Fleet: 40, Count: 5}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -180,6 +184,12 @@ func TestMessageCheck(t *testing.T) {
 		{"ships joined at the fleet limit, not sent", msg(0, 0x139, true, 1), "message 0x139 to player 0 present = false, want true"},
 		{"ships lost at the fleet limit", msg(0, 0x0ba, true, 1), ""},
 		{"ships lost at the fleet limit, not sent", msg(2, 0x0ba, true, 1), "message 0x0ba to player 2 present = false, want true"},
+		{"one ship built", msg(2, 0x02f, true, 1), ""},
+		{"one ship built, not sent", msg(0, 0x02f, true, 1), "message 0x02f to player 0 present = false, want true"},
+		{"several ships built", msg(0, 0x030, true, 1), ""},
+		{"several ships built, not sent", msg(2, 0x030, true, 1), "message 0x030 to player 2 present = false, want true"},
+		{"one ship routed", msg(2, 0x031, true, 1), ""},
+		{"one ship routed, not sent", msg(0, 0x031, true, 1), "message 0x031 to player 0 present = false, want true"},
 		{"claim adjusted", msg(2, 0x156, true, 1), ""},
 		{"claim adjusted, not sent", msg(0, 0x156, true, 1), "message 0x156 to player 0 present = false, want true"},
 		{"original drift", msg(2, 0x15c, true, 1), ""},

@@ -41,9 +41,6 @@
    1 message 0x02b has no event mapping
    1 message 0x02c has no event mapping
    3 message 0x02d has no event mapping
-  10 message 0x02f has no event mapping
-   4 message 0x030 has no event mapping
-   1 message 0x031 has no event mapping
    1 message 0x051 has no event mapping
    1 message 0x053 has no event mapping
    1 message 0x054 has no event mapping
