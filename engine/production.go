@@ -245,9 +245,14 @@ func (g *Game) PlanetProduction(pi int, in ProductionInput) (research int, event
 	return runProduction(g, pi, &g.Planets[pi], in)
 }
 
+// EventNoQueue: Player's Planet has no production queue this year
+// (MESSAGES.md 0x03f at stars-elegy d89b8a3, CONFIRMED: every year for
+// every owned planet with no queue, first in the planet's production).
+const EventNoQueue EventKind = EventOvercrowded + 1
+
 func runProduction(g *Game, pi int, p *Planet, in ProductionInput) (research int, events []Event) {
 	if !p.HasQueue {
-		return in.Resources, nil
+		return in.Resources, []Event{{Kind: EventNoQueue, Player: p.Owner, Planet: p.ID, Fleet: -1}}
 	}
 	if len(p.Queue) == 0 {
 		return 0, nil // BINARY-ONLY: an empty queue contributes nothing, not even the tax
