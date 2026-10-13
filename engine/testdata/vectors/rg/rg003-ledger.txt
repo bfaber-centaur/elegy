@@ -25,7 +25,7 @@ sample | rg003 | RG-003-2463 y1 #376 | object | wormhole: y = 1625, want 1639
 sample | rg003 | RG-003-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg003 | RG-003-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg003 | RG-003-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg003 | RG-003-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
+not compared | rg003 | RG-003-2463 y1 #403 | message_sequence | message_sequence 0x05b fleet slot not compared
 sample | rg003 | RG-003-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg003 | RG-003-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg003 | RG-003-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -379,7 +379,6 @@ sample | rg003 | RG-003-2466 y4 #424 | player id=3 seen_by=3 | score_record.unar
 sample | rg003 | RG-003-2466 y4 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
 sample | rg003 | RG-003-2466 y4 #428 | player id=5 seen_by=5 | score_record.resources = 10999, want 11016
 sample | rg003 | RG-003-2466 y4 #428 | player id=5 seen_by=5 | score_record.score = 603, want 604
-not compared | rg003 | RG-003-2466 y4 #430 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 sample | rg003 | RG-003-2466 y4 #48 | fleet owner=1 id=49 | waypoints[0] position = {1371 1309}, want {1369 1308}
 sample | rg003 | RG-003-2466 y4 #48 | fleet owner=1 id=49 | waypoints[1] = {{1367 1327} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1348 1358} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2466 y4 #48 | fleet owner=1 id=49 | x = 1371, want 1369
@@ -3021,7 +3020,6 @@ sample | rg003 | RG-003-2472 y10 #549 | player id=5 seen_by=5 | score_record.sco
 sample | rg003 | RG-003-2472 y10 #549 | player id=5 seen_by=5 | score_record.unarmed_ships = 65, want 69
 sample | rg003 | RG-003-2472 y10 #55 | fleet owner=1 id=57 | fuel = 700, want 2100
 sample | rg003 | RG-003-2472 y10 #55 | fleet owner=1 id=57 | ships = map[124:1], want map[124:3]
-not compared | rg003 | RG-003-2472 y10 #551 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 sample | rg003 | RG-003-2472 y10 #552 | player id=6 seen_by=6 | score_record.escort_ships = 18, want 19
 sample | rg003 | RG-003-2472 y10 #552 | player id=6 seen_by=6 | score_record.planets = 36, want 37
 sample | rg003 | RG-003-2472 y10 #552 | player id=6 seen_by=6 | score_record.resources = 9163, want 9191
@@ -5219,7 +5217,7 @@ sample | rg003-y1 | RG-003-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1
 sample | rg003-y1 | RG-003-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg003-y1 | RG-003-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg003-y1 | RG-003-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg003-y1 | RG-003-Y1-2463 y1 #403 | message_sequence | message_sequence 0x05b salvage and fleet slots not compared
+not compared | rg003-y1 | RG-003-Y1-2463 y1 #403 | message_sequence | message_sequence 0x05b fleet slot not compared
 sample | rg003-y1 | RG-003-Y1-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg003-y1 | RG-003-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg003-y1 | RG-003-Y1-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -5273,7 +5271,6 @@ sample | rg003-y10 | RG-003-Y10-2472 y1 #535 | message | message 0x085 to player
 sample | rg003-y10 | RG-003-Y10-2472 y1 #541 | player id=1 seen_by=1 | score_record.escort_ships = 131, want 134
 sample | rg003-y10 | RG-003-Y10-2472 y1 #549 | player id=5 seen_by=5 | score_record.resources = 13092, want 13072
 sample | rg003-y10 | RG-003-Y10-2472 y1 #549 | player id=5 seen_by=5 | score_record.score = 691, want 690
-not compared | rg003-y10 | RG-003-Y10-2472 y1 #551 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 sample | rg003-y10 | RG-003-Y10-2472 y1 #66 | fleet owner=1 id=66 | cargo.ironium = 625, want 626
 sample | rg003-y10 | RG-003-Y10-2472 y1 #75 | fleet owner=1 id=75 | cargo.boranium = 184, want 183
 sample | rg003-y10 | RG-003-Y10-2472 y1 #75 | fleet owner=1 id=75 | cargo.ironium = 151, want 150
@@ -5515,7 +5512,6 @@ sample | rg003-y4 | RG-003-Y4-2466 y1 #393 | object | wormhole: x = 1239, want 1
 sample | rg003-y4 | RG-003-Y4-2466 y1 #393 | object | wormhole: y = 1778, want 1789
 sample | rg003-y4 | RG-003-Y4-2466 y1 #420 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
 sample | rg003-y4 | RG-003-Y4-2466 y1 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
-not compared | rg003-y4 | RG-003-Y4-2466 y1 #430 | message_sequence | message_sequence 0x08f and 0x090 bombing fleet not compared
 random-driven | rg003-y4 | RG-003-Y4-2466 y1 #48 | fleet owner=1 id=49 | fleet gone (5/8 variants match)
 sample | rg003-y4 | RG-003-Y4-2466 y1 #76 | fleet owner=2 id=7 | cargo.germanium = 97, want 96
 random-driven | rg003-y4 | RG-003-Y4-2466 y1 #82 | fleet owner=2 id=13 | 0 waypoints after waypoint 0 [], want 1 (5/8 variants match)
@@ -5570,7 +5566,7 @@ sample | rg003-y5 | RG-003-Y5-2467 y1 #464 | player id=5 seen_by=5 | score_recor
 sample | rg003-y5 | RG-003-Y5-2467 y1 #47 | fleet owner=1 id=47 | cargo.boranium = 252, want 253
 sample | rg003-y5 | RG-003-Y5-2467 y1 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg003-y6 | RG-003-Y6-2468 y1 #114 | fleet owner=3 id=2 | fleet gone
-random-driven [lane D]: the target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target; it survives on seeds 1 and 5, where the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample | rg003-y6 | RG-003-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (2/8 variants match)
+random-driven [lane D]: movement tie draws in Elegy's battle at (1296,1356), where the target, player 3's fleet 2, is shot down on 6 of 8 seeds (102 of 200 fresh seeds) and the waypoint then loses its fleet target; it survives on seeds 1 and 5, where the waypoint matches. Each of the fleeing token's 7 moves has 7-8 squares tied (take 30, the estimate's per-weapon floor), and 6 of the chaser's 8 moves tie diagonal against straight. The record's move timing, disengage counter (leaves on its 8th move, round 9) and reach (distance 2 after round 8, 0 hits) match Elegy, and all 16 recorded moves are in Elegy's tie sets. The record steps toward the chaser once, (1,3) to (2,3) with the chaser at (6,5), consistent with flat scoring (MEASURED, one battle); the vector flags fleet 3/2's survival a sample | rg003-y6 | RG-003-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (2/8 variants match)
 sample | rg003-y6 | RG-003-Y6-2468 y1 #225 | planet id=29 | surface_minerals = [9 24 7], want [9 23 7]
 sample | rg003-y6 | RG-003-Y6-2468 y1 #250 | planet id=49 | starbase = design 102 damage 0, want design 102 damage 390
 sample | rg003-y6 | RG-003-Y6-2468 y1 #281 | planet id=79 | surface_minerals = [2 2193 2136], want [1 2193 2135]

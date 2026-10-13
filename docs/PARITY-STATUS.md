@@ -24,8 +24,10 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
 | sample | 1024 / 199 | 5291 / 451 | 2523 / 263 |
-| not compared | 3 / 3 | 11 / 11 | 19 / 19 |
-| total | 1316 | 5947 | 2893 |
+| not compared | 2 / 2 | 9 / 9 | 19 / 19 |
+| total | 1314 | 5943 | 2893 |
+
+- Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -42,13 +44,15 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-004 | chained | 197 | 1 | 0 | 1724 | 890 | 19 |
 | RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
 
+Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
+
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
 **Open owners (random-driven lines with a named draw).** RG-002 and RG-003 share them. Each has 3 lines, all in the Y6 restart (section "RG-002 and RG-003 year 6 rebuilt"):
 
 | line | owner | draw |
 |---|---|---|
-| fleet 6/12, waypoint 1 | lane D | combat draws: the target, player 3's fleet 2, dies in Elegy's battle at (1296,1356) on 6 of 8 seeds |
+| fleet 6/12, waypoint 1 | lane D | movement tie draws (#247): the target, player 3's fleet 2, dies in Elegy's battle at (1296,1356) on 6 of 8 seeds |
 | planet 102, surface minerals | economy | mining's +1 draw on germanium (54 kT on seed 0, 53 kT on seed 7) |
 | planet 102, production queue | economy | the same germanium draw (53 kT gives 93%, 54 kT gives 99%) |
 
@@ -68,8 +72,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 
 | cause | RG-002 | RG-003 | RG-004 | owner |
 |---|---:|---:|---:|---|
-| 0x05b salvage and fleet slots (EventFleetScrapped names neither) | 2 | 2 | 0 | lane D |
-| 0x08f/0x090 bombing fleet (EventBombed names the bomber) | 2 | 4 | 0 | lane D |
+| 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
@@ -78,7 +81,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 | 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 6 | 22 | 38 | |
+| total | 4 | 18 | 38 | |
 
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. The mapping is still missing.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
@@ -353,6 +356,15 @@ Measured on elegy main `bd0ed07` (#231) plus this branch.
 - **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
 
+### Salvage and bombing message slots (lane D)
+
+Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.
+
+- **0x05b** (a fleet scrapped in deep space): the salvage slot is now compared. `EventFleetScrapped` carries the new salvage's number (`Axes`), and the slot is its object id, 0x2000 + owner·512 + number (MESSAGES.md "Object ids in slots", MEASURED SV-1). When the minerals overflow into several objects the event names the first: ASSUMPTION (no run has overflowed a scrapped fleet's salvage). The fleet slot stays not compared: its owner bits are UNRESOLVED (the contradiction in MESSAGES.md). RG-002/RG-003 year 1's salvage 8192 matches in all 4 entries.
+- **0x08f / 0x090** (bombed empty): the fleet slot and 0x08f's fleet focus are now compared. `EventBombed` names the fleet whose plan started the pass (`Fleet`) and carries its number and the count of the bomber's fleets in orbit (`Axes`), saved at bombing time because the fleet can be gone by the end of the year (RG-002 year 4's was). All 16 sequence entries that skipped the slot match (RG-002 y4, RG-003 y4 and y10, chained and restart).
+  - With two or more of the bomber's fleets in orbit, the message is 0x17c/0x17d (MESSAGES.md, CONFIRMED tk2/tk121), with the fleet slot not compared. Which fleets count (all in orbit, or those with bombs) and which fleet 0x08f names when the pass was started by a fleet without bombs are ASSUMPTION: every vector case had one fleet in orbit. No vector names 0x17c or 0x17d.
+- Census: "0x05b salvage and fleet slots" (4) becomes "0x05b fleet slot" (4); "0x08f and 0x090 bombing fleet" (16) is gone.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
@@ -460,7 +472,10 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`rg002.json`, `rg002-y6.json`, `rg003.json`, `rg003-y6.json`). The alternative-stream host file behind them had been truncated mid-write, which flagged 459 of year 6's 476 expectations as samples; the rebuilt year has 493, 82 of them samples, so 394 expectations became strict. The four files are copied verbatim. RG-002 and RG-003 move identically.
 - **No new deterministic miss.** Every newly strict expectation matches on the reference seed except three, and each of those matches on some seed variant.
 - **The three, in the Y6 restart, each with the draw behind it** (`random-driven [owner]: evidence`; the vectors ledger now accepts that form on a random-driven line, as the battle ledger does since #229):
-  - **fleet 6/12, waypoint 1 (lane D):** its target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target. On seeds 1 and 5 the fleet survives and the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample.
+  - **fleet 6/12, waypoint 1 (lane D):** its target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (102 of 200 fresh seeds), and the waypoint then loses its fleet target. On seeds 1 and 5 the fleet survives and the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample.
+    - **The draws are movement ties.** Each of the fleeing token's 7 moves has 7 or 8 squares tied: every square not next to the chaser scores take 30, the estimate's per-weapon floor (3 lasers × 10 ships). On 6 of the chaser's 8 moves, a diagonal and a straight step tie.
+    - **The deterministic parts match the record.** Both tokens make no move in rounds 2 and 6, and the heavier chaser moves first. The fleeing token makes 7 moves and leaves on its 8th, in round 9. After round 8 the two are 2 apart, out of the lasers' reach 1, so there are no hits. Initiative and targeting do not apply, since only one side is armed. All 16 recorded moves are in Elegy's tie sets.
+    - **No simple tie rule.** The record's picks are not always the first or last tie in Elegy's scan order. Once the fleeing token steps toward the chaser, from (1,3) to (2,3) with the chaser at (6,5). That is consistent with flat scoring and not with a rule that maximises distance (MEASURED, one battle).
   - **planet 102, surface minerals (economy):** mining's +1 draw (KERNEL.md "Mining", BINARY-ONLY). Germanium enters production at 54 kT on seed 0 and 53 kT on seed 7, the only seed that matches. Germanium limits the ship being built, so the ironium and boranium spent follow it (666/1249 against 668/1251).
   - **planet 102, production queue (economy):** follows the same draw: 53 kT gives 93%, as recorded, and 54 kT gives 99%.
 - **Samples:** two new sample lines in the restart (planets 29 and 79, surface minerals) and two in the chained run (planets 29 and 85).

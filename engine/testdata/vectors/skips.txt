@@ -114,8 +114,7 @@
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
    2 message_sequence 0x004 colonists and player slots not compared
-   4 message_sequence 0x05b salvage and fleet slots not compared
-  16 message_sequence 0x08f and 0x090 bombing fleet not compared
+   4 message_sequence 0x05b fleet slot not compared
   12 message_sequence entry 0x007 has no event mapping
    4 message_sequence entry 0x040 has no event mapping
    2 message_sequence entry 0x0cd has no event mapping

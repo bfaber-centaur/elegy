@@ -12,7 +12,7 @@ import (
 
 // Takeover events.
 const (
-	EventBombed         EventKind = iota + EventBattleTech + 1 // Player = bomber, Planet, Count = population killed (units)
+	EventBombed         EventKind = iota + EventBattleTech + 1 // Player = bomber, Planet, Fleet = the fleet whose plan started the pass, Count = population killed (units), Axes = that fleet's number and the bomber's fleets in orbit
 	EventPlanetEmptied                                         // Player = the old owner, Planet
 	EventColonized                                             // Player = the new owner, Planet, Count = population landed (units)
 	EventDropRepelled                                          // Player = attacker, Planet, Count = troops lost (units)
@@ -220,9 +220,22 @@ func bombing(g *Game, rng Rand) []Event {
 			continue
 		}
 		done[key] = true
-		events = append(events, g.bombPlanet(pi, f.Owner, g.bomberPass(f.Owner, pi), rng)...)
+		evs := g.bombPlanet(pi, f.Owner, g.bomberPass(f.Owner, pi), rng)
+		evs[0].Fleet, evs[0].Axes = f.ID, []int{f.Number, g.orbiting(f.Owner, pi)}
+		events = append(events, evs...)
 	}
 	return events
+}
+
+// orbiting counts player's fleets at planet pi.
+func (g *Game) orbiting(player, pi int) int {
+	n := 0
+	for i := range g.Fleets {
+		if f := &g.Fleets[i]; f.Owner == player && f.Pos == g.Planets[pi].Pos {
+			n++
+		}
+	}
+	return n
 }
 
 // bomberPass sums every bomb of every fleet bomber has in orbit at planet

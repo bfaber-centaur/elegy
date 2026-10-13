@@ -121,7 +121,8 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	}
 	first := Minerals{30000, 0, 0}
 	rest := Minerals{left[Ironium] - 30000, left[Boranium], left[Germanium]}
-	g := l.turn(&seqRand{}).Game
+	r := l.turn(&seqRand{})
+	g := r.Game
 	if len(g.Salvage) != 2 {
 		t.Fatalf("salvage %+v, want two objects", g.Salvage)
 	}
@@ -137,6 +138,21 @@ func TestScrapSalvageOverflow(t *testing.T) {
 	}
 	if a.Steps != 3000 || b.Steps != salvageTenths(rest) {
 		t.Errorf("steps %d and %d, want 3000 and %d", a.Steps, b.Steps, salvageTenths(rest))
+	}
+	// The scrap event names the first object's number (for 0x05b's
+	// salvage slot; ASSUMPTION: no run overflowed a scrapped fleet's
+	// salvage).
+	scrapped := 0
+	for _, e := range r.Events {
+		if e.Kind == EventFleetScrapped {
+			scrapped++
+			if !reflect.DeepEqual(e.Axes, []int{a.Number}) {
+				t.Errorf("scrap event %+v, want Axes [%d] (the first object)", e, a.Number)
+			}
+		}
+	}
+	if scrapped != 1 {
+		t.Errorf("%d scrap events, want 1", scrapped)
 	}
 }
 
@@ -159,5 +175,46 @@ func TestSplitSalvage(t *testing.T) {
 		if got := splitSalvage(tt.m); !reflect.DeepEqual(got, tt.want) {
 			t.Errorf("splitSalvage(%v) = %v, want %v", tt.m, got, tt.want)
 		}
+	}
+}
+
+// The scrap event names the salvage number the owner's pool gives, not a
+// fixed one: with player 1's salvage 0 lying elsewhere, the new object
+// takes 1 (ASSUMPTION O14 in a game with no space objects; the packet pool
+// itself is objects' TestConfirmedE8SalvageNumbersWithAGap) and 0x05b's
+// salvage slot reads 0x2000 + 512 + 1.
+func TestScrapSalvageNumberInEvent(t *testing.T) {
+	l := newTKLab(t, 3)
+	scout := l.design("Scout", SlotFill{0, "Long Hump 6", 1})
+	pi := l.planet(NoOwner, 0, 100)
+	l.g.Planets[pi].Pos = Point{500, 500}
+	fi := l.fleet(1, 0, 0, Stack{Design: scout, Count: 1})
+	l.g.Planets = l.g.Planets[:0]
+	l.g.Fleets[fi].Task = Task{Kind: TaskScrap}
+	l.g.Salvage = []Salvage{
+		{Pos: Point{300, 300}, Owner: 1, Number: 0, Minerals: Minerals{100, 0, 0}},
+		{Pos: Point{300, 300}, Owner: 0, Number: 1, Minerals: Minerals{100, 0, 0}},
+	}
+	r := l.turn(&seqRand{})
+	var made *Salvage
+	for i, s := range r.Game.Salvage {
+		if s.Fresh {
+			made = &r.Game.Salvage[i]
+		}
+	}
+	if len(r.Game.Salvage) != 3 || made == nil || made.Owner != 1 || made.Number != 1 {
+		t.Fatalf("salvage %+v, want a new fresh object, player 1's number 1", r.Game.Salvage)
+	}
+	scrapped := 0
+	for _, e := range r.Events {
+		if e.Kind == EventFleetScrapped {
+			scrapped++
+			if !reflect.DeepEqual(e.Axes, []int{1}) {
+				t.Errorf("scrap event %+v, want Axes [1]", e)
+			}
+		}
+	}
+	if scrapped != 1 {
+		t.Errorf("%d scrap events, want 1", scrapped)
 	}
 }

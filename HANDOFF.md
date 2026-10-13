@@ -31,12 +31,12 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - RG-004 has 2049, with 84 refused in the chained run.
   - All chained refusals are samples. No restart refuses an order.
 - **Random-driven lines with a named draw.** Each corpus has 3 in the Y6 restart, the same 3 in RG-002 and RG-003:
-  - fleet 6/12's waypoint (lane D, combat draws);
+  - fleet 6/12's waypoint (lane D, movement tie draws in the battle at (1296,1356));
   - planet 102's minerals and production queue (economy, the germanium mining +1 draw).
   - RG-004's random-driven lines have no named draw.
 - **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
 - **Not compared, by owner:**
-  - lane D: 0x05b slots and the 0x08f/0x090 bombing fleet;
+  - lane D: the 0x05b fleet slot, whose owner bits are UNRESOLVED (the salvage slot and the 0x08f/0x090 bombing fleet are compared since #247);
   - economy: a null `packet_destination` on a planet with no starbase (PK-1), 0x040 after it, and the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
   - lane A: the 0x004 slots and 0x007, with the invasion messages;
   - lane B: `design_gone`.
