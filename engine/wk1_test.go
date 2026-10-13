@@ -2,6 +2,7 @@ package engine
 
 import (
 	"math/rand"
+	"slices"
 	"testing"
 )
 
@@ -86,7 +87,10 @@ func TestConfirmedWK1TargetDiedInBattle(t *testing.T) {
 // removal other than battle) and to each the next waypoint check finds
 // aimed at a gone fleet; none to one a stand-in fleet takes over
 // (ASSUMPTION W10). The messages go out as the files are written, to the
-// follower's owner, and only for a follower that still exists.
+// follower's owner, and only for a follower that still exists. Several
+// followers of one gone fleet each get their own 0x028 (fleets 5 and 10,
+// 6 and 11): ASSUMPTION, since WK-1 had one follower per victim and
+// RG-003's five followers of one victim have no message expectations.
 func TestWK1GoneOwed(t *testing.T) {
 	g := Game{Rules: ElegyRules(), Players: []Player{{}, {}},
 		Planets: []Planet{{ID: 7, Pos: Point{1150, 1150}}},
@@ -99,6 +103,9 @@ func TestWK1GoneOwed(t *testing.T) {
 			{ID: 6, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1180, 1100}, Target: TargetFleet, ID: 2}}},
 			{ID: 7, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1110, 1100}, Target: TargetFleet, ID: 3}}},
 			{ID: 8, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1140, 1140}, Target: TargetFleet, ID: 1}}}, // removed before the files
+			// Second followers of fleets 1 and 2, kept: each owes its own 0x028.
+			{ID: 10, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1140, 1140}, Target: TargetFleet, ID: 1}}},
+			{ID: 11, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1180, 1100}, Target: TargetFleet, ID: 2}}},
 		}}
 	g.removeFleets(map[int]bool{1: true, 2: true, 3: true})
 	g.waypointCheck()
@@ -107,9 +114,11 @@ func TestWK1GoneOwed(t *testing.T) {
 	// the planet: the planet, and 0x028 then.
 	g.Fleets = append(g.Fleets, Fleet{ID: 9, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1150, 1150}, Target: TargetFleet, ID: 98}}})
 	want := map[int]Waypoint{
-		5: {Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7},
-		6: {Pos: Point{1180, 1100}},
-		7: {Pos: Point{1120, 1100}, Target: TargetFleet, ID: 4},
+		5:  {Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7},
+		6:  {Pos: Point{1180, 1100}},
+		7:  {Pos: Point{1120, 1100}, Target: TargetFleet, ID: 4},
+		10: {Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7},
+		11: {Pos: Point{1180, 1100}},
 	}
 	want9 := Waypoint{Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7}
 	for _, f := range g.Fleets {
@@ -126,8 +135,8 @@ func TestWK1GoneOwed(t *testing.T) {
 		}
 		got = append(got, e.Fleet)
 	}
-	if len(got) != 3 || got[0] != 5 || got[1] != 6 || got[2] != 9 {
-		t.Errorf("0x028 to fleets %v, want [5 6 9]", got)
+	if !slices.Equal(got, []int{5, 10, 6, 11, 9}) {
+		t.Errorf("0x028 to fleets %v, want [5 10 6 11 9]", got)
 	}
 	if w := g.Fleets[len(g.Fleets)-1].Waypoints; len(w) != 1 || w[0] != want9 {
 		t.Errorf("fleet 9: waypoints %v, want %v", w, want9)

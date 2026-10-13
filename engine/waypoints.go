@@ -242,8 +242,9 @@ func (g *Game) chaseMerged(merged, follows map[int]int, rng Rand) {
 // for a target destroyed in battle (WK-1, 2 of 2 streams: one 0x028 per
 // follower, the waypoint the planet where the target died, after
 // movement); for the other removals BINARY-ONLY (ORDERS.md "The target is
-// gone"). ASSUMPTION W10: a waypoint taken over by a stand-in fleet owes
-// no 0x028.
+// gone"). Several followers of one removed fleet each owe their own
+// 0x028: ASSUMPTION (WK-1 had one follower per victim). ASSUMPTION W10: a
+// waypoint taken over by a stand-in fleet owes no 0x028.
 func (g *Game) retargetRemoved(ids map[int]bool, standIns bool) {
 	order := g.fleetOrder()
 	for _, i := range order {
