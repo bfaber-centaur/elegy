@@ -230,6 +230,24 @@ func traderFields(t objects.Trader, id int) map[string]any {
 	return map[string]any{"kind": "trader", "id": id, "x": t.Pos.X, "y": t.Pos.Y, "destination": []int{t.Dest.X, t.Dest.Y}, "warp": t.Warp, "met": pvMarked(t.Served), "offer": offer}
 }
 
+// wormholeFields is wormhole end id (a vector id) as the vectors write it
+// (README.md "initial_state" objects): its partner is the other end's
+// vector id. It is nil when Elegy has no such end.
+func wormholeFields(s *objects.Space, id int, endID map[int]int) map[string]any {
+	t, ok := endID[id]
+	if !ok || t/2 >= len(s.Wormholes) {
+		return nil
+	}
+	partner := -1
+	for v, u := range endID {
+		if u == t^1 {
+			partner = v
+		}
+	}
+	end := s.Wormholes[t/2].Ends[t%2]
+	return map[string]any{"kind": "wormhole", "id": id, "partner": partner, "x": end.Pos.X, "y": end.Pos.Y, "known_to": pvMarked(end.Known), "destination_known_to": pvMarked(end.DestKnown), "stability_class": end.Class, "years_since_jump": end.Years}
+}
+
 func packetFields(p *objects.Packet, planet map[int]int) map[string]any {
 	dest := -1
 	for v, e := range planet {
@@ -259,12 +277,11 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 		}
 		return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"radius": pvRadius})
 	case "wormhole":
-		id, ok := m.EndID[*e.ID]
-		if !ok || id/2 >= len(s.Wormholes) {
+		got := wormholeFields(s, *e.ID, m.EndID)
+		if got == nil {
 			return fmt.Sprintf("wormhole end %d missing", *e.ID)
 		}
-		end := s.Wormholes[id/2].Ends[id%2]
-		return pvCompare("wormhole", map[string]any{"x": end.Pos.X, "y": end.Pos.Y, "known_to": pvMarked(end.Known), "destination_known_to": pvMarked(end.DestKnown), "stability_class": end.Class, "years_since_jump": end.Years}, eq, tol, nil)
+		return pvCompare("wormhole", got, eq, tol, nil)
 	case "trader":
 		if *e.ID >= len(s.Traders) {
 			return fmt.Sprintf("trader %d gone", *e.ID)
@@ -297,6 +314,12 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 				return fmt.Sprintf("minefield %d/%d missing", o.Owner, o.ID)
 			}
 			return pvCompare("minefield", minefieldFields(f), eq, tol, map[string]string{"radius": pvRadius})
+		case "wormhole":
+			got := wormholeFields(s, o.ID, m.EndID)
+			if got == nil {
+				return fmt.Sprintf("wormhole end %d missing", o.ID)
+			}
+			return pvCompare("wormhole", got, eq, tol, nil)
 		}
 		return "skip: object " + o.Kind
 	case "object_gone":
