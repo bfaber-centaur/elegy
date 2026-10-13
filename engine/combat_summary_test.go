@@ -133,6 +133,16 @@ func TestConfirmedBattleSummaryDesignGroups(t *testing.T) {
 	if BattleSummary(ev[0].Count) != SummaryWonWithLoss || ev[0].Axes[SummaryDesign] != -1 {
 		t.Errorf("two designs: summary %d, design %d; want %d (0x09d), -1", ev[0].Count, ev[0].Axes[SummaryDesign], SummaryWonWithLoss)
 	}
+	// A zero-count stack is not a group, as it is not a token
+	// (combat_battle.go skips it too). CheckYear refuses a fleet stack of
+	// 0 ships, so a battle should never see one; the row pins the guard.
+	b = summaryBattle(80, 30, 77, 0)
+	b.g.Designs = append(b.g.Designs, b.g.Designs[0])
+	b.g.Fleets[5].Stacks = append(b.g.Fleets[5].Stacks, Stack{Design: 1, Count: 0})
+	ev = b.summaries(-1)
+	if BattleSummary(ev[0].Count) != SummaryStackWonUnhit || ev[0].Axes[SummaryOtherTotal] != 30 {
+		t.Errorf("zero-count stack: summary %d, axes %v; want %d (0x096), other total 30", ev[0].Count, ev[0].Axes, SummaryStackWonUnhit)
+	}
 	// One ship each, both survive: 0x095.
 	b = summaryBattle(1, 1, 1, 1)
 	ev = b.summaries(7)
@@ -279,6 +289,39 @@ func TestMeasuredCB059ThirdPlayer(t *testing.T) {
 			if ev[i].Player != w.player || BattleSummary(ev[i].Count) != w.kind || !reflect.DeepEqual(ev[i].Axes[:SummaryDesign], w.axes) {
 				t.Errorf("%s: summary %d is player %d, %d, axes %v; want player %d, %d, axes %v", r.name, i, ev[i].Player, ev[i].Count, ev[i].Axes, w.player, w.kind, w.axes)
 			}
+		}
+	}
+}
+
+func TestAssumptionSummaryPlayerCountIsP(t *testing.T) {
+	// NOT RUN (an ASSUMPTION): the multi-player texts give the number of
+	// players in P, not the number who fought. Players 0, 1 and 2 fought
+	// (n = 3) at player 3's planet, whose starbase was not attacked, so P
+	// has 4. CB-059 B3 is the 2-player form of this layout; the oracle
+	// spec is /mnt/project-files/combat/p-vs-q-count.md.
+	d := []Design{testDesign(tFrigate, 10, Slot{tLaser, 1}), testDesign(Hull{Name: "Space Station", Armor: 500, Starbase: true}, 100)}
+	g := &Game{Rules: ElegyRules(), Players: make([]Player, 4), Designs: d}
+	g.Planets = []Planet{{ID: 5, Owner: 3, Pos: Point{100, 100}, HasStarbase: true, StarbaseDesign: 1}}
+	b := &battle{g: g, loc: location{pos: Point{100, 100}, planet: 0}, players: []int{0, 1, 2, 3}, involved: 3}
+	for p := range 3 {
+		g.Fleets = append(g.Fleets, Fleet{ID: p, Owner: p, Pos: Point{100, 100}, Stacks: []Stack{{Design: 0, Count: 2}}})
+		t := tok(d, 0, p, 2)
+		t.fleet = p
+		b.loc.fleets = append(b.loc.fleets, p)
+		b.tokens = append(b.tokens, t)
+	}
+	sb := tokenValues(d[1], Race{}, true, Cost{})
+	sb.player, sb.design, sb.ships, sb.fleet, sb.planet = 3, 1, 1, -1, 0
+	b.tokens = append(b.tokens, &sb)
+	b.tokens[0].ships = 1 // player 0 lost one ship
+	ev := b.summaries(5)
+	if len(ev) != 4 {
+		t.Fatalf("summaries %+v, want one for each of the 4 players in P", ev)
+	}
+	for _, e := range ev {
+		// Player 0 lost one of 2, the others nothing: 0x0a8 for everyone.
+		if e.Axes[SummaryOther] != 4 || BattleSummary(e.Count) != SummaryMultiOneSideNoLoss {
+			t.Errorf("player %d: summary %d, player count %d; want %d (0x0a8), 4 (P), not 3 (who fought)", e.Player, e.Count, e.Axes[SummaryOther], SummaryMultiOneSideNoLoss)
 		}
 	}
 }
