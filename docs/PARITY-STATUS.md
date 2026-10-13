@@ -300,19 +300,44 @@ Counts are from the reference seed on main `217ab4b`.
   - Sample 1191 → 1197: the chained run's 0x036/0x038 counts in years 3, 4 and 6, which follow the factory and mine counts that already differ.
 
 
-### RG-003 wired (12 chained years)
+### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Its 13 files, every other `rg` vector file and the vectors README were copied verbatim from stars-elegy main `e3619ff` (#191, then #197). #197 only adds `start_sample` to every `battle` record (vectors README "`cases`"); Elegy does not read it yet, and the RG-001 and RG-002 results do not move. They have their own ledger, `engine/testdata/vectors/rg/rg003-ledger.txt`, which uses RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Measured on elegy main `245576b` (#226, after #223).
-- **Years 1–6 match RG-002 line for line.** The years-1-to-6 lines of the chained run (1000) and the six restarts' lines (33, 50, 60, 47, 52 and 41) are identical to RG-002's once the names are replaced. So are the baseline entries: RG-003-Y1-2463 random 1, RG-003-Y6-2468, RG-003-2463 random 1.
-- **Years 7–12, restarts: 8 hand lines**, each a miss on all 8 variants. Y9's plan 5 is the recorded order and is not compared (`battle_plan` is not compared yet):
-  - **incorrect mechanic [lane A], y7 and y8 (6 fleets):** waypoint 1 aims at a fleet (500002 in y7, 500092 in y8). The original keeps the planet (84, 95).
-  - **incorrect mechanic [lane A], y7:** planet 51's population is one unit short (15083, want 15084). The economy lane traced it to ground combat (the per-drop floor, GC-1), not growth.
-  - **Battles.** #223 cleared y8 (1571,1434), which now matches, and turned y11 (1323,1300) and y12 (1288,1347) into sample lines, because the vector flags those records ("Battle records the vector flags sample" above).
-    - **y12 is still a known deterministic gap owned by lane A:** token 0's damage is 281 against 235 (ship-move dilution). It reads as a sample only because the record is flagged. It is not noise.
-    - **unresolved randomness [lane D], y9:** Elegy fights a battle at (1388,1386) between players 3 and 6, and the year has no record there (#212's battle-set check). Lane D's diagnosis: in the original, player 1's minefield at (1385,1385) stopped player 6's fleet 2, which follows player 3's fleet 2, 3 ly short, so no battle took place. Elegy stops that fleet in about 4% of 200 seed variants, and variant 16 reproduces the record, but harness variants 1–7 all miss. The fleet's position and player 1's minefield are already sample lines, because the vector flags them. The battle ledger now accepts the `unresolved randomness [owner]: reason` class, as the vectors ledger does.
-- **Totals.**
-  - Ledger: 5756 samples, 107 matched, 50 not compared, 72 random-driven and 8 hand lines; 5337 lines are the chained run's. Y10's planet 22 alchemy line cleared with #224. The battle lines follow #212: one line per record, plus the battle-set check.
-  - The census (skips.txt) and the baseline grow only by RG-003's cases. Three RG-003 entries are `random 0`, the same form as the 3 already in the baseline.
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `e3619ff` (#191, then #197). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `1de8ab6`, after #225, #228, #229 (start_sample) and #230.
+
+**Totals (5975 lines).**
+
+| class | chained run | 12 restarts | total |
+|---|---:|---:|---:|
+| sample | 5304 | 451 | 5755 |
+| matched | 8 | 99 | 107 |
+| not compared | 16 | 16 | 32 |
+| random-driven | 0 | 73 | 73 |
+| incorrect mechanic | 0 | 8 | 8 |
+| lines | 5328 | 647 | 5975 |
+
+- **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
+- **Restarts:** "matched" counts battle records. The 73 random-driven lines include the y9 hand line.
+- **Baseline:** RG-003 adds 6 entries: Y1 `random 1`, Y6 failing, 2463 `random 1`, and 2472–2474 `random 0`.
+
+**Hand lines (9).** Every one is in a restart and misses on all 8 seed variants.
+
+| year | object | class and owner | cause |
+|---|---|---|---|
+| y7 | fleet 45 (owner 5) | incorrect mechanic [lane A] | Waypoint 1 aims at fleet 500002; the original keeps planet 84 (WK-1, stars-elegy #194). |
+| y8 | fleets 81, 82, 84, 86, 91 (owner 1) | incorrect mechanic [lane A], 5 lines | Waypoint 1 aims at fleet 500092; the original keeps planet 95 (WK-1). |
+| y7 | planet 51 | incorrect mechanic [lane A] | Population 15083, want 15084. The cause is ground combat (the per-drop floor, GC-1), not growth. |
+| y12 | battle (1288,1347) | incorrect mechanic [lane A] | Token 0's damage is 281 units, want 235 (ship-move dilution). #229 makes this strict: the record's start is the same in every stream (`start_sample: false`). |
+| y9 | battle (1388,1386) | random-driven [lane D] | Elegy fights players 3 and 6 here; the record has none. The original fought here in 3 of its 4 streams, and only the recorded stream stopped player 6's fleet 2 (stars-elegy #201). |
+
+**Before RG-003 has 0 deterministic gaps.** The 8 incorrect-mechanic lines are all lane A's. Each maps to a commit in lane A's queued stack:
+- **WK-1 (`bf04b0d`)** should clear the 6 waypoint lines.
+- **The ship-move change (`67e9acd`)** should clear the y12 battle.
+- **GC-1 (`fe7f7b5`)** should clear planet 51.
+
+These are expectations; a ledger rewrite on each PR will confirm them. Even at 0, the 32 not-compared lines remain fields the comparator cannot judge yet, so "0 deterministic gaps" holds for compared fields only:
+- 26 message lines with no event mapping or with slots not compared;
+- 4 "planet field packet_destination null" lines (planets 84 and 94);
+- 2 lines for y9's battle plan 5, because `battle_plan` is not compared yet.
 
 ### Planet records without installations block
 
