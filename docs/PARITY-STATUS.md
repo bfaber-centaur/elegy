@@ -27,9 +27,9 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | not compared | 1 / 1 | 7 / 7 | 19 / 19 |
 | total | 1312 | 5939 | 2893 |
 
-- Updated 2026-10-13 (FS-1 PR): 0x05b's fleet slot is now compared (design·512 + fleet number, stars-elegy FS-1, 28a3175) and matches in all 4 entries. The counts do not move: the same year-1 sequence entries stay not compared for 0x02e's mineral and location slots (lane A), which the ledger line now names. The not-compared row was "0x05b fleet slot … lane D".
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
+- Updated 2026-10-13 (FS-1 PR): 0x05b's fleet slot is now compared (design·512 + fleet number, stars-elegy FS-1, 28a3175) and matches in all 4 entries. The counts do not move: the same year-1 sequence entries stay not compared for 0x02e's mineral and location slots (lane A), which the ledger line now names. The not-compared row was "0x05b fleet slot … lane D".
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
