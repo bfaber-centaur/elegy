@@ -108,6 +108,12 @@ type Legacy struct {
 	// the points are stored, rounded up as slower tech stores stolen
 	// research (ELEGY CHOICE; no built-in uses it). engine/artifact.go.
 	ArtifactFullSlowerTech bool `json:"artifact_full_slower_tech"`
+	// LostPlanetMessageCarry: a planet that already has no colonists when
+	// population growth runs is reported as died out (0x023) instead of
+	// left (0x040) when the planet growth handled just before it shrank
+	// (stars-elegy MESSAGES.md "0x040 vs 0x023", LEGACY BUG, CONFIRMED
+	// MG-002). Only the message differs. engine/turn.go.
+	LostPlanetMessageCarry bool `json:"lost_planet_message_carry"`
 
 	// objects
 
@@ -183,14 +189,23 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, its latest version: version 5.
+// ElegyRules is Elegy's default ruleset, its latest version: version 6.
 // Four switches are off, where Elegy has chosen its own rule over the
 // original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
 // ZeroMaxPopulationStop. So are the two Cybertron switches, which version
 // 2 predates.
 //
-// Version 5 adds ArtifactFullSlowerTech, on; version 4 predates it.
+// Version 6 adds LostPlanetMessageCarry, on; version 5 predates it.
 func ElegyRules() Ruleset {
+	r := elegyRulesV5()
+	r.Version = 6
+	r.Legacy.LostPlanetMessageCarry = true
+	return r
+}
+
+// elegyRulesV5 is the Elegy ruleset, version 5: version 4 with
+// ArtifactFullSlowerTech on.
+func elegyRulesV5() Ruleset {
 	r := elegyRulesV4()
 	r.Version = 5
 	r.Legacy.ArtifactFullSlowerTech = true
@@ -253,14 +268,23 @@ func elegyRulesV1() Ruleset {
 }
 
 // FaithfulRules is the faithful J-RC3 ruleset, its latest version:
-// version 5, every legacy switch on. It differs from ElegyRules only in
+// version 6, every legacy switch on. It differs from ElegyRules only in
 // FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
 // and the two Cybertron switches. It is only as faithful as the switches
 // go: behaviour Elegy has not modelled, or models differently without a
 // switch, is the same in both.
 //
-// Version 5 adds ArtifactFullSlowerTech, on; version 4 predates it.
+// Version 6 adds LostPlanetMessageCarry, on; version 5 predates it.
 func FaithfulRules() Ruleset {
+	r := faithfulRulesV5()
+	r.Version = 6
+	r.Legacy.LostPlanetMessageCarry = true
+	return r
+}
+
+// faithfulRulesV5 is the faithful ruleset, version 5: version 4 with
+// ArtifactFullSlowerTech on.
+func faithfulRulesV5() Ruleset {
 	r := faithfulRulesV4()
 	r.Version = 5
 	r.Legacy.ArtifactFullSlowerTech = true
@@ -311,7 +335,7 @@ func faithfulRulesV1() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), elegyRulesV4(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), faithfulRulesV4(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), elegyRulesV4(), elegyRulesV5(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), faithfulRulesV4(), faithfulRulesV5(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).
