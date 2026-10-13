@@ -352,12 +352,21 @@ func (g *Game) destination(wp Waypoint) Point {
 			return p
 		}
 	case TargetFleet:
-		if i := g.fleetIndex(wp.ID); i >= 0 {
+		if i := g.fleetIndex(wp.ID); i >= 0 && !destroyedMoving(&g.Fleets[i]) {
 			return g.Fleets[i].Pos
 		}
 	}
 	return wp.Pos
 }
+
+// destroyedMoving reports a fleet destroyed during this year's movement
+// (by mines, warp-10 losses or a stargate), which stays in the game with
+// no ships until it is removed after movement. A waypoint aimed at it
+// keeps the coordinates it held before movement, the target's start
+// position, not where it died (ORDERS.md "Target destroyed during
+// movement", CONFIRMED by prediction Z-MD-1, Z-MD-3 for targets destroyed
+// by mines, stars-elegy #198 de1bd6f; other causes NOT RUN, ASSUMPTION).
+func destroyedMoving(f *Fleet) bool { return len(f.Stacks) == 0 }
 
 // OrbitedPlanet returns the id of the planet a fleet orbits: a fleet is in
 // orbit exactly when its coordinates equal the planet's.
@@ -879,7 +888,7 @@ func (g *Game) moveChasers(chasers []int, rng Rand) []Event {
 			if targetChasing {
 				step = min(c.rem, (c.rem+c.moved+4)/5)
 			}
-			m := g.newLegMove(f, wp.Warp, g.Fleets[ti].Pos)
+			m := g.newLegMove(f, wp.Warp, g.destination(*wp))
 			from := f.Pos
 			start := *f
 			start.Fuel = c.fuel0
@@ -935,9 +944,7 @@ func (g *Game) settleWaypoints(order []int) []Event {
 		for j := range g.Fleets[i].Waypoints {
 			wp := &g.Fleets[i].Waypoints[j]
 			if wp.Target == TargetFleet {
-				if t := g.fleetIndex(wp.ID); t >= 0 {
-					wp.Pos = g.Fleets[t].Pos
-				}
+				wp.Pos = g.destination(*wp)
 			}
 		}
 	}

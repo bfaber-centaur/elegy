@@ -247,12 +247,12 @@ sample | rg003 | RG-003-2465 y3 #85 | fleet owner=2 id=15 | x = 1365, want 1367
 sample | rg003 | RG-003-2465 y3 #85 | fleet owner=2 id=15 | y = 1319, want 1327
 sample | rg003 | RG-003-2465 y3 #92 | fleet owner=3 id=7 | fleet gone
 sample | rg003 | RG-003-2466 y4 #12 | fleet owner=1 id=11 | cargo.germanium = 2, want 1
-sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1247 1340}
-sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | x = 1241, want 1247
-sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | y = 1338, want 1340
-sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | waypoints[0] position = {1241 1338}, want {1247 1340}
-sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | x = 1241, want 1247
-sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | y = 1338, want 1340
+sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1247 1340}
+sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | x = 1223, want 1247
+sample | rg003 | RG-003-2466 y4 #125 | fleet owner=6 id=2 | y = 1332, want 1340
+sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | waypoints[0] position = {1223 1332}, want {1247 1340}
+sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | x = 1223, want 1247
+sample | rg003 | RG-003-2466 y4 #129 | fleet owner=6 id=8 | y = 1332, want 1340
 sample | rg003 | RG-003-2466 y4 #13 | fleet owner=1 id=12 | 2 waypoints after waypoint 0 [{1367 1327} {1341 1370}], want 1
 sample | rg003 | RG-003-2466 y4 #13 | fleet owner=1 id=12 | waypoints[0] position = {1380 1343}, want {1355 1356}
 sample | rg003 | RG-003-2466 y4 #13 | fleet owner=1 id=12 | x = 1380, want 1355
@@ -411,14 +411,10 @@ sample | rg003 | RG-003-2466 y4 #97 | fleet owner=3 id=7 | waypoints[0] position
 sample | rg003 | RG-003-2466 y4 #97 | fleet owner=3 id=7 | x = 1048, want 1096
 sample | rg003 | RG-003-2466 y4 #97 | fleet owner=3 id=7 | y = 1275, want 1191
 sample | rg003 | RG-003-2467 y5 #10 | fleet owner=1 id=11 | cargo.germanium = 2, want 1
-sample | rg003 | RG-003-2467 y5 #100 | fleet owner=2 id=18 | waypoints[0] position = {1337 1305}, want {1336 1305}
-sample | rg003 | RG-003-2467 y5 #100 | fleet owner=2 id=18 | waypoints[1] = {{1336 1317} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg003 | RG-003-2467 y5 #100 | fleet owner=2 id=18 | x = 1337, want 1336
+sample | rg003 | RG-003-2467 y5 #100 | fleet owner=2 id=18 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2467 y5 #101 | fleet owner=2 id=19 | fuel = 650, want 2250
 sample | rg003 | RG-003-2467 y5 #101 | fleet owner=2 id=19 | ships = map[16:1], want map[14:1]
-sample | rg003 | RG-003-2467 y5 #102 | fleet owner=2 id=20 | waypoints[0] position = {1337 1305}, want {1336 1305}
-sample | rg003 | RG-003-2467 y5 #102 | fleet owner=2 id=20 | waypoints[1] = {{1336 1317} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg003 | RG-003-2467 y5 #102 | fleet owner=2 id=20 | x = 1337, want 1336
+sample | rg003 | RG-003-2467 y5 #102 | fleet owner=2 id=20 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2467 y5 #103 | fleet owner=2 id=21 | fleet gone
 sample | rg003 | RG-003-2467 y5 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg003 | RG-003-2467 y5 #108 | fleet owner=3 id=4 | cargo.colonists = 0, want 132
@@ -450,9 +446,9 @@ sample | rg003 | RG-003-2467 y5 #164 | fleet owner=5 id=86 | orbiting = 110, wan
 sample | rg003 | RG-003-2467 y5 #164 | fleet owner=5 id=86 | waypoints[0] position = {1705 1049}, want {1659 1065}
 sample | rg003 | RG-003-2467 y5 #164 | fleet owner=5 id=86 | x = 1705, want 1659
 sample | rg003 | RG-003-2467 y5 #164 | fleet owner=5 id=86 | y = 1049, want 1065
-sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1262 1345}
-sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | x = 1241, want 1262
-sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | y = 1338, want 1345
+sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1262 1345}
+sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | x = 1223, want 1262
+sample | rg003 | RG-003-2467 y5 #167 | fleet owner=6 id=2 | y = 1332, want 1345
 sample | rg003 | RG-003-2467 y5 #17 | fleet owner=1 id=17 | cargo.germanium = 8, want 7
 sample | rg003 | RG-003-2467 y5 #172 | fleet owner=6 id=12 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2467 y5 #172 | fleet owner=6 id=12 | orbiting = 35, want none
@@ -638,9 +634,8 @@ sample | rg003 | RG-003-2467 y5 #89 | fleet owner=2 id=7 | cargo.ironium = 198, 
 sample | rg003 | RG-003-2467 y5 #89 | fleet owner=2 id=7 | fuel = 1510, want 1563
 sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | fuel = 3038, want 840
 sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | ships = map[14:1 15:3], want map[15:4]
-sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | waypoints[0] position = {1336 1317}, want {1335 1320}
-sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | x = 1336, want 1335
-sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | y = 1317, want 1320
+sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | waypoints[0] position = {1335 1315}, want {1335 1320}
+sample | rg003 | RG-003-2467 y5 #95 | fleet owner=2 id=13 | y = 1315, want 1320
 sample | rg003 | RG-003-2468 y6 #101 | fleet owner=2 id=11 | waypoints[0] position = {1414 1286}, want {1411 1281}
 sample | rg003 | RG-003-2468 y6 #101 | fleet owner=2 id=11 | waypoints[1] = {{1365 1319} 7 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 7 6 0 1 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2468 y6 #101 | fleet owner=2 id=11 | x = 1414, want 1411
@@ -716,9 +711,9 @@ sample | rg003 | RG-003-2468 y6 #179 | fleet owner=5 id=93 | x = 1571, want 1636
 sample | rg003 | RG-003-2468 y6 #179 | fleet owner=5 id=93 | y = 1434, want 1222
 sample | rg003 | RG-003-2468 y6 #180 | fleet owner=5 id=94 | fuel = 125, want 200
 sample | rg003 | RG-003-2468 y6 #180 | fleet owner=5 id=94 | ships = map[27:1], want map[28:1]
-sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1296 1356}
-sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | x = 1241, want 1296
-sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | y = 1338, want 1356
+sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1296 1356}
+sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | x = 1223, want 1296
+sample | rg003 | RG-003-2468 y6 #183 | fleet owner=6 id=2 | y = 1332, want 1356
 sample | rg003 | RG-003-2468 y6 #184 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2468 y6 #184 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2468 y6 #184 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1221 1335}
@@ -1041,9 +1036,9 @@ sample | rg003 | RG-003-2469 y7 #172 | fleet owner=5 id=98 | ships = map[28:1], 
 sample | rg003 | RG-003-2469 y7 #172 | fleet owner=5 id=98 | waypoints[0] position = {1636 1222}, want {1705 1049}
 sample | rg003 | RG-003-2469 y7 #172 | fleet owner=5 id=98 | x = 1636, want 1705
 sample | rg003 | RG-003-2469 y7 #172 | fleet owner=5 id=98 | y = 1222, want 1049
-sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1330 1367}
-sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | x = 1241, want 1330
-sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | y = 1338, want 1367
+sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1330 1367}
+sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | x = 1223, want 1330
+sample | rg003 | RG-003-2469 y7 #174 | fleet owner=6 id=2 | y = 1332, want 1367
 sample | rg003 | RG-003-2469 y7 #175 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2469 y7 #175 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2469 y7 #175 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1256 1326}
@@ -1433,9 +1428,9 @@ sample | rg003 | RG-003-2470 y8 #180 | fleet owner=5 id=101 | waypoints[0] posit
 sample | rg003 | RG-003-2470 y8 #180 | fleet owner=5 id=101 | x = 1553, want 1658
 sample | rg003 | RG-003-2470 y8 #180 | fleet owner=5 id=101 | y = 1101, want 1174
 sample | rg003 | RG-003-2470 y8 #181 | fleet owner=5 id=102 | fleet gone
-sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1364 1378}
-sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | x = 1241, want 1364
-sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | y = 1338, want 1378
+sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1364 1378}
+sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | x = 1223, want 1364
+sample | rg003 | RG-003-2470 y8 #184 | fleet owner=6 id=2 | y = 1332, want 1378
 sample | rg003 | RG-003-2470 y8 #186 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2470 y8 #186 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2470 y8 #186 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1281 1352}
@@ -1851,7 +1846,7 @@ sample | rg003 | RG-003-2471 y9 #117 | fleet owner=2 id=17 | waypoints[0] positi
 sample | rg003 | RG-003-2471 y9 #117 | fleet owner=2 id=17 | x = 1241, want 1293
 sample | rg003 | RG-003-2471 y9 #117 | fleet owner=2 id=17 | y = 1313, want 1364
 sample | rg003 | RG-003-2471 y9 #118 | fleet owner=2 id=18 | fuel = 684, want 749
-sample | rg003 | RG-003-2471 y9 #119 | fleet owner=2 id=18 | 2 waypoints after waypoint 0 [{1241 1313} {1343 1306}], want 1
+sample | rg003 | RG-003-2471 y9 #119 | fleet owner=2 id=18 | 2 waypoints after waypoint 0 [{1241 1313} {1346 1290}], want 1
 sample | rg003 | RG-003-2471 y9 #119 | fleet owner=2 id=18 | waypoints[0] position = {1292 1307}, want {1375 1380}
 sample | rg003 | RG-003-2471 y9 #119 | fleet owner=2 id=18 | x = 1292, want 1375
 sample | rg003 | RG-003-2471 y9 #119 | fleet owner=2 id=18 | y = 1307, want 1380
@@ -1977,9 +1972,9 @@ sample | rg003 | RG-003-2471 y9 #187 | fleet owner=5 id=100 | x = 1536, want 155
 sample | rg003 | RG-003-2471 y9 #187 | fleet owner=5 id=100 | y = 1346, want 1101
 sample | rg003 | RG-003-2471 y9 #188 | fleet_gone owner=5 id=101 | fleet still exists
 sample | rg003 | RG-003-2471 y9 #189 | fleet owner=5 id=102 | fleet gone
-sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1385 1385}
-sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | x = 1241, want 1385
-sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | y = 1338, want 1385
+sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1385 1385}
+sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | x = 1223, want 1385
+sample | rg003 | RG-003-2471 y9 #193 | fleet owner=6 id=2 | y = 1332, want 1385
 sample | rg003 | RG-003-2471 y9 #195 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2471 y9 #195 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2471 y9 #195 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1306 1378}
@@ -2623,9 +2618,9 @@ sample | rg003 | RG-003-2472 y10 #201 | fleet owner=5 id=102 | waypoints[0] posi
 sample | rg003 | RG-003-2472 y10 #201 | fleet owner=5 id=102 | x = 1553, want 1636
 sample | rg003 | RG-003-2472 y10 #201 | fleet owner=5 id=102 | y = 1101, want 1222
 sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | 0 waypoints after waypoint 0 [], want 1
-sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1385 1385}
-sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | x = 1241, want 1385
-sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | y = 1338, want 1385
+sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1385 1385}
+sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | x = 1223, want 1385
+sample | rg003 | RG-003-2472 y10 #203 | fleet owner=6 id=2 | y = 1332, want 1385
 sample | rg003 | RG-003-2472 y10 #204 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2472 y10 #204 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2472 y10 #204 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1331 1403}
@@ -3274,7 +3269,7 @@ sample | rg003 | RG-003-2473 y11 #126 | fleet owner=2 id=17 | fuel = 389, want 1
 sample | rg003 | RG-003-2473 y11 #126 | fleet owner=2 id=17 | waypoints[0] position = {1241 1313}, want {1344 1416}
 sample | rg003 | RG-003-2473 y11 #126 | fleet owner=2 id=17 | x = 1241, want 1344
 sample | rg003 | RG-003-2473 y11 #126 | fleet owner=2 id=17 | y = 1313, want 1416
-sample | rg003 | RG-003-2473 y11 #127 | fleet owner=2 id=18 | 1 waypoints after waypoint 0 [{1343 1306}], want 0
+sample | rg003 | RG-003-2473 y11 #127 | fleet owner=2 id=18 | 1 waypoints after waypoint 0 [{1346 1290}], want 0
 sample | rg003 | RG-003-2473 y11 #127 | fleet owner=2 id=18 | fuel = 506, want 280
 sample | rg003 | RG-003-2473 y11 #127 | fleet owner=2 id=18 | orbiting = null, want 53
 sample | rg003 | RG-003-2473 y11 #127 | fleet owner=2 id=18 | ships = map[15:4], want map[15:1]
@@ -3432,9 +3427,9 @@ sample | rg003 | RG-003-2473 y11 #205 | fleet owner=5 id=103 | waypoints[0] posi
 sample | rg003 | RG-003-2473 y11 #205 | fleet owner=5 id=103 | x = 1705, want 1658
 sample | rg003 | RG-003-2473 y11 #205 | fleet owner=5 id=103 | y = 1049, want 1174
 sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | 0 waypoints after waypoint 0 [], want 1
-sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1361 1377}
-sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | x = 1241, want 1361
-sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | y = 1338, want 1377
+sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1361 1377}
+sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | x = 1223, want 1361
+sample | rg003 | RG-003-2473 y11 #207 | fleet owner=6 id=2 | y = 1332, want 1377
 sample | rg003 | RG-003-2473 y11 #209 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2473 y11 #209 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2473 y11 #209 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1356 1428}
@@ -4397,10 +4392,10 @@ sample | rg003 | RG-003-2474 y12 #221 | fleet owner=5 id=99 | x = 1556, want 140
 sample | rg003 | RG-003-2474 y12 #221 | fleet owner=5 id=99 | y = 1059, want 1074
 sample | rg003 | RG-003-2474 y12 #222 | fleet_gone owner=5 id=100 | fleet still exists
 sample | rg003 | RG-003-2474 y12 #223 | fleet_gone owner=5 id=103 | fleet still exists
-sample | rg003 | RG-003-2474 y12 #225 | fleet owner=6 id=2 | x = 1241, want 1326
-sample | rg003 | RG-003-2474 y12 #225 | fleet owner=6 id=2 | y = 1338, want 1383
+sample | rg003 | RG-003-2474 y12 #225 | fleet owner=6 id=2 | x = 1223, want 1326
+sample | rg003 | RG-003-2474 y12 #225 | fleet owner=6 id=2 | y = 1332, want 1383
 sample | rg003 | RG-003-2474 y12 #226 | fleet owner=6 id=2 | 0 waypoints after waypoint 0 [], want 1
-sample | rg003 | RG-003-2474 y12 #226 | fleet owner=6 id=2 | waypoints[0] position = {1241 1338}, want {1326 1383}
+sample | rg003 | RG-003-2474 y12 #226 | fleet owner=6 id=2 | waypoints[0] position = {1223 1332}, want {1326 1383}
 sample | rg003 | RG-003-2474 y12 #228 | fleet owner=6 id=4 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2474 y12 #228 | fleet owner=6 id=4 | orbiting = 35, want none
 sample | rg003 | RG-003-2474 y12 #228 | fleet owner=6 id=4 | waypoints[0] position = {1197 1362}, want {1367 1439}
@@ -5754,8 +5749,8 @@ sample | rg003 | RG-003-2466 y4 | battle record (1569,1096) | sample matched
 sample | rg003 | RG-003-2466 y4 | battle record (1633,1380) | sample matched
 sample | rg003 | RG-003-2467 y5 | battle record (1204,1566) | sample matched
 sample | rg003 | RG-003-2467 y5 | battle record (1262,1345) | sample missed: tokens: a recorded fleet is not in Elegy's game
+sample | rg003 | RG-003-2467 y5 | battle record (1335,1315) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg003 | RG-003-2467 y5 | battle record (1335,1320) | sample missed: tokens: Elegy has no battle here
-sample | rg003 | RG-003-2467 y5 | battle record (1336,1317) | sample missed: battle set: Elegy fights here (players [1 2]), the record has no battle
 sample | rg003 | RG-003-2467 y5 | battle record (1395,1292) | sample missed: tokens: Elegy has no battle here
 sample | rg003 | RG-003-2467 y5 | battle record (1518,1414) | sample matched
 sample | rg003 | RG-003-2468 y6 | battle record (1101,1621) | sample matched
@@ -5858,7 +5853,7 @@ matched | rg003-y10 | RG-003-Y10-2472 y1 | battle record (1763,1147) | matched: 
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1101,1621) | matched: 2 tokens, players and planet; 0 of 4 hits compared and 4 conditioned; 8 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1278,1370) | matched: 3 tokens, players and planet; 0 of 0 hits compared; 24 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1313,1412) | matched: 2 tokens, players and planet; 1 of 1 hits compared; 14 moves allowed
-sample | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1323,1300) | sample missed: tokens: Elegy has no battle here
+random-driven | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1323,1300) | random, 1 of 7 other variants match: tokens: Elegy has no battle here
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1342,1272) | matched: 3 tokens, players and planet; 0 of 10 hits compared and 10 conditioned; 6 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1364,1319) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 2 moves allowed
 matched | rg003-y11 | RG-003-Y11-2473 y1 | battle record (1523,1298) | matched: 32 tokens, players and planet; 0 of 33 hits compared and 33 conditioned; 237 moves allowed
