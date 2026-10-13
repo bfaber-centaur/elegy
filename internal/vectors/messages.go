@@ -291,9 +291,11 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				}
 			}
 		case engine.EventStarbaseBuilt:
-			// MESSAGES.md 0x0cd: every starbase built gives 0x0cd,
-			// whatever its dock (MEASURED, SL-12, PD-1, PK-1; the dock
-			// rule's 0x0ce/0x0cf are never observed). Slots: planet, then
+			// MESSAGES.md 0x0cd: a starbase built gives 0x0cd whatever
+			// its dock, MEASURED for Orbital Fort, Space Dock, Space
+			// Station and Ultra Station (SL-12, PD-1, PK-1; the dock
+			// rule's 0x0ce/0x0cf are never observed). Death Star is NOT
+			// RUN; it gets 0x0cd too (inferred). Slots: planet, then
 			// the design as owner·32 + 16 + the starbase design slot
 			// (MEASURED, SL-12).
 			if len(ev.Axes) == 1 {

@@ -94,7 +94,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 26) are gone; the total was 2 | 14 | 32.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
   - Updated 2026-10-13 (0x040 PR): mapped with that rule (Legacy `lost_planet_message_carry`, ruleset v6). The 0x007 row was 24 (RG-004) and the total 2 | 14 | 38; two sequences now stop at 0x007 instead of 0x040.
-- Updated 2026-10-13 (0x0cd PR): the row "0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204)" is gone, and the total was 2 | 8 | 6. stars-elegy 898c526 MESSAGES.md now records 0x0cd for every starbase built (MEASURED) and keeps the dock rule as a preserved contradiction.
+- Updated 2026-10-13 (0x0cd PR): the row "0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204)" is gone, and the total was 2 | 8 | 6. stars-elegy 898c526 MESSAGES.md now records 0x0cd for every starbase built of the four hulls seen, Orbital Fort, Space Dock, Space Station and Ultra Station (MEASURED), and keeps the dock rule as a preserved contradiction. Death Star is NOT RUN; Elegy sends 0x0cd for it too (inferred).
 
 ## RG-002: full-order six-year regression
 
@@ -598,7 +598,7 @@ The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32, on `1de8ab6` before
 
 Left as they were, with the reason:
 - **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. No mapping is added until lanes F and G settle the rule. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.
-  - Superseded by the 0x0cd PR: MESSAGES.md (stars-elegy 898c526) now gives 0x0cd for every starbase built, MEASURED, with the design slot as owner·32 + 16 + slot. Elegy maps it that way.
+  - Superseded by the 0x0cd PR: MESSAGES.md (stars-elegy 898c526) now gives 0x0cd for every starbase built, MEASURED for Orbital Fort, Space Dock, Space Station and Ultra Station (Death Star NOT RUN), with the design slot as owner·32 + 16 + slot. Elegy maps it that way, sending 0x0cd for a Death Star too (inferred).
 - **Engine-side (lane D):**
   - 0x05b: the salvage and fleet slots are not compared, because EventFleetScrapped names neither the salvage object nor a fleet that still exists.
   - 0x08f/0x090: EventBombed names the bomber, not its fleet.
