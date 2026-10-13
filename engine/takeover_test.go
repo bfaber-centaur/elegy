@@ -284,12 +284,15 @@ func TestConfirmedGroundCombat(t *testing.T) {
 }
 
 func TestConfirmedGroundCombatGC1(t *testing.T) {
-	// GC-1 (stars-elegy 5962b72, CONFIRMED by prediction, 2 of 2
-	// streams): ten Neutron Shields, player 0 drops 395 and 165 (drop
-	// strengths 329 and 137; one strength from 560 would be 467). C and
-	// C2 capture a planet of 329 and land 164 in either order (per player
-	// 165, one after another 166 with 395 first); R is repelled by 600
-	// and loses 466 (per player 467).
+	// GC-1 (stars-elegy ea822ba, merged in 5962b72; CONFIRMED by
+	// prediction, 2 of 2 streams): ten Neutron Shields, player 0 drops
+	// 395 and 165 (drop strengths 329 and 137; one strength from 560
+	// would be 467). C and C2 capture a planet of 329 and land 164 in
+	// either order (per player 165, one after another 166 with 395
+	// first); R is repelled by 600 and loses 466 (per player 467). The
+	// landed and lost counts are inferred from the year-end population
+	// and carry, through the growth rule, because 0x007 does not report
+	// the landed count (stars-elegy PARITY.md GC-1).
 	for _, tt := range []struct {
 		name        string
 		pop         int

@@ -1133,7 +1133,9 @@ func groundStrength(r Race) int {
 // in stars-elegy #195). Per drop and pooled, against one strength per
 // player and against resolving the drops one after another, is CONFIRMED
 // by prediction for one attacker with two drops against a non-IS
-// defender (GC-1, stars-elegy 5962b72, 2 of 2 streams); several
+// defender (GC-1, stars-elegy ea822ba, merged in 5962b72, 2 of 2
+// streams; its landed and lost counts are inferred from the year-end
+// population and carry, through the growth rule); several
 // attackers, three or more drops and IS defenders are NOT RUN. The outer
 // floor per drop is also MEASURED (RG-003-Y7-2469, planet 51: drops of
 // 250 and 300 kill 208 + 250 = 458, where one strength from 550 would
