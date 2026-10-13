@@ -408,32 +408,31 @@ func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Ev
 	return events
 }
 
-// announceCategories is the order in which a level's components are
-// announced after its level message (MESSAGES.md "Order of the component
-// messages within one level", stars-elegy f5bffd8). BINARY-ONLY as a
-// whole. The pairs that met in one observed level are MEASURED (KX-003,
-// KX-005, RG-001). CONFIRMED by prediction (AO-1, 2 of 2 streams): shields
-// before mining robots, then starbase hulls, then ship hulls; electrical
-// before terraforming; planetary scanners before planetary defenses.
-var announceCategories = []string{
-	CatEngine, CatScanner, CatShield, CatArmor, CatBeam, CatTorpedo, CatBomb,
-	CatMiningRobot, CatMineLayer, CatOrbital,
-	CatStarbaseHull,
-	CatElectrical, CatMechanical, CatTerraform,
-	CatHull,
-	CatPlanetary,
-}
-
 // announceOrder is the catalog's component indices in announcement
-// order: by category (announceCategories), then by the item's index in
+// order: by category, then by the item's index in
 // its category. Index order is BINARY-ONLY in general, MEASURED for ship
 // hulls (RG-001 2434) and CONFIRMED by prediction for scanners and ship
 // hulls (AO-1). Planetary items so run scanners, defenses, then the
 // Genesis Device (its place BINARY-ONLY).
 var announceOrder = sync.OnceValue(func() []int {
+	// The category order (MESSAGES.md "Order of the component messages
+	// within one level", stars-elegy f5bffd8) is BINARY-ONLY as a whole.
+	// The pairs that met in one observed level are MEASURED (KX-003,
+	// KX-005, RG-001). CONFIRMED by prediction (AO-1, 2 of 2 streams):
+	// shields before mining robots, then starbase hulls, then ship hulls;
+	// electrical before terraforming; planetary scanners before planetary
+	// defenses.
+	categories := []string{
+		CatEngine, CatScanner, CatShield, CatArmor, CatBeam, CatTorpedo, CatBomb,
+		CatMiningRobot, CatMineLayer, CatOrbital,
+		CatStarbaseHull,
+		CatElectrical, CatMechanical, CatTerraform,
+		CatHull,
+		CatPlanetary,
+	}
 	cs := Components().Components
 	rank := map[string]int{}
-	for r, c := range announceCategories {
+	for r, c := range categories {
 		rank[c] = r
 	}
 	order := make([]int, len(cs))

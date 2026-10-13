@@ -328,6 +328,12 @@ func TestLevelEventsAnnounceOrder(t *testing.T) {
 			[]string{"level 5 1", "part 5 Gravity Terraform ±3", "part 5 Temp Terraform ±3", "part 5 Radiation Terraform ±3"}},
 		{"AO-1 (c), Total Terraforming", tt, aoC, Biotech,
 			[]string{"level 5 1"}},
+		// The skip is only for terraforming parts: a Total Terraforming
+		// race is told about another category's index 8 part (Gatling
+		// Gun, beam index 8; MESSAGES.md names only the ±3 terraforms). The
+		// M-80 Bomb is the level's other part.
+		{"Total Terraforming, weapons 11", tt, [NumFields]int{Weapons: 10}, Weapons,
+			[]string{"level 1 11", "part 1 Gatling Gun", "part 1 M-80 Bomb"}},
 	} {
 		g := Game{Players: []Player{{Race: c.race}}}
 		g.Players[0].Research.Levels = c.before
