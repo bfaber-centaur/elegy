@@ -187,3 +187,107 @@ func TestAssumptionDesignCheck(t *testing.T) {
 		}
 	}
 }
+
+// TestAssumptionDesignCheckEachField: the check compares every field. For
+// each field a Scout carries a part needing that field and no other, one
+// level above the owner's (every other field 26): the part is removed
+// (an engine is back-filled with the basic engine); at the part's level
+// it stays.
+func TestAssumptionDesignCheckEachField(t *testing.T) {
+	cat := Components()
+	parts := [NumFields]SlotFill{
+		Energy:       {2, "Wolverine Diffuse Shield", 1},
+		Weapons:      {2, "Yakimora Light Phaser", 1},
+		Propulsion:   {0, "Daddy Long Legs 7", 1},
+		Construction: {2, "Strobnium", 1},
+		Electronics:  {1, "Possum Scanner", 1},
+		Biotech:      {2, "Organic Armor", 1},
+	}
+	for f, fill := range parts {
+		c, _ := cat.Lookup(fill.Part)
+		p, err := c.Part()
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, short := range []bool{true, false} {
+			l := newTKLab(t, 3)
+			l.g.Players[0].Research.Levels = [NumFields]int{26, 26, 26, 26, 26, 26}
+			l.g.Players[0].Research.Levels[f] = p.TechReq[f]
+			if short {
+				l.g.Players[0].Research.Levels[f]--
+			}
+			fills := []SlotFill{fill}
+			if fill.Slot != 0 {
+				fills = append([]SlotFill{{0, "Long Hump 6", 1}}, fills...)
+			}
+			d := l.design("Scout", fills...)
+			l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: d}}
+			got := l.turn(&seqRand{}).Game.Designs[d]
+			kept := slices.Contains(slotNames(got), "1 "+fill.Part)
+			if kept == short {
+				t.Errorf("field %d, %s, level %d: slots %v, want it kept %v", f, fill.Part, l.g.Players[0].Research.Levels[f], slotNames(got), !short)
+			}
+		}
+	}
+}
+
+// TestAssumptionDesignCheckBeforeLevelUp: the check runs at step 1a.2,
+// before the year's first level-up check (step 2.4): a part whose field
+// rises to its level at step 2.4 is still removed that year (ASSUMPTION
+// T15).
+func TestAssumptionDesignCheckBeforeLevelUp(t *testing.T) {
+	l := newTKLab(t, 3)
+	l.g.Players[0].Research.Levels = [NumFields]int{26, 13, 26, 26, 26, 26} // Cherry needs weapons 14
+	l.g.Players[0].Research.Accumulated[Weapons] = 1 << 20
+	d := l.design("Mini Bomber", SlotFill{0, "Long Hump 6", 1}, SlotFill{1, "Cherry Bomb", 2})
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: d}}
+	r := l.turn(&seqRand{})
+	if lv := r.Game.Players[0].Research.Levels[Weapons]; lv < 14 {
+		t.Fatalf("weapons %d at the end of the year, want 14 or more from the step 2.4 level-up", lv)
+	}
+	if got := r.Game.Designs[d]; slices.Contains(slotNames(got), "2 Cherry Bomb") {
+		t.Errorf("slots %v, want the Cherry Bombs removed before the level-up", slotNames(got))
+	}
+}
+
+// TestAssumptionDesignCheckAfterOrders: the check runs at step 1a.2,
+// after the year's orders, so a split that year shares cargo by the
+// capacities before the check: the split-off ship's Super Cargo Pod
+// (above tech) still counts, and the design loses it afterwards
+// (ASSUMPTION T15).
+func TestAssumptionDesignCheckAfterOrders(t *testing.T) {
+	l := newTKLab(t, 3)
+	l.g.Players[0].Research.Levels = [NumFields]int{3, 3, 3, 3, 3, 3}
+	pi := l.planet(0, 0, 1000)
+	super := l.design("Medium Freighter", SlotFill{0, "Long Hump 6", 1}, SlotFill{1, "Super Cargo Pod", 1})
+	plain := l.design("Medium Freighter", SlotFill{0, "Long Hump 6", 1}, SlotFill{1, "Cargo Pod", 1})
+	l.g.DesignSlots = []DesignSlot{{Owner: 0, Slot: 0, Design: super}, {Owner: 0, Slot: 1, Design: plain}}
+	fi := l.fleet(0, pi, 0, Stack{Design: super, Count: 1}, Stack{Design: plain, Count: 1})
+	l.g.Fleets[fi].Cargo = Cargo{Minerals: Minerals{300, 0, 0}}
+	src := l.g.Fleets[fi].ID
+	cs, cp := l.g.Designs[super].CargoCapacity, l.g.Designs[plain].CargoCapacity
+	want := 300 * cs / (cs + cp)
+	if want == 300*(cs-100)/(cs-100+cp) {
+		t.Fatal("the two orders give the same share")
+	}
+	orders := []PlayerOrders{{Player: 0, GameID: l.g.ID, Year: l.g.Year, Orders: []Order{SplitOrder{Fleet: src, Ships: []Stack{{Design: super, Count: 1}}}}}}
+	r, err := GenerateTurn(withRules(l.g), orders, &seqRand{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, f := range r.Game.Fleets {
+		if f.Owner == 0 && f.ID != src {
+			found = true
+			if f.Cargo.Minerals[0] != want {
+				t.Errorf("split-off ship's ironium %d, want %d (Super Cargo Pod still counted)", f.Cargo.Minerals[0], want)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("no split-off fleet")
+	}
+	if got := r.Game.Designs[super]; got.CargoCapacity != cs-100 {
+		t.Errorf("design cargo %d, want %d after the check", got.CargoCapacity, cs-100)
+	}
+}
