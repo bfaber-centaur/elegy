@@ -36,6 +36,12 @@ func TestPvMessageList(t *testing.T) {
 		}
 		return k
 	}
+	sb := func(fleet, n int) engine.Event {
+		return engine.Event{Kind: engine.EventShipsBuilt, Player: 1, Planet: 5, Fleet: fleet, Count: n, Axes: []int{2}}
+	}
+	route := func(k engine.EventKind, fleet int) engine.Event {
+		return engine.Event{Kind: k, Player: 1, Planet: 7, Fleet: fleet, Count: 6}
+	}
 	for _, c := range []struct {
 		name   string
 		events []engine.Event
@@ -44,6 +50,10 @@ func TestPvMessageList(t *testing.T) {
 	}{
 		{"one factory", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 1}}, 2,
 			[]pvMsg{{id: 0x035, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
+		{"race penalized", []engine.Event{{Kind: engine.EventRacePenalized, Player: 1, Planet: -1, Fleet: -1}, {Kind: engine.EventRaceHacked, Player: 2, Planet: -1, Fleet: -1, Count: 1}}, 1,
+			[]pvMsg{{id: 0x117, focus: 0xffff, focusKnown: true, params: []int{}, known: []bool{}}}},
+		{"another race penalized", []engine.Event{{Kind: engine.EventRacePenalized, Player: 1, Planet: -1, Fleet: -1}, {Kind: engine.EventRaceHacked, Player: 2, Planet: -1, Fleet: -1, Count: 1}}, 2,
+			[]pvMsg{{id: 0x182, focus: 0xffff, focusKnown: true, params: []int{1}, known: []bool{false}, why: "0x182 player slot"}}},
 		{"merged count", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 1}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
 		{"defenses", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemDefenses, Count: 20}}, 2,
@@ -76,6 +86,29 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x04e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3}, known: all(1)}}},
 		{"fleet finished, then gone", []engine.Event{{Kind: engine.EventFleetArrived, Player: 1, Fleet: 8}}, 1,
 			[]pvMsg{{id: 0x04e, params: []int{0}, known: []bool{false}, why: "0x04e fleet gone by the end of the year"}}},
+		// MESSAGES.md 0x02f–0x034: planet, (count,) design as owner·32 +
+		// slot, (route target); focus the new fleet.
+		{"one ship built", []engine.Event{sb(9, 1)}, 1,
+			[]pvMsg{{id: 0x02f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34}, known: all(2)}}},
+		{"several ships built", []engine.Event{sb(9, 3)}, 1,
+			[]pvMsg{{id: 0x030, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34}, known: all(3)}}},
+		{"one ship routed", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 9)}, 1,
+			[]pvMsg{{id: 0x031, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"several ships routed", []engine.Event{sb(9, 3), route(engine.EventFleetRouted, 9)}, 1,
+			[]pvMsg{{id: 0x032, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34, 6}, known: all(4)}}},
+		{"one ship not routed", []engine.Event{sb(9, 1), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x033, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"several ships not routed", []engine.Event{sb(9, 3), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x034, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 3, 34, 6}, known: all(4)}}},
+		{"ship built, fleet gone", []engine.Event{sb(8, 1)}, 1,
+			[]pvMsg{{id: 0x02f, params: []int{4, 34}, known: all(2), why: "0x02f new fleet gone by the end of the year"}}},
+		{"ship routed, fleet gone", []engine.Event{sb(8, 1), route(engine.EventFleetRouted, 8)}, 1,
+			[]pvMsg{{id: 0x031, params: []int{4, 34, 6}, known: all(3), why: "0x031 new fleet gone by the end of the year"}}},
+		{"ship routed, then routed again on arrival", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 9), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x031, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
+		{"ships built, no slot", []engine.Event{{Kind: engine.EventShipsBuilt, Player: 1, Planet: 5, Fleet: 9, Count: 1}}, 1, nil},
+		{"route leg of another fleet", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 7)}, 1,
+			[]pvMsg{{id: 0x02f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34}, known: all(2)}}},
 		// MESSAGES.md 0x139 (planet, count, design, fleet; focus the
 		// fleet) and 0x0ba (planet, count, design), BINARY-ONLY slots.
 		{"ships joined at the fleet limit", []engine.Event{{Kind: engine.EventShipsJoinedFleet, Player: 1, Planet: 5, Fleet: 9, Count: 3}}, 1,
@@ -129,16 +162,40 @@ func TestPvMessageList(t *testing.T) {
 		{"scrapped in deep space, design with no slot", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: -1, Fleet: 9, Axes: []int{1, 7, 16, 1}}}, 0,
 			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{8193, 0}, known: []bool{true, false}, why: "0x05b fleet slot of a design with no slot"}}},
 		// FS-1 case p: player 0's fleet 0/7 (number 8), design 9, at its
-		// own planet 3 with no starbase: 0x059, fleet slot 4615.
-		{"scrapped at a planet", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, 0}}}, 0,
+		// own planet 3 with no starbase: 0x059 with fleet slot 4615, then
+		// 0x140 with 7 (owner·512 + number, MEASURED).
+		{"scrapped at a planet", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, 0, 0, 0}}}, 0,
+			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{4615, 0, 0}, known: []bool{true, false, false}, why: "0x059 kT and planet slots"},
+				{id: 0x140, focus: 2, focusKnown: true, params: []int{7, 0, 0}, known: []bool{true, false, false}, why: "0x140 kT and planet slots"}}},
+		// FS-1 case q: player 1's fleet 1/6, design 4: 2054 and 518.
+		{"scrapped at a planet, player 1", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: 3, Fleet: 9, Axes: []int{-1, 7, 4, 1, 0, 1, 0}}}, 1,
+			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{2054, 0, 0}, known: []bool{true, false, false}, why: "0x059 kT and planet slots"},
+				{id: 0x140, focus: 2, focusKnown: true, params: []int{518, 0, 0}, known: []bool{true, false, false}, why: "0x140 kT and planet slots"}}},
+		// At another player's planet the planet's owner gets 0x140.
+		{"scrapped at a foreign planet, fleet owner", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: 3, Fleet: 9, Axes: []int{-1, 7, 4, 1, 0, 2, 0}}}, 1,
+			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{2054, 0, 0}, known: []bool{true, false, false}, why: "0x059 kT and planet slots"}}},
+		{"scrapped at a foreign planet, planet owner", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: 3, Fleet: 9, Axes: []int{-1, 7, 4, 1, 0, 2, 0}}}, 2,
+			[]pvMsg{{id: 0x140, focus: 2, focusKnown: true, params: []int{518, 0, 0}, known: []bool{true, false, false}, why: "0x140 kT and planet slots"}}},
+		{"scrapped at an unowned planet", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, 0, engine.NoOwner, 0}}}, 0,
 			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{4615, 0, 0}, known: []bool{true, false, false}, why: "0x059 kT and planet slots"}}},
-		{"scrapped at a planet, several designs", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 2, 2, 0}}}, 0,
-			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x059 kT and planet slots, 0x059 fleet slot of a fleet of several designs"}}},
-		{"scrapped at a planet, design with no slot", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 16, 1, 0}}}, 0,
-			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x059 kT and planet slots, 0x059 fleet slot of a design with no slot"}}},
-		// 0x05a, 0x05c and 0x05d are not mapped.
-		{"scrapped at a starbase", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapAtStarbase}}}, 0, nil},
-		{"scrapped at a planet with Ultimate Recycling", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapRecycled}}}, 0, nil},
+		{"scrapped at a planet, several designs", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 2, 2, 0, 0, 0}}}, 0,
+			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x059 kT and planet slots, 0x059 fleet slot of a fleet of several designs"},
+				{id: 0x140, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x140 kT and planet slots, 0x140 fleet slot of a fleet of several designs"}}},
+		{"scrapped at a planet, design with no slot", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 16, 1, 0, 0, 0}}}, 0,
+			[]pvMsg{{id: 0x059, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x059 kT and planet slots, 0x059 fleet slot of a design with no slot"},
+				{id: 0x140, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x140 kT and planet slots, 0x140 fleet slot of a design with no slot"}}},
+		// At a starbase: 0x05a, then 0x141 to the planet's owner unless
+		// the scrap gave it a technology. No slot is compared.
+		{"scrapped at a starbase", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapAtStarbase, 0, 0}}}, 0,
+			[]pvMsg{{id: 0x05a, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x05a fleet, kT and planet slots"},
+				{id: 0x141, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x141 fleet, kT and planet slots"}}},
+		{"scrapped at a foreign starbase, planet owner", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapAtStarbase, 1, 0}}}, 1,
+			[]pvMsg{{id: 0x141, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x141 fleet, kT and planet slots"}}},
+		{"scrapped at a starbase, technology gained", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapAtStarbase, 0, 1}}}, 0,
+			[]pvMsg{{id: 0x05a, focus: 2, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false}, why: "0x05a fleet, kT and planet slots"}}},
+		// 0x05c, 0x05d, 0x142 and 0x143 are not mapped.
+		{"scrapped at a planet with Ultimate Recycling", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapRecycled, 0, 0}}}, 0, nil},
+		{"scrapped at a starbase with Ultimate Recycling", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 0, Planet: 3, Fleet: 9, Axes: []int{-1, 8, 9, 1, engine.ScrapAtStarbase | engine.ScrapRecycled, 0, 0}}}, 0, nil},
 		{"scrapped in deep space, no salvage", []engine.Event{{Kind: engine.EventFleetScrapped, Player: 1, Planet: -1, Fleet: 9, Axes: []int{-1, 1, 0, 1}}}, 1,
 			[]pvMsg{{id: 0x05b, focus: 0xfffa, focusKnown: true, params: []int{0, 0}, known: []bool{false, true}, why: "0x05b salvage slot (no salvage)"}}},
 		{"repelled", []engine.Event{{Kind: engine.EventDropRepelled, Player: 1, Planet: 5, Count: 3}}, 2,
@@ -279,9 +336,9 @@ func TestSequenceCheck(t *testing.T) {
 		{"a sample is not compared", seq(0, b36, sample(m(0x03f, 9, 9)), q5, q6, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"a sample's order is not compared", seq(0, sample(q6), b36, q5, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"samples only", seq(0, sample(b36)), "skip: message_sequence of sample entries only"},
-		{"unmapped entry", seq(0, m(0x117, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x117 has no event mapping"},
-		{"unmapped entry, mismatch", seq(0, m(0x117, 7, 7, 8), b36, q6, q5, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x117 has no event mapping"},
+		{"unmapped entry", seq(0, m(0x0ff, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x0ff has no event mapping"},
+		{"unmapped entry, mismatch", seq(0, m(0x0ff, 7, 7, 8), b36, q6, q5, lv, empt),
+			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x0ff has no event mapping"},
 		{"empty list, messages sent", seq(0),
 			"message 0x036 (focus 7, params [2 7]) = sent, want not sent; message 0x03f (focus 5, params [5]) = sent, want not sent; message 0x03f (focus 6, params [6]) = sent, want not sent; message 0x050 (focus 65534, params [5 2 3]) = sent, want not sent; message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
 		{"queue not loaded", seq(2, m(0x036, 4, 3, 4), m(0x03f, 4, 4), m(0x026, 4, 4, 12, 0)), "skip: message_sequence entry from a production queue not loaded"},
@@ -402,32 +459,37 @@ func TestSequenceCheckScrapDesign(t *testing.T) {
 	}
 }
 
-// TestSequenceCheckScrapAtPlanet pins 0x059's fleet slot through the
-// sequence comparator (stars-elegy FS-1 case q: player 1's fleet 1/6 of
-// design 4 at its own planet without a starbase gave 2054 = 4·512 + 6).
-// No vector's sequence holds a 0x059. The kT and planet slots are not
-// compared.
+// TestSequenceCheckScrapAtPlanet pins 0x059's and 0x140's fleet slots
+// through the sequence comparator (stars-elegy FS-1 case q: player 1's
+// fleet 1/6 of design 4 at its own planet without a starbase gave 0x059
+// 2054 = 4·512 + 6, then 0x140 518 = 1·512 + 6). No vector's sequence
+// holds either. The kT and planet slots are not compared.
 func TestSequenceCheckScrapAtPlanet(t *testing.T) {
 	l := pvLoaded{
 		g:      engine.Game{Players: []engine.Player{{}, {}}},
-		events: [][]engine.Event{nil, {{Kind: engine.EventFleetScrapped, Player: 1, Planet: 3, Fleet: 9, Axes: []int{-1, 7, 4, 1, 0}}}},
+		events: [][]engine.Event{nil, {{Kind: engine.EventFleetScrapped, Player: 1, Planet: 3, Fleet: 9, Axes: []int{-1, 7, 4, 1, 0, 1, 0}}}},
 	}
 	i := func(n int) *int { return &n }
-	seq := func(params ...int) pvExpect {
-		return pvExpect{Kind: "message_sequence", Year: 1, Player: i(1), Messages: []pvSeqEntry{{ID: 0x059, Focus: 2, Params: params}}}
+	seq := func(scrap, planet int) pvExpect {
+		return pvExpect{Kind: "message_sequence", Year: 1, Player: i(1), Messages: []pvSeqEntry{
+			{ID: 0x059, Focus: 2, Params: []int{scrap, 40, 2}}, {ID: 0x140, Focus: 2, Params: []int{planet, 40, 2}}}}
 	}
 	for _, c := range []struct {
-		name   string
-		params []int
-		want   string
+		name          string
+		scrap, planet int
+		want          string
 	}{
-		{"design 4", []int{2054, 40, 2}, "skip: message_sequence 0x059 kT and planet slots not compared"},
-		{"owner bits instead", []int{512 + 6, 40, 2},
-			"message 0x059 (focus 2, params [518 40 2]) = sent as 0x059 (focus 2, params [2054 ? ?]); message 0x059 (focus 2, params [2054 ? ?]) = sent, want not sent"},
-		{"no design bits", []int{6, 40, 2},
-			"message 0x059 (focus 2, params [6 40 2]) = sent as 0x059 (focus 2, params [2054 ? ?]); message 0x059 (focus 2, params [2054 ? ?]) = sent, want not sent"},
+		{"FS-1 q", 2054, 518, "skip: message_sequence 0x059 kT and planet slots not compared"},
+		{"0x059 with owner bits", 512 + 6, 518,
+			"message 0x059 (focus 2, params [518 40 2]) = sent as 0x059 (focus 2, params [2054 ? ?]); message 0x059 (focus 2, params [2054 ? ?]) = sent, want not sent\nalso skipped: message_sequence 0x140 kT and planet slots not compared"},
+		{"0x059 with no design bits", 6, 518,
+			"message 0x059 (focus 2, params [6 40 2]) = sent as 0x059 (focus 2, params [2054 ? ?]); message 0x059 (focus 2, params [2054 ? ?]) = sent, want not sent\nalso skipped: message_sequence 0x140 kT and planet slots not compared"},
+		{"0x140 with design bits", 2054, 2054,
+			"message 0x140 (focus 2, params [2054 40 2]) = sent as 0x140 (focus 2, params [518 ? ?]); message 0x140 (focus 2, params [518 ? ?]) = sent, want not sent\nalso skipped: message_sequence 0x059 kT and planet slots not compared"},
+		{"0x140 with no owner bits", 2054, 6,
+			"message 0x140 (focus 2, params [6 40 2]) = sent as 0x140 (focus 2, params [518 ? ?]); message 0x140 (focus 2, params [518 ? ?]) = sent, want not sent\nalso skipped: message_sequence 0x059 kT and planet slots not compared"},
 	} {
-		if got := l.sequenceCheck(&l.g, seq(c.params...)); got != c.want {
+		if got := l.sequenceCheck(&l.g, seq(c.scrap, c.planet)); got != c.want {
 			t.Errorf("%s:\n got %q\nwant %q", c.name, got, c.want)
 		}
 	}

@@ -50,8 +50,17 @@ func pvMessageIDs() map[int]string {
 		0x15c: "EventOriginalDrift",
 		0x05b: "EventFleetScrapped in deep space",
 		0x059: "EventFleetScrapped at a planet without a starbase whose owner lacks Ultimate Recycling",
+		0x140: "EventFleetScrapped at a planet without a starbase whose owner lacks Ultimate Recycling, to the planet's owner",
+		0x05a: "EventFleetScrapped at a starbase whose owner lacks Ultimate Recycling",
+		0x141: "EventFleetScrapped at a starbase whose owner lacks Ultimate Recycling, to the planet's owner, when it gave no technology",
 		0x05f: "EventPartAvailable of a component, not a ship or starbase hull, planetary scanner or defense",
 		0x08c: "EventAlchemy",
+		0x02f: "EventShipsBuilt, one ship, no route",
+		0x030: "EventShipsBuilt, several ships, no route",
+		0x031: "EventShipsBuilt then EventFleetRouted, one ship",
+		0x032: "EventShipsBuilt then EventFleetRouted, several ships",
+		0x033: "EventShipsBuilt then EventFleetNotRouted, one ship",
+		0x034: "EventShipsBuilt then EventFleetNotRouted, several ships",
 		0x0ba: "EventShipsLostFleetLimit",
 		0x0cd: "EventStarbaseBuilt",
 		0x07b: "EventTerraformed",
@@ -70,6 +79,8 @@ func pvMessageIDs() map[int]string {
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
 		0x17c: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the bomber",
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
+		0x117: "EventRacePenalized",
+		0x182: "EventRaceHacked",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -162,6 +173,7 @@ type pvMsg struct {
 // Focus codes (MESSAGES.md "How messages work", focus codes) as stored
 // 16-bit values.
 const (
+	pvFocusNone     = 0x10000 - 1
 	pvFocusFleet    = 0x8000
 	pvFocusResearch = 0x10000 - 2
 	pvFocusDesign   = 0x10000 - 3
@@ -245,6 +257,7 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 	}
 	single := map[built]int{} // pending single-unit message: its index in msgs
 	arrived := map[int]int{}  // a fleet's 0x04e: its index in msgs
+	launched := map[int]int{} // a new fleet's build message: its index in msgs
 	for i, ev := range events {
 		switch ev.Kind {
 		case engine.EventDropRepelled:
@@ -292,6 +305,49 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				if j := send(ev.Player, atPlanet(one, ev.Planet)); j >= 0 {
 					single[k] = j
 				}
+			}
+		case engine.EventShipsBuilt:
+			// MESSAGES.md 0x02f/0x030: a new fleet of one or several
+			// ships; slots planet, (count,) design, focus the new fleet
+			// (CONFIRMED CB-047, CB round 6). The design is owner·32 +
+			// the ship design slot (MEASURED, "Design slot"). A route leg
+			// that follows turns it into 0x031–0x034.
+			if len(ev.Axes) != 1 {
+				continue
+			}
+			params := []int{ev.Planet - 1, ev.Player*32 + ev.Axes[0]}
+			id := 0x02f
+			if ev.Count > 1 {
+				params = []int{ev.Planet - 1, ev.Count, ev.Player*32 + ev.Axes[0]}
+				id = 0x030
+			}
+			m := pvMsg{id: id, params: params, why: fmt.Sprintf("0x%03x new fleet gone by the end of the year", id)}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.focus, m.focusKnown, m.why = pvFocusFleet|code, true, ""
+			}
+			if j := send(ev.Player, m); j >= 0 {
+				launched[ev.Fleet] = j
+			}
+		case engine.EventFleetRouted, engine.EventFleetNotRouted:
+			// MESSAGES.md 0x031/0x032 (routed, CONFIRMED SL round 1) and
+			// 0x033/0x034 (no warp with fuel, BINARY-ONLY): the build
+			// message with the route target as its last slot.
+			// Only the leg Launch gives it: a later route task for the
+			// same fleet in the year (routeTask) is not a build message.
+			j, ok := launched[ev.Fleet]
+			if !ok {
+				continue
+			}
+			delete(launched, ev.Fleet)
+			m := &msgs[j].pvMsg
+			m.id += 2
+			if ev.Kind == engine.EventFleetNotRouted {
+				m.id += 2
+			}
+			m.params = append(m.params, ev.Planet-1)
+			m.known = append(m.known, true)
+			if m.why != "" {
+				m.why = fmt.Sprintf("0x%03x new fleet gone by the end of the year", m.id)
 			}
 		case engine.EventShipsJoinedFleet:
 			// MESSAGES.md 0x139: at the 512-fleet limit the new ships
@@ -353,6 +409,17 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			if j := send(ev.Player, m); j >= 0 {
 				arrived[ev.Fleet] = j
 			}
+		case engine.EventRacePenalized:
+			// MESSAGES.md 0x117: no slots, focus none (stars-elegy
+			// 28a3175, CONFIRMED RD-P12, KX-003).
+			send(ev.Player, pvMsg{id: 0x117, focus: pvFocusNone, focusKnown: true, params: []int{}})
+		case engine.EventRaceHacked:
+			// MESSAGES.md 0x182: player (the penalized one), focus none.
+			// The slot's value is in one KX-003 record only and the
+			// article/plural flags "Slot types" allows are not measured
+			// for it, so it is not compared.
+			send(ev.Player, pvMsg{id: 0x182, focus: pvFocusNone, focusKnown: true,
+				params: []int{ev.Count}, known: []bool{false}, why: "0x182 player slot"})
 		case engine.EventOvercrowded:
 			send(ev.Player, pvMsg{id: 0x026, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventHostileShrink:
@@ -488,30 +555,66 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					m.why = strings.Join(why, ", ")
 				}
 				send(ev.Player, m)
-			} else if len(ev.Axes) == 5 && ev.Axes[4] == 0 {
-				// 0x059, scrap onto the surface of a planet without a
-				// starbase whose owner lacks Ultimate Recycling
-				// (MESSAGES.md, CONFIRMED tk2). Slots, by MESSAGES.md's
-				// slot column: fleet, kT (one slot), planet. The fleet is
-				// as in 0x05b (design·512 + number for a fleet of one
-				// design, CONFIRMED by prediction, stars-elegy FS-1 p and
-				// q). No public record gives the kT or planet values, so
-				// they are not compared. The original also sends 0x059
-				// on a colonization (cs/cs-003); Elegy does not, and no
-				// vector carries a colonization's 0x059 (one would fail
-				// as not sent).
-				number, slot, designs := ev.Axes[1], ev.Axes[2], ev.Axes[3]
-				m := pvMsg{id: 0x059, focus: ev.Planet - 1, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false},
-					why: "0x059 kT and planet slots"}
-				switch {
-				case designs != 1:
-					m.why += ", 0x059 fleet slot of a fleet of several designs"
-				case slot >= 16:
-					m.why += ", 0x059 fleet slot of a design with no slot"
-				default:
-					m.params[0], m.known[0] = slot<<9|(number-1), true
+			} else if len(ev.Axes) == 7 {
+				// At a planet the fleet's owner gets one message and the
+				// planet's owner, if any, a second (MESSAGES.md, scrap
+				// notes, CONFIRMED tk2/tk111), each of three slots by
+				// MESSAGES.md's slot column: fleet, kT (one slot), planet.
+				// No public record gives the kT or planet values, so they
+				// are not compared.
+				//
+				// 0x059 (no starbase, no Ultimate Recycling): the fleet
+				// slot is as in 0x05b, design·512 + number for a fleet of
+				// one design (CONFIRMED by prediction, stars-elegy FS-1 p
+				// and q). The original also sends 0x059 on a
+				// colonization (cs/cs-003); Elegy does not, and no vector
+				// carries a colonization's 0x059 (one would fail as not
+				// sent).
+				//
+				// 0x140, to the planet's owner with 0x059: the fleet slot
+				// is owner·512 + number (MEASURED, FS-1, 2 values). In
+				// both the fleet's owner, the recipient and the planet's
+				// owner were one player, so which of them the bits name
+				// is not known; Elegy uses the fleet's owner.
+				//
+				// 0x05a (starbase, no Ultimate Recycling) and 0x141, to
+				// the planet's owner with it when the scrap gave no
+				// technology (0x13c/0x13d otherwise, not mapped): no
+				// fleet slot is measured, so none is compared.
+				//
+				// Fleets of several designs and designs with no slot are
+				// not compared in any of them. The Ultimate Recycling
+				// messages (0x05c, 0x05d, 0x142, 0x143) are not mapped.
+				number, slot, designs, how, owner, tech := ev.Axes[1], ev.Axes[2], ev.Axes[3], ev.Axes[4], ev.Axes[5], ev.Axes[6]
+				msg := func(id int, why string) pvMsg {
+					return pvMsg{id: id, focus: ev.Planet - 1, focusKnown: true, params: []int{0, 0, 0}, known: []bool{false, false, false},
+						why: fmt.Sprintf("0x%03x %s", id, why)}
 				}
-				send(ev.Player, m)
+				fleetSlot := func(m *pvMsg, value int) {
+					switch {
+					case designs != 1:
+						m.why += fmt.Sprintf(", 0x%03x fleet slot of a fleet of several designs", m.id)
+					case slot >= 16:
+						m.why += fmt.Sprintf(", 0x%03x fleet slot of a design with no slot", m.id)
+					default:
+						m.params[0], m.known[0] = value, true
+					}
+				}
+				switch how {
+				case 0:
+					m := msg(0x059, "kT and planet slots")
+					fleetSlot(&m, slot<<9|(number-1))
+					send(ev.Player, m)
+					// send drops 0x140 at an unowned planet (NoOwner).
+					m = msg(0x140, "kT and planet slots")
+					fleetSlot(&m, ev.Player<<9|(number-1))
+					send(owner, m)
+				case engine.ScrapAtStarbase:
+					send(ev.Player, msg(0x05a, "fleet, kT and planet slots"))
+					if tech == 0 {
+						send(owner, msg(0x141, "fleet, kT and planet slots"))
+					}
+				}
 			}
 		case engine.EventMinesSwept:
 			// Slots: sweeper (fleet or planet), amount (two slots), the

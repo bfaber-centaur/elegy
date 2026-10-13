@@ -586,3 +586,23 @@ func TestMeasuredStarbaseBuiltNamesDesignSlot(t *testing.T) {
 		t.Errorf("starbase %d, events %+v; want design 3 and one EventStarbaseBuilt naming slot 5", p.StarbaseDesign, got)
 	}
 }
+
+func TestMeasuredShipsBuiltNamesDesignSlot(t *testing.T) {
+	// MESSAGES.md 0x0cd "Design slot" (stars-elegy 898c526, MEASURED for
+	// 0x02f): the build message names the owner's ship design slot, so
+	// the event carries the slot (4), not the design index (1).
+	g := shipyard(t)
+	g.DesignSlots[1].Slot = 4 // the QJ5 Scout
+	p := &g.Planets[0]
+	p.HasQueue, p.Queue = true, []QueueItem{{Kind: ItemShip, Slot: 4, Count: 2}}
+	_, ev := shipyardRun(g, 0, 2*g.ownerCost(1).Resources)
+	var got []Event
+	for _, e := range ev {
+		if e.Kind == EventShipsBuilt {
+			got = append(got, e)
+		}
+	}
+	if len(got) != 1 || len(got[0].Axes) != 1 || got[0].Axes[0] != 4 || got[0].Count != 2 || got[0].Planet != p.ID || len(g.Fleets) != 1 || got[0].Fleet != g.Fleets[0].ID {
+		t.Errorf("events %+v, fleets %d; want one EventShipsBuilt of 2 ships naming slot 4 and the new fleet", got, len(g.Fleets))
+	}
+}
