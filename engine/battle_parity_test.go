@@ -182,6 +182,7 @@ type pvBattleOutcome struct {
 // "Battle records"): a place where an alternative stream of the original
 // fought and the recorded stream did not.
 type pvAltBattle struct {
+	caseID  string
 	year    int
 	at      Point
 	players []int
@@ -223,7 +224,7 @@ func loadBattles(t testing.TB) (map[string][]pvRecordedBattle, map[string][]pvAl
 			at := map[string]int{} // stream and location → index in out[name]
 			for _, e := range c.Expect {
 				if e.Kind == "alt_battle" {
-					alts[name] = append(alts[name], pvAltBattle{year: e.Year, at: Point{X: e.X, Y: e.Y}, players: e.Players})
+					alts[name] = append(alts[name], pvAltBattle{caseID: c.ID, year: e.Year, at: Point{X: e.X, Y: e.Y}, players: e.Players})
 					continue
 				}
 				if e.Kind != "battle" && e.Kind != "battle_actions" {
@@ -1001,7 +1002,8 @@ func elegyBattles(l *BattleStart) map[Point][]int {
 // extra battle where the vector has an alt_battle of the same players is
 // a sample (an alternative stream of the original fought there), and a
 // restart's extra battle that another seed variant does not fight is
-// random-driven.
+// random-driven. An alt_battle where Elegy does not fight is a sample
+// too, which matched: the recorded stream has no battle there either.
 func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, alts []pvAltBattle, years []BattleStart, vs BattleVariants) {
 	type yearRecs struct {
 		caseID string
@@ -1061,6 +1063,26 @@ func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, alts []p
 			}
 			t.Errorf("%s: %s", where, why)
 		}
+	}
+	// Each alt_battle where Elegy does not fight. One where it fights is
+	// an extra battle above, or, in a year with no record, unchecked like
+	// every battle of such a year. A year not run is reported by the
+	// vectors ledger ("not generated").
+	for _, a := range alts {
+		if a.year < 1 || a.year >= len(years) || years[a.year].Skip != "" {
+			continue
+		}
+		l := years[a.year]
+		if _, fights := elegyBattles(&l)[a.at]; fights {
+			continue
+		}
+		where := fmt.Sprintf("%s %s %q (%d,%d) y%d", name, a.caseID, "", a.at.X, a.at.Y, a.year)
+		why := fmt.Sprintf("no battle here, as in the recorded stream (an alternative stream's players %v fought)", sortedInts(a.players))
+		if l.Downstream > 0 {
+			t.Logf("%s: sample (after %d draws of earlier years) matched: %s", where, l.Downstream, why)
+			continue
+		}
+		t.Logf("%s: sample (alt_battle in the vector) matched: %s", where, why)
 	}
 }
 
@@ -1416,6 +1438,27 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		sampled := len(set.logs) == 1 && strings.Contains(set.logs[0], "(1060,") && strings.Contains(set.logs[0], ": sample (alt_battle in the vector) missed: battle set: Elegy fights here")
 		if sampled != c.sample || len(set.errs) != map[bool]int{true: 0, false: 1}[c.sample] {
 			t.Errorf("alt_battle, %s: errors %q, logs %q, want sample %v", c.name, set.errs, set.logs, c.sample)
+		}
+	}
+	// An alt_battle where Elegy does not fight is a matched sample (the
+	// recorded stream has none there either); after earlier years' draws
+	// it says so.
+	away := pvAltBattle{caseID: "C", year: 1, at: Point{X: r.x + 1, Y: r.y}, players: []int{2, 0}}
+	for _, c := range []struct {
+		name       string
+		downstream int
+		want       string
+	}{
+		{"restart", 0, ": sample (alt_battle in the vector) matched: no battle here, as in the recorded stream (an alternative stream's players [0 2] fought)"},
+		{"chained", 3, ": sample (after 3 draws of earlier years) matched: no battle here, as in the recorded stream (an alternative stream's players [0 2] fought)"},
+	} {
+		ly := l
+		ly.Downstream = c.downstream
+		set = &recordTBInternal{TB: t}
+		checkBattleSet(set, "cb/cb010.json", append(rest, r), []pvAltBattle{away}, []BattleStart{{}, ly}, BattleVariants{})
+		if len(set.errs) != 0 || len(set.logs) != 1 || !strings.HasSuffix(set.logs[0], c.want) ||
+			!strings.Contains(set.logs[0], fmt.Sprintf(`cb/cb010.json C "" (%d,%d) y1`, r.x+1, r.y)) {
+			t.Errorf("alt_battle with no battle, %s: errors %q, logs %q, want one log ending %q", c.name, set.errs, set.logs, c.want)
 		}
 	}
 	// A recorded move two squares long is not one Elegy's rule allows.
