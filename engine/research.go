@@ -331,7 +331,59 @@ func (g *Game) stealResearch(spent [][NumFields]int) []Event {
 			pl.Research.Accumulated[f] += stored
 			events = append(events, Event{Kind: EventResearchStolen, Player: i, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: s})
 		}
+		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+		events = append(events, g.levelEvents(i, before)...)
+	}
+	return events
+}
+
+// Research level-up messages.
+const (
+	// EventLevelUp: Player gained a level in field Item (a field index,
+	// not an item kind); Count is the new level (MESSAGES.md 0x050, or
+	// 0x136 for a Generalized Research player).
+	EventLevelUp EventKind = EventPlanetNotDegraded + 1 + iota
+	// EventPartAvailable: that level made a component available to
+	// Player; Item is the field, Count the component's position in
+	// Components().Components (MESSAGES.md 0x05f, or 0x078, 0x0d0, 0x145
+	// or 0x157 by its kind).
+	EventPartAvailable
+)
+
+// levelEvents is the level-up messages for the levels player gained since
+// its levels were before (MESSAGES.md 0x050 and 0x05f, CONFIRMED KX-003,
+// KX-004, KX-005): for each level, in field order, the level's message,
+// then one per component the race may use (owned, for a Mystery Trader
+// part) whose requirement in that field is the new level and whose other
+// requirements the player then meets (MEASURED KX-005 R1; BINARY-ONLY
+// beyond it). "Then" is the levels reached so far in field order, from
+// before (ASSUMPTION: a year that levels several fields is announced as
+// if they rose in field order, MESSAGES.md "Research order").
+//
+// ASSUMPTION: terraforming components are announced like other parts;
+// MESSAGES.md excludes only hulls, planetary scanners and defenses from
+// 0x05f, and those have messages of their own.
+func (g *Game) levelEvents(player int, before [NumFields]int) []Event {
+	pl := &g.Players[player]
+	cat := Components()
+	trader := g.traderItems(player)
+	levels := before
+	var events []Event
+	for f := range NumFields {
+		for levels[f] < pl.Research.Levels[f] {
+			levels[f]++
+			events = append(events, Event{Kind: EventLevelUp, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: levels[f]})
+			for i, c := range cat.Components {
+				if c.TechReq[f] != levels[f] {
+					continue
+				}
+				if ok, err := c.Buildable(pl.Race, levels, trader[c.Name]); err != nil || !ok {
+					continue
+				}
+				events = append(events, Event{Kind: EventPartAvailable, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: i})
+			}
+		}
 	}
 	return events
 }
