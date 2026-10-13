@@ -48,7 +48,7 @@ vectors/<corpus>/<run>.json      one oracle run
 | `ug` | UG01..UG30 | 150 | new games: starting tech and designs, planet counts, homeworlds, wormholes, stored victory conditions (`new_game` vectors) | `docs/UNIVERSE.md` |
 | `pg` | PG-002, PG-003 | 4 | population growth and carry, uncrowded and crowded, 19 and 29 empty-order years | `docs/KERNEL.md` "Population growth" |
 | `pq` | PQ-001 C01..C14, P0 | 16 | one year of the production queue: partial builds, mineral shortfall, auto items, alchemy, research tax, order clips | `docs/KERNEL.md` "Production" |
-| `rg` | RG-001, RG-001-Y1..Y6, RG-002, RG-002-Y1..Y6, RG-003, RG-003-Y1..Y12 | 37 | a representative game: seven players (six expert computer players), about a hundred fleets, six chained years with every player's orders, battles, colonizing, research, production and random events; each year's random stream start is in `random_start`. RG-001 chains the six years; RG-001-Yk is year k alone, from the original's own files for the year before | `docs/KERNEL.md`, PARITY "Representative game (RG-001)". RG-002 is the same kind from a **state-edited** AIX 2461 after one settling year (every edit in `experiments/rg002/README.md`), aimed at late-game economy: auto queue items, population over the maximum, low concentrations, slower tech with the lowest-field switch, remote mining, a hostile Orbital Adjuster, starbase replacement and salvage; PARITY "Representative game (RG-002)". RG-003 is RG-002 continued to 12 chained years (2462 to 2474; years 1 to 6 are RG-002's, and player 0's orders in years 7 to 12 were injected by lane F, `experiments/rg003/README.md`); PARITY "Representative game, 12 years (RG-003)" |
+| `rg` | RG-001, RG-001-Y1..Y6, RG-002, RG-002-Y1..Y6, RG-003, RG-003-Y1..Y12, RG-004, RG-004-Y1..Y12 | 72 (40 files; corrected 2026-10-13: main said 37 for 27 files that held 48 cases) | a representative game: seven players (six expert computer players), about a hundred fleets, six chained years with every player's orders, battles, colonizing, research, production and random events; each year's random stream start is in `random_start`. RG-001 chains the six years; RG-001-Yk is year k alone, from the original's own files for the year before | `docs/KERNEL.md`, PARITY "Representative game (RG-001)". RG-002 is the same kind from a **state-edited** AIX 2461 after one settling year (every edit in `experiments/rg002/README.md`), aimed at late-game economy: auto queue items, population over the maximum, low concentrations, slower tech with the lowest-field switch, remote mining, a hostile Orbital Adjuster, starbase replacement and salvage; PARITY "Representative game (RG-002)". RG-003 is RG-002 continued to 12 chained years (2462 to 2474; years 1 to 6 are RG-002's, and player 0's orders in years 7 to 12 were injected by lane F, `experiments/rg003/README.md`); PARITY "Representative game, 12 years (RG-003)". RG-004 is a second game, not from its start: seven custom races (WM, SD, IT, JoaT, PP, IS, HE) played by expert computer players, 12 chained years (2466 to 2477) after 65 unrecorded warm-up years, with no injected orders (`experiments/rg004/README.md`) |
 
 `internal/vectors` holds the same format as Go types and a test that
 decodes every file strictly, so `go test ./...` fails on a malformed vector.
@@ -304,6 +304,19 @@ unconstrained by that case.
 | `wormhole` | wormhole end `id` | `known_to`, `destination_known_to` |
 | `trader` | Mystery Trader `id` | `x`, `y`, `warp`, `destination`, `met` |
 | `packet` | packet `owner`/`id` | `x`, `y` (within `tolerance` ly) |
+| `salvage_at` | salvage at (`x`, `y`) | `minerals`; `observed: "none"` if there was none |
+| `message` | player `player` got message `message_id` | `present` |
+| `message_sequence` | every message player `player` got in the year, in `.M` order (`rg`, `kx001`–`kx005`, `pq`) | `messages`: per message `id`, `focus` and `params`; see "Message sequences" below |
+| `object` | a new or changed map object | the object, as in `initial_state.objects` |
+| `object_gone` | the object `subject` (`{kind, owner, id}`) no longer exists, e.g. a swept minefield | |
+| `minefield` | minefield `owner`/`id` | `x`, `y`, `mines`, `type`, `detonating`; `radius` when the case checks it |
+| `view` | what player `viewer` knows of `subject` (`{kind, owner, id}`: a planet, fleet, wormhole, minefield, design or player) | the fields the case checks, e.g. `level` (report level), `known`, `starbase_visible`, `heading`, `design_count` |
+| `battle` | the battle at (`x`, `y`) | `players`, `planet`, and `tokens`: per token its `owner`, `fleet` or `planet`, `kind`, `design`, `start_square`, `initiative`, `mass`, `shield`, `jammer`, `computer`, `capacitor`, `deflector`, `ships`, `damage`; in `rg`, `start_sample` (see below) |
+| `battle_actions` | the moves and shots of that battle | `actions`: per action `round`, `token`, `to` (square, or `null` for leaving the board) and `hits` (`token`, `flags`, `kills`, `shield_damage`, `armor_damage`) |
+| `no_battle` | no battle record was written | |
+| `alt_battle` | (`rg` only) a battle at (`x`, `y`) that an alternative stream fought and the recorded stream did not; always `sample: true` | `players` (every player in those records), `planet` when the records agree on it; see below |
+| `client_estimate` | a value the original client shows on `screen` for `subject` after the year | `field` names the value; `equals` holds it as a number or a short value with its unit, never the client's sentence |
+| `sample` | a random outcome | see below |
 
 A `planet` expectation carries `homeworld` only when the flag changed in
 the year. One vector has it, WU-RSG2's planet 8 (MEASURED, one run,
@@ -338,30 +351,36 @@ battle's start tokens were drawn. The rule:
   not fought in another stream.
 
 The record keeps `sample: true` whenever it differed in any alternative
-stream at all. Usually only the token order differed, and with it which
-start square each player got, because the battle draws the order. So a
-record with `sample: true` and `start_sample: false` has exact stacks, and
-only the order and squares are samples. A restart that gives other stacks
+stream at all. Usually only the token order differed, which the battle
+draws. Each player's start squares differed between streams in 1 of the
+154 RG battles (MEASURED). So a record with `sample: true` and
+`start_sample: false` has exact stacks, and only the token order and
+start squares are samples. A restart that gives other stacks
 there is a gap, not a sample.
+
+**Corrected 2026-10-13:** this paragraph used to say "Usually only the
+token order differed, and with it which start square each player got,
+because the battle draws the order." The order is drawn, but the start
+squares rarely changed with it: each player's start squares differed
+between streams in 1 of the 154 RG battles (MEASURED).
 
 MEASURED: the stacks matched in every alternative stream for every
 RG-001 and RG-002 battle, and for 100 of RG-003's 102. The two exceptions
 are year 10's battle at (1571,1434), where one stream had no token for
 player 1's fleet 88, and year 11's at (1323,1300), which neither
-alternative stream fought.
+alternative stream fought. Per-stream stacks for one battle of each
+kind are tabled in experiments/rg003/README.md, "Start tokens in the
+other streams".
 
-| `salvage_at` | salvage at (`x`, `y`) | `minerals`; `observed: "none"` if there was none |
-| `message` | player `player` got message `message_id` | `present` |
-| `message_sequence` | every message player `player` got in the year, in `.M` order (`rg`, `kx001`–`kx005`, `pq`) | `messages`: per message `id`, `focus` and `params`; see "Message sequences" below |
-| `object` | a new or changed map object | the object, as in `initial_state.objects` |
-| `object_gone` | the object `subject` (`{kind, owner, id}`) no longer exists, e.g. a swept minefield | |
-| `minefield` | minefield `owner`/`id` | `x`, `y`, `mines`, `type`, `detonating`; `radius` when the case checks it |
-| `view` | what player `viewer` knows of `subject` (`{kind, owner, id}`: a planet, fleet, wormhole, minefield, design or player) | the fields the case checks, e.g. `level` (report level), `known`, `starbase_visible`, `heading`, `design_count` |
-| `battle` | the battle at (`x`, `y`) | `players`, `planet`, and `tokens`: per token its `owner`, `fleet` or `planet`, `kind`, `design`, `start_square`, `initiative`, `mass`, `shield`, `jammer`, `computer`, `capacitor`, `deflector`, `ships`, `damage`; in `rg`, `start_sample` (see above) |
-| `battle_actions` | the moves and shots of that battle | `actions`: per action `round`, `token`, `to` (square, or `null` for leaving the board) and `hits` (`token`, `flags`, `kills`, `shield_damage`, `armor_damage`) |
-| `no_battle` | no battle record was written | |
-| `client_estimate` | a value the original client shows on `screen` for `subject` after the year | `field` names the value; `equals` holds it as a number or a short value with its unit, never the client's sentence |
-| `sample` | a random outcome | see below |
+`alt_battle` (`rg` only) marks a place where at least one alternative
+stream wrote a battle record and the recorded stream wrote none, so
+whether a battle happens there at all was drawn. A harness that fights
+there should class that battle as a sample, not as a gap. A battle
+fought only in the recorded stream already carries `sample: true` and
+`start_sample: true`. Example: RG-003 year 9 at (1388,1386), where only
+the recorded stream stopped the fleet that would have fought there
+(`experiments/rg003/README.md` "Year 9 (2471): the mine stop before
+(1388,1386)").
 
 ### Message sequences
 
@@ -581,6 +600,7 @@ python3 tools/vectors/build.py pq  ../stars-oracle-apparatus/evidence/pq001
 python3 tools/vectors/build.py rg001 ../stars-oracle-apparatus/evidence/rg001
 python3 tools/vectors/build.py rg002 <dir named rg002>                      # a link to evidence/rg002/run
 python3 tools/vectors/build.py rg003 <dir named rg003> vectors/rg           # a link to evidence/rg003/run
+python3 tools/vectors/build.py rg004 <dir named rg004> vectors/rg           # a link to evidence/rg004/run
 python3 tools/vectors/build.py co  <dir named co>                           # a link to evidence/fo (the co* runs)
 go test ./internal/vectors
 ```
