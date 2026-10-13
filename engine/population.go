@@ -40,6 +40,12 @@ func MaxPopulation(race Race, hab int, starbaseHull int) int {
 	return mp
 }
 
+// EventOvercrowded: Player's planet lost Count population (units of 100
+// colonists) to overcrowding during growth: it shrank but did not die
+// out, with a hab value of 0 or more (MESSAGES.md 0x026, CONFIRMED
+// KX-002). A planet that dies out is emptied instead (0x023).
+const EventOvercrowded EventKind = EventPartAvailable + 1
+
 // GrowPopulation advances one year of population growth (or death) on a
 // planet: pop in units, carry in hundredths of a unit (the persistent
 // excessPop byte), maxPop in units, growthRate G in percent (already doubled

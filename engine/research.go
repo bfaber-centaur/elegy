@@ -92,6 +92,14 @@ func ResearchLevelCost(level, levelSum int, setting ResearchCost, slowerTech boo
 // and stores half of what is left, rounded up. A Generalized Research
 // share for another field adds half of it, rounded down.
 func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) ResearchState {
+	s, _ = addResearch(s, race, resources, slowerTech)
+	return s
+}
+
+// addResearch is AddResearch, also returning the field of each level
+// gained, in the order gained.
+func addResearch(s ResearchState, race Race, resources int, slowerTech bool) (ResearchState, []int) {
+	var gained []int
 	scale := 1
 	if slowerTech {
 		scale = 2
@@ -131,6 +139,7 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 		}
 		s.Accumulated[field] -= cost
 		s.Levels[field]++
+		gained = append(gained, field)
 		return true
 	}
 	levelUp := func(field int) bool {
@@ -232,7 +241,7 @@ func AddResearch(s ResearchState, race Race, resources int, slowerTech bool) Res
 			s.Accumulated[f] = (s.Accumulated[f] + 1) / 2
 		}
 	}
-	return s
+	return s, gained
 }
 
 // LevelUpCheck is the second research level-up check of the turn, after
@@ -331,7 +340,76 @@ func (g *Game) stealResearch(spent [][NumFields]int) []Event {
 			pl.Research.Accumulated[f] += stored
 			events = append(events, Event{Kind: EventResearchStolen, Player: i, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: s})
 		}
+		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+		events = append(events, g.levelEvents(i, before, fieldOrder(before, pl.Research.Levels))...)
 	}
 	return events
+}
+
+// Research level-up messages.
+const (
+	// EventLevelUp: Player gained a level in field Item (a field index,
+	// not an item kind); Count is the new level (MESSAGES.md 0x050, or
+	// 0x136 for a Generalized Research player).
+	EventLevelUp EventKind = EventBattleSummary + 1 + iota
+	// EventPartAvailable: that level made a component available to
+	// Player; Item is the field, Count the component's position in
+	// Components().Components (MESSAGES.md 0x05f, or 0x078, 0x0d0, 0x145
+	// or 0x157 by its kind).
+	EventPartAvailable
+)
+
+// levelEvents is the level-up messages for the levels player gained since
+// its levels were before, one field index per level in gained, in the
+// order the levels were gained (MESSAGES.md 0x050 and 0x05f, CONFIRMED
+// KX-003, KX-004, KX-005): for each level, its message, then one per
+// component the race may use (owned, for a Mystery Trader part) whose
+// requirement in that field is the new level and whose other requirements
+// the player then meets (MEASURED KX-005 R1; BINARY-ONLY beyond it).
+//
+// The order follows the research chain, not field order: the current
+// field's levels first, then the field the leftover moved to, each level
+// followed by its own parts (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at
+// stars-elegy d89b8a3, MEASURED in RG-002 2468: biotech 7, its parts, then
+// weapons 8, its parts). A part is announced by whichever requirement is
+// met last (same clarification, MEASURED across years); ASSUMPTION: within
+// one year "then" is the levels reached so far in that order, so a part
+// needing two fields that both rose is announced at the later one.
+//
+// Terraforming components are announced like other parts, by any field
+// (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at stars-elegy d89b8a3,
+// MEASURED: Gravity ±7 on propulsion 5, Radiation ±7 on weapons 5).
+func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Event {
+	pl := &g.Players[player]
+	cat := Components()
+	trader := g.traderItems(player)
+	levels := before
+	var events []Event
+	for _, f := range gained {
+		levels[f]++
+		events = append(events, Event{Kind: EventLevelUp, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: levels[f]})
+		for i, c := range cat.Components {
+			if c.TechReq[f] != levels[f] {
+				continue
+			}
+			if ok, err := c.Buildable(pl.Race, levels, trader[c.Name]); err != nil || !ok {
+				continue
+			}
+			events = append(events, Event{Kind: EventPartAvailable, Player: player, Planet: -1, Fleet: -1, Item: ItemKind(f), Count: i})
+		}
+	}
+	return events
+}
+
+// fieldOrder is the levels gained from before to after, in field order:
+// the order of LevelUpCheck, which raises each field in turn.
+func fieldOrder(before, after [NumFields]int) []int {
+	var gained []int
+	for f := range NumFields {
+		for range after[f] - before[f] {
+			gained = append(gained, f)
+		}
+	}
+	return gained
 }

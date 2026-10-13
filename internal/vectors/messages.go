@@ -18,16 +18,16 @@ import (
 func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
-		0x026: "none: no event for a population loss to overcrowding",
+		0x026: "EventOvercrowded",
 		0x02e: "none: no event for colonists beamed down by an unload task",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
 		0x037: "EventBuilt of mines, one in all (merge rule)",
 		0x038: "EventBuilt of mines, more than one (merge rule)",
 		0x04e: "EventFleetArrived",
-		0x050: "none: no event for a research level gained",
+		0x050: "EventLevelUp, a player without Generalized Research",
 		0x05b: "EventFleetScrapped in deep space",
-		0x05f: "none: no event for a component a level made available",
+		0x05f: "EventPartAvailable of a component, not a hull, planetary scanner or defense",
 		0x083: "EventCometStrike, small",
 		0x084: "EventCometStrike, medium",
 		0x085: "EventCometStrike, large",
@@ -119,6 +119,21 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 			}
 		case engine.EventFleetArrived:
 			send(ev.Player, 0x04e)
+		case engine.EventOvercrowded:
+			send(ev.Player, 0x026)
+		case engine.EventLevelUp:
+			if ev.Player >= 0 && ev.Player < len(g.Players) && !g.Players[ev.Player].Race.LRT.GeneralizedResearch {
+				send(ev.Player, 0x050)
+			}
+		case engine.EventPartAvailable:
+			cs := engine.Components().Components
+			if ev.Count >= 0 && ev.Count < len(cs) {
+				switch cs[ev.Count].Category {
+				case engine.CatHull, engine.CatStarbaseHull, engine.CatPlanetary:
+				default:
+					send(ev.Player, 0x05f)
+				}
+			}
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
 				send(ev.Player, 0x05b)

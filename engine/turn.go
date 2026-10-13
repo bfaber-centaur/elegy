@@ -334,7 +334,9 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	// The first research level-up check (KERNEL.md "Turn order" step 2.4).
 	for i := range g.Players {
 		pl := &g.Players[i]
+		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+		events = append(events, g.levelEvents(i, before, fieldOrder(before, pl.Research.Levels))...)
 	}
 	events = append(events, g.loadPass(false)...)
 
@@ -458,11 +460,15 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		}
 		player := &g.Players[p.Owner]
 		col := NewColony(p, player)
+		was := p.Population
 		p.Population, p.GrowthCarry = GrowPopulation(p.Population, p.GrowthCarry, col.MaxPop, player.Race.growthRate(), col.Hab)
-		if p.Population <= 0 {
+		switch {
+		case p.Population <= 0:
 			// A planet whose population dies out is emptied
 			// (TAKEOVER.md "Capture").
 			events = append(events, g.emptyPlanet(i))
+		case p.Population < was && col.Hab >= 0:
+			events = append(events, Event{Kind: EventOvercrowded, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: was - p.Population})
 		}
 	}
 
@@ -470,7 +476,10 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	for i := range g.Players {
 		pl := &g.Players[i]
 		spent[i] = researchSpent(pl.Research, pl.Race, research[i])
-		pl.Research = AddResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
+		before := pl.Research.Levels
+		var order []int
+		pl.Research, order = addResearch(pl.Research, pl.Race, research[i], g.SlowerTech)
+		events = append(events, g.levelEvents(i, before, order)...)
 	}
 	events = append(events, g.stealResearch(spent)...)
 	// Research level-ups, then random events (KERNEL.md "Turn order"
@@ -549,7 +558,9 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
 	for i := range g.Players {
 		pl := &g.Players[i]
+		before := pl.Research.Levels
 		pl.Research = LevelUpCheck(pl.Research, pl.Race, g.SlowerTech)
+		events = append(events, g.levelEvents(i, before, fieldOrder(before, pl.Research.Levels))...)
 	}
 	events = withFinished(events, g.loadPass(true))
 	// Mine sweeping (step 7.1).
