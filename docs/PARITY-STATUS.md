@@ -24,8 +24,10 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
 | sample | 1024 / 199 | 5291 / 451 | 2523 / 263 |
-| not compared | 3 / 3 | 11 / 11 | 19 / 19 |
-| total | 1316 | 5947 | 2893 |
+| not compared | 2 / 2 | 9 / 9 | 19 / 19 |
+| total | 1314 | 5943 | 2893 |
+
+- Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -42,13 +44,15 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-004 | chained | 197 | 1 | 0 | 1724 | 890 | 19 |
 | RG-004 | restarts | 2501 | 12 | 0 | 139 | 160 | 19 |
 
+Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
+
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
 **Open owners (random-driven lines with a named draw).** RG-002 and RG-003 share them. Each has 3 lines, all in the Y6 restart (section "RG-002 and RG-003 year 6 rebuilt"):
 
 | line | owner | draw |
 |---|---|---|
-| fleet 6/12, waypoint 1 | lane D | combat draws: the target, player 3's fleet 2, dies in Elegy's battle at (1296,1356) on 6 of 8 seeds |
+| fleet 6/12, waypoint 1 | lane D | movement tie draws (#247): the target, player 3's fleet 2, dies in Elegy's battle at (1296,1356) on 6 of 8 seeds |
 | planet 102, surface minerals | economy | mining's +1 draw on germanium (54 kT on seed 0, 53 kT on seed 7) |
 | planet 102, production queue | economy | the same germanium draw (53 kT gives 93%, 54 kT gives 99%) |
 
@@ -68,8 +72,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 
 | cause | RG-002 | RG-003 | RG-004 | owner |
 |---|---:|---:|---:|---|
-| 0x05b salvage and fleet slots (EventFleetScrapped names neither) | 2 | 2 | 0 | lane D |
-| 0x08f/0x090 bombing fleet (EventBombed names the bomber) | 2 | 4 | 0 | lane D |
+| 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | planet `packet_destination` null with no starbase (cleared or not written: UNRESOLVED) | 2 | 4 | 0 | economy (PK-1, queued, compares these) |
 | 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
@@ -78,7 +81,7 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 | 0x040 planet lost with no colonists at growth has no event mapping (message and sequence entry) | 0 | 0 | 8 | economy, after PK-1 |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 6 | 22 | 38 | |
+| total | 4 | 18 | 38 | |
 
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. The mapping is still missing.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
