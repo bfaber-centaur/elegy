@@ -530,6 +530,8 @@ RD-P16
 RD-P17
 RD-P18
 RD-P19
+RD-P20
+RD-P21
 SC001-plain-in
 SC001-plain-out
 SC001-st35-in
