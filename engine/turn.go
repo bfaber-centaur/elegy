@@ -112,6 +112,11 @@ type Game struct {
 	// (battle.costLevels, colonize). It is nil outside that span and is
 	// not saved.
 	costLevels [][NumFields]int
+	// reached is, during a generation, the waypoint each fleet (by id)
+	// reached this year, its latest (arrive), whose target the load pass
+	// after movement reads (namedSource). It is nil outside that span and
+	// is not saved.
+	reached map[int]Waypoint
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies
@@ -293,6 +298,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 		costLevels[i] = p.Research.Levels
 	}
 	g.costLevels = costLevels
+	g.reached = map[int]Waypoint{}
 
 	// The orders (KERNEL.md "Turn order" step 1): the player shuffle,
 	// whose draws are the first of the year, then each player's file in
@@ -620,7 +626,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
-	g.heldNumbers, g.costLevels = nil, nil
+	g.heldNumbers, g.costLevels, g.reached = nil, nil, nil
 	g.dropBareRecords()
 	return TurnResult{
 		Game:   g,

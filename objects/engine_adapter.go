@@ -63,6 +63,17 @@ func (s *Space) PacketPos(owner, number int) (engine.Point, bool) {
 	return engine.Point{}, false
 }
 
+// PacketCargo is the cargo of owner's packet number and its position, or
+// nil.
+func (s *Space) PacketCargo(owner, number int) (*engine.Minerals, engine.Point) {
+	for i := range s.Packets {
+		if p := &s.Packets[i]; p.Owner == owner && p.Number == number {
+			return &p.Cargo, p.Pos
+		}
+	}
+	return nil, engine.Point{}
+}
+
 func width(g *engine.Game) int { return (g.Size + 1) * 400 }
 
 func impactContext(g *engine.Game) ImpactContext {
