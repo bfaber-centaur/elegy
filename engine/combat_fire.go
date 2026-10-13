@@ -57,22 +57,16 @@ func (b *battle) fire() {
 	}
 }
 
-// eligible returns the eligible targets of token t's weapon slot w, in
-// token order.
-func (b *battle) eligible(t *token, w weaponSlot) []int {
-	pick := func(tt TargetType) []int {
-		var out []int
-		for j, e := range b.tokens {
-			if e.live() && b.attacks(t.player, e.player) && dist(t.x, t.y, e.x, e.y) <= w.reach && e.matches(tt) {
-				out = append(out, j)
-			}
+// inReach returns the targets of token t's weapon slot w of target type
+// tt, in token order: live, attackable and in reach.
+func (b *battle) inReach(t *token, w weaponSlot, tt TargetType) []int {
+	var out []int
+	for j, e := range b.tokens {
+		if e.live() && b.attacks(t.player, e.player) && dist(t.x, t.y, e.x, e.y) <= w.reach && e.matches(tt) {
+			out = append(out, j)
 		}
-		return out
 	}
-	if out := pick(t.primary); len(out) > 0 {
-		return out
-	}
-	return pick(t.secondary)
+	return out
 }
 
 // gatlingTargets returns the targets of a gatling shot from token t's
@@ -92,16 +86,28 @@ func (b *battle) gatlingTargets(t *token, w weaponSlot) []int {
 	return out
 }
 
-// choose returns the most attractive eligible target, the first in token
-// order on ties, or -1 when every score is 0.
+// choose returns the most attractive target of the primary type, the
+// first in token order on ties, or of the secondary type when no
+// primary-type target scores above 0; -1 when none does.
+//
+// A pulsed sapper whose only primary-type ("armed") target in reach was
+// an unshielded starbase, scoring 0, fired at a shielded secondary-type
+// ("any") stack instead (MEASURED, RG-003 year 8, one battle). That the
+// same holds for a torpedo whose every primary-type target scores 0 is an
+// ASSUMPTION (NOT RUN).
 func (b *battle) choose(t *token, w weaponSlot) int {
-	best, bestScore := -1, 0
-	for _, j := range b.eligible(t, w) {
-		if s := attractiveness(t, w, b.tokens[j]); s > bestScore {
-			best, bestScore = j, s
+	for _, tt := range []TargetType{t.primary, t.secondary} {
+		best, bestScore := -1, 0
+		for _, j := range b.inReach(t, w, tt) {
+			if s := attractiveness(t, w, b.tokens[j]); s > bestScore {
+				best, bestScore = j, s
+			}
+		}
+		if best >= 0 {
+			return best
 		}
 	}
-	return best
+	return -1
 }
 
 // attractiveness is the target-choice score (COMBAT.md "Target choice").
