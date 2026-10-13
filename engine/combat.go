@@ -110,6 +110,7 @@ func battles(g *Game, rng Rand, gained map[int]bool, costLevels [][NumFields]int
 		for _, p := range inv {
 			res.events = append(res.events, Event{Kind: EventBattle, Player: p, Planet: planetID, Fleet: -1, Count: len(b.tokens)})
 		}
+		res.events = append(res.events, b.summaries(planetID)...)
 		res.events = append(res.events, b.techAttempts(gained)...)
 		b.finish()
 		res.hits = append(res.hits, b.hits)

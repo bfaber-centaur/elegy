@@ -343,7 +343,7 @@ const (
 	// EventLevelUp: Player gained a level in field Item (a field index,
 	// not an item kind); Count is the new level (MESSAGES.md 0x050, or
 	// 0x136 for a Generalized Research player).
-	EventLevelUp EventKind = EventPlanetNotDegraded + 1 + iota
+	EventLevelUp EventKind = EventBattleSummary + 1 + iota
 	// EventPartAvailable: that level made a component available to
 	// Player; Item is the field, Count the component's position in
 	// Components().Components (MESSAGES.md 0x05f, or 0x078, 0x0d0, 0x145
