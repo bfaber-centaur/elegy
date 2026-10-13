@@ -239,6 +239,7 @@ func TestMessageOrder(t *testing.T) {
 		{"the nearest one out of order", e[7], []int{0x05b, 0x036, 0x04e}, "message 0x036 to player 0 comes before 0x04e, want after"},
 		{"one Elegy does not send is passed over", e[7], []int{0x036, 0x05b}, "message 0x036 to player 0 comes before 0x05b, want after"},
 		{"none sent before", e[7], []int{0x036}, ""},
+		{"only the nearest one sent decides", e[7], []int{0x04e, 0x036, 0x05b}, ""},
 		{"a sample is passed over by an exact one", e[7], []int{0x05b, 0x04e, 0x036, 0x083}, ""},
 		{"a sample against the nearest", e[6], []int{0x05b, 0x083, 0x04e}, "message 0x083 to player 0 comes before 0x04e, want after"},
 	} {
@@ -254,6 +255,12 @@ func TestMessageOrder(t *testing.T) {
 	}
 	if got := messageOrderCheck(twice[0].Expect[2], []int{0x04e, 0x05b}); got != "message 0x04e to player 0 comes before 0x05b, want after" {
 		t.Errorf("repeated id, out of order: %q", got)
+	}
+	// A sample is placed against an earlier sample.
+	samples := []pvCase{{Expect: []pvExpect{msg(1, 0, 0x05b, true, true), msg(1, 0, 0x04e, true, true)}}}
+	pvMessageOrder(samples)
+	if got := messageOrderCheck(samples[0].Expect[1], []int{0x04e, 0x05b}); got != "message 0x04e to player 0 comes before 0x05b, want after" {
+		t.Errorf("sample after a sample: %q", got)
 	}
 	// Through messageCheck: a present message out of order fails.
 	l := pvLoaded{events: [][]engine.Event{nil, {{Kind: engine.EventFleetArrived, Player: 0, Fleet: 1}, {Kind: engine.EventFleetScrapped, Player: 0, Planet: -1}}}}

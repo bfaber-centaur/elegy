@@ -23,7 +23,7 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 - **Messages are compared now** (PARITY-STATUS.md "Messages compared"). RG-002's 68 message lines: 32 match, 15 are samples, and 21 were missing mechanic for ids Elegy sent no event for: economy 10 (0x026, 0x050, 0x05f), lane D 9 (battle summaries) and lane A 2 (0x02e). Lane D's battle summaries (#199) cleared its 9, leaving 12.
 - **`object`-form wormholes are compared now.** All 72 are samples (a wormhole moves on draws every year), and all 72 miss on position, so they add 160 sample lines and no deterministic one.
 - **Designs and player counts are compared now**, and all 20 RG-002 lines match.
-- **Message order is compared now** (PARITY-STATUS.md "Message order compared"): 794 comparisons over all corpora and seed variants, all in order.
+- **Message order between ids is compared now** (PARITY-STATUS.md "Message order compared"): 794 comparisons over all corpora and seed variants, all in order.
 - **Nothing Elegy models is left uncompared in RG-002.** The 184 not-compared lines are 176 battle expectations that `TestBattleRecords` compares record by record and 8 nulls in the original's file.
 
 ## What still matters
