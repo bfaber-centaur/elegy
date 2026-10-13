@@ -5995,7 +5995,7 @@ matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1153,1609) | matched: 2 
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1266,1400) | matched: 7 tokens, players and planet; 0 of 74 hits compared and 74 conditioned; 53 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1293,1597) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1329,1244) | matched: 3 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 6 moves allowed
-unresolved randomness [lane D]: player 1's mine stop of follower 6/2 (about 4% of seed variants in Elegy; variant 16 reproduces the record) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
+random-driven [lane D]: oracle fought here in 3 of 4 streams; only the recorded stream stopped 6/2 (stars-elegy #201) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1402,1704) | matched: 5 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 14 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1423,1158) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 3 hits compared and 3 conditioned; 8 moves allowed
