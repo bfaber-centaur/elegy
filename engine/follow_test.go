@@ -260,6 +260,18 @@ func TestFollowMergedLeader(t *testing.T) {
 	if a.Results[0].Err != nil || a.Results[1].Err != nil || g.fleetIndex(3) >= 0 || a.follows[1] != 3 {
 		t.Errorf("follower takes the ships: results %v, follows %v; want fleet 3 emptied, fleet 1 still naming 3", a.Results, a.follows)
 	}
+	// A merge later in the replay retargets only the follows of the fleet
+	// merged away: player 1's follow of player 0's fleet 2 stays when
+	// player 0 then merges fleet 1 into 3.
+	g, _ = mergedFollowGame(t)
+	files = []PlayerOrders{
+		{Player: 0, Orders: []Order{MergeOrder{Into: 3, From: []int{1}}}},
+		{Player: 1, Orders: []Order{FollowOrder{Fleet: 4, Leader: 2}}},
+	}
+	a = ApplyOrders(g, files, []int{1, 0})
+	if a.Results[0].Err != nil || a.Results[1].Err != nil || g.fleetIndex(1) >= 0 || a.follows[4] != 2 {
+		t.Errorf("other leader: results %v, follows %v; want fleet 1 merged, fleet 4 still following 2", a.Results, a.follows)
+	}
 	// The check touches only a follow whose leader is gone and was merged
 	// away: not a leader that exists, nor one gone some other way.
 	for _, c := range []struct {
