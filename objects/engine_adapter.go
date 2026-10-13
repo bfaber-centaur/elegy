@@ -383,6 +383,8 @@ func (s *Space) SweepMines(g *engine.Game) []engine.Event {
 			ev.Planet = g.Planets[w.Planet].ID
 		}
 		out = append(out, ev)
+		ev.Kind, ev.Player = engine.EventMinefieldSwept, w.Field.Owner
+		out = append(out, ev)
 	}
 	return out
 }

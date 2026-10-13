@@ -3882,10 +3882,10 @@ sample | rg003 | RG-003-2473 y11 #52 | fleet owner=1 id=52 | fuel = 43, want 42
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.boranium = 139, want 141
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.germanium = 14, want 16
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.ironium = 376, want 379
-not compared | rg003 | RG-003-2473 y11 #534 | message | message 0x0f4 has no event mapping
+sample | rg003 | RG-003-2473 y11 #534 | message | message 0x0f4 to player 0 present = false, want true
 sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x038 (focus 51, params [35 51]) = sent as 0x038 (focus 51, params [36 51])
 sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x038 (focus 51, params [36 51]) = sent, want not sent
-not compared | rg003 | RG-003-2473 y11 #535 | message_sequence | message_sequence entry 0x0f4 has no event mapping
+sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x0f4 (focus 95, params [95 82 0 5 0 1548 1298]) = not sent
 sample | rg003 | RG-003-2473 y11 #536 | player id=0 seen_by=0 | score_record.resources = 3071, want 3070
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.escort_ships = 140, want 143
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.resources = 23090, want 22823
@@ -4864,7 +4864,7 @@ sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.boranium = 29
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.germanium = 14, want 16
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.ironium = 393, want 395
 not compared | rg003 | RG-003-2474 y12 #556 | message | message 0x03a has no event mapping
-not compared | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 has no event mapping
+sample | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 to player 0 present = false, want true
 not compared | rg003 | RG-003-2474 y12 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003 | RG-003-2474 y12 #565 | player id=0 seen_by=0 | score_record.resources = 3157, want 3156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.escort_ships = 149, want 156
@@ -5357,8 +5357,7 @@ sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: y = 1778, want
 sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: years_since_jump = 42, want 0
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.boranium = 140, want 141
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.ironium = 378, want 379
-not compared | rg003-y11 | RG-003-Y11-2473 y1 #534 | message | message 0x0f4 has no event mapping
-not compared | rg003-y11 | RG-003-Y11-2473 y1 #535 | message_sequence | message_sequence entry 0x0f4 has no event mapping
+not compared | rg003-y11 | RG-003-Y11-2473 y1 #535 | message_sequence | message_sequence 0x0f4 field owner, type and location slots not compared
 sample | rg003-y11 | RG-003-Y11-2473 y1 #542 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 18
 sample | rg003-y11 | RG-003-Y11-2473 y1 #546 | player id=5 seen_by=5 | score_record.unarmed_ships = 69, want 70
 random-driven | rg003-y11 | RG-003-Y11-2473 y1 #78 | fleet owner=1 id=77 | waypoints[0] position = {1339 1443}, want {1342 1445} (7/8 variants match)
@@ -5414,7 +5413,6 @@ random-driven | rg003-y12 | RG-003-Y12-2474 y1 #53 | fleet owner=1 id=51 | cargo
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.boranium = 288, want 289
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.ironium = 396, want 395
 not compared | rg003-y12 | RG-003-Y12-2474 y1 #556 | message | message 0x03a has no event mapping
-not compared | rg003-y12 | RG-003-Y12-2474 y1 #563 | message | message 0x0f4 has no event mapping
 not compared | rg003-y12 | RG-003-Y12-2474 y1 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.score = 1246, want 1244
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.tech_level_sum = 60, want 59

@@ -2,6 +2,7 @@ package objects
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -185,6 +186,22 @@ func TestConfirmedSweepAfterLay(t *testing.T) {
 	m := space(g).Minefields
 	if len(m) != 1 || m[0].Count >= 160 {
 		t.Errorf("fields %+v, want the 160 field swept the year it was laid", m)
+	}
+}
+
+// Each sweep tells the sweeper (EventMinesSwept) and then the field's
+// owner (EventMinefieldSwept), with the same sweeper and amount
+// (MESSAGES.md 0x0c2, 0x0be, CONFIRMED ob/ob010).
+func TestSweepMinesEvents(t *testing.T) {
+	l := newLab(t)
+	fi := l.fleet(1, at(3, 0), "Laser DD", 1)
+	s := &Space{Minefields: []Minefield{{Owner: 0, Kind: Standard, Pos: origin, Count: 1000}}}
+	got := s.SweepMines(l.g)
+	id := l.g.Fleets[fi].ID
+	if len(got) != 2 || got[0].Count <= 0 || !reflect.DeepEqual(got, []engine.Event{
+		{Kind: engine.EventMinesSwept, Player: 1, Planet: -1, Fleet: id, Count: got[0].Count},
+		{Kind: engine.EventMinefieldSwept, Player: 0, Planet: -1, Fleet: id, Count: got[0].Count}}) {
+		t.Errorf("events %+v, want player 1's sweep by fleet %d, then the same to the field's owner 0", got, id)
 	}
 }
 

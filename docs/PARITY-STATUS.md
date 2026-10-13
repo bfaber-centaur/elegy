@@ -255,6 +255,18 @@ Measured on elegy main `97ac630` (#217) plus this branch.
 - **Other corpora:** 23 expectations that were skipped as unmapped (0x145 17, 0x078 4, 0x157 2) are now compared, and all match on the reference seed. The order check makes 2094 comparisons over the 8 seed variants, up from 1910 on main. 184 of them have 0x078, 0x145 or 0x157 on one side, and every one holds. That includes the KX-003 r2, KX-005 T0–T2 and RG-001 Y4 orders that failed under catalog order.
 - Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged. No compared expectation is decided by a BINARY-ONLY sentence alone: no vector has a starbase hull, a Genesis Device or a Total Terraforming race's ±3 announcement.
 
+### Mine-sweep messages (lane D)
+
+Measured on elegy main `3d65e46` (#225) plus this branch.
+
+- **Mapped** from Elegy's existing sweep step (objects `Sweep`, OBJECTS.md "Sweeping"), by MESSAGES.md at stars-elegy 1d4c97b:
+  - **0x0f4**: a starbase swept mines. `EventMinesSwept` with a planet, to its owner (CONFIRMED ob/ob007, mf/mf01).
+  - **0x0c2**: a fleet swept mines. `EventMinesSwept` with a fleet, to its owner (CONFIRMED ob/ob010, cs).
+  - **0x0be**: someone swept your field. The new `EventMinefieldSwept` (kind 95) goes to the field's owner right after each sweeper's event, one per sweeper per field (CONFIRMED ob/ob010, cs, mf/mf01).
+- **Slots.** The sweeper (planet or fleet) and the amount are compared. The player slot's flags, the field type value and the location encoding have no public table, so the field owner, type and centre slots (and 0x0be's field object) are not compared.
+- **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
+- **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
