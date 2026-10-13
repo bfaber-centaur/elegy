@@ -38,6 +38,7 @@ func TestPartsReaders(t *testing.T) {
 		"objects/trader.go:sameLoadout":            true, // the design's identity
 		"internal/vectors/orders.go:orders":        true, // design orders
 		"internal/vectors/vectors.go:loadVector":   true, // builds designs
+		"internal/vectors/vectors.go:designEquals": true, // compares the stored loadout with the original's file
 	}
 	var found []string
 	err := filepath.WalkDir("..", func(path string, e fs.DirEntry, err error) error {

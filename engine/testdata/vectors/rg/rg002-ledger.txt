@@ -59,8 +59,6 @@ sample | rg002 | RG-002-2464 y2 #1 | fleet owner=1 id=1 | cargo.ironium = 182, w
 sample | rg002 | RG-002-2464 y2 #11 | fleet owner=1 id=12 | waypoints[0] position = {1426 1398}, want {1411 1378}
 sample | rg002 | RG-002-2464 y2 #11 | fleet owner=1 id=12 | x = 1426, want 1411
 sample | rg002 | RG-002-2464 y2 #11 | fleet owner=1 id=12 | y = 1398, want 1378
-not compared | rg002 | RG-002-2464 y2 #133 | design owner=1 slot=3 | design read needs the order layer's design source
-not compared | rg002 | RG-002-2464 y2 #134 | design owner=6 slot=4 | design read needs the order layer's design source
 sample | rg002 | RG-002-2464 y2 #143 | planet id=8 | concentrations = [62 87 9], want [153 188 127]
 sample | rg002 | RG-002-2464 y2 #143 | planet id=8 | environment = [10 60 83], want [1 52 76]
 sample | rg002 | RG-002-2464 y2 #143 | planet id=8 | surface_minerals = [0 0 0], want [242 351 551]
@@ -91,10 +89,8 @@ sample | rg002 | RG-002-2464 y2 #238 | planet id=95 | surface_minerals = [146 11
 sample | rg002 | RG-002-2464 y2 #253 | planet id=110 | surface_minerals = [11 191 66], want [12 191 64]
 sample | rg002 | RG-002-2464 y2 #257 | planet id=114 | surface_minerals = [72 20 1], want [73 20 1]
 sample | rg002 | RG-002-2464 y2 #259 | planet id=116 | surface_minerals = [93 71 51], want [91 70 51]
-not compared | rg002 | RG-002-2464 y2 #270 | player id=1 | player field counts
 sample | rg002 | RG-002-2464 y2 #271 | player id=1 | research_accumulated.weapons = 238, want 242
 sample | rg002 | RG-002-2464 y2 #276 | player id=5 | research_accumulated.electronics = 432, want 433
-not compared | rg002 | RG-002-2464 y2 #277 | player id=6 | player field counts
 sample | rg002 | RG-002-2464 y2 #291 | production_queue planet=22 | queue = [{3 1 67 0} {7 1 0 0} {9 1 29 7}], want [{3 1 51 0} {7 1 0 0} {9 1 30 7}]
 sample | rg002 | RG-002-2464 y2 #298 | production_queue planet=37 | queue = [{3 1 55 0} {7 1 0 0} {9 1 37 7}], want [{3 1 39 0} {7 1 0 0} {9 1 38 7}]
 sample | rg002 | RG-002-2464 y2 #301 | production_queue planet=41 | queue = [{3 1 11 0} {7 1 0 0} {9 1 56 7}], want [{3 1 27 0} {7 1 0 0} {9 1 55 7}]
@@ -533,7 +529,6 @@ sample | rg002 | RG-002-2467 y5 #172 | fleet owner=6 id=12 | orbiting = 35, want
 sample | rg002 | RG-002-2467 y5 #172 | fleet owner=6 id=12 | waypoints[0] position = {1197 1362}, want {1232 1353}
 sample | rg002 | RG-002-2467 y5 #172 | fleet owner=6 id=12 | x = 1197, want 1232
 sample | rg002 | RG-002-2467 y5 #172 | fleet owner=6 id=12 | y = 1362, want 1353
-not compared | rg002 | RG-002-2467 y5 #176 | design owner=6 slot=3 | design read needs the order layer's design source
 sample | rg002 | RG-002-2467 y5 #178 | planet id=0 | surface_minerals = [118 15 4], want [119 18 2]
 sample | rg002 | RG-002-2467 y5 #183 | planet id=5 | surface_minerals = [4096 2127 1741], want [4095 2130 1741]
 sample | rg002 | RG-002-2467 y5 #185 | planet id=7 | excess = 11, want 36
@@ -635,7 +630,6 @@ sample | rg002 | RG-002-2467 y5 #317 | player id=3 | research_accumulated.weapon
 sample | rg002 | RG-002-2467 y5 #320 | player id=5 | research_accumulated.construction = 154, want 0
 sample | rg002 | RG-002-2467 y5 #320 | player id=5 | research_accumulated.propulsion = 0, want 351
 sample | rg002 | RG-002-2467 y5 #320 | player id=5 | research_accumulated.weapons = 171, want 185
-not compared | rg002 | RG-002-2467 y5 #321 | player id=6 | player field counts
 sample | rg002 | RG-002-2467 y5 #321 | player id=6 | research_accumulated.biotechnology = 290, want 291
 sample | rg002 | RG-002-2467 y5 #321 | player id=6 | research_accumulated.construction = 2890, want 2891
 sample | rg002 | RG-002-2467 y5 #321 | player id=6 | research_accumulated.electronics = 2180, want 2181
@@ -807,10 +801,6 @@ sample | rg002 | RG-002-2468 y6 #179 | fleet owner=6 id=12 | orbiting = 35, want
 sample | rg002 | RG-002-2468 y6 #179 | fleet owner=6 id=12 | waypoints[0] position = {1197 1362}, want {1268 1355}
 sample | rg002 | RG-002-2468 y6 #179 | fleet owner=6 id=12 | x = 1197, want 1268
 sample | rg002 | RG-002-2468 y6 #179 | fleet owner=6 id=12 | y = 1362, want 1355
-not compared | rg002 | RG-002-2468 y6 #183 | starbase_design owner=6 slot=2 | expectation starbase_design
-not compared | rg002 | RG-002-2468 y6 #184 | starbase_design owner=6 slot=7 | expectation starbase_design
-not compared | rg002 | RG-002-2468 y6 #185 | starbase_design owner=6 slot=8 | expectation starbase_design
-not compared | rg002 | RG-002-2468 y6 #186 | starbase_design owner=6 slot=9 | expectation starbase_design
 sample | rg002 | RG-002-2468 y6 #187 | planet id=0 | surface_minerals = [128 11 6], want [128 13 4]
 sample | rg002 | RG-002-2468 y6 #191 | planet id=4 | surface_minerals = [180 221 56], want [180 219 57]
 sample | rg002 | RG-002-2468 y6 #192 | planet id=5 | surface_minerals = [4668 2458 2282], want [4667 2461 2283]
@@ -1151,8 +1141,6 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #9 | fleet owner=1 id=7 | cargo.germanium 
 incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.boranium = 68, want 69 (6/8 variants match)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.ironium = 182, want 181 (6/8 variants match)
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #133 | design owner=1 slot=3 | design read needs the order layer's design source
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #134 | design owner=6 slot=4 | design read needs the order layer's design source
 sample | rg002-y2 | RG-002-Y2-2464 y1 #143 | planet id=8 | concentrations = [62 87 9], want [153 188 127]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #143 | planet id=8 | environment = [10 60 83], want [1 52 76]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #143 | planet id=8 | surface_minerals = [0 0 0], want [242 351 551]
@@ -1170,10 +1158,8 @@ sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | factories = 52, want
 sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | mines = 74, want 72
 sample | rg002-y2 | RG-002-Y2-2464 y1 #238 | planet id=95 | surface_minerals = [146 113 3], want [146 113 0]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #257 | planet id=114 | surface_minerals = [72 20 1], want [73 20 1]
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #270 | player id=1 | player field counts
 sample | rg002-y2 | RG-002-Y2-2464 y1 #271 | player id=1 | research_accumulated.weapons = 236, want 242
 sample | rg002-y2 | RG-002-Y2-2464 y1 #276 | player id=5 | research_accumulated.electronics = 432, want 433
-not compared | rg002-y2 | RG-002-Y2-2464 y1 #277 | player id=6 | player field counts
 sample | rg002-y2 | RG-002-Y2-2464 y1 #284 | production_queue planet=12 | queue = [{3 1 35 0} {7 1 0 0} {9 1 17 7}], want [{3 1 51 0} {7 1 0 0} {9 1 16 7}]
 sample | rg002-y2 | RG-002-Y2-2464 y1 #298 | production_queue planet=37 | queue = [{3 1 55 0} {7 1 0 0} {9 1 37 7}], want [{3 1 39 0} {7 1 0 0} {9 1 38 7}]
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #301 | production_queue planet=41 | queue = [{3 1 11 0} {7 1 0 0} {9 1 56 7}], want [{3 1 27 0} {7 1 0 0} {9 1 55 7}] (3/8 variants match)
@@ -1337,7 +1323,6 @@ random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | y = 128
 sample | rg002-y5 | RG-002-Y5-2467 y1 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg002-y5 | RG-002-Y5-2467 y1 #126 | fleet_gone owner=5 id=9 | fleet still exists
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #172 | fleet owner=6 id=12 | waypoints[1] = {{1262 1345} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1262 1345} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (4/8 variants match)
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #176 | design owner=6 slot=3 | design read needs the order layer's design source
 sample | rg002-y5 | RG-002-Y5-2467 y1 #178 | planet id=0 | surface_minerals = [117 16 1], want [119 18 2]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #190 | planet id=12 | surface_minerals = [62 610 9], want [64 611 10]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #215 | planet id=35 | surface_minerals = [3 1896 567], want [3 1898 567] (5/8 variants match)
@@ -1357,7 +1342,6 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #316 | player id=2 | research_accumulated.
 sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.biotechnology = 266, want 0
 sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.propulsion = 0, want 351
 sample | rg002-y5 | RG-002-Y5-2467 y1 #320 | player id=5 | research_accumulated.weapons = 186, want 185
-not compared | rg002-y5 | RG-002-Y5-2467 y1 #321 | player id=6 | player field counts
 sample | rg002-y5 | RG-002-Y5-2467 y1 #322 | production_queue planet=0 | queue = [{9 1 12 5}], want [{9 1 11 5}]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #326 | production_queue planet=12 | queue = [{3 1 31 0} {7 1 0 0} {9 1 9 7} {15 3 0 0}], want [{3 1 47 0} {7 1 0 0} {9 1 8 7} {15 3 0 0}]
 sample | rg002-y5 | RG-002-Y5-2467 y1 #344 | production_queue planet=39 | queue = [{3 1 15 0} {7 1 0 0} {9 1 33 7}], want [{3 1 31 0} {7 1 0 0} {9 1 32 7}]
@@ -1396,10 +1380,6 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #47 | fleet owner=1 id=47 | cargo.boranium
 sample | rg002-y5 | RG-002-Y5-2467 y1 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg002-y6 | RG-002-Y6-2468 y1 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg002-y6 | RG-002-Y6-2468 y1 #179 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #183 | starbase_design owner=6 slot=2 | expectation starbase_design
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #184 | starbase_design owner=6 slot=7 | expectation starbase_design
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #185 | starbase_design owner=6 slot=8 | expectation starbase_design
-not compared | rg002-y6 | RG-002-Y6-2468 y1 #186 | starbase_design owner=6 slot=9 | expectation starbase_design
 sample | rg002-y6 | RG-002-Y6-2468 y1 #239 | planet id=49 | starbase = design 102 damage 0, want design 102 damage 390
 sample | rg002-y6 | RG-002-Y6-2468 y1 #275 | planet id=85 | surface_minerals = [1886 0 1235], want [1884 0 1233]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #291 | planet id=100 | starbase = design 51 damage 39, want design 51 damage 26
