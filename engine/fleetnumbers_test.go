@@ -164,7 +164,7 @@ func TestNewFleetTakesNoIDGoneThisYear(t *testing.T) {
 	if want := [][2]int{{g.Fleets[a].ID, 1}, {gone + 1, 2}}; !reflect.DeepEqual(got, want) {
 		t.Errorf("fleets (ID, number) %v, want %v", got, want)
 	}
-	if r.Game.fleetIDs != 0 {
-		t.Error("the returned game still has the year's ID floor")
+	if r.Game.fleetIDs != 0 || r.Game.removedFleets != nil {
+		t.Error("the returned game still has the year's ID floor or removed fleets")
 	}
 }

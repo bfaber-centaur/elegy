@@ -167,7 +167,7 @@ type Event struct {
 	Fleet  int // fleet id, or -1
 	Item   ItemKind
 	Count  int
-	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, or a swept field
+	Axes   []int // environment axes a random-event message names, a salvage or load message's cargo type, a swept field, or a gone target's owner and number (EventTargetGone)
 }
 
 // ProductionInput is everything one planet's production reads.

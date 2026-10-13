@@ -476,6 +476,8 @@ func (g *Game) removeFleetsAs(ids map[int]bool, standIn bool) {
 	for _, f := range g.Fleets {
 		if !ids[f.ID] {
 			fleets = append(fleets, f)
+		} else if g.removedFleets != nil {
+			g.removedFleets[f.ID] = [2]int{f.Owner, f.Number}
 		}
 	}
 	g.Fleets = fleets
