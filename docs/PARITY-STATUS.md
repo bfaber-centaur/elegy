@@ -173,7 +173,7 @@ Measured on elegy main `217ab4b` plus this branch.
 
 ### Alchemy message (economy)
 
-Measured on elegy main `217ab4b` plus #207 and this branch.
+Measured on elegy main `133816c` plus this branch.
 
 - **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
 - **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
