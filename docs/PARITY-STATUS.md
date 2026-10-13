@@ -203,6 +203,14 @@ Measured on elegy main `3d33192` (#211) plus this branch.
 - **Order:** with 0x08c mapped, the order check (section above) makes 1662 comparisons over the 8 seed variants, up from 1534. The 128 new ones each place a 0x035 (40) or 0x036 (88) after a 0x08c, and every one holds: no per-corpus tally changes.
 - **RG-002:** it carries no 0x08c, so the ledger is unchanged.
 
+### Orders reduced to their limit (economy)
+
+Measured on elegy main `133816c` plus this branch.
+
+- **0x12a** from the existing `EventOrderClipped` of a factory, mine or defense order, and **0x12f** from the same event of a terraform order (MESSAGES.md 0x12a, CONFIRMED KX-002, PQ-001; 0x12f, CONFIRMED KX-002; both at stars-elegy d89b8a3). Production emits the event when it cuts an order to what still fits, including a cut to 0.
+- **Other corpora:** 6 expectations that were skipped as unmapped are compared now (0x12a 4, 0x12f 2). All 6 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **RG-002:** it carries neither id, so the ledger is unchanged.
+
 ### Deferred: client estimators (milestone 3)
 
 The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
