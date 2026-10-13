@@ -226,6 +226,12 @@ const (
 	EventPacketNoDriver                                                // Player, Planet: a packet item with no mass driver or destination
 )
 
+// EventMinefieldSwept is the field owner's side of EventMinesSwept
+// (MESSAGES.md 0x0be, CONFIRMED ob/ob010, mf/mf01): Player = the field's
+// owner, Fleet or Planet = the sweeper's (as EventMinesSwept), Count =
+// mines swept. One per sweeper per field, right after the sweeper's.
+const EventMinefieldSwept EventKind = EventTerraformed + 1
+
 // loseFollowers turns other players' waypoints aimed at fleet f into
 // plain positions at `at`: they lose a fleet that went through a
 // wormhole or a stargate (OBJECTS.md "Travel", "Stargates").

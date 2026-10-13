@@ -2,6 +2,7 @@ package objects
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -185,6 +186,67 @@ func TestConfirmedSweepAfterLay(t *testing.T) {
 	m := space(g).Minefields
 	if len(m) != 1 || m[0].Count >= 160 {
 		t.Errorf("fields %+v, want the 160 field swept the year it was laid", m)
+	}
+}
+
+// Each sweep tells the sweeper (EventMinesSwept) and then the field's
+// owner (EventMinefieldSwept), with the same sweeper and amount
+// (MESSAGES.md 0x0c2, 0x0f4, 0x0be, CONFIRMED ob/ob010, mf/mf01). Two
+// sweepers in one field give the owner two events, each with its own
+// sweeper's amount (MESSAGES.md "Duplicates", BINARY-ONLY: no run with
+// two sweepers in one field is cited). A fleet or starbase that cannot
+// sweep sends nothing (ASSUMPTION from the 0x0c2/0x0f4/0x0be triggers,
+// which name a sweeper that sweeps; no vector has a non-sweeper in an
+// enemy field).
+func TestSweepMinesEvents(t *testing.T) {
+	cat := engine.Components()
+	for _, c := range []struct {
+		name   string
+		fleet  string // player 1's fleet at (3,0), "" for none
+		fort   string // player 1's starbase at (5,0), "" for none
+		sweeps int    // sweepers expected, the fleet first
+	}{
+		{"one fleet", "Laser DD", "", 1},
+		{"a fleet and a starbase in one field", "Laser DD", "Laser Fort", 2},
+		{"a fleet and a starbase that cannot sweep", "MML", "Empty Fort", 0},
+	} {
+		l := newLab(t)
+		empty, err := cat.NewDesign("Empty Fort", "Orbital Fort", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		l.designs["Empty Fort"] = len(l.g.Designs)
+		l.g.Designs = append(l.g.Designs, empty)
+		id := -1
+		if c.fleet != "" {
+			id = l.g.Fleets[l.fleet(1, at(3, 0), c.fleet, 1)].ID
+		}
+		if c.fort != "" {
+			l.g.Planets = []engine.Planet{{ID: 7, Pos: at(5, 0), Owner: 1, HasStarbase: true, StarbaseDesign: l.designs[c.fort]}}
+		}
+		s := &Space{Minefields: []Minefield{{Owner: 0, Kind: Standard, Pos: origin, Count: 1000}}}
+		got := s.SweepMines(l.g)
+		var want []engine.Event
+		total := 0
+		for k := 0; k < c.sweeps && 2*k+1 < len(got); k++ {
+			n := got[2*k].Count
+			total += n
+			fleet, planet := id, -1
+			if k == 1 || id < 0 {
+				fleet, planet = -1, 7
+			}
+			want = append(want,
+				engine.Event{Kind: engine.EventMinesSwept, Player: 1, Planet: planet, Fleet: fleet, Count: n},
+				engine.Event{Kind: engine.EventMinefieldSwept, Player: 0, Planet: planet, Fleet: fleet, Count: n})
+		}
+		if len(got) != 2*c.sweeps || !reflect.DeepEqual(got, want) || 1000-s.Minefields[0].Count != total {
+			t.Errorf("%s: events %+v, want each of %d sweeps to its sweeper (player 1), then the same to the field's owner 0", c.name, got, c.sweeps)
+		}
+		for _, e := range got {
+			if e.Count <= 0 {
+				t.Errorf("%s: %+v sweeps no mines", c.name, e)
+			}
+		}
 	}
 }
 

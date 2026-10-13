@@ -1768,11 +1768,7 @@ sample | rg003 | RG-003-2470 y8 #80 | fleet owner=1 id=80 | cargo.colonists = 0,
 sample | rg003 | RG-003-2470 y8 #80 | fleet owner=1 id=80 | waypoints[0] position = {1449 1321}, want {1380 1676}
 sample | rg003 | RG-003-2470 y8 #80 | fleet owner=1 id=80 | x = 1449, want 1380
 sample | rg003 | RG-003-2470 y8 #80 | fleet owner=1 id=80 | y = 1321, want 1676
-sample | rg003 | RG-003-2470 y8 #81 | fleet owner=1 id=81 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg003 | RG-003-2470 y8 #82 | fleet owner=1 id=82 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg003 | RG-003-2470 y8 #84 | fleet owner=1 id=84 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2470 y8 #85 | fleet owner=1 id=85 | cargo.boranium = 381, want 382
-sample | rg003 | RG-003-2470 y8 #86 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 4 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2470 y8 #87 | fleet owner=1 id=87 | 1 waypoints after waypoint 0 [{1523 1298}], want 0
 sample | rg003 | RG-003-2470 y8 #87 | fleet owner=1 id=87 | cargo.colonists = 0, want 300
 sample | rg003 | RG-003-2470 y8 #87 | fleet owner=1 id=87 | fuel = 648, want 606
@@ -1804,7 +1800,6 @@ sample | rg003 | RG-003-2470 y8 #91 | fleet owner=1 id=90 | y = 1305, want 1293
 sample | rg003 | RG-003-2470 y8 #92 | fleet owner=1 id=90 | cargo.boranium = 0, want 113
 sample | rg003 | RG-003-2470 y8 #92 | fleet owner=1 id=90 | cargo.germanium = 0, want 20
 sample | rg003 | RG-003-2470 y8 #92 | fleet owner=1 id=90 | cargo.ironium = 0, want 147
-sample | rg003 | RG-003-2470 y8 #93 | fleet owner=1 id=91 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2470 y8 #96 | fleet owner=1 id=94 | 0 waypoints after waypoint 0 [], want 1
 sample | rg003 | RG-003-2470 y8 #96 | fleet owner=1 id=94 | orbiting = 102, want none
 sample | rg003 | RG-003-2470 y8 #96 | fleet owner=1 id=94 | waypoints[0] position = {1637 1335}, want {1617 1365}
@@ -2372,16 +2367,14 @@ sample | rg003 | RG-003-2471 y9 #77 | fleet owner=1 id=80 | fuel = 648, want 593
 sample | rg003 | RG-003-2471 y9 #77 | fleet owner=1 id=80 | waypoints[0] position = {1405 1344}, want {1350 1637}
 sample | rg003 | RG-003-2471 y9 #77 | fleet owner=1 id=80 | x = 1405, want 1350
 sample | rg003 | RG-003-2471 y9 #77 | fleet owner=1 id=80 | y = 1344, want 1637
-sample | rg003 | RG-003-2471 y9 #78 | fleet owner=1 id=81 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2471 y9 #8 | fleet owner=1 id=7 | cargo.boranium = 122, want 120
 sample | rg003 | RG-003-2471 y9 #8 | fleet owner=1 id=7 | cargo.ironium = 28, want 30
 sample | rg003 | RG-003-2471 y9 #80 | fleet owner=1 id=82 | waypoints[0] position = {1560 1453}, want {1556 1461}
-sample | rg003 | RG-003-2471 y9 #80 | fleet owner=1 id=82 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2471 y9 #80 | fleet owner=1 id=82 | x = 1560, want 1556
 sample | rg003 | RG-003-2471 y9 #80 | fleet owner=1 id=82 | y = 1453, want 1461
 sample | rg003 | RG-003-2471 y9 #82 | fleet owner=1 id=84 | waypoints[1] = {{1571 1434} 6 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2471 y9 #84 | fleet owner=1 id=86 | waypoints[0] position = {1582 1438}, want {1574 1435}
-sample | rg003 | RG-003-2471 y9 #84 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 2 500075 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 5 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg003 | RG-003-2471 y9 #84 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 5 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003 | RG-003-2471 y9 #84 | fleet owner=1 id=86 | x = 1582, want 1574
 sample | rg003 | RG-003-2471 y9 #84 | fleet owner=1 id=86 | y = 1438, want 1435
 sample | rg003 | RG-003-2471 y9 #85 | fleet owner=1 id=87 | 2 waypoints after waypoint 0 [{1481 1304} {1523 1298}], want 1
@@ -3874,10 +3867,10 @@ sample | rg003 | RG-003-2473 y11 #52 | fleet owner=1 id=52 | fuel = 43, want 42
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.boranium = 139, want 141
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.germanium = 14, want 16
 sample | rg003 | RG-003-2473 y11 #53 | fleet owner=1 id=52 | cargo.ironium = 376, want 379
-not compared | rg003 | RG-003-2473 y11 #534 | message | message 0x0f4 has no event mapping
+sample | rg003 | RG-003-2473 y11 #534 | message | message 0x0f4 to player 0 present = false, want true
 sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x038 (focus 51, params [35 51]) = sent as 0x038 (focus 51, params [36 51])
 sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x038 (focus 51, params [36 51]) = sent, want not sent
-not compared | rg003 | RG-003-2473 y11 #535 | message_sequence | message_sequence entry 0x0f4 has no event mapping
+sample | rg003 | RG-003-2473 y11 #535 | message_sequence | message 0x0f4 (focus 95, params [95 82 0 5 0 1548 1298]) = not sent
 sample | rg003 | RG-003-2473 y11 #536 | player id=0 seen_by=0 | score_record.resources = 3071, want 3070
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.escort_ships = 140, want 143
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.resources = 23090, want 22823
@@ -4856,7 +4849,7 @@ sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.boranium = 29
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.germanium = 14, want 16
 sample | rg003 | RG-003-2474 y12 #55 | fleet owner=1 id=52 | cargo.ironium = 393, want 395
 not compared | rg003 | RG-003-2474 y12 #556 | message | message 0x03a has no event mapping
-not compared | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 has no event mapping
+sample | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 to player 0 present = false, want true
 not compared | rg003 | RG-003-2474 y12 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003 | RG-003-2474 y12 #565 | player id=0 seen_by=0 | score_record.resources = 3157, want 3156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.escort_ships = 149, want 156
@@ -5348,8 +5341,7 @@ sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: y = 1778, want
 sample | rg003-y11 | RG-003-Y11-2473 y1 #512 | object | wormhole: years_since_jump = 42, want 0
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.boranium = 140, want 141
 sample | rg003-y11 | RG-003-Y11-2473 y1 #53 | fleet owner=1 id=52 | cargo.ironium = 378, want 379
-not compared | rg003-y11 | RG-003-Y11-2473 y1 #534 | message | message 0x0f4 has no event mapping
-not compared | rg003-y11 | RG-003-Y11-2473 y1 #535 | message_sequence | message_sequence entry 0x0f4 has no event mapping
+not compared | rg003-y11 | RG-003-Y11-2473 y1 #535 | message_sequence | message_sequence 0x0f4 field owner, type and location slots not compared
 sample | rg003-y11 | RG-003-Y11-2473 y1 #542 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 18
 sample | rg003-y11 | RG-003-Y11-2473 y1 #546 | player id=5 seen_by=5 | score_record.unarmed_ships = 69, want 70
 random-driven | rg003-y11 | RG-003-Y11-2473 y1 #78 | fleet owner=1 id=77 | waypoints[0] position = {1339 1443}, want {1342 1445} (7/8 variants match)
@@ -5405,7 +5397,6 @@ random-driven | rg003-y12 | RG-003-Y12-2474 y1 #53 | fleet owner=1 id=51 | cargo
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.boranium = 288, want 289
 sample | rg003-y12 | RG-003-Y12-2474 y1 #55 | fleet owner=1 id=52 | cargo.ironium = 396, want 395
 not compared | rg003-y12 | RG-003-Y12-2474 y1 #556 | message | message 0x03a has no event mapping
-not compared | rg003-y12 | RG-003-Y12-2474 y1 #563 | message | message 0x0f4 has no event mapping
 not compared | rg003-y12 | RG-003-Y12-2474 y1 #564 | message_sequence | message_sequence entry 0x03a has no event mapping
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.score = 1246, want 1244
 sample | rg003-y12 | RG-003-Y12-2474 y1 #567 | player id=1 seen_by=1 | score_record.tech_level_sum = 60, want 59
@@ -5627,7 +5618,6 @@ sample | rg003-y6 | RG-003-Y6-2468 y1 #438 | object | wormhole: x = 1249, want 1
 sample | rg003-y6 | RG-003-Y6-2468 y1 #438 | object | wormhole: y = 1766, want 1769
 sample | rg003-y6 | RG-003-Y6-2468 y1 #469 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
 sample | rg003-y6 | RG-003-Y6-2468 y1 #77 | fleet owner=1 id=85 | cargo.germanium = 2, want 3
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500002) where the original keeps the planet (84) | rg003-y7 | RG-003-Y7-2469 y1 #144 | fleet owner=5 id=45 | waypoints[1] = {{1513 1113} 4 2 500002 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1513 1113} 4 1 84 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg003-y7 | RG-003-Y7-2469 y1 #201 | planet id=16 | surface_minerals = [335 9 339], want [336 9 340]
 incorrect mechanic [lane A]: population one colonist unit short from ground combat (per-drop floor, GC-1) | rg003-y7 | RG-003-Y7-2469 y1 #237 | planet id=51 | population = 15083, want 15084
 sample | rg003-y7 | RG-003-Y7-2469 y1 #269 | planet id=83 | starbase = design 91 damage 33, want design 91 damage 31
@@ -5700,13 +5690,8 @@ sample | rg003-y8 | RG-003-Y8-2470 y1 #513 | player id=4 seen_by=4 | score_recor
 sample | rg003-y8 | RG-003-Y8-2470 y1 #515 | player id=5 seen_by=5 | score_record.unarmed_ships = 62, want 66
 sample | rg003-y8 | RG-003-Y8-2470 y1 #68 | fleet owner=1 id=68 | cargo.ironium = 327, want 328
 sample | rg003-y8 | RG-003-Y8-2470 y1 #75 | fleet owner=1 id=75 | cargo.ironium = 500, want 501
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #81 | fleet owner=1 id=81 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #82 | fleet owner=1 id=82 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #84 | fleet owner=1 id=84 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #86 | fleet owner=1 id=86 | waypoints[1] = {{1571 1434} 4 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 4 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 sample | rg003-y8 | RG-003-Y8-2470 y1 #92 | fleet owner=1 id=90 | cargo.germanium = 21, want 20
 sample | rg003-y8 | RG-003-Y8-2470 y1 #92 | fleet owner=1 id=90 | cargo.ironium = 146, want 147
-incorrect mechanic [lane A]: waypoint 1 aims at a fleet (500092) where the original keeps the planet (95) | rg003-y8 | RG-003-Y8-2470 y1 #93 | fleet owner=1 id=91 | waypoints[1] = {{1571 1434} 6 2 500092 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1571 1434} 6 1 95 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (0/8 variants match, values vary)
 sample | rg003-y9 | RG-003-Y9-2471 y1 #104 | fleet owner=2 id=2 | cargo.germanium = 71, want 72
 sample | rg003-y9 | RG-003-Y9-2471 y1 #104 | fleet owner=2 id=2 | cargo.ironium = 115, want 116
 sample | rg003-y9 | RG-003-Y9-2471 y1 #105 | fleet owner=2 id=5 | fleet gone
@@ -5977,7 +5962,7 @@ matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1153,1609) | matched: 2 
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1266,1400) | matched: 7 tokens, players and planet; 0 of 74 hits compared and 74 conditioned; 53 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1293,1597) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1329,1244) | matched: 3 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 6 moves allowed
-random-driven [lane D]: oracle fought here in 3 of 4 streams; only the recorded stream stopped 6/2 (stars-elegy #201) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
+random-driven [lane D]: oracle fought here in 3 of 4 streams; only the recorded stream stopped 6/2 (stars-elegy 045bc90) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1402,1704) | matched: 5 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 14 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1423,1158) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 3 hits compared and 3 conditioned; 8 moves allowed

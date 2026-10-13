@@ -112,6 +112,11 @@ type Game struct {
 	// (battle.costLevels, colonize). It is nil outside that span and is
 	// not saved.
 	costLevels [][NumFields]int
+	// goneTargets is, during a generation, the fleets owed 0x028 for a
+	// waypoint whose target fleet went away (targetGone,
+	// retargetRemoved), sent when the files are written (fileRetarget).
+	// fileRetarget empties it; it is not saved.
+	goneTargets []int
 }
 
 // RaceCloner is a RaceChecker that keeps state between years and copies

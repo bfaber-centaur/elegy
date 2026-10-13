@@ -127,7 +127,7 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 // random outcome explains. A battle line may also be hand-classed
 // "random-driven [owner]: evidence" when oracle evidence, not the harness
 // variants, shows the original's own streams differ there (RG-003-Y9's
-// battle at (1388,1386), stars-elegy #201).
+// battle at (1388,1386), stars-elegy 045bc90).
 func rg002BattleHand(class string) bool {
 	for _, h := range []string{"missing mechanic", "incorrect mechanic", "state-import error"} {
 		if rest, ok := strings.CutPrefix(class, h+" ["); ok && strings.HasSuffix(rest, "]") && len(rest) > 1 {

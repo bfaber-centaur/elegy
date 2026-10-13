@@ -21,6 +21,7 @@ func pvMessageIDs() map[int]string {
 		0x004: "EventDropRepelled, to the planet's owner",
 		0x025: "EventHostileShrink",
 		0x026: "EventOvercrowded",
+		0x028: "EventTargetGone",
 		0x02e: "EventColonistsBeamedDown",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
@@ -46,6 +47,9 @@ func pvMessageIDs() map[int]string {
 		0x085: "EventCometStrike, large",
 		0x086: "EventCometStrike, huge",
 		0x08f: "EventBombed then EventPlanetEmptied, to the bomber",
+		0x0c2: "EventMinesSwept by a fleet",
+		0x0f4: "EventMinesSwept by a starbase",
+		0x0be: "EventMinefieldSwept",
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
 	}
 	for k, id := range pvSummaryIDs {
@@ -355,6 +359,16 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 					known: []bool{true, true, true, false, false, false}, why: "0x02e mineral and location slots"}
 			}
 			send(ev.Player, m)
+		case engine.EventTargetGone:
+			// Slots: the follower, the gone target (MESSAGES.md 0x028;
+			// params MEASURED, WK-1). The event does not name the
+			// target, so its slot is not compared.
+			m := pvMsg{id: 0x028, params: make([]int, 2), known: make([]bool, 2), why: "0x028 fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m = pvMsg{id: 0x028, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, 0},
+					known: []bool{true, false}, why: "0x028 target slot"}
+			}
+			send(ev.Player, m)
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
 				// The salvage object's id is not in the event, and the
@@ -362,6 +376,32 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				send(ev.Player, pvMsg{id: 0x05b, focus: pvFocusObject, focusKnown: true, params: []int{0, 0}, known: []bool{false, false},
 					why: "0x05b salvage and fleet slots"})
 			}
+		case engine.EventMinesSwept:
+			// Slots: sweeper (fleet or planet), amount (two slots), the
+			// field's owner, type and centre (MESSAGES.md 0x0c2, 0x0f4).
+			// The player slot's flags and the type and location codes
+			// have no public table, so only the sweeper and amount are
+			// compared.
+			swept := []int{0, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0, 0}
+			known := []bool{true, true, true, false, false, false, false}
+			if ev.Planet >= 0 {
+				swept[0] = ev.Planet - 1
+				send(ev.Player, pvMsg{id: 0x0f4, focus: ev.Planet - 1, focusKnown: true, params: swept, known: known,
+					why: "0x0f4 field owner, type and location slots"})
+			} else if code, ok := fleet(ev.Fleet); ok {
+				swept[0] = code
+				send(ev.Player, pvMsg{id: 0x0c2, focus: pvFocusFleet | code, focusKnown: true, params: swept, known: known,
+					why: "0x0c2 field owner, type and location slots"})
+			} else {
+				send(ev.Player, pvMsg{id: 0x0c2, params: swept, known: make([]bool, len(swept)),
+					why: "0x0c2 fleet gone by the end of the year"})
+			}
+		case engine.EventMinefieldSwept:
+			// Slots: the field (an object id), amount (two slots), type
+			// and centre (MESSAGES.md 0x0be); the focus is the field.
+			send(ev.Player, pvMsg{id: 0x0be, focus: pvFocusObject, focusKnown: true,
+				params: []int{0, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0}, known: []bool{false, true, true, false, false, false},
+				why: "0x0be field, type and location slots"})
 		case engine.EventCometStrike:
 			if ev.Count >= 0 && ev.Count < 4 {
 				send(ev.Player, atPlanet(0x083+ev.Count, ev.Planet))
