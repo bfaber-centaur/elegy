@@ -41,17 +41,17 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
 | incorrect mechanic | 0 | 2 | 0 |
-| missing mechanic | 12 | 0 | 0 |
+| missing mechanic | 2 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 184 | 0 | 0 |
-| sample | 1146 | 43 | 16 |
+| sample | 1138 | 43 | 16 |
 
-These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below) and lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"). Samples total 1205: 1146 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1189), and 16 battle records, checked by `TestBattleRecords`.
+These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below) lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1197: 1138 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1181), and 16 battle records, checked by `TestBattleRecords`.
 
-The reference run of RG-002 has 12 deterministic field discrepancies, all messages Elegy sends no event for (missing mechanic: economy 10, lane A 2; "Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), and lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+The reference run of RG-002 has 2 deterministic field discrepancies, both lane A's 0x02e message, which Elegy sends no event for ("Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
@@ -135,6 +135,12 @@ Every RG-002 expectation of a quantity Elegy models is now compared, by the ledg
 **Closed after the final run: battle summaries (lane D).** Elegy now sends each battle player its summary (`EventBattleSummary`; PARITY-STATUS.md "Battle summaries"). These lines cleared, all now matching on the reference seed:
 - missing mechanic [lane D], 9: 0x116 in chained 2463, Y1 and Y2; 0x095 in chained 2463, Y1, Y4 and Y6; 0x09f in Y3; 0x0a1 in Y4;
 - samples, 5: the chained run's 2464 0x116, 2465 0x09f, 2466 0x0a1 and 0x095, and 2468 0x095.
+
+**Closed after the final run: level-up and overcrowding messages (economy).** Elegy now sends 0x026 when growth shrinks a planet over capacity that survives with a hab value of 0 or more (`EventOvercrowded`), and 0x050 and 0x05f at each research level-up check (`EventLevelUp`, `EventPartAvailable`; MESSAGES.md at stars-elegy b4c0086; PARITY-STATUS.md "Level-up and overcrowding messages"). These lines cleared, all now matching on the reference seed:
+- missing mechanic [economy], 10: 0x026 in chained 2463 and Y1–Y6; 0x050 in Y2 and Y3; 0x05f in Y3;
+- samples, 8: the chained run's 0x026 in 2464–2468, 0x050 in 2464 and 2465, and 0x05f in 2465.
+
+No line was added.
 
 **Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
 

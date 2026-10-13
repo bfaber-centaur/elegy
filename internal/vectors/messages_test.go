@@ -9,7 +9,17 @@ import (
 
 // TestPvMessages pins the event to message id mapping (MESSAGES.md).
 func TestPvMessages(t *testing.T) {
-	g := &engine.Game{Planets: []engine.Planet{{ID: 5, Owner: 2}, {ID: 6, Owner: engine.NoOwner}}}
+	g := &engine.Game{Planets: []engine.Planet{{ID: 5, Owner: 2}, {ID: 6, Owner: engine.NoOwner}}, Players: make([]engine.Player, 3)}
+	g.Players[1].Race.LRT.GeneralizedResearch = true
+	part := func(name string) engine.Event {
+		for i, c := range engine.Components().Components {
+			if c.Name == name {
+				return engine.Event{Kind: engine.EventPartAvailable, Player: 2, Planet: -1, Fleet: -1, Count: i}
+			}
+		}
+		t.Fatalf("no component %q", name)
+		return engine.Event{}
+	}
 	summary := func(player int, k engine.BattleSummary) engine.Event {
 		return engine.Event{Kind: engine.EventBattleSummary, Player: player, Planet: -1, Fleet: -1, Count: int(k)}
 	}
@@ -46,6 +56,19 @@ func TestPvMessages(t *testing.T) {
 		{"bombed empty", []engine.Event{{Kind: engine.EventBombed, Player: 4, Planet: 6}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 6}}, [][2]int{{2, 0x090}, {4, 0x08f}}},
 		{"emptied, not by bombing", []engine.Event{{Kind: engine.EventPlanetEmptied, Player: 2, Planet: 6}}, nil},
 		{"emptied after another planet's bombing", []engine.Event{{Kind: engine.EventBombed, Player: 4, Planet: 5}, {Kind: engine.EventPlanetEmptied, Player: 2, Planet: 6}}, nil},
+		{"overcrowded", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Fleet: -1, Count: 30}}, [][2]int{{2, 0x026}}},
+		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Count: 3}}, [][2]int{{2, 0x050}}},
+		{"level up, Generalized Research (0x136)", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Planet: -1, Fleet: -1, Count: 3}}, nil},
+		{"level up, no player", []engine.Event{{Kind: engine.EventLevelUp, Player: -1, Planet: -1, Fleet: -1, Count: 3}}, nil},
+		{"level up, player not in the game", []engine.Event{{Kind: engine.EventLevelUp, Player: 3, Planet: -1, Fleet: -1, Count: 3}}, nil},
+		{"component", []engine.Event{part("Cow-hide Shield")}, [][2]int{{2, 0x05f}}},
+		{"terraforming component", []engine.Event{part("Total Terraform ±5")}, [][2]int{{2, 0x05f}}},
+		{"ship hull (0x078)", []engine.Event{part("Medium Freighter")}, nil},
+		{"starbase hull (0x0d0)", []engine.Event{part("Space Dock")}, nil},
+		{"planetary scanner (0x157)", []engine.Event{part("Viewer 90")}, nil},
+		{"planetary defense (0x145)", []engine.Event{part("Laser Battery")}, nil},
+		{"component not in the catalog", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Count: -1}}, nil},
+		{"component past the catalog", []engine.Event{{Kind: engine.EventPartAvailable, Player: 2, Count: len(engine.Components().Components)}}, nil},
 		{"no recipient", []engine.Event{{Kind: engine.EventFleetArrived, Player: -1}}, nil},
 		{"duel won unhit", []engine.Event{summary(0, engine.SummaryDuelWonUnhit)}, [][2]int{{0, 0x091}}},
 		{"both survived", []engine.Event{summary(1, engine.SummaryDuelBothSurvived)}, [][2]int{{1, 0x095}}},
