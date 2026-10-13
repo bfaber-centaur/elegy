@@ -227,7 +227,9 @@ func TestCheckBattleLedger(t *testing.T) {
 	l.Logf("%s", `rg/rg002.json C "" (3,4) y2: sample (after 99 draws of earlier years) missed: y`)
 	l.Errorf("%s", `rg/rg001.json C "" (1,2) y1: tokens: x`)
 	l.Logf("%s", `rg/rg002-y3.json C "" (5,6) y1: random (after 12 draws in the year; 2 of 7 other variants match): tokens: z`)
+	l.Logf("%s", `rg/rg002-y4.json C "" (7,8) y1: sample (flagged in the vector) missed: tokens: w`)
 	want := map[string]string{
+		"rg002-y4 | C y1 | battle record (7,8) | sample missed: tokens: w":                       "sample",
 		"rg002-y2 | C y1 | battle record (1,2) | tokens: Elegy {Planet:0x?}":                     "",
 		"rg002 | C y2 | battle record (3,4) | sample missed: y":                                  "sample",
 		"rg002-y3 | C y1 | battle record (5,6) | random, 2 of 7 other variants match: tokens: z": "random-driven",
