@@ -69,7 +69,10 @@ func pvMessages(g *engine.Game, events []engine.Event) map[[2]int]bool {
 	for i, ev := range events {
 		switch ev.Kind {
 		case engine.EventDropRepelled:
-			// The defender's copy (0x004); Player is the attacker.
+			// The defender's copy (0x004); Player is the attacker. The
+			// defender is read as the planet's owner at the end of the
+			// year (ASSUMPTION: the event does not name it), so a planet
+			// captured later in the same year credits its new owner.
 			send(owner(ev.Planet), 0x004)
 		case engine.EventBuilt:
 			more := 0
