@@ -63,6 +63,7 @@ func TestPvMessages(t *testing.T) {
 		{"defense order removed", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemDefenses, Count: 0}}, [][2]int{{2, 0x12a}}},
 		{"terraform order reduced", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 2}}, [][2]int{{2, 0x12f}}},
 		{"overcrowded", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Fleet: -1, Count: 30}}, [][2]int{{2, 0x026}}},
+		{"target gone", []engine.Event{{Kind: engine.EventTargetGone, Player: 1, Planet: -1, Fleet: 4}}, [][2]int{{1, 0x028}}},
 		{"level up", []engine.Event{{Kind: engine.EventLevelUp, Player: 2, Planet: -1, Fleet: -1, Count: 3, Axes: []int{3}}}, [][2]int{{2, 0x050}}},
 		{"level up, Generalized Research", []engine.Event{{Kind: engine.EventLevelUp, Player: 1, Planet: -1, Fleet: -1, Count: 3, Axes: []int{3}}}, [][2]int{{1, 0x136}}},
 		{"research stolen", []engine.Event{{Kind: engine.EventResearchStolen, Player: 2, Planet: -1, Fleet: -1, Item: engine.ItemKind(3), Count: 40}}, [][2]int{{2, 0x159}}},
