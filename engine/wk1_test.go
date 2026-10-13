@@ -107,6 +107,9 @@ func TestWK1GoneOwed(t *testing.T) {
 			// Second followers of fleets 1 and 2, kept: each owes its own 0x028.
 			{ID: 10, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1140, 1140}, Target: TargetFleet, ID: 1}}},
 			{ID: 11, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1180, 1100}, Target: TargetFleet, ID: 2}}},
+			// Aimed at fleet 97, gone before this generation (a stale id):
+			// the waypoint check owes 0x028 with the target unnamed.
+			{ID: 12, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1300, 1300}, Target: TargetFleet, ID: 97}}},
 		}}
 	// During a generation (removedFleets set), each 0x028 also names the
 	// gone target's owner and number. Fleet 98 stands for one removed
@@ -118,6 +121,9 @@ func TestWK1GoneOwed(t *testing.T) {
 	// A waypoint the file check itself finds aimed at a gone fleet, at
 	// the planet: the planet, and 0x028 then.
 	g.Fleets = append(g.Fleets, Fleet{ID: 9, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1150, 1150}, Target: TargetFleet, ID: 98}}})
+	// The same for a fleet gone before the generation (stale id 96): no
+	// target named.
+	g.Fleets = append(g.Fleets, Fleet{ID: 13, Owner: 0, Waypoints: []Waypoint{{Pos: Point{1300, 1300}, Target: TargetFleet, ID: 96}}})
 	want := map[int]Waypoint{
 		5:  {Pos: Point{1150, 1150}, Target: TargetPlanet, ID: 7},
 		6:  {Pos: Point{1180, 1100}},
@@ -135,16 +141,27 @@ func TestWK1GoneOwed(t *testing.T) {
 	ev := g.fileRetarget([]PlayerView{{Player: 0, Fleets: []FleetSighting{{Fleet: 4, Owner: 1}}}, {Player: 1}})
 	var got [][3]int
 	for _, e := range ev {
-		if e.Kind != EventTargetGone || e.Player != 0 || len(e.Axes) != 2 {
-			t.Errorf("event %+v, want player 0's 0x028 naming its target", e)
+		if e.Kind != EventTargetGone || e.Player != 0 {
+			t.Errorf("event %+v, want player 0's 0x028", e)
+			continue
+		}
+		if e.Fleet == 12 || e.Fleet == 13 {
+			if e.Axes != nil {
+				t.Errorf("fleet %d's 0x028 names target %v, want none (gone before the generation)", e.Fleet, e.Axes)
+			}
+			got = append(got, [3]int{e.Fleet, -1, -1})
+			continue
+		}
+		if len(e.Axes) != 2 {
+			t.Errorf("event %+v, want its target named", e)
 			continue
 		}
 		got = append(got, [3]int{e.Fleet, e.Axes[0], e.Axes[1]})
 	}
-	if want := [][3]int{{5, 1, 1}, {10, 1, 1}, {6, 1, 2}, {11, 1, 2}, {9, 1, 98}}; !slices.Equal(got, want) {
+	if want := [][3]int{{5, 1, 1}, {10, 1, 1}, {6, 1, 2}, {11, 1, 2}, {12, -1, -1}, {9, 1, 98}, {13, -1, -1}}; !slices.Equal(got, want) {
 		t.Errorf("0x028 (follower, target owner, number) %v, want %v", got, want)
 	}
-	if w := g.Fleets[len(g.Fleets)-1].Waypoints; len(w) != 1 || w[0] != want9 {
+	if w := g.Fleets[len(g.Fleets)-2].Waypoints; len(w) != 1 || w[0] != want9 {
 		t.Errorf("fleet 9: waypoints %v, want %v", w, want9)
 	}
 	if g.goneTargets != nil {
