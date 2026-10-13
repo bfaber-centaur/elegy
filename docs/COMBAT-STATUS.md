@@ -44,13 +44,13 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Firing order, target choice; live-player check before each token | `combat_fire.go` `fire`, `attractiveness` | CONFIRMED; the check BINARY-ONLY; a common cost cap at or below 10,240,000 MEASURED (CB-057, consistent with Elegy 89cbc6a), its value 10^7 BINARY-ONLY | `TestConfirmedTargetChoice`, `TestPredictionOutPlayerStillFires`, `TestMeasuredCB057TargetCostCap`, `TestPredictionTargetChoiceCostCap` |
 | Design cost (COMPONENTS.md owner cost: miniaturization, PRT/LRT, Bleeding Edge) | `ships.go` `designCost` | CONFIRMED (CS-001) | `TestPredictionDesignCost` |
 | Beams, dropoff (none at range 0, CB-026), carry | `beam` | CONFIRMED | `TestConfirmedBeamDropoff`, `TestConfirmedCarryRescaled` |
-| Gatling (each target's own deflector), sappers | `gatling`, `damage` | CONFIRMED; a gatling shot goes on past a starbase (CONFIRMED in one stream only, CB-056, stars-elegy b0ca924) | `TestConfirmedGatlingHitsEveryTarget`, `TestGatlingDeflectorPerTarget`, `TestConfirmedSapperShieldsOnly` |
+| Gatling (each target's own deflector; the targets of both plan types), sappers (shields only; carry after stripping the last shields) | `gatling`, `gatlingTargets`, `beam`, `damage` | CONFIRMED; a gatling shot goes on past a starbase (CONFIRMED in one stream only, CB-056, stars-elegy b0ca924); a primary-type target in reach does not narrow a gatling shot (CONFIRMED by prediction, CB-060 G1); a target matching neither type left out: ASSUMPTION (NOT RUN); a sapper's carry after stripping the last shields: MEASURED (CB-060 S2) | `TestConfirmedGatlingHitsEveryTarget`, `TestGatlingDeflectorPerTarget`, `TestConfirmedSapperShieldsOnly`, `TestConfirmedCB060G1GatlingHitsSecondaryType`, `TestMeasuredCB060S2SapperCarry` |
 | Torpedoes and missiles; `h = hits·d/2` once; misses' shield damage in its own record before the hit record; a hit record for every reached target, even 0 hits | `hitChance`, `torpedoes` | CONFIRMED (CS-003-C2 for the rounding, CB-049 for the miss record, CB-058 for the 0-hit record); p ≥ 100 with no draw MEASURED (CB-057, consistent with Elegy 89cbc6a) | `TestConfirmedHitChance`, `TestConfirmedLargeSalvoHits`, `TestConfirmedMissileDoubleDamage`, `TestConfirmedOneKillPerMissile`, `TestConfirmedTorpedoMissesOnShields`, `TestConfirmedTorpedoHitRounding`, `TestPredictionTorpedoHitsPerTarget`, `TestPredictionTorpedoZeroHitRecord`, `TestConfirmedCB058ZeroHitTorpedoRecord`, `TestMeasuredCB057NexusTorpedoes` |
 | Damage, kills, spread | `damage` | CONFIRMED | `TestConfirmedMissileDoubleDamage` |
 | Starbase damage; no damage left over after a hit on a starbase; kept through the year | `starbaseDamage`, `finish`, `repair` | CONFIRMED in part (Space Station steps CB-011..015; the stop CB-052); the Death Star's 1500 armor MEASURED as consistent (CB-058: the hits fit 1126–1500); a 500th step, destroyed only at total ≥ armor, MEASURED (CB-056, 2 streams, stars-elegy b0ca924) | `TestConfirmedStarbaseDamageSteps`, `TestPredictionDeathStarDamageSteps`, `TestConfirmedBeamStopsAtStarbase`, `TestRG001StarbaseDamageKept` |
 | Starbase loss: the queue's ship items and non-automatic packet items removed, a starbase item restarts at 0%, planetary items kept (shared with the starbase design delete); AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `starbase_loss.go` `loseStarbase`, `emptyPlanet` | CONFIRMED (ship and planetary items CB-047, AR CB-041); packet items and the starbase restart BINARY-ONLY (PARITY.md "Queued ships after deleting the starbase design", stars-elegy ee47fff) | parity CB-047, `TestConfirmedBattleLossStripsQueue`, `TestPredictionAlternateRealityStarbaseLoss` |
 | Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each; overflow CB-040; fuel share CB-023; cargo share CB-058); numbering across two battles MEASURED (CB-058); empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestConfirmedSalvageOverflow`, `TestConfirmedCB058CargoShare`, `TestMeasuredCB058SalvageTwoPoints`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
-| Battle summaries: one per player in P, by the location's ships and design groups, the recipient's forces against every other ship at the location, and whether each side took armor damage (stars-elegy MESSAGES.md "Battles and bombing", 0x07e, 0x091–0x0a8, 0x113–0x116) | `combat_summary.go` `battleSummary`, `summaries` (`EventBattleSummary`) | CONFIRMED for 0x07e, 0x091–0x0a4, 0x0a6–0x0a8 and 0x113–0x116 (0x0a2, 0x0a3, 0x113 and 0x114 by prediction, CB-059); 0x0a5 BINARY-ONLY; "hit" as armor damage only: CONFIRMED by prediction for one ship a side (CB-059 B1); the 2-player texts when two players fought, every other ship counted as the enemy's, the uninvolved starbase owner included and a bystander fleet's owner sent nothing: MEASURED (CB-059 B3); no summary when an AR starbase dies: MEASURED (CB-059 B4); a "stack" as one player's ships of one design: MEASURED (CB-039, CB-048); ASSUMPTION B2 (both sides wiped), and the named player as the highest-numbered other one | `TestBattleSummaryRules`, `TestConfirmedBattleSummaryDesignGroups`, `TestBattleSummaryStarbase`, `TestConfirmedCB059HitIsArmorDamage`, `TestMeasuredCB059ThirdPlayer`, parity CB-048, CB-049, SC-036, RG-002 |
+| Battle summaries: one per player in P, by the location's ships and design groups, the recipient's forces against every other ship at the location, and whether each side took armor damage (stars-elegy MESSAGES.md "Battles and bombing", 0x07e, 0x091–0x0a8, 0x113–0x116) | `combat_summary.go` `battleSummary`, `summaries` (`EventBattleSummary`) | CONFIRMED for 0x07e, 0x091–0x0a4, 0x0a6–0x0a8 and 0x113–0x116 (0x0a2, 0x0a3, 0x113 and 0x114 by prediction, CB-059); 0x0a5 BINARY-ONLY; "hit" as armor damage only: CONFIRMED by prediction for one ship a side (CB-059 B1); the 2-player texts when two players fought, every other ship counted as the enemy's, the uninvolved starbase owner included and a bystander fleet's owner sent nothing: MEASURED (CB-059 B3); no summary when an AR starbase dies: MEASURED (CB-059 B4); a "stack" as one player's ships of one design: MEASURED (CB-039, CB-048); ASSUMPTION B2 (both sides wiped) and the named player as the highest-numbered other one; the races count of the multi-race texts is the number who fought (n), not P: CONFIRMED by prediction (CB-061 PQ-1b, stars-elegy 19896cd), the uninvolved starbase owner's 0x0a8 too, and its other counts MEASURED | `TestBattleSummaryRules`, `TestConfirmedBattleSummaryDesignGroups`, `TestBattleSummaryStarbase`, `TestConfirmedCB059HitIsArmorDamage`, `TestMeasuredCB059ThirdPlayer`, `TestConfirmedPQ1SummaryPlayerCountIsN`, parity CB-048, CB-049, SC-036, RG-002 |
 | Dump cargo (full amount; first salvage addition in deep space) | `setup` | CONFIRMED (CB-025) | `TestPredictionDumpCargo` |
 | Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024; the Ultra Station's and Death Star's docks, fleets −100 and the starbase −50: CB-056, stars-elegy b0ca924) | `TestConfirmedRepair`, `TestPredictionRepairOthers`, `TestPredictionRepairLargeDocks`, `TestRG001StarbaseDamageKept` |
 | Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
@@ -156,25 +156,26 @@ designs give each token's parts.
 - **Oracle only** means stars-elegy measured it in a CB round that has
   no vector. Elegy's unit test is labelled from that.
 
-No SC or KX vector has a battle with any of these parts. The case specs
-for the gaps (G, S, B and N below) are lane F's queue:
-`/mnt/project-files/combat/late-weapons-cases.md`.
+No SC or KX vector has a battle with any of these parts. Lane F ran the
+case specs for the gaps (G, S, B and N below,
+`/mnt/project-files/combat/late-weapons-cases.md`) as CB-060; "CB-060
+results" below has each case's label.
 
 | Weapon (Elegy catalog: damage, range, kind) | Battle evidence | In Elegy's vectors | Case |
 |---|---|---|---|
-| Mini Gun (13, 2, gatling) | none | none | G3 |
-| Gatling Gun (31, 2, gatling) | CB-002 to CB-006: hits at distances 0–2, 3 from a station, deflector 90 | compared | G1 (check these records first) |
-| Gatling Neutrino Cannon (80, 2, gatling) | CB-056, one stream: the shot goes on past a starbase, one hit per deflector | oracle only (`TestGatlingDeflectorPerTarget`) | G1 |
-| Big Mutha Cannon (204, 2, gatling) | none in battle (OT-6 counts it only in the score's ship power) | none | G2 |
-| Pulsed Sapper (82, 3, sapper) | CB-002, CB-049; RG-002 Y5 and the chained run's first year | compared (RG-002 Y3 and the chained run's later years are samples) | S3 |
-| Phased Sapper (211, 3, sapper) | none | none | S1 |
-| Syncro Sapper (541, 3, sapper) | none | none | S1, S2 |
-| Myopic Disruptor (169, 1), Disruptor (169, 2) | none | none | B |
-| Mega Disruptor (169, 3) | CB-058 Q5: every hit replays | oracle only | B |
-| Mini Blaster (66, 1), Mark IV Blaster (66, 2) | none | none | B |
-| Heavy Blaster (66, 3) | CB-056: one hit of 66 × 2.55; CB-058 Q6: reach 4 from a Death Star | oracle only (`TestPredictionDeathStarTokenValues`, `TestConfirmedCB058DeathStarReach`) | B |
-| Streaming Pulverizer (433, 1), Anti-Matter Pulverizer (433, 2) | none | none | B |
-| Battle Nexus (initiative +3, computer 50) | CB-056, CB-057: a starbase with 16 had initiative 63 and computer 99 | oracle only | N |
+| Mini Gun (13, 2, gatling) | CB-060 G3: 13 at distances 0 and 1 | oracle only (`TestConfirmedCB060LateWeaponValues`) | G3 |
+| Gatling Gun (31, 2, gatling) | CB-002 to CB-006: hits at distances 0–2, 3 from a station, deflector 90 | compared | G1 (those plans were primary "any") |
+| Gatling Neutrino Cannon (80, 2, gatling) | CB-056, one stream: the shot goes on past a starbase, one hit per deflector; CB-060 G1: primary- and secondary-type targets in one shot | oracle only (`TestGatlingDeflectorPerTarget`, `TestConfirmedCB060G1GatlingHitsSecondaryType`) | G1 |
+| Big Mutha Cannon (204, 2, gatling) | CB-060 G2: 204 at distances 0 and 1 (OT-6 counts it in the score's ship power) | oracle only (`TestConfirmedCB060LateWeaponValues`) | G2 |
+| Pulsed Sapper (82, 3, sapper) | CB-002, CB-049; RG-002 Y5 and the chained run's first year; CB-060 S3: no record with only unshielded targets | compared (RG-002 Y3 and the chained run's later years are samples) | S3 |
+| Phased Sapper (211, 3, sapper) | CB-060 S1: 409/396/379 at distances 1/2/3 | oracle only (`TestConfirmedCB060LateWeaponValues`) | S1 |
+| Syncro Sapper (541, 3, sapper) | CB-060 S1: 1049/1017/973 at distances 1/2/3; S2: the carry | oracle only (`TestConfirmedCB060LateWeaponValues`, `TestMeasuredCB060S2SapperCarry`) | S1, S2 |
+| Myopic Disruptor (169, 1), Disruptor (169, 2) | CB-060 B | oracle only (`TestConfirmedCB060LateWeaponValues`) | B |
+| Mega Disruptor (169, 3) | CB-058 Q5: every hit replays; CB-060 B | oracle only (`TestConfirmedCB060LateWeaponValues`) | B |
+| Mini Blaster (66, 1), Mark IV Blaster (66, 2) | CB-060 B | oracle only (`TestConfirmedCB060LateWeaponValues`) | B |
+| Heavy Blaster (66, 3) | CB-056: one hit of 66 × 2.55; CB-058 Q6: reach 4 from a Death Star; CB-060 B | oracle only (`TestPredictionDeathStarTokenValues`, `TestConfirmedCB058DeathStarReach`, `TestConfirmedCB060LateWeaponValues`) | B |
+| Streaming Pulverizer (433, 1), Anti-Matter Pulverizer (433, 2) | CB-060 B | oracle only (`TestConfirmedCB060LateWeaponValues`) | B |
+| Battle Nexus (initiative +3, computer 50) | CB-056, CB-057: a starbase with 16 had initiative 63 and computer 99; CB-060 N: one on a ship | oracle only (`TestConfirmedCB060BattleNexus`) | N |
 
 The catalog marks the disruptors', blasters' and pulverizers' `kind` and
 `mines_swept` BINARY-ONLY. Their beam rules are the general ones that the
@@ -310,6 +311,65 @@ recipient's enemy, and picks the text family by the number of players
 who fought (n). B1's armor-only rule is tested only with one ship a side;
 whether the one-stack texts (0x096–0x09a) use it is NOT RUN, and
 Elegy applies it there too (ASSUMPTION).
+
+A fleet stack of 0 ships is neither a token nor a summary group.
+`CheckYear` refuses one in any fleet (engine/invariants.go), so a battle
+should not see one; `TestConfirmedBattleSummaryDesignGroups` pins the
+guard in `summaries` anyway.
+
+### CB-060 results
+
+Lane D's late-weapon case specs (G, S, B, N), run by lane F. Elegy's
+predictions were Elegy 387c622's numbers, in a record pushed before the
+runs (private apparatus c3d48b65). Results and labels are from
+stars-elegy #185, merged as a564ab4 (PARITY.md "Late-tech weapons
+(CB-060)", `experiments/cb060`), with 6 pinned streams. Each ship had
+no computer, capacitor or shield, and each target had 4000 shields and
+no deflector, so the damage reads as shield damage.
+
+| Case | Setup | Elegy predicted | Original | Label | Test |
+|---|---|---|---|---|---|
+| G1 | Gatling Neutrino Cannon, plan primary "armed", secondary "any"; an armed and an unarmed stack in reach | 80 on the armed stack only | 80 on each (3 of 6 streams took the branch) | prediction REFUTED; fixed, CONFIRMED by prediction: a gatling shot hits the targets of both types | `TestConfirmedCB060G1GatlingHitsSecondaryType` |
+| G1, neither type | A target that matches neither plan type | left out | — | NOT RUN (Elegy leaves it out: ASSUMPTION) | `TestConfirmedCB060G1GatlingHitsSecondaryType` |
+| G2, G3 | Big Mutha Cannon, Mini Gun | 204 and 13, no dropoff | 204 and 13 at distances 0 and 1, every shot | CONFIRMED by prediction for distances 0 and 1 | `TestConfirmedCB060LateWeaponValues` |
+| G2, G3 at distance 2 | | 204 and 13 | no shot at 2 | NOT RUN | |
+| G2, G3, two targets | Two targets in one shot | each takes the full damage | no such shot | NOT RUN | |
+| S1 | Phased and Syncro Sappers | beam dropoff, shields only | 409/396/379 and 1049/1017/973 at distances 1/2/3; armor damage 0 | CONFIRMED by prediction for distances 1–3 | `TestConfirmedCB060LateWeaponValues` |
+| S1 at distance 0 | | no dropoff | no shot at 0 | NOT RUN | |
+| S2 | 2 Syncro Sappers; L with 300 shields and M, 2 ships with 4000 each, in reach | stops after L's shields | carries on to M: 673, 685 and 725 by distance (5 streams); stops when M is out of reach | prediction REFUTED; fixed, MEASURED: the beam carry with "stripped of its shields" in place of "died" | `TestMeasuredCB060S2SapperCarry` |
+| S3 | Pulsed Sapper, only unshielded targets | no record | no record | CONFIRMED by prediction | `TestConfirmedSapperShieldsOnly` |
+| B | Eight plain late beams (table above) | catalog damage, range and initiative | every value seen matches; no shot beyond range; firing order by weapon initiative, ties in reverse token order | CONFIRMED by prediction for distances 1–3 (as far as each range goes) | `TestConfirmedCB060LateWeaponValues` |
+| B at distance 0 | | no dropoff | no shot at 0 | NOT RUN | |
+| N | One Battle Nexus on a Battleship | initiative 13, computer 50 | 13 and 50 | CONFIRMED by prediction | `TestConfirmedCB060BattleNexus` |
+
+S2 corrects the CB-002 reading that sappers never carry; that reading was
+never tested with a second shielded target in reach. S2 did not test a
+shot that leaves its target some shields; Elegy does not carry then.
+
+### PQ-1 results
+
+The races count in a multi-race summary when a player who did not fight
+is among the recipients (lane D's spec
+`/mnt/project-files/combat/p-vs-q-count.md`), run by lane F as CB-061.
+Results and labels are from stars-elegy #187, merged as 19896cd
+(PARITY.md "The races count in multi-race battle summaries (CB-061)",
+`experiments/cb061`), with 6 pinned streams. The predictions were pushed
+before each run (private apparatus 3479c85 for PQ-1, 0c957e5 for PQ-1b).
+
+Setup: players 0, 1 and 2 are mutual enemies, player 3 neutral to all
+and attacking nobody. M is at player 3's homeworld, which has an unarmed
+Space Station and no player-3 fleet: player 0 has a 4000-shield
+Battleship and a one-Laser Destroyer (a Scout in PQ-1), players 1 and 2
+two of the Battleships each. The control C is a second fleet of each of
+players 0, 1 and 2 in the same layout in deep space at (1020,1100);
+player 3 has no fleet, planet or starbase there.
+
+| Case | Setup | Elegy predicted | Original | Label | Test |
+|---|---|---|---|---|---|
+| PQ-1 M | M with the Scout; nothing was destroyed | races count 4 (P) for all four | all four got one 0x0a8 with races count 3 | MEASURED; Elegy's P fails, fixed: the count is the number who fought | `TestConfirmedPQ1SummaryPlayerCountIsN` |
+| PQ-1b M | M; player 0's Destroyer destroyed, no shot at the starbase | races count 3 for all four, player 3 included | 3 for all four, player 3's included (6 of 6) | CONFIRMED by prediction: the count, and the uninvolved starbase owner's 0x0a8 | `TestConfirmedPQ1SummaryPlayerCountIsN` |
+| PQ-1b M counts | The 0x0a8 counts after the races count: your losses, your ships, everyone else's losses, everyone else's ships | | P0 1,2,0,5; P1 and P2 0,2,1,5; P3 0,1,1,6 (the starbase is player 3's own ship and among everyone else's for the fighters) | MEASURED (read after the run); Elegy matches | `TestConfirmedPQ1SummaryPlayerCountIsN` |
+| PQ-1b C | C; player 0's Destroyer destroyed | races count 3 for the fighters; nothing for player 3 | 3 for the fighters (totals 2 and 4); player 3 got none (6 of 6) | CONFIRMED by prediction | `TestConfirmedPQ1SummaryPlayerCountIsN` |
 
 ### Settled by current COMBAT.md
 
