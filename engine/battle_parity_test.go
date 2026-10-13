@@ -1064,19 +1064,38 @@ func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, alts []p
 			t.Errorf("%s: %s", where, why)
 		}
 	}
-	// Each alt_battle where Elegy does not fight. One where it fights is
-	// an extra battle above, or, in a year with no record, unchecked like
-	// every battle of such a year. A year not run is reported by the
-	// vectors ledger ("not generated").
+	// Each alt_battle the extra-battle check above did not judge: one
+	// where Elegy does not fight is a matched sample (the recorded stream
+	// has no battle there either); one where it fights in a year with no
+	// record is judged as an extra battle would be. A year past the run
+	// is reported by the vectors ledger ("not generated"); a year that
+	// failed to run fails, as its records do.
 	for _, a := range alts {
-		if a.year < 1 || a.year >= len(years) || years[a.year].Skip != "" {
+		if a.year < 1 || a.year >= len(years) {
 			continue
 		}
 		l := years[a.year]
-		if _, fights := elegyBattles(&l)[a.at]; fights {
+		where := fmt.Sprintf("%s %s %q (%d,%d) y%d", name, a.caseID, "", a.at.X, a.at.Y, a.year)
+		if l.Skip != "" {
+			t.Errorf("%s: alt_battle: %s", where, l.Skip)
 			continue
 		}
-		where := fmt.Sprintf("%s %s %q (%d,%d) y%d", name, a.caseID, "", a.at.X, a.at.Y, a.year)
+		players, fights := elegyBattles(&l)[a.at]
+		if fights && byYear[a.year] != nil {
+			continue
+		}
+		if fights {
+			why := fmt.Sprintf("battle set: Elegy fights here (players %v), the vector records no battle this year", players)
+			switch {
+			case l.Downstream > 0:
+				t.Logf("%s: sample (after %d draws of earlier years) missed: %s", where, l.Downstream, why)
+			case altBattle(alts, a.year, a.at, players):
+				t.Logf("%s: sample (alt_battle in the vector) missed: %s", where, why)
+			default:
+				t.Errorf("%s: %s", where, why)
+			}
+			continue
+		}
 		why := fmt.Sprintf("no battle here, as in the recorded stream (an alternative stream's players %v fought)", sortedInts(a.players))
 		if l.Downstream > 0 {
 			t.Logf("%s: sample (after %d draws of earlier years) matched: %s", where, l.Downstream, why)
@@ -1459,6 +1478,40 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		if len(set.errs) != 0 || len(set.logs) != 1 || !strings.HasSuffix(set.logs[0], c.want) ||
 			!strings.Contains(set.logs[0], fmt.Sprintf(`cb/cb010.json C "" (%d,%d) y1`, r.x+1, r.y)) {
 			t.Errorf("alt_battle with no battle, %s: errors %q, logs %q, want one log ending %q", c.name, set.errs, set.logs, c.want)
+		}
+	}
+	// A year that failed to run fails its alt_battle, never a matched
+	// sample.
+	set = &recordTBInternal{TB: t}
+	checkBattleSet(set, "cb/cb010.json", nil, []pvAltBattle{away}, []BattleStart{{}, {Skip: "x"}}, BattleVariants{})
+	if len(set.logs) != 0 || len(set.errs) != 1 || !strings.HasSuffix(set.errs[0], ": alt_battle: x") {
+		t.Errorf("alt_battle in a year not run: errors %q, logs %q, want one error and no log", set.errs, set.logs)
+	}
+	// Where Elegy fights in a year with no record: a sample with the
+	// alt_battle's players (or after earlier draws), else a failure.
+	here := pvAltBattle{caseID: "C", year: 1, at: alt.at, players: alt.players}
+	for _, c := range []struct {
+		name       string
+		alt        pvAltBattle
+		downstream int
+		log, err   string
+	}{
+		{"same players", here, 0, ": sample (alt_battle in the vector) missed: battle set: Elegy fights here", ""},
+		{"other players, chained", pvAltBattle{caseID: "C", year: 1, at: alt.at, players: []int{outsider}}, 2, ": sample (after 2 draws of earlier years) missed: battle set: Elegy fights here", ""},
+		{"other players", pvAltBattle{caseID: "C", year: 1, at: alt.at, players: []int{outsider}}, 0, "", "battle set: Elegy fights here"},
+	} {
+		ly := l
+		ly.Downstream = c.downstream
+		set = &recordTBInternal{TB: t}
+		checkBattleSet(set, "cb/cb010.json", nil, []pvAltBattle{c.alt}, []BattleStart{{}, ly}, BattleVariants{})
+		ok := len(set.logs)+len(set.errs) == 1 && strings.HasSuffix(strings.Join(set.logs, "")+strings.Join(set.errs, ""), "the vector records no battle this year")
+		if c.log != "" {
+			ok = ok && len(set.logs) == 1 && strings.Contains(set.logs[0], c.log)
+		} else {
+			ok = ok && len(set.errs) == 1 && strings.Contains(set.errs[0], c.err)
+		}
+		if !ok {
+			t.Errorf("alt_battle where Elegy fights in a year with no record, %s: errors %q, logs %q", c.name, set.errs, set.logs)
 		}
 	}
 	// A recorded move two squares long is not one Elegy's rule allows.
