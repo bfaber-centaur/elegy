@@ -1119,3 +1119,54 @@ func TestLoadTarget0(t *testing.T) {
 		}
 	}
 }
+
+// TestLoadGalaxySize checks that a vector's universe size is required:
+// the galaxy clamp reads it, so a missing size is a load error rather than
+// tiny, and bounds that are not the size's box are an error too.
+func TestLoadGalaxySize(t *testing.T) {
+	for _, c := range []struct {
+		name   string
+		size   string
+		bounds []int
+		want   int // -1: refused
+	}{
+		{"tiny with its box", "tiny", []int{1000, 1000, 1400, 1400}, 0},
+		{"medium with its box", "medium", []int{1000, 1000, 2200, 2200}, 2},
+		{"huge, no bounds", "huge", nil, 4},
+		{"missing size", "", nil, -1},
+		{"unknown size", "enormous", nil, -1},
+		{"bounds of another size", "small", []int{1000, 1000, 1400, 1400}, -1},
+		{"bounds not starting at 1000", "tiny", []int{0, 0, 400, 400}, -1},
+	} {
+		v, err := ReadFile(testVector)
+		if err != nil {
+			t.Fatal(err)
+		}
+		v.InitialState.Game.Size, v.InitialState.Game.Bounds = c.size, c.bounds
+		l, err := loadVector(v)
+		if refused := err != nil; refused != (c.want < 0) {
+			t.Errorf("%s: load error %v, want refused %v", c.name, err, c.want < 0)
+			continue
+		}
+		if c.want >= 0 && l.g.Size != c.want {
+			t.Errorf("%s: size %d, want %d", c.name, l.g.Size, c.want)
+		}
+	}
+
+	// A new-game vector has no starting state to size; one that has a
+	// state still needs its size.
+	for _, players := range []bool{false, true} {
+		v, err := ReadFile(testVector)
+		if err != nil {
+			t.Fatal(err)
+		}
+		v.NewGame = json.RawMessage(`{}`)
+		v.InitialState.Game.Size = ""
+		if !players {
+			v.InitialState = pvState{}
+		}
+		if _, err := loadVector(v); (err != nil) != players {
+			t.Errorf("new-game vector, players in its state %v: load error %v", players, err)
+		}
+	}
+}

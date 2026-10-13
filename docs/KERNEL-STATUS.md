@@ -80,7 +80,8 @@ Not modelled: the rebirth itself. GAP-001 MEASURED a new environment and new con
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
 file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); step
-1a.3: the waypoint check, which first retargets waypoints, a follower's
+1a.3: the waypoint check, which clamps every fleet's position into the
+galaxy box (below), then retargets waypoints, a follower's
 waypoint 0 included, aimed at a fleet merged away during the replay
 (ORDERS-STATUS.md), then following fleets (KERNEL.md as corrected in
 stars-elegy 33eeb4a); the before-movement waypoint tasks (unloads,
@@ -136,6 +137,21 @@ a new object that takes the freed number is followed instead. While the
 object exists the target is kept as the files are written, seen or not
 (`waypointCheck`; ORDERS.md "Salvage and mineral packet targets",
 stars-elegy f2f9794, BINARY-ONLY; the keeping also MEASURED in RG-002).
+Each waypoint check first clamps every fleet's position, its waypoint 0,
+into the galaxy box, 1000 to 1000 + (size + 1)·400 on each axis, with no
+message and no fuel (ORDERS.md "Outside the galaxy"): CONFIRMED by
+prediction at the start of the year for a stationary fleet (ET-2c fleet
+K); the end-of-year clamp BINARY-ONLY, fitting ET-2b fleet Q (MEASURED);
+the checks after objects move (steps 3.2 and 5.1) clamp too, as KERNEL.md
+names them the same check (ASSUMPTION). Later waypoints are not clamped
+(BINARY-ONLY), so one aimed at a packet outside the box keeps its
+position (`TestConfirmedGalaxyClampStationary`,
+`TestMeasuredGalaxyClampEndOfYear`, `TestGalaxyClampThenWaypoints`,
+`TestGalaxyClampBeforeFollow`). The size has no default, since a wrong
+one moves fleets: a parity vector with a starting state must name it, with
+`bounds`, when present, matching it (`TestLoadGalaxySize`); a save without
+it, or with one outside tiny..huge, does not load (`TestLoadRejects`); a
+new game carries its settings' size (`TestConfirmedPlacementAndSpacing`).
 A transport task at a packet loads minerals from it, whoever owns it,
 and the emptied packet flies on; there is no 0x11e (`loadPacket`;
 ORDERS.md "Salvage and mineral packet targets", "Arrival", stars-elegy

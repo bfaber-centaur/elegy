@@ -56,11 +56,11 @@ func TestConfirmedWaypointCheck(t *testing.T) {
 	// owns it; one aimed at a fleet that is gone becomes a plain go-to at
 	// its last coordinates.
 	g := Game{Rules: ElegyRules(), Fleets: []Fleet{
-		{ID: 1, Owner: 0, Waypoints: []Waypoint{{Pos: Point{180, 60}, Target: TargetFleet, ID: 2}, {Pos: Point{180, 70}, Target: TargetFleet, ID: 99}}},
-		{ID: 2, Owner: 1, Pos: Point{180, 85}},
+		{ID: 1, Owner: 0, Pos: Point{1100, 1100}, Waypoints: []Waypoint{{Pos: Point{1280, 1160}, Target: TargetFleet, ID: 2}, {Pos: Point{1280, 1170}, Target: TargetFleet, ID: 99}}},
+		{ID: 2, Owner: 1, Pos: Point{1280, 1185}},
 	}}
 	g.waypointCheck()
-	want := []Waypoint{{Pos: Point{180, 85}, Target: TargetFleet, ID: 2}, {Pos: Point{180, 70}}}
+	want := []Waypoint{{Pos: Point{1280, 1185}, Target: TargetFleet, ID: 2}, {Pos: Point{1280, 1170}}}
 	if got := g.Fleets[0].Waypoints; !reflect.DeepEqual(got, want) {
 		t.Errorf("waypoints %v, want %v", got, want)
 	}
@@ -329,6 +329,7 @@ func TestMeasuredWFRetargetInTurn(t *testing.T) {
 	// scanner of player 0's, so the year ends with the waypoint at the
 	// target's position in space and player 0's 0x02a.
 	l := followLab(t, 1)
+	l.g.Size = 3 // a large galaxy, 1000..2600, holds the target
 	scout := l.g.Fleets[0].Stacks[0].Design
 	pi := l.planet(NoOwner, 0, 0)
 	ti := l.fleet(1, pi, 0, Stack{Design: scout, Count: 1})

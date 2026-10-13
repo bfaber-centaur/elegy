@@ -152,11 +152,26 @@ func (g *Game) Hash() (string, error) {
 
 // Load reads a save document written by Save.
 func Load(r io.Reader) (*Game, error) {
-	dec := json.NewDecoder(r)
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrSave, err)
+	}
+	dec := json.NewDecoder(bytes.NewReader(b))
 	dec.DisallowUnknownFields()
 	var f saveFile
 	if err := dec.Decode(&f); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrSave, err)
+	}
+	// The universe size has no default: a missing one would read as tiny,
+	// and the waypoint check clamps fleets into the size's galaxy box.
+	// Encode always writes it.
+	var sized struct {
+		Game struct {
+			Size *int
+		} `json:"game"`
+	}
+	if err := json.Unmarshal(b, &sized); err != nil || sized.Game.Size == nil {
+		return nil, fmt.Errorf("%w: the game has no universe size", ErrSave)
 	}
 	if f.Format != SaveFormat {
 		return nil, fmt.Errorf("%w: format %q, want %q", ErrSave, f.Format, SaveFormat)

@@ -121,8 +121,8 @@ func TestRulesetsCoexist(t *testing.T) {
 			Mass: 134, Engines: 1, FuelCapacity: 2600}
 		d.Engine.Fuel = [11]int{0, 0, 0, 0, 0, 0, 100, 100, 100, 100, 100}
 		return Game{Rules: rules, Year: 2400, Players: make([]Player, 1), Designs: []Design{d},
-			Fleets: []Fleet{{ID: 1, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: 200,
-				Waypoints: []Waypoint{{Pos: Point{1000, 0}, Warp: 5}}}}}
+			Fleets: []Fleet{{ID: 1, Pos: Point{1100, 1100}, Stacks: []Stack{{Design: 0, Count: 1}}, Fuel: 200,
+				Waypoints: []Waypoint{{Pos: Point{2100, 1100}, Warp: 5}}}}}
 	}
 	exact := ElegyRules()
 	exact.ID = "elegy-exact-fuel"
@@ -141,8 +141,8 @@ func TestRulesetsCoexist(t *testing.T) {
 		}
 		alone[i] = res.Game
 	}
-	if got := alone[0].Fleets[0].Pos; got != (Point{7, 0}) {
-		t.Fatalf("Elegy ruleset: fleet at %v, want (7,0)", got)
+	if got := alone[0].Fleets[0].Pos; got != (Point{1107, 1100}) {
+		t.Fatalf("Elegy ruleset: fleet at %v, want (1107,1100)", got)
 	}
 	if a, b := alone[0].Fleets[0].Pos, alone[1].Fleets[0].Pos; a == b {
 		t.Fatalf("both rulesets put the fleet at %v", a)

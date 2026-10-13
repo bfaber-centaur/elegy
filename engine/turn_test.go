@@ -33,7 +33,7 @@ func TestGenerateTurnRejectsNilRand(t *testing.T) {
 func pgHomeworld() Game {
 	start := pgDeposits[0]
 	p := Planet{
-		ID: 7, Owner: 0, Homeworld: true, Env: [3]int{50, 50, 50},
+		ID: 7, Owner: 0, Homeworld: true, Pos: Point{1100, 1100}, Env: [3]int{50, 50, 50},
 		Population: 486, GrowthCarry: 80,
 		Mines: 10, Factories: 10, Defenses: 10,
 		Surface: Minerals(start.surface),

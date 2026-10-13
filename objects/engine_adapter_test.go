@@ -48,16 +48,16 @@ func space(g engine.Game) *Space { return g.Objects.(*Space) }
 // moving fleets", "On a hit"; KERNEL.md "Turn order" 3.3 then 3a, MF-4).
 func TestConfirmedMineStopInTurn(t *testing.T) {
 	l := newLab(t)
-	fi := l.fleet(0, at(-100, 0), "Tank", 2)
+	fi := l.fleet(0, at(100, 200), "Tank", 2)
 	f := &l.g.Fleets[fi]
 	f.Fuel = 500
-	f.Waypoints = []engine.Waypoint{{Pos: at(200, 0), Warp: 9}}
-	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: origin, Count: 2500}}}
+	f.Waypoints = []engine.Waypoint{{Pos: at(400, 200), Warp: 9}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: at(200, 200), Count: 2500}}}
 
 	g := turn(t, *l.g, zero{})
 	got := g.Fleets[0]
-	if got.Pos != at(-50, 0) {
-		t.Errorf("stopped at %v, want the field's edge %v", got.Pos, at(-50, 0))
+	if got.Pos != at(150, 200) {
+		t.Errorf("stopped at %v, want the field's edge %v", got.Pos, at(150, 200))
 	}
 	if len(got.Waypoints) != 1 {
 		t.Errorf("waypoints %v: the stopped fleet did not arrive", got.Waypoints)
@@ -74,7 +74,7 @@ func TestConfirmedMineStopInTurn(t *testing.T) {
 		t.Errorf("field %+v, want %d after the hit and decay", m, after)
 	}
 	// The original game is unchanged.
-	if l.g.Objects.(*Space).Minefields[0].Count != 2500 || l.g.Fleets[0].Pos != at(-100, 0) {
+	if l.g.Objects.(*Space).Minefields[0].Count != 2500 || l.g.Fleets[0].Pos != at(100, 200) {
 		t.Error("GenerateTurn changed its input")
 	}
 }
@@ -82,12 +82,12 @@ func TestConfirmedMineStopInTurn(t *testing.T) {
 // With no draw that hits the fleet passes and arrives.
 func TestConfirmedMineMissInTurn(t *testing.T) {
 	l := newLab(t)
-	fi := l.fleet(0, at(-100, 0), "Tank", 1)
+	fi := l.fleet(0, at(100, 200), "Tank", 1)
 	l.g.Fleets[fi].Fuel = 500
-	l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: at(-20, 0), Warp: 9}}
-	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: origin, Count: 2500}}}
+	l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: at(180, 200), Warp: 9}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: at(200, 200), Count: 2500}}}
 	g := turn(t, *l.g, top{})
-	if g.Fleets[0].Pos != at(-20, 0) || len(g.Fleets[0].Waypoints) != 0 {
+	if g.Fleets[0].Pos != at(180, 200) || len(g.Fleets[0].Waypoints) != 0 {
 		t.Errorf("fleet at %v, waypoints %v", g.Fleets[0].Pos, g.Fleets[0].Waypoints)
 	}
 }
@@ -96,17 +96,17 @@ func TestConfirmedMineMissInTurn(t *testing.T) {
 // salvage at the stop point.
 func TestPredictionMineHitDestroysFleet(t *testing.T) {
 	l := newLab(t)
-	fi := l.fleet(0, at(-100, 0), "Freighter", 1)
+	fi := l.fleet(0, at(100, 200), "Freighter", 1)
 	f := &l.g.Fleets[fi]
 	f.Fuel = 450
 	f.Cargo.Minerals = engine.Minerals{50, 0, 0}
-	f.Waypoints = []engine.Waypoint{{Pos: at(0, 0), Warp: 9}}
-	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: origin, Count: 2500}}}
+	f.Waypoints = []engine.Waypoint{{Pos: at(200, 200), Warp: 9}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: at(200, 200), Count: 2500}}}
 	g := turn(t, *l.g, zero{})
 	if len(g.Fleets) != 0 {
 		t.Fatalf("fleets %+v, want the freighter destroyed", g.Fleets)
 	}
-	if len(g.Salvage) != 1 || g.Salvage[0].Pos != at(-50, 0) || g.Salvage[0].Minerals[0] != 50 {
+	if len(g.Salvage) != 1 || g.Salvage[0].Pos != at(150, 200) || g.Salvage[0].Minerals[0] != 50 {
 		t.Errorf("salvage %+v", g.Salvage)
 	}
 }
