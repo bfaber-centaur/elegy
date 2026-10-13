@@ -51,7 +51,7 @@ var rg002RandomDraws = regexp.MustCompile(`^random \(after \d+ draws in the year
 
 // rg002SampleDraws matches a sample's count of earlier draws, which
 // moves with any change to earlier years' draws.
-var rg002SampleDraws = regexp.MustCompile(`^sample \((?:after \d+ draws of earlier years|flagged in the vector)\) `)
+var rg002SampleDraws = regexp.MustCompile(`^sample \((?:after \d+ draws of earlier years|flagged in the vector|alt_battle in the vector)\) `)
 
 // ledgerTB takes CheckBattleRecords' RG-002 failures and sample misses
 // as ledger lines, by key, with "", "sample" or "random-driven" (lane D's
@@ -109,7 +109,8 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 	l.TB.Helper()
 	msg := fmt.Sprintf(format, args...)
 	switch {
-	case strings.Contains(msg, ": sample (after "), strings.Contains(msg, ": sample (flagged in the vector) "):
+	case strings.Contains(msg, ": sample (after "), strings.Contains(msg, ": sample (flagged in the vector) "),
+		strings.Contains(msg, ": sample (alt_battle in the vector) "):
 		l.take(msg, "sample")
 	case strings.Contains(msg, ": random (after "):
 		l.take(msg, "random-driven")
@@ -277,7 +278,9 @@ func TestCheckBattleLedger(t *testing.T) {
 	l.Errorf("%s", `rg/rg001.json C "" (1,2) y1: tokens: x`)
 	l.Logf("%s", `rg/rg002-y3.json C "" (5,6) y1: random (after 12 draws in the year; 2 of 7 other variants match): tokens: z`)
 	l.Logf("%s", `rg/rg002-y4.json C "" (7,8) y1: sample (flagged in the vector) missed: tokens: w`)
+	l.Logf("%s", `rg/rg002-y5.json C "" (9,10) y1: sample (alt_battle in the vector) missed: battle set: v`)
 	want := map[string]string{
+		"rg002-y5 | C y1 | battle record (9,10) | sample missed: battle set: v":                  "sample",
 		"rg002-y4 | C y1 | battle record (7,8) | sample missed: tokens: w":                       "sample",
 		"rg002-y2 | C y1 | battle record (1,2) | tokens: Elegy {Planet:0x?}":                     "",
 		"rg002 | C y2 | battle record (3,4) | sample missed: y":                                  "sample",

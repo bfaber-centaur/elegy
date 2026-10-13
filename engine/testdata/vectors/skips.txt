@@ -22,6 +22,7 @@
    7 client estimate ship_designer mass
    2 client estimate ship_designer scanner
   10 client estimate status_tile population
+   2 expectation alt_battle
  387 expectation battle
  374 expectation battle_actions
   15 expectation battle_plan

@@ -178,14 +178,31 @@ type pvBattleOutcome struct {
 	moveStop                            string
 }
 
+// pvAltBattle is an `alt_battle` expectation (rg only, vectors README
+// "Battle records"): a place where an alternative stream of the original
+// fought and the recorded stream did not.
+type pvAltBattle struct {
+	year    int
+	at      Point
+	players []int
+}
+
 // loadBattleRecords reads every battle record in the vectors.
 func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
+	recs, _ := loadBattles(t)
+	return recs
+}
+
+// loadBattles reads every battle record and every alt_battle in the
+// vectors, by vector.
+func loadBattles(t testing.TB) (map[string][]pvRecordedBattle, map[string][]pvAltBattle) {
 	paths, err := filepath.Glob(filepath.Join("testdata", "vectors", "*", "*.json"))
 	if err != nil || len(paths) == 0 {
 		t.Fatalf("no vectors: %v", err)
 	}
 	sort.Strings(paths)
 	out := map[string][]pvRecordedBattle{}
+	alts := map[string][]pvAltBattle{}
 	for _, p := range paths {
 		b, err := os.ReadFile(p)
 		if err != nil {
@@ -205,6 +222,10 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 			first := len(out[name])
 			at := map[string]int{} // stream and location → index in out[name]
 			for _, e := range c.Expect {
+				if e.Kind == "alt_battle" {
+					alts[name] = append(alts[name], pvAltBattle{year: e.Year, at: Point{X: e.X, Y: e.Y}, players: e.Players})
+					continue
+				}
 				if e.Kind != "battle" && e.Kind != "battle_actions" {
 					continue
 				}
@@ -237,7 +258,7 @@ func loadBattleRecords(t testing.TB) map[string][]pvRecordedBattle {
 			}
 		}
 	}
-	return out
+	return out, alts
 }
 
 // pvAnswer is the Rand of the hit replay. During firing the only
@@ -976,10 +997,12 @@ func elegyBattles(l *BattleStart) map[Point][]int {
 // name that has battle records but none at that location: a vector
 // records every battle of its years (a year with no record is not
 // checked, as nothing shows the vector recorded it). Classes as in
-// CheckBattleRecords: a chained year past a random year is a sample, and
-// a restart's extra battle that another seed variant does not fight is
+// CheckBattleRecords: a chained year past a random year is a sample, an
+// extra battle where the vector has an alt_battle of the same players is
+// a sample (an alternative stream of the original fought there), and a
+// restart's extra battle that another seed variant does not fight is
 // random-driven.
-func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, years []BattleStart, vs BattleVariants) {
+func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, alts []pvAltBattle, years []BattleStart, vs BattleVariants) {
 	type yearRecs struct {
 		caseID string
 		at     map[Point]bool
@@ -1018,6 +1041,10 @@ func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, years []
 				t.Logf("%s: sample (after %d draws of earlier years) missed: %s", where, l.Downstream, why)
 				continue
 			}
+			if altBattle(alts, y, p, mine[p]) {
+				t.Logf("%s: sample (alt_battle in the vector) missed: %s", where, why)
+				continue
+			}
 			if l.InYear > 0 && vs.N > 1 {
 				hit := 0
 				for k := 1; k < vs.N; k++ {
@@ -1037,6 +1064,23 @@ func checkBattleSet(t testing.TB, name string, recs []pvRecordedBattle, years []
 	}
 }
 
+// altBattle reports whether alts has an alt_battle in year y at p with
+// exactly the players Elegy's battle there has.
+func altBattle(alts []pvAltBattle, y int, p Point, players []int) bool {
+	for _, a := range alts {
+		if a.year == y && a.at == p && slices.Equal(sortedInts(a.players), sortedInts(players)) {
+			return true
+		}
+	}
+	return false
+}
+
+func sortedInts(s []int) []int {
+	s = slices.Clone(s)
+	slices.Sort(s)
+	return s
+}
+
 // BattleRecordVectors lists the vectors holding battle records, by path
 // ("cb/cb010.json").
 func BattleRecordVectors(t *testing.T) []string {
@@ -1051,7 +1095,12 @@ func BattleRecordVectors(t *testing.T) []string {
 // recordTBInternal keeps a check's failures.
 type recordTBInternal struct {
 	testing.TB
-	errs []string
+	errs, logs []string
+}
+
+func (r *recordTBInternal) Logf(format string, args ...any) {
+	r.logs = append(r.logs, fmt.Sprintf(format, args...))
+	r.TB.Logf(format, args...)
 }
 
 func (r *recordTBInternal) Errorf(format string, args ...any) {
@@ -1109,7 +1158,7 @@ func BattleRecordKeys(t testing.TB, name string) map[string]string {
 // (battle_vectors_test.go) runs it: the vector loader, package vectors,
 // imports engine.
 func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs BattleVariants) map[string]int {
-	records := loadBattleRecords(t)
+	records, alts := loadBattles(t)
 	type tally struct {
 		records, tokens, built, ungen, full, draws int
 		compared, matched, total, salvos           int
@@ -1227,7 +1276,7 @@ func CheckBattleRecords(t testing.TB, starts map[string][]BattleStart, vs Battle
 				t.Logf("%s: matched: %s", where, o.matchedDetail(r))
 			}
 		}
-		checkBattleSet(t, name, records[name], starts[name], vs)
+		checkBattleSet(t, name, records[name], alts[name], starts[name], vs)
 	}
 	var corpora []string
 	for c := range per {
@@ -1335,14 +1384,39 @@ func CheckBattleRecordHarness(t *testing.T, l, lb BattleStart) {
 		}
 	}
 	set := &recordTBInternal{TB: t}
-	checkBattleSet(set, "cb/cb010.json", rest, []BattleStart{{}, l}, BattleVariants{})
+	checkBattleSet(set, "cb/cb010.json", rest, nil, []BattleStart{{}, l}, BattleVariants{})
 	if len(set.errs) != 1 || !strings.Contains(set.errs[0], "(1060,") || !strings.Contains(set.errs[0], "battle set: Elegy fights here") {
 		t.Errorf("an unrecorded battle: %q, want one battle-set failure at 1060", set.errs)
 	}
 	set = &recordTBInternal{TB: t}
-	checkBattleSet(set, "cb/cb010.json", append(rest, r), []BattleStart{{}, l}, BattleVariants{})
+	checkBattleSet(set, "cb/cb010.json", append(rest, r), nil, []BattleStart{{}, l}, BattleVariants{})
 	if len(set.errs) != 0 {
 		t.Errorf("every battle recorded: %q, want none", set.errs)
+	}
+	// An alt_battle of the same players there makes it a sample; one of
+	// other players (even as many of them), or of an earlier or later
+	// year or another place, does not.
+	fought := elegyBattles(&l)[Point{X: r.x, Y: r.y}]
+	alt := pvAltBattle{year: 1, at: Point{X: r.x, Y: r.y}, players: []int{fought[1], fought[0]}}
+	outsider := slices.Max(fought) + 1
+	for _, c := range []struct {
+		name   string
+		alt    pvAltBattle
+		sample bool
+	}{
+		{"same players, listed in another order", alt, true},
+		{"other players", pvAltBattle{year: 1, at: alt.at, players: []int{fought[0]}}, false},
+		{"as many players, one of them not fighting there", pvAltBattle{year: 1, at: alt.at, players: []int{fought[0], outsider}}, false},
+		{"a later year", pvAltBattle{year: 2, at: alt.at, players: alt.players}, false},
+		{"an earlier year", pvAltBattle{year: 0, at: alt.at, players: alt.players}, false},
+		{"another place", pvAltBattle{year: 1, at: Point{X: r.x + 1, Y: r.y}, players: alt.players}, false},
+	} {
+		set = &recordTBInternal{TB: t}
+		checkBattleSet(set, "cb/cb010.json", rest, []pvAltBattle{c.alt}, []BattleStart{{}, l}, BattleVariants{})
+		sampled := len(set.logs) == 1 && strings.Contains(set.logs[0], "(1060,") && strings.Contains(set.logs[0], ": sample (alt_battle in the vector) missed: battle set: Elegy fights here")
+		if sampled != c.sample || len(set.errs) != map[bool]int{true: 0, false: 1}[c.sample] {
+			t.Errorf("alt_battle, %s: errors %q, logs %q, want sample %v", c.name, set.errs, set.logs, c.sample)
+		}
 	}
 	// A recorded move two squares long is not one Elegy's rule allows.
 	jump := r

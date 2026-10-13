@@ -2318,6 +2318,7 @@ sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.plan
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.resources = 9012, want 9039
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.score = 602, want 603
 sample | rg003 | RG-003-2471 y9 #521 | player id=6 seen_by=6 | score_record.unarmed_ships = 18, want 16
+not compared | rg003 | RG-003-2471 y9 #522 | alt_battle x=1388 y=1386 | expectation alt_battle
 sample | rg003 | RG-003-2471 y9 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg003 | RG-003-2471 y9 #53 | fleet owner=1 id=52 | cargo.ironium = 293, want 295
 sample | rg003 | RG-003-2471 y9 #54 | fleet owner=1 id=54 | cargo.ironium = 91, want 90
@@ -5744,6 +5745,7 @@ sample | rg003-y9 | RG-003-Y9-2471 y1 #481 | object | wormhole: y = 1775, want 1
 sample | rg003-y9 | RG-003-Y9-2471 y1 #511 | player id=1 seen_by=1 | score_record.escort_ships = 129, want 130
 sample | rg003-y9 | RG-003-Y9-2471 y1 #513 | player id=2 seen_by=2 | score_record.escort_ships = 44, want 47
 sample | rg003-y9 | RG-003-Y9-2471 y1 #517 | player id=4 seen_by=4 | score_record.unarmed_ships = 3, want 2
+not compared | rg003-y9 | RG-003-Y9-2471 y1 #522 | alt_battle x=1388 y=1386 | expectation alt_battle
 sample | rg003-y9 | RG-003-Y9-2471 y1 #64 | fleet owner=1 id=64 | cargo.ironium = 480, want 481
 sample | rg003-y9 | RG-003-Y9-2471 y1 #72 | fleet owner=1 id=74 | fleet gone
 sample | rg003-y9 | RG-003-Y9-2471 y1 #80 | fleet owner=1 id=82 | waypoints[0] position = {1560 1453}, want {1556 1461}
@@ -5962,7 +5964,7 @@ matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1153,1609) | matched: 2 
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1266,1400) | matched: 7 tokens, players and planet; 0 of 74 hits compared and 74 conditioned; 53 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1293,1597) | matched: 2 tokens, players and planet; 0 of 0 hits compared; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1329,1244) | matched: 3 tokens, players and planet; 0 of 2 hits compared and 2 conditioned; 6 moves allowed
-random-driven [lane D]: oracle fought here in 3 of 4 streams; only the recorded stream stopped 6/2 (stars-elegy 045bc90) | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | battle set: Elegy fights here (players [3 6]), the record has no battle
+sample | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1388,1386) | sample missed: battle set: Elegy fights here (players [3 6]), the record has no battle
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1402,1704) | matched: 5 tokens, players and planet; 0 of 1 hits compared and 1 conditioned; 14 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1423,1158) | matched: 2 tokens, players and planet; 0 of 5 hits compared and 5 conditioned; 8 moves allowed
 matched | rg003-y9 | RG-003-Y9-2471 y1 | battle record (1518,1414) | matched: 2 tokens, players and planet; 0 of 3 hits compared and 3 conditioned; 8 moves allowed
