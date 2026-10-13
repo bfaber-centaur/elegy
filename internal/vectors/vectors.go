@@ -1754,8 +1754,11 @@ func (l *pvLoaded) planetEquals(g *engine.Game, p *engine.Planet, eq map[string]
 			// vectors then write null for those fields where the start
 			// state had them. Reading a missing block as those zero
 			// values is the converse of that rule (ASSUMPTION: the block
-			// is written whenever any of them is non-zero); every field
-			// read this way matches. The ORACLE.md note that pins this
+			// is written whenever any of them is non-zero). One field
+			// read this way misses: RG-001-2435 y6 planet 41 excess, on a
+			// population that already differs; the y6 restart, from the
+			// oracle's year-5 state, matches it (docs/PARITY-STATUS.md).
+			// The ORACLE.md note that pins this
 			// to populated planets ("Populations above 0 with no mines,
 			// factories, defenses or carry are written without an
 			// installations section") says nothing about a record whose
