@@ -3,6 +3,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -437,6 +438,36 @@ func TestCanBuildDesign(t *testing.T) {
 		}
 		if got := g.canBuild(0, d); got != tt.want {
 			t.Errorf("%s: %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}
+
+func TestStarbaseQueueChangesKeepEarlierItems(t *testing.T) {
+	// The queue changes after a starbase item at index i (afterEarlierHull,
+	// dropPacketItems) keep that item and every item before it: those were
+	// processed already this year, and production removes or keeps the
+	// starbase item itself by its count.
+	q := []QueueItem{
+		{Kind: ItemAutoAlchemy, Count: 1},
+		{Kind: ItemIroniumPacket, Count: 1},
+		{Kind: ItemStarbase, Slot: 0, Count: 1, Percent: 20},
+		{Kind: ItemShip, Slot: 0, Count: 1},
+		{Kind: ItemBoraniumPacket, Count: 1},
+		{Kind: ItemStarbase, Slot: 1, Count: 1, Percent: 30},
+		{Kind: ItemAutoPackets, Count: 1},
+	}
+	for _, tt := range []struct {
+		name string
+		f    func(*production, int)
+		want []QueueItem
+	}{
+		{"earlier hull", (*production).afterEarlierHull, []QueueItem{q[0], q[1], {Kind: ItemStarbase, Slot: 0, Count: 1}, q[4], {Kind: ItemStarbase, Slot: 1, Count: 1}, q[6]}},
+		{"no driver", (*production).dropPacketItems, []QueueItem{q[0], q[1], q[2], q[3], q[5], q[6]}},
+	} {
+		p := Planet{Queue: append([]QueueItem(nil), q...)}
+		tt.f(&production{planet: &p}, 2)
+		if !reflect.DeepEqual(p.Queue, tt.want) {
+			t.Errorf("%s: queue %+v, want %+v", tt.name, p.Queue, tt.want)
 		}
 	}
 }
