@@ -236,3 +236,23 @@ func TestPredictionWarp10LostFleetRemoved(t *testing.T) {
 		t.Errorf("fleets %+v, want only fleet 2", r.Game.Fleets)
 	}
 }
+
+func TestAssumptionChaseTargetLostAtWarp10(t *testing.T) {
+	// ASSUMPTION (NOT RUN; ORDERS.md "Target destroyed during movement"
+	// is measured for mines only): a chaser of a fleet that loses every
+	// ship at warp 10 goes to the coordinates its waypoint held before
+	// movement, which settlement keeps. The lost fleet does not move, so
+	// these are also where it was lost.
+	target := mover(1, 10, Stack{Design: 0, Count: 1})
+	chaser := Fleet{ID: 2, Number: 2, Stacks: []Stack{{Design: 1, Count: 1}}, Fuel: 100, Pos: Point{0, 60},
+		Waypoints: []Waypoint{{Pos: Point{0, 0}, Warp: 5, Target: TargetFleet, ID: 1}}}
+	g := drawGame(false, target, chaser)
+	ev, _ := g.moveAll(&scriptRand{draws: []int{0}})
+	if len(ev) == 0 || ev[0].Kind != EventWarp10FleetLost {
+		t.Fatalf("events %v, want the target lost", ev)
+	}
+	c := g.Fleets[1]
+	if c.Pos != (Point{0, 35}) || c.Waypoints[0].Pos != (Point{0, 0}) {
+		t.Errorf("chaser at %v with waypoint %v, want (0,35) heading for (0,0)", c.Pos, c.Waypoints[0].Pos)
+	}
+}

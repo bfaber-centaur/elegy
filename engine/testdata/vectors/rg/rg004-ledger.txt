@@ -316,9 +316,9 @@ sample | rg004 | RG-004-2469 y4 #27 | fleet owner=3 id=88 | fuel = 300, want 100
 sample | rg004 | RG-004-2469 y4 #27 | fleet owner=3 id=88 | ships = map[17:1], want map[18:5]
 sample | rg004 | RG-004-2469 y4 #29 | fleet owner=3 id=93 | cargo.boranium = 25, want 24
 sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | fuel = 235, want 241
-sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | waypoints[0] position = {1361 1384}, want {1358 1362}
-sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | waypoints[1] = {{1352 1347} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1346 1347} 4 2 10 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | x = 1361, want 1358
+sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | waypoints[0] position = {1367 1384}, want {1358 1362}
+sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | waypoints[1] = {{1371 1350} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1346 1347} 4 2 10 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | x = 1367, want 1358
 sample | rg004 | RG-004-2469 y4 #32 | fleet owner=4 id=39 | y = 1384, want 1362
 sample | rg004 | RG-004-2469 y4 #35 | fleet owner=6 id=1 | waypoints[0] position = {1305 1423}, want {1317 1384}
 sample | rg004 | RG-004-2469 y4 #35 | fleet owner=6 id=1 | x = 1305, want 1317
@@ -1399,9 +1399,9 @@ sample | rg004 | RG-004-2474 y9 #26 | fleet owner=3 id=95 | ships = map[18:5], w
 sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | fuel = 280, want 650
 sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | orbiting = null, want 82
 sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | ships = map[23:1], want map[108:1]
-sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | waypoints[0] position = {1352 1347}, want {1355 1480}
-sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | x = 1352, want 1355
-sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | y = 1347, want 1480
+sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | waypoints[0] position = {1371 1350}, want {1355 1480}
+sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | x = 1371, want 1355
+sample | rg004 | RG-004-2474 y9 #34 | fleet owner=4 id=39 | y = 1350, want 1480
 sample | rg004 | RG-004-2474 y9 #38 | fleet owner=6 id=1 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2474 y9 #38 | fleet owner=6 id=1 | fuel = 1680, want 1380
 sample | rg004 | RG-004-2474 y9 #38 | fleet owner=6 id=1 | waypoints[0] position = {1348 1400}, want {1351 1366}
@@ -1541,20 +1541,21 @@ sample | rg004 | RG-004-2475 y10 #106 | planet id=46 | excess = 95, want 93
 sample | rg004 | RG-004-2475 y10 #108 | planet id=48 | excess = 89, want 57
 sample | rg004 | RG-004-2475 y10 #108 | planet id=48 | owner = 3, want 6
 sample | rg004 | RG-004-2475 y10 #109 | planet id=48 | population = 28, want 339
-sample | rg004 | RG-004-2475 y10 #110 | planet id=48 | surface_minerals = [45 69 125], want [1 5 0]
-sample | rg004 | RG-004-2475 y10 #112 | planet id=50 | surface_minerals = [12471 10657 5499], want [12514 10665 5522]
+sample | rg004 | RG-004-2475 y10 #110 | planet id=48 | surface_minerals = [44 68 125], want [1 5 0]
+sample | rg004 | RG-004-2475 y10 #112 | planet id=50 | surface_minerals = [12471 10658 5498], want [12514 10665 5522]
 sample | rg004 | RG-004-2475 y10 #119 | planet id=57 | excess = 91, want 25
 sample | rg004 | RG-004-2475 y10 #119 | planet id=57 | population = 4103, want 3431
 sample | rg004 | RG-004-2475 y10 #119 | planet id=57 | surface_minerals = [3662 2652 552], want [3548 2547 546]
+sample | rg004 | RG-004-2475 y10 #123 | planet id=61 | concentrations = [58 10 68], want [58 10 55]
 sample | rg004 | RG-004-2475 y10 #124 | planet id=61 | surface_minerals = [343 0 196], want [350 1 203]
 sample | rg004 | RG-004-2475 y10 #13 | fleet owner=3 id=20 | waypoints[0] position = {1314 1390}, want {1315 1390}
-sample | rg004 | RG-004-2475 y10 #13 | fleet owner=3 id=20 | waypoints[1] = {{1396 1078} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 5 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2475 y10 #13 | fleet owner=3 id=20 | waypoints[1] = {{1397 1072} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 5 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2475 y10 #13 | fleet owner=3 id=20 | x = 1314, want 1315
 sample | rg004 | RG-004-2475 y10 #133 | planet id=70 | excess = 90, want 42
 sample | rg004 | RG-004-2475 y10 #133 | planet id=70 | population = 9624, want 9322
-sample | rg004 | RG-004-2475 y10 #133 | planet id=70 | surface_minerals = [10079 8204 4652], want [10438 8392 5045]
-sample | rg004 | RG-004-2475 y10 #135 | planet id=73 | surface_minerals = [2129 2154 2177], want [2130 2154 2173]
-sample | rg004 | RG-004-2475 y10 #138 | planet id=76 | surface_minerals = [588 922 1234], want [585 921 1237]
+sample | rg004 | RG-004-2475 y10 #133 | planet id=70 | surface_minerals = [10080 8203 4652], want [10438 8392 5045]
+sample | rg004 | RG-004-2475 y10 #135 | planet id=73 | surface_minerals = [2130 2153 2177], want [2130 2154 2173]
+sample | rg004 | RG-004-2475 y10 #138 | planet id=76 | surface_minerals = [588 921 1233], want [585 921 1237]
 sample | rg004 | RG-004-2475 y10 #14 | fleet owner=3 id=30 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2475 y10 #14 | fleet owner=3 id=30 | fuel = 300, want 257
 sample | rg004 | RG-004-2475 y10 #14 | fleet owner=3 id=30 | orbiting = 70, want none
@@ -1566,17 +1567,16 @@ sample | rg004 | RG-004-2475 y10 #141 | planet id=79 | population = 274, want 27
 sample | rg004 | RG-004-2475 y10 #144 | planet id=82 | concentrations = [39 34 40], want [39 34 41]
 sample | rg004 | RG-004-2475 y10 #144 | planet id=82 | excess = 18, want 19
 sample | rg004 | RG-004-2475 y10 #144 | planet id=82 | population = 6721, want 6485
-sample | rg004 | RG-004-2475 y10 #144 | planet id=82 | surface_minerals = [259 202 189], want [250 193 182]
-sample | rg004 | RG-004-2475 y10 #146 | planet id=84 | surface_minerals = [50 34 41], want [49 32 41]
+sample | rg004 | RG-004-2475 y10 #144 | planet id=82 | surface_minerals = [259 201 189], want [250 193 182]
+sample | rg004 | RG-004-2475 y10 #146 | planet id=84 | surface_minerals = [51 34 41], want [49 32 41]
 sample | rg004 | RG-004-2475 y10 #15 | fleet owner=3 id=35 | waypoints[0] position = {1309 1407}, want {1309 1408}
-sample | rg004 | RG-004-2475 y10 #15 | fleet owner=3 id=35 | waypoints[1] = {{1396 1078} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2475 y10 #15 | fleet owner=3 id=35 | waypoints[1] = {{1397 1072} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1404 1074} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2475 y10 #15 | fleet owner=3 id=35 | y = 1407, want 1408
 sample | rg004 | RG-004-2475 y10 #150 | planet id=88 | surface_minerals = [290 237 2], want [287 233 2]
 sample | rg004 | RG-004-2475 y10 #152 | planet id=91 | surface_minerals = [173 176 103], want [170 173 102]
-sample | rg004 | RG-004-2475 y10 #153 | planet id=92 | surface_minerals = [9492 5678 5811], want [9493 5677 5808]
-sample | rg004 | RG-004-2475 y10 #157 | planet id=96 | surface_minerals = [152 54 28], want [156 55 31]
-sample | rg004 | RG-004-2475 y10 #163 | planet id=102 | surface_minerals = [73 539 69], want [72 537 68]
-sample | rg004 | RG-004-2475 y10 #165 | planet id=104 | surface_minerals = [18 9 14], want [19 7 14]
+sample | rg004 | RG-004-2475 y10 #153 | planet id=92 | surface_minerals = [9492 5677 5811], want [9493 5677 5808]
+sample | rg004 | RG-004-2475 y10 #157 | planet id=96 | surface_minerals = [152 55 28], want [156 55 31]
+sample | rg004 | RG-004-2475 y10 #163 | planet id=102 | surface_minerals = [72 539 69], want [72 537 68]
 sample | rg004 | RG-004-2475 y10 #167 | planet id=106 | surface_minerals = [34 40 63], want [34 43 62]
 sample | rg004 | RG-004-2475 y10 #17 | fleet owner=3 id=70 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2475 y10 #17 | fleet owner=3 id=70 | fuel = 911, want 650
@@ -1586,7 +1586,7 @@ sample | rg004 | RG-004-2475 y10 #17 | fleet owner=3 id=70 | x = 1344, want 1323
 sample | rg004 | RG-004-2475 y10 #17 | fleet owner=3 id=70 | y = 1402, want 1394
 sample | rg004 | RG-004-2475 y10 #171 | planet id=110 | surface_minerals = [105 88 115], want [103 92 116]
 sample | rg004 | RG-004-2475 y10 #174 | planet id=113 | factories = 658, want 659
-sample | rg004 | RG-004-2475 y10 #174 | planet id=113 | surface_minerals = [7367 6664 3], want [7367 6661 4]
+sample | rg004 | RG-004-2475 y10 #174 | planet id=113 | surface_minerals = [7367 6665 4], want [7367 6661 4]
 sample | rg004 | RG-004-2475 y10 #19 | fleet owner=3 id=86 | fuel = 295, want 300
 sample | rg004 | RG-004-2475 y10 #19 | fleet owner=3 id=86 | orbiting = null, want 70
 sample | rg004 | RG-004-2475 y10 #19 | fleet owner=3 id=86 | waypoints[0] position = {1311 1403}, want {1301 1438}
@@ -1616,23 +1616,22 @@ sample | rg004 | RG-004-2475 y10 #209 | production_queue planet=88 | queue = [{9
 sample | rg004 | RG-004-2475 y10 #213 | minefield owner=2 id=0 | minefield: mines = 3033, want 2464
 sample | rg004 | RG-004-2475 y10 #214 | minefield owner=6 id=0 | minefield: mines = 4080, want 4111
 sample | rg004 | RG-004-2475 y10 #218 | minefield owner=6 id=4 | minefield 6/4 gone
-sample | rg004 | RG-004-2475 y10 #219 | salvage_at x=1310 y=1403 | salvage = [[13 0 14]], want [3 0 2]
 sample | rg004 | RG-004-2475 y10 #22 | fleet owner=3 id=93 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2475 y10 #22 | fleet owner=3 id=93 | fuel = 300, want 900
 sample | rg004 | RG-004-2475 y10 #22 | fleet owner=3 id=93 | ships = map[17:1], want map[19:1]
-sample | rg004 | RG-004-2475 y10 #220 | salvage_at x=1310 y=1403 | salvage = [[13 0 14]], want [3 0 2]
-sample | rg004 | RG-004-2475 y10 #223 | object | wormhole: x = 1102, want 1114
-sample | rg004 | RG-004-2475 y10 #223 | object | wormhole: y = 1102, want 1103
-sample | rg004 | RG-004-2475 y10 #224 | object | wormhole: x = 1396, want 1323
-sample | rg004 | RG-004-2475 y10 #224 | object | wormhole: y = 1078, want 1039
+sample | rg004 | RG-004-2475 y10 #222 | object | packet 4/2 missing
+sample | rg004 | RG-004-2475 y10 #223 | object | wormhole: x = 1094, want 1114
+sample | rg004 | RG-004-2475 y10 #223 | object | wormhole: y = 1099, want 1103
+sample | rg004 | RG-004-2475 y10 #224 | object | wormhole: x = 1397, want 1323
+sample | rg004 | RG-004-2475 y10 #224 | object | wormhole: y = 1072, want 1039
 sample | rg004 | RG-004-2475 y10 #224 | object | wormhole: years_since_jump = 2, want 1
 sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: known_to = [], want [3]
-sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: x = 1193, want 1598
-sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: y = 1629, want 1571
+sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: x = 1183, want 1598
+sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: y = 1625, want 1571
 sample | rg004 | RG-004-2475 y10 #225 | object | wormhole: years_since_jump = 3, want 51
 sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: known_to = [3 4], want [1]
-sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: x = 1450, want 1120
-sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: y = 1204, want 1339
+sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: x = 1455, want 1120
+sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: y = 1216, want 1339
 sample | rg004 | RG-004-2475 y10 #226 | object | wormhole: years_since_jump = 33, want 6
 sample | rg004 | RG-004-2475 y10 #23 | fleet owner=3 id=95 | cargo.colonists = 125, want 205
 sample | rg004 | RG-004-2475 y10 #23 | fleet owner=3 id=95 | fuel = 946, want 650
@@ -1652,22 +1651,16 @@ sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.pla
 sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.rank = 4, want 5
 sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.resources = 1907, want 1864
 sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.score = 184, want 179
-sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 115, want 95
-sample | rg004 | RG-004-2475 y10 #245 | player id=4 seen_by=4 | score_record.escort_ships = 6, want 5
+sample | rg004 | RG-004-2475 y10 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 114, want 95
 sample | rg004 | RG-004-2475 y10 #245 | player id=4 seen_by=4 | score_record.resources = 3020, want 2972
-sample | rg004 | RG-004-2475 y10 #245 | player id=4 seen_by=4 | score_record.score = 245, want 242
+sample | rg004 | RG-004-2475 y10 #245 | player id=4 seen_by=4 | score_record.score = 243, want 242
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.escort_ships = 41, want 40
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.planets = 40, want 44
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.resources = 2075, want 1988
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.score = 301, want 303
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.tech_level_sum = 46, want 47
 sample | rg004 | RG-004-2475 y10 #249 | player id=6 seen_by=6 | score_record.unarmed_ships = 19, want 18
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | cargo.colonists = 0, want 250
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | fuel = 213, want 562
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | ships = map[23:1], want map[108:1]
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | waypoints[0] position = {1339 1394}, want {1324 1518}
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | x = 1339, want 1324
-sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | y = 1394, want 1518
+sample | rg004 | RG-004-2475 y10 #30 | fleet owner=4 id=39 | fleet gone
 sample | rg004 | RG-004-2475 y10 #33 | fleet owner=6 id=1 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2475 y10 #33 | fleet owner=6 id=1 | waypoints[0] position = {1348 1400}, want {1337 1387}
 sample | rg004 | RG-004-2475 y10 #33 | fleet owner=6 id=1 | x = 1348, want 1337
@@ -1756,12 +1749,12 @@ sample | rg004 | RG-004-2475 y10 #58 | fleet owner=6 id=27 | x = 1265, want 1121
 sample | rg004 | RG-004-2475 y10 #58 | fleet owner=6 id=27 | y = 1381, want 1476
 sample | rg004 | RG-004-2475 y10 #63 | planet id=3 | excess = 81, want 67
 sample | rg004 | RG-004-2475 y10 #63 | planet id=3 | population = 548, want 411
-sample | rg004 | RG-004-2475 y10 #63 | planet id=3 | surface_minerals = [371 146 36], want [355 35 33]
-sample | rg004 | RG-004-2475 y10 #65 | planet id=5 | surface_minerals = [45 20 33], want [16 15 34]
+sample | rg004 | RG-004-2475 y10 #63 | planet id=3 | surface_minerals = [370 146 35], want [355 35 33]
+sample | rg004 | RG-004-2475 y10 #65 | planet id=5 | surface_minerals = [44 19 34], want [16 15 34]
 sample | rg004 | RG-004-2475 y10 #69 | planet id=9 | excess = 23, want 87
 sample | rg004 | RG-004-2475 y10 #69 | planet id=9 | factories = 41, want 46
 sample | rg004 | RG-004-2475 y10 #69 | planet id=9 | population = 464, want 548
-sample | rg004 | RG-004-2475 y10 #69 | planet id=9 | surface_minerals = [75 75 12], want [24 55 3]
+sample | rg004 | RG-004-2475 y10 #69 | planet id=9 | surface_minerals = [75 74 12], want [24 55 3]
 sample | rg004 | RG-004-2475 y10 #7 | fleet owner=3 id=2 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2475 y10 #7 | fleet owner=3 id=2 | cargo.boranium = 0, want 14
 sample | rg004 | RG-004-2475 y10 #7 | fleet owner=3 id=2 | cargo.germanium = 0, want 22
@@ -1779,27 +1772,27 @@ sample | rg004 | RG-004-2475 y10 #77 | planet id=17 | factories = 0, want 5
 sample | rg004 | RG-004-2475 y10 #77 | planet id=17 | mines = 0, want 6
 sample | rg004 | RG-004-2475 y10 #77 | planet id=17 | population = 4, want 160
 sample | rg004 | RG-004-2475 y10 #77 | planet id=17 | surface_minerals = [11 9 9], want [23 16 4]
-sample | rg004 | RG-004-2475 y10 #80 | planet id=20 | surface_minerals = [42 124 96], want [40 125 95]
-sample | rg004 | RG-004-2475 y10 #82 | planet id=22 | surface_minerals = [208 160 196], want [205 160 196]
+sample | rg004 | RG-004-2475 y10 #80 | planet id=20 | surface_minerals = [43 124 96], want [40 125 95]
+sample | rg004 | RG-004-2475 y10 #82 | planet id=22 | surface_minerals = [209 160 196], want [205 160 196]
 sample | rg004 | RG-004-2475 y10 #84 | planet id=24 | excess = 67, want 27
 sample | rg004 | RG-004-2475 y10 #84 | planet id=24 | population = 2041, want 1533
 sample | rg004 | RG-004-2475 y10 #84 | planet id=24 | surface_minerals = [846 0 1399], want [805 0 1337]
-sample | rg004 | RG-004-2475 y10 #86 | planet id=26 | surface_minerals = [94 18 65], want [96 3 68]
+sample | rg004 | RG-004-2475 y10 #86 | planet id=26 | surface_minerals = [94 19 66], want [96 3 68]
 sample | rg004 | RG-004-2475 y10 #9 | fleet owner=3 id=4 | 2 waypoints after waypoint 0 [{1290 1609} {1718 1294}], want 1
 sample | rg004 | RG-004-2475 y10 #9 | fleet owner=3 id=4 | fuel = 56, want 30
 sample | rg004 | RG-004-2475 y10 #9 | fleet owner=3 id=4 | waypoints[0] position = {1561 1395}, want {1602 1378}
 sample | rg004 | RG-004-2475 y10 #9 | fleet owner=3 id=4 | x = 1561, want 1602
 sample | rg004 | RG-004-2475 y10 #9 | fleet owner=3 id=4 | y = 1395, want 1378
-sample | rg004 | RG-004-2475 y10 #90 | planet id=30 | surface_minerals = [78 86 63], want [79 86 59]
+sample | rg004 | RG-004-2475 y10 #90 | planet id=30 | surface_minerals = [78 86 62], want [79 86 59]
 sample | rg004 | RG-004-2475 y10 #91 | planet id=31 | excess = 57, want 64
 sample | rg004 | RG-004-2475 y10 #91 | planet id=31 | factories = 0, want 6
 sample | rg004 | RG-004-2475 y10 #91 | planet id=31 | population = 3, want 188
 sample | rg004 | RG-004-2475 y10 #91 | planet id=31 | surface_minerals = [11 7 9], want [31 26 4]
 sample | rg004 | RG-004-2475 y10 #92 | planet id=32 | surface_minerals = [13501 12142 5963], want [13522 12145 5968]
 sample | rg004 | RG-004-2475 y10 #96 | planet id=36 | surface_minerals = [152 49 58], want [0 49 53]
-sample | rg004 | RG-004-2475 y10 #99 | planet id=39 | surface_minerals = [100 203 25], want [102 202 25]
 sample | rg004 | RG-004-2476 y11 #101 | planet id=36 | surface_minerals = [165 53 59], want [13 53 54]
-sample | rg004 | RG-004-2476 y11 #104 | planet id=39 | surface_minerals = [105 217 19], want [107 215 20]
+sample | rg004 | RG-004-2476 y11 #104 | planet id=39 | surface_minerals = [106 217 20], want [107 215 20]
+sample | rg004 | RG-004-2476 y11 #109 | planet id=44 | surface_minerals = [56 20 60], want [57 20 58]
 sample | rg004 | RG-004-2476 y11 #11 | fleet owner=3 id=10 | waypoints[0] position = {1163 1275}, want {1212 1268}
 sample | rg004 | RG-004-2476 y11 #11 | fleet owner=3 id=10 | waypoints[1] = {{1018 1165} 5 1 2 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1246 1243} 6 2 600021 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2476 y11 #11 | fleet owner=3 id=10 | x = 1163, want 1212
@@ -1809,33 +1802,33 @@ sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | excess = 59, want 85
 sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | factories = 15, want 17
 sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | mines = 13, want 16
 sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | population = 28, want 335
-sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | surface_minerals = [45 70 126], want [3 17 4]
-sample | rg004 | RG-004-2476 y11 #115 | planet id=50 | surface_minerals = [12724 10910 5739], want [12767 10917 5762]
+sample | rg004 | RG-004-2476 y11 #113 | planet id=48 | surface_minerals = [44 70 127], want [3 17 4]
+sample | rg004 | RG-004-2476 y11 #115 | planet id=50 | surface_minerals = [12724 10911 5738], want [12767 10917 5762]
 sample | rg004 | RG-004-2476 y11 #122 | planet id=57 | excess = 97, want 66
 sample | rg004 | RG-004-2476 y11 #122 | planet id=57 | population = 3879, want 3284
-sample | rg004 | RG-004-2476 y11 #122 | planet id=57 | surface_minerals = [3570 2720 584], want [3433 2594 557]
-sample | rg004 | RG-004-2476 y11 #126 | planet id=61 | surface_minerals = [396 8 245], want [398 7 248]
+sample | rg004 | RG-004-2476 y11 #122 | planet id=57 | surface_minerals = [3570 2719 584], want [3433 2594 557]
+sample | rg004 | RG-004-2476 y11 #126 | planet id=61 | surface_minerals = [396 8 257], want [398 7 248]
 sample | rg004 | RG-004-2476 y11 #13 | fleet owner=3 id=20 | waypoints[0] position = {1318 1375}, want {1319 1375}
 sample | rg004 | RG-004-2476 y11 #13 | fleet owner=3 id=20 | x = 1318, want 1319
 sample | rg004 | RG-004-2476 y11 #135 | planet id=70 | excess = 64, want 14
 sample | rg004 | RG-004-2476 y11 #135 | planet id=70 | population = 9682, want 9163
-sample | rg004 | RG-004-2476 y11 #135 | planet id=70 | surface_minerals = [10382 8504 4973], want [10731 8682 5356]
-sample | rg004 | RG-004-2476 y11 #137 | planet id=73 | surface_minerals = [2337 2270 2269], want [2337 2270 2264]
+sample | rg004 | RG-004-2476 y11 #135 | planet id=70 | surface_minerals = [10383 8503 4974], want [10731 8682 5356]
+sample | rg004 | RG-004-2476 y11 #137 | planet id=73 | surface_minerals = [2338 2268 2268], want [2337 2270 2264]
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | fuel = 300, want 255
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | orbiting = 70, want none
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | waypoints[0] position = {1301 1438}, want {1442 1368}
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | x = 1301, want 1442
 sample | rg004 | RG-004-2476 y11 #14 | fleet owner=3 id=30 | y = 1438, want 1368
-sample | rg004 | RG-004-2476 y11 #140 | planet id=76 | surface_minerals = [591 925 1237], want [589 924 1241]
+sample | rg004 | RG-004-2476 y11 #140 | planet id=76 | surface_minerals = [592 924 1236], want [589 924 1241]
 sample | rg004 | RG-004-2476 y11 #143 | planet id=79 | environment = [55 13 74], want [56 10 74]
 sample | rg004 | RG-004-2476 y11 #143 | planet id=79 | excess = 84, want 36
 sample | rg004 | RG-004-2476 y11 #143 | planet id=79 | population = 386, want 336
-sample | rg004 | RG-004-2476 y11 #143 | planet id=79 | surface_minerals = [80 58 153], want [82 60 152]
 sample | rg004 | RG-004-2476 y11 #146 | planet id=82 | excess = 54, want 6
 sample | rg004 | RG-004-2476 y11 #146 | planet id=82 | population = 6613, want 6391
-sample | rg004 | RG-004-2476 y11 #146 | planet id=82 | surface_minerals = [253 264 215], want [235 247 204]
-sample | rg004 | RG-004-2476 y11 #149 | planet id=85 | surface_minerals = [2 343 152], want [2 344 154]
+sample | rg004 | RG-004-2476 y11 #146 | planet id=82 | surface_minerals = [254 263 215], want [235 247 204]
+sample | rg004 | RG-004-2476 y11 #148 | planet id=84 | surface_minerals = [58 41 43], want [56 39 43]
+sample | rg004 | RG-004-2476 y11 #149 | planet id=85 | surface_minerals = [1 344 151], want [2 344 154]
 sample | rg004 | RG-004-2476 y11 #15 | fleet owner=3 id=35 | waypoints[0] position = {1316 1383}, want {1316 1384}
 sample | rg004 | RG-004-2476 y11 #15 | fleet owner=3 id=35 | y = 1383, want 1384
 sample | rg004 | RG-004-2476 y11 #151 | planet id=87 | owner = -1, want 6
@@ -1844,25 +1837,26 @@ sample | rg004 | RG-004-2476 y11 #151 | planet id=87 | surface_minerals = [130 1
 sample | rg004 | RG-004-2476 y11 #152 | planet id=87 | environment = [31 50 34], want [30 49 32]
 sample | rg004 | RG-004-2476 y11 #153 | planet id=88 | surface_minerals = [318 254 3], want [313 248 2]
 sample | rg004 | RG-004-2476 y11 #155 | planet id=91 | surface_minerals = [182 186 114], want [179 184 113]
-sample | rg004 | RG-004-2476 y11 #156 | planet id=92 | surface_minerals = [9751 5937 6070], want [9752 5935 6067]
-sample | rg004 | RG-004-2476 y11 #160 | planet id=96 | surface_minerals = [0 57 22], want [166 58 25]
-sample | rg004 | RG-004-2476 y11 #166 | planet id=102 | surface_minerals = [78 545 73], want [77 542 72]
-sample | rg004 | RG-004-2476 y11 #168 | planet id=104 | surface_minerals = [22 10 17], want [23 8 17]
+sample | rg004 | RG-004-2476 y11 #156 | planet id=92 | surface_minerals = [9751 5936 6069], want [9752 5935 6067]
+sample | rg004 | RG-004-2476 y11 #160 | planet id=96 | surface_minerals = [0 58 21], want [166 58 25]
+sample | rg004 | RG-004-2476 y11 #166 | planet id=102 | surface_minerals = [76 545 73], want [77 542 72]
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | fuel = 872, want 650
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | ships = map[18:5], want map[20:1]
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | waypoints[0] position = {1364 1387}, want {1347 1388}
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | x = 1364, want 1347
 sample | rg004 | RG-004-2476 y11 #17 | fleet owner=3 id=70 | y = 1387, want 1388
-sample | rg004 | RG-004-2476 y11 #170 | planet id=106 | surface_minerals = [40 45 68], want [40 48 67]
+sample | rg004 | RG-004-2476 y11 #170 | planet id=106 | surface_minerals = [40 44 67], want [40 48 67]
 sample | rg004 | RG-004-2476 y11 #174 | planet id=110 | surface_minerals = [111 94 122], want [109 98 123]
 sample | rg004 | RG-004-2476 y11 #177 | planet id=113 | factories = 679, want 680
-sample | rg004 | RG-004-2476 y11 #177 | planet id=113 | surface_minerals = [7649 6926 33], want [7648 6922 34]
+sample | rg004 | RG-004-2476 y11 #177 | planet id=113 | surface_minerals = [7648 6927 34], want [7648 6922 34]
 sample | rg004 | RG-004-2476 y11 #179 | planet id=115 | excess = 68, want 54
 sample | rg004 | RG-004-2476 y11 #18 | fleet owner=3 id=80 | x = 1305, want 1302
 sample | rg004 | RG-004-2476 y11 #18 | fleet owner=3 id=80 | y = 1423, want 1422
 sample | rg004 | RG-004-2476 y11 #19 | fleet owner=3 id=80 | waypoints[0] position = {1305 1423}, want {1302 1422}
-sample | rg004 | RG-004-2476 y11 #19 | fleet owner=3 id=80 | waypoints[1] = {{1386 1089} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2476 y11 #19 | fleet owner=3 id=80 | waypoints[1] = {{1402 1077} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2476 y11 #190 | planet id=132 | surface_minerals = [147 237 24], want [147 238 22]
+sample | rg004 | RG-004-2476 y11 #191 | planet id=134 | surface_minerals = [28 24 45], want [28 24 43]
 sample | rg004 | RG-004-2476 y11 #194 | player id=0 | research_accumulated.construction = 872, want 742
 sample | rg004 | RG-004-2476 y11 #194 | player id=0 | research_accumulated.electronics = 378, want 566
 sample | rg004 | RG-004-2476 y11 #194 | player id=0 | research_accumulated.weapons = 351, want 341
@@ -1881,29 +1875,29 @@ sample | rg004 | RG-004-2476 y11 #200 | player id=6 | research_accumulated.energ
 sample | rg004 | RG-004-2476 y11 #200 | player id=6 | research_accumulated.weapons = 239, want 2332
 sample | rg004 | RG-004-2476 y11 #201 | production_queue planet=3 | queue = [{9 1 58 5}], want [{9 1 48 5}]
 sample | rg004 | RG-004-2476 y11 #203 | production_queue planet=11 | queue = [{2 2 32 0}], want [{2 3 92 0}]
-sample | rg004 | RG-004-2476 y11 #205 | production_queue planet=24 | queue = [{3 1 35 0} {7 1 0 0} {8 3 93 0}], want [{3 1 10 0} {7 1 0 0} {8 2 7 0}]
+sample | rg004 | RG-004-2476 y11 #205 | production_queue planet=24 | queue = [{3 1 29 0} {7 1 0 0} {8 3 96 0}], want [{3 1 10 0} {7 1 0 0} {8 2 7 0}]
 sample | rg004 | RG-004-2476 y11 #209 | production_queue planet=88 | queue = [{9 1 24 5}], want [{9 1 63 5}]
 sample | rg004 | RG-004-2476 y11 #21 | fleet owner=3 id=86 | waypoints[0] position = {1317 1379}, want {1302 1413}
-sample | rg004 | RG-004-2476 y11 #21 | fleet owner=3 id=86 | waypoints[1] = {{1386 1089} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2476 y11 #21 | fleet owner=3 id=86 | waypoints[1] = {{1402 1077} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2476 y11 #212 | minefield owner=2 id=0 | minefield: mines = 3157, want 2668
 sample | rg004 | RG-004-2476 y11 #213 | minefield owner=6 id=0 | minefield: mines = 4272, want 4300
 sample | rg004 | RG-004-2476 y11 #216 | minefield owner=6 id=3 | minefield: mines = 2028, want 2232
 sample | rg004 | RG-004-2476 y11 #217 | minefield owner=6 id=4 | minefield 6/4 gone
-sample | rg004 | RG-004-2476 y11 #218 | salvage_at x=1310 y=1403 | salvage = [[3 0 4]], want [3 0 2]
 sample | rg004 | RG-004-2476 y11 #22 | fleet owner=3 id=90 | fuel = 1000, want 300
 sample | rg004 | RG-004-2476 y11 #22 | fleet owner=3 id=90 | ships = map[18:5], want map[17:1]
-sample | rg004 | RG-004-2476 y11 #222 | object | wormhole: x = 1103, want 1105
-sample | rg004 | RG-004-2476 y11 #222 | object | wormhole: y = 1095, want 1110
-sample | rg004 | RG-004-2476 y11 #223 | object | wormhole: x = 1386, want 1335
-sample | rg004 | RG-004-2476 y11 #223 | object | wormhole: y = 1089, want 1033
+sample | rg004 | RG-004-2476 y11 #221 | object | packet 4/2 missing
+sample | rg004 | RG-004-2476 y11 #222 | object | wormhole: x = 1094, want 1105
+sample | rg004 | RG-004-2476 y11 #222 | object | wormhole: y = 1090, want 1110
+sample | rg004 | RG-004-2476 y11 #223 | object | wormhole: x = 1402, want 1335
+sample | rg004 | RG-004-2476 y11 #223 | object | wormhole: y = 1077, want 1033
 sample | rg004 | RG-004-2476 y11 #223 | object | wormhole: years_since_jump = 3, want 2
 sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: known_to = [], want [3]
-sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: x = 1196, want 1610
-sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: y = 1620, want 1573
+sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: x = 1185, want 1610
+sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: y = 1622, want 1573
 sample | rg004 | RG-004-2476 y11 #224 | object | wormhole: years_since_jump = 4, want 52
 sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: known_to = [3 4], want [1]
-sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: x = 1450, want 1125
-sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: y = 1195, want 1331
+sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: x = 1460, want 1125
+sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: y = 1207, want 1331
 sample | rg004 | RG-004-2476 y11 #225 | object | wormhole: years_since_jump = 34, want 7
 sample | rg004 | RG-004-2476 y11 #23 | fleet owner=3 id=91 | x = 1307, want 1302
 sample | rg004 | RG-004-2476 y11 #23 | fleet owner=3 id=91 | y = 1414, want 1413
@@ -1913,17 +1907,16 @@ sample | rg004 | RG-004-2476 y11 #237 | player id=0 seen_by=0 | score_record.sco
 sample | rg004 | RG-004-2476 y11 #237 | player id=0 seen_by=0 | score_record.tech_level_sum = 35, want 37
 sample | rg004 | RG-004-2476 y11 #237 | player id=0 seen_by=0 | score_record.unarmed_ships = 9, want 11
 sample | rg004 | RG-004-2476 y11 #24 | fleet owner=3 id=91 | waypoints[0] position = {1307 1414}, want {1302 1413}
-sample | rg004 | RG-004-2476 y11 #24 | fleet owner=3 id=91 | waypoints[1] = {{1386 1089} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2476 y11 #24 | fleet owner=3 id=91 | waypoints[1] = {{1402 1077} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1033} 5 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2476 y11 #241 | player id=2 seen_by=2 | score_record.resources = 3108, want 3109
 sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.escort_ships = 26, want 29
 sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.planets = 2, want 1
 sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.rank = 5, want 6
 sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.resources = 1913, want 1832
 sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.score = 184, want 178
-sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 113, want 93
-sample | rg004 | RG-004-2476 y11 #245 | player id=4 seen_by=4 | score_record.escort_ships = 7, want 6
+sample | rg004 | RG-004-2476 y11 #243 | player id=3 seen_by=3 | score_record.unarmed_ships = 112, want 93
 sample | rg004 | RG-004-2476 y11 #245 | player id=4 seen_by=4 | score_record.resources = 3032, want 2983
-sample | rg004 | RG-004-2476 y11 #245 | player id=4 seen_by=4 | score_record.score = 248, want 244
+sample | rg004 | RG-004-2476 y11 #245 | player id=4 seen_by=4 | score_record.score = 246, want 244
 sample | rg004 | RG-004-2476 y11 #247 | player id=5 seen_by=5 | score_record.rank = 6, want 5
 sample | rg004 | RG-004-2476 y11 #249 | player id=6 seen_by=6 | score_record.escort_ships = 43, want 42
 sample | rg004 | RG-004-2476 y11 #249 | player id=6 seen_by=6 | score_record.planets = 40, want 45
@@ -1936,16 +1929,13 @@ sample | rg004 | RG-004-2476 y11 #25 | fleet owner=3 id=93 | fuel = 298, want 90
 sample | rg004 | RG-004-2476 y11 #25 | fleet owner=3 id=93 | ships = map[17:1], want map[19:1]
 sample | rg004 | RG-004-2476 y11 #26 | fleet owner=3 id=95 | fuel = 903, want 650
 sample | rg004 | RG-004-2476 y11 #26 | fleet owner=3 id=95 | ships = map[18:5], want map[20:1]
-sample | rg004 | RG-004-2476 y11 #29 | fleet owner=3 id=98 | fuel = 300, want 200
-sample | rg004 | RG-004-2476 y11 #29 | fleet owner=3 id=98 | ships = map[17:1], want map[18:1]
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | 1 waypoints after waypoint 0 [{1294 1554}], want 0
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | cargo.colonists = 0, want 250
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | fuel = 146, want 478
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | orbiting = null, want 65
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | ships = map[23:1], want map[108:1]
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | waypoints[0] position = {1326 1441}, want {1294 1554}
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | x = 1326, want 1294
-sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | y = 1441, want 1554
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | fuel = 650, want 478
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | orbiting = 82, want 65
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | waypoints[0] position = {1355 1480}, want {1294 1554}
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | x = 1355, want 1294
+sample | rg004 | RG-004-2476 y11 #34 | fleet owner=4 id=39 | y = 1480, want 1554
 sample | rg004 | RG-004-2476 y11 #40 | fleet owner=6 id=4 | 3 waypoints after waypoint 0 [{1167 1124} {1267 1405} {1210 1410}], want 1
 sample | rg004 | RG-004-2476 y11 #40 | fleet owner=6 id=4 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2476 y11 #40 | fleet owner=6 id=4 | cargo.germanium = 0, want 6
@@ -2003,7 +1993,7 @@ sample | rg004 | RG-004-2476 y11 #56 | fleet owner=6 id=22 | waypoints[0] positi
 sample | rg004 | RG-004-2476 y11 #56 | fleet owner=6 id=22 | x = 1249, want 1367
 sample | rg004 | RG-004-2476 y11 #56 | fleet owner=6 id=22 | y = 1396, want 1343
 sample | rg004 | RG-004-2476 y11 #57 | fleet owner=6 id=23 | cargo.boranium = 0, want 71
-sample | rg004 | RG-004-2476 y11 #57 | fleet owner=6 id=23 | cargo.germanium = 97, want 95
+sample | rg004 | RG-004-2476 y11 #57 | fleet owner=6 id=23 | cargo.germanium = 96, want 95
 sample | rg004 | RG-004-2476 y11 #57 | fleet owner=6 id=23 | fuel = 436, want 407
 sample | rg004 | RG-004-2476 y11 #58 | fleet owner=6 id=24 | cargo.germanium = 0, want 32
 sample | rg004 | RG-004-2476 y11 #58 | fleet owner=6 id=24 | fuel = 188, want 254
@@ -2036,8 +2026,8 @@ sample | rg004 | RG-004-2476 y11 #63 | fleet owner=6 id=30 | y = 1476, want 1381
 sample | rg004 | RG-004-2476 y11 #65 | planet id=1 | surface_minerals = [16 10 14], want [0 10 14]
 sample | rg004 | RG-004-2476 y11 #67 | planet id=3 | excess = 71, want 37
 sample | rg004 | RG-004-2476 y11 #67 | planet id=3 | population = 591, want 445
-sample | rg004 | RG-004-2476 y11 #67 | planet id=3 | surface_minerals = [387 155 33], want [377 164 36]
-sample | rg004 | RG-004-2476 y11 #69 | planet id=5 | surface_minerals = [49 22 35], want [20 17 36]
+sample | rg004 | RG-004-2476 y11 #67 | planet id=3 | surface_minerals = [386 155 32], want [377 164 36]
+sample | rg004 | RG-004-2476 y11 #69 | planet id=5 | surface_minerals = [47 21 37], want [20 17 36]
 sample | rg004 | RG-004-2476 y11 #7 | fleet owner=3 id=2 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2476 y11 #7 | fleet owner=3 id=2 | cargo.boranium = 0, want 14
 sample | rg004 | RG-004-2476 y11 #7 | fleet owner=3 id=2 | cargo.germanium = 0, want 22
@@ -2047,7 +2037,7 @@ sample | rg004 | RG-004-2476 y11 #7 | fleet owner=3 id=2 | ships = map[17:1], wa
 sample | rg004 | RG-004-2476 y11 #73 | planet id=9 | excess = 13, want 45
 sample | rg004 | RG-004-2476 y11 #73 | planet id=9 | factories = 46, want 53
 sample | rg004 | RG-004-2476 y11 #73 | planet id=9 | population = 504, want 595
-sample | rg004 | RG-004-2476 y11 #73 | planet id=9 | surface_minerals = [81 87 16], want [30 67 2]
+sample | rg004 | RG-004-2476 y11 #73 | planet id=9 | surface_minerals = [82 85 16], want [30 67 2]
 sample | rg004 | RG-004-2476 y11 #75 | planet id=10 | concentrations = [94 53 25], want [170 145 119]
 sample | rg004 | RG-004-2476 y11 #75 | planet id=10 | environment = [95 67 1], want [91 72 1]
 sample | rg004 | RG-004-2476 y11 #75 | planet id=10 | population = 4, want 2
@@ -2055,7 +2045,7 @@ sample | rg004 | RG-004-2476 y11 #75 | planet id=10 | surface_minerals = [9 6 8]
 sample | rg004 | RG-004-2476 y11 #76 | planet id=11 | defenses = 2, want 5
 sample | rg004 | RG-004-2476 y11 #76 | planet id=11 | excess = 65, want 94
 sample | rg004 | RG-004-2476 y11 #76 | planet id=11 | population = 2146, want 2100
-sample | rg004 | RG-004-2476 y11 #76 | planet id=11 | surface_minerals = [37 622 504], want [118 627 538]
+sample | rg004 | RG-004-2476 y11 #76 | planet id=11 | surface_minerals = [36 623 505], want [118 627 538]
 sample | rg004 | RG-004-2476 y11 #78 | planet id=13 | excess = 84, want 54
 sample | rg004 | RG-004-2476 y11 #78 | planet id=13 | mines = 0, want 2
 sample | rg004 | RG-004-2476 y11 #78 | planet id=13 | population = 3, want 52
@@ -2066,19 +2056,19 @@ sample | rg004 | RG-004-2476 y11 #82 | planet id=17 | factories = 0, want 6
 sample | rg004 | RG-004-2476 y11 #82 | planet id=17 | mines = 0, want 7
 sample | rg004 | RG-004-2476 y11 #82 | planet id=17 | population = 4, want 159
 sample | rg004 | RG-004-2476 y11 #82 | planet id=17 | surface_minerals = [11 9 9], want [28 21 5]
-sample | rg004 | RG-004-2476 y11 #85 | planet id=20 | surface_minerals = [53 139 0], want [51 141 0]
-sample | rg004 | RG-004-2476 y11 #87 | planet id=22 | surface_minerals = [220 169 202], want [218 169 202]
+sample | rg004 | RG-004-2476 y11 #85 | planet id=20 | surface_minerals = [55 139 0], want [51 141 0]
+sample | rg004 | RG-004-2476 y11 #87 | planet id=22 | surface_minerals = [221 170 202], want [218 169 202]
 sample | rg004 | RG-004-2476 y11 #89 | planet id=24 | concentrations = [56 9 82], want [57 9 83]
 sample | rg004 | RG-004-2476 y11 #89 | planet id=24 | excess = 49, want 85
 sample | rg004 | RG-004-2476 y11 #89 | planet id=24 | population = 2082, want 1606
-sample | rg004 | RG-004-2476 y11 #89 | planet id=24 | surface_minerals = [915 1 1494], want [874 1 1433]
+sample | rg004 | RG-004-2476 y11 #89 | planet id=24 | surface_minerals = [914 1 1492], want [874 1 1433]
 sample | rg004 | RG-004-2476 y11 #9 | fleet owner=3 id=4 | 2 waypoints after waypoint 0 [{1290 1609} {1718 1294}], want 1
 sample | rg004 | RG-004-2476 y11 #9 | fleet owner=3 id=4 | fuel = 51, want 25
 sample | rg004 | RG-004-2476 y11 #9 | fleet owner=3 id=4 | waypoints[0] position = {1533 1417}, want {1573 1399}
 sample | rg004 | RG-004-2476 y11 #9 | fleet owner=3 id=4 | x = 1533, want 1573
 sample | rg004 | RG-004-2476 y11 #9 | fleet owner=3 id=4 | y = 1417, want 1399
-sample | rg004 | RG-004-2476 y11 #91 | planet id=26 | surface_minerals = [100 19 70], want [101 3 73]
-sample | rg004 | RG-004-2476 y11 #95 | planet id=30 | surface_minerals = [86 95 66], want [87 96 63]
+sample | rg004 | RG-004-2476 y11 #91 | planet id=26 | surface_minerals = [99 20 71], want [101 3 73]
+sample | rg004 | RG-004-2476 y11 #95 | planet id=30 | surface_minerals = [87 96 65], want [87 96 63]
 sample | rg004 | RG-004-2476 y11 #96 | planet id=31 | excess = 54, want 39
 sample | rg004 | RG-004-2476 y11 #96 | planet id=31 | factories = 0, want 8
 sample | rg004 | RG-004-2476 y11 #96 | planet id=31 | population = 3, want 186
@@ -2088,23 +2078,23 @@ sample | rg004 | RG-004-2477 y12 #10 | fleet owner=3 id=10 | waypoints[0] positi
 sample | rg004 | RG-004-2477 y12 #10 | fleet owner=3 id=10 | waypoints[1] = {{1018 1165} 5 1 2 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1294 1252} 6 2 600021 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2477 y12 #10 | fleet owner=3 id=10 | x = 1143, want 1247
 sample | rg004 | RG-004-2477 y12 #10 | fleet owner=3 id=10 | y = 1260, want 1261
-sample | rg004 | RG-004-2477 y12 #102 | planet id=30 | surface_minerals = [94 105 69], want [95 106 66]
+sample | rg004 | RG-004-2477 y12 #102 | planet id=30 | surface_minerals = [96 106 68], want [95 106 66]
 sample | rg004 | RG-004-2477 y12 #103 | planet id=31 | excess = 51, want 16
 sample | rg004 | RG-004-2477 y12 #103 | planet id=31 | factories = 0, want 9
 sample | rg004 | RG-004-2477 y12 #103 | planet id=31 | mines = 0, want 9
 sample | rg004 | RG-004-2477 y12 #103 | planet id=31 | population = 3, want 184
 sample | rg004 | RG-004-2477 y12 #103 | planet id=31 | surface_minerals = [11 7 9], want [41 41 2]
-sample | rg004 | RG-004-2477 y12 #104 | planet id=32 | surface_minerals = [13998 12649 6446], want [14019 12651 6451]
-sample | rg004 | RG-004-2477 y12 #108 | planet id=36 | surface_minerals = [179 58 56], want [27 58 52]
+sample | rg004 | RG-004-2477 y12 #104 | planet id=32 | surface_minerals = [13998 12649 6447], want [14019 12651 6451]
+sample | rg004 | RG-004-2477 y12 #108 | planet id=36 | surface_minerals = [179 57 56], want [27 58 52]
 sample | rg004 | RG-004-2477 y12 #11 | fleet owner=3 id=15 | fleet gone
-sample | rg004 | RG-004-2477 y12 #116 | planet id=44 | surface_minerals = [60 23 64], want [61 22 62]
+sample | rg004 | RG-004-2477 y12 #116 | planet id=44 | surface_minerals = [60 21 65], want [61 22 62]
 sample | rg004 | RG-004-2477 y12 #118 | planet id=46 | excess = 87, want 79
 sample | rg004 | RG-004-2477 y12 #12 | fleet_gone owner=3 id=20 | fleet still exists
 sample | rg004 | RG-004-2477 y12 #120 | planet id=48 | excess = 29, want 17
 sample | rg004 | RG-004-2477 y12 #120 | planet id=48 | factories = 15, want 21
 sample | rg004 | RG-004-2477 y12 #120 | planet id=48 | population = 28, want 332
-sample | rg004 | RG-004-2477 y12 #120 | planet id=48 | surface_minerals = [45 72 128], want [5 31 2]
-sample | rg004 | RG-004-2477 y12 #123 | planet id=50 | surface_minerals = [13035 11175 6005], want [13066 11179 6023]
+sample | rg004 | RG-004-2477 y12 #120 | planet id=48 | surface_minerals = [44 72 129], want [5 31 2]
+sample | rg004 | RG-004-2477 y12 #123 | planet id=50 | surface_minerals = [13035 11177 6004], want [13066 11179 6023]
 sample | rg004 | RG-004-2477 y12 #13 | fleet owner=3 id=30 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2477 y12 #13 | fleet owner=3 id=30 | fuel = 300, want 253
 sample | rg004 | RG-004-2477 y12 #13 | fleet owner=3 id=30 | orbiting = 70, want none
@@ -2113,20 +2103,20 @@ sample | rg004 | RG-004-2477 y12 #13 | fleet owner=3 id=30 | x = 1301, want 1457
 sample | rg004 | RG-004-2477 y12 #13 | fleet owner=3 id=30 | y = 1438, want 1364
 sample | rg004 | RG-004-2477 y12 #130 | planet id=57 | excess = 79, want 73
 sample | rg004 | RG-004-2477 y12 #130 | planet id=57 | population = 3949, want 3157
-sample | rg004 | RG-004-2477 y12 #130 | planet id=57 | surface_minerals = [3451 2768 591], want [3283 2618 539]
-sample | rg004 | RG-004-2477 y12 #132 | planet id=59 | surface_minerals = [182 156 43], want [182 155 41]
-sample | rg004 | RG-004-2477 y12 #134 | planet id=61 | surface_minerals = [450 17 296], want [453 17 300]
+sample | rg004 | RG-004-2477 y12 #130 | planet id=57 | surface_minerals = [3450 2767 590], want [3283 2618 539]
+sample | rg004 | RG-004-2477 y12 #132 | planet id=59 | surface_minerals = [182 157 42], want [182 155 41]
+sample | rg004 | RG-004-2477 y12 #134 | planet id=61 | surface_minerals = [451 18 321], want [453 17 300]
 sample | rg004 | RG-004-2477 y12 #138 | planet id=65 | excess = 16, want 66
 sample | rg004 | RG-004-2477 y12 #138 | planet id=65 | mines = 17, want 21
 sample | rg004 | RG-004-2477 y12 #138 | planet id=65 | population = 159, want 418
-sample | rg004 | RG-004-2477 y12 #138 | planet id=65 | surface_minerals = [128 167 1], want [127 168 3]
+sample | rg004 | RG-004-2477 y12 #138 | planet id=65 | surface_minerals = [127 167 1], want [127 168 3]
 sample | rg004 | RG-004-2477 y12 #14 | fleet owner=3 id=35 | waypoints[0] position = {1323 1359}, want {1323 1360}
 sample | rg004 | RG-004-2477 y12 #14 | fleet owner=3 id=35 | y = 1359, want 1360
 sample | rg004 | RG-004-2477 y12 #143 | planet id=70 | excess = 73, want 60
 sample | rg004 | RG-004-2477 y12 #143 | planet id=70 | population = 9740, want 9245
-sample | rg004 | RG-004-2477 y12 #143 | planet id=70 | surface_minerals = [10621 8776 5223], want [10969 8952 5609]
-sample | rg004 | RG-004-2477 y12 #145 | planet id=73 | surface_minerals = [2399 2457 2430], want [2400 2457 2424]
-sample | rg004 | RG-004-2477 y12 #148 | planet id=76 | surface_minerals = [595 928 1241], want [593 927 1244]
+sample | rg004 | RG-004-2477 y12 #143 | planet id=70 | surface_minerals = [10628 8780 5235], want [10969 8952 5609]
+sample | rg004 | RG-004-2477 y12 #145 | planet id=73 | surface_minerals = [2400 2456 2428], want [2400 2457 2424]
+sample | rg004 | RG-004-2477 y12 #148 | planet id=76 | surface_minerals = [596 927 1239], want [593 927 1244]
 sample | rg004 | RG-004-2477 y12 #15 | fleet owner=3 id=40 | 2 waypoints after waypoint 0 [{1385 1440} {1341 1305}], want 1
 sample | rg004 | RG-004-2477 y12 #15 | fleet owner=3 id=40 | fuel = 0, want 291
 sample | rg004 | RG-004-2477 y12 #15 | fleet owner=3 id=40 | ships = map[18:5], want map[17:1]
@@ -2135,36 +2125,40 @@ sample | rg004 | RG-004-2477 y12 #15 | fleet owner=3 id=40 | x = 1339, want 1333
 sample | rg004 | RG-004-2477 y12 #15 | fleet owner=3 id=40 | y = 1327, want 1414
 sample | rg004 | RG-004-2477 y12 #152 | planet id=79 | excess = 7, want 68
 sample | rg004 | RG-004-2477 y12 #152 | planet id=79 | population = 386, want 334
-sample | rg004 | RG-004-2477 y12 #152 | planet id=79 | surface_minerals = [84 61 178], want [87 63 177]
+sample | rg004 | RG-004-2477 y12 #152 | planet id=79 | surface_minerals = [85 63 178], want [87 63 177]
 sample | rg004 | RG-004-2477 y12 #155 | planet id=82 | concentrations = [37 33 39], want [38 33 39]
 sample | rg004 | RG-004-2477 y12 #155 | planet id=82 | excess = 47, want 79
 sample | rg004 | RG-004-2477 y12 #155 | planet id=82 | population = 6272, want 6067
-sample | rg004 | RG-004-2477 y12 #155 | planet id=82 | surface_minerals = [251 220 250], want [225 195 230]
-sample | rg004 | RG-004-2477 y12 #159 | planet id=85 | surface_minerals = [2 408 195], want [1 409 197]
+sample | rg004 | RG-004-2477 y12 #155 | planet id=82 | surface_minerals = [252 219 250], want [225 195 230]
+sample | rg004 | RG-004-2477 y12 #157 | planet id=84 | surface_minerals = [65 47 45], want [63 46 45]
+sample | rg004 | RG-004-2477 y12 #159 | planet id=85 | surface_minerals = [1 410 195], want [1 409 197]
 sample | rg004 | RG-004-2477 y12 #16 | fleet owner=3 id=45 | x = 1305, want 1302
+sample | rg004 | RG-004-2477 y12 #16 | fleet owner=3 id=45 | y = 1423, want 1422
 sample | rg004 | RG-004-2477 y12 #161 | planet id=87 | excess = 0, want 24
 sample | rg004 | RG-004-2477 y12 #161 | planet id=87 | population = 0, want 11
-sample | rg004 | RG-004-2477 y12 #162 | planet id=88 | surface_minerals = [346 270 2], want [340 264 1]
+sample | rg004 | RG-004-2477 y12 #162 | planet id=88 | surface_minerals = [344 268 1], want [340 264 1]
 sample | rg004 | RG-004-2477 y12 #164 | planet id=91 | surface_minerals = [191 196 125], want [188 194 124]
-sample | rg004 | RG-004-2477 y12 #165 | planet id=92 | surface_minerals = [10012 6198 6331], want [10013 6196 6328]
-sample | rg004 | RG-004-2477 y12 #169 | planet id=96 | surface_minerals = [10 61 16], want [176 62 19]
-sample | rg004 | RG-004-2477 y12 #17 | fleet owner=3 id=45 | waypoints[0] position = {1305 1422}, want {1302 1422}
-sample | rg004 | RG-004-2477 y12 #17 | fleet owner=3 id=45 | waypoints[1] = {{1382 1083} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1330 1032} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
-sample | rg004 | RG-004-2477 y12 #175 | planet id=102 | surface_minerals = [83 550 78], want [82 547 76]
-sample | rg004 | RG-004-2477 y12 #177 | planet id=104 | surface_minerals = [27 11 20], want [27 9 20]
-sample | rg004 | RG-004-2477 y12 #179 | planet id=106 | surface_minerals = [46 49 73], want [46 53 71]
+sample | rg004 | RG-004-2477 y12 #165 | planet id=92 | surface_minerals = [10012 6197 6330], want [10013 6196 6328]
+sample | rg004 | RG-004-2477 y12 #169 | planet id=96 | surface_minerals = [10 62 15], want [176 62 19]
+sample | rg004 | RG-004-2477 y12 #17 | fleet owner=3 id=45 | waypoints[0] position = {1305 1423}, want {1302 1422}
+sample | rg004 | RG-004-2477 y12 #17 | fleet owner=3 id=45 | waypoints[1] = {{1404 1074} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1330 1032} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2477 y12 #175 | planet id=102 | surface_minerals = [81 551 77], want [82 547 76]
+sample | rg004 | RG-004-2477 y12 #177 | planet id=104 | surface_minerals = [26 9 22], want [27 9 20]
+sample | rg004 | RG-004-2477 y12 #179 | planet id=106 | surface_minerals = [46 49 72], want [46 53 71]
 sample | rg004 | RG-004-2477 y12 #18 | fleet owner=3 id=70 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2477 y12 #18 | fleet owner=3 id=70 | fuel = 864, want 650
 sample | rg004 | RG-004-2477 y12 #18 | fleet owner=3 id=70 | ships = map[18:5], want map[20:1]
-sample | rg004 | RG-004-2477 y12 #183 | planet id=110 | surface_minerals = [117 100 128], want [115 104 129]
+sample | rg004 | RG-004-2477 y12 #183 | planet id=110 | surface_minerals = [117 100 129], want [115 104 129]
 sample | rg004 | RG-004-2477 y12 #186 | planet id=113 | factories = 688, want 689
-sample | rg004 | RG-004-2477 y12 #186 | planet id=113 | surface_minerals = [7948 7205 127], want [7947 7200 127]
+sample | rg004 | RG-004-2477 y12 #186 | planet id=113 | surface_minerals = [7948 7206 128], want [7947 7200 127]
 sample | rg004 | RG-004-2477 y12 #188 | planet id=115 | excess = 81, want 53
 sample | rg004 | RG-004-2477 y12 #19 | fleet owner=3 id=80 | waypoints[0] position = {1305 1423}, want {1302 1422}
 sample | rg004 | RG-004-2477 y12 #19 | fleet owner=3 id=80 | x = 1305, want 1302
 sample | rg004 | RG-004-2477 y12 #19 | fleet owner=3 id=80 | y = 1423, want 1422
+sample | rg004 | RG-004-2477 y12 #199 | planet id=132 | surface_minerals = [144 265 18], want [144 267 16]
 sample | rg004 | RG-004-2477 y12 #20 | fleet_gone owner=3 id=81 | fleet still exists
-sample | rg004 | RG-004-2477 y12 #203 | player id=0 | research_accumulated.construction = 983, want 848
+sample | rg004 | RG-004-2477 y12 #200 | planet id=134 | surface_minerals = [29 26 48], want [29 26 46]
+sample | rg004 | RG-004-2477 y12 #203 | player id=0 | research_accumulated.construction = 977, want 848
 sample | rg004 | RG-004-2477 y12 #203 | player id=0 | research_accumulated.electronics = 378, want 566
 sample | rg004 | RG-004-2477 y12 #203 | player id=0 | research_accumulated.weapons = 351, want 341
 sample | rg004 | RG-004-2477 y12 #205 | player id=2 | research_accumulated.biotechnology = 1354, want 1356
@@ -2184,39 +2178,41 @@ sample | rg004 | RG-004-2477 y12 #211 | player id=6 | research_accumulated.energ
 sample | rg004 | RG-004-2477 y12 #211 | player id=6 | research_accumulated.weapons = 878, want 6
 sample | rg004 | RG-004-2477 y12 #212 | production_queue planet=3 | queue = [{9 1 71 5}], want [{9 1 59 5}]
 sample | rg004 | RG-004-2477 y12 #214 | production_queue planet=11 | queue = [{8 1 39 13} {8 1 0 1} {8 1 0 1} {8 1 0 1}], want [{8 1 42 13} {8 1 0 1} {8 1 0 1} {8 1 0 1}]
-sample | rg004 | RG-004-2477 y12 #216 | production_queue planet=24 | queue = [{3 1 88 0} {7 1 0 0} {8 2 34 0}], want [{3 1 22 0} {7 1 0 0} {8 2 49 0}]
+sample | rg004 | RG-004-2477 y12 #216 | production_queue planet=24 | queue = [{3 1 82 0} {7 1 0 0} {8 2 37 0}], want [{3 1 22 0} {7 1 0 0} {8 2 49 0}]
 sample | rg004 | RG-004-2477 y12 #22 | fleet owner=3 id=90 | fuel = 975, want 298
 sample | rg004 | RG-004-2477 y12 #22 | fleet owner=3 id=90 | ships = map[18:5], want map[17:1]
 sample | rg004 | RG-004-2477 y12 #22 | fleet owner=3 id=90 | x = 1305, want 1302
+sample | rg004 | RG-004-2477 y12 #22 | fleet owner=3 id=90 | y = 1423, want 1422
 sample | rg004 | RG-004-2477 y12 #221 | production_queue planet=79 | queue = [{15 1 59 0}], want [{15 1 55 0}]
 sample | rg004 | RG-004-2477 y12 #222 | production_queue planet=85 | queue = [{9 1 1 5}], want [{9 1 8 5}]
-sample | rg004 | RG-004-2477 y12 #223 | production_queue planet=88 | queue = [{9 1 30 5}], want [{9 1 70 5}]
+sample | rg004 | RG-004-2477 y12 #223 | production_queue planet=88 | queue = [{9 1 31 5}], want [{9 1 70 5}]
 sample | rg004 | RG-004-2477 y12 #227 | minefield owner=2 id=0 | minefield: mines = 3221, want 2843
 sample | rg004 | RG-004-2477 y12 #229 | minefield owner=6 id=0 | minefield: mines = 4445, want 4425
-sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[0] position = {1305 1422}, want {1302 1422}
-sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[1] = {{1382 1083} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1330 1032} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[0] position = {1305 1423}, want {1302 1422}
+sample | rg004 | RG-004-2477 y12 #23 | fleet owner=3 id=90 | waypoints[1] = {{1404 1074} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1330 1032} 4 3 1 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2477 y12 #232 | minefield owner=6 id=3 | minefield: mines = 2425, want 3120
 sample | rg004 | RG-004-2477 y12 #233 | minefield owner=6 id=4 | minefield 6/4 gone
 sample | rg004 | RG-004-2477 y12 #234 | salvage_at x=1303 y=1415 | salvage = [], want [5 0 6]
 sample | rg004 | RG-004-2477 y12 #235 | salvage_at x=1326 y=1351 | salvage = [], want [3 0 2]
+sample | rg004 | RG-004-2477 y12 #236 | salvage_at x=1310 y=1403 | salvage = [], want [3 0 2]
 sample | rg004 | RG-004-2477 y12 #24 | fleet owner=3 id=91 | waypoints[0] position = {1307 1414}, want {1302 1413}
 sample | rg004 | RG-004-2477 y12 #24 | fleet owner=3 id=91 | x = 1307, want 1302
 sample | rg004 | RG-004-2477 y12 #24 | fleet owner=3 id=91 | y = 1414, want 1413
 sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: destination_known_to = [3], want []
 sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: known_to = [3 4], want [4]
-sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: x = 1097, want 1109
-sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: y = 1086, want 1103
+sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: x = 1091, want 1109
+sample | rg004 | RG-004-2477 y12 #240 | object | wormhole: y = 1093, want 1103
 sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: destination_known_to = [3], want []
-sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: x = 1382, want 1330
-sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: y = 1083, want 1032
+sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: x = 1404, want 1330
+sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: y = 1074, want 1032
 sample | rg004 | RG-004-2477 y12 #241 | object | wormhole: years_since_jump = 4, want 3
 sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: known_to = [], want [3]
-sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: x = 1186, want 1608
-sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: y = 1609, want 1584
+sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: x = 1173, want 1608
+sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: y = 1623, want 1584
 sample | rg004 | RG-004-2477 y12 #242 | object | wormhole: years_since_jump = 5, want 53
 sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: known_to = [3 4], want [1]
-sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: x = 1442, want 1135
-sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: y = 1185, want 1330
+sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: x = 1465, want 1135
+sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: y = 1213, want 1330
 sample | rg004 | RG-004-2477 y12 #243 | object | wormhole: years_since_jump = 35, want 8
 sample | rg004 | RG-004-2477 y12 #25 | fleet owner=3 id=93 | battle_plan = 0, want 4
 sample | rg004 | RG-004-2477 y12 #25 | fleet owner=3 id=93 | cargo.colonists = 0, want 169
@@ -2236,9 +2232,8 @@ sample | rg004 | RG-004-2477 y12 #264 | player id=3 seen_by=3 | score_record.ran
 sample | rg004 | RG-004-2477 y12 #264 | player id=3 seen_by=3 | score_record.resources = 1919, want 1848
 sample | rg004 | RG-004-2477 y12 #264 | player id=3 seen_by=3 | score_record.score = 184, want 178
 sample | rg004 | RG-004-2477 y12 #264 | player id=3 seen_by=3 | score_record.unarmed_ships = 114, want 93
-sample | rg004 | RG-004-2477 y12 #266 | player id=4 seen_by=4 | score_record.escort_ships = 8, want 7
 sample | rg004 | RG-004-2477 y12 #266 | player id=4 seen_by=4 | score_record.resources = 2981, want 2960
-sample | rg004 | RG-004-2477 y12 #266 | player id=4 seen_by=4 | score_record.score = 248, want 245
+sample | rg004 | RG-004-2477 y12 #266 | player id=4 seen_by=4 | score_record.score = 246, want 245
 sample | rg004 | RG-004-2477 y12 #27 | fleet_gone owner=3 id=96 | fleet still exists
 sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.escort_ships = 43, want 42
 sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.planets = 40, want 45
@@ -2246,21 +2241,13 @@ sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.res
 sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.score = 311, want 318
 sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.tech_level_sum = 47, want 48
 sample | rg004 | RG-004-2477 y12 #270 | player id=6 seen_by=6 | score_record.unarmed_ships = 23, want 21
-sample | rg004 | RG-004-2477 y12 #30 | fleet owner=3 id=99 | fuel = 200, want 300
-sample | rg004 | RG-004-2477 y12 #30 | fleet owner=3 id=99 | ships = map[18:1], want map[17:1]
-sample | rg004 | RG-004-2477 y12 #31 | fleet owner=3 id=100 | fuel = 300, want 200
-sample | rg004 | RG-004-2477 y12 #31 | fleet owner=3 id=100 | ships = map[17:1], want map[18:1]
-sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | fuel = 280, want 454
+sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | 0 waypoints after waypoint 0 [], want 1
+sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | battle_plan = 0, want 4
+sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | fuel = 650, want 454
 sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | orbiting = 82, want none
-sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | ships = map[23:1], want map[108:1]
 sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | waypoints[0] position = {1355 1480}, want {1325 1516}
-sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | waypoints[1] = {{1294 1554} 7 1 66 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1355 1480} 7 1 83 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | x = 1355, want 1325
 sample | rg004 | RG-004-2477 y12 #36 | fleet owner=4 id=39 | y = 1480, want 1516
-sample | rg004 | RG-004-2477 y12 #38 | fleet owner=4 id=46 | fuel = 650, want 200
-sample | rg004 | RG-004-2477 y12 #38 | fleet owner=4 id=46 | ships = map[108:1], want map[22:1]
-sample | rg004 | RG-004-2477 y12 #39 | fleet owner=4 id=47 | fuel = 200, want 650
-sample | rg004 | RG-004-2477 y12 #39 | fleet owner=4 id=47 | ships = map[22:1], want map[108:1]
 sample | rg004 | RG-004-2477 y12 #41 | fleet owner=6 id=1 | waypoints[0] position = {1328 1374}, want {1326 1351}
 sample | rg004 | RG-004-2477 y12 #41 | fleet owner=6 id=1 | x = 1328, want 1326
 sample | rg004 | RG-004-2477 y12 #41 | fleet owner=6 id=1 | y = 1374, want 1351
@@ -2330,7 +2317,7 @@ sample | rg004 | RG-004-2477 y12 #61 | fleet owner=6 id=22 | waypoints[0] positi
 sample | rg004 | RG-004-2477 y12 #61 | fleet owner=6 id=22 | x = 1260, want 1367
 sample | rg004 | RG-004-2477 y12 #61 | fleet owner=6 id=22 | y = 1373, want 1318
 sample | rg004 | RG-004-2477 y12 #62 | fleet owner=6 id=23 | cargo.boranium = 0, want 71
-sample | rg004 | RG-004-2477 y12 #62 | fleet owner=6 id=23 | cargo.germanium = 97, want 95
+sample | rg004 | RG-004-2477 y12 #62 | fleet owner=6 id=23 | cargo.germanium = 96, want 95
 sample | rg004 | RG-004-2477 y12 #62 | fleet owner=6 id=23 | fuel = 472, want 443
 sample | rg004 | RG-004-2477 y12 #63 | fleet owner=6 id=24 | cargo.germanium = 0, want 71
 sample | rg004 | RG-004-2477 y12 #63 | fleet owner=6 id=24 | fuel = 222, want 288
@@ -2373,22 +2360,23 @@ sample | rg004 | RG-004-2477 y12 #71 | fleet owner=6 id=32 | fuel = 700, want 15
 sample | rg004 | RG-004-2477 y12 #71 | fleet owner=6 id=32 | ships = map[106:1], want map[28:1]
 sample | rg004 | RG-004-2477 y12 #75 | planet id=3 | excess = 38, want 86
 sample | rg004 | RG-004-2477 y12 #75 | planet id=3 | population = 635, want 481
-sample | rg004 | RG-004-2477 y12 #75 | planet id=3 | surface_minerals = [403 164 31], want [398 175 37]
-sample | rg004 | RG-004-2477 y12 #77 | planet id=5 | surface_minerals = [52 24 38], want [24 19 0]
+sample | rg004 | RG-004-2477 y12 #75 | planet id=3 | surface_minerals = [402 164 29], want [398 175 37]
+sample | rg004 | RG-004-2477 y12 #77 | planet id=5 | surface_minerals = [50 22 39], want [24 19 0]
 sample | rg004 | RG-004-2477 y12 #81 | planet id=9 | excess = 47, want 10
 sample | rg004 | RG-004-2477 y12 #81 | planet id=9 | factories = 50, want 59
 sample | rg004 | RG-004-2477 y12 #81 | planet id=9 | population = 547, want 643
-sample | rg004 | RG-004-2477 y12 #81 | planet id=9 | surface_minerals = [89 100 26], want [37 80 7]
+sample | rg004 | RG-004-2477 y12 #81 | planet id=9 | surface_minerals = [90 98 26], want [37 80 7]
 sample | rg004 | RG-004-2477 y12 #82 | planet id=10 | excess = 1, want 6
 sample | rg004 | RG-004-2477 y12 #83 | planet id=11 | defenses = 5, want 8
 sample | rg004 | RG-004-2477 y12 #83 | planet id=11 | excess = 71, want 74
 sample | rg004 | RG-004-2477 y12 #83 | planet id=11 | population = 1953, want 1910
-sample | rg004 | RG-004-2477 y12 #83 | planet id=11 | surface_minerals = [10 645 545], want [86 653 582]
+sample | rg004 | RG-004-2477 y12 #83 | planet id=11 | surface_minerals = [8 646 546], want [86 653 582]
 sample | rg004 | RG-004-2477 y12 #85 | planet id=13 | excess = 81, want 87
 sample | rg004 | RG-004-2477 y12 #85 | planet id=13 | mines = 0, want 3
 sample | rg004 | RG-004-2477 y12 #85 | planet id=13 | population = 3, want 51
 sample | rg004 | RG-004-2477 y12 #85 | planet id=13 | surface_minerals = [11 7 9], want [11 1 12]
-sample | rg004 | RG-004-2477 y12 #86 | planet id=14 | surface_minerals = [10 19 11], want [12 21 11]
+sample | rg004 | RG-004-2477 y12 #86 | planet id=14 | surface_minerals = [9 19 11], want [12 21 11]
+sample | rg004 | RG-004-2477 y12 #88 | planet id=16 | surface_minerals = [25 10 8], want [23 10 8]
 sample | rg004 | RG-004-2477 y12 #89 | planet id=17 | excess = 81, want 21
 sample | rg004 | RG-004-2477 y12 #89 | planet id=17 | factories = 0, want 7
 sample | rg004 | RG-004-2477 y12 #89 | planet id=17 | mines = 0, want 8
@@ -2399,12 +2387,12 @@ sample | rg004 | RG-004-2477 y12 #9 | fleet owner=3 id=4 | fuel = 46, want 20
 sample | rg004 | RG-004-2477 y12 #9 | fleet owner=3 id=4 | waypoints[0] position = {1505 1439}, want {1544 1420}
 sample | rg004 | RG-004-2477 y12 #9 | fleet owner=3 id=4 | x = 1505, want 1544
 sample | rg004 | RG-004-2477 y12 #9 | fleet owner=3 id=4 | y = 1439, want 1420
-sample | rg004 | RG-004-2477 y12 #92 | planet id=20 | surface_minerals = [65 155 1], want [62 157 1]
-sample | rg004 | RG-004-2477 y12 #94 | planet id=22 | surface_minerals = [233 179 208], want [230 179 208]
+sample | rg004 | RG-004-2477 y12 #92 | planet id=20 | surface_minerals = [67 155 1], want [62 157 1]
+sample | rg004 | RG-004-2477 y12 #94 | planet id=22 | surface_minerals = [233 180 208], want [230 179 208]
 sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | excess = 96, want 90
 sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | population = 2119, want 1675
-sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | surface_minerals = [980 0 1584], want [941 0 1524]
-sample | rg004 | RG-004-2477 y12 #98 | planet id=26 | surface_minerals = [105 20 74], want [106 4 0]
+sample | rg004 | RG-004-2477 y12 #96 | planet id=24 | surface_minerals = [980 0 1583], want [941 0 1524]
+sample | rg004 | RG-004-2477 y12 #98 | planet id=26 | surface_minerals = [105 21 76], want [106 4 0]
 sample | rg004 | year 10 | order | year 10 player 0 order 2 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 10 | order | year 10 player 0 order 5 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 10 | order | year 10 player 3 order 74 (WaypointOrder): fleet 0: orders: no such object
@@ -2422,7 +2410,7 @@ sample | rg004 | year 11 | order | year 11 player 6 order 30 (QueueOrder): plane
 sample | rg004 | year 11 | order | year 11 player 6 order 33 (QueueOrder): planet 49: orders: the object belongs to another player
 sample | rg004 | year 12 | order | year 12 player 0 order 3 (WaypointOrder): fleet 0: orders: no such object
 sample | rg004 | year 12 | order | year 12 player 0 order 6 (WaypointOrder): fleet 0: orders: no such object
-sample | rg004 | year 12 | order | year 12 player 4 order 3 (CargoOrder): cargo: fleet 400040 and planet 66: orders: the objects are not at the same place
+sample | rg004 | year 12 | order | year 12 player 4 order 3 (CargoOrder): cargo: fleet 600094 and planet 66: orders: the objects are not at the same place
 sample | rg004 | year 12 | order | year 12 player 6 order 1 (MoveShipsOrder): fleet 600068 has 0 ships of design 27, not 1: orders: a value is out of range
 sample | rg004 | year 12 | order | year 12 player 6 order 12 (CargoOrder): cargo: fleet 600074 and planet 58: orders: the objects are not at the same place
 sample | rg004 | year 12 | order | year 12 player 6 order 14 (WaypointOrder): waypoint 0 fleet 300021: orders: no such object
@@ -2811,13 +2799,13 @@ sample | rg004 | RG-004-2475 y10 | battle record (1310,1403) | sample missed: to
 sample | rg004 | RG-004-2475 y10 | battle record (1320,1343) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg004 | RG-004-2475 y10 | battle record (1718,1294) | sample matched
 sample | rg004 | RG-004-2476 y11 | battle record (1063,1434) | sample matched
-sample | rg004 | RG-004-2476 y11 | battle record (1310,1403) | sample missed: tokens: token 0: Elegy {Owner:6 Kind:ships Design:14 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:79 Shield:0 Ships:10 Damage:{Units:7 Pct:10} Fleet:0x? Planet:<nil>}, record {Owner:6 Kind:ships Design:14 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:79 Shield:0 Ships:13 Damage:{Units:37 Pct:8} Fleet:0x? Planet:<nil>}
+sample | rg004 | RG-004-2476 y11 | battle record (1310,1403) | sample missed: tokens: Elegy has no battle here
 sample | rg004 | RG-004-2476 y11 | battle record (1320,1343) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg004 | RG-004-2476 y11 | battle record (1328,1374) | sample missed: tokens: token 1: Elegy {Owner:6 Kind:ships Design:14 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:79 Shield:0 Ships:6 Damage:{Units:98 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:6 Kind:ships Design:14 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:79 Shield:0 Ships:6 Damage:{Units:221 Pct:100} Fleet:0x? Planet:<nil>}
 sample | rg004 | RG-004-2476 y11 | battle record (1718,1294) | sample matched
 sample | rg004 | RG-004-2477 y12 | battle record (1055,1420) | sample matched
 sample | rg004 | RG-004-2477 y12 | battle record (1217,1433) | sample matched
-sample | rg004 | RG-004-2477 y12 | battle record (1310,1403) | sample missed: tokens: token 0 (owner 3, design 1): not among Elegy's 2 tokens
+sample | rg004 | RG-004-2477 y12 | battle record (1310,1403) | sample missed: tokens: Elegy has no battle here
 sample | rg004 | RG-004-2477 y12 | battle record (1320,1343) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg004 | RG-004-2477 y12 | battle record (1326,1351) | sample missed: tokens: Elegy has no battle here
 sample | rg004 | RG-004-2477 y12 | battle record (1718,1294) | sample matched
