@@ -23,7 +23,7 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
   - The chained runs diverge in year 1 and are samples after it.
   - Ledger lines (chained / restarts):
     - RG-002: matched 8 / 44, random-driven 0 / 35, sample 1024 / 199, not compared 1 / 1 (main after #247 and #248).
-    - RG-003: matched 8 / 100, random-driven 0 / 75, sample 5291 / 451, not compared 7 / 7.
+    - RG-003: matched 8 / 100, random-driven 0 / 75, sample 5291 / 451, not compared 5 / 5.
     - RG-004: matched 4 / 47, random-driven 1 / 17, sample 2523 / 263, not compared 16 / 16.
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - RG-002 has 1867 orders, of which 37 are refused in the chained run.
@@ -37,7 +37,6 @@ Do the three representative-game corpora (RG-002, RG-003, RG-004) give trustwort
 - **The DA-1 rebuild of year 6 (stars-elegy #206) added no deterministic miss.** Its per-expectation before/after table is [docs/DA1-Y6-RECLASS.tsv](docs/DA1-Y6-RECLASS.tsv).
 - **Not compared, by owner:**
   - lane D: the 0x05b fleet slot, whose owner bits are UNRESOLVED (the salvage slot and the 0x08f/0x090 bombing fleet are compared since #247);
-  - economy: the 0x0cd mapping, with lane F supporting on the dock-rule evidence;
   - lane A: the 0x004 slots and 0x007, with the invasion messages;
   - lane B: `design_gone`.
   - `alt_battle` is judged by the battle harness instead of the vectors comparator.

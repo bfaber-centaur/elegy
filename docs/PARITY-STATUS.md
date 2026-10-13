@@ -24,12 +24,13 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | random-driven | 0 / 35 | 0 / 75 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
 | sample | 1024 / 199 | 5291 / 451 | 2523 / 263 |
-| not compared | 1 / 1 | 7 / 7 | 16 / 16 |
-| total | 1312 | 5939 | 2887 |
+| not compared | 1 / 1 | 5 / 5 | 16 / 16 |
+| total | 1312 | 5935 | 2887 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
 - Updated 2026-10-13 (0x040 PR): 0x040 and 0x023 are mapped, which removes RG-004's 8 0x040 lines (4 chained, 4 restart). Two RG-004 sequences (y4 #224, chained and Y4 restart) now stop at their next unmapped entry, 0x007, which adds 2 lines. The row was "1 / 1 | 7 / 7 | 19 / 19" and the totals 1312, 5939, 2893.
+- Updated 2026-10-13 (0x0cd PR): 0x0cd is mapped, which removes RG-003's 4 0x0cd lines (2 chained, 2 restart). The row was "1 / 1 | 7 / 7 | 16 / 16" and the totals 1312, 5939, 2887.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 2 battle, 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -49,6 +50,8 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 Not recomputed for #247 (2026-10-13): this table is still main `5a735e1`'s. #247 compares the 0x08f/0x090 entries counted here as not compared (RG-002 2, RG-003 4), and every one of them matches on the reference seed.
 
 Not recomputed for #248 (2026-10-13): #248 compares the null `packet_destination` entries counted here as not compared (RG-002 2, RG-003 4). Lane B will refresh this table.
+
+Not recomputed for the 0x0cd PR (2026-10-13): it compares the 0x0cd entries counted here as not compared in RG-003, and every one of them matches on the reference seed (no ledger line names 0x0cd).
 
 Not recomputed for the 0x040 PR (2026-10-13): it compares the 0x040 entries counted here as not compared in RG-004, and every one of them matches on the reference seed (no ledger line names 0x040 or 0x023).
 
@@ -80,16 +83,16 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 |---|---:|---:|---:|---|
 | 0x05b fleet slot: whether it carries the owner bits is UNRESOLVED (MESSAGES.md contradiction, #204). The salvage slot is compared since #247. | 2 | 2 | 0 | lane D (waits on evidence) |
 | `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
-| 0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204) |
 | 0x004 colonists and player slots | 0 | 2 | 0 | lane A, with the invasion messages |
 | 0x007 planet captured has no event mapping (message and sequence entry) | 0 | 4 | 26 | lane A, with the invasion messages |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 2 | 14 | 32 | |
+| total | 2 | 10 | 32 | |
 
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. The mapping is still missing.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
   - Updated 2026-10-13 (0x040 PR): mapped with that rule (Legacy `lost_planet_message_carry`, ruleset v6). The 0x007 row was 24 (RG-004) and the total 2 | 14 | 38; two sequences now stop at 0x007 instead of 0x040.
+- Updated 2026-10-13 (0x0cd PR): the row "0x0cd starbase built: id rule contradicted by two vectors (message and sequence entry) | 0 | 4 | 0 | economy (mapping); lane F supports with the dock-rule evidence (stars-elegy #204)" is gone, and the total was 2 | 14 | 32. stars-elegy 898c526 MESSAGES.md now records 0x0cd for every starbase built (MEASURED) and keeps the dock rule as a preserved contradiction.
 
 ## RG-002: full-order six-year regression
 
@@ -578,6 +581,7 @@ The RG ledgers' "not compared" lines (RG-002: 6, RG-003: 32, on `1de8ab6` before
 
 Left as they were, with the reason:
 - **0x0cd–0x0cf (starbase built).** MESSAGES.md picks the id by the new hull's dock (BINARY-ONLY): 0x0cf for an unlimited dock. Two vectors contradict that. SL-starbases (Space Station builds, design slot 2) and RG-003 y8 (planet 51, Space Station, `params [51 16]`) both record 0x0cd and no 0x0cf. No mapping is added until lanes F and G settle the rule. Mapping by the documented rule fails SL-starbases and SL-starbases-ctl.
+  - Superseded by the 0x0cd PR: MESSAGES.md (stars-elegy 898c526) now gives 0x0cd for every starbase built, MEASURED, with the design slot as owner·32 + 16 + slot. Elegy maps it that way.
 - **Engine-side (lane D):**
   - 0x05b: the salvage and fleet slots are not compared, because EventFleetScrapped names neither the salvage object nor a fleet that still exists.
   - 0x08f/0x090: EventBombed names the bomber, not its fleet.
