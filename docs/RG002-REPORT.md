@@ -40,24 +40,24 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| incorrect mechanic | 0 | 2 | 0 |
+| incorrect mechanic | 0 | 0 | 0 |
 | missing mechanic | 2 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 184 | 0 | 0 |
-| sample | 1138 | 43 | 16 |
+| sample | 1138 | 37 | 16 |
 
-These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below), lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1197: 1138 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1181), and 16 battle records, checked by `TestBattleRecords`.
+These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below), lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1191: 1138 fields and 37 orders, checked by `TestRG002Ledger` (which logs them together as 1175), and 16 battle records, checked by `TestBattleRecords`.
 
 The reference run of RG-002 has 2 deterministic field discrepancies, both lane A's 0x02e message, which Elegy sends no event for ("Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
 - **Restarts:** on the reference seed Elegy refuses none of the orders, and none of the 44 battle records fails.
-- **Refusals on other variants:** the ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There is one, in Y1 and in the chained run's year 1. Player 2's order 10 is a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refuse it. stars-elegy #170 (BINARY-ONLY) says the original never rejects such an order, so both lines are incorrect mechanic for lane A.
-- **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
+- **Refusals on other variants:** none. The ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There was one, in Y1 and in the chained run's year 1: player 2's order 10, a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refused it (incorrect mechanic [lane A]). The waypoint-0 follow change (ORDERS.md "Waypoint 0, following", stars-elegy a1c4c91, BINARY-ONLY) accepts it, and both lines cleared.
+- **Chained run:** 37 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples. The same change removed 6 refused follow orders (Y2 p1 o35, Y4 p5 o64, Y5 p5 o30, o67, Y5 p6 o14, Y6 p6 o10); no other line moved.
 
 ## Effect of #189 and #190
 

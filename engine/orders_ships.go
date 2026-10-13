@@ -214,6 +214,7 @@ func (o MoveShipsOrder) apply(g *Game, player int, ap *Applied) error {
 	}
 	// A later file's waypoint may still name an emptied fleet, as a
 	// merged one (Applied.merged).
+	ap.retargetFollows(g, empty, -1)
 	ap.noteRemoved(player, empty)
 	g.removeFleets(empty)
 	return nil
