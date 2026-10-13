@@ -158,7 +158,7 @@ Elegy now sends the three economy messages it had no event for (MESSAGES.md at s
 - **0x05f** from `EventPartAvailable`, after its level's 0x050: one per component the race may use (a Mystery Trader part only when owned) whose requirement in the field is the new level and whose other requirements the player meets (MEASURED, KX-005 R1). Hulls, starbase hulls and planetary scanners and defenses get their own ids (0x078, 0x0d0, 0x157, 0x145), which are not mapped.
 - **Order within a year.** The research step announces its levels in the order the research chain gained them: the current field's levels, then the field the leftover moved to, each level followed by its own 0x05f parts. MEASURED (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at stars-elegy d89b8a3; RG-002 2468: biotech 7, its parts, then weapons 8, its parts). The other checks raise each field in turn, so they announce in field order. ASSUMPTION: the part check sees the levels reached so far in that order, so a part needing two fields that rose in one year is announced at the later one.
 - **Terraforming parts** get 0x05f by the same rule, from any of their fields (MEASURED, MESSAGES.md "Clarified 2026-10-13 (EM-1)" at stars-elegy d89b8a3: Gravity ±7 on propulsion 5, Radiation ±7 on weapons 5).
-- Not modelled: the level messages of a Mystery Trader reward (objects/ raises those levels directly, with no 0x050 or 0x05f) and of scrapping at a starbase (0x13d, then 0x050, before the production messages; Elegy gains no levels from scrapping). EM-1 places each in its own position; they are left for the objects and production owners.
+- Not modelled: the level messages of a Mystery Trader reward (objects/ raises those levels directly, with no 0x050 or 0x05f) and the position of the level messages from scrapping at a starbase (0x13d, then 0x050, before the production messages). EM-1 places each in its own position; they are left for the objects and production owners. Corrected 2026-10-13: an earlier version said Elegy gains no levels from scrapping. Scrapping at an owned starbase does add a level's research (`techAttempt`, engine/scrap.go), and the year's first level-up check then gains the level and announces its 0x050 and its parts.
 - The comparator checked only whether a player received an id, not the order or the count (it now checks the order between ids, "Message order compared" below, but still not within one id), so the order above is pinned by engine tests (`TestLevelEventsChainOrder`, `TestTurnLevelEventsChainOrder`), not by the vectors. That is why field order also matched.
 
 **RG-002:** economy's 10 missing-mechanic lines match on the reference seed (0x026 ×7, 0x050 ×2, 0x05f), and so do 8 chained samples. No new line appears. The ledger is missing mechanic 2 (lane A's 0x02e), incorrect mechanic 2 (orders), random-driven 30, not compared 184, and samples 1138 fields / 43 orders / 16 battle records (on main `1f03d6a`, after the `object`-form wormholes, designs and player counts).
@@ -203,6 +203,23 @@ Measured on elegy main `3d33192` (#211) plus this branch.
 - **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
 - **Order:** with 0x08c mapped, the order check (section above) makes 1662 comparisons over the 8 seed variants, up from 1534. The 128 new ones each place a 0x035 (40) or 0x036 (88) after a 0x08c, and every one holds: no per-corpus tally changes.
 - **RG-002:** it carries no 0x08c, so the ledger is unchanged.
+
+### Orders reduced to their limit (economy)
+
+Measured on elegy main `fd606a1` (#209) plus this branch.
+
+- **0x12a** from the existing `EventOrderClipped` of a factory, mine or defense order, and **0x12f** from the same event of a terraform order (MESSAGES.md 0x12a, CONFIRMED KX-002, PQ-001; 0x12f, CONFIRMED KX-002; both at stars-elegy d89b8a3). Production emits the event when it cuts an order to what still fits, including a cut to 0.
+- **Other corpora:** 6 expectations that were skipped as unmapped are compared now (0x12a 4, 0x12f 2). All 6 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **Order:** the order check makes 1742 comparisons over the 8 seed variants, up from 1710 on main. The 32 new ones place a 0x036 (16) or 0x038 (8) after a 0x12a, and a 0x03e (8) after a 0x12f. Every one holds: no per-corpus tally changes.
+- **RG-002:** it carries neither id, so the ledger is unchanged.
+
+### Default queue settings (economy)
+
+Measured on elegy main `fd606a1` (#209) plus this branch.
+
+- With #211's re-sync, 9 of the 11 "player default queue settings" skips are compared (section "Vector re-sync" above).
+- The other 2 were one RG-001 planet that was owned at the start of the year and had no owner at its end, counted in two cases. A planet left with no owner takes no default (Elegy clears its queue and setting when it empties, engine `emptyPlanet`), so the harness now compares its queue and `leftover_to_research` as it does an unchanged owner's. Both expectations match on every seed variant.
+- No skip of this kind is left. Every per-corpus tally, the parity baseline and the RG-002 ledger are unchanged.
 
 ### Deferred: client estimators (milestone 3)
 

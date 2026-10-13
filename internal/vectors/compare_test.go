@@ -382,6 +382,9 @@ func TestLeftoverToResearch(t *testing.T) {
 	pvWant(t, "new owner", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "", "player default queue settings")
 	l.defaults[2] = true
 	pvWant(t, "new owner, defaults loaded", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "leftover_to_research = true, want false", "")
+	// A planet left with no owner takes no default, so it is compared.
+	p.Owner = engine.NoOwner
+	pvWant(t, "no owner", l.planetEquals(g, &p, pvEq(t, `{"leftover_to_research": false}`), nil), "leftover_to_research = true, want false", "")
 }
 
 func TestQueueOfNewOwner(t *testing.T) {
@@ -398,6 +401,12 @@ func TestQueueOfNewOwner(t *testing.T) {
 	}
 	e.Equals = json.RawMessage(`[{"kind": 1, "id": 0, "count": 5}]`)
 	pvWant(t, "defaults loaded, match", l.queueEquals(g, e), "", "")
+	// A planet left with no owner takes no default, so it is compared.
+	delete(l.defaults, 2)
+	g.Planets[0].Owner = engine.NoOwner
+	if msg := l.queueEquals(g, e); strings.HasPrefix(msg, "skip: ") {
+		t.Errorf("no owner: %q, want the queue compared", msg)
+	}
 }
 
 func TestScoreRecord(t *testing.T) {
