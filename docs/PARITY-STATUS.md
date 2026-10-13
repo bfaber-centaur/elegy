@@ -170,3 +170,26 @@ Measured on elegy main `217ab4b` plus this branch.
 - A planet whose queue the harness cannot load runs with no queue. So for a player with such a planet, both ids are skipped ("a queue message from a production queue not loaded"), as the build messages already are. No current vector reaches this guard.
 - **Other corpora:** 339 expectations that were skipped as unmapped (0x03f 298, 0x03e 41) are compared now, and every one matches on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-002:** it carries none of these ids, so the ledger is unchanged.
+
+### Alchemy message (economy)
+
+Measured on elegy main `217ab4b` plus #207 and this branch.
+
+- **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
+- **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **RG-002:** it carries no 0x08c, so the ledger is unchanged.
+
+### Deferred: client estimators (milestone 3)
+
+The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
+
+| Count | Reading |
+|---:|---|
+| 19 | production_tile completion |
+| 5 | production_dialog completion |
+| 10 | status_tile population |
+| 10 | planet_summary_report value |
+| 10 | planet_summary_report mining_rate |
+| 15 | research_dialog: resources_needed 4, annual_resources_from_all_planets 3, estimated_time_to_completion 3, next_year_projected_research_budget 3, next_field_choice_after_the_year 1, total_resources_spent_on_research_last_year 1 |
+
+Counts are from the reference seed on main `217ab4b`.
