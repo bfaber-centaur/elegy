@@ -370,14 +370,16 @@ const (
 //
 // The order follows the research chain, not field order: the current
 // field's levels first, then the field the leftover moved to, each level
-// followed by its own parts (MEASURED by lane F's EM-1 from existing runs,
-// RG-002 2468: biotech 7, its parts, then weapons 8, its parts; ASSUMPTION
-// until the stars-elegy MESSAGES.md write-up lands). ASSUMPTION: "then" is
-// the levels reached so far in that order, so a part needing two fields
-// that both rose is announced at the later one.
+// followed by its own parts (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at
+// stars-elegy d89b8a3, MEASURED in RG-002 2468: biotech 7, its parts, then
+// weapons 8, its parts). A part is announced by whichever requirement is
+// met last (same clarification, MEASURED across years); ASSUMPTION: within
+// one year "then" is the levels reached so far in that order, so a part
+// needing two fields that both rose is announced at the later one.
 //
 // Terraforming components are announced like other parts, by any field
-// (MEASURED, EM-1: Gravity ±7 on propulsion 5, Radiation ±7 on weapons 5).
+// (MESSAGES.md "Clarified 2026-10-13 (EM-1)" at stars-elegy d89b8a3,
+// MEASURED: Gravity ±7 on propulsion 5, Radiation ±7 on weapons 5).
 func (g *Game) levelEvents(player int, before [NumFields]int, gained []int) []Event {
 	pl := &g.Players[player]
 	cat := Components()

@@ -82,8 +82,9 @@ func TestLevelEventsSeveralLevels(t *testing.T) {
 // TestLevelEventsChainOrder checks a year whose research levels biotech,
 // the current field, and whose leftover then levels weapons, the next
 // field: biotech's level comes first, then weapons', though weapons comes
-// first in field order (MEASURED, lane F's EM-1: RG-002 2468 gave biotech
-// 7, its parts, then weapons 8, its parts). Radiation Terraform ±7
+// first in field order (MEASURED, stars-elegy d89b8a3 MESSAGES.md EM-1:
+// RG-002 2468 gave biotech 7, its parts, then weapons 8, its parts).
+// Radiation Terraform ±7
 // (weapons 5, biotech 2) is announced at weapons 5 because biotech 2 came
 // first; in field order it would not be announced at all.
 func TestLevelEventsChainOrder(t *testing.T) {
@@ -107,8 +108,8 @@ func TestLevelEventsChainOrder(t *testing.T) {
 
 // TestLevelEventsTerraformByOtherField checks that a terraforming part is
 // announced by its non-biotech field: Gravity Terraform ±7 (propulsion 5,
-// biotech 2) on propulsion 4 → 5 (MEASURED, EM-1: Gravity ±7 was announced
-// on propulsion 5).
+// biotech 2) on propulsion 4 → 5 (MEASURED, stars-elegy d89b8a3
+// MESSAGES.md EM-1: Gravity ±7 was announced on propulsion 5).
 func TestLevelEventsTerraformByOtherField(t *testing.T) {
 	g := Game{Players: []Player{{Race: pgRace()}}}
 	before := [NumFields]int{Propulsion: 4, Biotech: 2}
@@ -245,7 +246,8 @@ func TestTurnLevelEventsAfterDrops(t *testing.T) {
 
 // TestTurnLevelEventsChainOrder checks that a whole turn announces the
 // research step's levels in the order gained: biotech, the current field,
-// then weapons, which the leftover reaches (MEASURED, EM-1).
+// then weapons, which the leftover reaches (MEASURED, stars-elegy d89b8a3
+// MESSAGES.md EM-1).
 func TestTurnLevelEventsChainOrder(t *testing.T) {
 	g := pgHomeworld()
 	pl := &g.Players[0]
