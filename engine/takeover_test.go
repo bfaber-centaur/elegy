@@ -1168,3 +1168,38 @@ func TestMeasuredDropFinishedAfterDrops(t *testing.T) {
 		t.Errorf("events %v, want %v", got, want)
 	}
 }
+
+func TestMeasuredFinishedBeforeColonizeDrop(t *testing.T) {
+	// A colonization queues the colony ship's colonists as a drop, but
+	// the ship is consumed and gets no 0x04e. The hold of
+	// TestMeasuredDropFinishedAfterDrops is for fleets that dropped
+	// colonists, by id: fleet 0 (Elegy's first fleet id, newgame), which
+	// unloads ironium at its owner's planet, keeps its 0x04e before the
+	// colony (TK-201's mineral unloads, MEASURED).
+	l := newTKLab(t, 3)
+	own := l.planet(0, 0, 100)
+	empty := l.planet(NoOwner, 100, 0)
+	ship := l.colonyShip()
+	fi := l.fleet(0, own, 0, Stack{Design: ship, Count: 1})
+	l.g.Fleets[fi].ID = 0
+	l.g.Fleets[fi].Cargo.Minerals[Ironium] = 10
+	l.g.Fleets[fi].Task = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}}}
+	fj := l.fleet(0, empty, 0, Stack{Design: ship, Count: 1})
+	l.g.Fleets[fj].ID = 5
+	l.g.Fleets[fj].Cargo.Colonists = 20
+	l.g.Fleets[fj].Task = colonizeTask
+	r := l.turn(&seqRand{})
+	var got []string
+	for _, e := range r.Events {
+		switch e.Kind {
+		case EventFleetArrived:
+			got = append(got, fmt.Sprint("finished ", e.Fleet))
+		case EventColonized:
+			got = append(got, fmt.Sprint("colonized ", e.Planet))
+		}
+	}
+	want := []string{"finished 0", "colonized 1"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("events %v, want %v", got, want)
+	}
+}
