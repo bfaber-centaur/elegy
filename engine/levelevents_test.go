@@ -96,8 +96,8 @@ func TestLevelEventsChainOrder(t *testing.T) {
 	bio := ResearchLevelCost(2, 5, r.ResearchCosts[Biotech], false)
 	weap := ResearchLevelCost(5, 6, r.ResearchCosts[Weapons], false)
 	after, gained := addResearch(s, r, bio+weap, false)
-	if !reflect.DeepEqual(gained, []int{Biotech, Weapons}) || after.Levels[Biotech] != 2 || after.Levels[Weapons] != 5 {
-		t.Fatalf("setup: gained %v, levels %v; want biotech then weapons, to 2 and 5", gained, after.Levels)
+	if !reflect.DeepEqual(gained, []levelGain{{Biotech, Weapons}, {Weapons, Weapons}}) || after.Levels[Biotech] != 2 || after.Levels[Weapons] != 5 {
+		t.Fatalf("setup: gained %v, levels %v; want biotech (next weapons) then weapons, to 2 and 5", gained, after.Levels)
 	}
 	g := Game{Players: []Player{{Race: r, Research: after}}}
 	got := levelMessages(g.levelEvents(0, s.Levels, gained))
@@ -116,7 +116,7 @@ func TestLevelEventsTerraformByOtherField(t *testing.T) {
 	before := [NumFields]int{Propulsion: 4, Biotech: 2}
 	g.Players[0].Research.Levels = before
 	g.Players[0].Research.Levels[Propulsion] = 5
-	got := levelMessages(g.levelEvents(0, before, []int{Propulsion}))
+	got := levelMessages(g.levelEvents(0, before, []levelGain{{Propulsion, -1}}))
 	if len(got) == 0 || got[0] != "level 2 5" || !contains(got, "part 2 Gravity Terraform ±7") {
 		t.Errorf("got %q, want level 2 5 announcing Gravity Terraform ±7", got)
 	}
@@ -281,7 +281,7 @@ func TestTurnLevelEventsChainOrder(t *testing.T) {
 func TestFieldOrder(t *testing.T) {
 	before := [NumFields]int{Energy: 3, Weapons: 1, Biotech: 2}
 	after := [NumFields]int{Energy: 4, Weapons: 3, Biotech: 2}
-	if got, want := fieldOrder(before, after), []int{Energy, Weapons, Weapons}; !reflect.DeepEqual(got, want) {
+	if got, want := fieldOrder(before, after), []levelGain{{Energy, -1}, {Weapons, -1}, {Weapons, -1}}; !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
@@ -378,5 +378,67 @@ func TestAnnounceOrder(t *testing.T) {
 		if !okA || !okB || a >= b {
 			t.Errorf("%s at %d (%v), %s at %d (%v): want the first before the second", pair[0], a, okA, pair[1], b, okB)
 		}
+	}
+}
+
+// TestLevelUpNextField checks the level message's third slot, the field
+// researched next (MESSAGES.md 0x050 at stars-elegy e3619ff, CONFIRMED):
+// the chosen next field when the leveled field was the current one and the
+// choice is not "same field" ("lowest field" taking the first lowest);
+// otherwise the current field.
+func TestLevelUpNextField(t *testing.T) {
+	r := pgRace()
+	type lvl struct{ field, level, next int }
+	messages := func(g Game, before [NumFields]int, gained []levelGain) []lvl {
+		var out []lvl
+		for _, ev := range g.levelEvents(0, before, gained) {
+			if ev.Kind == EventLevelUp {
+				out = append(out, lvl{int(ev.Item), ev.Count, ev.Axes[0]})
+			}
+		}
+		return out
+	}
+	year := func(s ResearchState, resources int) []lvl {
+		after, gained := addResearch(s, r, resources, false)
+		return messages(Game{Players: []Player{{Race: r, Research: after}}}, s.Levels, gained)
+	}
+	cost := func(s ResearchState, f int) int {
+		return ResearchLevelCost(s.Levels[f]+1, s.levelSum(), r.ResearchCosts[f], false)
+	}
+	low := [NumFields]int{Energy: 3, Weapons: 1, Propulsion: 1, Construction: 2, Electronics: 2, Biotech: 1}
+
+	same := ResearchState{Levels: low, Current: Energy, Next: NextSameField}
+	explicit := ResearchState{Levels: low, Current: Energy, Next: Propulsion}
+	lowest := ResearchState{Levels: low, Current: Energy, Next: NextLowestField}
+	maxed := ResearchState{Levels: low, Current: Energy, Next: NextSameField}
+	maxed.Levels[Energy] = MaxTechLevel - 1
+	for _, c := range []struct {
+		name string
+		got  []lvl
+		want []lvl
+	}{
+		{"same field", year(same, cost(same, Energy)), []lvl{{Energy, 4, Energy}}},
+		{"explicit field", year(explicit, cost(explicit, Energy)), []lvl{{Energy, 4, Propulsion}}},
+		{"lowest field, first of the ties", year(lowest, cost(lowest, Energy)), []lvl{{Energy, 4, Weapons}}},
+		{"level 26 under same field", year(maxed, cost(maxed, Energy)), []lvl{{Energy, MaxTechLevel, Weapons}}},
+	} {
+		if !reflect.DeepEqual(c.got, c.want) {
+			t.Errorf("%s: %v, want %v", c.name, c.got, c.want)
+		}
+	}
+
+	// A level in another field names the current field: the second
+	// level-up check, and a non-current field in the year's passes.
+	g := Game{Players: []Player{{Race: r, Research: ResearchState{Levels: low, Current: Biotech}}}}
+	g.Players[0].Research.Accumulated[Weapons] = cost(g.Players[0].Research, Weapons)
+	before := low
+	g.Players[0].Research = LevelUpCheck(g.Players[0].Research, r, false)
+	if got, want := messages(g, before, fieldOrder(before, g.Players[0].Research.Levels)), []lvl{{Weapons, 2, Biotech}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("level-up check: %v, want %v", got, want)
+	}
+	other := ResearchState{Levels: low, Current: Biotech, Next: Energy}
+	other.Accumulated[Weapons] = cost(other, Weapons)
+	if got, want := year(other, 0), []lvl{{Weapons, 2, Biotech}}; !reflect.DeepEqual(got, want) {
+		t.Errorf("another field in the year: %v, want %v", got, want)
 	}
 }
