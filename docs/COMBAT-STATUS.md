@@ -50,6 +50,7 @@ draws of a torpedo estimate for exactly 200 simulated torpedoes.
 | Starbase damage; no damage left over after a hit on a starbase; kept through the year | `starbaseDamage`, `finish`, `repair` | CONFIRMED in part (Space Station steps CB-011..015; the stop CB-052); the Death Star's 1500 armor MEASURED as consistent (CB-058: the hits fit 1126–1500); a 500th step, destroyed only at total ≥ armor, MEASURED (CB-056, 2 streams, stars-elegy b0ca924) | `TestConfirmedStarbaseDamageSteps`, `TestPredictionDeathStarDamageSteps`, `TestConfirmedBeamStopsAtStarbase`, `TestRG001StarbaseDamageKept` |
 | Starbase loss: the queue's ship items and non-automatic packet items removed, a starbase item restarts at 0%, planetary items kept (shared with the starbase design delete); AR planet uninhabited (emptied as TAKEOVER.md "Capture" lists) | `combat.go` `finish`, `starbase_loss.go` `loseStarbase`, `emptyPlanet` | CONFIRMED (ship and planetary items CB-047, AR CB-041); packet items and the starbase restart BINARY-ONLY (PARITY.md "Queued ships after deleting the starbase design", stars-elegy ee47fff) | parity CB-047, `TestConfirmedBattleLossStripsQueue`, `TestPredictionAlternateRealityStarbaseLoss` |
 | Salvage (10 kT steps, overflow objects) | `killEvent`, `cargoShare`, `addSalvage`, `finish` | CONFIRMED (one case each; overflow CB-040; fuel share CB-023; cargo share CB-058); numbering across two battles MEASURED (CB-058); empty object BINARY-ONLY | `TestConfirmedSalvage`, `TestConfirmedSalvageOverflow`, `TestConfirmedCB058CargoShare`, `TestMeasuredCB058SalvageTwoPoints`, `TestPredictionCargoShare`, `TestPredictionFuelShare`, `TestPredictionSalvageLimit`, `TestPredictionEmptySalvageGetsTokenAmount` |
+| Battle summaries: one per battle player, by the location's ships and design groups, each side's total and losses, and whether it was hit (stars-elegy MESSAGES.md "Battles and bombing", 0x07e, 0x091–0x0a8, 0x113–0x116) | `combat_summary.go` `battleSummary`, `summaries` (`EventBattleSummary`) | CONFIRMED for 0x07e, 0x091–0x0a1, 0x0a4, 0x0a6–0x0a8, 0x115 and 0x116; 0x0a2, 0x0a3, 0x0a5, 0x113 and 0x114 BINARY-ONLY; a "stack" as one player's ships of one design, whatever fleets hold them: MEASURED (CB-039, CB-048 sent the one-stack texts with many fleets a side); ASSUMPTIONS B1–B4 | `TestBattleSummaryRules`, `TestConfirmedBattleSummaryDesignGroups`, `TestBattleSummaryStarbase`, parity CB-048, CB-049, SC-036, RG-002 |
 | Dump cargo (full amount; first salvage addition in deep space) | `setup` | CONFIRMED (CB-025) | `TestPredictionDumpCargo` |
 | Repair | `repair` | CONFIRMED (moved, Inner Strength, starbase: CB-024; the Ultra Station's and Death Star's docks, fleets −100 and the starbase −50: CB-056, stars-elegy b0ca924) | `TestConfirmedRepair`, `TestPredictionRepairOthers`, `TestPredictionRepairLargeDocks`, `TestRG001StarbaseDamageKept` |
 | Tech from battle, same-turn level; the "gained" mark is shared with capture (TAKEOVER.md) | `techAttempts`, `techAttempt`, `LevelUpCheck` | CONFIRMED in part (CB-018, CB-021) | `TestConfirmedTechFromBattleSameTurn`, `TestConfirmedTechAttemptLocation`, `TestPredictionTechAttemptRules` |
@@ -91,6 +92,18 @@ A11 was refuted (a starbase at 499 goes to 500 and only a total of at
 least its armor destroys it, MEASURED, now the rule in `starbaseDamage`);
 A12 held in one stream only and A13 held for Croby Sharmor (the Langston
 Shell is not observed), both CONFIRMED.
+
+Battle summaries (`combat_summary.go`) carry their own:
+- **B1.** A side was "hit" when any of its tokens took shield or armor
+  damage in a hit record (a 0-damage torpedo record is not a hit).
+- **B2.** In other 2-player battles, a single ship lost while the enemy
+  is wiped out too gets 0x09d ("Precedence" names 0x09d for both sides
+  wiped); a side that loses some but not all ships while a single enemy
+  ship dies gets 0x0a2.
+- **B3.** A 2-player battle is one whose player list P has 2 players.
+- **B4.** When an Alternate Reality starbase is destroyed, no summary is
+  sent: MESSAGES.md gives its owner 0x08d/0x08e and the others 0x144,
+  which Elegy does not send yet.
 
 A6 (plan-0 X at the first location of a turn) is now
 COMBAT.md's chosen rule for Elegy (#38), so it is cited above rather than

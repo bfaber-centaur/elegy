@@ -41,17 +41,17 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
 | incorrect mechanic | 0 | 2 | 0 |
-| missing mechanic | 21 | 0 | 0 |
+| missing mechanic | 12 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 0 |
 | not compared | 204 | 0 | 0 |
-| sample | 1151 | 43 | 16 |
+| sample | 1146 | 43 | 16 |
 
-These counts include the message and `object`-form wormhole comparisons added after the final run ("Not compared, by reason" below). Samples total 1210: 1151 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1194), and 16 battle records, checked by `TestBattleRecords`.
+These counts include the message and `object`-form wormhole comparisons added after the final run ("Messages" and "Not compared, by reason" below) and lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"). Samples total 1205: 1146 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1189), and 16 battle records, checked by `TestBattleRecords`.
 
-The reference run of RG-002 has 21 deterministic field discrepancies, all messages Elegy sends no event for (missing mechanic: economy 10, lane D 9, lane A 2; "Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+The reference run of RG-002 has 12 deterministic field discrepancies, all messages Elegy sends no event for (missing mechanic: economy 10, lane A 2; "Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), and lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"). Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
@@ -138,6 +138,10 @@ None of the 204 lines is an RG-002 mechanic Elegy is known to lack. Each falls i
 Group 1 is comparator work. Until it is done, a mismatch in those 20 lines would go unseen, so their count is the honest size of the gap.
 
 **Closed on this branch: packet settings and research percent.** Economy's comparator (internal/vectors `planetEquals`, `playerEquals`; `TestPacketSettings`, `TestResearchPercent`) compares planet `packet_destination` (the target id, or -1 for none) and `packet_warp` (below 5 is unset on both sides), and player `research_percent` against the research budget. A malformed expected value fails the check rather than reading as absent, as for `starbase` (#191). That removed 112 lines from group 1 (108 `packet_destination`, 2 `packet_warp`, 2 `research_percent`). 110 of them match on the reference seed. The other two were Y4 planet 88's `packet_warp`, a missing mechanic, and the same field in the chained run's year 4, a sample; the packet-warp fix cleared both.
+
+**Closed after the final run: battle summaries (lane D).** Elegy now sends each battle player its summary (`EventBattleSummary`; PARITY-STATUS.md "Battle summaries"). These lines cleared, all now matching on the reference seed:
+- missing mechanic [lane D], 9: 0x116 in chained 2463, Y1 and Y2; 0x095 in chained 2463, Y1, Y4 and Y6; 0x09f in Y3; 0x0a1 in Y4;
+- samples, 5: the chained run's 2464 0x116, 2465 0x09f, 2466 0x0a1 and 0x095, and 2468 0x095.
 
 **Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
 

@@ -46,8 +46,6 @@ not compared | rg002 | RG-002-2463 y1 #392 | battle_actions x=1523 y=1298 | expe
 not compared | rg002 | RG-002-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002 | RG-002-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002 | RG-002-2463 y1 #398 | message | message 0x026 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x116, CONFIRMED) | rg002 | RG-002-2463 y1 #399 | message | message 0x116 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x095, CONFIRMED) | rg002 | RG-002-2463 y1 #400 | message | message 0x095 to player 0 present = false, want true
 missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002 | RG-002-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
 sample | rg002 | RG-002-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
@@ -136,7 +134,6 @@ not compared | rg002 | RG-002-2464 y2 #410 | battle_actions x=1513 y=1113 | expe
 sample | rg002 | RG-002-2464 y2 #413 | message | message 0x026 to player 0 present = false, want true
 sample | rg002 | RG-002-2464 y2 #414 | message | message 0x050 to player 0 present = false, want true
 sample | rg002 | RG-002-2464 y2 #415 | message | message 0x086 to player 0 present = false, want true
-sample | rg002 | RG-002-2464 y2 #416 | message | message 0x116 to player 0 present = false, want true
 sample | rg002 | RG-002-2464 y2 #419 | player id=2 seen_by=2 | score_record.escort_ships = 52, want 50
 sample | rg002 | RG-002-2464 y2 #420 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 21
 sample | rg002 | RG-002-2464 y2 #47 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
@@ -271,7 +268,6 @@ not compared | rg002 | RG-002-2465 y3 #408 | battle_actions x=1481 y=1304 | expe
 sample | rg002 | RG-002-2465 y3 #411 | message | message 0x026 to player 0 present = false, want true
 sample | rg002 | RG-002-2465 y3 #412 | message | message 0x050 to player 0 present = false, want true
 sample | rg002 | RG-002-2465 y3 #413 | message | message 0x05f to player 0 present = false, want true
-sample | rg002 | RG-002-2465 y3 #414 | message | message 0x09f to player 0 present = false, want true
 sample | rg002 | RG-002-2465 y3 #415 | player id=0 seen_by=0 | score_record.resources = 2522, want 2521
 sample | rg002 | RG-002-2465 y3 #417 | player id=2 seen_by=2 | score_record.escort_ships = 48, want 46
 sample | rg002 | RG-002-2465 y3 #417 | player id=2 seen_by=2 | score_record.resources = 4920, want 4717
@@ -449,8 +445,6 @@ not compared | rg002 | RG-002-2466 y4 #408 | battle_actions x=1569 y=1096 | expe
 not compared | rg002 | RG-002-2466 y4 #409 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002 | RG-002-2466 y4 #410 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002 | RG-002-2466 y4 #413 | message | message 0x026 to player 0 present = false, want true
-sample | rg002 | RG-002-2466 y4 #414 | message | message 0x0a1 to player 0 present = false, want true
-sample | rg002 | RG-002-2466 y4 #415 | message | message 0x095 to player 0 present = false, want true
 sample | rg002 | RG-002-2466 y4 #418 | player id=1 seen_by=1 | score_record.resources = 16180, want 16183
 sample | rg002 | RG-002-2466 y4 #419 | player id=2 seen_by=2 | score_record.escort_ships = 49, want 51
 sample | rg002 | RG-002-2466 y4 #419 | player id=2 seen_by=2 | score_record.resources = 5021, want 4850
@@ -1003,7 +997,6 @@ not compared | rg002 | RG-002-2468 y6 #455 | battle_actions x=1569 y=1096 | expe
 not compared | rg002 | RG-002-2468 y6 #456 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002 | RG-002-2468 y6 #457 | battle_actions x=1633 y=1380 | expectation battle_actions
 sample | rg002 | RG-002-2468 y6 #460 | message | message 0x026 to player 0 present = false, want true
-sample | rg002 | RG-002-2468 y6 #461 | message | message 0x095 to player 0 present = false, want true
 sample | rg002 | RG-002-2468 y6 #462 | player id=0 seen_by=0 | score_record.resources = 2698, want 2697
 sample | rg002 | RG-002-2468 y6 #463 | player id=1 seen_by=1 | score_record.resources = 18077, want 18089
 sample | rg002 | RG-002-2468 y6 #464 | player id=2 seen_by=2 | score_record.escort_ships = 47, want 52
@@ -1147,8 +1140,6 @@ not compared | rg002-y1 | RG-002-Y1-2463 y1 #392 | battle_actions x=1523 y=1298 
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #393 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002-y1 | RG-002-Y1-2463 y1 #394 | battle_actions x=1633 y=1380 | expectation battle_actions
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002-y1 | RG-002-Y1-2463 y1 #398 | message | message 0x026 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x116, CONFIRMED) | rg002-y1 | RG-002-Y1-2463 y1 #399 | message | message 0x116 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x095, CONFIRMED) | rg002-y1 | RG-002-Y1-2463 y1 #400 | message | message 0x095 to player 0 present = false, want true
 missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002-y1 | RG-002-Y1-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
 sample | rg002-y1 | RG-002-Y1-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
@@ -1218,7 +1209,6 @@ not compared | rg002-y2 | RG-002-Y2-2464 y1 #410 | battle_actions x=1513 y=1113 
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002-y2 | RG-002-Y2-2464 y1 #413 | message | message 0x026 to player 0 present = false, want true
 missing mechanic [economy]: no message for a research level gained (stars-elegy MESSAGES.md 0x050, CONFIRMED) | rg002-y2 | RG-002-Y2-2464 y1 #414 | message | message 0x050 to player 0 present = false, want true
 sample | rg002-y2 | RG-002-Y2-2464 y1 #415 | message | message 0x086 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x116, CONFIRMED) | rg002-y2 | RG-002-Y2-2464 y1 #416 | message | message 0x116 to player 0 present = false, want true
 sample | rg002-y2 | RG-002-Y2-2464 y1 #417 | player id=0 seen_by=0 | score_record.resources = 2481, want 2482
 sample | rg002-y2 | RG-002-Y2-2464 y1 #420 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 21
 sample | rg002-y2 | RG-002-Y2-2464 y1 #89 | fleet owner=3 id=2 | fleet gone
@@ -1281,7 +1271,6 @@ not compared | rg002-y3 | RG-002-Y3-2465 y1 #408 | battle_actions x=1481 y=1304 
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002-y3 | RG-002-Y3-2465 y1 #411 | message | message 0x026 to player 0 present = false, want true
 missing mechanic [economy]: no message for a research level gained (stars-elegy MESSAGES.md 0x050, CONFIRMED) | rg002-y3 | RG-002-Y3-2465 y1 #412 | message | message 0x050 to player 0 present = false, want true
 missing mechanic [economy]: no message for a component a research level made available (stars-elegy MESSAGES.md 0x05f, CONFIRMED) | rg002-y3 | RG-002-Y3-2465 y1 #413 | message | message 0x05f to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x09f, CONFIRMED) | rg002-y3 | RG-002-Y3-2465 y1 #414 | message | message 0x09f to player 0 present = false, want true
 random-driven | rg002-y3 | RG-002-Y3-2465 y1 #415 | player id=0 seen_by=0 | score_record.resources = 2520, want 2521 (5/8 variants match)
 sample | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=1 seen_by=1 | score_record.planets = 56, want 55
 sample | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=1 seen_by=1 | score_record.resources = 15340, want 15309
@@ -1336,8 +1325,6 @@ not compared | rg002-y4 | RG-002-Y4-2466 y1 #408 | battle_actions x=1569 y=1096 
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #409 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002-y4 | RG-002-Y4-2466 y1 #410 | battle_actions x=1633 y=1380 | expectation battle_actions
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002-y4 | RG-002-Y4-2466 y1 #413 | message | message 0x026 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x0a1, CONFIRMED) | rg002-y4 | RG-002-Y4-2466 y1 #414 | message | message 0x0a1 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x095, CONFIRMED) | rg002-y4 | RG-002-Y4-2466 y1 #415 | message | message 0x095 to player 0 present = false, want true
 sample | rg002-y4 | RG-002-Y4-2466 y1 #418 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
 sample | rg002-y4 | RG-002-Y4-2466 y1 #421 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #48 | fleet owner=1 id=49 | fleet gone (5/8 variants match)
@@ -1460,7 +1447,6 @@ not compared | rg002-y6 | RG-002-Y6-2468 y1 #455 | battle_actions x=1569 y=1096 
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #456 | battle planet=100 x=1633 y=1380 | expectation battle
 not compared | rg002-y6 | RG-002-Y6-2468 y1 #457 | battle_actions x=1633 y=1380 | expectation battle_actions
 missing mechanic [economy]: no message for a population loss to overcrowding (stars-elegy MESSAGES.md 0x026, CONFIRMED KX-002) | rg002-y6 | RG-002-Y6-2468 y1 #460 | message | message 0x026 to player 0 present = false, want true
-missing mechanic [lane D]: no per-player battle summary message (stars-elegy MESSAGES.md 0x095, CONFIRMED) | rg002-y6 | RG-002-Y6-2468 y1 #461 | message | message 0x095 to player 0 present = false, want true
 sample | rg002-y6 | RG-002-Y6-2468 y1 #465 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
 sample | rg002-y6 | RG-002-Y6-2468 y1 #77 | fleet owner=1 id=85 | cargo.germanium = 2, want 3
 sample | rg002 | RG-002-2464 y2 | battle record (1293,1597) | sample missed: tokens: token 2: Elegy {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:91 Pct:100} Fleet:<nil> Planet:0x?}, record {Owner:0 Kind:starbase Design:17 StartSquare:[1 4] Initiative:14 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:65535 Shield:400 Ships:1 Damage:{Units:0 Pct:0} Fleet:<nil> Planet:0x?}
