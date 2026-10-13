@@ -489,9 +489,19 @@ func (a *Applied) retargetFollows(g *Game, gone map[int]bool, to int) {
 // ASSUMPTION L18: a patrol task with a negative range rejects the order,
 // as a negative transport amount does (ORDERS.md "Waypoint warp, target
 // and transport"); ORDERS.md gives no range check.
+//
+// With Retarget0 set, Target0 replaces the fleet's waypoint-0 target
+// (Fleet.Target0): the mineral packet or salvage waypoint 0 names, or nil
+// for any other target. Without it the fleet keeps its own, as an order
+// that leaves waypoint 0 alone does. Target0's owner must be a player and
+// its number not negative, and a Target0 without Retarget0 rejects the
+// order; an object that does not exist does not reject it (W9), and loads
+// nothing.
 type WaypointOrder struct {
 	Fleet     int
 	Task      Task
+	Retarget0 bool
+	Target0   *ObjectRef
 	Waypoints []Waypoint
 }
 
@@ -502,6 +512,12 @@ func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 	}
 	if err := validTask(o.Task); err != nil {
 		return err
+	}
+	if o.Target0 != nil && !o.Retarget0 {
+		return fmt.Errorf("waypoint 0 target without Retarget0: %w", ErrOutOfRange)
+	}
+	if r := o.Target0; r != nil && (r.Owner < 0 || r.Owner >= len(g.Players) || r.Number < 0) {
+		return fmt.Errorf("waypoint 0 packet %d of player %d: %w", r.Number, r.Owner, ErrOutOfRange)
 	}
 	wps := make([]Waypoint, len(o.Waypoints))
 	for k, wp := range o.Waypoints {
@@ -567,6 +583,13 @@ func (o WaypointOrder) apply(g *Game, player int, a *Applied) error {
 	}
 	f := &g.Fleets[i]
 	f.Task = o.Task
+	if o.Retarget0 {
+		f.Target0 = nil
+		if o.Target0 != nil {
+			r := *o.Target0
+			f.Target0 = &r
+		}
+	}
 	f.Waypoints = wps
 	delete(a.follows, f.ID)
 	return nil

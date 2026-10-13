@@ -876,6 +876,10 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 			}
 			if i == 0 {
 				ef.Task = task
+				// Waypoint 0 naming a packet or salvage (Fleet.Target0).
+				if wp, why := l.waypoint(f.Owner, w); why == "" && wp.Target == engine.TargetPacketObject {
+					ef.Target0 = &engine.ObjectRef{Owner: wp.Owner, Number: wp.ID}
+				}
 				continue
 			}
 			wp, why := l.waypoint(f.Owner, w)

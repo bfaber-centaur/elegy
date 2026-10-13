@@ -64,6 +64,9 @@ func Check(g engine.Game) []string {
 				bad("fleet %d: a stack of design %d has %d ships", f.ID, s.Design, s.Count)
 			}
 		}
+		if r := f.Target0; r != nil && (!validOwner(r.Owner) || r.Number < 0) {
+			bad("fleet %d: waypoint 0 names object %d of player %d", f.ID, r.Number, r.Owner)
+		}
 		if f.Fuel < 0 || f.Cargo.Colonists < 0 {
 			bad("fleet %d: negative fuel or colonists (%d mg, %d)", f.ID, f.Fuel, f.Cargo.Colonists)
 		}

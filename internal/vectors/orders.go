@@ -220,6 +220,16 @@ func (l *pvLoaded) orders(blocks []pvOrderBlock, y int, g *engine.Game) (files [
 						return nil, "order waypoint_add before the fleet's position"
 					}
 					w.Task = task
+					// Its target replaces the fleet's waypoint-0 target
+					// when it names a packet or salvage, and clears it
+					// otherwise (Fleet.Target0). A target the loader cannot
+					// map leaves it, as before.
+					if wp, why := l.waypoint(b.Player, o.Waypoint); why == "" {
+						w.Retarget0, w.Target0 = true, nil
+						if wp.Target == engine.TargetPacketObject {
+							w.Target0 = &engine.ObjectRef{Owner: wp.Owner, Number: wp.ID}
+						}
+					}
 				} else {
 					wp, why := l.waypoint(b.Player, o.Waypoint)
 					if why != "" {
