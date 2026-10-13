@@ -64,3 +64,36 @@ func TestMeasuredPK1RebuiltStarbaseKeepsNoPacketSettings(t *testing.T) {
 		t.Errorf("control: events %v, packets %+v; want one ironium launch to planet 17", control, pk)
 	}
 }
+
+// A planet with a mass-driver starbase but no packet settings launches
+// nothing, even when the galaxy has a planet 0 (Elegy-generated galaxies
+// number planets from 0): PacketDest's zero value is not a destination.
+// The packet item is cancelled (0x129), as on the rebuilt planet above.
+func TestPacketWithoutSettingsIgnoresPlanetZero(t *testing.T) {
+	l := newLab(t)
+	d, err := engine.Components().NewDesign("Catcher 7", "Orbital Fort", []engine.SlotFill{{Slot: 0, Part: "Mass Driver 7", Count: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	l.g.Designs = append(l.g.Designs, d)
+	sb := len(l.g.Designs) - 1
+	for f := range l.g.Players[0].Research.Levels {
+		l.g.Players[0].Research.Levels[f] = 26
+	}
+	surface := engine.Minerals{5000, 5000, 5000}
+	l.g.Planets = []engine.Planet{
+		{ID: 0, Pos: at(50, 0), Owner: engine.NoOwner},
+		{ID: 1, Pos: origin, Owner: 0, Surface: surface, HasQueue: true, Queue: []engine.QueueItem{{Kind: engine.ItemIroniumPacket, Count: 1}},
+			HasStarbase: true, StarbaseDesign: sb, StarbaseHull: 1},
+	}
+	l.g.Objects = &Space{}
+	p := &l.g.Planets[1]
+	_, ev := l.g.PlanetProduction(1, engine.ProductionInput{Colony: engine.NewColony(p, &l.g.Players[0]), Resources: 1000, GrownPop: p.Population})
+	var kinds []engine.EventKind
+	for _, e := range ev {
+		kinds = append(kinds, e.Kind)
+	}
+	if pk := l.g.Objects.(*Space).Packets; len(pk) != 0 || !slices.Contains(kinds, engine.EventPacketNoDriver) || l.g.Planets[1].Surface != surface {
+		t.Errorf("events %v, packets %+v, surface %v; want the packet item cancelled with no launch and no ironium spent", kinds, pk, l.g.Planets[1].Surface)
+	}
+}
