@@ -44,6 +44,30 @@ func TestConfirmedE8SalvageDecayFloor(t *testing.T) {
 	}
 }
 
+// E-8 P3 through the production numbering (Space.SalvageNumber, the
+// packet pool): with player 1's number 1 in use, three new salvage
+// objects take 0, 2 and 3 (CONFIRMED by prediction, stars-elegy 96613bb;
+// the battle half is engine's TestConfirmedE8SalvageBesideLyingSalvage).
+func TestConfirmedE8SalvageNumbersWithAGap(t *testing.T) {
+	g := &engine.Game{Rules: engine.ElegyRules(), Salvage: []engine.Salvage{
+		{Owner: 0, Number: 0, Minerals: engine.Minerals{50, 0, 0}},
+		{Owner: 1, Number: 1, Minerals: engine.Minerals{225, 40, 20}},
+	}}
+	s := &Space{}
+	var got []int
+	for range 3 {
+		n, ok := s.SalvageNumber(g, 1)
+		if !ok {
+			t.Fatalf("no room for salvage %d", len(got))
+		}
+		got = append(got, n)
+		g.Salvage = append(g.Salvage, engine.Salvage{Owner: 1, Number: n, Minerals: engine.Minerals{6, 4, 2}})
+	}
+	if !reflect.DeepEqual(got, []int{0, 2, 3}) {
+		t.Errorf("numbers %v, want [0 2 3]", got)
+	}
+}
+
 // Mine-hit salvage joins the first object at the exact spot, whatever its
 // owner, and marks it; elsewhere a new object of the hit fleet's owner
 // takes a number from its packet pool (OBJECTS.md "Salvage", "Joining

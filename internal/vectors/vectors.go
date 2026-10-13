@@ -304,6 +304,9 @@ type pvExpect struct {
 	// before lists the present message expectations of the same player
 	// and year listed before this one in its case (pvMessageOrder).
 	before []pvMessagePrior
+	// Messages is a message_sequence expectation's list (README.md
+	// "Message sequences"), with Player.
+	Messages []pvSeqEntry `json:"messages"`
 }
 
 // pvMaps maps vector ids to Elegy's: EndID a wormhole end id to its
@@ -1305,6 +1308,8 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		return designEquals(g, *e.Owner, *e.Slot, e.Kind == "starbase_design", eq)
 	case "message":
 		return l.messageCheck(g, e)
+	case "message_sequence":
+		return l.sequenceCheck(g, e)
 	}
 	return "skip: expectation " + e.Kind
 }

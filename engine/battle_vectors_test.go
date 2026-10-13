@@ -192,10 +192,12 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 		return got
 	}
 	var tally string
+	unflagged := true
 	run := func(downstream int) (failed, missed int) {
 		starts := append([]engine.BattleStart(nil), chain...)
 		starts[last].Game.Fleets = nil
 		starts[last].Downstream = downstream
+		starts[last].Unflagged = unflagged
 		r := &recordTB{TB: t}
 		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts}, engine.BattleVariants{})
 		tally = samples(r)
@@ -231,6 +233,13 @@ func TestBattleRecordSampleMissIsNotFailure(t *testing.T) {
 	if f, m := run(0); f != missed || m != 0 {
 		t.Errorf("with no earlier draws: %d failures, %d misses, want %d and 0", f, m, missed)
 	}
+	// The vector flags these records sample (they differed between the
+	// original's random streams): with no earlier draws a miss is still a
+	// sample, not a failure.
+	unflagged = false
+	if f, m := run(0); f != 0 || m != missed {
+		t.Errorf("flagged, with no earlier draws: %d failures, %d misses, want 0 and %d", f, m, missed)
+	}
 }
 
 // battleVariants generates a vector's other seed variants when
@@ -261,7 +270,9 @@ func TestBattleRecordRandomInYear(t *testing.T) {
 		t.Fatalf("RG-002-Y2 draws nothing before its battles")
 	}
 	vs := battleVariants(t)
+	unflagged, flaggedSamples, flaggedLine := true, 0, ""
 	run := func(inYear int, vs engine.BattleVariants) (failed, random int) {
+		flaggedSamples = 0
 		starts := append([]engine.BattleStart(nil), base...)
 		g := starts[1].Game
 		g.Fleets = nil
@@ -270,7 +281,7 @@ func TestBattleRecordRandomInYear(t *testing.T) {
 				g.Fleets = append(g.Fleets, f)
 			}
 		}
-		starts[1].Game, starts[1].InYear = g, inYear
+		starts[1].Game, starts[1].InYear, starts[1].Unflagged = g, inYear, unflagged
 		r := &recordTB{TB: t}
 		engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts}, vs)
 		for _, e := range r.errs {
@@ -281,6 +292,10 @@ func TestBattleRecordRandomInYear(t *testing.T) {
 		for _, l := range r.logs {
 			if strings.Contains(l, marker) && strings.Contains(l, "random") {
 				random++
+			}
+			if strings.Contains(l, marker) && strings.Contains(l, "sample (flagged in the vector) missed") {
+				flaggedSamples++
+				flaggedLine = l
 			}
 		}
 		return failed, random
@@ -307,6 +322,57 @@ func TestBattleRecordRandomInYear(t *testing.T) {
 	for _, k := range []int{1, vs.N - 1} {
 		if f, r := run(base[1].InYear, only(k)); f != 0 || r != 1 {
 			t.Errorf("only variant %d matching: %d failures, %d random, want 0 and 1", k, f, r)
+		}
+	}
+	// The vector flags this record sample. With no variant matching it is
+	// a sample, not a failure; with one matching it is still random.
+	unflagged = false
+	if f, r := run(base[1].InYear, only(-1)); f != 0 || r != 0 || flaggedSamples != 1 {
+		t.Errorf("flagged, no variant matching: %d failures, %d random, %d samples, want 0, 0 and 1", f, r, flaggedSamples)
+	}
+	// The sample line carries the first difference, which keeps a hidden
+	// start-state gap visible (PARITY-STATUS "Battle records the vector
+	// flags sample").
+	if want := "sample (flagged in the vector) missed: tokens: Elegy has no battle here"; !strings.Contains(flaggedLine, want) {
+		t.Errorf("flagged sample line %q, want it to contain %q", flaggedLine, want)
+	}
+	if f, r := run(base[1].InYear, only(1)); f != 0 || r != 1 {
+		t.Errorf("flagged, variant 1 matching: %d failures, %d random, want 0 and 1", f, r)
+	}
+}
+
+// A miss on a record the vector does not flag sample fails strictly even
+// with Unflagged unset: CB-001's records carry no sample flag. Its battle
+// at (1020,1230) is taken out of Elegy's game.
+func TestBattleRecordUnflaggedVectorStaysStrict(t *testing.T) {
+	const path = "cb/cb001.json"
+	const marker = " (1020,1230) y1: "
+	starts := append([]engine.BattleStart(nil), battleStarts(t, path)...)
+	g := starts[1].Game
+	g.Fleets = nil
+	for _, f := range starts[1].Game.Fleets {
+		if f.Pos != (engine.Point{X: 1020, Y: 1230}) {
+			g.Fleets = append(g.Fleets, f)
+		}
+	}
+	starts[1].Game = g
+	if starts[1].Unflagged {
+		t.Fatal("Unflagged is set")
+	}
+	r := &recordTB{TB: t}
+	engine.CheckBattleRecords(r, map[string][]engine.BattleStart{path: starts}, engine.BattleVariants{})
+	failed := 0
+	for _, e := range r.errs {
+		if strings.Contains(e, marker) {
+			failed++
+		}
+	}
+	if failed == 0 {
+		t.Errorf("no failure for a miss on an unflagged record: %q", r.errs)
+	}
+	for _, l := range r.logs {
+		if strings.Contains(l, marker) && strings.Contains(l, "flagged in the vector") {
+			t.Errorf("unflagged record logged as flagged: %s", l)
 		}
 	}
 }
