@@ -319,20 +319,20 @@ Counts are from the reference seed on main `217ab4b`.
 
 ### RG-003: 12 chained years
 
-RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `0ca6c3b` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235 and #240 GC-1).
+RG-003 (vectors README.md "rg") is RG-002 continued to 12 chained years, 2462 to 2474. Player 0's orders in years 7 to 12 were injected (stars-elegy experiments/rg003/README.md). The vectors are copied verbatim from stars-elegy main `f38c843` (#191, #197, #203). The ledger is `engine/testdata/vectors/rg/rg003-ledger.txt`, with RG-002's classes. `TestRG003Ledger` checks it, `TestBattleRecords` checks its battle lines, and `RG002_LEDGER=write` rewrites it. Years 1–6 match RG-002 line for line once the names are replaced. Measured on elegy main `896a546` (after #232 WK-1, #234, #236, #237 ship moves, #238, #235, #240 GC-1 and #239) with the year-6 rebuild below.
 
-**Totals (5943 lines).**
+**Totals (5946 lines).**
 
 | class | chained run | 12 restarts | total |
 |---|---:|---:|---:|
-| sample | 5289 | 452 | 5741 |
+| sample | 5291 | 451 | 5742 |
 | matched | 8 | 100 | 108 |
 | not compared | 11 | 11 | 22 |
-| random-driven | 0 | 72 | 72 |
+| random-driven | 0 | 75 | 75 |
 
 - **No deterministic hand lines remain.** Every compared difference in the restarts is random-driven (it matches on some seed variant) or a sample.
 - **Chained run:** every compared difference is a sample. The run diverges in year 1 and samples carry it forward. Its only matched lines are 8 battle records.
-- **Restarts:** "matched" counts battle records.
+- **Restarts:** "matched" counts battle records. Three random-driven lines carry their draw (Y6 restart, "RG-002 and RG-003 year 6 rebuilt" below).
 - **GC-1 (#240, `0ca6c3b`)** cleared the last hand line, y7 planet 51's population (15083 against 15084, the per-drop ground-combat floor), and the 11 chained sample lines that carried it forward (planet 51's population and excess in years 7–12).
 - **Ship moves (#237, `6cde505`)** cleared the y12 battle at (1288,1347), which now matches: 3 tokens, 19 of 19 hits.
 - **WK-1 (#232, `0959671`)** cleared the 6 waypoint lines (y7 fleet 45, y8 fleets 81, 82, 84, 86 and 91).
@@ -368,6 +368,76 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 | y4–y12 | player 0's order: delete ship design slot 0 | 9 | Elegy refuses the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way. That the original accepts it is inferred. | lane A |
 | y4 | fleets 10 and 23 (player 6) | 5 | The original numbers the new fleets at planets 11 and 57 as 10 and 23. Elegy puts fleet 23 at planet 11 and has no fleet 10. Cause not traced. | lane A |
 | y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
+
+### RG-002 and RG-003 year 6 rebuilt (stars-elegy #206, DA-1)
+
+stars-elegy #206 (`104e8f5`) rebuilt the year-6 vectors of RG-002 and RG-003 (`rg002.json`, `rg002-y6.json`, `rg003.json`, `rg003-y6.json`). The alternative-stream host file behind them had been truncated mid-write, which flagged 459 of year 6's 476 expectations as samples; the rebuilt year has 493, 82 of them samples, so 394 expectations became strict. The four files are copied verbatim. RG-002 and RG-003 move identically.
+- **No new deterministic miss.** Every newly strict expectation matches on the reference seed except three, and each of those matches on some seed variant.
+- **The three, in the Y6 restart, each with the draw behind it** (`random-driven [owner]: evidence`; the vectors ledger now accepts that form on a random-driven line, as the battle ledger does since #229):
+  - **fleet 6/12, waypoint 1 (lane D):** its target, player 3's fleet 2, is shot down in Elegy's battle at (1296,1356) on 6 of 8 seeds (combat draws), and the waypoint then loses its fleet target. On seeds 1 and 5 the fleet survives and the waypoint matches. The recorded battle has 0 hits, and the vector flags fleet 3/2's survival a sample.
+  - **planet 102, surface minerals (economy):** mining's +1 draw (KERNEL.md "Mining", BINARY-ONLY). Germanium enters production at 54 kT on seed 0 and 53 kT on seed 7, the only seed that matches. Germanium limits the ship being built, so the ironium and boranium spent follow it (666/1249 against 668/1251).
+  - **planet 102, production queue (economy):** follows the same draw: 53 kT gives 93%, as recorded, and 54 kT gives 99%.
+- **Samples:** two new sample lines in the restart (planets 29 and 79, surface minerals) and two in the chained run (planets 29 and 85).
+- **Baseline:** RG-002-Y6-2468 and RG-003-Y6-2468 leave it. They passed only because every year-6 miss was a sample; with the three lines above strict, the reference seed fails them. This is the honest result of the rebuild, not a regression.
+- **Census:** "sample: one stream's random outcome" 2241 → 2001.
+
+### Order accounting (RG-002, RG-003, RG-004)
+
+Every order in the RG vectors is accounted for: it is either accepted by the engine, or refused and recorded as a ledger line (an `order` line). **No RG vector has a load error.** Counts are from the reference seed. A restart's year is the year it restarts at, and its orders are the same as the chained run's for that year.
+
+Refusal classes: N, no such object (fleet, waypoint, design slot or salvage); P, objects not at the same place; O, the object belongs to another player; R, a value out of range (a ship count); H, the harness refusal of a waypoint_delete past the end of the fleet's list (ELEGY CHOICE, harness).
+
+**RG-002**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| total | 1867 | 37 | 0 |
+
+**RG-003**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 287 | 0 | 0 |
+| 2 | 309 | 7 (7/0/0/0/0) | 0 |
+| 3 | 308 | 2 (1/1/0/0/0) | 0 |
+| 4 | 307 | 3 (2/1/0/0/0) | 0 |
+| 5 | 361 | 9 (8/1/0/0/0) | 0 |
+| 6 | 295 | 16 (15/1/0/0/0) | 0 |
+| 7 | 311 | 22 (17/5/0/0/0) | 0 |
+| 8 | 301 | 18 (13/5/0/0/0) | 0 |
+| 9 | 298 | 26 (18/6/1/1/0) | 0 |
+| 10 | 308 | 35 (27/8/0/0/0) | 0 |
+| 11 | 335 | 39 (25/13/1/0/0) | 0 |
+| 12 | 311 | 43 (22/19/1/1/0) | 0 |
+| total | 3731 | 220 | 0 |
+
+**RG-004**
+
+| year | orders | chained: refused (N/P/O/R/H) | restart: refused |
+|---:|---:|---|---|
+| 1 | 158 | 0 | 0 |
+| 2 | 157 | 0 | 0 |
+| 3 | 190 | 6 (4/2/0/0/0) | 0 |
+| 4 | 162 | 7 (6/1/0/0/0) | 1 (1/0/0/0/0) |
+| 5 | 171 | 12 (8/2/2/0/0) | 1 (1/0/0/0/0) |
+| 6 | 173 | 13 (10/0/2/1/0) | 1 (1/0/0/0/0) |
+| 7 | 183 | 10 (5/2/2/0/1) | 1 (1/0/0/0/0) |
+| 8 | 161 | 8 (6/0/2/0/0) | 1 (1/0/0/0/0) |
+| 9 | 164 | 8 (4/2/2/0/0) | 1 (1/0/0/0/0) |
+| 10 | 173 | 8 (4/1/3/0/0) | 1 (1/0/0/0/0) |
+| 11 | 172 | 9 (5/0/4/0/0) | 1 (1/0/0/0/0) |
+| 12 | 185 | 12 (5/2/4/1/0) | 1 (1/0/0/0/0) |
+| total | 2049 | 93 | 9 |
+
+- **Chained runs:** every refusal is a sample line. It follows earlier divergence, because the order names an object that Elegy's diverged state no longer has, or has elsewhere. RG-002 has 37, RG-003 220 and RG-004 93.
+- **Restarts:** RG-002 and RG-003 refuse nothing. RG-004's 9 restart refusals are the lane A hand lines "empty design-slot delete refused", one in each restart from Y4 to Y12 (see the RG-004 section).
+- **RG-004 ledger:** 102 order lines (93 + 9), matching the steward's count.
 
 ### Planet records without installations block
 
