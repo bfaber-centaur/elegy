@@ -100,6 +100,8 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x02f, params: []int{4, 34}, known: all(2), why: "0x02f new fleet gone by the end of the year"}}},
 		{"ship routed, fleet gone", []engine.Event{sb(8, 1), route(engine.EventFleetRouted, 8)}, 1,
 			[]pvMsg{{id: 0x031, params: []int{4, 34, 6}, known: all(3), why: "0x031 new fleet gone by the end of the year"}}},
+		{"ship routed, then routed again on arrival", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 9), route(engine.EventFleetNotRouted, 9)}, 1,
+			[]pvMsg{{id: 0x031, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34, 6}, known: all(3)}}},
 		{"ships built, no slot", []engine.Event{{Kind: engine.EventShipsBuilt, Player: 1, Planet: 5, Fleet: 9, Count: 1}}, 1, nil},
 		{"route leg of another fleet", []engine.Event{sb(9, 1), route(engine.EventFleetRouted, 7)}, 1,
 			[]pvMsg{{id: 0x02f, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{4, 34}, known: all(2)}}},

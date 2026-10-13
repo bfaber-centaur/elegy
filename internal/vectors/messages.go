@@ -326,6 +326,8 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// MESSAGES.md 0x031/0x032 (routed, CONFIRMED SL round 1) and
 			// 0x033/0x034 (no warp with fuel, BINARY-ONLY): the build
 			// message with the route target as its last slot.
+			// Only the leg Launch gives it: a later route task for the
+			// same fleet in the year (routeTask) is not a build message.
 			j, ok := launched[ev.Fleet]
 			if !ok {
 				continue
