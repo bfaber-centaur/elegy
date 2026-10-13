@@ -472,6 +472,8 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 			events = append(events, g.emptyPlanet(i))
 		case p.Population < was && col.Hab >= 0:
 			events = append(events, Event{Kind: EventOvercrowded, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: was - p.Population})
+		case p.Population < was:
+			events = append(events, Event{Kind: EventHostileShrink, Player: p.Owner, Planet: p.ID, Fleet: -1, Count: was, Axes: []int{p.Population}})
 		}
 	}
 

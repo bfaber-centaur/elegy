@@ -123,7 +123,8 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Destroyer")},
 			{Kind: engine.EventPartAvailable, Player: 2, Planet: -1, Fleet: -1, Count: comp("Laser Battery")},
 			{Kind: engine.EventPartAvailable, Player: 0, Planet: -1, Fleet: -1, Count: comp("Scoper 150")},
-			{Kind: engine.EventTerraformed, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 1, Axes: []int{0, 51}}}},
+			{Kind: engine.EventTerraformed, Player: 2, Planet: 5, Fleet: -1, Item: engine.ItemTerraform, Count: 1, Axes: []int{0, 51}},
+			{Kind: engine.EventHostileShrink, Player: 0, Planet: 3, Fleet: -1, Count: 486, Axes: []int{479}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -147,6 +148,8 @@ func TestMessageCheck(t *testing.T) {
 		{"alchemy, not sent", msg(2, 0x08c, true, 1), "message 0x08c to player 2 present = false, want true"},
 		{"installation order reduced", msg(2, 0x12a, true, 1), ""},
 		{"installation order reduced, not sent", msg(0, 0x12a, true, 1), "message 0x12a to player 0 present = false, want true"},
+		{"hostile shrink", msg(0, 0x025, true, 1), ""},
+		{"hostile shrink, not sent", msg(2, 0x025, true, 1), "message 0x025 to player 2 present = false, want true"},
 		{"terraform click", msg(2, 0x07b, true, 1), ""},
 		{"terraform click, not sent", msg(0, 0x07b, true, 1), "message 0x07b to player 0 present = false, want true"},
 		{"terraform order reduced", msg(0, 0x12f, true, 1), ""},

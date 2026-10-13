@@ -39,7 +39,6 @@
    1 message 0x003 has no event mapping
    6 message 0x007 has no event mapping
    4 message 0x00c has no event mapping
-   4 message 0x025 has no event mapping
    1 message 0x02a has no event mapping
    1 message 0x02b has no event mapping
    1 message 0x02c has no event mapping
@@ -121,7 +120,6 @@
    4 message_sequence 0x05b salvage and fleet slots not compared
   16 message_sequence 0x08f and 0x090 bombing fleet not compared
    2 message_sequence entry 0x007 has no event mapping
-   3 message_sequence entry 0x025 has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping

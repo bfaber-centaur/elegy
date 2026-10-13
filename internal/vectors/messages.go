@@ -20,6 +20,7 @@ import (
 func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
+		0x025: "EventHostileShrink",
 		0x026: "EventOvercrowded",
 		0x028: "EventTargetGone",
 		0x02e: "EventColonistsBeamedDown",
@@ -288,6 +289,11 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			}
 		case engine.EventOvercrowded:
 			send(ev.Player, pvMsg{id: 0x026, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
+		case engine.EventHostileShrink:
+			// MESSAGES.md 0x025: planet, colonists before, colonists
+			// after, each a 32-bit count in two 16-bit slots as in 0x026.
+			old, now := ev.Count, ev.Axes[0]
+			send(ev.Player, pvMsg{id: 0x025, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, old & 0xffff, old >> 16, now & 0xffff, now >> 16}})
 		case engine.EventQueueCompleted:
 			send(ev.Player, atPlanet(0x03e, ev.Planet))
 		case engine.EventNoQueue:
