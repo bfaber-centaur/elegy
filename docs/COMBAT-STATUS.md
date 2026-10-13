@@ -358,7 +358,7 @@ write-up is stars-elegy CB-061 (pending). 6 pinned streams.
 | PQ-1 | Players 0, 1 and 2 fought at player 3's homeworld; player 3's unarmed starbase took no part | races count 4 (P) for all four | all four got one 0x0a8 with races count 3 | prediction REFUTED; fixed: the count is the number who fought | `TestConfirmedPQ1SummaryPlayerCountIsN` |
 | PQ-1b | The same, predicting n | 3 for all four | 3 for all four (6 of 6) | CONFIRMED by prediction | `TestConfirmedPQ1SummaryPlayerCountIsN` |
 | PQ-1 counts | The 0x0a8 counts after the races count: your losses, your ships, everyone else's losses, everyone else's ships | | P0 1,2,0,5; P1 and P2 0,2,1,5; P3 0,1,1,6 (the starbase is player 3's own ship and among everyone else's for the fighters) | MEASURED (read after the run); Elegy matches | `TestConfirmedPQ1SummaryPlayerCountIsN` |
-| PQ-1 control | The same three in deep space with player 3 present but not fighting | | the fighters got 3; player 3 got no summary | MEASURED; Elegy's rule (a bystander fleet's owner is not in P, CB-059 B3-BY) | `TestMeasuredCB059ThirdPlayer` (the 2-player form) |
+| PQ-1 control | Control (setup per CB-061) | | the three fighters got 3; player 3 got no summary | MEASURED | |
 
 ### Settled by current COMBAT.md
 
