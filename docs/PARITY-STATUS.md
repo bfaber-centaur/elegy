@@ -365,7 +365,7 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 
 | year | object | lines | cause | owner |
 |---|---|---:|---|---|
-| y4–y12 | player 0's order: delete ship design slot 0 | 9 | Elegy refuses the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way. That the original accepts it is inferred. | lane A |
+| y4–y12 | player 0's order: delete ship design slot 0 | 9 | Cleared (lane A): Elegy refused the delete ("no such object") because the slot has been empty since y4. The original's planner sends it every year and nothing records a refusal; the state is unchanged either way (MEASURED). Elegy now accepts a delete of an empty slot and changes nothing. That the original accepts it is inferred. | lane A |
 | y4 | fleets 10 and 23 (player 6) | 5 | The original numbers the new fleets at planets 11 and 57 as 10 and 23. Elegy puts fleet 23 at planet 11 and has no fleet 10. Cause not traced. | lane A |
 | y6, y10 | player 6's minefields 2 and 3 | 2 | `known_to` lacks player 0: the original adds player 0, and Elegy does not. Cause not traced. | lane D |
 
