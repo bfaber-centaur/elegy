@@ -351,10 +351,28 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	gained := map[int]bool{}
 	// Scraps (TaskScrap) run in their place among these tasks.
 	recycled := scrapYear{}
+	// A fleet whose unload dropped colonists on another player's planet
+	// is told it has finished its orders (0x04e) after every drop is
+	// resolved. MEASURED, one run each: in TK-501 and WU-CAP that fleet's
+	// 0x04e came after the capture's 0x00c (in TK-501 after the last
+	// planet's drop message too), while in TK-201 the mineral unloads'
+	// 0x04e came before the capture. Inferred: that the drop decides it.
 	queue, ev := g.unloadTasks(g.phaseStart(), nil, func(i int) []Event { return g.scrap(i, rng, gained, recycled) })
-	events = append(events, ev...)
+	dropped := map[int]bool{}
+	for _, d := range queue {
+		dropped[d.fleet] = true
+	}
+	var finished []Event
+	for _, e := range ev {
+		if e.Kind == EventFleetArrived && dropped[e.Fleet] {
+			finished = append(finished, e)
+		} else {
+			events = append(events, e)
+		}
+	}
 	queue = append(append([]drop(nil), applied.drops...), queue...)
 	events = append(events, g.resolveQueue(queue, rng, gained)...)
+	events = append(events, finished...)
 	// The first research level-up check (KERNEL.md "Turn order" step 2.4).
 	for i := range g.Players {
 		pl := &g.Players[i]

@@ -37,8 +37,6 @@
    1 message 0x000 has no event mapping
    3 message 0x002 has no event mapping
    1 message 0x003 has no event mapping
-  20 message 0x007 has no event mapping
-   4 message 0x00c has no event mapping
    1 message 0x02a has no event mapping
    1 message 0x02b has no event mapping
    1 message 0x02c has no event mapping
@@ -112,9 +110,7 @@
    1 message 0x179 has no event mapping
    3 message 0x17e has no event mapping
   13 message 0x182 has no event mapping
-   2 message_sequence 0x004 colonists and player slots not compared
    4 message_sequence 0x05b fleet slot not compared
-  14 message_sequence entry 0x007 has no event mapping
    2 message_sequence entry 0x0cd has no event mapping
    1 message_sequence entry 0x117 has no event mapping
    1 message_sequence entry 0x12c has no event mapping

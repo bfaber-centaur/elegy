@@ -21,6 +21,8 @@ import (
 func pvMessageIDs() map[int]string {
 	ids := map[int]string{
 		0x004: "EventDropRepelled, to the planet's owner",
+		0x007: "EventPlanetCaptured, to the former owner",
+		0x00c: "EventPlanetCaptured, to the winner",
 		0x025: "EventHostileShrink",
 		0x026: "EventOvercrowded",
 		0x028: "EventTargetGone",
@@ -72,6 +74,14 @@ func pvMessageIDs() map[int]string {
 	}
 	return ids
 }
+
+// The player slots of the invasion messages (MESSAGES.md "Invasion
+// slots"): the player number plus 0x30 in 0x004 and 0x007, plus 0x20 in
+// 0x00c (MEASURED; the high bits are article flags, BINARY-ONLY).
+const (
+	pvInvasionPlayer = 0x30
+	pvCapturedPlayer = 0x20
+)
 
 // pvPlanetaryIDs is the level-up message id of each planetary scanner
 // (0x157) and planetary defense (0x145), by name.
@@ -238,9 +248,20 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// defender is read as the planet's owner at the end of the
 			// year (ASSUMPTION: the event does not name it), so a planet
 			// captured later in the same year credits its new owner.
+			// Slots: planet, troops dropped (two slots), attacker + 0x30
+			// (MESSAGES.md "Invasion slots", MEASURED).
 			send(owner(ev.Planet), pvMsg{id: 0x004, focus: ev.Planet - 1, focusKnown: true,
-				params: []int{ev.Planet - 1, 0, 0, 0}, known: []bool{true, false, false, false},
-				why: "0x004 colonists and player slots"})
+				params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16, pvInvasionPlayer + ev.Player}})
+		case engine.EventPlanetCaptured:
+			// 0x00c to the winner, then 0x007 to the former owner
+			// (MESSAGES.md "Invasion slots", MEASURED). 0x00c: former
+			// owner + 0x20, planet; 0x007: winner + 0x30, planet, troops
+			// the winner dropped (two slots).
+			old := ev.Axes[0]
+			send(ev.Player, pvMsg{id: 0x00c, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{pvCapturedPlayer + old, ev.Planet - 1}})
+			send(old, pvMsg{id: 0x007, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{pvInvasionPlayer + ev.Player, ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventBuilt:
 			one, more := 0, 0
 			switch ev.Item {
