@@ -243,28 +243,38 @@ func TestPacketTransportNamedSource(t *testing.T) {
 		left     []engine.Minerals // the packets' cargo after
 		salvLeft []int             // the salvage's ironium after
 		action   engine.TransportAction
+		next     []engine.Waypoint // waypoints after the named one
 	}{
 		{"named packet over salvage", []Packet{packet(2, engine.Minerals{100, 0, 0})}, []engine.Salvage{salvage(0, 60)}, false,
-			named(1, 2, loadIronium), engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, []int{60}, engine.TransportNone},
+			named(1, 2, loadIronium), engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, []int{60}, engine.TransportNone, nil},
 		{"named salvage, the second there", []Packet{packet(2, engine.Minerals{100, 0, 0})}, []engine.Salvage{salvage(0, 60), salvage(1, 40)}, false,
-			named(1, 1, loadIronium), engine.Minerals{40, 0, 0}, []engine.Minerals{{100, 0, 0}}, []int{60, 0}, engine.TransportNone},
+			named(1, 1, loadIronium), engine.Minerals{40, 0, 0}, []engine.Minerals{{100, 0, 0}}, []int{60, 0}, engine.TransportNone, nil},
 		{"named packet, the second there", []Packet{packet(2, engine.Minerals{100, 0, 0}), packet(3, engine.Minerals{0, 50, 0})}, nil, false,
-			named(1, 3, task(1, engine.LoadAll, 0)), engine.Minerals{0, 50, 0}, []engine.Minerals{{100, 0, 0}, {}}, nil, engine.TransportNone},
+			named(1, 3, task(1, engine.LoadAll, 0)), engine.Minerals{0, 50, 0}, []engine.Minerals{{100, 0, 0}, {}}, nil, engine.TransportNone, nil},
 		{"plain position on the packet", []Packet{packet(2, engine.Minerals{100, 0, 0})}, nil, false,
-			engine.Waypoint{Pos: at(100, 0), Warp: 5, Task: loadIronium}, engine.Minerals{}, []engine.Minerals{{100, 0, 0}}, nil, engine.TransportNone},
+			engine.Waypoint{Pos: at(100, 0), Warp: 5, Task: loadIronium}, engine.Minerals{}, []engine.Minerals{{100, 0, 0}}, nil, engine.TransportNone, nil},
 		{"named packet at the owner's planet", []Packet{packet(2, engine.Minerals{100, 0, 0})}, nil, true,
-			named(1, 2, loadIronium), engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, nil, engine.TransportNone},
+			named(1, 2, loadIronium), engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, nil, engine.TransportNone, nil},
 		// "set amount to 50" from 30 kT: unmet, the task keeps waiting.
 		{"set amount, short", []Packet{packet(2, engine.Minerals{30, 0, 0})}, nil, false,
-			named(1, 2, task(0, engine.SetAmount, 50)), engine.Minerals{30, 0, 0}, []engine.Minerals{{}}, nil, engine.SetAmount},
+			named(1, 2, task(0, engine.SetAmount, 50)), engine.Minerals{30, 0, 0}, []engine.Minerals{{}}, nil, engine.SetAmount, nil},
 		// A packet launched this year waits at the origin until after
 		// movement, then flies on: the fleet that reached it there loads
 		// nothing.
 		{"named packet gone on", []Packet{{Owner: 1, Number: 2, Pos: at(100, 0), Target: 7, Warp: 10, New: true, Cargo: engine.Minerals{100, 0, 0}}}, nil, false,
-			engine.Waypoint{Pos: at(100, 0), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 2, Task: loadIronium}, engine.Minerals{}, []engine.Minerals{{100, 0, 0}}, nil, engine.TransportNone},
+			engine.Waypoint{Pos: at(100, 0), Warp: 5, Target: engine.TargetPacketObject, Owner: 1, ID: 2, Task: loadIronium}, engine.Minerals{}, []engine.Minerals{{100, 0, 0}}, nil, engine.TransportNone, nil},
 		// "set waypoint to 10" from 30 kT: 20 load, the packet holds 10, met.
 		{"set waypoint", []Packet{packet(2, engine.Minerals{30, 0, 0})}, nil, false,
-			named(1, 2, task(0, engine.SetWaypoint, 10)), engine.Minerals{20, 0, 0}, []engine.Minerals{{10, 0, 0}}, nil, engine.TransportNone},
+			named(1, 2, task(0, engine.SetWaypoint, 10)), engine.Minerals{20, 0, 0}, []engine.Minerals{{10, 0, 0}}, nil, engine.TransportNone, nil},
+		// Salvage numbers are per owner: player 0's salvage 1, first in
+		// object order, shares the number of player 1's named one.
+		{"named salvage, another owner's same number first", nil, []engine.Salvage{
+			{Pos: at(100, 0), Owner: 0, Number: 1, Minerals: engine.Minerals{60, 0, 0}, Steps: 6, Fresh: true}, salvage(1, 40)}, false,
+			named(1, 1, loadIronium), engine.Minerals{40, 0, 0}, nil, []int{60, 0}, engine.TransportNone, nil},
+		// The source is the waypoint just reached, not the route's last.
+		{"named packet with a waypoint after it", []Packet{packet(2, engine.Minerals{100, 0, 0})}, nil, false,
+			named(1, 2, loadIronium), engine.Minerals{100, 0, 0}, []engine.Minerals{{}}, nil, engine.TransportNone,
+			[]engine.Waypoint{{Pos: at(100, 300), Warp: 5}}},
 	} {
 		l := newLab(t)
 		l.g.Planets = []engine.Planet{{ID: 7, Pos: at(900, 0), Owner: engine.NoOwner}}
@@ -275,7 +285,7 @@ func TestPacketTransportNamedSource(t *testing.T) {
 		l.g.Salvage = c.salvage
 		fi := l.fleet(0, at(100, 10), "Freighter", 1)
 		l.g.Fleets[fi].Fuel = 500
-		l.g.Fleets[fi].Waypoints = []engine.Waypoint{c.wp}
+		l.g.Fleets[fi].Waypoints = append([]engine.Waypoint{c.wp}, c.next...)
 		g := turn(t, *l.g, top{})
 		f := g.Fleets[0]
 		if f.Pos != at(100, 0) || f.Cargo.Minerals != c.cargo || f.Task.Transport[0].Action != c.action {
