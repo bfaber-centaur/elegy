@@ -52,7 +52,8 @@ import (
 // written in the ledger; a new one is written as UNCLASSIFIED and fails
 // until someone classifies it. RG002_LEDGER=write go test -run
 // TestRG002Ledger ./internal/vectors rewrites the ledger, keeping the
-// hand classes of lines that remain.
+// hand classes of lines that remain. TestRG003Ledger does the same for
+// RG-003's ledger (rgLedgers), under the same variable.
 
 const (
 	rg002Ledger = "../../engine/testdata/vectors/rg/rg002-ledger.txt"
@@ -63,6 +64,29 @@ const (
 // rg002Vectors are the RG-002 runs the ledger covers: the chained six
 // years and each year's restart from the recorded state.
 var rg002Vectors = []string{"rg002", "rg002-y1", "rg002-y2", "rg002-y3", "rg002-y4", "rg002-y5", "rg002-y6"}
+
+// rgLedger is one representative game's discrepancy ledger: its file,
+// header, chained run and the runs it covers. RG-003 (RG-002 continued to
+// 12 years, vectors README.md "rg") has its own, with RG-002's classes.
+type rgLedger struct {
+	path, header, chained string
+	vectors               []string
+}
+
+// rgLedgers are the representative games' ledgers.
+var rgLedgers = map[string]rgLedger{
+	"rg002": {rg002Ledger, rg002LedgerHeader, "rg002", rg002Vectors},
+	"rg003": {"../../engine/testdata/vectors/rg/rg003-ledger.txt", rg003LedgerHeader, "rg003", rgRuns("rg003", 12)},
+}
+
+// rgRuns is a chained run and its restarts, years 1 to n.
+func rgRuns(chained string, n int) []string {
+	runs := []string{chained}
+	for y := 1; y <= n; y++ {
+		runs = append(runs, fmt.Sprintf("%s-y%d", chained, y))
+	}
+	return runs
+}
 
 // rg002Hand lists the hand classes; any other class is computed.
 var rg002Hand = []string{"missing mechanic", "incorrect mechanic", "state-import error", "unsupported order"}
@@ -175,15 +199,15 @@ func rg002Run(t *testing.T, name string, seed int) (fields map[rg002Field]string
 	return fields, l.rejected, stop
 }
 
-// rg002Lines runs every RG-002 vector on all seed variants and returns
-// the reference run's ledger lines, with the computed class or "" for a
-// line whose class is written by hand.
-func rg002Lines(t *testing.T) []ledgerLine {
+// rg002Lines runs every vector of a ledger on all seed variants and
+// returns the reference run's ledger lines, with the computed class or ""
+// for a line whose class is written by hand.
+func rg002Lines(t *testing.T, lg rgLedger) []ledgerLine {
 	var out []ledgerLine
 	add := func(class, vector, where, object, detail string) {
 		out = append(out, ledgerLine{class: class, key: strings.Join([]string{vector, where, object, detail}, " | ")})
 	}
-	for _, name := range rg002Vectors {
+	for _, name := range lg.vectors {
 		ref, rejected, stop := rg002Run(t, name, 0)
 		matches := map[rg002Field]int{}
 		same := map[rg002Field]int{}
@@ -214,12 +238,12 @@ func rg002Lines(t *testing.T) []ledgerLine {
 		}
 		for _, r := range rejected {
 			class := ""
-			if rejectedSample(r) && name == "rg002" {
+			if rejectedSample(r) && name == lg.chained {
 				class = "sample"
 			}
 			add(class, name, strings.SplitN(r, " player", 2)[0], "order", r)
 		}
-		for r, seeds := range rg002VariantRefusals(name == "rg002", rejected, others) {
+		for r, seeds := range rg002VariantRefusals(name == lg.chained, rejected, others) {
 			out = append(out, rg002VariantRefusalLine(name, r, seeds))
 		}
 		for k, d := range ref {
@@ -403,10 +427,15 @@ func checkLedger(t testing.TB, got []ledgerLine, ledger map[string]string) []led
 	return write
 }
 
-func TestRG002Ledger(t *testing.T) {
-	ledger := readLedger(t, rg002Ledger)
-	battles := readBattleLines(t, rg002Ledger)
-	write := checkLedger(t, rg002Lines(t), ledger)
+func TestRG002Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg002"]) }
+
+// TestRG003Ledger checks RG-003's ledger as TestRG002Ledger does RG-002's.
+func TestRG003Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg003"]) }
+
+func testRGLedger(t *testing.T, lg rgLedger) {
+	ledger := readLedger(t, lg.path)
+	battles := readBattleLines(t, lg.path)
+	write := checkLedger(t, rg002Lines(t, lg), ledger)
 	census := map[string]int{}
 	for _, l := range write {
 		class, _, _ := strings.Cut(l.class, " [")
@@ -424,14 +453,14 @@ func TestRG002Ledger(t *testing.T) {
 		return
 	}
 	var b strings.Builder
-	b.WriteString(rg002LedgerHeader)
+	b.WriteString(lg.header)
 	for _, l := range write {
 		b.WriteString(l.class + " | " + l.key + "\n")
 	}
 	for _, l := range battles {
 		b.WriteString(l + "\n")
 	}
-	if err := os.WriteFile(rg002Ledger, []byte(b.String()), 0o644); err != nil {
+	if err := os.WriteFile(lg.path, []byte(b.String()), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -477,6 +506,18 @@ const rg002LedgerHeader = `# RG-002 discrepancy ledger: every difference of the 
 # omissions, both UNRESOLVED in meaning and constant across RG-002: the
 # lay-mines task's second word (6 orders, all "indefinitely") and the high
 # nibble of the waypoint target type (0x31 and 0x51, 23 orders).
+`
+
+const rg003LedgerHeader = `# RG-003 discrepancy ledger: every difference of the reference run (seed
+# variant 0, every recorded order loaded) from the original, one per line:
+# class | vector | case and year | object | detail
+# RG-003 is RG-002 continued to 12 chained years (vectors README.md "rg"):
+# its years 1 to 6 are RG-002's, and player 0's orders in years 7 to 12
+# were injected (stars-elegy experiments/rg003/README.md). Checked
+# exactly by internal/vectors TestRG003Ledger and, for the "battle" lines,
+# engine TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
+# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[23]Ledger'
+# ./internal/vectors, then classify every UNCLASSIFIED line by hand.
 `
 
 // TestCheckLedger pins what TestRG002Ledger fails on: a new line, a line

@@ -35,7 +35,7 @@ Does Elegy reproduce a representative late-game run with every recorded order (R
 - Exact random parity needs the original's generator in the harness (SPRINT.md P1-1, the seed-table publication pending Bobby). Until then the restarts' random-driven lines and the chained years stay unresolved.
 - A variant-only order refusal. In RG-002 Y1, variants 1 and 6 refuse player 2's waypoint-0 change aimed at a fleet that player 6's `move_ships` empties earlier in the replay. stars-elegy #170 (a1c4c91, BINARY-ONLY) says the original never rejects a waypoint-0 follow whose target was merged away, so Elegy's refusal is the bug. Owner: lane A. It is 2 incorrect-mechanic ledger lines (PARITY-STATUS.md, point 2).
 - stars-elegy #169 (ET-2c): a transport task aimed at another player's packet loads its minerals with no 0x11e (CONFIRMED by prediction). Elegy sends 0x11e and loads nothing. Owner: lane A.
-- RG-002 has 6 years. Milestone 2 asks for 10.
+- RG-003 (12 years) is wired with its own ledger (PARITY-STATUS.md "RG-003 wired"). Its years 1–6 match RG-002 line for line. Years 7–12 add 11 hand lines for lanes A, D and economy.
 
 ## Best next move
 

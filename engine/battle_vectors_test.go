@@ -68,7 +68,8 @@ func TestBattleRecords(t *testing.T) {
 	for _, path := range engine.BattleRecordVectors(t) {
 		starts[path] = battleStarts(t, path)
 	}
-	// RG-002's records go to its ledger (battle_ledger_test.go).
+	// RG-002's and RG-003's records go to their ledgers
+	// (battle_ledger_test.go).
 	l := &ledgerTB{TB: t, lines: map[string]string{}}
 	ungen := engine.CheckBattleRecords(l, starts, battleVariants(t))
 	for corpus, n := range ungen {
@@ -76,20 +77,31 @@ func TestBattleRecords(t *testing.T) {
 			t.Errorf("%s: %d records of a year not generated", corpus, n)
 		}
 	}
-	ledger := readBattleLedger(t)
-	if os.Getenv("RG002_LEDGER") == "write" {
-		writeBattleLedger(t, l.lines, ledger)
-		ledger = readBattleLedger(t)
+	// Each representative game's lines go to its own ledger.
+	for _, path := range []string{rgBattleLedgers["rg002"], rgBattleLedgers["rg003"]} {
+		got := map[string]string{}
+		for k, class := range l.lines {
+			if rgBattleLedger(k) == path {
+				got[k] = class
+			}
+		}
+		ledger := readBattleLedger(t, path)
+		if os.Getenv("RG002_LEDGER") == "write" {
+			writeBattleLedger(t, path, got, ledger)
+			ledger = readBattleLedger(t, path)
+		}
+		checkBattleLedger(t, got, ledger)
 	}
-	checkBattleLedger(t, l.lines, ledger)
-	checkRG002BattleCoverage(t, l.lines)
+	checkRGBattleCoverage(t, l.lines, "rg002", rg002BattleRecords)
+	checkRGBattleCoverage(t, l.lines, "rg003", rg003BattleRecords)
 }
 
-// checkRG002BattleCoverage fails unless every RG-002 battle record has
-// both its expectations and at least one ledger line: the internal/vectors
-// ledger leaves the `battle` and `battle_actions` expectations to these
-// lines, so none may go unreported.
-func checkRG002BattleCoverage(t *testing.T, lines map[string]string) {
+// checkRGBattleCoverage fails unless every battle record of the
+// representative game named by its chained run (rg002, rg003) has both its
+// expectations and at least one ledger line: the internal/vectors ledger
+// leaves the `battle` and `battle_actions` expectations to these lines,
+// so none may go unreported. want is the game's number of records.
+func checkRGBattleCoverage(t *testing.T, lines map[string]string, game string, want int) {
 	covered := map[string]bool{}
 	for k := range lines {
 		parts := strings.SplitN(k, " | ", 4)
@@ -98,21 +110,21 @@ func checkRG002BattleCoverage(t *testing.T, lines map[string]string) {
 	n := 0
 	for _, path := range engine.BattleRecordVectors(t) {
 		vector, ok := strings.CutPrefix(strings.TrimSuffix(path, ".json"), "rg/")
-		if !ok || !strings.HasPrefix(vector, "rg002") {
+		if !ok || !strings.HasPrefix(vector, game) {
 			continue
 		}
 		for k, lacks := range engine.BattleRecordKeys(t, path) {
 			n++
 			if lacks != "" {
-				t.Errorf("RG-002 battle record %s %s: %s", vector, k, lacks)
+				t.Errorf("%s battle record %s %s: %s", game, vector, k, lacks)
 			}
 			if !covered[vector+" | "+k] {
-				t.Errorf("RG-002 battle record %s %s has no ledger line", vector, k)
+				t.Errorf("%s battle record %s %s has no ledger line", game, vector, k)
 			}
 		}
 	}
-	if n != rg002BattleRecords {
-		t.Errorf("%d RG-002 battle records, want %d", n, rg002BattleRecords)
+	if n != want {
+		t.Errorf("%d %s battle records, want %d", n, game, want)
 	}
 }
 
@@ -120,6 +132,10 @@ func checkRG002BattleCoverage(t *testing.T, lines map[string]string) {
 // vectors: 44 in the chained run and 44 in the restarts, each a `battle`
 // and a `battle_actions` expectation.
 const rg002BattleRecords = 88
+
+// rg003BattleRecords is the number of battle records in the RG-003
+// vectors: 102 in the chained run and 102 in the restarts.
+const rg003BattleRecords = 204
 
 func TestBattleRecordHarness(t *testing.T) {
 	engine.CheckBattleRecordHarness(t, battleStarts(t, "cb/cb010.json")[1], battleStarts(t, "cs/cs003c.json")[1])

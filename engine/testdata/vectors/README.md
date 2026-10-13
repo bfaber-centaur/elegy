@@ -48,7 +48,7 @@ vectors/<corpus>/<run>.json      one oracle run
 | `ug` | UG01..UG30 | 150 | new games: starting tech and designs, planet counts, homeworlds, wormholes, stored victory conditions (`new_game` vectors) | `docs/UNIVERSE.md` |
 | `pg` | PG-002, PG-003 | 4 | population growth and carry, uncrowded and crowded, 19 and 29 empty-order years | `docs/KERNEL.md` "Population growth" |
 | `pq` | PQ-001 C01..C14, P0 | 16 | one year of the production queue: partial builds, mineral shortfall, auto items, alchemy, research tax, order clips | `docs/KERNEL.md` "Production" |
-| `rg` | RG-001, RG-001-Y1..Y6, RG-002, RG-002-Y1..Y6 | 24 | a representative game: seven players (six expert computer players), about a hundred fleets, six chained years with every player's orders, battles, colonizing, research, production and random events; each year's random stream start is in `random_start`. RG-001 chains the six years; RG-001-Yk is year k alone, from the original's own files for the year before | `docs/KERNEL.md`, PARITY "Representative game (RG-001)". RG-002 is the same kind from a **state-edited** AIX 2461 after one settling year (every edit in `experiments/rg002/README.md`), aimed at late-game economy: auto queue items, population over the maximum, low concentrations, slower tech with the lowest-field switch, remote mining, a hostile Orbital Adjuster, starbase replacement and salvage; PARITY "Representative game (RG-002)" |
+| `rg` | RG-001, RG-001-Y1..Y6, RG-002, RG-002-Y1..Y6, RG-003, RG-003-Y1..Y12 | 37 | a representative game: seven players (six expert computer players), about a hundred fleets, six chained years with every player's orders, battles, colonizing, research, production and random events; each year's random stream start is in `random_start`. RG-001 chains the six years; RG-001-Yk is year k alone, from the original's own files for the year before | `docs/KERNEL.md`, PARITY "Representative game (RG-001)". RG-002 is the same kind from a **state-edited** AIX 2461 after one settling year (every edit in `experiments/rg002/README.md`), aimed at late-game economy: auto queue items, population over the maximum, low concentrations, slower tech with the lowest-field switch, remote mining, a hostile Orbital Adjuster, starbase replacement and salvage; PARITY "Representative game (RG-002)". RG-003 is RG-002 continued to 12 chained years (2462 to 2474; years 1 to 6 are RG-002's, and player 0's orders in years 7 to 12 were injected by lane F, `experiments/rg003/README.md`); PARITY "Representative game, 12 years (RG-003)" |
 
 `internal/vectors` holds the same format as Go types and a test that
 decodes every file strictly, so `go test ./...` fails on a malformed vector.
@@ -329,6 +329,27 @@ and otherwise treat it as one sample of what the rule allows. Single-stream
 combat vectors flag what the year's battle draws decide (see "Combat
 vectors").
 
+`start_sample` (`rg` only, on every `battle` record) says whether the
+battle's start tokens were drawn. The rule:
+- `false` when every alternative stream had the same tokens: the same
+  owner, fleet or planet, design, ships, damage, shields and every other
+  token field, compared as an order-free set without `start_square`;
+- `true` otherwise, for example when a token was missing or the battle was
+  not fought in another stream.
+
+The record keeps `sample: true` whenever it differed in any alternative
+stream at all. Usually only the token order differed, and with it which
+start square each player got, because the battle draws the order. So a
+record with `sample: true` and `start_sample: false` has exact stacks, and
+only the order and squares are samples. A restart that gives other stacks
+there is a gap, not a sample.
+
+MEASURED: the stacks matched in every alternative stream for every
+RG-001 and RG-002 battle, and for 100 of RG-003's 102. The two exceptions
+are year 10's battle at (1571,1434), where one stream had no token for
+player 1's fleet 88, and year 11's at (1323,1300), which neither
+alternative stream fought.
+
 | `salvage_at` | salvage at (`x`, `y`) | `minerals`; `observed: "none"` if there was none |
 | `message` | player `player` got message `message_id` | `present` |
 | `message_sequence` | every message player `player` got in the year, in `.M` order (`rg`, `kx001`–`kx005`, `pq`) | `messages`: per message `id`, `focus` and `params`; see "Message sequences" below |
@@ -336,7 +357,7 @@ vectors").
 | `object_gone` | the object `subject` (`{kind, owner, id}`) no longer exists, e.g. a swept minefield | |
 | `minefield` | minefield `owner`/`id` | `x`, `y`, `mines`, `type`, `detonating`; `radius` when the case checks it |
 | `view` | what player `viewer` knows of `subject` (`{kind, owner, id}`: a planet, fleet, wormhole, minefield, design or player) | the fields the case checks, e.g. `level` (report level), `known`, `starbase_visible`, `heading`, `design_count` |
-| `battle` | the battle at (`x`, `y`) | `players`, `planet`, and `tokens`: per token its `owner`, `fleet` or `planet`, `kind`, `design`, `start_square`, `initiative`, `mass`, `shield`, `jammer`, `computer`, `capacitor`, `deflector`, `ships`, `damage` |
+| `battle` | the battle at (`x`, `y`) | `players`, `planet`, and `tokens`: per token its `owner`, `fleet` or `planet`, `kind`, `design`, `start_square`, `initiative`, `mass`, `shield`, `jammer`, `computer`, `capacitor`, `deflector`, `ships`, `damage`; in `rg`, `start_sample` (see above) |
 | `battle_actions` | the moves and shots of that battle | `actions`: per action `round`, `token`, `to` (square, or `null` for leaving the board) and `hits` (`token`, `flags`, `kills`, `shield_damage`, `armor_damage`) |
 | `no_battle` | no battle record was written | |
 | `client_estimate` | a value the original client shows on `screen` for `subject` after the year | `field` names the value; `equals` holds it as a number or a short value with its unit, never the client's sentence |
@@ -559,6 +580,7 @@ python3 tools/vectors/build.py pg  ../stars-oracle-apparatus/evidence       # re
 python3 tools/vectors/build.py pq  ../stars-oracle-apparatus/evidence/pq001
 python3 tools/vectors/build.py rg001 ../stars-oracle-apparatus/evidence/rg001
 python3 tools/vectors/build.py rg002 <dir named rg002>                      # a link to evidence/rg002/run
+python3 tools/vectors/build.py rg003 <dir named rg003> vectors/rg           # a link to evidence/rg003/run
 python3 tools/vectors/build.py co  <dir named co>                           # a link to evidence/fo (the co* runs)
 go test ./internal/vectors
 ```
@@ -627,22 +649,26 @@ default queue; only TK-106, TK-107 and TK-108 give player 0 a queue and
 them). `ug` and `rw` were not changed (`ug` is new-game vectors; `rw` came
 out identical).
 
-**WT-001 player-0 wormhole bit (UNRESOLVED, 2026-10-13).** WT-001-G
+**WT-001 player-0 wormhole bit (UNRESOLVED until WG-1, explained 2026-10-13).** WT-001-G
 expects ends 2 and 3 known to players 0 and 1, and it is not flagged a
-sample. Player 1's bit is clear of the jiggle: its scouts sit 5 ly from
-each end against a 50 ly bound, and the jiggle moves an end at most 17 ly.
-Player 0 has no scanner close to either end, so there is no jiggle margin
-for its bit, and the run does not show how player 0 came to know them.
-Both streams agree. Until that is explained, player 0's bit on ends 2
-and 3 may be drawn rather than a rule.
+sample. Player 0's bit comes from its Scouts' JOAT built-in scanner
+(`SCANNING.md` "Ship designs" (JOAT hulls): 520 / 260 at electronics 26). Ends 2 and 3 were
+154 and 233 ly from player 0's Scouts 0/1 and 0/3, inside the penetrating
+range, so the jiggle (at most 17 ly) cannot flip the bit. With the JOAT
+built-ins, the planetary scanners and `SCANNING.md` "Space objects" (Wormholes), all 24
+known bits of WT-001 (12 ends, 2 players) are reproduced in both streams.
+WG-1 removed the built-in (player 0 made IS) and player 0 then lacked ends
+2, 3 and 11 exactly as predicted (CONFIRMED by prediction, 2 of 2 streams;
+`docs/PARITY.md` "Wormholes and Mystery Trader, round 2"). The expectation
+stays exact.
 
 **Oracle runs not run.** Each PARITY section's "Not tested" list is the
 current record; the main ones are:
 
 - Fleet Operations: split, direct transfers and merges, direct cargo
   placement, steal mode (need host-accepted order files, serial-gated).
-- Combat: salvage at more than one point (E-8), Mystery Trader items from
-  battle (never observed).
+- Combat: Mystery Trader items from battle (never observed). Salvage
+  at more than one point (E-8) was run on 2026-10-13 (`experiments/e8`).
 - Scanning: SD detection of cloaked fleets (S-21), AR planet scanners
   (S-11), chase retargeting (S-24), more than two players, planet reports
   after bombing, minefield hits or a lost planet.

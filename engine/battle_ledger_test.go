@@ -22,9 +22,24 @@ import (
 
 const rg002BattleLedger = "testdata/vectors/rg/rg002-ledger.txt"
 
-// rg002BattleWhere parses CheckBattleRecords' locator for an RG-002
-// record: vector, case, stream, x, y, year, then the message.
-var rg002BattleWhere = regexp.MustCompile(`^rg/(rg002[^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
+// rgBattleLedgers are the representative games' ledgers by chained run:
+// RG-003's records go to its own ledger, with RG-002's classes.
+var rgBattleLedgers = map[string]string{
+	"rg002": rg002BattleLedger,
+	"rg003": "testdata/vectors/rg/rg003-ledger.txt",
+}
+
+// rgBattleLedger is the ledger of a battle ledger key: the one named by
+// the chained run its vector belongs to ("rg003-y7" → rg003).
+func rgBattleLedger(key string) string {
+	game, _, _ := strings.Cut(key, " | ")
+	game, _, _ = strings.Cut(game, "-")
+	return rgBattleLedgers[game]
+}
+
+// rg002BattleWhere parses CheckBattleRecords' locator for an RG-002 or
+// RG-003 record: vector, case, stream, x, y, year, then the message.
+var rg002BattleWhere = regexp.MustCompile(`^rg/(rg00[23][^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
 
 // rg002Pointer matches a printed pointer, which differs between runs.
 var rg002Pointer = regexp.MustCompile(`0x[0-9a-f]+`)
@@ -105,19 +120,27 @@ func (l *ledgerTB) Logf(format string, args ...any) {
 }
 
 // rg002BattleHand reports whether class is a hand class with its owner
-// ("incorrect mechanic [lane A]"), as internal/vectors rg002HandClass.
+// ("incorrect mechanic [lane A]"), as internal/vectors rg002HandClass, or
+// the unresolved randomness class with its owner and reason
+// ("unresolved randomness [lane D]: reason"), as internal/vectors
+// rg002UnresolvedClass: a miss on every harness variant that a named
+// random outcome explains.
 func rg002BattleHand(class string) bool {
 	for _, h := range []string{"missing mechanic", "incorrect mechanic", "state-import error"} {
 		if rest, ok := strings.CutPrefix(class, h+" ["); ok && strings.HasSuffix(rest, "]") && len(rest) > 1 {
 			return true
 		}
 	}
+	if rest, ok := strings.CutPrefix(class, "unresolved randomness ["); ok {
+		owner, reason, ok := strings.Cut(rest, "]: ")
+		return ok && owner != "" && strings.TrimSpace(reason) != ""
+	}
 	return false
 }
 
-// readBattleLedger reads the ledger's battle record lines, by key.
-func readBattleLedger(t testing.TB) map[string]string {
-	data, err := os.ReadFile(rg002BattleLedger)
+// readBattleLedger reads a ledger's battle record lines, by key.
+func readBattleLedger(t testing.TB, path string) map[string]string {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,11 +166,11 @@ func checkBattleLedger(t testing.TB, got, ledger map[string]string) {
 		class, ok := ledger[k]
 		switch {
 		case !ok:
-			t.Errorf("new RG-002 battle ledger line: %s | %s", got[k], k)
+			t.Errorf("new battle ledger line: %s | %s", got[k], k)
 		case got[k] != "" && class != got[k]:
-			t.Errorf("RG-002 battle ledger line is %s, was %s: %s", got[k], class, k)
+			t.Errorf("battle ledger line is %s, was %s: %s", got[k], class, k)
 		case got[k] == "" && !rg002BattleHand(class):
-			t.Errorf("RG-002 battle ledger line needs a hand class with its owner, has %q: %s", class, k)
+			t.Errorf("battle ledger line needs a hand class with its owner, has %q: %s", class, k)
 		}
 	}
 	var gone []string
@@ -158,15 +181,15 @@ func checkBattleLedger(t testing.TB, got, ledger map[string]string) {
 	}
 	sort.Strings(gone)
 	for _, l := range gone {
-		t.Errorf("RG-002 battle ledger line no longer produced (resolved or changed): %s", l)
+		t.Errorf("battle ledger line no longer produced (resolved or changed): %s", l)
 	}
 }
 
-// writeBattleLedger rewrites the ledger's battle record lines from got,
+// writeBattleLedger rewrites a ledger's battle record lines from got,
 // keeping each remaining line's hand class and every other line, for
 // RG002_LEDGER=write.
-func writeBattleLedger(t testing.TB, got, ledger map[string]string) {
-	data, err := os.ReadFile(rg002BattleLedger)
+func writeBattleLedger(t testing.TB, path string, got, ledger map[string]string) {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +214,7 @@ func writeBattleLedger(t testing.TB, got, ledger map[string]string) {
 		}
 		out = append(out, class+" | "+k)
 	}
-	if err := os.WriteFile(rg002BattleLedger, []byte(strings.Join(out, "\n")+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(strings.Join(out, "\n")+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -219,6 +242,24 @@ func TestCheckBattleLedger(t *testing.T) {
 		r := &recordTB{TB: t}
 		if checkBattleLedger(r, c.got, ledger); len(r.errs) != c.errors {
 			t.Errorf("%s: errors %q, want %d", c.name, r.errs, c.errors)
+		}
+	}
+	for _, c := range []struct {
+		class string
+		hand  bool
+	}{
+		{"incorrect mechanic [lane A]", true},
+		{"incorrect mechanic []", false},
+		{"incorrect mechanic", false},
+		{"unresolved randomness [lane D]: a mine stop", true},
+		{"unresolved randomness [lane D]", false},
+		{"unresolved randomness [lane D]:  ", false},
+		{"unresolved randomness []: a mine stop", false},
+		{"random-driven", false},
+		{"sample", false},
+	} {
+		if got := rg002BattleHand(c.class); got != c.hand {
+			t.Errorf("rg002BattleHand(%q) = %v, want %v", c.class, got, c.hand)
 		}
 	}
 	r := &recordTB{TB: t}
