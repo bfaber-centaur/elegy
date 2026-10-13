@@ -88,39 +88,63 @@ func (g *Game) waypointCheck() {
 // Elegy does not model that preference: the k-th candidate in fleet order
 // is taken when its rand(k) is 0, a uniform choice, and the extra rand(2)
 // is drawn without changing the choice. Waypoints are visited in fleet
-// order, and a fleet is never its own candidate. Elegy's fleet ids can be
+// order, and a fleet is never its own candidate for a waypoint (a
+// follower can be, below). Elegy's fleet ids can be
 // reused (Game.newFleetID): a fleet made later in the replay with the
 // merged fleet's id is chased as itself.
-func (g *Game) chaseMerged(merged map[int]int, rng Rand) {
+func (g *Game) chaseMerged(merged, follows map[int]int, rng Rand) {
 	if len(merged) == 0 {
 		return
 	}
 	order := g.fleetOrder()
 	picked := map[int]bool{}
+	// pick draws for the fleets of owner at pos, other than fleet index i
+	// (-1 for none), and returns the chosen fleet's id, or -1.
+	pick := func(i, owner int, pos Point) int {
+		choice, k := -1, 0
+		for _, c := range order {
+			cf := &g.Fleets[c]
+			if c == i || cf.Owner != owner || cf.Pos != pos {
+				continue
+			}
+			k++
+			if rng.Intn(k) == 0 {
+				choice = c
+			}
+			if picked[cf.ID] {
+				rng.Intn(2)
+			}
+		}
+		if choice < 0 {
+			return -1
+		}
+		picked[g.Fleets[choice].ID] = true
+		return g.Fleets[choice].ID
+	}
 	for _, i := range order {
-		for j := range g.Fleets[i].Waypoints {
-			wp := &g.Fleets[i].Waypoints[j]
+		f := &g.Fleets[i]
+		// A follower's waypoint 0, at its own position, aimed at a fleet
+		// merged away earlier in the replay (ORDERS.md "Waypoint 0,
+		// following", stars-elegy a1c4c91, BINARY-ONLY): the follow step
+		// then follows the fleet chosen, or sends 0x138 with none. The
+		// follower is a candidate when it has the merged fleet's owner,
+		// and then follows itself (KERNEL.md step 1a.3, "possibly the
+		// follower itself"; F3).
+		if leader, ok := follows[f.ID]; ok && g.fleetIndex(leader) < 0 {
+			if owner, ok := merged[leader]; ok {
+				if id := pick(-1, owner, f.Pos); id >= 0 {
+					follows[f.ID] = id
+				}
+			}
+		}
+		for j := range f.Waypoints {
+			wp := &f.Waypoints[j]
 			owner, ok := merged[wp.ID]
 			if wp.Target != TargetFleet || !ok || g.fleetIndex(wp.ID) >= 0 {
 				continue
 			}
-			choice, k := -1, 0
-			for _, c := range order {
-				cf := &g.Fleets[c]
-				if c == i || cf.Owner != owner || cf.Pos != wp.Pos {
-					continue
-				}
-				k++
-				if rng.Intn(k) == 0 {
-					choice = c
-				}
-				if picked[cf.ID] {
-					rng.Intn(2)
-				}
-			}
-			if choice >= 0 {
-				wp.ID = g.Fleets[choice].ID
-				picked[wp.ID] = true
+			if id := pick(i, owner, wp.Pos); id >= 0 {
+				wp.ID = id
 			}
 		}
 	}
@@ -164,21 +188,27 @@ func (g *Game) retargetRemoved(ids map[int]bool) {
 			retarget := func(kind TargetKind, id int) {
 				wp.Pos, wp.Target, wp.ID = gone.Pos, kind, id
 			}
-			fi := -1
-			for _, c := range order {
-				cf := &g.Fleets[c]
-				if c != i && !ids[cf.ID] && cf.Owner == gone.Owner && cf.Pos == gone.Pos {
-					fi = c
-					break
-				}
-			}
-			if fi >= 0 {
+			if fi := g.standIn(order, ids, gone, i); fi >= 0 {
 				retarget(TargetFleet, g.Fleets[fi].ID)
 			} else if pi := g.planetAt(gone.Pos); pi >= 0 {
 				retarget(TargetPlanet, g.Planets[pi].ID)
 			}
 		}
 	}
+}
+
+// standIn is the fleet (index) that takes over from gone, a fleet in ids
+// about to be removed, for the fleet at index chaser: the first in fleet
+// order of gone's owner standing exactly at gone's position, not chaser
+// and not being removed itself, or -1 (retargetRemoved; ASSUMPTION W10).
+func (g *Game) standIn(order []int, ids map[int]bool, gone *Fleet, chaser int) int {
+	for _, c := range order {
+		cf := &g.Fleets[c]
+		if c != chaser && !ids[cf.ID] && cf.Owner == gone.Owner && cf.Pos == gone.Pos {
+			return c
+		}
+	}
+	return -1
 }
 
 // Route and transfer-fleet messages. Elegy's wording.

@@ -42,25 +42,25 @@ A field that misses on all 8 variants by a varying amount says so in its detail:
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
-| incorrect mechanic | 0 | 2 | 0 |
-| missing mechanic | 2 | 0 | 0 |
+| incorrect mechanic | 0 | 0 | 0 |
+| missing mechanic | 0 | 0 | 0 |
 | state-import error | 0 | 0 | 0 |
 | unsupported order | 0 | 0 | 0 |
 | unresolved randomness | 0 | 0 | 0 |
 | random-driven | 30 | 0 | 1 |
-| not compared | 8 | 0 | 0 |
-| sample | 1138 | 43 | 41 |
+| not compared | 92 | 0 | 0 |
+| sample | 1138 | 37 | 41 |
 | matched | 0 | 0 | 52 |
 
-These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below), lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1222: 1138 fields and 43 orders, checked by `TestRG002Ledger` (which logs them together as 1181), and 41 battle lines, checked by `TestBattleRecords` (36 chained records, 20 matched and 16 missed, and 5 battles Elegy fights where the chained record has none).
+These counts include the message, `object`-form wormhole, design and player-count comparisons added after the final run ("Messages" and "Not compared, by reason" below), lane D's battle summaries, which cleared 9 missing-mechanic lines and 5 samples ("Closed after the final run: battle summaries"), and economy's level-up and overcrowding messages, which cleared 10 missing-mechanic lines and 8 samples ("Closed after the final run: level-up and overcrowding messages"). Samples total 1216: 1138 fields and 37 orders, checked by `TestRG002Ledger` (which logs them together as 1175), and 41 battle lines, checked by `TestBattleRecords` (36 chained records, 20 matched and 16 missed, and 5 battles Elegy fights where the chained record has none). Of the 92 fields not compared, 84 are `message_sequence` expectations, which wait on lane B's within-id comparator, and 8 are null values ("Not compared, by reason" below).
 
-The reference run of RG-002 has 2 deterministic field discrepancies, both lane A's 0x02e message, which Elegy sends no event for ("Messages" below). The last other one, Y4 planet 88's `packet_warp` (missing mechanic [economy]), was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
+The reference run of RG-002 has no deterministic field discrepancy. The last two, lane A's 0x02e message for colonists beamed down by an unload task (Y1 and the chained year 1), cleared when Elegy began sending it (`EventColonistsBeamedDown`). With them gone, the Y1 restart (RG-002-Y1-2463) and the chained run's first year (RG-002-2463) pass on 1 of the 8 seed variants (baseline.txt `random 1`); every field they miss on the other variants is random-driven or a sample. Before them, Y4 planet 88's `packet_warp` (missing mechanic [economy]) was cleared by the starbase mass-driver fix ("Effect of the packet-warp fix" below), lane D's 9 battle-summary lines by the battle summaries ("Closed after the final run: battle summaries"), and economy's 10 message lines by the level-up and overcrowding messages. Every other field, order and battle record of the seven runs either matches the original on the reference seed, matches on at least one other seed variant (random-driven), is a sample, or is not compared.
 
 No order fails to load. Lane F's coverage check found that the 42 order files hold 1867 order records and the vectors carry 1867 orders, so a refused order is always Elegy's gap, never the decoder's. Two fields of the host files are not in the vectors, and their meaning is UNRESOLVED: the lay-mines task's second word and the high nibble of the waypoint target type. The ledger header lists both.
 
 - **Restarts:** on the reference seed Elegy refuses none of the orders, and all 44 battle records match. Elegy fights one battle the original did not record, Y4 at (1362,1284): random-driven, as player 2's fleet 13 ends there on the reference seed and on 2 other variants, and fights nothing there on the 5 variants that put it at the original's (1367,1305).
-- **Refusals on other variants:** the ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There is one, in Y1 and in the chained run's year 1. Player 2's order 10 is a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refuse it. stars-elegy #170 (BINARY-ONLY) says the original never rejects such an order, so both lines are incorrect mechanic for lane A.
-- **Chained run:** 43 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples.
+- **Refusals on other variants:** none. The ledger lists an order refused on another seed variant but not on the reference one, outside the chained run's samples. There was one, in Y1 and in the chained run's year 1: player 2's order 10, a waypoint-0 follow of player 6's fleet 10, which player 6's `move_ships` empties; variants 1 and 6 replay player 6 first and refused it (incorrect mechanic [lane A]). The waypoint-0 follow change (ORDERS.md "Waypoint 0, following", stars-elegy a1c4c91, BINARY-ONLY) accepts it, and both lines cleared.
+- **Chained run:** 37 orders are refused in years 2–6, all samples, and 16 battle records miss, all samples ("Closed: battle records line by line" below). The same change removed 6 refused follow orders (Y2 p1 o35, Y4 p5 o64, Y5 p5 o30, o67, Y5 p6 o14, Y6 p6 o10); no other line moved.
 
 ## Effect of #189 and #190
 
@@ -125,7 +125,7 @@ Economy's change (a new starbase's mass driver sets the planet's packet speed to
 
 ## Not compared, by reason
 
-None of the 8 lines is an RG-002 mechanic Elegy is known to lack. The other groups are empty now: quantities Elegy models but the harness did not compare (the "Closed" notes below), and the 176 `battle` and `battle_actions` expectations, which are ledger lines of their own now ("Closed: battle records line by line").
+92 lines are not compared. None of the 8 null lines below is an RG-002 mechanic Elegy is known to lack. The other 84 are the `message_sequence` expectations from lane B's vector re-sync, which wait on lane B's within-id message-order comparator. The other groups are empty now: quantities Elegy models but the harness did not compare (the "Closed" notes below), and the 176 `battle` and `battle_actions` expectations, which are ledger lines of their own now ("Closed: battle records line by line").
 
 **1. No value in the original's file.** The vectors write null where the file holds nothing to compare: 6 lines of planet `defenses` null and 2 of `packet_destination` null. Keeping null `packet_destination` out of the comparison is an ELEGY CHOICE: null means the file holds no destination record, which is not the same claim as -1 ("none"), so it is not compared as -1. Reversible if stars-elegy documents null as "none".
 
@@ -140,7 +140,7 @@ All 88 records' players and planets match.
 
 | Class | Before: lines | After: lines |
 |---|---|---|
-| not compared | 184 | 8 |
+| not compared | 268 (176 battle, 84 `message_sequence`, 8 null) | 92 (84 `message_sequence`, 8 null) |
 | matched | 0 | 52 (44 restarts, 8 chained year 1) |
 | sample (battle lines) | 16 | 41 (36 chained records: 20 matched, 16 missed; 5 extra Elegy battles) |
 | random-driven (battle lines) | 0 | 1 (Y4 (1362,1284)) |
@@ -157,7 +157,7 @@ All 88 records' players and planets match.
 
 No line was added.
 
-**Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 are missing-mechanic lines for ids Elegy sends no event for. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
+**Closed after the final run: messages.** The 68 `message` lines are compared now. 32 match on the reference seed, 15 are samples, and 21 were missing-mechanic lines for ids Elegy sent no event for. Lane D's battle summaries cleared 9, economy's level-up and overcrowding messages 10, and lane A's 0x02e the last 2. The mapping, the per-owner split and the effect on other corpora are in [PARITY-STATUS.md](PARITY-STATUS.md) "Messages compared".
 
 **Closed after the final run: `object`-form wormholes.** The 72 `object` expectations of kind `wormhole` are compared now, with the fields the `wormhole` form already used plus `id` and `partner` (the other end's vector id). The vectors mark all 72 as samples: a wormhole end jiggles or jumps on draws every year (OBJECTS.md). All 72 miss, making 160 sample field lines: x (72), y (65), `years_since_jump` (13, a jump on one side and not the other) and `known_to` (10). `partner`, `stability_class` and `destination_known_to` match in all 72.
 

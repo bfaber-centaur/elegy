@@ -20,6 +20,7 @@ Bobby's five requirements, in order:
    - **One refusal on other variants: incorrect mechanic [lane A], 2 ledger lines.** In Y1, and in the chained run's year 1, variants 1 and 6 refuse player 2's order 10. That order is a waypoint-0 change aimed at player 6's fleet 10, which player 6's order 1 (`move_ships`) empties. When the year's player shuffle replays player 6 first, the target is gone and Elegy refuses the order ("no such object"). The reference seed replays player 2 first.
      - stars-elegy #170 (a1c4c91, BINARY-ONLY) says the original never rejects a waypoint-0 follow whose target was merged away: a waypoint edit checks only the ordering fleet and the index. The stale id is resolved later, by the start-of-year waypoint check or by the removal-time retarget. So Elegy's refusal is the bug. #170 also says the player shuffle itself matches the original: the year's first draws, Fisher-Yates.
      - It is classed `incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY)`, one line each for Y1 and the chained run.
+     - Cleared since by the follow change: a follow order is never refused for its leader, so both lines and 6 refused FollowOrder samples of the chained run leave the ledger (RG002-REPORT.md "Counts").
 3. **Exact deterministic field diffs: MEASURED, one.**
    - The reference run (seed variant 0) has one field line of a deterministic class, and no order or battle record line of one. It appeared when this branch began comparing packet settings (below).
    - **Missing mechanic [economy], 1 field line.** In the Y4 restart, planet 88's `packet_warp` is 0 in Elegy and 8 in the original. The planet's starbase with a mass driver completes that year. Economy infers that the original sets the launch warp when such a starbase completes, from this one observation: "packet warp not set when a starbase with a mass driver completes (inferred from one observation)". The same field in the chained run's year 4 is a sample.
@@ -89,6 +90,7 @@ The harness now compares `message` expectations (vectors/README.md "message": pl
 - 0x004 from `EventDropRepelled`, sent to the planet's owner;
 - 0x035–0x038 from `EventBuilt` of factories or mines, with MESSAGES.md's merge rule for build counts;
 - 0x04e from `EventFleetArrived`;
+- 0x02e from `EventColonistsBeamedDown` (added later; see below);
 - 0x05b from `EventFleetScrapped` in deep space;
 - 0x083–0x086 from `EventCometStrike`, by size;
 - 0x08f and 0x090 from `EventBombed` followed by `EventPlanetEmptied`.
@@ -101,7 +103,7 @@ Some ids have no Elegy event at all: 0x026, 0x02e, 0x050, 0x05f, 0x095, 0x09f, 0
 - 21 are new missing-mechanic lines. Each fails on every seed variant:
   - **economy, 10 lines:** 0x026 overcrowding (7: each restart and the chained run's first year), 0x050 research level gained (2: Y2, Y3) and 0x05f component available (1: Y3);
   - **lane D, 9 lines:** no per-player battle summary: 0x095 (4), 0x116 (3), 0x09f (1) and 0x0a1 (1);
-  - **lane A, 2 lines:** 0x02e, colonists beamed down by an unload task (Y1 and the chained year 1).
+  - **lane A, 2 lines:** 0x02e, colonists beamed down by an unload task (Y1 and the chained year 1). Cleared since: an unload task that drops colonists on the fleet owner's own planet sends `EventColonistsBeamedDown`, and both lines match on the reference seed.
 
 | Class | Fields | Orders | Battle records |
 |---|---|---|---|
@@ -117,7 +119,7 @@ The other classes stay 0. The 21 missing-mechanic field lines are the message li
 - 0x050 or 0x05f (research level, component available): 29 cases, KX-002 (12), KX-003, KX-004 (2), KX-005 (5), PQ-001 (3), RD-P15, RG-001 Y2–Y6 and TK-203.
 - 0x026: also in KX-002 G1 and KX-005 T0–T2.
 - RG-002: Y1, Y6, and the chained 2463 and 2468.
-- **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sends no `EventFleetArrived` after the refusal.
+- **0x04e after a refused gift: WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2 (lane A).** A transfer task to another player at the fleet's last waypoint is refused (Elegy's `EventFleetGiftRefused`), and the original then sends 0x04e: a refusal cancels the task, and 0x04e follows at the last waypoint (MESSAGES.md 0x04e (a)). Elegy sent no `EventFleetArrived` after the refusal. Cleared since: a refused gift ends the task, and a fleet with no waypoints ahead gets `EventFleetArrived` after the refusal; a fleet given away gets none. The four cases are back in the baseline.
 
 ### Battle summaries (lane D)
 
@@ -184,3 +186,36 @@ Measured on elegy main `133816c` (#207) plus the order branch.
   - **TK-203 (random 6 of 8, was pass):** the vector lists player 1's 0x050 before 0x03f, with no stream label and no sample flag. On seed variants 0 and 6 Elegy sends 0x050 after 0x03f. Elegy's level comes from scrapping at the starbase only when the tech attempt succeeds (`techAttempt`, a draw; TAKEOVER.md scrapping, "as in battle", COMBAT.md "Tech from battle"). When the attempt fails, the level comes from the research step after production. The original's attempt is a draw too: it gave the level in 8 of the 12 cycle settings (TAKEOVER.md, CONFIRMED TK-203). So in the original, too, the place of 0x050 depends on draws. tk3 is not a build_kx vector: its unlabelled list merges 12 streams, so its order is the ASSUMPTION case above. This is a flagging question for lane F (mark TK-203's 0x050 a sample, or compare its order only through MS-1's per-stream `message_sequence`), not an Elegy mechanic.
   - RG-002's ledger is unchanged, so its per-lane count is 0.
 - **What the order check cannot see.** Only ids Elegy maps can be placed. The vectors also list an id only once, without its parameters, so the order among several messages of one id is not recorded. Which field's level-up comes first is one such order, which is why the economy section above pins it with engine tests. Comparing it against the original needs the vectors to carry each player's full message sequence with its parameters (lane F).
+
+### Vector re-sync from stars-elegy main (19896cd)
+
+Every corpus was copied verbatim from stars-elegy main `19896cd`. The only differences from the earlier copies are new fields: `default_queue` and `default_leftover_to_research` on 866 player records, 542 `message_sequence` expectations (MS-1, stars-elegy #186), and the galaxy `size`, `bounds` and `density` in `initial_state.game` (#180). Removing those fields, each file equals its earlier copy. Measured on elegy main `397cd2e` (#206) plus the re-sync.
+- **Default queues now load**, so a captured planet or new colony gets its owner's default queue in the harness:
+  - **TK-106-A2 joins the parity baseline.** War Monger keeps all five default items (stars-elegy PARITY.md T-26, CONFIRMED).
+  - **TK-108-A and TK-108-C leave it: incorrect mechanic (lane A).** T-26 says a Claim Adjuster owner skips items 4–5, the auto minimum and maximum terraform, and an Alternate Reality owner skips items 0–2 (auto mines, factories, defenses). These are item ids. `newColony` (engine/takeover.go) skips queue positions instead. TK-108's default queue is factories, mines, defenses, minimum terraform, maximum terraform, so Elegy drops only the maximum terraform (position 4) and keeps the minimum terraform: `queue = [... {16 2 0 0}], want [...]`.
+- **`message_sequence` is not compared yet** (the within-id comparator follows). In RG-002 it adds 84 not-compared ledger lines, one per player and year. The ledger's other lines are unchanged apart from their expectation numbers.
+- The galaxy fields are not read yet (lane A's clamp PR).
+
+### Alchemy message (economy)
+
+Measured on elegy main `3d33192` (#211) plus this branch.
+
+- **0x08c** from the existing `EventAlchemy`, now mapped (MESSAGES.md 0x08c at stars-elegy d89b8a3, CONFIRMED KX-001, PQ-001). Production emits the event for completed alchemy items and for alchemy bought ahead of the next item.
+- **Other corpora:** 27 expectations that were skipped as unmapped are compared now. All 27 are "present", and all match on the reference seed. Every per-corpus tally and the parity baseline are unchanged.
+- **Order:** with 0x08c mapped, the order check (section above) makes 1662 comparisons over the 8 seed variants, up from 1534. The 128 new ones each place a 0x035 (40) or 0x036 (88) after a 0x08c, and every one holds: no per-corpus tally changes.
+- **RG-002:** it carries no 0x08c, so the ledger is unchanged.
+
+### Deferred: client estimators (milestone 3)
+
+The economy area's 69 `client_estimate` expectations stay skipped, by the coordinator's decision of 2026-10-13: they are display estimators, and they belong with the Report and UI work of milestone 3, not with engine parity. The harness reports them as "client estimate <screen> <field>".
+
+| Count | Reading |
+|---:|---|
+| 19 | production_tile completion |
+| 5 | production_dialog completion |
+| 10 | status_tile population |
+| 10 | planet_summary_report value |
+| 10 | planet_summary_report mining_rate |
+| 15 | research_dialog: resources_needed 4, annual_resources_from_all_planets 3, estimated_time_to_completion 3, next_year_projected_research_budget 3, next_field_choice_after_the_year 1, total_resources_spent_on_research_last_year 1 |
+
+Counts are from the reference seed on main `217ab4b`.

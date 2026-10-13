@@ -79,9 +79,11 @@ Not modelled: the rebirth itself. GAP-001 MEASURED a new environment and new con
 
 `GenerateTurn` follows KERNEL.md "Turn order" for the steps Elegy
 models: the players' orders (`YearOrders`: the player shuffle, each
-file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); the
-waypoint check (step 1a.3), which first retargets waypoints aimed at a
-fleet merged away during the replay (ORDERS-STATUS.md); the before-movement waypoint tasks (unloads,
+file in that order, then the gift credits; ORDERS-LAYER-STATUS.md); step
+1a.3: the waypoint check, which first retargets waypoints, a follower's
+waypoint 0 included, aimed at a fleet merged away during the replay
+(ORDERS-STATUS.md), then following fleets (KERNEL.md as corrected in
+stars-elegy 33eeb4a); the before-movement waypoint tasks (unloads,
 colonize, route, drops, the research level-up check, loads and merges);
 fleet movement (ordinary fleets in fleet order, owner then fleet number,
 then fleet chasers in rounds, then waypoint settlement, where reached
@@ -381,6 +383,13 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   design of a gift takes a free slot (CONFIRMED that a differing existing
   design is not matched).
 - **W3 (ASSUMPTION).** A gifted fleet has no name and repeat orders off.
+- **Refused gift (CONFIRMED).** A refused transfer-fleet task is
+  cancelled, and a fleet with no waypoint ahead then gets 0x04e
+  (`EventFleetArrived`) after the refusal (MESSAGES.md 0x04e (a): "cancelled
+  by any refusal message"; WU-AICOMP3, WU-AICOMP4, WU-B1, WU-B2). A fleet
+  given away sends its old owner no 0x04e (ASSUMPTION: it is the
+  recipient's fleet now; a vector's messages do not name the fleet).
+  `TestConfirmedTransferFleet`, `TestConfirmedTransferFleetRefused`.
 - **W4 (ASSUMPTION).** The route task runs only for a fleet with no
   further waypoint, so a fleet already routed is not routed again before
   it leaves.
@@ -419,7 +428,7 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   stars-elegy d4eafd9). Only a `FollowOrder` starts a follow, and it lasts
   the year: Elegy keeps the leader link in the year's replay state, not
   in `Game`, so no saved game carries it (`TestFollowDoesNotPersist`).
-  Before the waypoint check, a leader not at its follower's position is
+  After the waypoint check, a leader not at its follower's position is
   re-chosen among the fleets of the leader's owner at that position,
   which can be the follower itself (BINARY-ONLY). MESSAGES.md 0x138 names
   the leader's owner and KERNEL.md says only "the same owner"; Elegy
@@ -444,12 +453,19 @@ Waypoint tasks (`waypoints.go`), where ORDERS.md is silent:
   followers of a fleet with orders move with it and end where it does,
   and that followers of an idle fleet do not move, is MEASURED for the
   computer players' orders only (AI-27). `TestFollow*`.
-- **F1 (ASSUMPTION).** A follow order naming a leader that does not exist
-  when it applies, including one merged away earlier in the replay, or
-  the fleet itself, is rejected; a leader merged away later in the replay
-  is gone at step 1a.3 (0x138), and is not re-chosen. ORDERS.md's merge
-  retargeting covers waypoints, not waypoint 0. The stale-id issue below
-  applies to a leader too.
+- **F1.** A follow order is not checked against its leader (ORDERS.md
+  "Waypoint 0, following", stars-elegy a1c4c91, BINARY-ONLY). A leader
+  merged away or emptied by a move-ships order during the replay is
+  handled by file order: with the follower's file first, the removal
+  retargets waypoint 0 to the fleet joined (a move-ships stand-in: the
+  owner's fleet at the position, as W10), no draws; with the remover's
+  file first, the stale id stays, and the waypoint check after the orders
+  (run before the follow step, KERNEL.md step 1a.3 as corrected in
+  stars-elegy 33eeb4a) picks one of the leader owner's fleets at the
+  follower's position, the follower included (it then follows itself,
+  F3), with the merged-chase draws, else the follow step sends 0x138. A leader that never existed gets 0x138 at the follow
+  step; the fleet itself is F3. `TestFollowMergedLeader*`,
+  `TestFollowNoLeader`.
 - **F2 (ASSUMPTION).** Within a pass the followers are taken one at a
   time, so one resolved earlier in the pass leads the rest of it.
 - **F3.** A follower still unresolved after the 8 passes gets no message,

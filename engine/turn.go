@@ -309,13 +309,15 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	applied := YearOrders(&g, orders, rng)
 	events = append(events, applied.Events...)
 	g.holdFleetNumbers()
-	// Following fleets, then the waypoint check after the orders (step
-	// 1a.3), first retargeting waypoints that name a fleet merged away in
-	// the replay.
+	// Step 1a.3: the waypoint check, then following fleets (KERNEL.md
+	// "Turn order", order BINARY-ONLY, corrected in stars-elegy 33eeb4a).
+	// Waypoints, a follower's waypoint 0 included, that name a fleet
+	// merged away in the replay are retargeted first, so the follow step
+	// follows the fleet chosen (ORDERS.md "Waypoint 0, following").
+	g.chaseMerged(applied.merged, applied.follows, rng)
+	g.waypointCheck()
 	followDone, ev := g.follow(applied.follows)
 	events = append(events, ev...)
-	g.chaseMerged(applied.merged, rng)
-	g.waypointCheck()
 
 	// Waypoint tasks before movement (TAKEOVER.md "Where each task
 	// happens", step 2): unloads and colonize, then the drops. Colonists

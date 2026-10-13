@@ -389,6 +389,7 @@ func (o MergeOrder) apply(g *Game, player int, a *Applied) error {
 	for _, id := range o.From {
 		ids[id] = true
 	}
+	a.retargetFollows(g, ids, g.fleetIndex(o.Into))
 	a.noteRemoved(player, ids)
 	return nil
 }
@@ -401,6 +402,35 @@ func (a *Applied) noteRemoved(player int, ids map[int]bool) {
 			a.merged = map[int]int{}
 		}
 		a.merged[id] = player
+	}
+}
+
+// retargetFollows retargets the follows, from files replayed earlier,
+// whose leader is in gone, a set of one player's fleets an order removes
+// (or has just removed): to fleet index to, the fleet a merge joined them
+// to (ASSUMPTION W7), or with to < 0 to the stand-in a removal gives any
+// waypoint aimed at that leader (Game.standIn; the gone fleets must still
+// exist). With no stand-in the stale id stays and the follow step sends
+// 0x138. ORDERS.md "Waypoint 0, following" (BINARY-ONLY): the B-first
+// path, as for any waypoint; no draws. A follow never aims at a planet,
+// so the planet fallback does not arise: a merge or a move-ships order
+// leaves the receiving fleet at the spot.
+func (a *Applied) retargetFollows(g *Game, gone map[int]bool, to int) {
+	var order []int
+	for id, leader := range a.follows {
+		if !gone[leader] {
+			continue
+		}
+		c := to
+		if c < 0 {
+			if order == nil {
+				order = g.fleetOrder()
+			}
+			c = g.standIn(order, gone, &g.Fleets[g.fleetIndex(leader)], g.fleetIndex(id))
+		}
+		if c >= 0 {
+			a.follows[id] = g.Fleets[c].ID
+		}
 	}
 }
 

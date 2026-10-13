@@ -599,13 +599,15 @@ func checkRGRejections(t testing.TB, names []string) int {
 	return checked
 }
 
-// TestCheckRGRejections checks that checkRGRejections fails on a strict
-// refusal on any variant: RG-002 Y1 refuses one order on variants 1 and
-// 6 (the RG-002 ledger's variant-only incorrect mechanic).
+// TestCheckRGRejections checks checkRGRejections on every variant of
+// RG-002 Y1. Its one variant-only refusal (player 2's waypoint-0 follow,
+// refused on variants 1 and 6) cleared with the waypoint-0 follow change
+// (ORDERS.md "Waypoint 0, following"), so no run errs;
+// TestRejectedSample pins that a strict refusal fails.
 func TestCheckRGRejections(t *testing.T) {
 	e := &errorCounter{TB: t}
-	if checked := checkRGRejections(e, []string{"rg002-y1"}); checked != Seeds || e.errors != 2 {
-		t.Errorf("checkRGRejections(rg002-y1): %d runs, %d errors; want %d runs, 2 errors", checked, e.errors, Seeds)
+	if checked := checkRGRejections(e, []string{"rg002-y1"}); checked != Seeds || e.errors != 0 {
+		t.Errorf("checkRGRejections(rg002-y1): %d runs, %d errors; want %d runs, none", checked, e.errors, Seeds)
 	}
 }
 
@@ -618,9 +620,10 @@ func variantRejections(v *Vector) [][]string {
 	return out
 }
 
-// TestVariantRejections checks variantRejections on a run whose refusal
-// hangs on the player shuffle: RG-002 Y1 refuses player 2's order 10 on
-// variants 1 and 6 only (the RG-002 ledger's incorrect mechanic [lane A] line).
+// TestVariantRejections checks variantRejections on RG-002 Y1, whose
+// player 2's order 10 was refused on variants 1 and 6 only, where the
+// player shuffle replays player 6's move_ships first. Since the
+// waypoint-0 follow change no variant refuses it.
 func TestVariantRejections(t *testing.T) {
 	v, err := ReadFile("../../engine/testdata/vectors/rg/rg002-y1.json")
 	if err != nil {
@@ -632,8 +635,8 @@ func TestVariantRejections(t *testing.T) {
 			got = append(got, k)
 		}
 	}
-	if fmt.Sprint(got) != "[1 6]" {
-		t.Errorf("variants refusing an RG-002 Y1 order: %v, want [1 6]", got)
+	if len(got) != 0 {
+		t.Errorf("variants refusing an RG-002 Y1 order: %v, want none", got)
 	}
 }
 
@@ -848,6 +851,12 @@ func TestDefaultQueue(t *testing.T) {
 		v, err := ReadFile("../../engine/testdata/vectors/kx004/s1.json")
 		if err != nil {
 			t.Fatal(err)
+		}
+		// Start from players without default queue settings (the vector
+		// carries them since stars-elegy's full rebuild).
+		for i := range v.InitialState.Players {
+			v.InitialState.Players[i].DefaultQueue = nil
+			v.InitialState.Players[i].DefaultLeftoverToResearch = nil
 		}
 		edit(&v.InitialState.Players[0])
 		return loadVector(v)

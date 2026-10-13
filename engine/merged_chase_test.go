@@ -43,7 +43,7 @@ func TestMergedChaseMergerFirst(t *testing.T) {
 		t.Fatalf("after the replay: waypoint %+v, want the stale fleet 1 at (1100,1100)", *wp)
 	}
 	rng := &recordRand{}
-	g.chaseMerged(a.merged, rng)
+	g.chaseMerged(a.merged, nil, rng)
 	g.waypointCheck()
 	if wp.Target != TargetFleet || wp.ID != 2 {
 		t.Errorf("waypoint %+v, want fleet 2", *wp)
@@ -68,7 +68,7 @@ func TestMergedChaseChaserFirst(t *testing.T) {
 		t.Fatalf("after the replay: waypoint %+v, want fleet 2 at (1100,1100)", *wp)
 	}
 	rng := &recordRand{}
-	g.chaseMerged(a.merged, rng)
+	g.chaseMerged(a.merged, nil, rng)
 	if len(rng.bounds) != 0 || wp.ID != 2 {
 		t.Errorf("draws %v, waypoint %+v; want no draws and fleet 2", rng.bounds, *wp)
 	}
@@ -83,7 +83,7 @@ func TestMergedChaseNoCandidate(t *testing.T) {
 	files[1].Orders[0] = WaypointOrder{Fleet: 3, Waypoints: []Waypoint{{Pos: seen, Warp: 5, Target: TargetFleet, ID: 1}}}
 	a := ApplyOrders(g, files, []int{0, 1})
 	rng := &recordRand{}
-	g.chaseMerged(a.merged, rng)
+	g.chaseMerged(a.merged, nil, rng)
 	g.waypointCheck()
 	wp := g.Fleets[g.fleetIndex(3)].Waypoints[0]
 	if wp.Target != TargetSpace || wp.Pos != seen || len(rng.bounds) != 0 {
@@ -109,7 +109,7 @@ func TestMergedChaseSeveralCandidates(t *testing.T) {
 	a := ApplyOrders(g, files, []int{0, 1})
 	rng := &seqRand{draws: []int{0, 1, 0, 1, 0}}
 	bounds := &recordBounds{r: rng}
-	g.chaseMerged(a.merged, bounds)
+	g.chaseMerged(a.merged, nil, bounds)
 	if got := []int{g.Fleets[g.fleetIndex(3)].Waypoints[0].ID, g.Fleets[g.fleetIndex(5)].Waypoints[0].ID}; !reflect.DeepEqual(got, []int{2, 4}) {
 		t.Errorf("chasers' targets %v, want [2 4]", got)
 	}
@@ -153,7 +153,7 @@ func TestMovedShipsChase(t *testing.T) {
 			t.Fatalf("chaser first %v: fleet 1 not removed", chaserFirst)
 		}
 		rng := &recordRand{}
-		g.chaseMerged(a.merged, rng)
+		g.chaseMerged(a.merged, nil, rng)
 		g.waypointCheck()
 		wp := g.Fleets[g.fleetIndex(3)].Waypoints[0]
 		if wp.Target != TargetFleet || wp.ID != 2 || wp.Pos != (Point{1100, 1100}) {
@@ -166,5 +166,46 @@ func TestMovedShipsChase(t *testing.T) {
 		if !reflect.DeepEqual(rng.bounds, want) {
 			t.Errorf("chaser first %v: draws %v, want %v", chaserFirst, rng.bounds, want)
 		}
+	}
+}
+
+// A chaser of the merging player's own, standing at the waypoint's
+// coordinates, is never its own candidate (ASSUMPTION W8), unlike a
+// follower (TestFollowMergedLeader): fleet 2 is the only one, one draw.
+func TestMergedChaseNotSelf(t *testing.T) {
+	g, files := mergedChaseGame()
+	g.Fleets = append(g.Fleets, Fleet{ID: 4, Number: 4, Owner: 0, Pos: Point{1100, 1100}, Stacks: []Stack{{Design: 0, Count: 1}}})
+	files[0].Orders = append(files[0].Orders, WaypointOrder{Fleet: 4, Waypoints: []Waypoint{{Pos: Point{1100, 1100}, Warp: 5, Target: TargetFleet, ID: 1}}})
+	a := ApplyOrders(g, files[:1], []int{0})
+	rng := &recordRand{}
+	g.chaseMerged(a.merged, nil, rng)
+	if wp := g.Fleets[g.fleetIndex(4)].Waypoints[0]; wp.ID != 2 || !reflect.DeepEqual(rng.bounds, []int{1}) {
+		t.Errorf("waypoint %+v, draws %v; want fleet 2, one rand(1)", wp, rng.bounds)
+	}
+}
+
+// The follower set is decided before the waypoint check (KERNEL.md step
+// 1a.3, stars-elegy 33eeb4a: marking, the check, then the follow step),
+// and the check does not change it: a chaser whose waypoint 1 the check
+// retargets is not made a follower, and a follower stays one.
+func TestMergedChaseFollowerSetFixed(t *testing.T) {
+	g, files := mergedChaseGame()
+	g.Fleets = append(g.Fleets, Fleet{ID: 4, Number: 2, Owner: 1, Pos: Point{1050, 1050}, Stacks: []Stack{{Design: 0, Count: 1}}})
+	files[1].Orders = append(files[1].Orders, FollowOrder{Fleet: 4, Leader: 1})
+	a := ApplyOrders(g, files, []int{0, 1})
+	g.chaseMerged(a.merged, a.follows, &recordRand{})
+	if !reflect.DeepEqual(a.follows, map[int]int{4: 1}) {
+		t.Errorf("follows %v after the check, want only fleet 4, its leader still the stale 1", a.follows)
+	}
+	if wp := g.Fleets[g.fleetIndex(3)].Waypoints; len(wp) != 1 || wp[0].ID != 2 {
+		t.Errorf("chaser waypoints %v, want one, aimed at fleet 2", wp)
+	}
+	g.waypointCheck()
+	_, ev := g.follow(a.follows)
+	if got := followEvents(ev); !reflect.DeepEqual(got, map[int][]EventKind{4: {EventFollowNoLeader}}) {
+		t.Errorf("follow messages %v, want 0x138 for fleet 4 only", got)
+	}
+	if wp := g.Fleets[g.fleetIndex(3)].Waypoints; len(wp) != 1 || wp[0].ID != 2 {
+		t.Errorf("after the follow step chaser waypoints %v, want unchanged", wp)
 	}
 }

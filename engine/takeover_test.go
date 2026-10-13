@@ -440,6 +440,12 @@ func TestConfirmedTakeoverTiming(t *testing.T) {
 
 	r := l.turn(&seqRand{})
 	g := r.Game
+	// Drops have their own messages; none sends 0x02e (ASSUMPTION).
+	for _, e := range r.Events {
+		if e.Kind == EventColonistsBeamedDown {
+			t.Errorf("drop sent 0x02e: %+v", e)
+		}
+	}
 	check := func(name string, pi, owner, pop int) {
 		t.Helper()
 		if p := g.Planets[pi]; p.Owner != owner || p.Population != pop {
@@ -563,7 +569,13 @@ func TestPredictionUnloadAmounts(t *testing.T) {
 		Germanium:      {Action: UnloadExactly, Amount: 10},
 		CargoColonists: {Action: UnloadAll},
 	}}
-	l.g.unloadPhase(l.g.phaseStart())
+	_, ev := l.g.unloadPhase(l.g.phaseStart())
+	// Only the colonists send 0x02e (MESSAGES.md 0x02e, CONFIRMED fo/fo02),
+	// then the ended task 0x04e.
+	if want := []Event{{Kind: EventColonistsBeamedDown, Player: 0, Planet: l.g.Planets[pi].ID, Fleet: l.g.Fleets[fi].ID, Count: 40},
+		{Kind: EventFleetArrived, Player: 0, Planet: -1, Fleet: l.g.Fleets[fi].ID}}; !reflect.DeepEqual(ev, want) {
+		t.Errorf("unload events %v, want %v", ev, want)
+	}
 	p, f := l.g.Planets[pi], &l.g.Fleets[fi]
 	if p.Population != 140 || p.Surface != (Minerals{10, 0, 5}) || f.Cargo != (Cargo{Minerals: Minerals{20, 0, 0}}) {
 		t.Errorf("pop %d surface %v cargo %+v, want 140, 10/0/5, 20/0/0 aboard", p.Population, p.Surface, f.Cargo)
@@ -582,9 +594,23 @@ func TestPredictionUnloadAmounts(t *testing.T) {
 	l.g.Fleets[fa].Cargo.Colonists = 13
 	l.g.Fleets[fa].Task = unloadColonists
 	l.arriving(0, b, freighter, 13, unloadColonists)
-	g := l.turn(&seqRand{}).Game
+	r := l.turn(&seqRand{})
+	g := r.Game
 	if pa, pb := g.Planets[a].Population, g.Planets[b].Population; pa != 115 || pb != 128 {
 		t.Errorf("before movement %d, after movement %d; want 115 and 115+13=128", pa, pb)
+	}
+	// Each unload at its last waypoint: 0x02e, then 0x04e (PARITY.md
+	// ET-1 C, CONFIRMED).
+	for _, id := range []int{g.Fleets[0].ID, g.Fleets[1].ID} {
+		var kinds []EventKind
+		for _, e := range r.Events {
+			if e.Fleet == id && (e.Kind == EventColonistsBeamedDown || e.Kind == EventFleetArrived) {
+				kinds = append(kinds, e.Kind)
+			}
+		}
+		if !reflect.DeepEqual(kinds, []EventKind{EventColonistsBeamedDown, EventFleetArrived}) {
+			t.Errorf("fleet %d: messages %v, want 0x02e then 0x04e", id, kinds)
+		}
 	}
 }
 

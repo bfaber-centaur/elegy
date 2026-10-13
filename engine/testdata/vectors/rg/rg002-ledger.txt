@@ -30,8 +30,14 @@ sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: y = 1625, want 1639
 sample | rg002 | RG-002-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002 | RG-002-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
-sample | rg002 | RG-002-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
+not compared | rg002 | RG-002-2463 y1 #403 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2463 y1 #405 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2463 y1 #407 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
+not compared | rg002 | RG-002-2463 y1 #409 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2463 y1 #411 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2463 y1 #413 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2463 y1 #415 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002 | RG-002-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
 sample | rg002 | RG-002-2463 y1 #76 | fleet owner=2 id=14 | fleet gone
@@ -98,8 +104,15 @@ sample | rg002 | RG-002-2464 y2 #395 | object | wormhole: y = 1457, want 1446
 sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: x = 1235, want 1258
 sample | rg002 | RG-002-2464 y2 #396 | object | wormhole: y = 1783, want 1778
 sample | rg002 | RG-002-2464 y2 #415 | message | message 0x086 to player 0 present = false, want true
-sample | rg002 | RG-002-2464 y2 #419 | player id=2 seen_by=2 | score_record.escort_ships = 52, want 50
-sample | rg002 | RG-002-2464 y2 #420 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 21
+not compared | rg002 | RG-002-2464 y2 #417 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2464 y2 #419 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2464 y2 #421 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2464 y2 #422 | player id=2 seen_by=2 | score_record.escort_ships = 52, want 50
+not compared | rg002 | RG-002-2464 y2 #423 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2464 y2 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 21
+not compared | rg002 | RG-002-2464 y2 #425 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2464 y2 #427 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2464 y2 #429 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2464 y2 #47 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
 sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | waypoints[0] position = {1373 1318}, want {1375 1324}
 sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | waypoints[1] = {{1364 1319} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1367 1327} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
@@ -215,11 +228,18 @@ sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: y = 1465, want 1663
 sample | rg002 | RG-002-2465 y3 #393 | object | wormhole: years_since_jump = 39, want 0
 sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: x = 1242, want 1249
 sample | rg002 | RG-002-2465 y3 #394 | object | wormhole: y = 1783, want 1787
-sample | rg002 | RG-002-2465 y3 #415 | player id=0 seen_by=0 | score_record.resources = 2522, want 2521
-sample | rg002 | RG-002-2465 y3 #417 | player id=2 seen_by=2 | score_record.escort_ships = 48, want 46
-sample | rg002 | RG-002-2465 y3 #417 | player id=2 seen_by=2 | score_record.resources = 4920, want 4717
-sample | rg002 | RG-002-2465 y3 #417 | player id=2 seen_by=2 | score_record.score = 308, want 302
-sample | rg002 | RG-002-2465 y3 #420 | player id=5 seen_by=5 | score_record.resources = 10309, want 10310
+not compared | rg002 | RG-002-2465 y3 #415 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2465 y3 #416 | player id=0 seen_by=0 | score_record.resources = 2522, want 2521
+not compared | rg002 | RG-002-2465 y3 #417 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2465 y3 #419 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2465 y3 #420 | player id=2 seen_by=2 | score_record.escort_ships = 48, want 46
+sample | rg002 | RG-002-2465 y3 #420 | player id=2 seen_by=2 | score_record.resources = 4920, want 4717
+sample | rg002 | RG-002-2465 y3 #420 | player id=2 seen_by=2 | score_record.score = 308, want 302
+not compared | rg002 | RG-002-2465 y3 #421 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2465 y3 #423 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2465 y3 #425 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2465 y3 #426 | player id=5 seen_by=5 | score_record.resources = 10309, want 10310
+not compared | rg002 | RG-002-2465 y3 #427 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2465 y3 #50 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
 sample | rg002 | RG-002-2465 y3 #7 | fleet owner=1 id=7 | cargo.germanium = 1, want 2
 sample | rg002 | RG-002-2465 y3 #7 | fleet owner=1 id=7 | cargo.ironium = 92, want 91
@@ -375,14 +395,21 @@ sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: x = 1531, want 1408
 sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: y = 1463, want 1672
 sample | rg002 | RG-002-2466 y4 #392 | object | wormhole: years_since_jump = 40, want 1
 sample | rg002 | RG-002-2466 y4 #393 | object | wormhole: x = 1234, want 1241
-sample | rg002 | RG-002-2466 y4 #418 | player id=1 seen_by=1 | score_record.resources = 16180, want 16183
-sample | rg002 | RG-002-2466 y4 #419 | player id=2 seen_by=2 | score_record.escort_ships = 49, want 51
-sample | rg002 | RG-002-2466 y4 #419 | player id=2 seen_by=2 | score_record.resources = 5021, want 4850
-sample | rg002 | RG-002-2466 y4 #419 | player id=2 seen_by=2 | score_record.score = 314, want 309
-sample | rg002 | RG-002-2466 y4 #420 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
-sample | rg002 | RG-002-2466 y4 #421 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
-sample | rg002 | RG-002-2466 y4 #422 | player id=5 seen_by=5 | score_record.resources = 10999, want 11016
-sample | rg002 | RG-002-2466 y4 #422 | player id=5 seen_by=5 | score_record.score = 603, want 604
+not compared | rg002 | RG-002-2466 y4 #417 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2466 y4 #419 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2466 y4 #420 | player id=1 seen_by=1 | score_record.resources = 16180, want 16183
+not compared | rg002 | RG-002-2466 y4 #421 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2466 y4 #422 | player id=2 seen_by=2 | score_record.escort_ships = 49, want 51
+sample | rg002 | RG-002-2466 y4 #422 | player id=2 seen_by=2 | score_record.resources = 5021, want 4850
+sample | rg002 | RG-002-2466 y4 #422 | player id=2 seen_by=2 | score_record.score = 314, want 309
+not compared | rg002 | RG-002-2466 y4 #423 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2466 y4 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
+not compared | rg002 | RG-002-2466 y4 #425 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2466 y4 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+not compared | rg002 | RG-002-2466 y4 #427 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.resources = 10999, want 11016
+sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.score = 603, want 604
+not compared | rg002 | RG-002-2466 y4 #430 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[0] position = {1371 1309}, want {1369 1308}
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[1] = {{1367 1327} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1348 1358} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | x = 1371, want 1369
@@ -609,18 +636,25 @@ sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: y = 1452, want 1667
 sample | rg002 | RG-002-2467 y5 #437 | object | wormhole: years_since_jump = 41, want 2
 sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: x = 1225, want 1246
 sample | rg002 | RG-002-2467 y5 #438 | object | wormhole: y = 1782, want 1778
-sample | rg002 | RG-002-2467 y5 #454 | player id=1 seen_by=1 | score_record.resources = 17123, want 17130
-sample | rg002 | RG-002-2467 y5 #454 | player id=1 seen_by=1 | score_record.score = 953, want 954
-sample | rg002 | RG-002-2467 y5 #455 | player id=2 seen_by=2 | score_record.escort_ships = 50, want 52
-sample | rg002 | RG-002-2467 y5 #455 | player id=2 seen_by=2 | score_record.resources = 5073, want 4935
-sample | rg002 | RG-002-2467 y5 #455 | player id=2 seen_by=2 | score_record.score = 317, want 313
-sample | rg002 | RG-002-2467 y5 #456 | player id=3 seen_by=3 | score_record.resources = 7424, want 7389
-sample | rg002 | RG-002-2467 y5 #456 | player id=3 seen_by=3 | score_record.score = 393, want 392
-sample | rg002 | RG-002-2467 y5 #456 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
-sample | rg002 | RG-002-2467 y5 #457 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
-sample | rg002 | RG-002-2467 y5 #458 | player id=5 seen_by=5 | score_record.resources = 10998, want 11015
-sample | rg002 | RG-002-2467 y5 #458 | player id=5 seen_by=5 | score_record.score = 608, want 609
-sample | rg002 | RG-002-2467 y5 #458 | player id=5 seen_by=5 | score_record.unarmed_ships = 49, want 48
+not compared | rg002 | RG-002-2467 y5 #453 | message_sequence | expectation message_sequence
+not compared | rg002 | RG-002-2467 y5 #455 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2467 y5 #456 | player id=1 seen_by=1 | score_record.resources = 17123, want 17130
+sample | rg002 | RG-002-2467 y5 #456 | player id=1 seen_by=1 | score_record.score = 953, want 954
+not compared | rg002 | RG-002-2467 y5 #457 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2467 y5 #458 | player id=2 seen_by=2 | score_record.escort_ships = 50, want 52
+sample | rg002 | RG-002-2467 y5 #458 | player id=2 seen_by=2 | score_record.resources = 5073, want 4935
+sample | rg002 | RG-002-2467 y5 #458 | player id=2 seen_by=2 | score_record.score = 317, want 313
+not compared | rg002 | RG-002-2467 y5 #459 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2467 y5 #460 | player id=3 seen_by=3 | score_record.resources = 7424, want 7389
+sample | rg002 | RG-002-2467 y5 #460 | player id=3 seen_by=3 | score_record.score = 393, want 392
+sample | rg002 | RG-002-2467 y5 #460 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
+not compared | rg002 | RG-002-2467 y5 #461 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2467 y5 #462 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+not compared | rg002 | RG-002-2467 y5 #463 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2467 y5 #464 | player id=5 seen_by=5 | score_record.resources = 10998, want 11015
+sample | rg002 | RG-002-2467 y5 #464 | player id=5 seen_by=5 | score_record.score = 608, want 609
+sample | rg002 | RG-002-2467 y5 #464 | player id=5 seen_by=5 | score_record.unarmed_ships = 49, want 48
+not compared | rg002 | RG-002-2467 y5 #465 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2467 y5 #47 | fleet owner=1 id=47 | cargo.boranium = 255, want 253
 sample | rg002 | RG-002-2467 y5 #47 | fleet owner=1 id=47 | cargo.germanium = 3, want 2
 sample | rg002 | RG-002-2467 y5 #5 | fleet owner=1 id=6 | cargo.germanium = 242, want 240
@@ -891,19 +925,26 @@ sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: y = 1447, want 1666
 sample | rg002 | RG-002-2468 y6 #437 | object | wormhole: years_since_jump = 42, want 3
 sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: x = 1235, want 1236
 sample | rg002 | RG-002-2468 y6 #438 | object | wormhole: y = 1781, want 1769
-sample | rg002 | RG-002-2468 y6 #462 | player id=0 seen_by=0 | score_record.resources = 2698, want 2697
-sample | rg002 | RG-002-2468 y6 #463 | player id=1 seen_by=1 | score_record.resources = 18077, want 18089
-sample | rg002 | RG-002-2468 y6 #464 | player id=2 seen_by=2 | score_record.escort_ships = 47, want 52
-sample | rg002 | RG-002-2468 y6 #464 | player id=2 seen_by=2 | score_record.resources = 5169, want 5069
-sample | rg002 | RG-002-2468 y6 #464 | player id=2 seen_by=2 | score_record.score = 321, want 318
-sample | rg002 | RG-002-2468 y6 #465 | player id=3 seen_by=3 | score_record.resources = 7464, want 7435
-sample | rg002 | RG-002-2468 y6 #465 | player id=3 seen_by=3 | score_record.score = 398, want 397
-sample | rg002 | RG-002-2468 y6 #465 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
-sample | rg002 | RG-002-2468 y6 #466 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
-sample | rg002 | RG-002-2468 y6 #467 | player id=5 seen_by=5 | score_record.resources = 11488, want 11508
-sample | rg002 | RG-002-2468 y6 #467 | player id=5 seen_by=5 | score_record.score = 625, want 626
-sample | rg002 | RG-002-2468 y6 #467 | player id=5 seen_by=5 | score_record.unarmed_ships = 58, want 59
+not compared | rg002 | RG-002-2468 y6 #462 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #463 | player id=0 seen_by=0 | score_record.resources = 2698, want 2697
+not compared | rg002 | RG-002-2468 y6 #464 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #465 | player id=1 seen_by=1 | score_record.resources = 18077, want 18089
+not compared | rg002 | RG-002-2468 y6 #466 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #467 | player id=2 seen_by=2 | score_record.escort_ships = 47, want 52
+sample | rg002 | RG-002-2468 y6 #467 | player id=2 seen_by=2 | score_record.resources = 5169, want 5069
+sample | rg002 | RG-002-2468 y6 #467 | player id=2 seen_by=2 | score_record.score = 321, want 318
+not compared | rg002 | RG-002-2468 y6 #468 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #469 | player id=3 seen_by=3 | score_record.resources = 7464, want 7435
+sample | rg002 | RG-002-2468 y6 #469 | player id=3 seen_by=3 | score_record.score = 398, want 397
+sample | rg002 | RG-002-2468 y6 #469 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
 sample | rg002 | RG-002-2468 y6 #47 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
+not compared | rg002 | RG-002-2468 y6 #470 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #471 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+not compared | rg002 | RG-002-2468 y6 #472 | message_sequence | expectation message_sequence
+sample | rg002 | RG-002-2468 y6 #473 | player id=5 seen_by=5 | score_record.resources = 11488, want 11508
+sample | rg002 | RG-002-2468 y6 #473 | player id=5 seen_by=5 | score_record.score = 625, want 626
+sample | rg002 | RG-002-2468 y6 #473 | player id=5 seen_by=5 | score_record.unarmed_ships = 58, want 59
+not compared | rg002 | RG-002-2468 y6 #474 | message_sequence | expectation message_sequence
 sample | rg002 | RG-002-2468 y6 #49 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg002 | RG-002-2468 y6 #50 | fleet owner=1 id=54 | cargo.ironium = 91, want 90
 sample | rg002 | RG-002-2468 y6 #69 | fleet owner=1 id=76 | 0 waypoints after waypoint 0 [], want 1
@@ -956,8 +997,6 @@ sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | ships = map[14:1], w
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | waypoints[0] position = {1311 1324}, want {1299 1325}
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | x = 1311, want 1299
 sample | rg002 | RG-002-2468 y6 #95 | fleet owner=2 id=13 | y = 1324, want 1325
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
-sample | rg002 | year 2 | order | year 2 player 1 order 35 (FollowOrder): follow: fleet 300005: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 39 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 42 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 2 | order | year 2 player 1 order 59 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
@@ -970,17 +1009,13 @@ sample | rg002 | year 3 | order | year 3 player 5 order 56 (WaypointOrder): wayp
 sample | rg002 | year 4 | order | year 4 player 1 order 31 (WaypointOrder): waypoint 0 fleet 200011: orders: no such object
 sample | rg002 | year 4 | order | year 4 player 1 order 53 (WaypointOrder): waypoint 0 fleet 200011: orders: no such object
 sample | rg002 | year 4 | order | year 4 player 2 order 13 (CargoOrder): cargo: fleet 200010 and salvage 0: orders: the objects are not at the same place
-sample | rg002 | year 4 | order | year 4 player 5 order 64 (FollowOrder): follow: fleet 500085: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 2 order 10 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 2 order 25 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 3 order 7 (CargoOrder): cargo: fleet 600027 and planet 8: orders: the objects are not at the same place
 sample | rg002 | year 5 | order | year 5 player 3 order 9 (WaypointOrder): fleet 0: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 4 order 0 (WaypointOrder): fleet 0: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 5 order 30 (FollowOrder): follow: fleet 400001: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 5 order 31 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 5 order 67 (FollowOrder): follow: fleet 500085: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 5 order 90 (WaypointOrder): waypoint 0 fleet 500016: orders: no such object
-sample | rg002 | year 5 | order | year 5 player 6 order 14 (FollowOrder): follow: fleet 300003: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 6 order 15 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg002 | year 5 | order | year 5 player 6 order 17 (WaypointOrder): waypoint 0 fleet 300003: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 1 order 40 (WaypointOrder): waypoint 0 fleet 200014: orders: no such object
@@ -997,7 +1032,6 @@ sample | rg002 | year 6 | order | year 6 player 4 order 0 (WaypointOrder): fleet
 sample | rg002 | year 6 | order | year 6 player 5 order 17 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 5 order 2 (MoveShipsOrder): move ships: fleet 600061 is not with fleet 600049: orders: the objects are not at the same place
 sample | rg002 | year 6 | order | year 6 player 5 order 45 (WaypointOrder): waypoint 0 fleet 400001: orders: no such object
-sample | rg002 | year 6 | order | year 6 player 6 order 10 (FollowOrder): follow: fleet 300003: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 11 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002 | year 6 | order | year 6 player 6 order 12 (WaypointOrder): waypoint 0 fleet 200015: orders: no such object
 sample | rg002-y1 | RG-002-Y1-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
@@ -1017,15 +1051,20 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1
 sample | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-missing mechanic [lane A]: no message for colonists beamed down by an unload task (stars-elegy MESSAGES.md 0x02e, CONFIRMED fo/fo02) | rg002-y1 | RG-002-Y1-2463 y1 #401 | message | message 0x02e to player 0 present = false, want true
-sample | rg002-y1 | RG-002-Y1-2463 y1 #405 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #403 | message_sequence | expectation message_sequence
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #405 | message_sequence | expectation message_sequence
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #407 | message_sequence | expectation message_sequence
+sample | rg002-y1 | RG-002-Y1-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #409 | message_sequence | expectation message_sequence
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #411 | message_sequence | expectation message_sequence
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #413 | message_sequence | expectation message_sequence
+not compared | rg002-y1 | RG-002-Y1-2463 y1 #415 | message_sequence | expectation message_sequence
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
 sample | rg002-y1 | RG-002-Y1-2463 y1 #76 | fleet owner=2 id=14 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #82 | fleet owner=3 id=4 | fleet gone
 sample | rg002-y1 | RG-002-Y1-2463 y1 #84 | fleet_gone owner=3 id=7 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #9 | fleet owner=1 id=7 | cargo.germanium = 0, want 1
-incorrect mechanic [lane A]: waypoint-0 follow of a merged-away fleet is refused (stars-elegy ORDERS 'Waypoint 0, following', a1c4c91, BINARY-ONLY) | rg002-y1 | year 1 | order | year 1 player 2 order 10 (FollowOrder): follow: fleet 600011: orders: no such object (refused on variants 1, 6 of 8, not on the reference)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.boranium = 68, want 69 (6/8 variants match)
 random-driven | rg002-y2 | RG-002-Y2-2464 y1 #1 | fleet owner=1 id=1 | cargo.ironium = 182, want 181 (6/8 variants match)
 sample | rg002-y2 | RG-002-Y2-2464 y1 #143 | planet id=8 | concentrations = [62 87 9], want [153 188 127]
@@ -1066,8 +1105,15 @@ sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: x = 1612, want 1
 sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: y = 1525, want 1778
 sample | rg002-y2 | RG-002-Y2-2464 y1 #396 | object | wormhole: years_since_jump = 0, want 33
 sample | rg002-y2 | RG-002-Y2-2464 y1 #415 | message | message 0x086 to player 0 present = false, want true
-sample | rg002-y2 | RG-002-Y2-2464 y1 #417 | player id=0 seen_by=0 | score_record.resources = 2481, want 2482
-sample | rg002-y2 | RG-002-Y2-2464 y1 #420 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 21
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #417 | message_sequence | expectation message_sequence
+sample | rg002-y2 | RG-002-Y2-2464 y1 #418 | player id=0 seen_by=0 | score_record.resources = 2481, want 2482
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #419 | message_sequence | expectation message_sequence
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #421 | message_sequence | expectation message_sequence
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #423 | message_sequence | expectation message_sequence
+sample | rg002-y2 | RG-002-Y2-2464 y1 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 20, want 21
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #425 | message_sequence | expectation message_sequence
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #427 | message_sequence | expectation message_sequence
+not compared | rg002-y2 | RG-002-Y2-2464 y1 #429 | message_sequence | expectation message_sequence
 sample | rg002-y2 | RG-002-Y2-2464 y1 #89 | fleet owner=3 id=2 | fleet gone
 sample | rg002-y3 | RG-002-Y3-2465 y1 #147 | planet id=13 | surface_minerals = [199 1 43], want [200 1 42]
 sample | rg002-y3 | RG-002-Y3-2465 y1 #153 | planet id=18 | surface_minerals = [15 1218 823], want [15 1217 824]
@@ -1111,13 +1157,20 @@ sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: y = 1456, want 1
 sample | rg002-y3 | RG-002-Y3-2465 y1 #393 | object | wormhole: years_since_jump = 39, want 0
 sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: x = 1263, want 1249
 sample | rg002-y3 | RG-002-Y3-2465 y1 #394 | object | wormhole: y = 1781, want 1787
-random-driven | rg002-y3 | RG-002-Y3-2465 y1 #415 | player id=0 seen_by=0 | score_record.resources = 2520, want 2521 (5/8 variants match)
-sample | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=1 seen_by=1 | score_record.planets = 56, want 55
-sample | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=1 seen_by=1 | score_record.resources = 15340, want 15309
-sample | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=1 seen_by=1 | score_record.score = 888, want 884
-sample | rg002-y3 | RG-002-Y3-2465 y1 #421 | player id=6 seen_by=6 | score_record.planets = 35, want 36
-sample | rg002-y3 | RG-002-Y3-2465 y1 #421 | player id=6 seen_by=6 | score_record.resources = 7485, want 7541
-sample | rg002-y3 | RG-002-Y3-2465 y1 #421 | player id=6 seen_by=6 | score_record.score = 509, want 512
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #415 | message_sequence | expectation message_sequence
+random-driven | rg002-y3 | RG-002-Y3-2465 y1 #416 | player id=0 seen_by=0 | score_record.resources = 2520, want 2521 (5/8 variants match)
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #417 | message_sequence | expectation message_sequence
+sample | rg002-y3 | RG-002-Y3-2465 y1 #418 | player id=1 seen_by=1 | score_record.planets = 56, want 55
+sample | rg002-y3 | RG-002-Y3-2465 y1 #418 | player id=1 seen_by=1 | score_record.resources = 15340, want 15309
+sample | rg002-y3 | RG-002-Y3-2465 y1 #418 | player id=1 seen_by=1 | score_record.score = 888, want 884
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #419 | message_sequence | expectation message_sequence
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #421 | message_sequence | expectation message_sequence
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #423 | message_sequence | expectation message_sequence
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #425 | message_sequence | expectation message_sequence
+not compared | rg002-y3 | RG-002-Y3-2465 y1 #427 | message_sequence | expectation message_sequence
+sample | rg002-y3 | RG-002-Y3-2465 y1 #428 | player id=6 seen_by=6 | score_record.planets = 35, want 36
+sample | rg002-y3 | RG-002-Y3-2465 y1 #428 | player id=6 seen_by=6 | score_record.resources = 7485, want 7541
+sample | rg002-y3 | RG-002-Y3-2465 y1 #428 | player id=6 seen_by=6 | score_record.score = 509, want 512
 sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.boranium = 144, want 143
 sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.germanium = 3, want 2
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[0] position = {1369 1321}, want {1355 1356} (4/8 variants match)
@@ -1148,8 +1201,15 @@ sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: x = 1420, want 1
 sample | rg002-y4 | RG-002-Y4-2466 y1 #392 | object | wormhole: y = 1662, want 1672
 sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: x = 1239, want 1241
 sample | rg002-y4 | RG-002-Y4-2466 y1 #393 | object | wormhole: y = 1778, want 1789
-sample | rg002-y4 | RG-002-Y4-2466 y1 #418 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
-sample | rg002-y4 | RG-002-Y4-2466 y1 #421 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #417 | message_sequence | expectation message_sequence
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #419 | message_sequence | expectation message_sequence
+sample | rg002-y4 | RG-002-Y4-2466 y1 #420 | player id=1 seen_by=1 | score_record.escort_ships = 96, want 97
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #421 | message_sequence | expectation message_sequence
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #423 | message_sequence | expectation message_sequence
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #425 | message_sequence | expectation message_sequence
+sample | rg002-y4 | RG-002-Y4-2466 y1 #426 | player id=4 seen_by=4 | score_record.unarmed_ships = 2, want 3
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #427 | message_sequence | expectation message_sequence
+not compared | rg002-y4 | RG-002-Y4-2466 y1 #430 | message_sequence | expectation message_sequence
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #48 | fleet owner=1 id=49 | fleet gone (5/8 variants match)
 sample | rg002-y4 | RG-002-Y4-2466 y1 #76 | fleet owner=2 id=7 | cargo.germanium = 97, want 96
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | 0 waypoints after waypoint 0 [], want 1 (5/8 variants match)
@@ -1199,9 +1259,16 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: x = 1412, want 1
 sample | rg002-y5 | RG-002-Y5-2467 y1 #437 | object | wormhole: y = 1665, want 1667
 sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: x = 1230, want 1246
 sample | rg002-y5 | RG-002-Y5-2467 y1 #438 | object | wormhole: y = 1783, want 1778
-sample | rg002-y5 | RG-002-Y5-2467 y1 #453 | player id=0 seen_by=0 | score_record.resources = 2622, want 2623
-sample | rg002-y5 | RG-002-Y5-2467 y1 #456 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
-sample | rg002-y5 | RG-002-Y5-2467 y1 #458 | player id=5 seen_by=5 | score_record.unarmed_ships = 49, want 48
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #453 | message_sequence | expectation message_sequence
+sample | rg002-y5 | RG-002-Y5-2467 y1 #454 | player id=0 seen_by=0 | score_record.resources = 2622, want 2623
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #455 | message_sequence | expectation message_sequence
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #457 | message_sequence | expectation message_sequence
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #459 | message_sequence | expectation message_sequence
+sample | rg002-y5 | RG-002-Y5-2467 y1 #460 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #461 | message_sequence | expectation message_sequence
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #463 | message_sequence | expectation message_sequence
+sample | rg002-y5 | RG-002-Y5-2467 y1 #464 | player id=5 seen_by=5 | score_record.unarmed_ships = 49, want 48
+not compared | rg002-y5 | RG-002-Y5-2467 y1 #465 | message_sequence | expectation message_sequence
 sample | rg002-y5 | RG-002-Y5-2467 y1 #47 | fleet owner=1 id=47 | cargo.boranium = 252, want 253
 sample | rg002-y5 | RG-002-Y5-2467 y1 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg002-y6 | RG-002-Y6-2468 y1 #106 | fleet owner=3 id=2 | fleet gone
@@ -1234,7 +1301,14 @@ sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: x = 1420, want 1
 sample | rg002-y6 | RG-002-Y6-2468 y1 #437 | object | wormhole: y = 1668, want 1666
 sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: x = 1249, want 1236
 sample | rg002-y6 | RG-002-Y6-2468 y1 #438 | object | wormhole: y = 1766, want 1769
-sample | rg002-y6 | RG-002-Y6-2468 y1 #465 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #462 | message_sequence | expectation message_sequence
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #464 | message_sequence | expectation message_sequence
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #466 | message_sequence | expectation message_sequence
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #468 | message_sequence | expectation message_sequence
+sample | rg002-y6 | RG-002-Y6-2468 y1 #469 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 22
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #470 | message_sequence | expectation message_sequence
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #472 | message_sequence | expectation message_sequence
+not compared | rg002-y6 | RG-002-Y6-2468 y1 #474 | message_sequence | expectation message_sequence
 sample | rg002-y6 | RG-002-Y6-2468 y1 #77 | fleet owner=1 id=85 | cargo.germanium = 2, want 3
 matched | rg002 | RG-002-2463 y1 | battle record (1199,1324) | matched: 2 tokens, players and planet; 3 of 3 hits compared; 14 moves allowed
 matched | rg002 | RG-002-2463 y1 | battle record (1204,1566) | matched: 2 tokens, players and planet; 0 of 6 hits compared and 6 conditioned; 5 moves allowed
