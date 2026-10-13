@@ -79,8 +79,10 @@ func TestMeasuredMoveShipsDamage(t *testing.T) {
 	// 100% join 3 at 292 units and 67%. The record holds 235 units,
 	// ceil((3·275 + 2·292)/6), and 84%, ceil(100·5/6): the Merge with
 	// Fleet task's dilution, not the merge order's floor(1409/5) = 281.
-	// With Legacy.MergeDilution off, the task's rule divides by the
-	// damaged ships, rounding up: ceil(1409/5) = 282.
+	// That ship moves use the task's routine is inferred from this
+	// outcome, so the off case is inferred too: with Legacy.MergeDilution
+	// off, the task's rule divides by the damaged ships, rounding up:
+	// ceil(1409/5) = 282.
 	for _, c := range []struct {
 		dilution bool
 		want     Damage

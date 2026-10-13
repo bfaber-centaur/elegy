@@ -76,7 +76,7 @@ switch as a parameter from a caller that does.
 | `observer_tech_mask` | `ObserverTechMask` | on | on | `engine/combat.go` `battle.techAttempts` | COMBAT.md "Tech from battle", LEGACY BUG, CONFIRMED CB-031-obs, CB-037 |
 | `plan0_recipient` | `Plan0Recipient` | on | on | `engine/combat_who.go` `legacyPlan0Recipient` | COMBAT.md "LEGACY BUG: plan 0 ...", CONFIRMED CB-011..013, CB-022, CB-035 |
 | `comet_axes` | `CometAxes` | on | on | `engine/randomevents.go` `Game.cometStrike` | KERNEL.md "Comet strike", LEGACY BUG, CONFIRMED KX-004 S2 (message only) |
-| `merge_dilution` | `MergeDilution` | on | on | `engine/fleetops.go` `Game.taskMergeRule` (the task and ship moves) | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO-01..07; ship moves MEASURED RG-003 2474 |
+| `merge_dilution` | `MergeDilution` | on | on | `engine/fleetops.go` `Game.taskMergeRule` (the task and ship moves) | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO-01..07; ship moves: the dilution-on outcome MEASURED RG-003 2474 (one ship move), the routine and the off rule inferred |
 | `merge_overflow` | `MergeOverflow` | off | on | `engine/fleetops.go` `Game.mergeTask` | ORDERS.md "Merge", LEGACY BUG, CONFIRMED FO; parity cases FO-03-E and FO-06-G differ under `elegy` |
 | `keep_unentitled_parts` | `KeepUnentitledParts` | off | on | `engine/fleetops.go` `Catalog.ReadDesign` (takes the ruleset) | ORDERS.md "Design legality (Mystery Trader parts kept)", LEGACY BUG, CONFIRMED |
 | `zero_max_population_stop` | `ZeroMaxPopulationStop` | off (on in v1) | on | `engine/turn.go` `GenerateTurn` (`checkGenerable`) | KERNEL.md "Maximum population", LEGACY BUG, CONFIRMED KX-001 Z1; see below |

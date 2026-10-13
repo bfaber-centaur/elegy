@@ -154,11 +154,12 @@ func withNewFleets(o Order, names map[int]int) Order {
 //
 // Moved ships joining ships of their design combine damage by the Merge
 // with Fleet task's rule (Game.taskMergeRule): with Legacy.MergeDilution
-// on, the units are divided by all ships of the stack, rounded up
-// (MEASURED RG-003 2474, one ship move: 3 ships at 275 units and 100%
-// joined 3 at 292 units and 67%, giving 235 units, ceil(1409/6), and
-// 84%). The merge order's own rule (floor over the damaged ships,
-// CONFIRMED CO-05) would give 281.
+// on, the units are divided by all ships of the stack, rounded up.
+// MEASURED: the RG-003 2474 outcome, one ship move (3 ships at 275 units
+// and 100% joined 3 at 292 units and 67%, giving 235 units,
+// ceil(1409/6), and 84%); the merge order's own rule (floor over the
+// damaged ships, CONFIRMED CO-05) would give 281. Inferred: that ship
+// moves use the task's routine, and so its rule with the switch off.
 //
 // ASSUMPTION L22: the moved ships of a damaged stack keep its damage
 // percentage and units, as do the ships left behind; ORDERS.md does not
