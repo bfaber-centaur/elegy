@@ -48,6 +48,12 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
 		{"overcrowded, long amount", []engine.Event{{Kind: engine.EventOvercrowded, Player: 2, Planet: 5, Count: 70000}}, 2,
 			[]pvMsg{{id: 0x026, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1}, known: all(3)}}},
+		// MESSAGES.md 0x025: each count in two 16-bit slots, as KX-004
+		// S11's [2 9101 0 8928 0]; a long count fills the high slot.
+		{"hostile shrink", []engine.Event{{Kind: engine.EventHostileShrink, Player: 2, Planet: 5, Fleet: -1, Count: 9101, Axes: []int{8928}}}, 2,
+			[]pvMsg{{id: 0x025, focus: 4, focusKnown: true, params: []int{4, 9101, 0, 8928, 0}, known: all(5)}}},
+		{"hostile shrink, long counts", []engine.Event{{Kind: engine.EventHostileShrink, Player: 2, Planet: 5, Fleet: -1, Count: 70000, Axes: []int{65000}}}, 2,
+			[]pvMsg{{id: 0x025, focus: 4, focusKnown: true, params: []int{4, 70000 - 65536, 1, 65000, 0}, known: all(5)}}},
 		{"no queue", []engine.Event{{Kind: engine.EventNoQueue, Player: 2, Planet: 5}}, 2,
 			[]pvMsg{{id: 0x03f, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"queue completed", []engine.Event{{Kind: engine.EventQueueCompleted, Player: 2, Planet: 5}}, 2,
