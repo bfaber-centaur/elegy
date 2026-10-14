@@ -118,6 +118,3 @@
    5 score_record: a computer player's planned orders (not in the vector)
 5129 stream (another oracle random stream)
    8 transport fuel
-   4 view of a design
-  96 view of a other_players
-  56 view of a player

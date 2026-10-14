@@ -47,7 +47,7 @@ tests can supply their own.
 | Battle planet: at least position only for each participant | `battles`, `view` | CONFIRMED (SC-032) at a planet the fleet still orbits; otherwise BINARY-ONLY | `TestConfirmedBattleDisclosure`, `TestPredictionBattleRecords` |
 | Left out of a battle by its size limit: normal report | `battles`, `view` | BINARY-ONLY | `TestPredictionLeftOutOfBattle` |
 | Designs that fought the viewer disclosed in full, destroyed ones too | `battles`, `view` | CONFIRMED (SC-031) | `TestConfirmedBattleDisclosure` |
-| Disclosure: partial designs, WM full, CA habitability, cargo scan | `view` | CONFIRMED | `TestConfirmedDisclosure` |
+| Disclosure: partial designs, WM full, CA habitability, cargo scan | `view` | CONFIRMED | `TestConfirmedDisclosure`; parity: the sc views of `other_players`, `player` and `design` (156, all pass; `internal/vectors` `pvDesignViews`, `TestDesignViews`) |
 | Allies do not share | `Views` | CONFIRMED (one run) | `TestConfirmedAlliesDoNotShare` |
 | Views at the end of the turn | `GenerateTurn` | BINARY-ONLY | `TestPredictionTurnViews` |
 
