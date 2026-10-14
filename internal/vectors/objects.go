@@ -397,3 +397,20 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 	}
 	return "skip: " + e.Kind
 }
+
+// pvTraderExpect reports whether e compares a Mystery Trader: the trader
+// form, or an object or object_gone expectation of kind trader.
+func pvTraderExpect(e pvExpect) bool {
+	var o struct {
+		Kind string `json:"kind"`
+	}
+	switch e.Kind {
+	case "trader":
+		return true
+	case "object":
+		json.Unmarshal(e.Equals, &o)
+	case "object_gone":
+		json.Unmarshal(e.Subject, &o)
+	}
+	return o.Kind == "trader"
+}

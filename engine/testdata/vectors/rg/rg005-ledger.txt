@@ -34,7 +34,6 @@ sample | rg005 | RG-005-2467 y2 #116 | planet id=202 | environment = [50 40 58],
 sample | rg005 | RG-005-2467 y2 #116 | planet id=202 | original_environment = [50 45 51], want [50 45 52]
 sample | rg005 | RG-005-2467 y2 #117 | planet id=205 | surface_minerals = [177 45 16], want [176 46 18]
 sample | rg005 | RG-005-2467 y2 #118 | planet id=211 | surface_minerals = [68 14 4], want [68 12 3]
-sample | rg005 | RG-005-2467 y2 #121 | planet id=218 | surface_minerals = [14696 19898 12129], want [0 0 0]
 sample | rg005 | RG-005-2467 y2 #132 | planet id=253 | surface_minerals = [19 11 21], want [18 11 23]
 sample | rg005 | RG-005-2467 y2 #133 | planet id=254 | surface_minerals = [412 12 455], want [417 12 457]
 sample | rg005 | RG-005-2467 y2 #134 | planet id=254 | original_environment = [16 18 57], want [16 18 58]
@@ -58,7 +57,6 @@ sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: x = 1421, want 2144
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: y = 1289, want 1815
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: years_since_jump = 1, want 45
-sample | rg005 | RG-005-2467 y2 #192 | object | trader: met = [], want [1]
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | fuel = 138, want 107
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | waypoints[0] position = {1863 1408}, want {1826 1375}
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | x = 1863, want 1826
@@ -78,7 +76,6 @@ sample | rg005 | RG-005-2468 y3 #118 | planet id=202 | population = 1984, want 1
 sample | rg005 | RG-005-2468 y3 #118 | planet id=202 | surface_minerals = [13 825 0], want [43 811 0]
 sample | rg005 | RG-005-2468 y3 #119 | planet id=205 | surface_minerals = [171 35 7], want [171 35 10]
 sample | rg005 | RG-005-2468 y3 #120 | planet id=211 | surface_minerals = [77 15 2], want [77 13 0]
-sample | rg005 | RG-005-2468 y3 #124 | planet id=218 | surface_minerals = [15036 20238 12470], want [340 340 340]
 sample | rg005 | RG-005-2468 y3 #128 | planet id=230 | surface_minerals = [4309 3146 1], want [4312 3149 5]
 sample | rg005 | RG-005-2468 y3 #132 | planet id=247 | surface_minerals = [4593 11844 7845], want [4593 11844 7843]
 sample | rg005 | RG-005-2468 y3 #134 | planet id=252 | surface_minerals = [37 188 3], want [35 187 2]
@@ -104,7 +101,6 @@ sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: x = 1433, want 1291
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: y = 1279, want 1896
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: years_since_jump = 2, want 0
-sample | rg005 | RG-005-2468 y3 #192 | object | trader: met = [], want [1]
 sample | rg005 | RG-005-2468 y3 #200 | player id=2 seen_by=0 | score_record.score = 110, want 111
 sample | rg005 | RG-005-2468 y3 #200 | player id=2 seen_by=0 | score_record.tech_level_sum = 17, want 18
 sample | rg005 | RG-005-2468 y3 #206 | player id=2 seen_by=1 | score_record.score = 110, want 111
@@ -156,7 +152,6 @@ sample | rg005 | RG-005-2469 y4 #113 | planet id=202 | excess = 9, want 46
 sample | rg005 | RG-005-2469 y4 #113 | planet id=202 | population = 2198, want 2202
 sample | rg005 | RG-005-2469 y4 #113 | planet id=202 | surface_minerals = [0 875 12], want [10 853 3]
 sample | rg005 | RG-005-2469 y4 #115 | planet id=211 | surface_minerals = [88 16 4], want [88 15 2]
-sample | rg005 | RG-005-2469 y4 #120 | planet id=218 | surface_minerals = [15377 20579 12812], want [681 681 682]
 sample | rg005 | RG-005-2469 y4 #122 | planet id=222 | surface_minerals = [189 40 82], want [191 40 82]
 sample | rg005 | RG-005-2469 y4 #124 | planet id=230 | factories = 61, want 62
 sample | rg005 | RG-005-2469 y4 #124 | planet id=230 | surface_minerals = [4667 3393 0], want [4670 3396 2]
@@ -274,7 +269,6 @@ sample | rg005 | RG-005-2470 y5 #114 | planet id=202 | population = 2435, want 2
 sample | rg005 | RG-005-2470 y5 #114 | planet id=202 | surface_minerals = [38 951 54], want [47 929 45]
 sample | rg005 | RG-005-2470 y5 #116 | planet id=205 | surface_minerals = [167 19 1], want [166 19 2]
 sample | rg005 | RG-005-2470 y5 #117 | planet id=211 | surface_minerals = [102 18 3], want [103 16 1]
-sample | rg005 | RG-005-2470 y5 #121 | planet id=218 | surface_minerals = [15719 20922 13155], want [1023 1023 1025]
 sample | rg005 | RG-005-2470 y5 #125 | planet id=230 | factories = 76, want 78
 sample | rg005 | RG-005-2470 y5 #125 | planet id=230 | surface_minerals = [5030 3641 0], want [5032 3644 0]
 sample | rg005 | RG-005-2470 y5 #128 | planet id=246 | surface_minerals = [57 4200 2813], want [57 4202 2813]
@@ -411,7 +405,6 @@ sample | rg005 | RG-005-2471 y6 #112 | planet id=211 | surface_minerals = [119 2
 sample | rg005 | RG-005-2471 y6 #113 | planet id=213 | excess = 1, want 37
 sample | rg005 | RG-005-2471 y6 #113 | planet id=213 | population = 627, want 626
 sample | rg005 | RG-005-2471 y6 #114 | planet id=213 | surface_minerals = [470 405 2], want [472 405 2]
-sample | rg005 | RG-005-2471 y6 #117 | planet id=218 | surface_minerals = [16062 21265 13486], want [1366 1366 1356]
 sample | rg005 | RG-005-2471 y6 #119 | planet id=220 | environment = [14 52 68], want [14 51 68]
 sample | rg005 | RG-005-2471 y6 #119 | planet id=220 | original_environment = [14 59 75], want [14 58 75]
 sample | rg005 | RG-005-2471 y6 #122 | planet id=230 | factories = 92, want 94
@@ -564,7 +557,7 @@ sample | rg005 | RG-005-2472 y7 #117 | planet id=213 | environment = [55 55 59],
 sample | rg005 | RG-005-2472 y7 #117 | planet id=213 | excess = 97, want 57
 sample | rg005 | RG-005-2472 y7 #117 | planet id=213 | population = 675, want 674
 sample | rg005 | RG-005-2472 y7 #117 | planet id=213 | surface_minerals = [503 436 1], want [506 435 1]
-sample | rg005 | RG-005-2472 y7 #120 | planet id=218 | surface_minerals = [16406 21609 13819], want [1711 1710 1688]
+sample | rg005 | RG-005-2472 y7 #120 | planet id=218 | surface_minerals = [1710 1711 1690], want [1711 1710 1688]
 sample | rg005 | RG-005-2472 y7 #121 | planet id=220 | environment = [14 52 63], want [14 51 64]
 sample | rg005 | RG-005-2472 y7 #121 | planet id=220 | excess = 37, want 87
 sample | rg005 | RG-005-2472 y7 #121 | planet id=220 | population = 1482, want 1483
@@ -729,7 +722,7 @@ sample | rg005 | RG-005-2473 y8 #113 | planet id=211 | surface_minerals = [162 2
 sample | rg005 | RG-005-2473 y8 #114 | planet id=213 | excess = 65, want 43
 sample | rg005 | RG-005-2473 y8 #114 | planet id=213 | population = 731, want 729
 sample | rg005 | RG-005-2473 y8 #114 | planet id=213 | surface_minerals = [540 471 1], want [544 470 1]
-sample | rg005 | RG-005-2473 y8 #117 | planet id=218 | surface_minerals = [16719 21937 14126], want [2023 2038 1995]
+sample | rg005 | RG-005-2473 y8 #117 | planet id=218 | surface_minerals = [2023 2039 1997], want [2023 2038 1995]
 sample | rg005 | RG-005-2473 y8 #118 | planet id=220 | excess = 30, want 26
 sample | rg005 | RG-005-2473 y8 #120 | planet id=222 | surface_minerals = [255 54 136], want [256 52 134]
 sample | rg005 | RG-005-2473 y8 #122 | planet id=230 | factories = 118, want 120
@@ -891,7 +884,7 @@ sample | rg005 | RG-005-2474 y9 #114 | planet id=211 | surface_minerals = [188 3
 sample | rg005 | RG-005-2474 y9 #115 | planet id=213 | excess = 95, want 77
 sample | rg005 | RG-005-2474 y9 #115 | planet id=213 | population = 791, want 788
 sample | rg005 | RG-005-2474 y9 #115 | planet id=213 | surface_minerals = [581 508 2], want [585 507 2]
-sample | rg005 | RG-005-2474 y9 #119 | planet id=218 | surface_minerals = [17060 22278 14467], want [2364 2379 2336]
+sample | rg005 | RG-005-2474 y9 #119 | planet id=218 | surface_minerals = [2364 2380 2338], want [2364 2379 2336]
 sample | rg005 | RG-005-2474 y9 #121 | planet id=220 | excess = 89, want 7
 sample | rg005 | RG-005-2474 y9 #121 | planet id=220 | population = 1768, want 1767
 sample | rg005 | RG-005-2474 y9 #122 | planet id=221 | excess = 26, want 63
@@ -1079,7 +1072,7 @@ sample | rg005 | RG-005-2475 y10 #141 | planet id=211 | surface_minerals = [216 
 sample | rg005 | RG-005-2475 y10 #142 | planet id=213 | excess = 20, want 78
 sample | rg005 | RG-005-2475 y10 #142 | planet id=213 | population = 857, want 853
 sample | rg005 | RG-005-2475 y10 #143 | planet id=213 | surface_minerals = [624 547 1], want [629 548 2]
-sample | rg005 | RG-005-2475 y10 #146 | planet id=218 | surface_minerals = [17403 22620 14810], want [2707 2722 2679]
+sample | rg005 | RG-005-2475 y10 #146 | planet id=218 | surface_minerals = [2707 2722 2681], want [2707 2722 2679]
 sample | rg005 | RG-005-2475 y10 #148 | planet id=220 | excess = 25, want 39
 sample | rg005 | RG-005-2475 y10 #148 | planet id=220 | population = 1932, want 1928
 sample | rg005 | RG-005-2475 y10 #149 | planet id=221 | excess = 91, want 26
@@ -1406,7 +1399,7 @@ sample | rg005 | RG-005-2476 y11 #141 | planet id=211 | original_environment = [
 sample | rg005 | RG-005-2476 y11 #142 | planet id=213 | excess = 90, want 15
 sample | rg005 | RG-005-2476 y11 #142 | planet id=213 | population = 927, want 924
 sample | rg005 | RG-005-2476 y11 #142 | planet id=213 | surface_minerals = [668 588 3], want [671 588 3]
-sample | rg005 | RG-005-2476 y11 #145 | planet id=218 | surface_minerals = [17747 22964 15154], want [3051 3067 3023]
+sample | rg005 | RG-005-2476 y11 #145 | planet id=218 | surface_minerals = [3051 3066 3025], want [3051 3067 3023]
 sample | rg005 | RG-005-2476 y11 #147 | planet id=220 | excess = 76, want 41
 sample | rg005 | RG-005-2476 y11 #147 | planet id=220 | population = 2110, want 2104
 sample | rg005 | RG-005-2476 y11 #148 | planet id=221 | excess = 56, want 91
@@ -1801,7 +1794,7 @@ sample | rg005 | RG-005-2477 y12 #146 | planet id=211 | surface_minerals = [282 
 sample | rg005 | RG-005-2477 y12 #147 | planet id=213 | excess = 37, want 38
 sample | rg005 | RG-005-2477 y12 #147 | planet id=213 | population = 1004, want 1000
 sample | rg005 | RG-005-2477 y12 #148 | planet id=213 | surface_minerals = [712 627 2], want [713 626 1]
-sample | rg005 | RG-005-2477 y12 #151 | planet id=218 | surface_minerals = [18092 23309 15499], want [3396 3411 3368]
+sample | rg005 | RG-005-2477 y12 #151 | planet id=218 | surface_minerals = [3396 3411 3370], want [3396 3411 3368]
 sample | rg005 | RG-005-2477 y12 #153 | planet id=220 | excess = 9, want 82
 sample | rg005 | RG-005-2477 y12 #153 | planet id=220 | population = 2305, want 2294
 sample | rg005 | RG-005-2477 y12 #153 | planet id=220 | surface_minerals = [242 687 2], want [244 687 1]
@@ -2253,32 +2246,15 @@ sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: x = 2028, want
 sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: y = 1385, want 1088
 sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: years_since_jump = 58, want 0
 sample | rg005-y10 | RG-005-Y10-2475 y1 #219 | object | wormhole: x = 1310, want 1288
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #100 | planet id=71 | surface_minerals = [7929 7921 7873], want [0 0 0] (0/8 variants match, values vary)
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #118 | planet id=162 | surface_minerals = [667 3481 2958], want [667 1439 0] (0/8 variants match, values vary)
 sample | rg005-y11 | RG-005-Y11-2476 y1 #130 | planet id=184 | surface_minerals = [640 19 0], want [641 19 0]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #141 | planet id=211 | original_environment = [62 35 55], want [62 36 55]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | environment = [16 26 60], want [16 27 60]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | original_environment = [16 19 58], want [16 20 58]
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.biotechnology = 0, want 2
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.construction = 0, want 2
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.weapons = 1, want 3
 not compared | rg005-y11 | RG-005-Y11-2476 y1 #179 | player id=4 | player field mystery_trader_items
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: x = 1569, want 1561
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: y = 1095, want 1076
 sample | rg005-y11 | RG-005-Y11-2476 y1 #212 | object | wormhole: x = 1283, want 1297
 sample | rg005-y11 | RG-005-Y11-2476 y1 #212 | object | wormhole: y = 1878, want 1870
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #213 | object | trader: met = [], want [2]
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #214 | object | trader: met = [], want [4]
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.score = 117, want 123
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.tech_level_sum = 19, want 25
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.score = 117, want 123
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.tech_level_sum = 19, want 25
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.score = 117, want 123
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.tech_level_sum = 19, want 25
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.score = 117, want 123
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.tech_level_sum = 19, want 25
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.score = 117, want 123
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.tech_level_sum = 19, want 25
 sample | rg005-y12 | RG-005-Y12-2477 y1 #106 | planet id=74 | environment = [30 44 17], want [30 44 21]
 sample | rg005-y12 | RG-005-Y12-2477 y1 #148 | planet id=213 | surface_minerals = [714 626 2], want [713 626 1]
 sample | rg005-y12 | RG-005-Y12-2477 y1 #180 | player id=0 | research_accumulated.propulsion = 6984, want 6978
@@ -2291,7 +2267,6 @@ sample | rg005-y12 | RG-005-Y12-2477 y1 #222 | object | wormhole: y = 1861, want
 sample | rg005-y2 | RG-005-Y2-2467 y1 #107 | planet id=184 | surface_minerals = [365 7 1], want [365 8 1]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #116 | planet id=202 | environment = [50 40 58], want [50 40 59]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #116 | planet id=202 | original_environment = [50 45 51], want [50 45 52]
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y2 | RG-005-Y2-2467 y1 #121 | planet id=218 | surface_minerals = [14696 19898 12129], want [0 0 0] (0/8 variants match, values vary)
 sample | rg005-y2 | RG-005-Y2-2467 y1 #134 | planet id=254 | original_environment = [16 18 57], want [16 18 58]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #140 | planet id=272 | environment = [47 41 42], want [47 40 42]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #140 | planet id=272 | original_environment = [47 48 35], want [47 47 35]
@@ -2306,7 +2281,6 @@ sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: known_to = [3], 
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: x = 1432, want 2144
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: y = 1293, want 1815
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: years_since_jump = 0, want 45
-state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane B diagnostic run with Level 3, MEASURED: matches; not in lane D's retrodiction, which predates fix A) | rg005-y2 | RG-005-Y2-2467 y1 #192 | object | trader: met = [], want [1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #117 | planet id=201 | surface_minerals = [221 294 1], want [222 294 1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #143 | planet id=275 | surface_minerals = [1 1015 451], want [2 1018 453]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #150 | planet id=286 | surface_minerals = [1229 1590 0], want [1227 1590 0]

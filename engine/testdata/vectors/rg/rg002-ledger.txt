@@ -1151,6 +1151,7 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg002-y5 | RG-002-Y5-2467 y1 #126 | fleet_gone owner=5 id=9 | fleet still exists
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #172 | fleet owner=6 id=12 | waypoints[1] = {{1262 1345} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1262 1345} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (4/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #178 | planet id=0 | surface_minerals = [117 16 1], want [119 18 2]
+random-driven | rg002-y5 | RG-002-Y5-2467 y1 #181 | planet id=3 | surface_minerals = [0 0 0], want [7783 7191 3948] (7/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #190 | planet id=12 | surface_minerals = [62 610 9], want [64 611 10]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #215 | planet id=35 | surface_minerals = [3 1896 567], want [3 1898 567] (5/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [415 1397 12], want [417 1398 12]
