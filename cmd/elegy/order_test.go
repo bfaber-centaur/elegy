@@ -320,9 +320,12 @@ func TestDryRunLeavesGame(t *testing.T) {
 		t.Fatal(err)
 	}
 	h, _ := g.Hash()
-	res, err := dryRun(g, map[int][]engine.Order{0: {engine.ResearchOrder{Budget: 50}, engine.RenameOrder{Fleet: r.Fleets[0].ID, Name: "x"}}})
+	res, next, err := dryRun(g, map[int][]engine.Order{0: {engine.ResearchOrder{Budget: 50}, engine.RenameOrder{Fleet: r.Fleets[0].ID, Name: "x"}}})
 	if err != nil || len(res) != 2 || res[0].Err != nil || res[1].Err != nil {
 		t.Fatalf("dry run: %+v %v", res, err)
+	}
+	if next.State.Year != 2401 || next.State.Players[0].ResearchBudget != 50 {
+		t.Fatalf("dry run's game: year %d budget %d", next.State.Year, next.State.Players[0].ResearchBudget)
 	}
 	if after, _ := g.Hash(); after != h || g.State.Year != 2400 {
 		t.Fatalf("dry run changed the game: year %d", g.State.Year)
