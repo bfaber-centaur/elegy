@@ -10,8 +10,9 @@ const (
 	// EventPlanetImproved: Fleet's Orbital Adjusters improved Planet.
 	// Player = told (the fleet owner, and the planet owner when it is
 	// someone else and the planet owner's value changed), Count = the
-	// planet owner's habitability after the fleet's clicks, Axes[0] =
-	// before them.
+	// planet owner's habitability after this fleet's own clicks, Axes[0]
+	// = before them (ASSUMPTION T3, terraform.Adjust: fleets act one at a
+	// time, so a later fleet's before is an earlier one's after).
 	EventPlanetImproved EventKind = iota + EventRaceHacked + 1
 	// EventPlanetDegraded: as EventPlanetImproved, by a fleet that is not
 	// the planet owner's friend.

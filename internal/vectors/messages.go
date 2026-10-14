@@ -450,7 +450,11 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			}
 			if ev.Axes[0] < 0 || ev.Count < 0 {
 				m.known[2], m.known[3] = ev.Axes[0] >= 0, ev.Count >= 0
-				m.why = whyNot(0x15a, "negative percent slot")
+				if m.why == "" {
+					m.why = whyNot(0x15a, "negative percent slot")
+				} else {
+					m.why += ", negative percent slot"
+				}
 			}
 			send(ev.Player, m)
 		case engine.EventOvercrowded:

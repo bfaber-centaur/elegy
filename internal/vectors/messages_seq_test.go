@@ -64,6 +64,8 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x15a, focus: 4, focusKnown: true, params: []int{0, 4, 72, 70}, known: []bool{false, true, true, true}, why: "0x15a fleet gone by the end of the year"}}},
 		{"planet degraded below zero", []engine.Event{{Kind: engine.EventPlanetDegraded, Player: 1, Planet: 5, Fleet: 9, Count: -3, Axes: []int{1}}}, 1,
 			[]pvMsg{{id: 0x15a, focus: pvFocusFleet | 515, focusKnown: true, params: []int{515, 4, 1, -3}, known: []bool{true, true, true, false}, why: "0x15a negative percent slot"}}},
+		{"planet degraded below zero, fleet gone", []engine.Event{{Kind: engine.EventPlanetDegraded, Player: 2, Planet: 5, Fleet: 8, Count: -3, Axes: []int{1}}}, 2,
+			[]pvMsg{{id: 0x15a, focus: 4, focusKnown: true, params: []int{0, 4, 1, -3}, known: []bool{false, true, true, false}, why: "0x15a fleet gone by the end of the year, negative percent slot"}}},
 		{"planet degraded, no before", []engine.Event{{Kind: engine.EventPlanetDegraded, Player: 1, Planet: 5, Fleet: 9, Count: 70}}, 1, nil},
 		{"merged count", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 1}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
