@@ -2253,32 +2253,32 @@ sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: x = 2028, want
 sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: y = 1385, want 1088
 sample | rg005-y10 | RG-005-Y10-2475 y1 #218 | object | wormhole: years_since_jump = 58, want 0
 sample | rg005-y10 | RG-005-Y10-2475 y1 #219 | object | wormhole: x = 1310, want 1288
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #100 | planet id=71 | surface_minerals = [7929 7921 7873], want [0 0 0] (0/8 variants match, values vary)
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #118 | planet id=162 | surface_minerals = [667 3481 2958], want [667 1439 0] (0/8 variants match, values vary)
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #100 | planet id=71 | surface_minerals = [7929 7921 7873], want [0 0 0] (0/8 variants match, values vary)
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #118 | planet id=162 | surface_minerals = [667 3481 2958], want [667 1439 0] (0/8 variants match, values vary)
 sample | rg005-y11 | RG-005-Y11-2476 y1 #130 | planet id=184 | surface_minerals = [640 19 0], want [641 19 0]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #141 | planet id=211 | original_environment = [62 35 55], want [62 36 55]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | environment = [16 26 60], want [16 27 60]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | original_environment = [16 19 58], want [16 20 58]
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.biotechnology = 0, want 2
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.construction = 0, want 2
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.weapons = 1, want 3
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.biotechnology = 0, want 2
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.construction = 0, want 2
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #177 | player id=2 | tech.weapons = 1, want 3
 not compared | rg005-y11 | RG-005-Y11-2476 y1 #179 | player id=4 | player field mystery_trader_items
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: x = 1569, want 1561
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: y = 1095, want 1076
 sample | rg005-y11 | RG-005-Y11-2476 y1 #212 | object | wormhole: x = 1283, want 1297
 sample | rg005-y11 | RG-005-Y11-2476 y1 #212 | object | wormhole: y = 1878, want 1870
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #213 | object | trader: met = [], want [2]
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #214 | object | trader: met = [], want [4]
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.score = 117, want 123
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.tech_level_sum = 19, want 25
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.score = 117, want 123
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.tech_level_sum = 19, want 25
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.score = 117, want 123
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.tech_level_sum = 19, want 25
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.score = 117, want 123
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.tech_level_sum = 19, want 25
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.score = 117, want 123
-UNCLASSIFIED | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.tech_level_sum = 19, want 25
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #213 | object | trader: met = [], want [2]
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #214 | object | trader: met = [], want [4]
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.score = 117, want 123
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #219 | player id=2 seen_by=0 | score_record.tech_level_sum = 19, want 25
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.score = 117, want 123
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #225 | player id=2 seen_by=1 | score_record.tech_level_sum = 19, want 25
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.score = 117, want 123
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #231 | player id=2 seen_by=2 | score_record.tech_level_sum = 19, want 25
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.score = 117, want 123
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #237 | player id=2 seen_by=3 | score_record.tech_level_sum = 19, want 25
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.score = 117, want 123
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y11 | RG-005-Y11-2476 y1 #243 | player id=2 seen_by=4 | score_record.tech_level_sum = 19, want 25
 sample | rg005-y12 | RG-005-Y12-2477 y1 #106 | planet id=74 | environment = [30 44 17], want [30 44 21]
 sample | rg005-y12 | RG-005-Y12-2477 y1 #148 | planet id=213 | surface_minerals = [714 626 2], want [713 626 1]
 sample | rg005-y12 | RG-005-Y12-2477 y1 #180 | player id=0 | research_accumulated.propulsion = 6984, want 6978
@@ -2291,7 +2291,7 @@ sample | rg005-y12 | RG-005-Y12-2477 y1 #222 | object | wormhole: y = 1861, want
 sample | rg005-y2 | RG-005-Y2-2467 y1 #107 | planet id=184 | surface_minerals = [365 7 1], want [365 8 1]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #116 | planet id=202 | environment = [50 40 58], want [50 40 59]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #116 | planet id=202 | original_environment = [50 45 51], want [50 45 52]
-UNCLASSIFIED | rg005-y2 | RG-005-Y2-2467 y1 #121 | planet id=218 | surface_minerals = [14696 19898 12129], want [0 0 0] (0/8 variants match, values vary)
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane D retrodiction, MEASURED: matches with Level 3) | rg005-y2 | RG-005-Y2-2467 y1 #121 | planet id=218 | surface_minerals = [14696 19898 12129], want [0 0 0] (0/8 variants match, values vary)
 sample | rg005-y2 | RG-005-Y2-2467 y1 #134 | planet id=254 | original_environment = [16 18 57], want [16 18 58]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #140 | planet id=272 | environment = [47 41 42], want [47 40 42]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #140 | planet id=272 | original_environment = [47 48 35], want [47 47 35]
@@ -2306,7 +2306,7 @@ sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: known_to = [3], 
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: x = 1432, want 2144
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: y = 1293, want 1815
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: years_since_jump = 0, want 45
-UNCLASSIFIED | rg005-y2 | RG-005-Y2-2467 y1 #192 | object | trader: met = [], want [1]
+state-import error [lane B]: cause UNRESOLVED, counted as a deterministic miss; leading candidate harness: Player.Level not loaded, so computer players run as Easy and make no Trader planet trade (lane B diagnostic run with Level 3, MEASURED: matches; not in lane D's retrodiction, which predates fix A) | rg005-y2 | RG-005-Y2-2467 y1 #192 | object | trader: met = [], want [1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #117 | planet id=201 | surface_minerals = [221 294 1], want [222 294 1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #143 | planet id=275 | surface_minerals = [1 1015 451], want [2 1018 453]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #150 | planet id=286 | surface_minerals = [1229 1590 0], want [1227 1590 0]

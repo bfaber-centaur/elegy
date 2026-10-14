@@ -42,7 +42,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   - random parity, which is 0 exact;
   - computer players, with no oracle comparison;
   - client estimates, 216 expectations;
-  - 63 unmapped message ids;
+  - 61 unmapped message ids;
   - fleet-to-fleet cargo.
 
 ## Engine completion
@@ -52,8 +52,10 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 63 message ids and fleet-to-fleet cargo. |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 61 message ids and fleet-to-fleet cargo. |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
+
+- **RG-005 (out of sample), 2026-10-14:** the zero did not hold. On the candidate's first run, 25 lines were UNCLASSIFIED (8 in restarts years 1–6 and chained year 1). Fix A (harness: Trader vector ids) leaves 19, all in the restarts: 12 strict expectations that miss on all 8 seeds, hand-classed `state-import error [lane B]` with cause UNRESOLVED and still counted as deterministic misses. The leading candidate is that the vectors do not carry the computer players' level (lane D retrodiction). PARITY-STATUS.md "RG-005" has the tallies and the PREDICTION.md scoring.
 
 ## What still matters
 
@@ -70,4 +72,4 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 
 ## Best next move
 
-Run RG-005 (lane F) on `f09acd9` as the out-of-sample check of the zero. Then route the ranked gaps, starting with the minefield messages.
+Load the computer players' level once lane F's vectors carry it (`computer_level`), with an explicit skip where a computer player has none, and regenerate RG-005 as a fourth tally. Then route the ranked gaps, starting with the minefield messages.

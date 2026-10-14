@@ -56,6 +56,13 @@ Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts.
   - a sequence of sample entries only (RG-004, 1 per run), which has nothing strict to compare;
   - `alt_battle` (RG-003 and RG-004, 1 per run), which the battle harness judges instead (a battle-ledger sample), so it has no vectors-ledger line.
 
+## RG-005: the out-of-sample game (2026-10-14)
+
+RG-005 (stars-elegy `419229a`, PREDICTION.md the pre-run record) was run first on the candidate 8584f92 unchanged; PARITY-STATUS.md "RG-005" has the three tallies and the scoring. Not in the RG table above, which stays the candidate's in-sample result.
+- **The zero does not hold out of sample.** 12 strict expectations (19 ledger lines) miss on all 8 seeds: Y2 planet 218 and Trader 3, and Y11 planets 71 and 162, player 2's tech and score, and Traders 0 and 1. Their cause is UNRESOLVED and they stay counted as deterministic misses. The leading candidate is a harness gap: the vectors do not carry the computer players' level, so they load as Easy and make no Trader planet trade (lane D retrodiction with level 3: these lines match).
+- **Fix A (harness).** A vector Trader id is the original's slot, not Elegy's dense index. Where a Trader left or appeared during the run, Elegy cannot say which slot a Trader holds, and the comparison is not compared with that reason (15 expectations).
+- Field expectations, chained / restarts, after fix A: strict matched 184 / 2453, random-driven 2 / 9, strict missed 0 / 12, sample matched 1654 / 144, sample missed 859 / 90, not compared 14 / 5. Orders: no refusal in a restart or chained year 1, no load error, no panic.
+
 ## All corpora
 
 `TestParityVectors` over 31 corpora, 1827 cases:
@@ -93,6 +100,8 @@ The most frequent unmapped message ids are:
 - 0x0c3 and 0x0c4 (mines laid, new or added): 5 each;
 - 0x17e (mines not laid, object limit): 3.
 
+Updated 2026-10-14 (RG-005 ingest PR): the partial-starbase owner reading of the viewer reports PR now has its own ASSUMPTION row in SCANNING-STATUS.md (pinned by `TestDesignViews`), so the ASSUMPTION count is 81 (was 80). The RG-005 section of PARITY-STATUS.md adds 3 UNRESOLVED lines (the cause of its deterministic misses), so that count is 15 (was 12). Blind spot 4 said "63 ids"; since the 0x12c/0x12d mapping it is 61.
+
 ## Unproven claims in the status documents
 
 Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weaker than CONFIRMED or MEASURED (a count of labelled lines, `grep -c`, not of distinct rules):
@@ -100,9 +109,9 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 | label | lines | heaviest in |
 |---|---:|---|
 | BINARY-ONLY (from analysis, no oracle run) | 188 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 20, AI 17, COMBAT 17, TAKEOVER 18 |
-| ASSUMPTION | 80 | KERNEL 33, PARITY 12, TAKEOVER 12, COMBAT 7 |
+| ASSUMPTION | 81 | KERNEL 33, PARITY 12, TAKEOVER 12, COMBAT 7 |
 | NOT RUN | 22 | COMBAT 9, PARITY 5, TAKEOVER 4 |
-| UNRESOLVED | 12 | PARITY 4, TAKEOVER 3 |
+| UNRESOLVED | 15 | PARITY 7, TAKEOVER 3 |
 
 ## Biggest blind spots
 
@@ -112,10 +121,10 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
    - This needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
-4. **Message coverage.** 63 ids have no event mapping, and minefield messages are the largest group.
+4. **Message coverage.** 61 ids have no event mapping, and minefield messages are the largest group.
 5. **Fleet-to-fleet cargo.** Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (TAKEOVER-STATUS.md "Not modelled"; 38 expectations).
-6. **Labels.** 188 BINARY-ONLY and 80 ASSUMPTION lines are claims no oracle run has checked.
-7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
+6. **Labels.** 188 BINARY-ONLY and 81 ASSUMPTION lines are claims no oracle run has checked.
+7. **Breadth.** RG covers three representative games (RG-002/003 share years 1–6) plus RG-005, the out-of-sample game. On RG-005 the zero did not hold: 12 strict expectations miss on all 8 seeds (section "RG-005" above).
 
 ## Remaining comparator gaps, ranked
 
