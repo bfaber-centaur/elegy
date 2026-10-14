@@ -190,13 +190,8 @@ func planOrder(r game.Report, pending []engine.Order, args []string) (engine.Ord
 		return nil, fmt.Errorf("order plan: unexpected %q", fs.Arg(0))
 	}
 	o := engine.BattlePlanOrder{Index: *index}
-	if *index >= 0 && *index < len(r.Self.Plans) {
-		o.Plan = r.Self.Plans[*index]
-	}
-	for _, p := range pending {
-		if po, ok := p.(engine.BattlePlanOrder); ok && po.Index == *index {
-			o.Plan = po.Plan
-		}
+	if plans := pendingPlans(r.Self.Plans, pending); *index >= 0 && *index < len(plans) {
+		o.Plan = plans[*index]
 	}
 	set := map[string]bool{}
 	fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
@@ -229,6 +224,32 @@ func planOrder(r game.Report, pending []engine.Order, args []string) (engine.Ord
 		o.Plan.DumpCargo = *dump
 	}
 	return o, nil
+}
+
+// pendingPlans is the player's plans after the file's earlier plan and
+// delete-plan orders, numbered as the engine numbers them: a deleted plan
+// moves later ones down one. An order out of range, which the engine
+// refuses, changes nothing.
+func pendingPlans(plans []engine.BattlePlan, pending []engine.Order) []engine.BattlePlan {
+	plans = slices.Clone(plans)
+	for _, p := range pending {
+		switch o := p.(type) {
+		case engine.BattlePlanOrder:
+			for i := range plans {
+				if i == o.Index {
+					plans[i] = o.Plan
+				}
+			}
+			if o.Index == len(plans) {
+				plans = append(plans, o.Plan)
+			}
+		case engine.DeletePlanOrder:
+			if o.Index >= 1 && o.Index < len(plans) {
+				plans = slices.Delete(plans, o.Index, o.Index+1)
+			}
+		}
+	}
+	return plans
 }
 
 func deletePlanOrder(args []string) (engine.Order, error) {
