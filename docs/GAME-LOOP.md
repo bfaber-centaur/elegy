@@ -245,6 +245,9 @@ picks one.
 go run ./cmd/elegy new -seed 1 -players 3 -size small -rules elegy -o game.json   # or -rules jrc3-faithful
 go run ./cmd/elegy new -race default -race me.json -race random -ai rototill:expert,cybertron -o game.json
 go run ./cmd/elegy race -name Testers > me.json                     # a race file to edit
+go run ./cmd/elegy show -game game.json -player 0 all              # the player's Report as text
+go run ./cmd/elegy order -game game.json -player 0 move -fleet 2 -to planet:45 -task colonize   # add one order, checked
+go run ./cmd/elegy check -game game.json orders0-2400.json         # would these orders be accepted?
 go run ./cmd/elegy orders -game game.json -player 0 > orders0.json   # an empty file to fill
 go run ./cmd/elegy turn -game game.json orders0.json                # players without a file keep standing orders
 go run ./cmd/elegy report -game game.json -player 0                 # the player's Report as JSON
@@ -253,6 +256,11 @@ go run ./cmd/elegy play -seed 1 -players 1 -ai robotoid,rototill,cybertron -year
 go run ./cmd/elegy vector engine/testdata/vectors/pq/c01.json      # a parity vector, field by field
 go run ./cmd/elegy vector -json -variant 3 rg001.json              # the same as one JSON document
 ```
+
+`show`, `order` and `check` are the playable slice: a person plays from
+the command line with readable output and no hand-written JSON.
+[PLAYING.md](PLAYING.md) walks through a game and lists what they do
+and do not cover.
 
 `vector` runs one stars-elegy parity vector with package
 `internal/vectors`, as `TestParityVectors` does: the vector's start, its

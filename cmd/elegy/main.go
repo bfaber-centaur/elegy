@@ -5,6 +5,9 @@
 //	elegy new -seed 1 -players 3 -size small -rules elegy -o game.json
 //	elegy new -race default -race me.json -ai rototill:expert,cybertron -o game.json
 //	elegy race > me.json                                   (a race file to edit)
+//	elegy show -game game.json -player 0 all              (what player 0 knows, as text)
+//	elegy order -game game.json -player 0 move -fleet 2 -to planet:7 -task colonize
+//	elegy check -game game.json orders0-2400.json          (would these orders be accepted?)
 //	elegy report -game game.json -player 0 > report.json
 //	elegy orders -game game.json -player 0 > orders.json   (an empty order file to fill)
 //	elegy turn -game game.json orders0.json orders2.json
@@ -40,7 +43,7 @@ func main() {
 	}
 }
 
-const usage = "usage: elegy new|race|report|orders|turn|hash|play|vector [flags]; elegy <command> -h for flags"
+const usage = "usage: elegy new|race|show|report|order|orders|check|turn|hash|play|vector [flags]; elegy <command> -h for flags"
 
 func run(args []string, out io.Writer) error {
 	if len(args) == 0 {
@@ -60,6 +63,12 @@ func run(args []string, out io.Writer) error {
 		return cmdTurn(args, out)
 	case "hash":
 		return cmdHash(args, out)
+	case "show":
+		return cmdShow(args, out)
+	case "order":
+		return cmdOrder(args, out)
+	case "check":
+		return cmdCheck(args, out)
 	case "play":
 		return cmdPlay(args, out)
 	case "vector":
@@ -348,29 +357,9 @@ func cmdTurn(args []string, out io.Writer) error {
 	}
 	// Each file is one player's orders for this year; players with no
 	// file keep their standing orders.
-	byPlayer := map[int][]engine.Order{}
-	for _, name := range fs.Args() {
-		fh, err := os.Open(name)
-		if err != nil {
-			return err
-		}
-		f, err := game.DecodeOrders(fh)
-		fh.Close()
-		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
-		}
-		switch {
-		case f.GameID != g.State.ID:
-			return fmt.Errorf("%s: orders for game %d, this is game %d", name, f.GameID, g.State.ID)
-		case f.Year != g.State.Year:
-			return fmt.Errorf("%s: orders for %d, the game is at %d", name, f.Year, g.State.Year)
-		case f.Player < 0 || f.Player >= len(g.State.Players):
-			return fmt.Errorf("%s: no player %d", name, f.Player)
-		}
-		if _, dup := byPlayer[f.Player]; dup {
-			return fmt.Errorf("%s: a second order file for player %d", name, f.Player)
-		}
-		byPlayer[f.Player] = f.Orders
+	byPlayer, err := readOrderFiles(g, fs.Args())
+	if err != nil {
+		return err
 	}
 	ds, err := drivers(g)
 	if err != nil {
