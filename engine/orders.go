@@ -608,6 +608,10 @@ func validTask(t Task) error {
 			return fmt.Errorf("patrol range %d: %w", t.Range, ErrOutOfRange)
 		}
 	case TaskTransport:
+		if t.ToFleet {
+			// Set by the engine only (Task.ToFleet).
+			return fmt.Errorf("transport task aimed at a fleet: %w", ErrOutOfRange)
+		}
 		for _, tr := range t.Transport {
 			if tr.Action < TransportNone || tr.Action > SetWaypoint || tr.Amount < 0 || (tr.Action == FillTo || tr.Action == WaitFor) && tr.Amount > 100 {
 				return fmt.Errorf("transport task: %w", ErrOutOfRange)

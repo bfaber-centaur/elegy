@@ -484,7 +484,7 @@ func (l *tkLab) arriving(owner, pi, design, colonists int, task Task) int {
 }
 
 var (
-	unloadColonists = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{CargoColonists: {Action: UnloadAll}}}
+	unloadColonists = Task{Kind: TaskTransport, Transport: [NumTransport]Transport{CargoColonists: {Action: UnloadAll}}}
 	colonizeTask    = Task{Kind: TaskColonize}
 )
 
@@ -669,7 +669,7 @@ func TestPredictionUnloadAmounts(t *testing.T) {
 	fi := l.fleet(0, pi, 0, Stack{Design: freighter, Count: 1})
 	f := &l.g.Fleets[fi]
 	f.Cargo = Cargo{Minerals: Minerals{30, 0, 5}, Colonists: 40}
-	f.Task = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{
+	f.Task = Task{Kind: TaskTransport, Transport: [NumTransport]Transport{
 		Ironium:        {Action: UnloadExactly, Amount: 10},
 		Germanium:      {Action: UnloadExactly, Amount: 10},
 		CargoColonists: {Action: UnloadAll},
@@ -685,7 +685,7 @@ func TestPredictionUnloadAmounts(t *testing.T) {
 	if p.Population != 140 || p.Surface != (Minerals{10, 0, 5}) || f.Cargo != (Cargo{Minerals: Minerals{20, 0, 0}}) {
 		t.Errorf("pop %d surface %v cargo %+v, want 140, 10/0/5, 20/0/0 aboard", p.Population, p.Surface, f.Cargo)
 	}
-	if f.Task.Transport != ([NumCargo]Transport{}) {
+	if f.Task.Transport != ([NumTransport]Transport{}) {
 		t.Errorf("unload actions should clear after running: %+v", f.Task.Transport)
 	}
 
@@ -933,7 +933,7 @@ func TestPredictionForeignMinerals(t *testing.T) {
 	enemy := l.planet(1, 0, 100)
 	unowned := l.planet(NoOwner, 10, 0)
 	freighter := l.design("Small Freighter", SlotFill{0, "Quick Jump 5", 1})
-	all := Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}, Boranium: {Action: UnloadAll}}}
+	all := Task{Kind: TaskTransport, Transport: [NumTransport]Transport{Ironium: {Action: UnloadAll}, Boranium: {Action: UnloadAll}}}
 	for _, pi := range []int{enemy, unowned} {
 		fi := l.fleet(0, pi, 0, Stack{Design: freighter, Count: 1})
 		l.g.Fleets[fi].Cargo.Minerals = Minerals{7, 3, 0}
@@ -954,7 +954,7 @@ func TestPredictionDeepSpaceUnload(t *testing.T) {
 	freighter := l.design("Small Freighter", SlotFill{0, "Quick Jump 5", 1})
 	l.g.Fleets = append(l.g.Fleets, Fleet{ID: 1, Owner: 0, Pos: Point{50, 50}, Stacks: []Stack{{Design: freighter, Count: 1}},
 		Cargo: Cargo{Minerals: Minerals{7, 3, 0}, Colonists: 20},
-		Task:  Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}, CargoColonists: {Action: UnloadAll}}}})
+		Task:  Task{Kind: TaskTransport, Transport: [NumTransport]Transport{Ironium: {Action: UnloadAll}, CargoColonists: {Action: UnloadAll}}}})
 	_, ev := l.g.unloadPhase(l.g.phaseStart())
 	f := l.g.Fleets[0]
 	if f.Cargo != (Cargo{Minerals: Minerals{0, 3, 0}, Colonists: 20}) || len(l.g.Salvage) != 0 || len(ev) != 2 || ev[0].Kind != EventDropRefused || ev[1].Kind != EventFleetArrived {
@@ -1152,7 +1152,7 @@ func TestMeasuredDropFinishedAfterDrops(t *testing.T) {
 	l.g.Fleets[fi].Task = unloadColonists
 	fj := l.fleet(0, own, 0, Stack{Design: ship, Count: 1})
 	l.g.Fleets[fj].Cargo.Minerals[Ironium] = 10
-	l.g.Fleets[fj].Task = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}}}
+	l.g.Fleets[fj].Task = Task{Kind: TaskTransport, Transport: [NumTransport]Transport{Ironium: {Action: UnloadAll}}}
 	r := l.turn(&seqRand{})
 	var got []string
 	for _, e := range r.Events {
@@ -1183,7 +1183,7 @@ func TestMeasuredFinishedBeforeColonizeDrop(t *testing.T) {
 	fi := l.fleet(0, own, 0, Stack{Design: ship, Count: 1})
 	l.g.Fleets[fi].ID = 0
 	l.g.Fleets[fi].Cargo.Minerals[Ironium] = 10
-	l.g.Fleets[fi].Task = Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}}}
+	l.g.Fleets[fi].Task = Task{Kind: TaskTransport, Transport: [NumTransport]Transport{Ironium: {Action: UnloadAll}}}
 	fj := l.fleet(0, empty, 0, Stack{Design: ship, Count: 1})
 	l.g.Fleets[fj].ID = 5
 	l.g.Fleets[fj].Cargo.Colonists = 20
