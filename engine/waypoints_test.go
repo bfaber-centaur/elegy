@@ -383,3 +383,28 @@ func TestBinaryOnlyPacketObjectWaypointCheck(t *testing.T) {
 		t.Errorf("reused number: %v, want the new object", got)
 	}
 }
+
+func TestMeasuredPatrolTargetMessage(t *testing.T) {
+	// MESSAGES.md 0x0ff (presence MEASURED in the WU patrol runs): the
+	// patrolling fleet's owner is told of the intercept it picked, one
+	// message per patrol fleet, in fleet order; a patrol with no enemy in
+	// reach picks nothing and is not told.
+	l := followLab(t, 4)
+	l.g.Players[1].Relations = []Relation{RelationEnemy, RelationEnemy}
+	for _, i := range []int{0, 1} {
+		l.g.Fleets[i].Task = Task{Kind: TaskPatrol, Range: 50}
+	}
+	l.g.Fleets[1].Pos = Point{1500, 1500}
+	l.g.Fleets[2].Owner, l.g.Fleets[2].Pos = 1, Point{1240, 1200}
+	l.g.Fleets[3].Owner, l.g.Fleets[3].Pos = 1, Point{1210, 1200}
+	g := withRules(l.g)
+	var seen []FleetSighting
+	for _, f := range g.Fleets {
+		seen = append(seen, FleetSighting{Fleet: f.ID, Owner: f.Owner, Pos: f.Pos})
+	}
+	ev := g.patrol([]PlayerView{{Fleets: seen}, {}})
+	want := []Event{{Kind: EventPatrolTarget, Player: 0, Planet: -1, Fleet: 1, Axes: []int{4}}}
+	if !reflect.DeepEqual(ev, want) {
+		t.Errorf("events %v, want %v", ev, want)
+	}
+}

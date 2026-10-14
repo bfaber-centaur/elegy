@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 	"github.com/bfaber-centaur/elegy/races"
 	"github.com/bfaber-centaur/elegy/terraform"
 )
@@ -132,6 +133,7 @@ type pvPlayer struct {
 	ResearchAccumulated map[string]int    `json:"research_accumulated"`
 	ResearchPercent     int               `json:"research_percent"`
 	Computer            bool              `json:"computer"`
+	ComputerLevel       *string           `json:"computer_level"`
 	ResearchField       string            `json:"research_field"`
 	ResearchNextField   json.RawMessage   `json:"research_next_field"`
 	Relations           map[string]string `json:"relations"`
@@ -314,6 +316,11 @@ type pvExpect struct {
 // waypoint target ID, Planet a planet id to the Elegy planet ID.
 type pvMaps struct {
 	EndID, Planet map[int]int
+	// Traders is the vector ids of the initial state's Traders, in
+	// ascending order; TradersAppeared, how many appeared from the first
+	// generated year through the compared one (pvTraderIndex).
+	Traders         []int
+	TradersAppeared int
 }
 
 // pvObjExpect is an expectation as the space-object checker sees it.
@@ -514,9 +521,14 @@ type pvLoaded struct {
 	defaults map[int]bool
 	// ordered marks the players the vector gives orders for.
 	ordered map[int]bool
+	// noLevel marks the computer players whose computer_level the vector
+	// does not carry (pvNoLevelWhy).
+	noLevel map[int]bool
 	// endID maps a vector wormhole end id to its waypoint target ID
 	// (pvWormholeEnds).
 	endID map[int]int
+	// traders is the vector ids of the initial state's Traders, sorted.
+	traders []int
 	// views is each generated year's player views, by year.
 	views [][]engine.PlayerView
 	// events is each generated year's events, by year.
@@ -574,7 +586,7 @@ func pvElegyFleetID(owner, id int) int { return owner*100000 + id + 1 }
 func loadVector(v *Vector) (*pvLoaded, error) {
 	s := v.InitialState
 	cat := engine.Components()
-	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]engine.Point{}, queued: map[int]bool{}, defaults: map[int]bool{}, ordered: map[int]bool{}}
+	l := &pvLoaded{fleetID: map[[2]int]int{}, design: map[[2]int]int{}, planet: map[int]int{}, unsupported: map[[2]int]string{}, start: map[[2]int]engine.Point{}, queued: map[int]bool{}, defaults: map[int]bool{}, ordered: map[int]bool{}, noLevel: map[int]bool{}}
 	for _, b := range v.Orders {
 		l.ordered[b.Player] = true
 	}
@@ -604,6 +616,19 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 	for _, p := range s.Players {
 		pl := &g.Players[p.ID]
 		pl.Computer = p.Computer
+		// A computer player's level (vectors/README.md "Computer level":
+		// easy, standard, harder, expert) is engine.Player.Level 0 to 3.
+		switch {
+		case !p.Computer:
+		case p.ComputerLevel == nil:
+			l.noLevel[p.ID] = true
+		default:
+			lv := slices.Index([]string{"easy", "standard", "harder", "expert"}, *p.ComputerLevel)
+			if lv < 0 {
+				return nil, fmt.Errorf("player %d: computer_level %q", p.ID, *p.ComputerLevel)
+			}
+			pl.Level = lv
+		}
 		// The planet the player's own record names as its homeworld,
 		// re-marked each year (vectors/README.md "homeworld"; KERNEL.md
 		// "Turn order" step 3.6); absent, the record names none.
@@ -832,7 +857,8 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 	{
 		// Every game holds space objects, so the Trader's appearance
 		// draws run with random events on.
-		obj, err := pvObjects{}.Load(g, s.Objects, pvMaps{l.endID, l.planet})
+		l.traders = pvTraderIDs(s.Objects)
+		obj, err := pvObjects{}.Load(g, s.Objects, pvMaps{EndID: l.endID, Planet: l.planet, Traders: l.traders})
 		if err != nil {
 			l.global = "space objects: " + err.Error()
 		}
@@ -967,6 +993,9 @@ func (l *pvLoaded) queueEquals(g *engine.Game, e pvExpect) string {
 	}
 	if l.planned(l.startOwner(*e.Planet)) {
 		return "skip: " + pvPlannedWhy
+	}
+	if l.levelUnknown(l.startOwner(*e.Planet), e.Year) {
+		return "skip: " + pvNoLevelWhy
 	}
 	if why := l.unsupportedAt(-1); why != "" {
 		return "skip: " + why
@@ -1207,7 +1236,10 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		if (e.Kind == "packet" || e.Kind == "object") && owner != nil && l.queued[*owner] {
 			return "skip: a packet from a production queue"
 		}
-		return pvObjects{}.Check(g, pvObjExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, pvMaps{l.endID, l.planet})
+		if pvTraderExpect(e) && l.levelUnknown(-2, e.Year) {
+			return "skip: " + pvNoLevelWhy
+		}
+		return pvObjects{}.Check(g, pvObjExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, pvMaps{l.endID, l.planet, l.traders, l.tradersAppeared(e.Year)})
 	}
 	var eq map[string]json.RawMessage
 	if len(e.Equals) > 0 && json.Unmarshal(e.Equals, &eq) != nil {
@@ -1254,6 +1286,13 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		}
 		if l.planned(l.startOwner(id)) {
 			return "skip: " + pvPlannedWhy
+		}
+		if l.levelUnknown(l.startOwner(id), e.Year) {
+			return "skip: " + pvNoLevelWhy
+		}
+	case "player":
+		if l.levelUnknown(*e.ID, e.Year) {
+			return "skip: " + pvNoLevelWhy
 		}
 	}
 	switch e.Kind {
@@ -1515,6 +1554,27 @@ const pvPlannedWhy = "a computer player's planned orders (not in the vector)"
 // orders for.
 func (l *pvLoaded) planned(owner int) bool {
 	return owner >= 0 && owner < len(l.g.Players) && l.g.Players[owner].Computer && !l.ordered[owner]
+}
+
+// pvNoLevelWhy is the reason an expectation that a computer player's
+// level can change is skipped when the vector does not carry the level.
+// The only rule that reads the level is the Mystery Trader planet trade
+// (engine.Player.Level), so the expectations are the Traders and that
+// player's planets, queues and player record, in a run that had a
+// Trader by then.
+const pvNoLevelWhy = "computer level not in the vector"
+
+// levelUnknown reports whether owner is a computer player with no level
+// in the vector (any such player, for owner −2) and a Trader was loaded
+// or had appeared by the given year.
+func (l *pvLoaded) levelUnknown(owner, year int) bool {
+	if len(l.traders) == 0 && l.tradersAppeared(year) == 0 {
+		return false
+	}
+	if owner == -2 {
+		return len(l.noLevel) > 0
+	}
+	return l.noLevel[owner]
 }
 
 // startOwner is the owner of the vector's planet id at the start, or −1.
@@ -2137,6 +2197,28 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 				errs = append(errs, pvMismatch("race settings", fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", st.Spend, st.Stat15, st.ExpensiveAt3),
 					fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", spend, q.Stat15, q.TechsStartHigh)))
 			}
+		case "mystery_trader_items":
+			// The player's Trader part word, by bit (stars-elegy
+			// tools/vectors/build.py; OBJECTS.md "Encounters", CONFIRMED
+			// WT-003 A). Elegy keeps it in the space objects.
+			var want []string
+			if json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+				continue
+			}
+			if g.Objects == nil {
+				skipped("mystery_trader_items without space objects")
+				continue
+			}
+			got := []string{}
+			for b, name := range objects.TraderPartNames {
+				if g.Objects.OwnsTraderBit(id, b) {
+					got = append(got, name)
+				}
+			}
+			if !slices.Equal(got, want) {
+				errs = append(errs, pvMismatch(k, got, want))
+			}
 		default:
 			skipped("player field " + k)
 		}
@@ -2356,6 +2438,22 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		l.events = append(l.events, r.Events)
 	}
 	return l, games, nil, ""
+}
+
+// tradersAppeared is how many Traders appeared in generated years 1
+// through year: each appearance tells every player, by the Trader's index.
+func (l *pvLoaded) tradersAppeared(year int) int {
+	n := 0
+	for y := 1; y <= year && y < len(l.events); y++ {
+		seen := map[int]bool{}
+		for _, ev := range l.events[y] {
+			if ev.Kind == engine.EventTraderAppeared && !seen[ev.Count] {
+				seen[ev.Count] = true
+				n++
+			}
+		}
+	}
+	return n
 }
 
 // startFollows adds the start's follows (pvLoaded.follows) to the year-1

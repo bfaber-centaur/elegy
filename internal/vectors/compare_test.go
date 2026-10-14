@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // A mismatch is always reported, even when another field of the same
@@ -531,4 +532,29 @@ func TestBattlePlanEquals(t *testing.T) {
 	pvWant(t, "no plan", battlePlanEquals(g, 0, 2, pvEq(t, all)), "no battle plan in slot 2 of player 0", "")
 	pvWant(t, "other player", battlePlanEquals(g, 1, 1, pvEq(t, all)), "no battle plan in slot 1 of player 1", "")
 	pvWant(t, "unknown field", battlePlanEquals(g, 0, 1, pvEq(t, `{"colour": 1}`)), "", "battle plan field colour")
+}
+
+// TestMysteryTraderItems pins the player's Trader parts comparison: the
+// part word in bit order (stars-elegy tools/vectors/build.py), extra and
+// missing parts both mismatching.
+func TestMysteryTraderItems(t *testing.T) {
+	var l pvLoaded
+	g := &engine.Game{Players: make([]engine.Player, 2)}
+	pvWant(t, "no space objects", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": []}`), nil), "", "mystery_trader_items without space objects")
+	s := &objects.Space{}
+	s.GiveTraderBit(0, objects.BitMiniMorph)
+	s.GiveTraderBit(0, objects.BitMultiFunctionPod)
+	g.Objects = s
+	pvWant(t, "match", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": ["Multi Function Pod", "Mini Morph"]}`), nil), "", "")
+	pvWant(t, "none", l.playerEquals(g, 1, pvEq(t, `{"mystery_trader_items": []}`), nil), "", "")
+	pvWant(t, "missing", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": ["Multi Function Pod", "Mini Morph", "Jump Gate"]}`), nil),
+		"mystery_trader_items = [Multi Function Pod Mini Morph], want [Multi Function Pod Mini Morph Jump Gate]", "")
+	pvWant(t, "another part", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": ["Multi Function Pod", "Jump Gate"]}`), nil),
+		"mystery_trader_items = [Multi Function Pod Mini Morph], want [Multi Function Pod Jump Gate]", "")
+	pvWant(t, "extra", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": ["Mini Morph"]}`), nil),
+		"mystery_trader_items = [Multi Function Pod Mini Morph], want [Mini Morph]", "")
+	pvWant(t, "other player's", l.playerEquals(g, 1, pvEq(t, `{"mystery_trader_items": ["Mini Morph"]}`), nil),
+		"mystery_trader_items = [], want [Mini Morph]", "")
+	pvWant(t, "malformed", l.playerEquals(g, 0, pvEq(t, `{"mystery_trader_items": "Mini Morph"}`), nil),
+		`mystery_trader_items: malformed expectation "Mini Morph"`, "")
 }

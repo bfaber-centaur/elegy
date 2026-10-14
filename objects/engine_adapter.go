@@ -328,6 +328,9 @@ func (s *Space) MeetTraders(g *engine.Game, rng engine.Rand) []engine.Event {
 			}
 		default:
 			ev.Kind, ev.Count = engine.EventTraderTrade, int(e.Reward.Kind)
+			if e.Reward.Kind == ItemPart {
+				ev.Axes = []int{e.Reward.Part}
+			}
 		}
 		out = append(out, ev)
 		switch {

@@ -538,7 +538,12 @@ func (g *Game) fileRetarget(views []PlayerView) []Event {
 //
 // ASSUMPTION P1: "enemy" is a fleet whose owner the patrolling player
 // treats as an enemy.
-func (g *Game) patrol(views []PlayerView) {
+//
+// The owner is told of each intercept chosen (EventPatrolTarget,
+// MESSAGES.md 0x0ff; its presence MEASURED in the WU patrol runs, the
+// rest of the row BINARY-ONLY), in fleet order.
+func (g *Game) patrol(views []PlayerView) []Event {
+	var events []Event
 	order := g.fleetOrder()
 	for _, i := range order {
 		f := &g.Fleets[i]
@@ -565,8 +570,14 @@ func (g *Game) patrol(views []PlayerView) {
 		}
 		e := &g.Fleets[best]
 		f.Waypoints = []Waypoint{{Pos: e.Pos, Warp: min(10, f.Task.Range/5), Target: TargetFleet, ID: e.ID, Task: f.Task}}
+		events = append(events, Event{Kind: EventPatrolTarget, Player: f.Owner, Planet: -1, Fleet: f.ID, Axes: []int{e.ID}})
 	}
+	return events
 }
+
+// EventPatrolTarget: Player's patrolling Fleet picked the fleet Axes[0]
+// to intercept (MESSAGES.md 0x0ff). Elegy's wording.
+const EventPatrolTarget EventKind = EventColonistsToForeignFleet + 1
 
 // TargetPacketObject is a waypoint's mineral packet or salvage object:
 // Waypoint.Owner's object number Waypoint.ID. Packets and salvage are one

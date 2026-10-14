@@ -77,7 +77,11 @@ file, so nothing in it is a default you have to guess.
   `victory_conditions` (each with its value in game units and, for the seven
   that can be switched, `enabled`), when the vector's builder read them.
 - `players`: `computer: true` for a computer player (the host plans its
-  orders each year; a vector lists only the outcomes its case is about),
+  orders each year; a vector lists only the outcomes its case is about)
+  and its `computer_level`: `easy`, `standard`, `harder` or `expert`,
+  decoded from the host file's computer-player byte (stars-elegy
+  vectors/README.md "Computer level", added 2026-10-14; the harness loads
+  it as `Player.Level` 0 to 3),
   tech levels by field, research accumulated per field, research
   percent and field, `research_next_field` (the stored "next field to
   research" choice: a field, `same` or `lowest`; an explicit field is used

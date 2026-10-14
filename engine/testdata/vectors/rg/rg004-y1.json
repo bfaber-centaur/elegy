@@ -152,6 +152,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 72
@@ -239,6 +240,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 32
@@ -327,6 +329,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 92
@@ -415,6 +418,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 70
@@ -503,6 +507,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 82
@@ -591,6 +596,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 50
@@ -679,6 +685,7 @@
      "starbase_designs": 10
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 57
