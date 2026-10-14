@@ -82,6 +82,8 @@ func pvMessageIDs() map[int]string {
 		0x117: "EventRacePenalized",
 		0x182: "EventRaceHacked",
 		0x15a: "EventPlanetDegraded",
+		0x12c: "EventPlanetImproved",
+		0x12d: "EventPlanetNotImproved",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -429,17 +431,22 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// for it, so it is not compared.
 			send(ev.Player, pvMsg{id: 0x182, focus: pvFocusNone, focusKnown: true,
 				params: []int{ev.Count}, known: []bool{false}, why: "0x182 player slot"})
-		case engine.EventPlanetDegraded:
-			// MESSAGES.md 0x15a (CONFIRMED GAP-001 W1, stars-elegy
-			// 28a3175): fleet, planet, percent before, percent after;
-			// focus the fleet for its owner, the planet for the planet
-			// owner. A negative percent's slot value is not measured.
+		case engine.EventPlanetImproved, engine.EventPlanetDegraded:
+			// MESSAGES.md 0x12c (improved, BINARY-ONLY) and 0x15a
+			// (degraded, CONFIRMED GAP-001 W1), stars-elegy 4f59d8d:
+			// fleet, planet, percent before, percent after; focus the
+			// fleet for its owner, the planet for the planet owner. A
+			// negative percent's slot value is not measured.
 			if len(ev.Axes) != 1 {
 				break
 			}
-			m := pvMsg{id: 0x15a, focus: ev.Planet - 1, focusKnown: true,
+			id := 0x15a
+			if ev.Kind == engine.EventPlanetImproved {
+				id = 0x12c
+			}
+			m := pvMsg{id: id, focus: ev.Planet - 1, focusKnown: true,
 				params: []int{0, ev.Planet - 1, ev.Axes[0], ev.Count}, known: []bool{false, true, true, true},
-				why: "0x15a fleet gone by the end of the year"}
+				why: whyNot(id, "fleet gone by the end of the year")}
 			if code, ok := fleet(ev.Fleet); ok {
 				m.params[0], m.known[0], m.why = code, true, ""
 				if code>>9 == ev.Player {
@@ -451,7 +458,24 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			if ev.Axes[0] < 0 || ev.Count < 0 {
 				m.known[2], m.known[3] = ev.Axes[0] >= 0, ev.Count >= 0
 				if m.why == "" {
-					m.why = whyNot(0x15a, "negative percent slot")
+					m.why = whyNot(id, "negative percent slot")
+				} else {
+					m.why += ", negative percent slot"
+				}
+			}
+			send(ev.Player, m)
+		case engine.EventPlanetNotImproved:
+			// MESSAGES.md 0x12d (BINARY-ONLY, stars-elegy 4f59d8d):
+			// fleet, planet, percent; focus the fleet.
+			m := pvMsg{id: 0x12d, params: []int{0, ev.Planet - 1, ev.Count}, known: []bool{false, true, ev.Count >= 0},
+				why: "0x12d fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.focus, m.focusKnown = pvFocusFleet|code, true
+				m.params[0], m.known[0], m.why = code, true, ""
+			}
+			if ev.Count < 0 {
+				if m.why == "" {
+					m.why = whyNot(0x12d, "negative percent slot")
 				} else {
 					m.why += ", negative percent slot"
 				}

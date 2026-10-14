@@ -81,6 +81,8 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (e) other fields and expectations | 33 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; fleet heading 7, `mass_shown` 3; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
 
+Updated 2026-10-14 (economy, 0x12c/0x12d mapping): "messages with no event mapping" was "148 | 63 ids (145 expectations) and 2 ids' sequence entries (3)" on `f09acd9`; 0x12c (2 + 1 sequence entry) and 0x12d (3 + 2) are now compared and match, so it is 140 (61 ids, no sequence entries) and class (e) is 584. The other numbers on this page are still `f09acd9`'s.
+
 The most frequent unmapped message ids are:
 - 0x0c6 and 0x0ca (fleet stopped and damaged in a minefield, both sides): 11 each;
 - 0x10b (Mystery Trader trade): 10;
@@ -124,7 +126,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 | 4 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 5 | patrol target 0x0ff | 9 | lane A |
 | 6 | fleet heading and `mass_shown` | 10 | lane B (harness) |
-| 7 | planet value messages 0x12c, 0x12d (and their sequence entries) | 8 | economy |
+| 7 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |
 | 8 | `design_gone`, `starbase_design_gone`, `no_new_fleets` | 7 | lane B (harness) |
 | 9 | 0x182 player slot | 1 | economy |
 
