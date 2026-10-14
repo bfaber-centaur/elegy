@@ -328,3 +328,38 @@ func TestAssumptionTransportAimedAtItself(t *testing.T) {
 		t.Errorf("events %v task %+v, want %v and no task", got, followed(t, r.Game, 1).Task, want)
 	}
 }
+
+func TestAssumptionFuelWantWithNoFleetSource(t *testing.T) {
+	// ASSUMPTION T16, T22: with no usable fleet source, "fill to 50%"
+	// fuel still wants against the 450 mg tank, not the 210 kT hold: at
+	// 150 mg it wants 75 mg (half the hold, 105, it already exceeds).
+	// So it waits before movement, whether the target is gone, elsewhere
+	// or another player's, and after movement is cancelled, with 0x123
+	// for a gone target.
+	for _, c := range []struct {
+		name string
+		edit func(g *Game)
+	}{
+		{"gone", func(g *Game) { g.Fleets[0].Task.Fleet = 99 }},
+		{"elsewhere", func(g *Game) { g.Fleets[1].Pos = Point{1250, 1200} }},
+		{"foreign", func(g *Game) { g.Fleets[1].Owner = 1 }},
+	} {
+		l := ftLab(t, 0, RelationNeutral)
+		g := withRules(l.g)
+		x := &g.Fleets[0]
+		x.Fuel = 150
+		x.Task = ftTask(CargoFuel, Transport{Action: FillTo, Amount: 50})
+		x.Task.ToFleet, x.Task.Fleet = true, 2
+		c.edit(&g)
+		if ev := g.load(x, false); len(ev) != 0 || x.Task.Transport[CargoFuel].Action != FillTo {
+			t.Errorf("%s, before movement: %v, task %+v, want it waiting", c.name, ev, x.Task)
+		}
+		if c.name != "gone" {
+			continue
+		}
+		want := []Event{{Kind: EventLoadRefused, Player: 0, Planet: -1, Fleet: 1, Axes: []int{CargoFuel}}}
+		if ev := g.load(x, true); !reflect.DeepEqual(ev, want) || x.Task.Kind != TaskNone || x.Fuel != 150 {
+			t.Errorf("%s, after movement: %v, task %+v, fuel %d; want %v and no task", c.name, ev, x.Task, x.Fuel, want)
+		}
+	}
+}

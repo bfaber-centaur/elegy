@@ -1179,3 +1179,35 @@ func TestLoadGalaxySize(t *testing.T) {
 		}
 	}
 }
+
+// TestLoadStartFollow checks a start fleet whose waypoint 0 is aimed at a
+// fleet: alone, it becomes a year-1 follow order; with a waypoint after
+// it, the fleet is unsupported, never a follow that drops that waypoint.
+func TestLoadStartFollow(t *testing.T) {
+	for _, extra := range []bool{false, true} {
+		v, err := ReadFile(testVector)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fl := &v.InitialState.Fleets[0]
+		id := 1
+		w := &fl.Waypoints[0]
+		w.Target.Kind, w.Target.ID = "fleet", &id
+		if extra {
+			next := fl.Waypoints[0]
+			next.X, next.Target.Kind, next.Target.ID = fl.X+10, "space", nil
+			fl.Waypoints = append(fl.Waypoints, next)
+		}
+		l, err := loadVector(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		why := l.unsupported[pvFleetKey(fl.Owner, fl.ID)]
+		switch {
+		case !extra && (why != "" || len(l.follows) != 1 || l.follows[0].order.Leader != l.fleetAt(&l.g, 0, 1).ID):
+			t.Errorf("one waypoint: follows %+v, unsupported %q; want one follow of fleet 1", l.follows, why)
+		case extra && (why != "waypoint 0 aimed at a fleet, with more waypoints" || len(l.follows) != 0):
+			t.Errorf("two waypoints: follows %+v, unsupported %q; want no follow and the reason", l.follows, why)
+		}
+	}
+}

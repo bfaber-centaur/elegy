@@ -106,6 +106,8 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 | NOT RUN | 22 | COMBAT 9, PARITY 5, TAKEOVER 4 |
 | UNRESOLVED | 12 | PARITY 4, TAKEOVER 3 |
 
+Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows added for transport aimed at a fleet and transport fuel (the implemented rows, T16 to T22, the year-end drop and the T19 row citing MESSAGES.md) take TAKEOVER from 18 to 20 BINARY-ONLY lines and from 12 to 15 ASSUMPTION lines by the same `grep -c`. The totals become 190 BINARY-ONLY (was 188) and 83 ASSUMPTION (was 80). The table above keeps the earlier figures.
+
 ## Biggest blind spots
 
 1. **Random parity.** Exact parity is 0 in every corpus (RANDOM-PARITY.md).
@@ -116,7 +118,7 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
 4. **Message coverage.** 63 ids have no event mapping, and minefield messages are the largest group.
 5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
-6. **Labels.** 188 BINARY-ONLY and 80 ASSUMPTION lines are claims no oracle run has checked.
+6. **Labels.** 190 BINARY-ONLY and 83 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims").
 7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
 
 ## Remaining comparator gaps, ranked
