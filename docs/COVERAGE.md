@@ -132,6 +132,8 @@ Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows 
 
 Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section adds one line that matches `BINARY-ONLY`: it names 0x0c7 and 0x0cb, which stay unmapped because MESSAGES.md labels them BINARY-ONLY, so no implemented rule is behind it. By the same `grep -c` the totals become 191 BINARY-ONLY (was 190) and 83 ASSUMPTION (unchanged).
 
+Updated 2026-10-14 (lane A, patrol target 0x0ff): KERNEL-STATUS's patrol paragraph gains a line that matches `BINARY-ONLY`: the 0x0ff slots, a BINARY-ONLY claim that stays uncompared. KERNEL goes from 20 to 21 lines, and by the same `grep -c` the BINARY-ONLY total becomes 192 (was 191). ASSUMPTION 84, NOT RUN 22 and UNRESOLVED 14 are unchanged. The table above keeps 191.
+
 ## Biggest blind spots
 
 1. **Random parity.** Exact parity is 0 in every corpus (RANDOM-PARITY.md).
@@ -142,7 +144,7 @@ Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section add
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
 4. **Message coverage.** 55 ids have no event mapping (updated 2026-10-14 after the economy, minefield and patrol messages; it was 63, and minefield messages were the largest group).
 5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
-6. **Labels.** 191 BINARY-ONLY and 84 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims"). Updated 2026-10-14 (RG-005 ingest PR): this read "190 BINARY-ONLY and 83 ASSUMPTION"; the minefield-messages line adds 1 BINARY-ONLY and the SCANNING-STATUS partial-starbase row 1 ASSUMPTION.
+6. **Labels.** 191 BINARY-ONLY and 84 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims"). Updated 2026-10-14 (RG-005 ingest PR): this read "190 BINARY-ONLY and 83 ASSUMPTION"; the minefield-messages line adds 1 BINARY-ONLY and the SCANNING-STATUS partial-starbase row 1 ASSUMPTION. Updated 2026-10-14 (lane A, patrol target 0x0ff): 192 BINARY-ONLY; the KERNEL-STATUS 0x0ff slot line adds 1 (note under "Unproven claims").
 7. **Breadth.** RG covers three representative games (RG-002/003 share years 1–6) plus RG-005, the out-of-sample game. On RG-005's first run the zero did not hold: 12 strict expectations missed on all 8 seeds, all from a harness gap now closed (section "RG-005" above).
 
 ## Remaining comparator gaps, ranked
