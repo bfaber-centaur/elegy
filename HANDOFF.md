@@ -8,25 +8,26 @@ Is Elegy ready for a human playtest? The release candidate is meant to be stable
 
 Release-candidate checkpoint, 2026-10-14.
 
-- **Engine:** elegy main after #279. The tested code is `b2642b4` (tree `533a530`), which merges main `2943788` (#278) with #279's command-line changes. #279's last commit adds only this file, so the code tested is exactly the code merged.
+- **Engine:** elegy main after #279. The tested commit is `6e31db0` (tree `5e83591`): main `f3a3080` (#280, docs only on top of #278's `2943788`) merged with #279's command-line changes. #279's last commit changes only this file, so the code tested is the code merged.
 - **Integrated on main, in order:**
   - #276 (`97fb5d2`): RG-005 ingest, the Trader-id harness fix and computer levels from the vectors.
   - #277 (`d64c936`): the patrol target message 0x0ff.
   - #278 (`2943788`): the Mystery Trader part messages and player Trader items.
+  - #280 (`f3a3080`): COVERAGE.md and PARITY-STATUS.md re-measured on `2943788` (docs only).
 - **Specification and vectors:** stars-elegy main `d3d436b`. The RG-005 vectors are `419229a` (#212); the computer levels come from `bdb4921` (#214).
 - **Other repositories** (private, not used by elegy's build): stars-oracle-apparatus `1a9f1c2`, stars-decomp `a1af617`.
 - **Ruleset** `elegy` v7 (default) and `jrc3-faithful` v6. SaveVersion 13. Event kinds up to 103.
 
-### Verification on `b2642b4`
+### Verification
 
 | check | command | result |
 |---|---|---|
-| full suite | `go test ./... -count=1` | pass, every package (2 min 37 s on 4 cores) |
-| computer players across save and reload | `go test ./ai -run TestDriversSaveReload -count=1` | pass, both rulesets |
-| release matrix | `go test ./regress -run '^TestLongGames$' -count=1 -args -seeds=1,2,3,4,5,6,7,8 -years=150 -save-at=77 -size=2` | 64 games, 64 with no failure (4 min 42 s) |
+| full suite | `go test ./... -count=1` | `6e31db0`: pass, every package (2 min 20 s on 4 cores) |
+| computer players across save and reload | `go test ./ai -run TestDriversSaveReload -count=1` | `6e31db0`: pass, both rulesets |
+| release matrix | `go test ./regress -run '^TestLongGames$' -count=1 -args -seeds=1,2,3,4,5,6,7,8 -years=150 -save-at=77 -size=2` | `b2642b4`: 64 games, 64 with no failure (4 min 42 s) |
 | CLI walkthrough, save copy continued | `TestPlaytestScript`, `TestCLIPlayableSlice` (in the full suite) | pass |
 
-The release matrix covers 8 seeds × 2 rulesets × 4 opponent sets: 64 games of 150 years on a medium map. Each game is replayed from its seed and reloaded from its year-77 save, and every year's hash must match ([docs/REGRESSION.md](docs/REGRESSION.md)). The steward also ran this matrix on #278's trial merge, with 64 of 64 games and no failure, and `TestDriversSaveReload` passed there.
+The release matrix covers 8 seeds × 2 rulesets × 4 opponent sets: 64 games of 150 years on a medium map. Each game is replayed from its seed and reloaded from its year-77 save, and every year's hash must match ([docs/REGRESSION.md](docs/REGRESSION.md)). `b2642b4` is the earlier head of #279 (main `2943788` with the command-line changes). From it to `6e31db0`, outside docs/ and HANDOFF.md, only two test files in cmd/elegy changed (`git diff b2642b4 6e31db0 -- . ':!docs' ':!HANDOFF.md'`), so the matrix result holds for the code merged. The steward ran this matrix (`-size=2`, medium) on #279's code at `a05a530`: 64 of 64 with no failure (479 s), and `TestDriversSaveReload` passed on the #279 trial merge. On #278's trial merge the steward ran the same seeds and years on the default small map: 64 of 64.
 
 ## What we know
 
@@ -55,7 +56,7 @@ The release matrix covers 8 seeds × 2 rulesets × 4 opponent sets: 64 games of 
 - **Messages.** 52 message ids are not mapped. The CLI prints Elegy's event names, not the original's texts.
 - **Not modelled.** Robber Baron and Pick Pocket cargo stealing, and the fuel action "load optimal" (TAKEOVER-STATUS.md).
 - **Mystery Trader slots.** Elegy keeps Traders densely, without the original's slot, so 15 RG-005 Trader expectations are not compared.
-- **INTENTIONALLY DIFFERENT under `elegy`:** merge overflow (FO-03-E, FO-06-G) and `zero_max_population_stop` off (RULESET.md). `jrc3-faithful` keeps the original's behaviour.
+- **Legacy switches off under `elegy` v7 and on under `jrc3-faithful` v6** (RULESET.md): `merge_overflow` (parity cases FO-03-E and FO-06-G differ, INTENTIONALLY DIFFERENT), `keep_unentitled_parts`, `zero_max_population_stop`, `cybertron_packet_mark_next_id` and `cybertron_scanner_shot_overflow`. `jrc3-faithful` is only as faithful as the switches go; where Elegy models a behaviour differently without a switch, both rulesets behave the same.
 
 **Playable** (docs/PLAYTEST.md): creating a game, inspecting it, research, production, designing and queueing a ship, moving, colonizing, meeting and fighting the computer player, advancing years, and saving and continuing all work from `cmd/elegy`. `TestPlaytestScript` runs the guide's literal walkthrough. The command line has no `order` kind for merge, split, rename, transfers between fleets, follow, repeat, planet settings, relations, the default queue or detonation. Those orders can be written into the JSON order file by hand.
 
@@ -63,7 +64,7 @@ The release matrix covers 8 seeds × 2 rulesets × 4 opponent sets: 64 games of 
 
 ```sh
 git clone https://github.com/bfaber-centaur/elegy && cd elegy
-git checkout b2642b4        # or main
+git checkout 6e31db0        # or main
 go test ./...              # about 3 minutes on 4 cores
 go build -o elegy ./cmd/elegy
 mkdir -p playtest && cd playtest
