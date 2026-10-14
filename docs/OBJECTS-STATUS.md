@@ -21,7 +21,7 @@ below and KERNEL-STATUS.md "Space objects").
 | Lay amounts, hull multiplier, MCM | `LayAmounts` | CONFIRMED (OB-002, OB-024) |
 | Merging, merge cap, laying order | `Space.Lay` | CONFIRMED (OB-002-G, MF-10, MF-12) |
 | SD half lay while moving | `Layer.Half` | CONFIRMED (OB-014-C) |
-| 512-field limit | `Space.Lay` | MEASURED (MF-11); the 511 case is LEGACY BUG `Legacy.FieldLimit511` (on in the `elegy` ruleset from v7, off in v1–v6; MF-13a, MF-13b) |
+| 512-field limit | `Space.Lay` | MEASURED (MF-11); field 511 only when nothing sorts after the owner's fields (MF-13) is LEGACY BUG `Legacy.FieldLimit511` (on in the `elegy` ruleset from v7, off in v1–v6; MF-13a, MF-13b) |
 | 4050-object limit | `Space.Lay` | BINARY-ONLY |
 | Sweep rating and amount | `SweepRating`, `Space.Sweep` | CONFIRMED (OB-001, OB-007, OB-008, OB-010-S); ratings agree with the table's mines-swept column |
 | Effective warp | `EffectiveWarp` | CONFIRMED (OB-010, MF-3) |

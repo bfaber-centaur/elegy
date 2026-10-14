@@ -25,7 +25,7 @@ included, not just the ID.
 
 | ID | Version | Settings |
 |---|---|---|
-| `elegy` | 7 | `engine.ElegyRules()`, the default: version 6 with `field_limit_511` on (Bobby, project chat decision card, 2026-10-14 04:33Z: chose Match 511; MF-13a and MF-13b, stars-elegy MEASURED MF-13). |
+| `elegy` | 7 | `engine.ElegyRules()`, the default: version 6 with `field_limit_511` on: a player's 512th field (number 511) is made only when no other space object sorts after that player's minefields, so the limit is 511 fields when something does and 512 otherwise (Bobby, project chat decision card, 2026-10-14 04:33Z: chose "Match 511", that is, match the original; MF-13a and MF-13b, stars-elegy MEASURED MF-13). |
 | `elegy` | 6 | Version 5 with `lost_planet_message_carry` on. Kept for games saved under it. |
 | `elegy` | 5 | Version 4 with `artifact_full_slower_tech` on. Kept for games saved under it. |
 | `elegy` | 4 | Version 3 with `bare_record_drop` on. Kept for games saved under it. |
@@ -87,7 +87,7 @@ switch as a parameter from a caller that does.
 | `bare_record_drop` | `BareRecordDrop` | on (off in v1–v3) | on (off in v1–v3) | `engine/population.go` `Game.dropBareRecords`, when the year's files are written | stars-elegy 9a355fe TAKEOVER.md "Capture: what a planet keeps": an unowned planet with no mines, factories, defenses or scanner is written without its installations record, so it loses its growth carry and leftover setting, LEGACY BUG (a file round trip artifact); the behaviour BINARY-ONLY, MEASURED RG-001 planets 50 and 87 |
 | `artifact_full_slower_tech` | `ArtifactFullSlowerTech` | on (off in v1–v4) | on (off in v1–v4) | `engine/artifact.go` `Game.findArtifact` | stars-elegy 7c06f47 TAKEOVER.md "Ancient artifacts": slower tech does not halve an artifact's points, LEGACY BUG in the binary reading (the halving is computed and never used), MEASURED TK-304. Off: half the points are stored, rounded up as slower tech stores stolen research (ELEGY CHOICE, not measured; no built-in uses it; `TestElegyChoiceArtifactHalvedSwitchOff`) |
 | `lost_planet_message_carry` | `LostPlanetMessageCarry` | on (off in v1–v5) | on (off in v1–v5) | `engine/turn.go` `GenerateTurn` (the growth loop) | stars-elegy MESSAGES.md "0x040 vs 0x023": a planet that already has no colonists when growth runs is reported as died out (0x023) instead of left (0x040) when the planet growth handled just before it shrank, LEGACY BUG, CONFIRMED MG-002. Only the message differs. Planets growth skips (unowned, or already empty) leave the carried value alone (ASSUMPTION) |
-| `field_limit_511` | `FieldLimit511` | on (off in v1–v6) | on | `objects/minefields.go` `Space.Lay` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
+| `field_limit_511` | `FieldLimit511` (field 511, the 512th, only when no other space object sorts after the owner's minefields; else a plain 512) | on (off in v1–v6) | on | `objects/minefields.go` `Space.Lay` | OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13 |
 | `empty_fleet_salvage` | `EmptyFleetSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Hits on moving fleets", LEGACY BUG candidate, MEASURED OB-024 |
 | `due_north_south_cut` | `DueNorthSouthCut` | on | on | `objects/minefields.go` `CheckStep` | OBJECTS.md "Due-north and due-south legs", LEGACY BUG, MEASURED MF-15 |
 | `mine_survivor_salvage` | `MineSurvivorSalvage` | on | on | `objects/minefields.go` `mineCargo` | OBJECTS.md "Cargo when ships are destroyed", LEGACY BUG candidate, MEASURED MF-14 |
