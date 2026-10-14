@@ -24,7 +24,7 @@ Each cell is done, partial or missing, with its evidence. The coverage numbers b
 | fleets: merge, split, cargo | done between own fleets | partial: merge rules CONFIRMED. Fleet-to-fleet transport, loads from another player's fleet and Robber Baron stealing are missing (38 expectations, COVERAGE.md) | n/a |
 | combat | done | partial: 12,561 of 12,561 hits compared and recorded moves all match; 9 NOT RUN (COMBAT-STATUS.md "Not tested against the oracle") | missing: torpedo rolls only conditioned |
 | takeover, invasion, bombing | done | partial: bombing and ground combat CONFIRMED; GC-1 with several attackers NOT RUN; 12 ASSUMPTION | missing: bombing roundings not replayed |
-| scanning, reports | done: `game.Report`, history, known designs | partial: sc corpus passes; 156 viewer-report and 216 client-estimate expectations not compared (milestone 3) | missing: population estimates use Elegy's stream (ELEGY CHOICE) |
+| scanning, reports | done: `game.Report`, history, known designs | partial: sc corpus passes, including its 156 viewer-report expectations (compared since 2026-10-14); 216 client-estimate expectations not compared (milestone 3) | missing: population estimates use Elegy's stream (ELEGY CHOICE) |
 | minefields, packets, wormholes, salvage, Mystery Trader | done (OBJECTS-STATUS.md "Turn wiring") | partial: 44 BINARY-ONLY lines; minefield messages unmapped (35 expectations); battles never award Trader items | missing: mf never matches its random outcomes; ob and wt are samples |
 | races | done: `elegy race`, race file v1 | partial: RD-P1..RD-P21 pass; ASSUMPTION B1 | missing: random race uses Elegy's stream |
 | components, designs | done: catalog, design orders | partial: verbatim component table; design orders not in the vectors | n/a |

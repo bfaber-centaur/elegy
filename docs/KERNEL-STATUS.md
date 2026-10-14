@@ -687,9 +687,11 @@ reproduced), `battle_plan` 13, wormhole objects 10,
   (`Game.EstRange`, `Game.EstFuelUsage`; ESTIMATES.md): ES-001's 23
   ranges and 21 fuel readings and ES-002's 18 fuel readings all pass,
   61 of them CONFIRMED and ES-002-F07-w1 MEASURED.
-- `view` of `other_players` (96), `player` (56) and `design` (4), and
-  the view fields `population_estimate`, `defense_estimate`, `heading`,
-  `mass_shown` and `environment_visible`: not compared yet.
+- `view` of `other_players` (96), `player` (56) and `design` (4) is
+  compared since 2026-10-14, and all 156 pass (`pvDesignViews`). The view
+  fields `heading` and `mass_shown` are compared since 2026-10-14 (SC-027,
+  all 10 pass); `population_estimate`, `defense_estimate` and
+  `environment_visible` are not compared yet.
 - `battle` and `battle_actions` expectations (18, CS-003-C): battle
   records are compared only through their effects.
 - Orders and tasks Elegy does not load: fleet-to-fleet transport (15),

@@ -30,8 +30,6 @@
    1 expectation no_new_fleets
  192 expectation sample
    1 expectation starbase_design_gone
-   7 fleet field heading
-   3 fleet field mass_shown
   15 fleet-to-fleet transport
   15 fleet-to-fleet transport (target)
    1 message 0x000 has no event mapping
@@ -73,8 +71,6 @@
    1 message 0x10c has no event mapping
    1 message 0x10f has no event mapping
    3 message 0x127 has no event mapping
-   2 message 0x12c has no event mapping
-   3 message 0x12d has no event mapping
    1 message 0x147 has no event mapping
    1 message 0x149 has no event mapping
    3 message 0x14c has no event mapping
@@ -93,8 +89,6 @@
    1 message 0x174 has no event mapping
    1 message 0x179 has no event mapping
    1 message_sequence 0x182 player slot not compared
-   1 message_sequence entry 0x12c has no event mapping
-   2 message_sequence entry 0x12d has no event mapping
    2 message_sequence of sample entries only
    9 planet field defense_estimate
    2 planet field defenses null
@@ -113,6 +107,3 @@
    5 score_record: a computer player's planned orders (not in the vector)
 5129 stream (another oracle random stream)
    8 transport fuel
-   4 view of a design
-  96 view of a other_players
-  56 view of a player

@@ -2481,6 +2481,9 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 		}
 		f := fleet(sub.Owner, sub.ID)
 		level := 0
+		// heading and mass_shown are null for a fleet the viewer does not
+		// see, so an expectation on one is never silent.
+		got["heading"], got["mass_shown"] = nil, nil
 		if f != nil {
 			for _, s := range v.Fleets {
 				if s.Fleet == f.ID {
@@ -2490,6 +2493,7 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 					if s.Cargo != nil {
 						level = 4
 					}
+					got["heading"], got["mass_shown"] = pvHeading(s), s.Mass
 				}
 			}
 		}
@@ -2511,10 +2515,96 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 		got["known"] = ok && slices.Contains(v.Objects.Wormholes, id)
 	case "trader":
 		got["known"] = slices.Contains(v.Objects.Traders, sub.ID)
+	case "other_players", "player", "design":
+		pvDesignViews(g, v, sub.Kind, sub.Owner, sub.ID, l.design, got)
 	default:
 		return "skip: view of a " + sub.Kind
 	}
 	return pvCompare(sub.Kind, got, eq, 0, nil)
+}
+
+// pvHeading is a sighting's heading as the vectors give it: [dx, dy,
+// warp]. A fleet that did not move has heading (0, 0) and warp 0, which
+// the original's file stores as bytes of 0 holding value + 127, so the
+// vectors read it as [-127, -127, 0] (SCANNING.md "Heading" and "Notes for
+// comparing with original-game files", MEASURED SC-027).
+func pvHeading(s engine.FleetSighting) []int {
+	if s.Warp == 0 && s.Heading == (engine.Point{}) {
+		return []int{-127, -127, 0}
+	}
+	return []int{s.Heading.X, s.Heading.Y, s.Warp}
+}
+
+// pvDesignViews fills got with what viewer v's file holds of other
+// players' designs and player blocks (vectors README.md "view"; SCANNING.md
+// "Designs" and "Players"):
+//   - other_players: foreign_designs and foreign_starbase_designs, the
+//     viewer's foreign ship and starbase designs counted as partial (hull
+//     and mass) or full;
+//   - player: player_block, null for an unknown player, "partial" (name
+//     only) or "full" (with habitability, a Claim Adjuster viewer), and
+//     starbase_designs_full, the player's starbase designs in the
+//     viewer's file by slot, each true when full;
+//     (ASSUMPTION: the design's own owner. The original's file names no
+//     owner for a partial starbase design, and stars-elegy experiments/sc
+//     round2.py counts every such design for the subject. The sc cases
+//     have two players, where the two readings cannot be told apart.
+//     Pinned by TestDesignViews, player 2);
+//   - design: design_full for one ship design, null when it is not in
+//     the viewer's file.
+func pvDesignViews(g *engine.Game, v engine.PlayerView, kind string, owner, id int, design map[[2]int]int, got map[string]any) {
+	slot := map[int]engine.DesignSlot{}
+	for _, s := range g.DesignSlots {
+		slot[s.Design] = s
+	}
+	switch kind {
+	case "other_players":
+		ships := map[string]int{"partial": 0, "full": 0}
+		bases := map[string]int{"partial": 0, "full": 0}
+		for _, d := range v.Designs {
+			n := ships
+			if slot[d.Design].Starbase {
+				n = bases
+			}
+			if d.Full {
+				n["full"]++
+			} else {
+				n["partial"]++
+			}
+		}
+		got["foreign_designs"], got["foreign_starbase_designs"] = ships, bases
+	case "player":
+		got["player_block"] = nil
+		for _, p := range v.Players {
+			if p.Player == id {
+				got["player_block"] = "partial"
+				if p.Hab != nil {
+					got["player_block"] = "full"
+				}
+			}
+		}
+		var sb []engine.DesignSighting
+		for _, d := range v.Designs {
+			if s := slot[d.Design]; s.Starbase && s.Owner == id {
+				sb = append(sb, d)
+			}
+		}
+		slices.SortFunc(sb, func(a, b engine.DesignSighting) int { return slot[a.Design].Slot - slot[b.Design].Slot })
+		full := []bool{}
+		for _, d := range sb {
+			full = append(full, d.Full)
+		}
+		got["starbase_designs_full"] = full
+	case "design":
+		got["design_full"] = nil
+		if di, ok := design[[2]int{owner, id}]; ok {
+			for _, d := range v.Designs {
+				if d.Design == di {
+					got["design_full"] = d.Full
+				}
+			}
+		}
+	}
 }
 
 // pvLegacyOff names the LEGACY BUG cases whose switch is off by default,
