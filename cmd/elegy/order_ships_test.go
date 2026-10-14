@@ -244,3 +244,30 @@ func TestOrderQueueNewDesign(t *testing.T) {
 		t.Fatalf("queueing a deleted design: %v", err)
 	}
 }
+
+// TestPendingDesigns pins the design names and slots a queue item can
+// name after a file's design orders: each kind keeps to its own slots, a
+// delete frees only its own kind's slot, and a name two designs share
+// names the lower slot.
+func TestPendingDesigns(t *testing.T) {
+	r := game.Report{Designs: []game.OwnDesign{
+		{Slot: engine.DesignSlot{Slot: 0}, Design: engine.Design{Name: "Scout"}},
+		{Slot: engine.DesignSlot{Slot: 1}, Design: engine.Design{Name: "Scout"}},
+		{Slot: engine.DesignSlot{Slot: 0, Starbase: true}, Design: engine.Design{Name: "Starbase"}},
+		{Slot: engine.DesignSlot{Slot: 1, Starbase: true}, Design: engine.Design{Name: "Old Fort"}},
+	}}
+	pending := []engine.Order{
+		engine.DesignOrder{Starbase: true, Slot: 2, Name: "Fort"},
+		engine.DeleteDesignOrder{Starbase: true, Slot: 1},
+		engine.DesignOrder{Slot: 5, Name: "twin"},
+		engine.DesignOrder{Slot: 3, Name: "Twin"},
+	}
+	ships := map[string]int{"0": 0, "1": 1, "scout": 0, "3": 3, "5": 5, "twin": 3}
+	if got := pendingDesigns(r, pending, false); !reflect.DeepEqual(got, ships) {
+		t.Errorf("ship designs %v, want %v", got, ships)
+	}
+	starbases := map[string]int{"0": 0, "starbase": 0, "2": 2, "fort": 2}
+	if got := pendingDesigns(r, pending, true); !reflect.DeepEqual(got, starbases) {
+		t.Errorf("starbase designs %v, want %v", got, starbases)
+	}
+}

@@ -14,7 +14,7 @@ import (
 // showReport is a hand-made report that reaches every branch of show.
 func showReport() game.Report {
 	race := engine.Race{Env: [3]engine.EnvRange{{Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}},
-		ColonistsPerResource: 1000, FactoryOutput: 10, FactoriesOperated: 10, MinesOperated: 10}
+		ColonistsPerResource: 1000, FactoryOutput: 10, FactoriesOperated: 10, MinesOperated: 6}
 	scout := engine.Design{Name: "Scout", Mass: 25, Hull: engine.Hull{Name: "Scout"}, Engines: 1, Engine: engine.Engine{Name: "Long Hump 6"}, FuelCapacity: 300}
 	hauler := engine.Design{Name: "Hauler", Mass: 130, Hull: engine.Hull{Name: "Medium Freighter"}, CargoCapacity: 210}
 	other := engine.Design{Name: "Spy", Mass: 20}
@@ -51,7 +51,7 @@ func showReport() game.Report {
 			{Kind: engine.EventBuilt, Planet: 0, Fleet: -1, Item: engine.ItemFactory, Count: 3},
 			{Kind: engine.EventShipsBuilt, Planet: 0, Fleet: 0, Count: 1},
 			{Kind: engine.EventLevelUp, Planet: -1, Fleet: -1, Item: engine.ItemKind(engine.Weapons), Count: 9},
-			{Kind: engine.EventPartAvailable, Planet: -1, Fleet: -1, Count: 0},
+			{Kind: engine.EventPartAvailable, Planet: -1, Fleet: -1, Count: 3},
 			{Kind: engine.EventPartAvailable, Planet: -1, Fleet: -1, Count: -1},
 			{Kind: engine.EventBattleSummary, Planet: 0, Fleet: -1, Count: 28, Axes: []int{2, 1, 0, 5, 3, -1, -1}},
 			{Kind: engine.EventBattleSummary, Planet: -1, Fleet: -1, Count: 28, Axes: []int{2, 1, 1, 5, 4, -1, -1}},
@@ -89,7 +89,7 @@ Messages: 9; last year's orders: 3, 2 rejected
 Planets (2)
 Planet 11 (#0) at (1000, 1000), homeworld
   population 25000, mines 10, factories 12, defenses 3
-  resources 37 a year; maximum population 1000000; population operates up to 25 mines, 25 factories
+  resources 37 a year; maximum population 1000000; population operates up to 15 mines, 25 factories
   starbase Fort
   surface minerals: ironium 1, boranium 2, germanium 3 kT
   concentrations: 40, 50, 60
@@ -159,7 +159,7 @@ Messages for 2404 (9)
 built factories: Planet 11 (#0), count 3
 ships built: Planet 11 (#0), fleet #0, count 1
 level up: weapons level 9
-part available: Small Freighter
+part available: Super Freighter
 part available, count -1
 battle summary: Planet 11 (#0); your ships 1, 0 lost; other side 5, 3 lost
 battle summary: deep space; your ships 1, 1 lost; other side 5, 4 lost
@@ -310,16 +310,17 @@ func TestShowTech(t *testing.T) {
 	for _, want := range []string{
 		"Hulls the player can build (",
 		"\nScout (ship), 8 kT, armor 20, fuel 50 mg; cost ",
+		"\nOrbital Fort (starbase), 0 kT, armor 100; cost 35 resources, ironium 11, boranium 0, germanium 15 kT as a starbase\n",
 		"\n  slot 0: engine, up to 1\n  slot 1: scanner, up to 1\n",
 		"\nSpace Station (starbase), ",
-		"\nParts the player can build (",
+		"\nParts the player can build (18); ",
 		"\nengine: Long Hump 6, 9 kT; cost ",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("show tech lacks %q", want)
 		}
 	}
-	for _, not := range []string{"Battleship", "Super Freighter", "Genesis Device", "Total Terraform"} {
+	for _, not := range []string{"Battleship", "Super Freighter", "Genesis Device", "Total Terraform", "Viewer 50", "SDI"} {
 		if strings.Contains(got, not) {
 			t.Errorf("show tech lists %q", not)
 		}
