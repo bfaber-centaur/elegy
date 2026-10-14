@@ -175,6 +175,13 @@ func rg002Run(t *testing.T, name string, seed int) (fields map[rg002Field]string
 				fields[k] = "not generated: " + stop
 				continue
 			}
+			// An alt_battle gets its line from engine TestBattleRecords,
+			// which judges it as a sample: an extra battle there, or none
+			// as in the recorded stream (battle_parity_test.go
+			// checkBattleSet).
+			if e.Kind == "alt_battle" {
+				continue
+			}
 			msg, also, _ := strings.Cut(l.pvCheck(&games[e.Year], e), pvAlsoSkipped)
 			if also != "" {
 				ks := k
