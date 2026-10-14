@@ -23,13 +23,17 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
 - **0 known discrepancies in RG-002, RG-003 and RG-004** on the reference seed: no incorrect-mechanic line and no unresolved-randomness line.
   - Every compared difference is a sample, or random-driven: it matches on at least one of the 8 seed variants.
   - The chained runs diverge in year 1, and everything after year 1 is a sample.
-- **Ledger lines** (chained / restarts):
+- **Ledger lines** (chained / restarts; computer players at their vector level since 2026-10-14):
 
   | corpus | matched | random-driven | sample | not compared | total |
   |---|---|---|---|---|---:|
-  | RG-002 | 8 / 44 | 0 / 35 | 1019 / 199 | 0 / 0 | 1305 |
-  | RG-003 | 8 / 100 | 0 / 76 | 5287 / 450 | 0 / 0 | 5921 |
-  | RG-004 | 4 / 47 | 1 / 17 | 2519 / 263 | 2 / 2 | 2855 |
+  | RG-002 | 8 / 44 | 0 / 36 | 1019 / 199 | 0 / 0 | 1306 |
+  | RG-003 | 8 / 100 | 0 / 77 | 5291 / 450 | 0 / 0 | 5926 |
+  | RG-004 | 4 / 47 | 1 / 17 | 2539 / 263 | 2 / 2 | 2875 |
+
+  Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 56 message ids are unmapped (was 61). `elegy` v7 turns `Legacy.FieldLimit511` on, so MF-13a and MF-13b keep passing with 0x17e compared (PARITY-STATUS.md "Minefield laying and hit messages").
+
+  Updated 2026-10-14 (lane A, patrol target 0x0ff): the ledgers do not move. The 9 skipped 0x0ff expectations, all in the WU patrol cases, are compared now and match, and 55 message ids are unmapped (was 56). Class (e) goes from 366 to 357 (COVERAGE.md).
 
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.
@@ -42,7 +46,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   - random parity, which is 0 exact;
   - computer players, with no oracle comparison;
   - client estimates, 216 expectations;
-  - 63 unmapped message ids;
+  - 56 unmapped message ids;
   - fleet-to-fleet cargo.
 
 ## Engine completion
@@ -52,13 +56,15 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 63 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 56 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
+
+- **RG-005 (out of sample), 2026-10-14:** the zero did not hold. On the candidate's first run, 25 lines were UNCLASSIFIED (8 in restarts years 1–6 and chained year 1). Fix A (harness: Trader vector ids) leaves 19, all in the restarts: 12 strict expectations that miss on all 8 seeds, hand-classed `state-import error [lane B]` with cause UNRESOLVED and counted as deterministic misses. Loading each computer player's level from the vectors (stars-elegy #214) makes all 12 match, so the cause was that harness gap and RG-005 now has 0 deterministic misses (no longer out of sample). PARITY-STATUS.md "RG-005" has the four tallies and the PREDICTION.md scoring.
 
 ## What still matters
 
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
-  - minefield messages (35, lane D);
+  - ~~minefield messages (35, lane D)~~ done 2026-10-14;
   - fleet-to-fleet transport (38, lane A, a mechanic). Updated 2026-10-14: implemented by lane A; 36 of the 38 are compared and pass (16 FO and FM cases), FO-02-Q's "load optimal" fuel (2) stays not compared, and no RG ledger line moves (COVERAGE.md dated note);
   - the Mystery Trader (15, lane D).
 - Viewer reports (156) are compared since 2026-10-14 and all pass.
@@ -70,4 +76,4 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 
 ## Best next move
 
-Run RG-005 (lane F) on `f09acd9` as the out-of-sample check of the zero. Then route the ranked gaps, starting with the minefield messages.
+Route the ranked gaps, starting with the minefield messages. A Trader's original slot is not kept in Elegy (15 RG-005 expectations not compared); a slot field on objects.Trader would let the harness compare them.

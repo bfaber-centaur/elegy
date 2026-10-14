@@ -222,11 +222,11 @@ const YearsIndefinitely = -1
 
 // Space object messages. Elegy's wording; Player is who is told.
 const (
-	EventMineHit           EventKind = iota + EventFleetGiftNoRoom + 1 // Player = victim, Fleet, Count = mines the field lost
+	EventMineHit           EventKind = iota + EventFleetGiftNoRoom + 1 // Player = victim, Fleet, Count = mines the field lost, Axes = the field's owner, its kind and the ships lost
 	EventMineShipsLost                                                 // Player = victim, Fleet, Count = ships destroyed by a hit or detonation
 	EventMineDetonation                                                // Player = victim, Fleet: hit by a detonating field
-	EventMinesLaid                                                     // Player, Fleet, Count = mines
-	EventMinesNotLaid                                                  // Player, Fleet: no room for a new field
+	EventMinesLaid                                                     // Player, Fleet, Count = mines, Axes = 1 for a new field (else 0) and the mine kind
+	EventMinesNotLaid                                                  // Player, Fleet: no room for a new field; Count and Axes as EventMinesLaid
 	EventNoDispensers                                                  // Player, Fleet: a lay-mines task with no dispensers
 	EventMinesSwept                                                    // Player = sweeper, Fleet (or -1 for a starbase), Planet (or -1), Count = mines, Axes = the field's owner, kind, x, y and number
 	EventWormholeTransit                                               // Player, Fleet, Count = the end passed through

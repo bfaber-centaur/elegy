@@ -17,7 +17,7 @@ func TestRGGames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := fmt.Sprint(games), fmt.Sprintf("[{rg001  6 0} {rg002 %[1]s/rg002-ledger.txt 6 88} {rg003 %[1]s/rg003-ledger.txt 12 204} {rg004 %[1]s/rg004-ledger.txt 12 110}]", rgCorpus); got != want {
+	if got, want := fmt.Sprint(games), fmt.Sprintf("[{rg001  6 0} {rg002 %[1]s/rg002-ledger.txt 6 88} {rg003 %[1]s/rg003-ledger.txt 12 204} {rg004 %[1]s/rg004-ledger.txt 12 110} {rg005 %[1]s/rg005-ledger.txt 12 36}]", rgCorpus); got != want {
 		t.Errorf("RGGames(%s) = %s, want %s", rgCorpus, got, want)
 	}
 	const (

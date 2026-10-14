@@ -47,7 +47,7 @@ func TestRulesetValidate(t *testing.T) {
 		t.Errorf("zero ruleset: %v", err)
 	}
 	mislabelled := ElegyRules()
-	mislabelled.Legacy.FieldLimit511 = true
+	mislabelled.Legacy.FieldLimit511 = false
 	noVersion := ElegyRules()
 	noVersion.ID = "custom"
 	noVersion.Version = 0
@@ -74,6 +74,14 @@ func TestRulesetValidate(t *testing.T) {
 			t.Errorf("built-in %s version %d listed twice", r.ID, r.Version)
 		}
 		ids[key] = true
+	}
+	// Every earlier version stays registered, so its saves still load.
+	for _, latest := range []Ruleset{ElegyRules(), FaithfulRules()} {
+		for v := 1; v <= latest.Version; v++ {
+			if !ids[key{latest.ID, v}] {
+				t.Errorf("built-in %s version %d not registered", latest.ID, v)
+			}
+		}
 	}
 }
 
@@ -256,12 +264,18 @@ func TestRulesetSavedBeforeSwitch(t *testing.T) {
 			t.Errorf("%s v%d differs from v4 beyond artifact_full_slower_tech, on in v5 only", c.v5.ID, c.v5.Version)
 		}
 	}
-	for _, c := range []struct{ v6, v5 Ruleset }{{ElegyRules(), elegyRulesV5()}, {FaithfulRules(), faithfulRulesV5()}} {
+	for _, c := range []struct{ v6, v5 Ruleset }{{elegyRulesV6(), elegyRulesV5()}, {FaithfulRules(), faithfulRulesV5()}} {
 		v6 := c.v6
 		v6.Version = 5
 		v6.Legacy.LostPlanetMessageCarry = false
 		if c.v6.Version != 6 || !c.v6.Legacy.LostPlanetMessageCarry || c.v5.Legacy.LostPlanetMessageCarry || v6 != c.v5 {
 			t.Errorf("%s v%d differs from v5 beyond lost_planet_message_carry, on in v6 only", c.v6.ID, c.v6.Version)
 		}
+	}
+	v7 := ElegyRules()
+	v7.Version = 6
+	v7.Legacy.FieldLimit511 = false
+	if ElegyRules().Version != 7 || !ElegyRules().Legacy.FieldLimit511 || elegyRulesV6().Legacy.FieldLimit511 || v7 != elegyRulesV6() {
+		t.Errorf("elegy v7 differs from v6 beyond field_limit_511, on in v7 only")
 	}
 }

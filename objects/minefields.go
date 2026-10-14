@@ -361,12 +361,11 @@ func (s *Space) lay(owner int, pos engine.Point, k MineKind, amount int, limit51
 	return LayResult{Kind: k, Amount: amount, Field: -1}
 }
 
-// freeNumber is the owner's lowest unused field number below the limit.
 // freeNumber is the lowest field number free for owner. limit511
 // reproduces the original's LEGACY BUG that a player's last field number,
 // 511, is given only when no other space object sorts after that player's
 // minefields (Legacy.FieldLimit511; OBJECTS.md "Laying", MEASURED MF-13).
-// Without it (the Elegy ruleset) the limit is a plain 512.
+// Without it (elegy v1–v6) the limit is a plain 512.
 func (s *Space) freeNumber(owner int, limit511 bool) (int, bool) {
 	used := map[int]bool{}
 	later := s.otherObjects() > 0
