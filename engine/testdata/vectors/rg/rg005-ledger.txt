@@ -24,8 +24,6 @@ sample | rg005 | RG-005-2466 y1 #179 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2466 y1 #179 | object | wormhole: x = 1432, want 2154
 sample | rg005 | RG-005-2466 y1 #179 | object | wormhole: y = 1293, want 1815
 sample | rg005 | RG-005-2466 y1 #179 | object | wormhole: years_since_jump = 0, want 44
-UNCLASSIFIED | rg005 | RG-005-2466 y1 #180 | object | trader 2 missing
-UNCLASSIFIED | rg005 | RG-005-2466 y1 #181 | object | trader 3 missing
 sample | rg005 | RG-005-2467 y2 #103 | planet id=172 | surface_minerals = [52 33 65], want [52 31 65]
 sample | rg005 | RG-005-2467 y2 #107 | planet id=184 | surface_minerals = [366 8 1], want [365 8 1]
 sample | rg005 | RG-005-2467 y2 #112 | planet id=196 | surface_minerals = [101 64 63], want [103 64 64]
@@ -60,8 +58,7 @@ sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: x = 1421, want 2144
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: y = 1289, want 1815
 sample | rg005 | RG-005-2467 y2 #190 | object | wormhole: years_since_jump = 1, want 45
-sample | rg005 | RG-005-2467 y2 #191 | object | trader 2 missing
-sample | rg005 | RG-005-2467 y2 #192 | object | trader 3 missing
+sample | rg005 | RG-005-2467 y2 #192 | object | trader: met = [], want [1]
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | fuel = 138, want 107
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | waypoints[0] position = {1863 1408}, want {1826 1375}
 sample | rg005 | RG-005-2467 y2 #33 | fleet owner=0 id=35 | x = 1863, want 1826
@@ -107,8 +104,7 @@ sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: x = 1433, want 1291
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: y = 1279, want 1896
 sample | rg005 | RG-005-2468 y3 #190 | object | wormhole: years_since_jump = 2, want 0
-sample | rg005 | RG-005-2468 y3 #191 | object | trader 2 missing
-sample | rg005 | RG-005-2468 y3 #192 | object | trader 3 missing
+sample | rg005 | RG-005-2468 y3 #192 | object | trader: met = [], want [1]
 sample | rg005 | RG-005-2468 y3 #200 | player id=2 seen_by=0 | score_record.score = 110, want 111
 sample | rg005 | RG-005-2468 y3 #200 | player id=2 seen_by=0 | score_record.tech_level_sum = 17, want 18
 sample | rg005 | RG-005-2468 y3 #206 | player id=2 seen_by=1 | score_record.score = 110, want 111
@@ -618,11 +614,8 @@ sample | rg005 | RG-005-2472 y7 #188 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2472 y7 #188 | object | wormhole: x = 1433, want 1302
 sample | rg005 | RG-005-2472 y7 #188 | object | wormhole: y = 1286, want 1885
 sample | rg005 | RG-005-2472 y7 #188 | object | wormhole: years_since_jump = 6, want 4
-sample | rg005 | RG-005-2472 y7 #189 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2472 y7 #189 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2472 y7 #189 | object | trader: x = 1352, want 2003
-sample | rg005 | RG-005-2472 y7 #189 | object | trader: y = 1020, want 2035
-sample | rg005 | RG-005-2472 y7 #190 | object | trader 1 missing
+not compared | rg005 | RG-005-2472 y7 #189 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2472 y7 #190 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2472 y7 #196 | player id=0 seen_by=0 | score_record.resources = 6175, want 6190
 sample | rg005 | RG-005-2472 y7 #196 | player id=0 seen_by=0 | score_record.score = 509, want 511
 sample | rg005 | RG-005-2472 y7 #196 | player id=0 seen_by=0 | score_record.unarmed_ships = 37, want 38
@@ -788,11 +781,8 @@ sample | rg005 | RG-005-2473 y8 #181 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2473 y8 #181 | object | wormhole: x = 1437, want 1294
 sample | rg005 | RG-005-2473 y8 #181 | object | wormhole: y = 1292, want 1875
 sample | rg005 | RG-005-2473 y8 #181 | object | wormhole: years_since_jump = 7, want 5
-sample | rg005 | RG-005-2473 y8 #182 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2473 y8 #182 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2473 y8 #182 | object | trader: x = 1398, want 1944
-sample | rg005 | RG-005-2473 y8 #182 | object | trader: y = 1087, want 2010
-sample | rg005 | RG-005-2473 y8 #183 | object | trader 1 missing
+not compared | rg005 | RG-005-2473 y8 #182 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2473 y8 #183 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2473 y8 #187 | player id=0 seen_by=0 | score_record.planets = 40, want 41
 sample | rg005 | RG-005-2473 y8 #187 | player id=0 seen_by=0 | score_record.resources = 6572, want 6595
 sample | rg005 | RG-005-2473 y8 #187 | player id=0 seen_by=0 | score_record.score = 528, want 531
@@ -957,11 +947,8 @@ sample | rg005 | RG-005-2474 y9 #185 | object | wormhole: known_to = [3], want [
 sample | rg005 | RG-005-2474 y9 #185 | object | wormhole: x = 1444, want 1298
 sample | rg005 | RG-005-2474 y9 #185 | object | wormhole: y = 1281, want 1880
 sample | rg005 | RG-005-2474 y9 #185 | object | wormhole: years_since_jump = 8, want 6
-sample | rg005 | RG-005-2474 y9 #186 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2474 y9 #186 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2474 y9 #186 | object | trader: x = 1444, want 1885
-sample | rg005 | RG-005-2474 y9 #186 | object | trader: y = 1154, want 1985
-sample | rg005 | RG-005-2474 y9 #187 | object | trader 1 missing
+not compared | rg005 | RG-005-2474 y9 #186 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2474 y9 #187 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2474 y9 #195 | player id=0 seen_by=0 | score_record.planets = 42, want 43
 sample | rg005 | RG-005-2474 y9 #195 | player id=0 seen_by=0 | score_record.resources = 7004, want 7034
 sample | rg005 | RG-005-2474 y9 #195 | player id=0 seen_by=0 | score_record.score = 554, want 558
@@ -1166,14 +1153,8 @@ sample | rg005 | RG-005-2475 y10 #219 | object | wormhole: known_to = [3], want 
 sample | rg005 | RG-005-2475 y10 #219 | object | wormhole: x = 1432, want 1288
 sample | rg005 | RG-005-2475 y10 #219 | object | wormhole: y = 1289, want 1880
 sample | rg005 | RG-005-2475 y10 #219 | object | wormhole: years_since_jump = 9, want 7
-sample | rg005 | RG-005-2475 y10 #220 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2475 y10 #220 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2475 y10 #220 | object | trader: x = 1490, want 1826
-sample | rg005 | RG-005-2475 y10 #220 | object | trader: y = 1221, want 1961
-sample | rg005 | RG-005-2475 y10 #221 | object | trader: destination = [1659 1020], want [2180 2110]
-sample | rg005 | RG-005-2475 y10 #221 | object | trader: offer = Multi Cargo Pod, want Mega Poly Shell
-sample | rg005 | RG-005-2475 y10 #221 | object | trader: x = 1523, want 1239
-sample | rg005 | RG-005-2475 y10 #221 | object | trader: y = 2180, want 1664
+not compared | rg005 | RG-005-2475 y10 #220 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2475 y10 #221 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2475 y10 #229 | player id=0 seen_by=0 | score_record.planets = 42, want 43
 sample | rg005 | RG-005-2475 y10 #229 | player id=0 seen_by=0 | score_record.resources = 7253, want 7285
 sample | rg005 | RG-005-2475 y10 #229 | player id=0 seen_by=0 | score_record.score = 564, want 569
@@ -1509,16 +1490,8 @@ sample | rg005 | RG-005-2476 y11 #212 | object | wormhole: known_to = [3], want 
 sample | rg005 | RG-005-2476 y11 #212 | object | wormhole: x = 1428, want 1297
 sample | rg005 | RG-005-2476 y11 #212 | object | wormhole: y = 1277, want 1870
 sample | rg005 | RG-005-2476 y11 #212 | object | wormhole: years_since_jump = 10, want 8
-sample | rg005 | RG-005-2476 y11 #213 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2476 y11 #213 | object | trader: met = [], want [2]
-sample | rg005 | RG-005-2476 y11 #213 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2476 y11 #213 | object | trader: x = 1536, want 1767
-sample | rg005 | RG-005-2476 y11 #213 | object | trader: y = 1288, want 1936
-sample | rg005 | RG-005-2476 y11 #214 | object | trader: destination = [1659 1020], want [2180 2110]
-sample | rg005 | RG-005-2476 y11 #214 | object | trader: met = [], want [4]
-sample | rg005 | RG-005-2476 y11 #214 | object | trader: offer = Multi Cargo Pod, want Mega Poly Shell
-sample | rg005 | RG-005-2476 y11 #214 | object | trader: x = 1532, want 1312
-sample | rg005 | RG-005-2476 y11 #214 | object | trader: y = 2100, want 1699
+not compared | rg005 | RG-005-2476 y11 #213 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2476 y11 #214 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2476 y11 #217 | player id=0 seen_by=0 | score_record.planets = 42, want 43
 sample | rg005 | RG-005-2476 y11 #217 | player id=0 seen_by=0 | score_record.resources = 7625, want 7585
 sample | rg005 | RG-005-2476 y11 #217 | player id=0 seen_by=0 | score_record.score = 585, want 589
@@ -1915,16 +1888,8 @@ sample | rg005 | RG-005-2477 y12 #222 | object | wormhole: known_to = [3], want 
 sample | rg005 | RG-005-2477 y12 #222 | object | wormhole: x = 1422, want 1292
 sample | rg005 | RG-005-2477 y12 #222 | object | wormhole: y = 1274, want 1859
 sample | rg005 | RG-005-2477 y12 #222 | object | wormhole: years_since_jump = 11, want 9
-sample | rg005 | RG-005-2477 y12 #223 | object | trader: destination = [2146 2180], want [1020 1627]
-sample | rg005 | RG-005-2477 y12 #223 | object | trader: met = [], want [2]
-sample | rg005 | RG-005-2477 y12 #223 | object | trader: warp = 9, want 8
-sample | rg005 | RG-005-2477 y12 #223 | object | trader: x = 1582, want 1708
-sample | rg005 | RG-005-2477 y12 #223 | object | trader: y = 1355, want 1912
-sample | rg005 | RG-005-2477 y12 #224 | object | trader: destination = [1659 1020], want [2180 2110]
-sample | rg005 | RG-005-2477 y12 #224 | object | trader: met = [], want [4]
-sample | rg005 | RG-005-2477 y12 #224 | object | trader: offer = Multi Cargo Pod, want Mega Poly Shell
-sample | rg005 | RG-005-2477 y12 #224 | object | trader: x = 1541, want 1385
-sample | rg005 | RG-005-2477 y12 #224 | object | trader: y = 2020, want 1734
+not compared | rg005 | RG-005-2477 y12 #223 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005 | RG-005-2477 y12 #224 | object | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005 | RG-005-2477 y12 #226 | player id=0 seen_by=0 | score_record.planets = 42, want 43
 sample | rg005 | RG-005-2477 y12 #226 | player id=0 seen_by=0 | score_record.resources = 8129, want 8082
 sample | rg005 | RG-005-2477 y12 #226 | player id=0 seen_by=0 | score_record.score = 605, want 607
@@ -2276,8 +2241,6 @@ sample | rg005-y1 | RG-005-Y1-2466 y1 #179 | object | wormhole: known_to = [3], 
 sample | rg005-y1 | RG-005-Y1-2466 y1 #179 | object | wormhole: x = 1432, want 2154
 sample | rg005-y1 | RG-005-Y1-2466 y1 #179 | object | wormhole: y = 1293, want 1815
 sample | rg005-y1 | RG-005-Y1-2466 y1 #179 | object | wormhole: years_since_jump = 0, want 44
-UNCLASSIFIED | rg005-y1 | RG-005-Y1-2466 y1 #180 | object | trader 2 missing
-UNCLASSIFIED | rg005-y1 | RG-005-Y1-2466 y1 #181 | object | trader 3 missing
 random-driven | rg005-y10 | RG-005-Y10-2475 y1 #136 | planet id=201 | surface_minerals = [177 376 0], want [175 376 0] (4/8 variants match)
 random-driven | rg005-y10 | RG-005-Y10-2475 y1 #161 | planet id=254 | defenses = 26, want 27 (4/8 variants match)
 sample | rg005-y10 | RG-005-Y10-2475 y1 #175 | player id=0 | research_accumulated.propulsion = 6013, want 6005
@@ -2343,8 +2306,7 @@ sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: known_to = [3], 
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: x = 1432, want 2144
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: y = 1293, want 1815
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: years_since_jump = 0, want 45
-random-driven | rg005-y2 | RG-005-Y2-2467 y1 #191 | object | trader 2 missing (1/8 variants match)
-UNCLASSIFIED | rg005-y2 | RG-005-Y2-2467 y1 #192 | object | trader 3 missing
+UNCLASSIFIED | rg005-y2 | RG-005-Y2-2467 y1 #192 | object | trader: met = [], want [1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #117 | planet id=201 | surface_minerals = [221 294 1], want [222 294 1]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #143 | planet id=275 | surface_minerals = [1 1015 451], want [2 1018 453]
 sample | rg005-y3 | RG-005-Y3-2468 y1 #150 | planet id=286 | surface_minerals = [1229 1590 0], want [1227 1590 0]
@@ -2360,8 +2322,6 @@ sample | rg005-y3 | RG-005-Y3-2468 y1 #190 | object | wormhole: known_to = [1], 
 sample | rg005-y3 | RG-005-Y3-2468 y1 #190 | object | wormhole: x = 2151, want 1291
 sample | rg005-y3 | RG-005-Y3-2468 y1 #190 | object | wormhole: y = 1805, want 1896
 sample | rg005-y3 | RG-005-Y3-2468 y1 #190 | object | wormhole: years_since_jump = 46, want 0
-UNCLASSIFIED | rg005-y3 | RG-005-Y3-2468 y1 #191 | object | trader 2 missing
-UNCLASSIFIED | rg005-y3 | RG-005-Y3-2468 y1 #192 | object | trader 3 missing
 sample | rg005-y3 | RG-005-Y3-2468 y1 #200 | player id=2 seen_by=0 | score_record.score = 110, want 111
 sample | rg005-y3 | RG-005-Y3-2468 y1 #200 | player id=2 seen_by=0 | score_record.tech_level_sum = 17, want 18
 sample | rg005-y3 | RG-005-Y3-2468 y1 #206 | player id=2 seen_by=1 | score_record.score = 110, want 111
@@ -2387,12 +2347,9 @@ sample | rg005-y4 | RG-005-Y4-2469 y1 #178 | object | wormhole: x = 2039, want 2
 sample | rg005-y4 | RG-005-Y4-2469 y1 #178 | object | wormhole: y = 1406, want 1407
 sample | rg005-y4 | RG-005-Y4-2469 y1 #179 | object | wormhole: x = 1299, want 1302
 sample | rg005-y4 | RG-005-Y4-2469 y1 #179 | object | wormhole: y = 1903, want 1884
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: destination = [2102 2180], want [1020 1627]
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: met = [1], want []
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: offer = Alien Miner, want research
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: warp = 11, want 8
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: x = 2020, want 2180
-sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader: y = 1020, want 2110
+sample | rg005-y4 | RG-005-Y4-2469 y1 #180 | object | trader 0 missing
+not compared | rg005-y4 | RG-005-Y4-2469 y1 #181 | object_gone subject={"kind":"trader","owner":null,"id":2} | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
+not compared | rg005-y4 | RG-005-Y4-2469 y1 #182 | object_gone subject={"kind":"trader","owner":null,"id":3} | a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005-y4 | RG-005-Y4-2469 y1 #66 | fleet owner=0 id=70 | fuel = 200, want 280
 sample | rg005-y4 | RG-005-Y4-2469 y1 #66 | fleet owner=0 id=70 | orbiting = null, want 254
 sample | rg005-y4 | RG-005-Y4-2469 y1 #66 | fleet owner=0 id=70 | waypoints[0] position = {2057 1717}, want {2058 1668}
@@ -2438,11 +2395,7 @@ sample | rg005-y7 | RG-005-Y7-2472 y1 #187 | object | wormhole: x = 2045, want 2
 sample | rg005-y7 | RG-005-Y7-2472 y1 #187 | object | wormhole: y = 1411, want 1394
 sample | rg005-y7 | RG-005-Y7-2472 y1 #188 | object | wormhole: x = 1292, want 1302
 sample | rg005-y7 | RG-005-Y7-2472 y1 #188 | object | wormhole: y = 1872, want 1885
-sample | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | trader: destination = [1020 1209], want [2180 2110]
-sample | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | trader: offer = Enigma Pulsar, want Mega Poly Shell
-sample | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | trader: warp = 12, want 9
-sample | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | trader: x = 2180, want 1020
-sample | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | trader: y = 1790, want 1559
+not compared | rg005-y7 | RG-005-Y7-2472 y1 #190 | object | a Trader appeared during the run; Elegy's dense Trader list does not keep the original's slots
 sample | rg005-y8 | RG-005-Y8-2473 y1 #110 | planet id=205 | original_environment = [66 40 66], want [66 40 65]
 sample | rg005-y8 | RG-005-Y8-2473 y1 #134 | planet id=262 | environment = [57 36 40], want [57 37 40]
 sample | rg005-y8 | RG-005-Y8-2473 y1 #134 | planet id=262 | original_environment = [57 29 29], want [57 30 29]

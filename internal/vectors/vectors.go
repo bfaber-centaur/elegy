@@ -314,6 +314,11 @@ type pvExpect struct {
 // waypoint target ID, Planet a planet id to the Elegy planet ID.
 type pvMaps struct {
 	EndID, Planet map[int]int
+	// Traders is the vector ids of the initial state's Traders, in
+	// ascending order; TradersAppeared, how many appeared from the first
+	// generated year through the compared one (pvTraderIndex).
+	Traders         []int
+	TradersAppeared int
 }
 
 // pvObjExpect is an expectation as the space-object checker sees it.
@@ -517,6 +522,8 @@ type pvLoaded struct {
 	// endID maps a vector wormhole end id to its waypoint target ID
 	// (pvWormholeEnds).
 	endID map[int]int
+	// traders is the vector ids of the initial state's Traders, sorted.
+	traders []int
 	// views is each generated year's player views, by year.
 	views [][]engine.PlayerView
 	// events is each generated year's events, by year.
@@ -823,7 +830,8 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 	{
 		// Every game holds space objects, so the Trader's appearance
 		// draws run with random events on.
-		obj, err := pvObjects{}.Load(g, s.Objects, pvMaps{l.endID, l.planet})
+		l.traders = pvTraderIDs(s.Objects)
+		obj, err := pvObjects{}.Load(g, s.Objects, pvMaps{EndID: l.endID, Planet: l.planet, Traders: l.traders})
 		if err != nil {
 			l.global = "space objects: " + err.Error()
 		}
@@ -1174,7 +1182,7 @@ func (l *pvLoaded) pvCheck(g *engine.Game, e pvExpect) string {
 		if (e.Kind == "packet" || e.Kind == "object") && owner != nil && l.queued[*owner] {
 			return "skip: a packet from a production queue"
 		}
-		return pvObjects{}.Check(g, pvObjExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, pvMaps{l.endID, l.planet})
+		return pvObjects{}.Check(g, pvObjExpect{Kind: e.Kind, Owner: e.Owner, ID: e.ID, Equals: e.Equals, Tolerance: e.Tolerance, Subject: e.Subject}, pvMaps{l.endID, l.planet, l.traders, l.tradersAppeared(e.Year)})
 	}
 	var eq map[string]json.RawMessage
 	if len(e.Equals) > 0 && json.Unmarshal(e.Equals, &eq) != nil {
@@ -2320,6 +2328,22 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		l.events = append(l.events, r.Events)
 	}
 	return l, games, nil, ""
+}
+
+// tradersAppeared is how many Traders appeared in generated years 1
+// through year: each appearance tells every player, by the Trader's index.
+func (l *pvLoaded) tradersAppeared(year int) int {
+	n := 0
+	for y := 1; y <= year && y < len(l.events); y++ {
+		seen := map[int]bool{}
+		for _, ev := range l.events[y] {
+			if ev.Kind == engine.EventTraderAppeared && !seen[ev.Count] {
+				seen[ev.Count] = true
+				n++
+			}
+		}
+	}
+	return n
 }
 
 // checkCases checks every case of v against the generated games. Each
