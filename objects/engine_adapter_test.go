@@ -754,3 +754,28 @@ func TestMinesLaidEventAxes(t *testing.T) {
 		t.Errorf("512 fields: %+v, want the mines lost", got)
 	}
 }
+
+// TestMinesLaidEventKindAxis pins Axes[1], the mine type of each laid
+// event: a mixed layer reports one event per type, and a speed-bump layer
+// reports SpeedBump.
+func TestMinesLaidEventKindAxis(t *testing.T) {
+	for _, tc := range []struct {
+		design string
+		want   [][]int
+	}{
+		{"MML mixed", [][]int{{1, int(Standard)}, {1, int(Heavy)}}},
+		{"Frigate ST", [][]int{{1, int(SpeedBump)}}},
+	} {
+		l := newLab(t)
+		fi := l.fleet(0, origin, tc.design, 1)
+		l.g.Fleets[fi].Task = engine.Task{Kind: engine.TaskLayMines, Years: engine.YearsIndefinitely}
+		l.g.Objects = &Space{}
+		var got [][]int
+		for _, ev := range eventsOf(t, *l.g, top{}, engine.EventMinesLaid) {
+			got = append(got, ev.Axes)
+		}
+		if !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("%s: axes %v, want %v", tc.design, got, tc.want)
+		}
+	}
+}
