@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -218,5 +219,28 @@ func TestDesignFills(t *testing.T) {
 	o, err := designOrder(game.Report{}, nil, []string{"-name", "X", "-hull", "Scout"})
 	if err != nil || o.(engine.DesignOrder).Slot != 0 {
 		t.Errorf("design in an empty report: %+v %v", o, err)
+	}
+}
+
+// TestOrderQueueNewDesign queues a design the file's earlier orders
+// create, by name and by slot, and refuses one the file deletes.
+func TestOrderQueueNewDesign(t *testing.T) {
+	save, r := orderGame(t)
+	hw := strconv.Itoa(r.Self.Homeworld)
+	file := filepath.Join(filepath.Dir(save), "o.json")
+	order := func(args ...string) string {
+		t.Helper()
+		return cli(t, append([]string{"order", "-game", save, "-o", file}, args...)...)
+	}
+	order("design", "-name", "Colonizer", "-from", "Colony Ship")
+	order("queue", "-planet", hw, "ship:colonizer=1", "ship:6=2")
+	f := readOrders(t, file)
+	want := engine.QueueOrder{Planet: r.Self.Homeworld, Queue: []engine.QueueItem{{Kind: engine.ItemShip, Slot: 6, Count: 1}, {Kind: engine.ItemShip, Slot: 6, Count: 2}}}
+	if !reflect.DeepEqual(f.Orders[1], want) {
+		t.Fatalf("queue order %#v, want %#v", f.Orders[1], want)
+	}
+	order("delete-design", "-slot", "6")
+	if err := run([]string{"order", "-game", save, "-o", file, "queue", "-planet", hw, "ship:Colonizer=1"}, &bytes.Buffer{}); err == nil || !strings.Contains(err.Error(), `no ship design "Colonizer"`) {
+		t.Fatalf("queueing a deleted design: %v", err)
 	}
 }

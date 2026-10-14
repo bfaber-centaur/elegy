@@ -15,7 +15,7 @@ import (
 )
 
 // showSections are show's sections, in the order "all" prints them.
-var showSections = []string{"summary", "planets", "galaxy", "fleets", "designs", "plans", "research", "messages"}
+var showSections = []string{"summary", "planets", "galaxy", "fleets", "designs", "tech", "plans", "research", "messages"}
 
 // cmdShow prints a player's report as text, one section after another.
 // It reads only the player's Report, so it shows nothing the player does
@@ -66,6 +66,8 @@ func show(out io.Writer, v reportView, sections []string) error {
 			v.fleets(out)
 		case "designs":
 			v.designs(out)
+		case "tech":
+			v.tech(out)
 		case "plans":
 			v.plans(out)
 		case "research":
@@ -157,6 +159,14 @@ func (v reportView) fleetName(f engine.Fleet) string {
 	return fmt.Sprintf("%s #%d", v.designName(f.Stacks[0].Design), f.Number)
 }
 
+// colony is the economy view of the player's i-th planet in the report:
+// the client's derived numbers (resources, maximum population, operable
+// installations) come from it.
+func (v reportView) colony(i int) engine.Colony {
+	self := v.r.Self
+	return engine.NewColony(&v.r.Planets[i], &self)
+}
+
 func (v reportView) homeworld() (engine.Point, bool) {
 	if !v.r.Self.HasHomeworld {
 		return engine.Point{}, false
@@ -202,7 +212,11 @@ func (v reportView) summary(out io.Writer) {
 	for _, p := range r.Planets {
 		pop += p.Population
 	}
-	fmt.Fprintf(out, "Planets: %d, population %d\n", len(r.Planets), pop*100)
+	res := 0
+	for i := range r.Planets {
+		res += v.colony(i).Resources(r.Planets[i].Population, r.Planets[i].Factories)
+	}
+	fmt.Fprintf(out, "Planets: %d, population %d, resources %d a year\n", len(r.Planets), pop*100, res)
 	if r.Self.HasHomeworld {
 		fmt.Fprintf(out, "Homeworld: %s\n", v.planetName(r.Self.Homeworld))
 	}
@@ -227,13 +241,16 @@ func (v reportView) summary(out io.Writer) {
 func (v reportView) planets(out io.Writer) {
 	r := v.r
 	fmt.Fprintf(out, "Planets (%d)\n", len(r.Planets))
-	for _, p := range r.Planets {
+	for i, p := range r.Planets {
 		head := fmt.Sprintf("%s at (%d, %d)", v.planetName(p.ID), p.Pos.X, p.Pos.Y)
 		if p.Homeworld {
 			head += ", homeworld"
 		}
 		fmt.Fprintln(out, head)
 		fmt.Fprintf(out, "  population %d, mines %d, factories %d, defenses %d\n", p.Population*100, p.Mines, p.Factories, p.Defenses)
+		c := v.colony(i)
+		fmt.Fprintf(out, "  resources %d a year; maximum population %d; population operates up to %d mines, %d factories\n",
+			c.Resources(p.Population, p.Factories), c.MaxPop*100, c.OperableMines(p.Population), c.OperableFactories(p.Population))
 		if p.HasStarbase {
 			fmt.Fprintf(out, "  starbase %s\n", v.designName(p.StarbaseDesign))
 		}
@@ -313,7 +330,7 @@ func (v reportView) galaxy(out io.Writer) {
 			for _, s := range f.Stacks {
 				ships = append(ships, fmt.Sprintf("%d %s", s.Count, v.designName(s.Design)))
 			}
-			fmt.Fprintf(out, "player %d fleet %s: %s\n", f.Owner, v.where(f.Pos), strings.Join(ships, ", "))
+			fmt.Fprintf(out, "player %d fleet #%d %s: %s\n", f.Owner, f.Fleet, v.where(f.Pos), strings.Join(ships, ", "))
 		}
 	}
 }
@@ -487,8 +504,35 @@ func (v reportView) messages(out io.Writer) {
 	fmt.Fprintf(out, "Messages for %d (%d)\n", r.Year-1, len(r.Events))
 	for _, e := range r.Events {
 		line := eventName(e.Kind)
-		if e.Kind == engine.EventBuilt {
+		switch e.Kind {
+		case engine.EventBuilt:
 			line += " " + itemName(e.Item)
+		case engine.EventLevelUp:
+			// Item is the field and Count the new level (engine
+			// levelEvents); the count is not printed again.
+			line += fmt.Sprintf(": %s level %d", fieldName(int(e.Item)), e.Count)
+			fmt.Fprintln(out, line)
+			continue
+		case engine.EventBattleSummary:
+			// Axes are the counts the summary names (engine.summaryAxes):
+			// your ships and losses, the other side's, and in a two-player
+			// battle the other player.
+			if a := e.Axes; len(a) > engine.SummaryOtherLost {
+				where := "deep space"
+				if e.Planet >= 0 {
+					where = v.planetName(e.Planet)
+				}
+				line += ": " + where
+				fmt.Fprintf(out, "%s; your ships %d, %d lost; other side %d, %d lost\n", line,
+					a[engine.SummaryTotal], a[engine.SummaryLost], a[engine.SummaryOtherTotal], a[engine.SummaryOtherLost])
+				continue
+			}
+		case engine.EventPartAvailable:
+			// Count is the component's position in the catalog.
+			if cs := engine.Components().Components; e.Count >= 0 && e.Count < len(cs) {
+				fmt.Fprintf(out, "%s: %s\n", line, cs[e.Count].Name)
+				continue
+			}
 		}
 		if e.Planet >= 0 {
 			line += ": " + v.planetName(e.Planet)
@@ -510,5 +554,74 @@ func (v reportView) messages(out io.Writer) {
 		} else {
 			fmt.Fprintf(out, "order %d rejected: %s\n", o.Index, o.Message)
 		}
+	}
+}
+
+// tech lists the hulls and parts the player can build at its tech levels,
+// with each hull's slots (the SLOT numbers elegy order design takes, what
+// each accepts and how many parts it holds) and each item's cost for the
+// player. Mystery Trader parts are not listed.
+func (v reportView) tech(out io.Writer) {
+	self := v.r.Self
+	levels := self.Research.Levels
+	var hulls, parts []engine.Component
+	for _, c := range engine.Components().Components {
+		if ok, err := c.Buildable(self.Race, levels, false); err != nil || !ok {
+			continue
+		}
+		switch c.Category {
+		case engine.CatHull, engine.CatStarbaseHull:
+			hulls = append(hulls, c)
+		case engine.CatPlanetary, engine.CatTerraform:
+		default:
+			parts = append(parts, c)
+		}
+	}
+	cost := func(c engine.Component) string {
+		k := c.OwnerCost(self.Race, levels)
+		return fmt.Sprintf("cost %d resources, %s kT", k.Resources, minerals(k.Minerals))
+	}
+	fmt.Fprintf(out, "Hulls the player can build (%d)\n", len(hulls))
+	for _, c := range hulls {
+		h, err := c.Hull()
+		if err != nil {
+			continue
+		}
+		kind := "ship"
+		if h.Starbase {
+			kind = "starbase"
+		}
+		line := fmt.Sprintf("%s (%s), %d kT, armor %d", c.Name, kind, h.Mass, h.Armor)
+		if h.FuelCapacity > 0 {
+			line += fmt.Sprintf(", fuel %d mg", h.FuelCapacity)
+		}
+		if h.CargoCapacity > 0 {
+			line += fmt.Sprintf(", cargo %d kT", h.CargoCapacity)
+		}
+		if h.Starbase {
+			// What production charges for the bare hull.
+			k := engine.StarbaseBuildCost(engine.Design{Hull: h}, self.Race, levels)
+			line += fmt.Sprintf("; cost %d resources, %s kT as a starbase", k.Resources, minerals(k.Minerals))
+		} else {
+			line += "; " + cost(c)
+		}
+		fmt.Fprintln(out, line)
+		slots, _ := c.Stats["slots"].([]any)
+		for i, sl := range slots {
+			m, _ := sl.(map[string]any)
+			var kinds []string
+			ks, _ := m["kinds"].([]any)
+			for _, k := range ks {
+				if s, ok := k.(string); ok {
+					kinds = append(kinds, s)
+				}
+			}
+			mx, _ := m["max"].(float64)
+			fmt.Fprintf(out, "  slot %d: %s, up to %d\n", i, strings.Join(kinds, " or "), int(mx))
+		}
+	}
+	fmt.Fprintf(out, "Parts the player can build (%d); on a starbase a part costs less than shown\n", len(parts))
+	for _, c := range parts {
+		fmt.Fprintf(out, "%s: %s, %d kT; %s\n", c.Category, c.Name, c.Mass, cost(c))
 	}
 }

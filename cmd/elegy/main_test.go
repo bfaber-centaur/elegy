@@ -317,3 +317,12 @@ func TestCLIVectorRejected(t *testing.T) {
 		t.Error("a vector without refused orders lists rejected orders")
 	}
 }
+
+// TestHelp prints the usage for help and -h, without an error.
+func TestHelp(t *testing.T) {
+	for _, arg := range []string{"help", "-h"} {
+		if got := cli(t, arg); !strings.HasPrefix(got, usage) || !strings.Contains(got, "PLAYTEST.md") {
+			t.Errorf("elegy %s: %q", arg, got)
+		}
+	}
+}

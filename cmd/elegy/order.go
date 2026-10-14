@@ -131,6 +131,10 @@ func cmdOrder(args []string, out io.Writer) error {
 	path := fs.String("game", "game.json", "save file")
 	player := fs.Int("player", 0, "player index")
 	file := fs.String("o", "", "order file to add to (default orders<player>-<year>.json)")
+	fs.Usage = func() {
+		fmt.Fprintln(fs.Output(), "usage: elegy order [-game FILE] [-player P] [-o FILE] KIND [flags]\n"+orderKindsUsage)
+		fs.PrintDefaults()
+	}
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -394,7 +398,9 @@ func cargoOrder(args []string) (engine.Order, error) {
 // or with -append adds them after the planet's queue: the one the file's
 // last queue order for the planet sets, or else the planet's current one. An item is
 // NAME=COUNT (factories=10), or for a design ship:DESIGN=COUNT or
-// starbase:DESIGN=COUNT, DESIGN being the design's name or slot.
+// starbase:DESIGN=COUNT, DESIGN being the design's name or slot. A design
+// the file's earlier design orders create can be queued: the engine
+// applies a file's orders in order.
 func queueOrder(r game.Report, pending []engine.Order, args []string) (engine.Order, error) {
 	fs := flag.NewFlagSet("order queue", flag.ContinueOnError)
 	planet := fs.Int("planet", -1, "planet id")
@@ -420,7 +426,7 @@ func queueOrder(r game.Report, pending []engine.Order, args []string) (engine.Or
 		}
 	}
 	for _, a := range fs.Args() {
-		it, err := queueItem(r, a)
+		it, err := queueItem(r, pending, a)
 		if err != nil {
 			return nil, err
 		}
@@ -435,7 +441,7 @@ func queueOrder(r game.Report, pending []engine.Order, args []string) (engine.Or
 	return engine.QueueOrder{Planet: *planet, Queue: q}, nil
 }
 
-func queueItem(r game.Report, s string) (engine.QueueItem, error) {
+func queueItem(r game.Report, pending []engine.Order, s string) (engine.QueueItem, error) {
 	i := strings.LastIndex(s, "=")
 	if i < 0 {
 		return engine.QueueItem{}, fmt.Errorf("order queue: item %q: NAME=COUNT", s)
@@ -457,12 +463,44 @@ func queueItem(r game.Report, s string) (engine.QueueItem, error) {
 	if !isDesign {
 		return it, nil
 	}
-	starbase := it.Kind == engine.ItemStarbase
+	slot, ok := pendingDesigns(r, pending, it.Kind == engine.ItemStarbase)[strings.ToLower(design)]
+	if !ok {
+		return engine.QueueItem{}, fmt.Errorf("order queue: item %q: no %s design %q (elegy show designs)", s, name, design)
+	}
+	it.Slot = slot
+	return it, nil
+}
+
+// pendingDesigns is the player's ship or starbase design slots after the
+// file's earlier design and delete-design orders, by lower-case design
+// name and by slot number.
+func pendingDesigns(r game.Report, pending []engine.Order, starbase bool) map[string]int {
+	names := map[int]string{}
 	for _, d := range r.Designs {
-		if d.Slot.Starbase == starbase && (strings.EqualFold(d.Design.Name, design) || strconv.Itoa(d.Slot.Slot) == design) {
-			it.Slot = d.Slot.Slot
-			return it, nil
+		if d.Slot.Starbase == starbase {
+			names[d.Slot.Slot] = d.Design.Name
 		}
 	}
-	return engine.QueueItem{}, fmt.Errorf("order queue: item %q: no %s design %q (elegy show designs)", s, name, design)
+	for _, p := range pending {
+		switch o := p.(type) {
+		case engine.DesignOrder:
+			if o.Starbase == starbase {
+				names[o.Slot] = o.Name
+			}
+		case engine.DeleteDesignOrder:
+			if o.Starbase == starbase {
+				delete(names, o.Slot)
+			}
+		}
+	}
+	m := map[string]int{}
+	for slot := range names {
+		m[strconv.Itoa(slot)] = slot
+	}
+	for slot, name := range names {
+		if prev, dup := m[strings.ToLower(name)]; !dup || slot < prev {
+			m[strings.ToLower(name)] = slot
+		}
+	}
+	return m
 }

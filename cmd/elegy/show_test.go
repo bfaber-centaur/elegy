@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -12,7 +13,8 @@ import (
 
 // showReport is a hand-made report that reaches every branch of show.
 func showReport() game.Report {
-	race := engine.Race{Env: [3]engine.EnvRange{{Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}}}
+	race := engine.Race{Env: [3]engine.EnvRange{{Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}, {Center: 50, Low: 15, High: 85}},
+		ColonistsPerResource: 1000, FactoryOutput: 10, FactoriesOperated: 10, MinesOperated: 10}
 	scout := engine.Design{Name: "Scout", Mass: 25, Hull: engine.Hull{Name: "Scout"}, Engines: 1, Engine: engine.Engine{Name: "Long Hump 6"}, FuelCapacity: 300}
 	hauler := engine.Design{Name: "Hauler", Mass: 130, Hull: engine.Hull{Name: "Medium Freighter"}, CargoCapacity: 210}
 	other := engine.Design{Name: "Spy", Mass: 20}
@@ -44,11 +46,16 @@ func showReport() game.Report {
 			{Index: 2, Slot: engine.DesignSlot{Slot: 0, Starbase: true}, Design: engine.Design{Name: "Fort", Hull: engine.Hull{Name: "Orbital Fort"}}},
 			{Index: 4, Slot: engine.DesignSlot{Slot: 1}, Design: hauler},
 		},
-		View: engine.PlayerView{Fleets: []engine.FleetSighting{{Owner: 0, Pos: engine.Point{X: 1030, Y: 1040}, Stacks: []engine.Stack{{Design: 3, Count: 4}, {Design: 5, Count: 1}}}}},
+		View: engine.PlayerView{Fleets: []engine.FleetSighting{{Fleet: 3, Owner: 0, Pos: engine.Point{X: 1030, Y: 1040}, Stacks: []engine.Stack{{Design: 3, Count: 4}, {Design: 5, Count: 1}}}}},
 		Events: []engine.Event{
 			{Kind: engine.EventBuilt, Planet: 0, Fleet: -1, Item: engine.ItemFactory, Count: 3},
 			{Kind: engine.EventShipsBuilt, Planet: 0, Fleet: 0, Count: 1},
-			{Kind: engine.EventLevelUp, Planet: -1, Fleet: -1},
+			{Kind: engine.EventLevelUp, Planet: -1, Fleet: -1, Item: engine.ItemKind(engine.Weapons), Count: 9},
+			{Kind: engine.EventPartAvailable, Planet: -1, Fleet: -1, Count: 0},
+			{Kind: engine.EventPartAvailable, Planet: -1, Fleet: -1, Count: -1},
+			{Kind: engine.EventBattleSummary, Planet: 0, Fleet: -1, Count: 28, Axes: []int{2, 1, 0, 5, 3, -1, -1}},
+			{Kind: engine.EventBattleSummary, Planet: -1, Fleet: -1, Count: 28, Axes: []int{2, 1, 1, 5, 4, -1, -1}},
+			{Kind: engine.EventBattleSummary, Planet: -1, Fleet: -1, Count: 28},
 			{Kind: engine.EventKind(999), Planet: 7, Fleet: 2},
 		},
 		Orders: []game.OrderOutcome{{Index: 0}, {Index: 1, Message: "fleet 9: no such object"}, {Index: -1, Message: "late"}},
@@ -73,15 +80,16 @@ func showReport() game.Report {
 
 const showWant = `Game 9, year 2405, player 1, ruleset elegy v6
 This player has been eliminated.
-Planets: 2, population 25500
+Planets: 2, population 25500, resources 38 a year
 Homeworld: Planet 11 (#0)
 Fleets: 4, ships 5
 Research: 15% of resources to biotechnology (level 10), then lowest field
-Messages: 4; last year's orders: 3, 2 rejected
+Messages: 9; last year's orders: 3, 2 rejected
 
 Planets (2)
 Planet 11 (#0) at (1000, 1000), homeworld
   population 25000, mines 10, factories 12, defenses 3
+  resources 37 a year; maximum population 1000000; population operates up to 25 mines, 25 factories
   starbase Fort
   surface minerals: ironium 1, boranium 2, germanium 3 kT
   concentrations: 40, 50, 60
@@ -92,6 +100,7 @@ Planet 11 (#0) at (1000, 1000), homeworld
     3. starbase Fort ×1
 Planet 12 (#1) at (1030, 1040)
   population 500, mines 0, factories 0, defenses 0
+  resources 1 a year; maximum population 50000; population operates up to 1 mines, 1 factories
   surface minerals: ironium 0, boranium 0, germanium 0 kT
   concentrations: 0, 0, 0
   environment 0/50/50, habitability -15%
@@ -104,7 +113,7 @@ Planet 14 (#3) at (1003, 1004), 5.0 ly, seen 2404, owned by player 0
 Planet 15 (#4) at (1100, 1000), 100.0 ly, never seen
 Planet 13 (#2) at (1300, 1400), 500.0 ly, seen 2403, unowned, habitability -5%, concentrations 1/2/3
 Other players' fleets seen (1)
-player 0 fleet at Planet 12 (#1): 4 Spy, 1 unknown Destroyer
+player 0 fleet #3 at Planet 12 (#1): 4 Spy, 1 unknown Destroyer
 
 Fleets (4)
 #0 Scout #1, at Planet 11 (#0)
@@ -146,19 +155,26 @@ Research: 15% of resources, current field biotechnology, then lowest field
   electronics   level  3, 0 of 1060 toward level 4
   biotechnology level 10  <- researching
 
-Messages for 2404 (4)
+Messages for 2404 (9)
 built factories: Planet 11 (#0), count 3
 ships built: Planet 11 (#0), fleet #0, count 1
-level up
+level up: weapons level 9
+part available: Small Freighter
+part available, count -1
+battle summary: Planet 11 (#0); your ships 1, 0 lost; other side 5, 3 lost
+battle summary: deep space; your ships 1, 1 lost; other side 5, 4 lost
+battle summary, count 28
 event 999: planet #7, fleet #2
 order 1 rejected: fleet 9: no such object
 order file refused: late
 `
 
-// TestShow prints every section of a hand-made report under slower tech.
+// TestShow prints every section but tech of a hand-made report under
+// slower tech.
 func TestShow(t *testing.T) {
 	var out bytes.Buffer
-	if err := show(&out, newReportView(showReport(), true), showSections); err != nil {
+	sections := slices.DeleteFunc(slices.Clone(showSections), func(s string) bool { return s == "tech" })
+	if err := show(&out, newReportView(showReport(), true), sections); err != nil {
 		t.Fatal(err)
 	}
 	if out.String() != showWant {
@@ -203,7 +219,7 @@ func TestShowCommand(t *testing.T) {
 		t.Fatalf("default section:\n%s", sum)
 	}
 	all := cli(t, "show", "-game", save, "all")
-	parts := cli(t, "show", "-game", save, "summary", "planets", "galaxy", "fleets", "designs", "plans", "research", "messages")
+	parts := cli(t, "show", "-game", save, "summary", "planets", "galaxy", "fleets", "designs", "tech", "plans", "research", "messages")
 	if all != parts || !strings.Contains(all, "\n\nPlanets (1)\n") {
 		t.Fatalf("all:\n%s\nsections:\n%s", all, parts)
 	}
@@ -259,17 +275,17 @@ func TestShowNoHomeworld(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `Game 9, year 2405, player 1, ruleset elegy v6
-Planets: 2, population 25500
+Planets: 2, population 25500, resources 38 a year
 Fleets: 4, ships 5
 Research: 15% of resources to biotechnology (level 10), then lowest field
-Messages: 4; last year's orders: 3, 2 rejected
+Messages: 9; last year's orders: 3, 2 rejected
 
 Other planets (3)
 Planet 13 (#2) at (1300, 1400), seen 2403, unowned, habitability -5%, concentrations 1/2/3
 Planet 14 (#3) at (1003, 1004), seen 2404, owned by player 0
 Planet 15 (#4) at (1100, 1000), never seen
 Other players' fleets seen (1)
-player 0 fleet at Planet 12 (#1): 4 design #3, 1 unknown Destroyer
+player 0 fleet #3 at Planet 12 (#1): 4 design #3, 1 unknown Destroyer
 
 Designs (0)
 Other players' designs known (1)
@@ -282,6 +298,31 @@ design #5: unknown Destroyer, Destroyer hull, 180 kT, seen 2402
 	r.Self.HasHomeworld, r.Self.Homeworld = true, 99
 	if _, ok := newReportView(r, false).homeworld(); ok {
 		t.Fatal("homeworld 99 found")
+	}
+}
+
+// TestShowTech lists what the default race can build at the start: hulls
+// with their slots, parts with their cost, and nothing above its tech.
+func TestShowTech(t *testing.T) {
+	save := filepath.Join(t.TempDir(), "game.json")
+	cli(t, "new", "-seed", "5", "-players", "1", "-size", "tiny", "-ai", "robotoid", "-o", save)
+	got := cli(t, "show", "-game", save, "tech")
+	for _, want := range []string{
+		"Hulls the player can build (",
+		"\nScout (ship), 8 kT, armor 20, fuel 50 mg; cost ",
+		"\n  slot 0: engine, up to 1\n  slot 1: scanner, up to 1\n",
+		"\nSpace Station (starbase), ",
+		"\nParts the player can build (",
+		"\nengine: Long Hump 6, 9 kT; cost ",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("show tech lacks %q", want)
+		}
+	}
+	for _, not := range []string{"Battleship", "Super Freighter", "Genesis Device", "Total Terraform"} {
+		if strings.Contains(got, not) {
+			t.Errorf("show tech lists %q", not)
+		}
 	}
 }
 

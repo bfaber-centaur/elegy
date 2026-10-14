@@ -5,6 +5,9 @@ what their player knows, gives orders, generates years, and saves and
 continues, all with `cmd/elegy` and no hand-written JSON. There is no
 other user interface yet.
 
+For a guided first game, known limitations and the playtest bug-report
+format, see [PLAYTEST.md](PLAYTEST.md).
+
 Playable is not the same as faithful. A game played this way runs Elegy's
 rules, whose parity with the original game is measured separately
 ([PARITY-STATUS.md](PARITY-STATUS.md)).
@@ -30,8 +33,11 @@ game 2817366194855738197 year 2400 hash 4bc2612c...
 `show` prints what one player knows, as text. It reads only that
 player's report, so it shows nothing the player has not seen. The
 sections are `summary` (the default), `planets`, `galaxy`, `fleets`,
-`designs`, `plans` (battle plans), `research` and `messages`; `all`
-prints every one.
+`designs`, `tech` (the hulls, with their slots, and parts the player can
+build now, with their cost), `plans` (battle plans), `research` and
+`messages`; `all` prints every one. `summary` and `planets` include the
+resources each planet makes a year at its current population, its
+maximum population and the installations its population can operate.
 
 ```console
 $ ./elegy show -game game.json -player 0
@@ -184,11 +190,9 @@ file with `-player N`, and one `turn` call takes every file.
 
 - Fleet operations other than move and cargo (merge, split, rename,
   routes, packets) have no `order` kind; they are written by hand.
-- There is no list of hulls and parts with their slots; `show designs`
-  shows the player's own designs' fills, and a design order's dry run
-  shows what the engine kept.
-- `show` does not compute what a fuller client would: resources per
-  year, maximum population, fleet range, or the cost of queue items.
+- `show tech` lists hulls and parts but not Mystery Trader parts.
+- `show` does not compute fleet range or the cost and time of queue
+  items.
 - Messages name the event and the objects it concerns, not the
   original's message text.
 - Planet names are placeholders (`Planet 937`), not the original's name
