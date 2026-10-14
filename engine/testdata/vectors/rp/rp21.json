@@ -372,6 +372,7 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "computer_level": "easy",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 108
