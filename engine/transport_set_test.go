@@ -132,7 +132,7 @@ func TestSetAmountAndWaypointFromSalvage(t *testing.T) {
 	if f.Cargo.Minerals != (Minerals{50, 160, 0}) || sv.Minerals != (Minerals{70, 240, 0}) {
 		t.Errorf("fleet %v, salvage %v; want [50 160 0] and [70 240 0]", f.Cargo.Minerals, sv.Minerals)
 	}
-	want := [NumCargo]Transport{Boranium: {SetWaypoint, 100}}
+	want := [NumTransport]Transport{Boranium: {SetWaypoint, 100}}
 	if f.Task.Kind != TaskTransport || f.Task.Transport != want {
 		t.Errorf("task %+v, want %+v", f.Task, want)
 	}

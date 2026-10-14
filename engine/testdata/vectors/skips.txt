@@ -30,8 +30,6 @@
    1 expectation no_new_fleets
  192 expectation sample
    1 expectation starbase_design_gone
-  15 fleet-to-fleet transport
-  15 fleet-to-fleet transport (target)
    1 message 0x000 has no event mapping
    3 message 0x002 has no event mapping
    1 message 0x003 has no event mapping
@@ -106,4 +104,5 @@
    3 score_record: Super Stealth research stealing
    5 score_record: a computer player's planned orders (not in the vector)
 5129 stream (another oracle random stream)
-   8 transport fuel
+   1 transport load_optimal (no fuel need estimate)
+   1 transport load_optimal (no fuel need estimate) (target)

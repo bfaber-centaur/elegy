@@ -54,14 +54,14 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 56 message ids and fleet-to-fleet cargo. |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 56 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
 
 ## What still matters
 
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
   - ~~minefield messages (35, lane D)~~ done 2026-10-14;
-  - fleet-to-fleet transport (38, lane A, a mechanic);
+  - fleet-to-fleet transport (38, lane A, a mechanic). Updated 2026-10-14: implemented by lane A; 36 of the 38 are compared and pass (16 FO and FM cases), FO-02-Q's "load optimal" fuel (2) stays not compared, and no RG ledger line moves (COVERAGE.md dated note);
   - the Mystery Trader (15, lane D).
 - Viewer reports (156) are compared since 2026-10-14 and all pass.
 - Random-driven lines stay open until the original's generator is in the harness.

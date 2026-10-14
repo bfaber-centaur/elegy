@@ -76,7 +76,7 @@ func TestPredictionEmptyTransportIsNoTask(t *testing.T) {
 		Players: []Player{{}},
 		Fleets: []Fleet{{ID: 1, Owner: 0, Pos: Point{10, 10}, Stacks: []Stack{{Design: 0, Count: 1}},
 			Cargo: Cargo{Minerals: Minerals{20, 0, 0}},
-			Task:  Task{Kind: TaskTransport, Transport: [NumCargo]Transport{Ironium: {Action: UnloadAll}}}}},
+			Task:  Task{Kind: TaskTransport, Transport: [NumTransport]Transport{Ironium: {Action: UnloadAll}}}}},
 	}
 	g.unloadPhase(g.phaseStart())
 	if f := g.Fleets[0]; f.Task != (Task{}) || f.Cargo.Minerals[Ironium] != 0 || g.Planets[0].Surface[Ironium] != 20 {

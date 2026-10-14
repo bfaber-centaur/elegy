@@ -114,6 +114,8 @@ var eventNames = map[engine.EventKind]string{
 	engine.EventHostileShrink:           "hostile shrink",
 	engine.EventClaimAdjusted:           "claim adjusted",
 	engine.EventPlanetCaptured:          "planet captured",
+	engine.EventFleetLoadRefused:        "load from a foreign fleet refused",
+	engine.EventColonistsToForeignFleet: "colonists refused by a foreign fleet",
 }
 
 // nameAt is names[i], or "" when i is not an index of names.
