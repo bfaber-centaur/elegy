@@ -42,7 +42,7 @@ tests can supply their own.
 | Population estimate (one draw per populated planet, rand(0) included) | `PopulationEstimates` | range CONFIRMED (SC-024..SC-033); draw order BINARY-ONLY | `TestPredictionPopulationEstimate` |
 | Defense coverage estimate (operable cap included) | `defenseEstimate` | CONFIRMED (SC-024..SC-033) | `TestConfirmedDefenseEstimateVectors`, `TestPredictionDefenseEstimate` |
 | Every report shows owner, homeworld and starbase; orbit makes the owner known | `report`, `view` | CONFIRMED (SC-024..SC-026) | `TestPredictionPositionReportStarbase` |
-| Fleet heading (this year's move, halved toward zero to ±127; kept on arrival) | `scanHeading`, movement `place` | CONFIRMED for straight moves (SC-027); chasers BINARY-ONLY | `TestConfirmedHeadingVectors`, `TestPredictionHeading` |
+| Fleet heading (this year's move, halved toward zero to ±127; kept on arrival) | `scanHeading`, movement `place` | CONFIRMED for straight moves (SC-027); chasers BINARY-ONLY | `TestConfirmedHeadingVectors`, `TestPredictionHeading`; parity: SC-027 headings and masses (10, all pass; `internal/vectors` `pvHeading`) |
 | Bombing check: normal report where the viewer would bomb | `bombCheck` | CONFIRMED for blind fleets without bombs (SC-024, SC-031, SC-032); mechanism BINARY-ONLY | `TestConfirmedBombingCheck` |
 | Battle planet: at least position only for each participant | `battles`, `view` | CONFIRMED (SC-032) at a planet the fleet still orbits; otherwise BINARY-ONLY | `TestConfirmedBattleDisclosure`, `TestPredictionBattleRecords` |
 | Left out of a battle by its size limit: normal report | `battles`, `view` | BINARY-ONLY | `TestPredictionLeftOutOfBattle` |

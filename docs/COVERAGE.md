@@ -4,12 +4,14 @@ What Elegy's comparison with the original covers, what it leaves out, and how mu
 
 Updated 2026-10-14 (viewer reports PR): the sc corpus's 156 viewer-report expectations (views of `other_players` 96, `player` 56, `design` 4) are now compared, and all pass. All-corpora pass rose from 981 to 1137 and skip fell from 565 to 409. Class (e) fell from 584 (after the 0x12c/0x12d mapping, below) to 428, and the gap ranking lost its old rank 1, "viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness)". The RG numbers are unchanged from `f09acd9`. One reading is an ASSUMPTION: `starbase_designs_full` lists the subject's own starbase designs, while the original's file names no owner for a partial starbase design and the sc experiment's reader counts every such design for the subject. The sc cases have two players, so they cannot tell the two readings apart (pinned by `internal/vectors` `TestDesignViews`).
 
+Updated 2026-10-14 (fleet heading and mass PR): the sc corpus's 7 fleet `heading` and 3 `mass_shown` expectations are now compared, and all pass. All-corpora pass rose from 1137 to 1147 and skip fell from 409 to 399. Class (e) fell from 428 to 418, the "other fields" row from 33 to 23, and the gap ranking lost its old rank 5, "fleet heading and `mass_shown` | 10 | lane B (harness)".
+
 Tested at #260's head `b78c03c` (tree `59a494d`), a merge of main `f09acd9` with this PR's docs-only commits. Outside docs/ and HANDOFF.md its files are identical to `f09acd9`'s (`git diff f09acd9 b78c03c -- . ':!docs' ':!HANDOFF.md'` is empty), so the code tested is main `f09acd9`'s (tree `b7e0e77`). No test reads the files this PR changes. The candidate is #260's merge commit, whose tree differs from `f09acd9`'s only in docs/ and HANDOFF.md. On that head: `go test ./...` passes; the PR-subset matrix (24 games of 60 years, replayed and reloaded after 23) has 24 with no failure; the nightly matrix has 96 of 96 games with no failure (12 seeds × 2 rulesets × 4 opponent sets, 150 years on a medium map, replayed and reloaded after 77 years; 444 s).
 
 **Zero known discrepancies is not complete equivalence.** No compared value in RG-002, RG-003 or RG-004 differs from the original in a way no seed variant reproduces, and no targeted corpus case fails. That claim covers only what is compared:
 - most random outcomes are compared as samples or across 8 seed variants, never replayed bit for bit;
 - 7,324 skipped expectations are samples of another random stream;
-- 428 more expectations test mechanics or views the harness does not compare yet (class e);
+- 418 more expectations test mechanics or views the harness does not compare yet (class e);
 - whole subsystems, such as the computer players' choices and the client's estimates, have no oracle comparison at all.
 
 The biggest blind spots are listed at the end.
@@ -60,14 +62,14 @@ Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts.
 
 | status | cases | class |
 |---|---:|---|
-| pass | 1137 | (a) |
+| pass | 1147 | (a) |
 | measured pass | 178 | (a), with a MEASURED tag |
 | random, passes on some seeds | 16 | (b) |
 | random, reference seed fails | 12 | (b) |
 | sample-only | 25 | (c) |
 | fail | 48 | all in RG chained years and restarts: (b) and (c), as above |
 | differs | 2 | INTENTIONALLY DIFFERENT under the `elegy` ruleset (FO-03-E, FO-06-G, `Legacy.MergeOverflow` off) |
-| skip | 409 | every expectation of the case is skipped, by the reasons below |
+| skip | 399 | every expectation of the case is skipped, by the reasons below |
 
 Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 
@@ -79,7 +81,7 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (e) client estimates (milestone 3) | 216 | 21 reasons: ETA, travel time, mining rate, completion, research dialog, ship designer, population and defense estimates |
 | (e) messages with no event mapping | 148 | 63 ids (145 expectations) and 2 ids' sequence entries (3) |
 | (e) fleet-to-fleet transport | 38 | the task 15, its target 15, transport fuel 8 |
-| (e) other fields and expectations | 33 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; fleet heading 7, `mass_shown` 3; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
+| (e) other fields and expectations | 23 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
 
 Updated 2026-10-14 (economy, 0x12c/0x12d mapping): "messages with no event mapping" was "148 | 63 ids (145 expectations) and 2 ids' sequence entries (3)" on `f09acd9`; 0x12c (2 + 1 sequence entry) and 0x12d (3 + 2) are now compared and match, so it is 140 (61 ids, no sequence entries) and class (e) is 584. The other numbers on this page are still `f09acd9`'s.
@@ -125,9 +127,8 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 | 2 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator) |
 | 3 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 4 | patrol target 0x0ff | 9 | lane A |
-| 5 | fleet heading and `mass_shown` | 10 | lane B (harness) |
-| 6 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |
-| 7 | `design_gone`, `starbase_design_gone`, `no_new_fleets` | 7 | lane B (harness) |
-| 8 | 0x182 player slot | 1 | economy |
+| 5 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |
+| 6 | `design_gone`, `starbase_design_gone`, `no_new_fleets` | 7 | lane B (harness) |
+| 7 | 0x182 player slot | 1 | economy |
 
 Viewer reports (156: `other_players`, `player` and `design` views) are compared since 2026-10-14 and all pass (sc corpus, below). Client estimates (216) stay deferred to milestone 3 (ELEGY CHOICE, PARITY-STATUS.md "Deferred: client estimators").
