@@ -2,7 +2,6 @@ package vectors
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -410,13 +409,22 @@ func TestReadFileMessageOrder(t *testing.T) {
 	t.Error("no message expectation has the ones listed before it")
 }
 
-// MF-13a and MF-13b differ only by Legacy.FieldLimit511, off in Elegy's
-// rules: under the faithful rules, which turn it on, every expectation
-// matches, 0x17e included (OBJECTS.md "Limits", LEGACY BUG, MEASURED
-// MF-13).
+// MF-13a and MF-13b turn on Legacy.FieldLimit511, on in the elegy ruleset
+// from version 7 (OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13): every
+// expectation matches, 0x17e included. Under elegy version 6, which has
+// the switch off, both fail on 0x17e alone.
 func TestFieldLimit511Cases(t *testing.T) {
-	faithful := func(g engine.Game, orders []engine.PlayerOrders, rng engine.Rand) (engine.TurnResult, error) {
-		g.Rules = engine.FaithfulRules()
+	var v6 engine.Ruleset
+	for _, r := range engine.Rulesets() {
+		if r.ID == engine.ElegyRulesID && r.Version == 6 {
+			v6 = r
+		}
+	}
+	if v6.Legacy.FieldLimit511 || !engine.ElegyRules().Legacy.FieldLimit511 {
+		t.Fatalf("FieldLimit511: elegy v6 %v, latest %v; want off, on", v6.Legacy.FieldLimit511, engine.ElegyRules().Legacy.FieldLimit511)
+	}
+	old := func(g engine.Game, orders []engine.PlayerOrders, rng engine.Rand) (engine.TurnResult, error) {
+		g.Rules = v6
 		return engine.GenerateTurn(g, orders, rng)
 	}
 	for _, name := range []string{"mf13a", "mf13b"} {
@@ -427,13 +435,13 @@ func TestFieldLimit511Cases(t *testing.T) {
 		for _, c := range []struct {
 			run  pvRun
 			want string
-		}{{pvRun{}, "differs"}, {pvRun{turn: faithful}, "pass"}} {
+		}{{pvRun{}, "pass"}, {pvRun{turn: old}, "fail"}} {
 			l, games, genErr, stop := generate(v, c.run)
 			for _, r := range checkCases(v, c.run, l, games, genErr, stop) {
 				if r.Status != c.want {
-					t.Errorf("%s (faithful %v): %s %s, want %s", name, c.run.turn != nil, r.ID, r.Status, c.want)
-				} else if c.want == "differs" && !strings.Contains(r.Why, "message 0x17e to player 0 present = false, want true") {
-					t.Errorf("%s: %s differs by %q, want 0x17e", name, r.ID, r.Why)
+					t.Errorf("%s (elegy v6 %v): %s %s, want %s", name, c.run.turn != nil, r.ID, r.Status, c.want)
+				} else if c.want == "fail" && r.Why != "y1 message: message 0x17e to player 0 present = false, want true" {
+					t.Errorf("%s: %s fails by %q, want 0x17e alone", name, r.ID, r.Why)
 				}
 			}
 		}

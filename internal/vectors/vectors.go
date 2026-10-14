@@ -2523,8 +2523,6 @@ func pvLegacyOff() map[string]string {
 	return map[string]string{
 		"FO-03-E": "Legacy.MergeOverflow off",
 		"FO-06-G": "Legacy.MergeOverflow off",
-		"MF-13a":  "Legacy.FieldLimit511 off",
-		"MF-13b":  "Legacy.FieldLimit511 off",
 	}
 }
 

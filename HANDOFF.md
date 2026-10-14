@@ -31,7 +31,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   | RG-003 | 8 / 100 | 0 / 76 | 5287 / 450 | 0 / 0 | 5921 |
   | RG-004 | 4 / 47 | 1 / 17 | 2519 / 263 | 2 / 2 | 2855 |
 
-  Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 58 message ids are unmapped (was 63). MF-13a and MF-13b leave the parity baseline as "differs" under `Legacy.FieldLimit511` (PARITY-STATUS.md "Minefield laying and hit messages").
+  Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 58 message ids are unmapped (was 63). `elegy` v7 turns `Legacy.FieldLimit511` on, so MF-13a and MF-13b keep passing with 0x17e compared (PARITY-STATUS.md "Minefield laying and hit messages").
 
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.

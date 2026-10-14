@@ -67,7 +67,7 @@ Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts.
 | differs | 2 | INTENTIONALLY DIFFERENT under the `elegy` ruleset (FO-03-E, FO-06-G, `Legacy.MergeOverflow` off) |
 | skip | 565 | every expectation of the case is skipped, by the reasons below |
 
-- Updated 2026-10-14 (lane D, minefield messages): MF-13a and MF-13b move from pass to differs (`Legacy.FieldLimit511` off; PARITY-STATUS.md "Minefield laying and hit messages"). pass was 981, differs 2 (FO-03-E, FO-06-G).
+- Updated 2026-10-14 (lane D, minefield messages): no case changes status. MF-13a and MF-13b now compare 0x17e and still pass, under `elegy` v7, which turns `Legacy.FieldLimit511` on (PARITY-STATUS.md "Minefield laying and hit messages").
 
 Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 
@@ -127,7 +127,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 | rank | gap | expectations | proposed owner |
 |---:|---|---:|---|
 | 1 | viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness) |
-| 2 | ~~minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e~~ done 2026-10-14 (lane D): 33 match, MF-13a/b differ | 35 | lane D |
+| 2 | ~~minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e~~ done 2026-10-14 (lane D): all 35 match on the reference seed (`elegy` v7) | 35 | lane D |
 | 3 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator) |
 | 4 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 5 | patrol target 0x0ff | 9 | lane A |
