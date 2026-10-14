@@ -34,7 +34,7 @@ The release matrix covers 8 seeds × 2 rulesets × 4 opponent sets: 64 games of 
 
 | game | what it is | status on main |
 |---|---|---|
-| RG-001 | 7 players, 2429–2435 | Held strict, no ledger. Restarts Y2 and Y4 pass. Y1, Y3, Y5, Y6 and the chained run pass on some seed variants (random). No order is refused on any variant (`TestRGNoRejectedOrders`). |
+| RG-001 | 7 players, 2429–2435 | Held strict, no ledger. The 6 restarts and chained year 1 pass on some seed variant; Y2 and Y4 are measured passes on the reference seed. Chained years 2–6 fail after the year-1 divergence. No order is refused on any variant (`TestRGNoRejectedOrders`). |
 | RG-002 | AIX start, 2461 | 0 deterministic misses. Ledger: 52 matched, 36 random-driven, 1218 sample. |
 | RG-003 | 12-year chain, 2462–2474 | 0 deterministic misses. Ledger: 108 matched, 77 random-driven, 5741 sample. |
 | RG-004 | 7 custom races, 2466–2477 | 0 deterministic misses. Ledger: 51 matched, 18 random-driven, 2802 sample, 4 not compared (`design_gone` and a samples-only sequence). |
