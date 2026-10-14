@@ -41,7 +41,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
 - **Zero known discrepancies is not complete equivalence.** COVERAGE.md "Biggest blind spots" covers:
   - random parity, which is 0 exact;
   - computer players, with no oracle comparison;
-  - viewer reports and client estimates, 372 expectations;
+  - client estimates, 216 expectations;
   - 63 unmapped message ids;
   - fleet-to-fleet cargo.
 
@@ -52,15 +52,16 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, viewer reports, client estimates, 63 message ids and fleet-to-fleet cargo. |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 63 message ids and fleet-to-fleet cargo. |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
 
 ## What still matters
 
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
-  - viewer reports (156 expectations, lane B);
   - minefield messages (35, lane D);
-  - fleet-to-fleet transport (38, lane A, a mechanic).
+  - fleet-to-fleet transport (38, lane A, a mechanic);
+  - the Mystery Trader (15, lane D).
+- Viewer reports (156) are compared since 2026-10-14 and all pass.
 - Random-driven lines stay open until the original's generator is in the harness.
 - The parity case tally lists most RG cases as `fail`, although there are 0 known discrepancies.
   - Restarts fail because no single seed matches all their random-driven expectations at once.
@@ -69,4 +70,4 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 
 ## Best next move
 
-Run RG-005 (lane F) on `f09acd9` as the out-of-sample check of the zero. Then route the ranked gaps, starting with the viewer reports.
+Run RG-005 (lane F) on `f09acd9` as the out-of-sample check of the zero. Then route the ranked gaps, starting with the minefield messages.
