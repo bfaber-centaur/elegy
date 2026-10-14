@@ -39,8 +39,10 @@ func TestTraderVectorIDs(t *testing.T) {
 		t.Errorf("trader form: %q", got)
 	}
 	gone := pvObjExpect{Kind: "object_gone", Subject: json.RawMessage(`{"kind": "trader", "id": 3}`)}
-	if got := (pvObjects{}).Check(g, gone, m); got != "trader still exists" {
-		t.Errorf("object_gone of a loaded Trader: %q", got)
+	for _, sub := range []string{`{"kind": "trader", "id": 2}`, `{"kind": "trader", "id": 3}`} {
+		if got := (pvObjects{}).Check(g, pvObjExpect{Kind: "object_gone", Subject: json.RawMessage(sub)}, m); got != "trader still exists" {
+			t.Errorf("object_gone of loaded %s: %q", sub, got)
+		}
 	}
 	// have is how many Traders Elegy holds after the run.
 	left := "skip: a Trader left during the run; Elegy's dense Trader list does not keep the original's slots"
@@ -58,6 +60,8 @@ func TestTraderVectorIDs(t *testing.T) {
 		{[]int{2, 3}, 1, 3, 3, 1, ""}, {[]int{2, 3}, 1, 3, 0, -1, appeared},
 		{[]int{2, 3}, 0, 1, 3, -1, left}, {[]int{2, 3}, 0, 0, 3, -1, ""},
 		{[]int{2, 3}, 1, 0, 0, -1, ""},
+		// One left and one appeared: as many Traders as were loaded.
+		{[]int{2, 3}, 1, 2, 3, -1, left},
 		{nil, 0, 0, 1, -1, ""}, {[]int{0, 1}, 0, 2, 1, 1, ""}, {[]int{0, 1}, 0, 2, 2, -1, ""},
 	} {
 		got, why := pvTraderIndex(pvMaps{Traders: c.loaded, TradersAppeared: c.appeared}, c.have, c.id)
