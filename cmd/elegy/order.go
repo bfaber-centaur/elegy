@@ -17,7 +17,7 @@ import (
 
 // readOrderFiles reads order files for the game's current year, by
 // player. A file for another game or year, for a player the game does not
-// have, or a second file for one player is an error.
+// have or a computer player, or a second file for one player is an error.
 func readOrderFiles(g *game.Game, names []string) (map[int][]engine.Order, error) {
 	byPlayer := map[int][]engine.Order{}
 	for _, name := range names {
@@ -32,6 +32,9 @@ func readOrderFiles(g *game.Game, names []string) (map[int][]engine.Order, error
 		}
 		if err := orderFileFits(g, f); err != nil {
 			return nil, fmt.Errorf("%s: %w", name, err)
+		}
+		if _, computer := g.ComputerLevel(f.Player); computer {
+			return nil, fmt.Errorf("%s: an order file for player %d, a computer player", name, f.Player)
 		}
 		if _, dup := byPlayer[f.Player]; dup {
 			return nil, fmt.Errorf("%s: a second order file for player %d", name, f.Player)
@@ -56,20 +59,20 @@ func orderFileFits(g *game.Game, f game.OrderFile) error {
 
 // dryRun generates the year on a copy of the game with only the given
 // order files (every other player keeps its standing orders, computer
-// players included) and returns the outcome of every order. The game is
-// not changed.
+// players included) and returns the outcome of every order and the copy,
+// at the next year. The game is not changed.
 //
 // ELEGY CHOICE: the check is against the game as it stands. An order
 // that another player's orders for the same year would make fail (or
 // succeed) is not caught.
-func dryRun(g *game.Game, byPlayer map[int][]engine.Order) ([]engine.OrderResult, error) {
+func dryRun(g *game.Game, byPlayer map[int][]engine.Order) ([]engine.OrderResult, *game.Game, error) {
 	b, err := g.Encode()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	c, err := game.Load(bytes.NewReader(b))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ds := make([]game.Driver, len(c.State.Players))
 	for p := range ds {
@@ -79,9 +82,9 @@ func dryRun(g *game.Game, byPlayer map[int][]engine.Order) ([]engine.OrderResult
 	}
 	y, err := c.Advance(ds)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return y.Result.Orders, nil
+	return y.Result.Orders, c, nil
 }
 
 func cmdCheck(args []string, out io.Writer) error {
@@ -98,7 +101,7 @@ func cmdCheck(args []string, out io.Writer) error {
 	if err != nil {
 		return err
 	}
-	results, err := dryRun(g, byPlayer)
+	results, _, err := dryRun(g, byPlayer)
 	if err != nil {
 		return err
 	}
@@ -118,7 +121,7 @@ func cmdCheck(args []string, out io.Writer) error {
 }
 
 // orderKindsUsage lists order's kinds.
-const orderKindsUsage = "order kinds: research, move, cargo, queue; elegy order <kind> -h for flags"
+const orderKindsUsage = "order kinds: research, move, cargo, queue, design, delete-design, plan, delete-plan, fleet-plan; elegy order <kind> -h for flags"
 
 // cmdOrder adds one order to a player's order file for the current year,
 // creating the file if needed. The order is checked with a dry run of the
@@ -172,6 +175,16 @@ func cmdOrder(args []string, out io.Writer) error {
 		o, err = cargoOrder(kargs)
 	case "queue":
 		o, err = queueOrder(r, f.Orders, kargs)
+	case "design":
+		o, err = designOrder(r, f.Orders, kargs)
+	case "delete-design":
+		o, err = deleteDesignOrder(kargs)
+	case "plan":
+		o, err = planOrder(r, f.Orders, kargs)
+	case "delete-plan":
+		o, err = deletePlanOrder(kargs)
+	case "fleet-plan":
+		o, err = fleetPlanOrder(kargs)
 	default:
 		err = fmt.Errorf("unknown order kind %q; %s", kind, orderKindsUsage)
 	}
@@ -180,7 +193,7 @@ func cmdOrder(args []string, out io.Writer) error {
 	}
 
 	f.Orders = append(f.Orders, o)
-	results, err := dryRun(g, map[int][]engine.Order{*player: f.Orders})
+	results, next, err := dryRun(g, map[int][]engine.Order{*player: f.Orders})
 	if err != nil {
 		return err
 	}
@@ -205,8 +218,13 @@ func cmdOrder(args []string, out io.Writer) error {
 	if err := os.Rename(tmp, name); err != nil {
 		return err
 	}
-	_, err = fmt.Fprintf(out, "%s: order %d added (%s)\n", name, last, kind)
-	return err
+	if _, err := fmt.Fprintf(out, "%s: order %d added (%s)\n", name, last, kind); err != nil {
+		return err
+	}
+	if d, ok := o.(engine.DesignOrder); ok {
+		return showStoredDesign(out, next, *player, d)
+	}
+	return nil
 }
 
 // researchOrder sets the research budget, field and next field; a flag

@@ -19,7 +19,9 @@ func showReport() game.Report {
 	return game.Report{
 		GameID: 9, Year: 2405, Player: 1,
 		Rules: engine.Ruleset{ID: "elegy", Version: 6},
-		Self: engine.Player{Race: race, ResearchBudget: 15, HasHomeworld: true, Homeworld: 0, Dead: true,
+		Self: engine.Player{Race: race, ResearchBudget: 15, Plans: []engine.BattlePlan{
+			{Name: "Default", Tactic: engine.TacticMaximizeDamage, Primary: engine.TargetArmed, Secondary: engine.TargetAny, Attack: engine.AttackEnemies},
+			{Name: "Hunt", Tactic: engine.TacticDisengage, Primary: engine.TargetFreighters, Attack: engine.AttackPlayer, Player: 2, DumpCargo: true}}, HasHomeworld: true, Homeworld: 0, Dead: true,
 			Research: engine.ResearchState{Levels: [engine.NumFields]int{3, 9, 4, 3, 3, 10}, Accumulated: [engine.NumFields]int{7, 0, 0, 0, 0, 5}, Current: engine.Biotech, Next: engine.NextLowestField, MaxLevel: 10}},
 		Planets: []engine.Planet{
 			{ID: 0, Pos: engine.Point{X: 1000, Y: 1000}, Homeworld: true, Env: [3]int{50, 50, 50}, Population: 250, Mines: 10, Factories: 12, Defenses: 3,
@@ -33,7 +35,7 @@ func showReport() game.Report {
 				Cargo: engine.Cargo{Minerals: engine.Minerals{4, 5, 6}, Colonists: 7}, Task: engine.Task{Kind: engine.TaskTransport},
 				Waypoints: []engine.Waypoint{{Pos: engine.Point{X: 1030, Y: 1040}, Target: engine.TargetPlanet, ID: 1, Warp: 5, Task: engine.Task{Kind: engine.TaskColonize}},
 					{Pos: engine.Point{X: 1060, Y: 1080}, Target: engine.TargetFleet, ID: 9, Warp: 6}, {Pos: engine.Point{X: 1060, Y: 1081}, Warp: 7}}, Repeat: true},
-			{ID: 5, Number: 2, Name: "Home Guard", Pos: engine.Point{X: 1001, Y: 1000}, Stacks: []engine.Stack{{Design: 1, Count: 1}}},
+			{ID: 5, Number: 2, Name: "Home Guard", Plan: 1, Pos: engine.Point{X: 1001, Y: 1000}, Stacks: []engine.Stack{{Design: 1, Count: 1}}},
 			{ID: 6, Number: 3, Pos: engine.Point{X: 1001, Y: 1000}},
 			{ID: 7, Number: 4, Pos: engine.Point{X: 1001, Y: 1000}, Stacks: []engine.Stack{{Design: 8, Count: 1}}},
 		},
@@ -116,6 +118,7 @@ Fleets (4)
 #5 Home Guard, in space at (1001, 1000)
   ships: 1 Scout
   fuel 0 mg; cargo ironium 0, boranium 0, germanium 0 kT, colonists 0
+  battle plan 1
 #6 Fleet #3, in space at (1001, 1000)
   ships: none
   fuel 0 mg; cargo ironium 0, boranium 0, germanium 0 kT, colonists 0
@@ -130,6 +133,10 @@ ship slot 1: Hauler (Medium Freighter hull), 130 kT, cargo 210 kT
 Other players' designs known (2)
 design #3: Spy, Scout hull, 20 kT, seen 2404
 design #5: unknown Destroyer, Destroyer hull, 180 kT, seen 2402
+
+Battle plans (2)
+0 Default: maximize-damage; primary armed, secondary any; attack enemies
+1 Hunt: disengage; primary freighters, secondary none; attack player 2; dumps cargo
 
 Research: 15% of resources, current field biotechnology, then lowest field
   energy        level  3, 14 of 1060 toward level 4
@@ -196,11 +203,11 @@ func TestShowCommand(t *testing.T) {
 		t.Fatalf("default section:\n%s", sum)
 	}
 	all := cli(t, "show", "-game", save, "all")
-	parts := cli(t, "show", "-game", save, "summary", "planets", "galaxy", "fleets", "designs", "research", "messages")
+	parts := cli(t, "show", "-game", save, "summary", "planets", "galaxy", "fleets", "designs", "plans", "research", "messages")
 	if all != parts || !strings.Contains(all, "\n\nPlanets (1)\n") {
 		t.Fatalf("all:\n%s\nsections:\n%s", all, parts)
 	}
-	for _, want := range []string{"  parts: 32 Laser, 32 Mole-skin Shield\n", "  parts: 1 Long Hump 6, 1 Rhino Scanner, 1 X-Ray Laser\n"} {
+	for _, want := range []string{"  parts: 32 Laser, 32 Mole-skin Shield\n", "  parts: 1 Long Hump 6, 1 Rhino Scanner, 1 X-Ray Laser\n", "  slots: 0:1:Long Hump 6, 1:1:Rhino Scanner, 2:1:X-Ray Laser\n", "Battle plans (5)\n0 Default: maximize-ratio; "} {
 		if !strings.Contains(all, want) {
 			t.Errorf("show lacks %q", want)
 		}

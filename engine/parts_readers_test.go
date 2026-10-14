@@ -35,6 +35,7 @@ func TestPartsReaders(t *testing.T) {
 		"engine/fleetops.go:readDesign":            true, // builds the design
 		"engine/designcheck.go:checkDesign":        true, // rebuilds the stored design, misslotted parts kept
 		"engine/combat_token.go:tokenValues":       true, // battleDesign's copy; armor from the full design
+		"cmd/elegy/show.go:designFills":            true, // the stored loadout, in the form a design order takes
 		"objects/minefields.go:designArmor":        true, // armor
 		"objects/trader.go:sameLoadout":            true, // the design's identity
 		"internal/vectors/orders.go:orders":        true, // design orders

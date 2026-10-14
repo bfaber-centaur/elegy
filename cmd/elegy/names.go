@@ -213,3 +213,34 @@ func lookup(what, name string, names []string) (int, error) {
 	}
 	return 0, fmt.Errorf("%s %q: one of %s", what, name, strings.Join(names, ", "))
 }
+
+// tacticNames are the battle-plan tactics, in tactic order.
+var tacticNames = []string{
+	engine.TacticDisengage:             "disengage",
+	engine.TacticDisengageIfChallenged: "disengage-if-challenged",
+	engine.TacticMinimizeDamage:        "minimize-damage",
+	engine.TacticMaximizeNet:           "maximize-net",
+	engine.TacticMaximizeRatio:         "maximize-ratio",
+	engine.TacticMaximizeDamage:        "maximize-damage",
+}
+
+// targetNames are the battle-plan target types, in type order.
+var targetNames = []string{
+	engine.TargetNone:              "none",
+	engine.TargetAny:               "any",
+	engine.TargetStarbase:          "starbase",
+	engine.TargetArmed:             "armed",
+	engine.TargetBombersFreighters: "bombers-freighters",
+	engine.TargetUnarmed:           "unarmed",
+	engine.TargetFuelTransports:    "fuel-transports",
+	engine.TargetFreighters:        "freighters",
+}
+
+// attackNames are the battle-plan attack choices, in order.
+var attackNames = []string{
+	engine.AttackNobody:             "nobody",
+	engine.AttackEnemies:            "enemies",
+	engine.AttackNeutralsAndEnemies: "neutrals-and-enemies",
+	engine.AttackEveryone:           "everyone",
+	engine.AttackPlayer:             "player",
+}
