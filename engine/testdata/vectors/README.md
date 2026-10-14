@@ -605,6 +605,15 @@ python3 tools/vectors/build.py co  <dir named co>                           # a 
 go test ./internal/vectors
 ```
 
+### Adding a representative game
+
+A representative game needs no code. The ledger tests and `TestBattleRecords` find every game in `rg/` (`vectors.RGGames`): a chained run `rgNNN.json`, its restarts `rgNNN-y1.json` to `rgNNN-yN.json` with no gap, and its ledger `rgNNN-ledger.txt`. RG-001 alone has no ledger and is held to exact matches. A missing ledger, a restart gap, or a run or ledger without its chained run fails every one of those tests rather than dropping the game.
+
+1. Add the vectors to `rg/`.
+2. Create `rg/rgNNN-ledger.txt` holding only its header, as `#` lines (see `rg004-ledger.txt`). A rewrite keeps the leading `#` lines.
+3. Run `RG002_LEDGER=write go test ./internal/vectors -run 'TestRG00.Ledger'` and `RG002_LEDGER=write go test ./engine -run 'TestBattleRecords$'`. A game without a test of its own runs as a subtest of `TestRG00xLedger`.
+4. Classify every UNCLASSIFIED line by hand. Until then, each fails, as does every line of a ledger that lacks it.
+
 ## Not converted yet
 
 - FM-000..004 (round 1, `experiments/fm00N`) and TK-001..007 (round 1,
