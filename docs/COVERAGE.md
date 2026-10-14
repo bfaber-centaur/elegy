@@ -136,7 +136,7 @@ Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section add
 
 Updated 2026-10-14 (lane A, patrol target 0x0ff): KERNEL-STATUS's patrol paragraph gains a line that matches `BINARY-ONLY`: the 0x0ff slots, a BINARY-ONLY claim that stays uncompared. KERNEL goes from 20 to 21 lines, and by the same `grep -c` the BINARY-ONLY total becomes 192 (was 191). ASSUMPTION 84, NOT RUN 22 and UNRESOLVED 14 are unchanged. The table above keeps 191.
 
-Updated 2026-10-14 (lane D, Mystery Trader parts): no label line changes; by the same `grep -c` the totals stay 192 BINARY-ONLY and 84 ASSUMPTION.
+Updated 2026-10-14 (lane D, Mystery Trader parts): PARITY-STATUS's Trader section adds two lines that match `UNRESOLVED`, both real claims: the 0x10c/0x10f slot identity (MESSAGES.md `369a3b4`) and "The one slot is not compared (UNRESOLVED)". By the same `grep -c` UNRESOLVED becomes 16 (was 14; PARITY 6 → 8). BINARY-ONLY 192, ASSUMPTION 84 and NOT RUN 22 are unchanged. The table above keeps the earlier figures. Corrected 2026-10-14: this note first read "no label line changes; by the same `grep -c` the totals stay 192 BINARY-ONLY and 84 ASSUMPTION", which missed the UNRESOLVED lines.
 
 ## Biggest blind spots
 
