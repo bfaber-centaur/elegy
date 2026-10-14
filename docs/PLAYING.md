@@ -35,7 +35,7 @@ prints every one.
 
 ```console
 $ ./elegy show -game game.json -player 0
-Game 2817366194855738197, year 2400, player 0, ruleset elegy v6
+Game 2817366194855738197, year 2400, player 0, ruleset elegy v7
 Planets: 1, population 25000
 Homeworld: Planet 937 (#37)
 Fleets: 6, ships 6

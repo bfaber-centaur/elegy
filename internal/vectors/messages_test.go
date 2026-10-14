@@ -155,7 +155,11 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventPlanetDegraded, Player: 0, Planet: 3, Fleet: -1, Count: 70},
 			{Kind: engine.EventPlanetImproved, Player: 0, Planet: 3, Fleet: -1, Count: 74, Axes: []int{72}},
 			{Kind: engine.EventPlanetImproved, Player: 2, Planet: 5, Fleet: -1, Count: 74},
-			{Kind: engine.EventPlanetNotImproved, Player: 2, Planet: 5, Fleet: -1, Count: 100}}},
+			{Kind: engine.EventPlanetNotImproved, Player: 2, Planet: 5, Fleet: -1, Count: 100},
+			{Kind: engine.EventMinesLaid, Player: 0, Planet: -1, Fleet: -1, Count: 100, Axes: []int{1, 0}},
+			{Kind: engine.EventMinesLaid, Player: 2, Planet: -1, Fleet: -1, Count: 100, Axes: []int{0, 0}},
+			{Kind: engine.EventMinesNotLaid, Player: 0, Planet: -1, Fleet: -1, Count: 100, Axes: []int{0, 0}},
+			{Kind: engine.EventMineHit, Player: 2, Planet: -1, Fleet: -1, Count: 10, Axes: []int{0, 0, 0}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -227,6 +231,17 @@ func TestMessageCheck(t *testing.T) {
 		{"planetary defense, not sent", msg(0, 0x145, true, 1), "message 0x145 to player 0 present = false, want true"},
 		{"planetary scanner", msg(0, 0x157, true, 1), ""},
 		{"planetary scanner, not sent", msg(2, 0x157, true, 1), "message 0x157 to player 2 present = false, want true"},
+		{"mines laid, new field", msg(0, 0x0c3, true, 1), ""},
+		{"mines laid, new field, not sent", msg(2, 0x0c3, true, 1), "message 0x0c3 to player 2 present = false, want true"},
+		{"mines laid, own field", msg(2, 0x0c4, true, 1), ""},
+		{"mines laid, own field, not sent", msg(0, 0x0c4, true, 1), "message 0x0c4 to player 0 present = false, want true"},
+		{"mines not laid", msg(0, 0x17e, true, 1), ""},
+		{"mines not laid, not sent", msg(2, 0x17e, true, 1), "message 0x17e to player 2 present = false, want true"},
+		{"mine hit, victim", msg(2, 0x0c6, true, 1), ""},
+		{"mine hit, victim, not sent", msg(0, 0x0c6, true, 1), "message 0x0c6 to player 0 present = false, want true"},
+		{"mine hit, field's owner", msg(0, 0x0ca, true, 1), ""},
+		{"mine hit, field's owner, not sent", msg(2, 0x0ca, true, 1), "message 0x0ca to player 2 present = false, want true"},
+		{"mine hit, speed bump id unmapped", msg(2, 0x0c5, true, 1), "skip: message 0x0c5 has no event mapping"},
 		{"no queue, not sent", msg(0, 0x03f, true, 1), "message 0x03f to player 0 present = false, want true"},
 		{"queue not loaded, no queue", msg(2, 0x03f, true, 1), "skip: a queue message from a production queue not loaded"},
 		{"queue not loaded, queue completed", msg(2, 0x03e, false, 1), "skip: a queue message from a production queue not loaded"},
@@ -399,4 +414,43 @@ func TestReadFileMessageOrder(t *testing.T) {
 		}
 	}
 	t.Error("no message expectation has the ones listed before it")
+}
+
+// MF-13a and MF-13b turn on Legacy.FieldLimit511, on in the elegy ruleset
+// from version 7 (OBJECTS.md "Laying", LEGACY BUG, MEASURED MF-13): every
+// expectation matches, 0x17e included. Under elegy version 6, which has
+// the switch off, both fail on 0x17e alone.
+func TestFieldLimit511Cases(t *testing.T) {
+	var v6 engine.Ruleset
+	for _, r := range engine.Rulesets() {
+		if r.ID == engine.ElegyRulesID && r.Version == 6 {
+			v6 = r
+		}
+	}
+	if v6.Legacy.FieldLimit511 || !engine.ElegyRules().Legacy.FieldLimit511 {
+		t.Fatalf("FieldLimit511: elegy v6 %v, latest %v; want off, on", v6.Legacy.FieldLimit511, engine.ElegyRules().Legacy.FieldLimit511)
+	}
+	old := func(g engine.Game, orders []engine.PlayerOrders, rng engine.Rand) (engine.TurnResult, error) {
+		g.Rules = v6
+		return engine.GenerateTurn(g, orders, rng)
+	}
+	for _, name := range []string{"mf13a", "mf13b"} {
+		v, err := ReadFile("../../engine/testdata/vectors/mf/" + name + ".json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, c := range []struct {
+			run  pvRun
+			want string
+		}{{pvRun{}, "pass"}, {pvRun{turn: old}, "fail"}} {
+			l, games, genErr, stop := generate(v, c.run)
+			for _, r := range checkCases(v, c.run, l, games, genErr, stop) {
+				if r.Status != c.want {
+					t.Errorf("%s (elegy v6 %v): %s %s, want %s", name, c.run.turn != nil, r.ID, r.Status, c.want)
+				} else if c.want == "fail" && r.Why != "y1 message: message 0x17e to player 0 present = false, want true" {
+					t.Errorf("%s: %s fails by %q, want 0x17e alone", name, r.ID, r.Why)
+				}
+			}
+		}
+	}
 }

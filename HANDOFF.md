@@ -31,6 +31,8 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   | RG-003 | 8 / 100 | 0 / 76 | 5287 / 450 | 0 / 0 | 5921 |
   | RG-004 | 4 / 47 | 1 / 17 | 2519 / 263 | 2 / 2 | 2855 |
 
+  Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 56 message ids are unmapped (was 61). `elegy` v7 turns `Legacy.FieldLimit511` on, so MF-13a and MF-13b keep passing with 0x17e compared (PARITY-STATUS.md "Minefield laying and hit messages").
+
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.
   - No restart refuses an order.
@@ -42,7 +44,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   - random parity, which is 0 exact;
   - computer players, with no oracle comparison;
   - client estimates, 216 expectations;
-  - 63 unmapped message ids;
+  - 56 unmapped message ids;
   - fleet-to-fleet cargo.
 
 ## Engine completion
@@ -52,13 +54,13 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 63 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 56 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
 
 ## What still matters
 
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
-  - minefield messages (35, lane D);
+  - ~~minefield messages (35, lane D)~~ done 2026-10-14;
   - fleet-to-fleet transport (38, lane A, a mechanic). Updated 2026-10-14: implemented by lane A; 36 of the 38 are compared and pass (16 FO and FM cases), FO-02-Q's "load optimal" fuel (2) stays not compared, and no RG ledger line moves (COVERAGE.md dated note);
   - the Mystery Trader (15, lane D).
 - Viewer reports (156) are compared since 2026-10-14 and all pass.
