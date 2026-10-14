@@ -81,6 +81,7 @@ func pvMessageIDs() map[int]string {
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
 		0x117: "EventRacePenalized",
 		0x182: "EventRaceHacked",
+		0x15a: "EventPlanetDegraded",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -178,6 +179,14 @@ const (
 	pvFocusResearch = 0x10000 - 2
 	pvFocusDesign   = 0x10000 - 3
 	pvFocusObject   = 0x10000 - 6
+)
+
+// Cargo message slots (0x02b to 0x02e; MESSAGES.md "Slot types" CM-1
+// update, stars-elegy 4f59d8d, MEASURED): the cargo type of colonists,
+// and the first location slot of a planet (the second is the planet).
+const (
+	pvCargoColonists = 3
+	pvLocationPlanet = 0xffff
 )
 
 // pvCategoryBits is each component category's bit number b in a part
@@ -420,6 +429,30 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// for it, so it is not compared.
 			send(ev.Player, pvMsg{id: 0x182, focus: pvFocusNone, focusKnown: true,
 				params: []int{ev.Count}, known: []bool{false}, why: "0x182 player slot"})
+		case engine.EventPlanetDegraded:
+			// MESSAGES.md 0x15a (CONFIRMED GAP-001 W1, stars-elegy
+			// 28a3175): fleet, planet, percent before, percent after;
+			// focus the fleet for its owner, the planet for the planet
+			// owner. A negative percent's slot value is not measured.
+			if len(ev.Axes) != 1 {
+				break
+			}
+			m := pvMsg{id: 0x15a, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{0, ev.Planet - 1, ev.Axes[0], ev.Count}, known: []bool{false, true, true, true},
+				why: "0x15a fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.params[0], m.known[0], m.why = code, true, ""
+				if code>>9 == ev.Player {
+					m.focus = pvFocusFleet | code
+				}
+			} else if ev.Player != owner(ev.Planet) {
+				m.focusKnown = false
+			}
+			if ev.Axes[0] < 0 || ev.Count < 0 {
+				m.known[2], m.known[3] = ev.Axes[0] >= 0, ev.Count >= 0
+				m.why = whyNot(0x15a, "negative percent slot")
+			}
+			send(ev.Player, m)
 		case engine.EventOvercrowded:
 			send(ev.Player, pvMsg{id: 0x026, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventHostileShrink:
@@ -497,14 +530,23 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// Slots: field, research added (MESSAGES.md 0x159).
 			send(ev.Player, pvMsg{id: 0x159, focus: pvFocusResearch, focusKnown: true, params: []int{int(ev.Item), ev.Count}})
 		case engine.EventColonistsBeamedDown:
-			// Slots: fleet, amount (two slots), mineral, location (two
-			// slots). Which word of a planet location holds the planet
-			// is not stated, so the cargo and location slots are not
-			// compared.
-			m := pvMsg{id: 0x02e, params: make([]int, 6), known: make([]bool, 6), why: "0x02e fleet gone by the end of the year"}
+			// Slots: fleet, amount (two slots), cargo type, location (two
+			// slots). The cargo type of colonists is 3, and a planet
+			// location is 65535 then the planet number (MEASURED,
+			// stars-elegy CM-1, 4f59d8d: 14 and 39 records). Elegy sends
+			// 0x02e only at the fleet's owner's own planet. The fleet
+			// slot is owner·512 + (number − 1): CM-1 measured the plain
+			// number for player 0's one-design fleets only, and the
+			// owner·512 part for other players is an ASSUMPTION
+			// (consistent with FS-1 and 0x028, not measured for 0x02e).
+			// The amount's second slot as its high word is inferred
+			// (CM-1: 0 in every record, at most 300). The fleet slot and
+			// the focus need the fleet, so they are not compared when it
+			// is gone by the end of the year.
+			m := pvMsg{id: 0x02e, params: []int{0, ev.Count & 0xffff, ev.Count >> 16, pvCargoColonists, pvLocationPlanet, ev.Planet - 1},
+				known: []bool{false, true, true, true, true, true}, why: "0x02e fleet gone by the end of the year"}
 			if code, ok := fleet(ev.Fleet); ok {
-				m = pvMsg{id: 0x02e, focus: pvFocusFleet | code, focusKnown: true, params: []int{code, ev.Count & 0xffff, ev.Count >> 16, 0, 0, 0},
-					known: []bool{true, true, true, false, false, false}, why: "0x02e mineral and location slots"}
+				m.focus, m.focusKnown, m.params[0], m.known[0], m.why = pvFocusFleet|code, true, code, true, ""
 			}
 			send(ev.Player, m)
 		case engine.EventTargetGone:

@@ -45,6 +45,10 @@ type Adjustment struct {
 	// owner is told only when this is set (Rules.Adjust sends the
 	// messages).
 	HabChanged bool
+	// Before and After are the planet owner's habitability before and
+	// after this fleet's clicks (MESSAGES.md 0x12c/0x15a "percent,
+	// percent"; under ASSUMPTION T3 a later fleet starts from After).
+	Before, After int
 }
 
 // Adjust runs KERNEL.md "Turn order" step 7.4, remote terraforming by
@@ -103,7 +107,8 @@ func Adjust(g *engine.Game) []Adjustment {
 		if len(adj.Axes) == 0 {
 			continue
 		}
-		adj.HabChanged = engine.Habitability(race, p.Env) != before
+		adj.Before, adj.After = before, engine.Habitability(race, p.Env)
+		adj.HabChanged = adj.After != before
 		out = append(out, adj)
 	}
 	return out

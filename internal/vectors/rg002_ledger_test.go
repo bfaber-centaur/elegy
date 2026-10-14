@@ -51,34 +51,58 @@ import (
 // The first four are computed. A deterministic line carries the class
 // written in the ledger; a new one is written as UNCLASSIFIED and fails
 // until someone classifies it. RG002_LEDGER=write go test -run
-// TestRG002Ledger ./internal/vectors rewrites the ledger, keeping the
-// hand classes of lines that remain. TestRG003Ledger does the same for
-// RG-003's ledger (rgLedgers), under the same variable.
+// TestRG002Ledger ./internal/vectors rewrites the ledger, keeping its
+// header and the hand classes of lines that remain. TestRG003Ledger,
+// TestRG004Ledger and TestRG00xLedger do the same for the other games'
+// ledgers (rgLedgers), under the same variable.
 
-const (
-	rg002Ledger = "../../engine/testdata/vectors/rg/rg002-ledger.txt"
-	// rg002Unclassified marks a deterministic line nobody classified.
-	rg002Unclassified = "UNCLASSIFIED"
-)
+// rg002Unclassified marks a deterministic line nobody classified.
+const rg002Unclassified = "UNCLASSIFIED"
 
-// rg002Vectors are the RG-002 runs the ledger covers: the chained six
-// years and each year's restart from the recorded state.
-var rg002Vectors = []string{"rg002", "rg002-y1", "rg002-y2", "rg002-y3", "rg002-y4", "rg002-y5", "rg002-y6"}
+// rgCorpus is the representative games' directory (RGGames).
+const rgCorpus = "../../engine/testdata/vectors/rg"
 
 // rgLedger is one representative game's discrepancy ledger: its file,
-// header, chained run and the runs it covers. RG-003 (RG-002 continued to
-// 12 years) and RG-004 (a second game, 12 years) have their own, with
-// RG-002's classes (vectors README.md "rg").
+// header, chained run and the runs it covers. Every game with a ledger
+// in rgCorpus has one, with RG-002's classes (vectors README.md "rg"):
+// RG-003 is RG-002 continued to 12 years, RG-004 a second game.
 type rgLedger struct {
 	path, header, chained string
 	vectors               []string
 }
 
-// rgLedgers are the representative games' ledgers.
-var rgLedgers = map[string]rgLedger{
-	"rg002": {rg002Ledger, rg002LedgerHeader, "rg002", rg002Vectors},
-	"rg003": {"../../engine/testdata/vectors/rg/rg003-ledger.txt", rg003LedgerHeader, "rg003", rgRuns("rg003", 12)},
-	"rg004": {"../../engine/testdata/vectors/rg/rg004-ledger.txt", rg004LedgerHeader, "rg004", rgRuns("rg004", 12)},
+// rgLedgers lists the representative games' ledgers (RGGames), by game.
+// A ledger's header is its leading comment lines, which a rewrite keeps.
+func rgLedgers(t *testing.T) map[string]rgLedger {
+	t.Helper()
+	games, err := RGGames(rgCorpus)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]rgLedger{}
+	for _, g := range games {
+		if g.Ledger == "" {
+			continue
+		}
+		data, err := os.ReadFile(g.Ledger)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out[g.Name] = rgLedger{g.Ledger, ledgerHeader(string(data)), g.Name, rgRuns(g.Name, g.Years)}
+	}
+	return out
+}
+
+// ledgerHeader is a ledger's leading comment lines.
+func ledgerHeader(data string) string {
+	var header strings.Builder
+	for _, line := range strings.SplitAfter(data, "\n") {
+		if !strings.HasPrefix(line, "#") {
+			break
+		}
+		header.WriteString(line)
+	}
+	return header.String()
 }
 
 // rgRuns is a chained run and its restarts, years 1 to n.
@@ -173,6 +197,13 @@ func rg002Run(t *testing.T, name string, seed int) (fields map[rg002Field]string
 			if e.Year >= len(games) {
 				k.field, k.skip = "year", true
 				fields[k] = "not generated: " + stop
+				continue
+			}
+			// An alt_battle gets its line from engine TestBattleRecords,
+			// which judges it as a sample: an extra battle there, or none
+			// as in the recorded stream (battle_parity_test.go
+			// checkBattleSet).
+			if e.Kind == "alt_battle" {
 				continue
 			}
 			msg, also, _ := strings.Cut(l.pvCheck(&games[e.Year], e), pvAlsoSkipped)
@@ -443,13 +474,39 @@ func checkLedger(t testing.TB, got []ledgerLine, ledger map[string]string) []led
 	return write
 }
 
-func TestRG002Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg002"]) }
+func TestRG002Ledger(t *testing.T) { testRGLedger(t, rgLedgers(t)["rg002"]) }
 
 // TestRG003Ledger checks RG-003's ledger as TestRG002Ledger does RG-002's.
-func TestRG003Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg003"]) }
+func TestRG003Ledger(t *testing.T) { testRGLedger(t, rgLedgers(t)["rg003"]) }
 
 // TestRG004Ledger checks RG-004's ledger as TestRG002Ledger does RG-002's.
-func TestRG004Ledger(t *testing.T) { testRGLedger(t, rgLedgers["rg004"]) }
+func TestRG004Ledger(t *testing.T) { testRGLedger(t, rgLedgers(t)["rg004"]) }
+
+// rgOwnTest lists the games checked by a test of their own above.
+var rgOwnTest = map[string]bool{"rg002": true, "rg003": true, "rg004": true}
+
+// TestRG00xLedger checks every other game's ledger (rgOtherGames) as
+// TestRG002Ledger does RG-002's, one subtest per game, so a new game's
+// vectors and ledger need no code; its name matches -run
+// 'TestRG00.Ledger' with the others.
+func TestRG00xLedger(t *testing.T) {
+	ledgers := rgLedgers(t)
+	for _, game := range rgOtherGames(ledgers) {
+		t.Run(game, func(t *testing.T) { testRGLedger(t, ledgers[game]) })
+	}
+}
+
+// rgOtherGames lists the games of ledgers without a test of their own.
+func rgOtherGames(ledgers map[string]rgLedger) []string {
+	var out []string
+	for game := range ledgers {
+		if !rgOwnTest[game] {
+			out = append(out, game)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
 
 func testRGLedger(t *testing.T, lg rgLedger) {
 	if lg.path == "" || len(lg.vectors) == 0 {
@@ -512,48 +569,6 @@ func readBattleLines(t *testing.T, path string) []string {
 	}
 	return out
 }
-
-const rg002LedgerHeader = `# RG-002 discrepancy ledger: every difference of the reference run (seed
-# variant 0, every recorded order loaded) from the original, one per line,
-# and one line for each battle record, matched or not:
-# class | vector | case and year | object | detail
-# Checked exactly by internal/vectors TestRG002Ledger and, for the
-# "battle record" lines, engine TestBattleRecords; see rg002_ledger_test.go
-# for the classes. Rewrite with RG002_LEDGER=write go test -run TestRG002Ledger
-# ./internal/vectors, then classify every UNCLASSIFIED line by hand.
-#
-# Order coverage (lane F, at stars-elegy fe0ccc5): the 42 order files hold
-# 1867 order records and the vectors carry 1867 orders, none dropped, so a
-# refused order here is Elegy's gap, never the decoder's. Known vector
-# omissions, both UNRESOLVED in meaning and constant across RG-002: the
-# lay-mines task's second word (6 orders, all "indefinitely") and the high
-# nibble of the waypoint target type (0x31 and 0x51, 23 orders).
-`
-
-const rg003LedgerHeader = `# RG-003 discrepancy ledger: every difference of the reference run (seed
-# variant 0, every recorded order loaded) from the original, one per line:
-# class | vector | case and year | object | detail
-# RG-003 is RG-002 continued to 12 chained years (vectors README.md "rg"):
-# its years 1 to 6 are RG-002's, and player 0's orders in years 7 to 12
-# were injected (stars-elegy experiments/rg003/README.md). Checked
-# exactly by internal/vectors TestRG003Ledger and, for the "battle" lines,
-# engine TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
-# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
-# ./internal/vectors, then classify every UNCLASSIFIED line by hand.
-`
-
-const rg004LedgerHeader = `# RG-004 discrepancy ledger: every difference of the reference run (seed
-# variant 0, every recorded order loaded) from the original, one per line:
-# class | vector | case and year | object | detail
-# RG-004 is a second representative game (vectors README.md "rg"): seven
-# custom races played by expert computer players, 12 chained years (2466
-# to 2477) after 65 unrecorded warm-up years, with no injected orders
-# (stars-elegy experiments/rg004/README.md). Checked exactly by
-# internal/vectors TestRG004Ledger and, for the "battle" lines, engine
-# TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
-# Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
-# ./internal/vectors, then classify every UNCLASSIFIED line by hand.
-`
 
 // TestCheckLedger pins what TestRG002Ledger fails on: a new line, a line
 // gone, a computed class that changed, a deterministic line without a

@@ -605,6 +605,26 @@ python3 tools/vectors/build.py co  <dir named co>                           # a 
 go test ./internal/vectors
 ```
 
+### Adding a representative game
+
+Adding a representative game needs no code. The ledger tests and `TestBattleRecords` take the games from `rg/` (`vectors.RGGames`).
+- The hand-kept list `rg/GAMES` names every game. A `no-ledger` game (RG-001) is held to exact matches.
+- Each game is a chained run `rgNNN.json`, its restarts `rgNNN-y1.json` to `rgNNN-yN.json` with no gap, and its ledger `rgNNN-ledger.txt`.
+- The ledger's leading `#` lines pin the counts by hand, as `# restarts: N` and `# battle records: N`, where battle records is the number of `battle` expectations across the runs.
+- A ledger rewrite keeps those lines and never writes them. So a rebuild that loses records, or a deleted trailing restart, still fails after regeneration.
+
+Each of these fails every one of those tests rather than shrinking or dropping the game:
+- a listed game with its files missing;
+- a run without a GAMES line;
+- a missing ledger;
+- a restart gap;
+- a count that disagrees with its header.
+
+1. Add the vectors to `rg/` and the game's line to `rg/GAMES`.
+2. Create `rg/rgNNN-ledger.txt` holding only its header: `#` lines describing the game (see `rg004-ledger.txt`) and the two counts.
+3. Run `RG002_LEDGER=write go test ./internal/vectors -run 'TestRG00.Ledger'` and `RG002_LEDGER=write go test ./engine -run 'TestBattleRecords$'`. A game without a test of its own runs as a subtest of `TestRG00xLedger`.
+4. Classify every UNCLASSIFIED line by hand. Until then each fails, as does every line of the ledger the run does not produce.
+
 ## Not converted yet
 
 - FM-000..004 (round 1, `experiments/fm00N`) and TK-001..007 (round 1,

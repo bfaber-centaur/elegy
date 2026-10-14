@@ -3,10 +3,13 @@ package engine_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/bfaber-centaur/elegy/internal/vectors"
 )
 
 // RG-002's battle records are checked against the RG-002 ledger
@@ -20,28 +23,37 @@ import (
 // (CheckBattleRecords' random column) is "random-driven" with its count
 // of matching variants, so a change in that count fails too.
 
-const rg002BattleLedger = "testdata/vectors/rg/rg002-ledger.txt"
-
-// rgBattleLedgers are the representative games' ledgers by chained run:
-// RG-003's and RG-004's records go to their own ledgers, with RG-002's
-// classes.
-var rgBattleLedgers = map[string]string{
-	"rg002": rg002BattleLedger,
-	"rg003": "testdata/vectors/rg/rg003-ledger.txt",
-	"rg004": "testdata/vectors/rg/rg004-ledger.txt",
+// rgBattleLedgers are the representative games with a ledger, by
+// chained run (vectors.RGGames): each game's records go to its own
+// ledger, with RG-002's classes. A game without a ledger (RG-001) is
+// held strict.
+func rgBattleLedgers(t testing.TB) map[string]vectors.RGGame {
+	t.Helper()
+	games, err := vectors.RGGames(filepath.Join("testdata", "vectors", "rg"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]vectors.RGGame{}
+	for _, g := range games {
+		if g.Ledger != "" {
+			out[g.Name] = g
+		}
+	}
+	return out
 }
 
-// rgBattleLedger is the ledger of a battle ledger key: the one named by
-// the chained run its vector belongs to ("rg003-y7" → rg003).
-func rgBattleLedger(key string) string {
+// rgBattleGame is the chained run a ledger key's vector belongs to
+// ("rg003-y7 | …" → rg003).
+func rgBattleGame(key string) string {
 	game, _, _ := strings.Cut(key, " | ")
 	game, _, _ = strings.Cut(game, "-")
-	return rgBattleLedgers[game]
+	return game
 }
 
-// rg002BattleWhere parses CheckBattleRecords' locator for an RG-002,
-// RG-003 or RG-004 record: vector, case, stream, x, y, year, then the message.
-var rg002BattleWhere = regexp.MustCompile(`^rg/(rg00[234][^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
+// rg002BattleWhere parses CheckBattleRecords' locator for a
+// representative game's record: vector, case, stream, x, y, year, then
+// the message.
+var rg002BattleWhere = regexp.MustCompile(`^rg/(rg\d{3}[^ ]*)\.json (\S+) "([^"]*)" \((\d+),(\d+)\) y(\d+): (.*)$`)
 
 // rg002Pointer matches a printed pointer, which differs between runs.
 var rg002Pointer = regexp.MustCompile(`0x[0-9a-f]+`)
@@ -55,18 +67,20 @@ var rg002RandomDraws = regexp.MustCompile(`^random \(after \d+ draws in the year
 // moves with any change to earlier years' draws.
 var rg002SampleDraws = regexp.MustCompile(`^sample \((?:after \d+ draws of earlier years|flagged in the vector|alt_battle in the vector)\) `)
 
-// ledgerTB takes CheckBattleRecords' RG-002 failures and sample misses
-// as ledger lines, by key, with "", "sample" or "random-driven" (lane D's
-// in-year rule, with its count of matching variants) as the class, and passes
-// everything else to the test.
+// ledgerTB takes CheckBattleRecords' failures and sample misses of the
+// games in ledgers (game → ledger path) as ledger lines, by key, with "",
+// "sample" or "random-driven" (lane D's in-year rule, with its count of
+// matching variants) as the class, and passes everything else to the
+// test.
 type ledgerTB struct {
 	testing.TB
-	lines map[string]string
+	ledgers map[string]string
+	lines   map[string]string
 }
 
 func (l *ledgerTB) take(msg, class string) bool {
 	m := rg002BattleWhere.FindStringSubmatch(msg)
-	if m == nil {
+	if m == nil || l.ledgers[rgBattleGame(m[1])] == "" {
 		return false
 	}
 	detail := rg002Pointer.ReplaceAllString(m[7], "0x?")
@@ -274,7 +288,7 @@ func TestCheckBattleLedger(t *testing.T) {
 		}
 	}
 	r := &recordTB{TB: t}
-	l := &ledgerTB{TB: r, lines: map[string]string{}}
+	l := &ledgerTB{TB: r, ledgers: map[string]string{"rg002": "rg002-ledger.txt"}, lines: map[string]string{}}
 	l.Errorf("%s", `rg/rg002-y2.json C "" (1,2) y1: tokens: Elegy {Planet:0xc000123}`)
 	l.Logf("%s", `rg/rg002.json C "" (3,4) y2: sample (after 99 draws of earlier years) missed: y`)
 	l.Errorf("%s", `rg/rg001.json C "" (1,2) y1: tokens: x`)
@@ -290,5 +304,44 @@ func TestCheckBattleLedger(t *testing.T) {
 	}
 	if fmt.Sprint(l.lines) != fmt.Sprint(want) || len(r.errs) != 1 {
 		t.Errorf("taken %q, passed on %q; want %q and the rg001 failure", l.lines, r.errs, want)
+	}
+}
+
+// A new game's battle records need no code: with its ledger registered
+// (rgBattleLedgers) its failures are taken as its lines, and while the
+// ledger is its header alone the first difference fails, a sample as a
+// new line and a strict record also once written, as UNCLASSIFIED, until
+// someone classifies it. A game with no ledger is held strict.
+func TestNewGameBattleLedger(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "rg005-ledger.txt")
+	const header = "# RG-005 discrepancy ledger\n"
+	if err := os.WriteFile(path, []byte(header), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r := &recordTB{TB: t}
+	l := &ledgerTB{TB: r, ledgers: map[string]string{"rg005": path}, lines: map[string]string{}}
+	l.Errorf("%s", `rg/rg005-y1.json C "" (1,2) y1: tokens: x`)
+	l.Errorf("%s", `rg/rg006-y1.json C "" (1,2) y1: tokens: x`)
+	strict := "rg005-y1 | C y1 | battle record (1,2) | tokens: x"
+	if fmt.Sprint(l.lines) != fmt.Sprint(map[string]string{strict: ""}) || len(r.errs) != 1 || !strings.Contains(r.errs[0], "rg006") {
+		t.Fatalf("taken %q, passed on %q; want the rg005 line taken and rg006 failed", l.lines, r.errs)
+	}
+	sample := map[string]string{"rg005 | C y2 | battle record (3,4) | sample missed: y": "sample"}
+	for _, c := range []struct {
+		name string
+		got  map[string]string
+	}{{"strict record", l.lines}, {"sample", sample}} {
+		r := &recordTB{TB: t}
+		if checkBattleLedger(r, c.got, readBattleLedger(t, path)); len(r.errs) != 1 || !strings.HasPrefix(r.errs[0], "new battle ledger line") {
+			t.Errorf("%s on an empty ledger: errors %q, want the new line", c.name, r.errs)
+		}
+	}
+	writeBattleLedger(t, path, l.lines, readBattleLedger(t, path))
+	if data, _ := os.ReadFile(path); string(data) != header+"UNCLASSIFIED | "+strict+"\n" {
+		t.Errorf("written ledger %q, want the header and the line UNCLASSIFIED", data)
+	}
+	r = &recordTB{TB: t}
+	if checkBattleLedger(r, l.lines, readBattleLedger(t, path)); len(r.errs) != 1 || !strings.Contains(r.errs[0], "needs a hand class") {
+		t.Errorf("written UNCLASSIFIED: errors %q, want one needing a hand class", r.errs)
 	}
 }

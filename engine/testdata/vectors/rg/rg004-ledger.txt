@@ -9,6 +9,9 @@
 # TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
 # Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
+# Counts kept by hand, checked by internal/vectors RGGames (a rewrite keeps them):
+# restarts: 12
+# battle records: 110
 sample | rg004 | RG-004-2466 y1 #136 | planet id=77 | original_environment = [45 49 67], want [45 50 67]
 sample | rg004 | RG-004-2466 y1 #148 | planet id=88 | surface_minerals = [85 118 1], want [87 118 3]
 sample | rg004 | RG-004-2466 y1 #18 | fleet owner=3 id=4 | fuel = 252, want 224
@@ -155,7 +158,6 @@ sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.plan
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.resources = 1526, want 1477
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.score = 251, want 250
 sample | rg004 | RG-004-2468 y3 #243 | player id=6 seen_by=6 | score_record.unarmed_ships = 20, want 19
-not compared | rg004 | RG-004-2468 y3 #244 | alt_battle x=1365 y=1400 | expectation alt_battle
 sample | rg004 | RG-004-2468 y3 #25 | fleet owner=3 id=40 | 0 waypoints after waypoint 0 [], want 1
 sample | rg004 | RG-004-2468 y3 #25 | fleet owner=3 id=40 | fuel = 1000, want 294
 sample | rg004 | RG-004-2468 y3 #25 | fleet owner=3 id=40 | orbiting = 70, want none
@@ -2615,7 +2617,6 @@ sample | rg004-y3 | RG-004-Y3-2468 y1 #230 | player id=0 seen_by=0 | score_recor
 sample | rg004-y3 | RG-004-Y3-2468 y1 #236 | player id=3 seen_by=3 | score_record.unarmed_ships = 89, want 90
 sample | rg004-y3 | RG-004-Y3-2468 y1 #243 | player id=6 seen_by=6 | score_record.escort_ships = 32, want 31
 sample | rg004-y3 | RG-004-Y3-2468 y1 #243 | player id=6 seen_by=6 | score_record.score = 252, want 250
-not compared | rg004-y3 | RG-004-Y3-2468 y1 #244 | alt_battle x=1365 y=1400 | expectation alt_battle
 random-driven | rg004-y3 | RG-004-Y3-2468 y1 #29 | fleet owner=3 id=93 | fleet gone (7/8 variants match)
 sample | rg004-y3 | RG-004-Y3-2468 y1 #34 | fleet owner=4 id=39 | fuel = 139, want 145
 sample | rg004-y3 | RG-004-Y3-2468 y1 #34 | fleet owner=4 id=39 | waypoints[0] position = {1365 1400}, want {1368 1375}

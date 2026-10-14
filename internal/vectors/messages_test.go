@@ -150,7 +150,9 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventShipsBuilt, Player: 2, Planet: 5, Fleet: 40, Count: 1, Axes: []int{1}},
 			{Kind: engine.EventFleetRouted, Player: 2, Planet: 3, Fleet: 40, Count: 5},
 			{Kind: engine.EventRacePenalized, Player: 2, Planet: -1, Fleet: -1},
-			{Kind: engine.EventRaceHacked, Player: 0, Planet: -1, Fleet: -1, Count: 2}}},
+			{Kind: engine.EventRaceHacked, Player: 0, Planet: -1, Fleet: -1, Count: 2},
+			{Kind: engine.EventPlanetDegraded, Player: 2, Planet: 5, Fleet: -1, Count: 70, Axes: []int{72}},
+			{Kind: engine.EventPlanetDegraded, Player: 0, Planet: 3, Fleet: -1, Count: 70}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -173,6 +175,8 @@ func TestMessageCheck(t *testing.T) {
 		{"race penalized", msg(2, 0x117, true, 1), ""},
 		{"race penalized, not sent", msg(0, 0x117, true, 1), "message 0x117 to player 0 present = false, want true"},
 		{"another race penalized", msg(0, 0x182, true, 1), ""},
+		{"planet degraded", msg(2, 0x15a, true, 1), ""},
+		{"planet degraded, no before value", msg(0, 0x15a, true, 1), "message 0x15a to player 0 present = false, want true"},
 		{"another race penalized, not sent", msg(2, 0x182, true, 1), "message 0x182 to player 2 present = false, want true"},
 		{"alchemy", msg(0, 0x08c, true, 1), ""},
 		{"alchemy, not sent", msg(2, 0x08c, true, 1), "message 0x08c to player 2 present = false, want true"},
