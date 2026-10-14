@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // TestPvMessageList pins each mapped message's focus and slots (vectors
@@ -302,6 +303,18 @@ func TestPvMessageList(t *testing.T) {
 		{"mine hit, ships lost, field's owner", []engine.Event{{Kind: engine.EventMineHit, Player: 1, Planet: -1, Fleet: 9, Count: 10, Axes: []int{2, 0, 1}}}, 2, nil},
 		{"mine hit, speed bump, victim", []engine.Event{{Kind: engine.EventMineHit, Player: 1, Planet: -1, Fleet: 9, Count: 10, Axes: []int{2, 2, 0}}}, 1, nil},
 		{"mine hit, speed bump, field's owner", []engine.Event{{Kind: engine.EventMineHit, Player: 1, Planet: -1, Fleet: 9, Count: 10, Axes: []int{2, 2, 0}}}, 2, nil},
+		{"trader part", []engine.Event{engine.Event{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemPart), Axes: []int{objects.BitMultiCargoPod}}}, 1,
+			[]pvMsg{{id: 0x10b, params: []int{0}, known: []bool{false}, why: "0x10b slot (fleet, Trader or item; equal in WT-003)"}}},
+		{"trader part, Jump Gate", []engine.Event{engine.Event{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemPart), Axes: []int{objects.BitJumpGate}}}, 1,
+			[]pvMsg{{id: 0x10b, params: []int{0}, known: []bool{false}, why: "0x10b slot (fleet, Trader or item; equal in WT-003)"}}},
+		{"trader hull", []engine.Event{engine.Event{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemPart), Axes: []int{objects.BitMiniMorph}}}, 1,
+			[]pvMsg{{id: 0x10c, params: []int{0}, known: []bool{false}, why: "0x10c slot (fleet, Trader or item; equal in WT-003)"}}},
+		{"trader planetary device", []engine.Event{engine.Event{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemPart), Axes: []int{objects.BitGenesisDevice}}}, 1,
+			[]pvMsg{{id: 0x10f, params: []int{0}, known: []bool{false}, why: "0x10f slot (fleet, Trader or item; equal in WT-003)"}}},
+		{"trader part, other player", []engine.Event{engine.Event{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemPart), Axes: []int{objects.BitMultiCargoPod}}}, 2, nil},
+		{"trader research", []engine.Event{{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemResearch)}}, 1, nil},
+		{"trader research, a bit named", []engine.Event{{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemResearch), Axes: []int{objects.BitJumpGate}}}, 1, nil},
+		{"trader ship", []engine.Event{{Kind: engine.EventTraderTrade, Player: 1, Planet: -1, Fleet: 8, Count: int(objects.ItemShip)}}, 1, nil},
 		{"fleet swept", []engine.Event{{Kind: engine.EventMinesSwept, Player: 1, Planet: -1, Fleet: 9, Count: 100, Axes: []int{0, 1, 1050, 1180, 1}}}, 1,
 			[]pvMsg{{id: 0x0c2, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 100, 0, 0, 1, 1050, 1180}, known: all(7)}}},
 		{"fleet swept a speed bump", []engine.Event{{Kind: engine.EventMinesSwept, Player: 1, Planet: -1, Fleet: 9, Count: 33, Axes: []int{2, 2, 1080, 1360, 2}}}, 1,

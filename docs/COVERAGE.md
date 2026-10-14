@@ -99,6 +99,8 @@ The most frequent unmapped message ids are:
 
 Updated 2026-10-14 (lane D, minefield messages): 0x0c3, 0x0c4, 0x0c6, 0x0ca and 0x17e are mapped, which compares their 35 expectations: "messages with no event mapping" goes from 140 (61 ids, after the economy note above) to 105 (56 ids, no sequence entries), and class (e) falls from 382 (after lane A's note above) to 347. The most frequent unmapped ids are now 0x10b (10) and 0x0ff (9).
 
+Updated 2026-10-14 (lane D, Mystery Trader parts): 0x10b, 0x10c and 0x10f are mapped (12 expectations), and the 5 player `mystery_trader_items` expectations are compared. All 17 are samples, not parity: 13 match on the reference seed, and the 4 that miss are counted with class (c) "sample: one stream's random outcome" (2001 → 2005, so class (c) is 7,328). The messages' slot is not compared because WT-003 cannot tell the fleet number, the Trader number and the item bit apart (they are equal there). On main `b0cab2f` (#271) plus this change: "messages with no event mapping" goes from 105 (56 ids) to 93 (53 ids); "other fields and expectations" goes from 23 to 18 (no player Mystery Trader items); class (e) goes from 347 to 330. No case changes status (pass 1162, skip 383), and no RG ledger line moves.
+
 Minefield ids still not compared (4 expectations, "message 0x… has no event mapping" in skips.txt):
 - 0x0c5 and 0x0c9 (a speed bump stopped a fleet, to the fleet's and the field's owners), 1 each. Both are CONFIRMED (mf/mf07, ob/ob024) and are also sent when a speed bump detonates, to every other player's fleet inside it. That second trigger needs the detonation event to carry the field type and each fleet, so it is left for a follow-up rather than mapping half of each id.
 - 0x0c7 and 0x0cb (a hit destroyed ships, to the two owners), 1 each: MESSAGES.md labels both BINARY-ONLY, and their pairing with `EventMineShipsLost` has no oracle record to pin it.
@@ -118,15 +120,17 @@ Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows 
 
 Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section adds one line that matches `BINARY-ONLY`: it names 0x0c7 and 0x0cb, which stay unmapped because MESSAGES.md labels them BINARY-ONLY, so no implemented rule is behind it. By the same `grep -c` the totals become 191 BINARY-ONLY (was 190) and 83 ASSUMPTION (unchanged).
 
+Updated 2026-10-14 (lane D, Mystery Trader parts): PARITY-STATUS's Trader section adds one line that matches `BINARY-ONLY`. It records that MESSAGES.md labels 0x10c and 0x10f BINARY-ONLY while PARITY.md's O-48 row confirms them, and Elegy follows PARITY.md. By the same `grep -c` the totals become 192 BINARY-ONLY and 83 ASSUMPTION (unchanged).
+
 ## Biggest blind spots
 
 1. **Random parity.** Exact parity is 0 in every corpus (RANDOM-PARITY.md).
    - Random outcomes are compared as samples or across 8 seeds, never replayed.
-   - The 7,324 other-stream expectations and the chained years after year 1 test only plausibility.
+   - The 7,328 other-stream expectations (7,324 before the Trader items, 2026-10-14) and the chained years after year 1 test only plausibility.
    - This needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
-4. **Message coverage.** 56 ids have no event mapping (updated 2026-10-14 after the economy and minefield messages; it was 63, and minefield messages were the largest group).
+4. **Message coverage.** 53 ids have no event mapping (updated 2026-10-14 after the economy, minefield and Mystery Trader messages; it was 63, and minefield messages were the largest group).
 5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
 6. **Labels.** 190 BINARY-ONLY and 83 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims").
 7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
@@ -139,7 +143,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 |---:|---|---:|---|
 | 1 | ~~minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e~~ done 2026-10-14 (lane D): all 35 match on the reference seed (`elegy` v7) | 35 | lane D |
 | 2 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator). Done 2026-10-14: 36 compared and pass (16 cases); FO-02-Q's "load optimal" stays not compared (2) |
-| 3 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
+| 3 | ~~Mystery Trader trade 0x10b and player Trader items~~ done 2026-10-14 (lane D), with 0x10c and 0x10f: 17 samples, 13 matched on the reference seed (samples, not parity) | 15 | lane D (objects) |
 | 4 | patrol target 0x0ff | 9 | lane A |
 | 5 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |
 | 6 | `design_gone`, `starbase_design_gone`, `no_new_fleets` | 7 | lane B (harness) |

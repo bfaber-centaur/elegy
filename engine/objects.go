@@ -232,7 +232,7 @@ const (
 	EventWormholeTransit                                               // Player, Fleet, Count = the end passed through
 	EventTraderAppeared                                                // Player (each), Count = the Trader's index
 	EventTraderLeft                                                    // Player, Fleet: its waypoint on a Trader that left is now space
-	EventTraderTrade                                                   // Player, Fleet (the consumed fleet's id), Count = the item kind
+	EventTraderTrade                                                   // Player, Fleet (the consumed fleet's id), Count = the item kind, Axes = the part's bit for a part
 	EventTraderRefused                                                 // Player, Fleet, Count = 1 when already served, 0 for too little cargo
 	EventTraderPlanetTrade                                             // Player, Planet: a computer player's planet traded
 	EventTraderGift                                                    // Player, Fleet = the gift fleet, Count = ships

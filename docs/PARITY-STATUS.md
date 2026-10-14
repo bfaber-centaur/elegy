@@ -402,6 +402,23 @@ Measured on elegy main `f09acd9` (#269) plus this branch, by MESSAGES.md at star
 - **MF-13a and MF-13b: `elegy` v7 turns `Legacy.FieldLimit511` on.** Each expects 0x17e when a player's 512th field is refused because another space object sorts after its minefields. The original's limit is not a flat 511: the 512th field (number 511) is made only when no other space object sorts after the owner's minefields, so a player is held to 511 fields when something does and gets 512 otherwise (MEASURED MF-11 and MF-13, one run each; MF-13c made a 512th field). `Legacy.FieldLimit511` is that conditional rule, LEGACY BUG (RULESET.md `field_limit_511`; `objects` `Space.freeNumber`). The switch had been off in `elegy` since the minefield code landed (elegy #18, `0bc91a9`, an author choice with no recorded decision). Comparing 0x17e made the difference visible, so `elegy` v7 turns it on (Bobby, project chat decision card, 2026-10-14 04:33Z: chose "Match 511", that is, match the original); v1–v6 stay registered unchanged. Both cases stay in the parity baseline. `TestFieldLimit511Cases` pins them: they pass under the default (v7), and under `elegy` v6 each fails on 0x17e alone.
 - **Census:** skips.txt loses "message 0x0c3 has no event mapping" (5), "0x0c4" (5), "0x0c6" (11), "0x0ca" (11) and "0x17e" (3). baseline.txt is unchanged. Every RG ledger is unchanged.
 
+### Mystery Trader part messages and player Trader items (lane D)
+
+Measured on elegy main `b0cab2f` (#271) plus this branch, by stars-elegy `4f59d8d`.
+
+- **Mapped:** a trade whose reward is a part sends **0x10b** to the fleet's owner, or **0x10c** for the Mini Morph hull (bit 8) and **0x10f** for the Genesis Device (bit 10). CONFIRMED: PARITY.md "Wormholes and Mystery Trader, round 2", O-48 (WT-003 A, all twelve parts); MESSAGES.md also has 0x10b CONFIRMED (ob/ob004). `EventTraderTrade` now carries the part's bit (`Axes`).
+  - MESSAGES.md still labels 0x10c and 0x10f BINARY-ONLY, which PARITY.md's O-48 row contradicts. Elegy follows PARITY.md, the canonical record; the MESSAGES.md label is left to stars-elegy.
+  - Not mapped: the research rewards (0x109, 0x10a, 0x10e) and the ship rewards (0x14f, 0x150). Their 3 skips stay.
+  - Presence and the message id are compared. The one slot is not compared: in WT-003 the fleet number, the Trader number and the item bit are equal (the slot reads 0x0400 + 8 and 0x0400 + 10), so the run cannot tell which one it names (found by lane F). Elegy implements no reading. The part focus is not compared either.
+- **Player `mystery_trader_items`** is compared now: the player's Trader part word, as the part names in bit order (stars-elegy `tools/vectors/build.py`; OBJECTS.md "Encounters", CONFIRMED WT-003 A). A missing or an extra part mismatches.
+- **Other corpora:** 17 expectations that were skipped are compared now: 0x10b 10, 0x10c 1 and 0x10f 1 (all WT-003), and 5 `mystery_trader_items` (WT-003-A, WT-003-B, WT-002-B, OB-030-T ×2). Every one is a sample.
+  - 13 match on the reference seed.
+  - 4 miss there, each a random outcome:
+    - WT-003-A10's 0x10f and WT-003-A's item list: on the reference seed, the Genesis Device's Trader takes the 1-in-25 warp bump (8 to 9; MESSAGES.md 0x130, CONFIRMED) and misses the meeting. The oracle voided its stream "cycles 26000" for the same reason. On variant 1 the Jump Gate's Trader is bumped, and on variant 3 the Mini Morph's.
+    - OB-030-T's two item lists: at tech 26 a research offer gives a random part with 4/5 (OBJECTS.md "Encounters"), and no variant draws the original's parts.
+  - The parity baseline keeps every case. WT-003-A11 goes from `sample-only 7` to `sample-only`: 0x10b's presence is per player, so on variant 1 another trade's 0x10b matches it.
+- **Census:** skips.txt loses "message 0x10b has no event mapping" (10), "0x10c" (1), "0x10f" (1) and "player field mystery_trader_items" (5). "sample: one stream's random outcome" goes from 2001 to 2005. Every RG ledger is unchanged.
+
 ### Salvage and bombing message slots (lane D)
 
 Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.

@@ -33,6 +33,8 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
 
   Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 56 message ids are unmapped (was 61). `elegy` v7 turns `Legacy.FieldLimit511` on, so MF-13a and MF-13b keep passing with 0x17e compared (PARITY-STATUS.md "Minefield laying and hit messages").
 
+  Updated 2026-10-14 (lane D, Mystery Trader parts): the ledgers do not move. 0x10b, 0x10c, 0x10f and player `mystery_trader_items` are compared (17 samples; 13 matched on the reference seed, which is not parity), and 53 message ids are unmapped (was 56) (PARITY-STATUS.md "Mystery Trader part messages").
+
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.
   - No restart refuses an order.
@@ -44,7 +46,7 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   - random parity, which is 0 exact;
   - computer players, with no oracle comparison;
   - client estimates, 216 expectations;
-  - 56 unmapped message ids;
+  - 53 unmapped message ids;
   - fleet-to-fleet cargo.
 
 ## Engine completion
@@ -54,7 +56,7 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 | column | state | what is missing |
 |---|---|---|
 | playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
-| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 56 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
+| behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, client estimates, 53 message ids, cargo stealing and "load optimal" fuel (fleet-to-fleet cargo implemented 2026-10-14). |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
 
 ## What still matters
@@ -62,7 +64,7 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
   - ~~minefield messages (35, lane D)~~ done 2026-10-14;
   - fleet-to-fleet transport (38, lane A, a mechanic). Updated 2026-10-14: implemented by lane A; 36 of the 38 are compared and pass (16 FO and FM cases), FO-02-Q's "load optimal" fuel (2) stays not compared, and no RG ledger line moves (COVERAGE.md dated note);
-  - the Mystery Trader (15, lane D).
+  - ~~the Mystery Trader (15, lane D)~~ done 2026-10-14, as samples.
 - Viewer reports (156) are compared since 2026-10-14 and all pass.
 - Random-driven lines stay open until the original's generator is in the harness.
 - The parity case tally lists most RG cases as `fail`, although there are 0 known discrepancies.

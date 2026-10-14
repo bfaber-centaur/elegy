@@ -1353,7 +1353,7 @@ WT-003-A07 sample-only
 WT-003-A08 sample-only 7
 WT-003-A09 sample-only
 WT-003-A10 sample-only 7
-WT-003-A11 sample-only 7
+WT-003-A11 sample-only
 WT-003-A sample-only
 WT-003-B sample-only
 WT-005-A sample-only
