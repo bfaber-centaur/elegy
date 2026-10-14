@@ -25,7 +25,7 @@ included, not just the ID.
 
 | ID | Version | Settings |
 |---|---|---|
-| `elegy` | 7 | `engine.ElegyRules()`, the default: version 6 with `field_limit_511` on ([BOBBY-CITE]; MF-13a and MF-13b, stars-elegy MEASURED MF-13). |
+| `elegy` | 7 | `engine.ElegyRules()`, the default: version 6 with `field_limit_511` on (Bobby, project chat decision card, 2026-10-14 04:33Z: chose Match 511; MF-13a and MF-13b, stars-elegy MEASURED MF-13). |
 | `elegy` | 6 | Version 5 with `lost_planet_message_carry` on. Kept for games saved under it. |
 | `elegy` | 5 | Version 4 with `artifact_full_slower_tech` on. Kept for games saved under it. |
 | `elegy` | 4 | Version 3 with `bare_record_drop` on. Kept for games saved under it. |
