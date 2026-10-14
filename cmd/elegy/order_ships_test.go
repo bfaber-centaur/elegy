@@ -121,6 +121,9 @@ func TestOrderPlans(t *testing.T) {
 		{[]string{"plan", "-index", "5", "-dump=false"}, engine.BattlePlanOrder{Index: 5, Plan: func() engine.BattlePlan { p := calm; p.DumpCargo = false; return p }()}},
 		{[]string{"fleet-plan", "-fleet", "1", "-plan", "5"}, engine.FleetPlanOrder{Fleet: 1, Plan: 5}},
 		{[]string{"delete-plan", "-index", "4"}, engine.DeletePlanOrder{Index: 4}},
+		// After the delete, the file's plan 5 is plan 4.
+		{[]string{"plan", "-index", "4", "-name", "Moved"}, engine.BattlePlanOrder{Index: 4, Plan: func() engine.BattlePlan { p := calm; p.DumpCargo, p.Name = false, "Moved"; return p }()}},
+		{[]string{"plan", "-index", "5", "-name", "New"}, engine.BattlePlanOrder{Index: 5, Plan: engine.BattlePlan{Name: "New"}}},
 	} {
 		if got := add(x.args...); !reflect.DeepEqual(got, x.want) {
 			t.Errorf("order %v:\n%#v\nwant\n%#v", x.args, got, x.want)
@@ -170,6 +173,31 @@ func TestCheckComputerPlayerFile(t *testing.T) {
 		if err == nil || err.Error() != path+": an order file for player 2, a computer player" {
 			t.Errorf("%s: %v", cmd, err)
 		}
+	}
+}
+
+func TestPendingPlans(t *testing.T) {
+	a, b, c := engine.BattlePlan{Name: "A"}, engine.BattlePlan{Name: "B"}, engine.BattlePlan{Name: "C"}
+	plans := []engine.BattlePlan{a, b}
+	got := pendingPlans(plans, []engine.Order{
+		engine.BattlePlanOrder{Index: 1, Plan: a},
+		engine.BattlePlanOrder{Index: 2, Plan: c},
+		engine.BattlePlanOrder{Index: 3, Plan: c},
+		engine.DeletePlanOrder{Index: 3},
+		engine.DeletePlanOrder{Index: 1},
+		engine.BattlePlanOrder{Index: 0, Plan: b},
+		// Out of range: the engine refuses these.
+		engine.BattlePlanOrder{Index: 3, Plan: a},
+		engine.BattlePlanOrder{Index: -1, Plan: a},
+		engine.DeletePlanOrder{Index: 0},
+		engine.DeletePlanOrder{Index: 2},
+		engine.ResearchOrder{},
+	})
+	if want := []engine.BattlePlan{b, c}; !reflect.DeepEqual(got, want) {
+		t.Errorf("pendingPlans: %+v, want %+v", got, want)
+	}
+	if plans[1] != b {
+		t.Errorf("pendingPlans changed the report's plans: %+v", plans)
 	}
 }
 
