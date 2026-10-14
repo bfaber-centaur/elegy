@@ -2,7 +2,13 @@
 
 Elegy's end-to-end results against the original, one entry per full-order regression. The release-candidate coverage report, which separates strict passes, random-dependent results, samples, absent source values and untested mechanics across every corpus, is [COVERAGE.md](COVERAGE.md). The behavioral record these rest on is stars-elegy `docs/PARITY.md`. Other elegy docs mean that file when they cite "docs/PARITY.md".
 
-## Current status: RG-002, RG-003 and RG-004 on main `f09acd9`
+## Current status: RG-002 to RG-005 on main `2943788`
+
+**Re-measured 2026-10-14 on main `2943788`** (the final integration: #276 `97fb5d2`, #277 `d64c936` and #278 on top). Every ledger, baseline.txt and skips.txt were regenerated (`RG002_LEDGER=write`, `PARITY_BASELINE=write`) and nothing moved; `go test ./...` passes. The classification, field-expectation and not-compared tables of this section now carry that measurement, with RG-005's corrected result (computer level loaded, fix A, Trader items compared) beside the in-sample games. RG-005's first run, its pre-registered scoring and its four tallies stay in section "RG-005" and are not re-scored here. The dated notes under each table are history; each quotes the figures it replaced. On `2943788`:
+- `TestParityVectors`, rg corpus (RG-001 to RG-005, 96 cases): pass 0, measured pass 2, fail 60, random 22, random with the reference seed failing 12. baseline.txt keeps 36 RG entries: RG-001 7, RG-002 2, RG-003 2, RG-004 13 and RG-005 12 (chained year 1, Y1 to Y9, Y11 and Y12). This replaces the `f09acd9` bullet below (fail 48, random 13 and 9; 17 RG-002 to RG-004 entries).
+- RG-005's 12 failing cases are its chained years 2–12 and the Y10 restart, for the reasons given below for the other games: Y10's misses each match on some seed, and the chained years continue from Elegy's own year-1 state.
+- RG-001 has no ledger. Its six restarts and chained year 1 pass on some seed (Y2 and Y4 as measured passes on the reference seed), its chained years 2–6 fail after the year-1 divergence, and `TestRGNoRejectedOrders` finds no refused order on any variant.
+- The test runs listed next (the PR-subset and nightly matrices) are the candidate's on `f09acd9` and are not repeated here.
 
 Updated 2026-10-14 (RG-005 ingest PR): RG-005, the out-of-sample game, is in the rg corpus, and its result is in section "RG-005" below, not in the tables of this section, which stay the candidate's in-sample result. On its first run (and after fix A) RG-005 had 12 strict expectations that missed on all 8 seeds, all of them gone once the computer players' level is loaded (fourth tally there). With it, the rg corpus case tally is fail 60, random 22, random with the reference seed failing 12, and baseline.txt keeps 29 RG entries (RG-005 12; 7 on the first run, 10 after fix A). Loading the level also moves RG-002, RG-003 and RG-004 lines (the dated note below the classification table).
 
@@ -19,17 +25,19 @@ The combined run on elegy main `f09acd9` (the release candidate, [COVERAGE.md](C
   - Chained year 1 and every restart: no strict expectation misses on all 8 seeds.
   - Battle records are not in this check. `TestBattleRecords` and the ledgers judge them, with no hand line.
 
-**Classification.** Each corpus has 0 deterministic misses: 0 incorrect-mechanic lines and 0 unresolved-randomness lines. Every compared difference from the original is a sample or random-driven (it matches on at least one seed variant). Ledger lines, chained run / restarts:
+**Classification.** Each corpus has 0 deterministic misses: 0 incorrect-mechanic lines and 0 unresolved-randomness lines (RG-005: since the harness fixes; its first run had 12 strict expectations missing on all 8 seeds, section "RG-005"). Every compared difference from the original is a sample or random-driven (it matches on at least one seed variant). Ledger lines, chained run / restarts, re-measured on `2943788`:
 
-| class | RG-002 | RG-003 | RG-004 |
-|---|---|---|---|
-| matched | 8 / 44 | 8 / 100 | 4 / 47 |
-| strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 |
-| random-driven | 0 / 36 | 0 / 77 | 1 / 17 |
-| of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
-| sample | 1019 / 199 | 5291 / 450 | 2539 / 263 |
-| not compared | 0 / 0 | 0 / 0 | 2 / 2 |
-| total | 1306 | 5926 | 2875 |
+| class | RG-002 | RG-003 | RG-004 | RG-005 (corrected) |
+|---|---|---|---|---|
+| matched | 8 / 44 | 8 / 100 | 4 / 47 | 3 / 18 |
+| strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| random-driven | 0 / 36 | 0 / 77 | 1 / 17 | 2 / 9 |
+| of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 | 0 / 0 |
+| sample | 1019 / 199 | 5291 / 450 | 2539 / 263 | 2211 / 152 |
+| not compared | 0 / 0 | 0 / 0 | 2 / 2 | 12 / 3 |
+| total | 1306 | 5926 | 2875 | 2410 |
+
+- Re-measured 2026-10-14 on `2943788`: the RG-005 column is added. The RG-002 to RG-004 columns are as the computer-level note below left them.
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
@@ -57,6 +65,10 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | RG-003 | restarts | 4832 | 60 | 0 | 452 | 320 | 1 |
 | RG-004 | chained | 197 | 1 | 0 | 1726 | 904 | 3 |
 | RG-004 | restarts | 2517 | 12 | 0 | 139 | 160 | 3 |
+| RG-005 (corrected) | chained | 184 | 2 | 0 | 1662 | 853 | 12 |
+| RG-005 (corrected) | restarts | 2467 | 9 | 0 | 144 | 90 | 3 |
+
+Re-measured on main `2943788` (2026-10-14): the RG-002 to RG-004 rows are unchanged, and the RG-005 rows are added (2713 expectations per run). RG-005's not-compared expectations are the 15 Trader comparisons whose slot Elegy cannot name.
 
 Recomputed on main `f09acd9` (2026-10-14). The 0x02e slots (CM-1) moved one year-1 sequence entry per run from not compared to strict matched in RG-002 and RG-003. The not-compared expectations left are `alt_battle` (RG-003, RG-004; judged by `TestBattleRecords`), `design_gone` and one sequence of sample entries only (RG-004). On `215cd38` the table read:
 
@@ -108,11 +120,14 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 
 **Not compared, by owner.**
 
-| cause | RG-002 | RG-003 | RG-004 | owner |
-|---|---:|---:|---:|---|
-| `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
-| message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 0 | 0 | 4 | |
+| cause | RG-002 | RG-003 | RG-004 | RG-005 | owner |
+|---|---:|---:|---:|---:|---|
+| `design_gone` expectation not compared | 0 | 0 | 2 | 0 | lane B (harness) |
+| message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | 0 | none needed |
+| Trader slot: a Trader left or appeared during the run, and Elegy's dense Trader list keeps no slot | 0 | 0 | 0 | 15 | none planned |
+| total | 0 | 0 | 4 | 15 | |
+
+- Re-measured 2026-10-14 on `2943788`: the RG-005 column and its Trader-slot row are added (12 chained, 3 restarts; section "RG-005", fix A).
 
 - Updated 2026-10-13 (alt_battle PR): the `alt_battle` row (0 | 2 | 2, lane D) is gone; those expectations are battle-ledger samples (Current status notes). The total was 2 | 4 | 6.
 - Updated 2026-10-14 (lane A, 0x02e slots): the row "0x02e mineral and location slots (MESSAGES.md does not say which word of a planet location holds the planet), in the year-1 sequence entry that also holds 0x05b | 2 | 2 | 0 | lane A" is gone (stars-elegy CM-1, 4f59d8d), and the total was 2 | 2 | 4.
@@ -573,6 +588,8 @@ RG-005 (vectors README.md "rg"; stars-elegy experiments/rg005/README.md and PARI
 | matched (battle records) | 21 / 12 | 21 / 12 | 21 / 12 | 21 / 12 |
 | total | 2486 | 2439 | 2439 | 2413 |
 
+Re-measured 2026-10-14 on `2943788`: since the Mystery Trader items are compared (#278), the fourth column reads not compared 15 / 2, sample 2363 / 111 and total 2410; the other rows are unchanged. The four columns above stay as measured at the time.
+
 Field expectations, chained / restarts (reference seed, 8 seeds for random-driven):
 
 | | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
@@ -580,6 +597,7 @@ Field expectations, chained / restarts (reference seed, 8 seeds for random-drive
 | first run | 182 / 2449 | 2 / 9 | 2 / 17 | 1652 / 145 | 873 / 91 | 2 / 2 |
 | after fix A | 184 / 2453 | 2 / 9 | 0 / 12 | 1654 / 144 | 859 / 90 | 14 / 5 |
 | computer level loaded | 184 / 2465 | 2 / 9 | 0 / 0 | 1661 / 144 | 852 / 90 | 14 / 5 |
+| re-measured on `2943788` (Trader items compared) | 184 / 2467 | 2 / 9 | 0 / 0 | 1662 / 144 | 853 / 90 | 12 / 3 |
 
 - `TestParityVectors`, rg corpus: first run fail 65, random 19, random with the reference seed failing 10 (pass 0, measured pass 2); after fix A fail 62, random 20, random with the reference seed failing 12; with the computer level loaded fail 60, random 22 and 12 (RG-002-Y5 and RG-003-Y5 lose `random` status; RG-005-Y2 and -Y11 gain it).
 - No load error, no panic, and no recorded order refused in a restart or in chained year 1. The chained runs refuse 56 orders after year 1, all samples.
