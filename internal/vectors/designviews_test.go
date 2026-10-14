@@ -2,6 +2,8 @@ package vectors
 
 import (
 	"encoding/json"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -45,6 +47,40 @@ func TestDesignViews(t *testing.T) {
 		b, _ := json.Marshal(got)
 		if string(b) != c.want {
 			t.Errorf("%s %d/%d: %s, want %s", c.kind, c.owner, c.id, b, c.want)
+		}
+	}
+}
+
+// pvHeading reads only a fleet with warp 0 and heading (0, 0) as not
+// moving; any other pair is shown as it is. A heading expectation on a
+// fleet the viewer does not see is a mismatch, never a skip.
+func TestFleetHeadingView(t *testing.T) {
+	for _, c := range []struct {
+		s    engine.FleetSighting
+		want []int
+	}{
+		{engine.FleetSighting{}, []int{-127, -127, 0}},
+		{engine.FleetSighting{Warp: 5}, []int{0, 0, 5}},
+		{engine.FleetSighting{Heading: engine.Point{X: 3}}, []int{3, 0, 0}},
+		{engine.FleetSighting{Heading: engine.Point{X: 75, Y: -1}, Warp: 5}, []int{75, -1, 5}},
+	} {
+		if got := pvHeading(c.s); !slices.Equal(got, c.want) {
+			t.Errorf("pvHeading(%+v) = %v, want %v", c.s, got, c.want)
+		}
+	}
+	viewer := 0
+	l := &pvLoaded{views: [][]engine.PlayerView{nil, {{}}}}
+	e := pvExpect{Year: 1, Viewer: &viewer, Subject: json.RawMessage(`{"kind":"fleet","owner":1,"id":0}`)}
+	// Each value a wrong default would give: a moved fleet's heading, the
+	// not-moved encoding, and a mass of 0.
+	for _, c := range []struct{ k, want string }{
+		{"heading", `[75,25,5]`}, {"heading", `[-127,-127,0]`},
+		{"mass_shown", `29`}, {"mass_shown", `0`},
+	} {
+		eq := map[string]json.RawMessage{c.k: json.RawMessage(c.want)}
+		got := l.viewCheck(&engine.Game{}, e, eq, func(int, int) *engine.Fleet { return nil })
+		if got == "" || strings.HasPrefix(got, "skip") {
+			t.Errorf("%s %s of an unseen fleet: %q, want a mismatch", c.k, c.want, got)
 		}
 	}
 }

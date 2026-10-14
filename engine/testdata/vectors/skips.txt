@@ -30,8 +30,6 @@
    1 expectation no_new_fleets
  192 expectation sample
    1 expectation starbase_design_gone
-   7 fleet field heading
-   3 fleet field mass_shown
    1 message 0x000 has no event mapping
    3 message 0x002 has no event mapping
    1 message 0x003 has no event mapping
