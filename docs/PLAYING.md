@@ -30,7 +30,8 @@ game 2817366194855738197 year 2400 hash 4bc2612c...
 `show` prints what one player knows, as text. It reads only that
 player's report, so it shows nothing the player has not seen. The
 sections are `summary` (the default), `planets`, `galaxy`, `fleets`,
-`designs`, `research` and `messages`; `all` prints every one.
+`designs`, `plans` (battle plans), `research` and `messages`; `all`
+prints every one.
 
 ```console
 $ ./elegy show -game game.json -player 0
@@ -96,14 +97,35 @@ The order kinds:
 | `move` | replaces a fleet's waypoints | `-fleet ID`, `-to planet:ID\|fleet:ID\|X,Y` once per waypoint (`-to none` clears them), `-warp W`, `-task none\|colonize\|remote-mine\|scrap` at the last waypoint |
 | `cargo` | loads (positive) or unloads (negative) cargo at a planet or another fleet where the fleet is | `-fleet ID`, `-planet ID` or `-with ID`, `-ironium`, `-boranium`, `-germanium` in kT, `-colonists` in kT (100 colonists each), `-fuel` in mg |
 | `queue` | replaces a planet's production queue, or adds to it with `-append` | `-planet ID`, then items `NAME=COUNT`, or `ship:DESIGN=COUNT` and `starbase:DESIGN=COUNT` with the design's name or slot |
+| `design` | puts a ship or starbase design in a slot | `-name NAME`, `-hull HULL` or `-from DESIGN` (copies one of the player's designs), `-slot N` (default: the lowest free one), `-starbase`, `-picture 0..3`, then fills `SLOT:COUNT:PART` (`COUNT` 0 empties a slot) |
+| `delete-design` | empties a design slot | `-slot N`, `-starbase` |
+| `plan` | adds or changes a battle plan | `-index N` (`show plans`; the next number adds one), `-name`, `-tactic`, `-primary`, `-secondary`, `-attack`, `-player P`, `-dump`; an unset flag keeps the plan's setting |
+| `delete-plan` | deletes a battle plan; later ones move down one | `-index N` |
+| `fleet-plan` | puts a fleet on a battle plan | `-fleet ID`, `-plan N` |
 
 Later orders in the file build on earlier ones: `-append` adds to the
-queue the file already sets, and an unset research flag keeps what the
-file's earlier research order set.
+queue the file already sets, an unset research or plan flag keeps what
+the file's earlier order set, and a new design skips the slots the file
+already fills.
+
+`show designs` prints each design's fills in the `SLOT:COUNT:PART` form
+`design` takes. The engine drops or cuts a fill it cannot use (a part
+the slot does not take, above the player's tech, or over the slot's
+size) rather than refusing the design, so `design` prints the design as
+the year will store it, and warns when that differs from the order:
+
+```console
+$ ./elegy order -game game.json design -name "Long Scout" -from Scout 1:0:x
+orders0-2400.json: order 5 added (design)
+the design will be:
+ship slot 6: Long Scout (Scout hull), 20 kT, 1 Long Hump 6, fuel 300 mg
+  parts: 1 Long Hump 6, 1 Fuel Tank
+  slots: 0:1:Long Hump 6, 2:1:Fuel Tank
+```
 
 `elegy order <kind> -h` lists a kind's flags. Every other order the
-engine has (battle plans, designs, merges, splits, renames and the rest)
-can still be written into the file by hand ([GAME-LOOP.md](GAME-LOOP.md)
+engine has (merges, splits, renames, routes and the rest) can still be
+written into the file by hand ([GAME-LOOP.md](GAME-LOOP.md)
 "Order files"), and `check` checks a file written that way:
 
 ```console
@@ -159,8 +181,11 @@ file with `-player N`, and one `turn` call takes every file.
 
 ## What the slice does not cover yet
 
-- Ship design and battle plans have no `order` kind; they are written by
-  hand.
+- Fleet operations other than move and cargo (merge, split, rename,
+  routes, packets) have no `order` kind; they are written by hand.
+- There is no list of hulls and parts with their slots; `show designs`
+  shows the player's own designs' fills, and a design order's dry run
+  shows what the engine kept.
 - `show` does not compute what a fuller client would: resources per
   year, maximum population, fleet range, or the cost of queue items.
 - Messages name the event and the objects it concerns, not the

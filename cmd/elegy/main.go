@@ -366,9 +366,6 @@ func cmdTurn(args []string, out io.Writer) error {
 		return err
 	}
 	for p, orders := range byPlayer {
-		if ds[p] != nil {
-			return fmt.Errorf("an order file for player %d, a computer player", p)
-		}
 		ds[p] = game.DriverFunc(func(game.Report) ([]engine.Order, error) { return orders, nil })
 	}
 	y, err := g.Advance(ds)

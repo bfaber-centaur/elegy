@@ -15,7 +15,7 @@ import (
 )
 
 // showSections are show's sections, in the order "all" prints them.
-var showSections = []string{"summary", "planets", "galaxy", "fleets", "designs", "research", "messages"}
+var showSections = []string{"summary", "planets", "galaxy", "fleets", "designs", "plans", "research", "messages"}
 
 // cmdShow prints a player's report as text, one section after another.
 // It reads only the player's Report, so it shows nothing the player does
@@ -66,6 +66,8 @@ func show(out io.Writer, v reportView, sections []string) error {
 			v.fleets(out)
 		case "designs":
 			v.designs(out)
+		case "plans":
+			v.plans(out)
 		case "research":
 			v.research(out)
 		case "messages":
@@ -352,6 +354,9 @@ func (v reportView) fleets(out io.Writer) {
 		if f.Repeat {
 			fmt.Fprintln(out, "  repeats its orders")
 		}
+		if f.Plan != 0 {
+			fmt.Fprintf(out, "  battle plan %d\n", f.Plan)
+		}
 	}
 }
 
@@ -359,44 +364,89 @@ func (v reportView) designs(out io.Writer) {
 	r := v.r
 	fmt.Fprintf(out, "Designs (%d)\n", len(r.Designs))
 	for _, d := range r.Designs {
-		kind := "ship"
-		if d.Slot.Starbase {
-			kind = "starbase"
-		}
-		x := d.Design
-		fmt.Fprintf(out, "%s slot %d: %s (%s hull), %d kT", kind, d.Slot.Slot, x.Name, x.Hull.Name, x.Mass)
-		if x.Engines > 0 {
-			fmt.Fprintf(out, ", %d %s", x.Engines, x.Engine.Name)
-		}
-		if x.FuelCapacity > 0 {
-			fmt.Fprintf(out, ", fuel %d mg", x.FuelCapacity)
-		}
-		if x.CargoCapacity > 0 {
-			fmt.Fprintf(out, ", cargo %d kT", x.CargoCapacity)
-		}
-		fmt.Fprintln(out)
-		// Parts are counted by name, in the order they first appear.
-		var names []string
-		count := map[string]int{}
-		for _, s := range x.Parts() {
-			if count[s.Part.Name] == 0 {
-				names = append(names, s.Part.Name)
-			}
-			count[s.Part.Name] += s.Count
-		}
-		var parts []string
-		for _, n := range names {
-			parts = append(parts, fmt.Sprintf("%d %s", count[n], n))
-		}
-		if len(parts) > 0 {
-			fmt.Fprintf(out, "  parts: %s\n", strings.Join(parts, ", "))
-		}
+		designLines(out, d)
 	}
 	if len(r.KnownDesigns) > 0 {
 		fmt.Fprintf(out, "Other players' designs known (%d)\n", len(r.KnownDesigns))
 		for _, d := range r.KnownDesigns {
 			fmt.Fprintf(out, "design #%d: %s, %s hull, %d kT, seen %d\n", d.Index, v.designName(d.Index), d.Hull, d.Mass, d.Year)
 		}
+	}
+}
+
+// designLines prints one of the player's designs: its slot, hull, mass,
+// engines, capacities, its parts by name, and what each hull slot holds
+// (the SLOT:COUNT:PART fills elegy order design takes).
+func designLines(out io.Writer, d game.OwnDesign) {
+	kind := "ship"
+	if d.Slot.Starbase {
+		kind = "starbase"
+	}
+	x := d.Design
+	fmt.Fprintf(out, "%s slot %d: %s (%s hull), %d kT", kind, d.Slot.Slot, x.Name, x.Hull.Name, x.Mass)
+	if x.Engines > 0 {
+		fmt.Fprintf(out, ", %d %s", x.Engines, x.Engine.Name)
+	}
+	if x.FuelCapacity > 0 {
+		fmt.Fprintf(out, ", fuel %d mg", x.FuelCapacity)
+	}
+	if x.CargoCapacity > 0 {
+		fmt.Fprintf(out, ", cargo %d kT", x.CargoCapacity)
+	}
+	fmt.Fprintln(out)
+	// Parts are counted by name, in the order they first appear.
+	var names []string
+	count := map[string]int{}
+	for _, s := range x.Parts() {
+		if count[s.Part.Name] == 0 {
+			names = append(names, s.Part.Name)
+		}
+		count[s.Part.Name] += s.Count
+	}
+	var parts []string
+	for _, n := range names {
+		parts = append(parts, fmt.Sprintf("%d %s", count[n], n))
+	}
+	if len(parts) > 0 {
+		fmt.Fprintf(out, "  parts: %s\n", strings.Join(parts, ", "))
+	}
+	if fills := designFills(x); len(fills) > 0 {
+		var fs []string
+		for _, f := range fills {
+			fs = append(fs, fmt.Sprintf("%d:%d:%s", f.Slot, f.Count, f.Part))
+		}
+		fmt.Fprintf(out, "  slots: %s\n", strings.Join(fs, ", "))
+	}
+}
+
+// designFills is a design's hull-slot fills, in slot order, or nil when
+// the design does not record its slot positions.
+func designFills(d engine.Design) []engine.SlotFill {
+	if len(d.SlotPos) != len(d.Slots) {
+		return nil
+	}
+	var fills []engine.SlotFill
+	for i := range min(len(d.Slots), len(d.SlotPos)) {
+		fills = append(fills, engine.SlotFill{Slot: d.SlotPos[i], Part: d.Slots[i].Part.Name, Count: d.Slots[i].Count})
+	}
+	sort.SliceStable(fills, func(a, b int) bool { return fills[a].Slot < fills[b].Slot })
+	return fills
+}
+
+// plans lists the player's battle plans; orders name a plan by its number.
+func (v reportView) plans(out io.Writer) {
+	plans := v.r.Self.Plans
+	fmt.Fprintf(out, "Battle plans (%d)\n", len(plans))
+	for i, p := range plans {
+		line := fmt.Sprintf("%d %s: %s; primary %s, secondary %s; attack %s", i, p.Name, nameAt(tacticNames, int(p.Tactic)),
+			nameAt(targetNames, int(p.Primary)), nameAt(targetNames, int(p.Secondary)), nameAt(attackNames, int(p.Attack)))
+		if p.Attack == engine.AttackPlayer {
+			line += fmt.Sprintf(" %d", p.Player)
+		}
+		if p.DumpCargo {
+			line += "; dumps cargo"
+		}
+		fmt.Fprintln(out, line)
 	}
 }
 

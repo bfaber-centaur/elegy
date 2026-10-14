@@ -64,11 +64,11 @@ func engineConstants(t *testing.T, typeNames ...string) map[string]map[string]in
 	return out
 }
 
-// TestNames checks that show and order name every event kind, item kind
-// and task kind the engine has, so a new kind cannot be added without a
-// name.
+// TestNames checks that show and order name every event kind, item kind,
+// task kind and battle-plan setting the engine has, so a new one cannot be
+// added without a name.
 func TestNames(t *testing.T) {
-	c := engineConstants(t, "EventKind", "ItemKind", "TaskKind")
+	c := engineConstants(t, "EventKind", "ItemKind", "TaskKind", "Tactic", "TargetType", "AttackWho")
 	if len(c["EventKind"]) < 100 || len(eventNames) != len(c["EventKind"]) {
 		t.Errorf("%d event names for %d event kinds", len(eventNames), len(c["EventKind"]))
 	}
@@ -80,7 +80,7 @@ func TestNames(t *testing.T) {
 	for _, x := range []struct {
 		typ   string
 		names []string
-	}{{"ItemKind", itemNames}, {"TaskKind", taskNames}} {
+	}{{"ItemKind", itemNames}, {"TaskKind", taskNames}, {"Tactic", tacticNames}, {"TargetType", targetNames}, {"AttackWho", attackNames}} {
 		if len(x.names) != len(c[x.typ]) {
 			t.Errorf("%d names for %d %s constants", len(x.names), len(c[x.typ]), x.typ)
 		}

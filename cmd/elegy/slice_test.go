@@ -79,6 +79,10 @@ func TestCLIPlayableSlice(t *testing.T) {
 	if got := order("queue", "-planet", itoa(hw), "-append", "mines=3"); !strings.Contains(got, "order 4 added (queue)") {
 		t.Errorf("order output %q", got)
 	}
+	if got := order("design", "-name", "Long Scout", "-from", "Scout", "1:0:x"); !strings.Contains(got, "ship slot 6: Long Scout") {
+		t.Errorf("order output %q", got)
+	}
+	order("plan", "-index", "0", "-attack", "everyone")
 	before, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
@@ -90,10 +94,12 @@ func TestCLIPlayableSlice(t *testing.T) {
 	if after, _ := os.ReadFile(file); !bytes.Equal(before, after) {
 		t.Fatal("a rejected order changed the order file")
 	}
-	if got := cli(t, "check", "-game", save, file); got != "5 orders checked, 0 would be rejected\n" {
+	if got := cli(t, "check", "-game", save, file); got != "7 orders checked, 0 would be rejected\n" {
 		t.Fatalf("check: %q", got)
 	}
 
+	plan0 := r.Self.Plans[0]
+	plan0.Attack = engine.AttackEveryone
 	queue := []engine.QueueItem{{Kind: engine.ItemFactory, Count: 10}, {Kind: engine.ItemShip, Count: 1, Slot: slot}}
 	want := []engine.Order{
 		engine.CargoOrder{Fleet: colony, Target: engine.TargetPlanet, ID: hw, Amounts: [engine.NumCargo + 1]int{engine.CargoColonists: 25}},
@@ -101,6 +107,8 @@ func TestCLIPlayableSlice(t *testing.T) {
 		engine.ResearchOrder{Budget: 20, Field: engine.Propulsion, Next: engine.NextLowestField},
 		engine.QueueOrder{Planet: hw, Queue: queue},
 		engine.QueueOrder{Planet: hw, Queue: append(append([]engine.QueueItem(nil), queue...), engine.QueueItem{Kind: engine.ItemMine, Count: 3})},
+		engine.DesignOrder{Slot: 6, Name: "Long Scout", Hull: "Scout", Fills: []engine.SlotFill{{Slot: 0, Part: "Long Hump 6", Count: 1}, {Slot: 2, Part: "Fuel Tank", Count: 1}}},
+		engine.BattlePlanOrder{Index: 0, Plan: plan0},
 	}
 	f, err := game.DecodeOrders(bytes.NewReader(before))
 	if err != nil {
