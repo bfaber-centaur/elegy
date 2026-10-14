@@ -2,14 +2,14 @@
 
 What Elegy's comparison with the original covers, what it leaves out, and how much of each. Measured on elegy main `f09acd9`, with stars-elegy vectors `104e8f5`, after every RG ledger was regenerated with `RG002_LEDGER=write` (no line moved). [PARITY-STATUS.md](PARITY-STATUS.md) holds the per-corpus detail and the history behind these numbers.
 
-Updated 2026-10-14 (viewer reports PR): the sc corpus's 156 viewer-report expectations (views of `other_players` 96, `player` 56, `design` 4) are now compared, and all pass. All-corpora pass rose from 981 to 1137 and skip fell from 565 to 409. Class (e) fell from 592 to 436, and the gap ranking lost its old rank 1, "viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness)". The RG numbers and everything else are unchanged from `f09acd9`. One reading is an ASSUMPTION: `starbase_designs_full` lists the subject's own starbase designs, while the original's file names no owner for a partial starbase design and the sc experiment's reader counts every such design for the subject. The sc cases have two players, so they cannot tell the two readings apart (pinned by `internal/vectors` `TestDesignViews`).
+Updated 2026-10-14 (viewer reports PR): the sc corpus's 156 viewer-report expectations (views of `other_players` 96, `player` 56, `design` 4) are now compared, and all pass. All-corpora pass rose from 981 to 1137 and skip fell from 565 to 409. Class (e) fell from 584 (after the 0x12c/0x12d mapping, below) to 428, and the gap ranking lost its old rank 1, "viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness)". The RG numbers are unchanged from `f09acd9`. One reading is an ASSUMPTION: `starbase_designs_full` lists the subject's own starbase designs, while the original's file names no owner for a partial starbase design and the sc experiment's reader counts every such design for the subject. The sc cases have two players, so they cannot tell the two readings apart (pinned by `internal/vectors` `TestDesignViews`).
 
 Tested at #260's head `b78c03c` (tree `59a494d`), a merge of main `f09acd9` with this PR's docs-only commits. Outside docs/ and HANDOFF.md its files are identical to `f09acd9`'s (`git diff f09acd9 b78c03c -- . ':!docs' ':!HANDOFF.md'` is empty), so the code tested is main `f09acd9`'s (tree `b7e0e77`). No test reads the files this PR changes. The candidate is #260's merge commit, whose tree differs from `f09acd9`'s only in docs/ and HANDOFF.md. On that head: `go test ./...` passes; the PR-subset matrix (24 games of 60 years, replayed and reloaded after 23) has 24 with no failure; the nightly matrix has 96 of 96 games with no failure (12 seeds × 2 rulesets × 4 opponent sets, 150 years on a medium map, replayed and reloaded after 77 years; 444 s).
 
 **Zero known discrepancies is not complete equivalence.** No compared value in RG-002, RG-003 or RG-004 differs from the original in a way no seed variant reproduces, and no targeted corpus case fails. That claim covers only what is compared:
 - most random outcomes are compared as samples or across 8 seed variants, never replayed bit for bit;
 - 7,324 skipped expectations are samples of another random stream;
-- 436 more expectations test mechanics or views the harness does not compare yet (class e);
+- 428 more expectations test mechanics or views the harness does not compare yet (class e);
 - whole subsystems, such as the computer players' choices and the client's estimates, have no oracle comparison at all.
 
 The biggest blind spots are listed at the end.
@@ -82,6 +82,8 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (e) other fields and expectations | 33 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; fleet heading 7, `mass_shown` 3; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
 
+Updated 2026-10-14 (economy, 0x12c/0x12d mapping): "messages with no event mapping" was "148 | 63 ids (145 expectations) and 2 ids' sequence entries (3)" on `f09acd9`; 0x12c (2 + 1 sequence entry) and 0x12d (3 + 2) are now compared and match, so it is 140 (61 ids, no sequence entries) and class (e) is 584. The other numbers on this page are still `f09acd9`'s.
+
 The most frequent unmapped message ids are:
 - 0x0c6 and 0x0ca (fleet stopped and damaged in a minefield, both sides): 11 each;
 - 0x10b (Mystery Trader trade): 10;
@@ -124,7 +126,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 | 3 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 4 | patrol target 0x0ff | 9 | lane A |
 | 5 | fleet heading and `mass_shown` | 10 | lane B (harness) |
-| 6 | planet value messages 0x12c, 0x12d (and their sequence entries) | 8 | economy |
+| 6 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |
 | 7 | `design_gone`, `starbase_design_gone`, `no_new_fleets` | 7 | lane B (harness) |
 | 8 | 0x182 player slot | 1 | economy |
 

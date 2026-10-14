@@ -89,23 +89,31 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 		}
 	}
 	// Not GAP-001: the same fleet 1/4 as a friend, at 63/60/60, improves
-	// gravity to 62 and leaves 70%. "Cannot degrade any further" is the
-	// hostile message; Elegy sends a friendly fleet nothing (0x12d is not
-	// modelled).
+	// gravity to 62 and leaves 70%: "cannot improve beyond 70%" to the
+	// fleet owner alone (MESSAGES.md 0x12d, BINARY-ONLY).
 	l, pi = gap001W(t, false)
 	l.g.Players[1].Relations[0] = engine.RelationFriend
 	l.g.Planets[pi].Env = [3]int{63, 60, 60}
 	l.g.Fleets = l.g.Fleets[:1]
-	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{62, 60, 60} {
+	ev = Rules{}.Adjust(l.g)
+	if l.g.Planets[pi].Env != [3]int{62, 60, 60} || len(ev) != 1 ||
+		ev[0].Kind != engine.EventPlanetNotImproved || ev[0].Player != 1 || ev[0].Fleet != l.g.Fleets[0].ID || ev[0].Count != 70 || ev[0].Axes != nil {
 		t.Errorf("friendly: env %v, messages %+v", l.g.Planets[pi].Env, ev)
 	}
-	// Not GAP-001: a hostile fleet that can make no click (every axis
-	// already at the edge of its reach, 71/63/63 from 60/60/60) changes
-	// nothing and gets no message ("cannot degrade" for a fleet that made
-	// no click is not modelled).
+	// Not GAP-001: hostile fleets that can make no click (every axis
+	// already at the edge of their reach, 71/63/63 from 60/60/60) change
+	// nothing; each still gets "cannot degrade any further" at the
+	// unchanged 51%, in fleet order (MESSAGES.md "Remote terraforming":
+	// every turn, even when nothing changes; BINARY-ONLY).
 	l, pi = gap001W(t, false)
 	l.g.Planets[pi].Env = [3]int{71, 63, 63}
-	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{71, 63, 63} {
+	ev = Rules{}.Adjust(l.g)
+	if h := engine.Habitability(race(), [3]int{71, 63, 63}); h != 51 {
+		t.Fatalf("habitability %d, want 51", h)
+	}
+	if l.g.Planets[pi].Env != [3]int{71, 63, 63} || len(ev) != 2 ||
+		ev[0].Kind != engine.EventPlanetNotDegraded || ev[0].Fleet != l.g.Fleets[1].ID || ev[0].Count != 51 ||
+		ev[1].Kind != engine.EventPlanetNotDegraded || ev[1].Fleet != l.g.Fleets[0].ID || ev[1].Count != 51 {
 		t.Errorf("no click: env %v, messages %+v", l.g.Planets[pi].Env, ev)
 	}
 	// W2: a starbase blocks every hostile click; no message.
@@ -153,5 +161,52 @@ func TestAdjustersReportEachFleetsChange(t *testing.T) {
 	want := []msg{{1, 1, 72, 70}, {0, 1, 72, 70}, {1, 2, 70, h64}, {0, 2, 70, h64}}
 	if !slices.Equal(got, want) {
 		t.Errorf("messages %+v, want %+v", got, want)
+	}
+}
+
+// Not GAP-001 (MESSAGES.md 0x12c and 0x12d, BINARY-ONLY): a friend's fleet
+// that improves player 0's habitability tells both players, with the
+// value before and after; one that changes nothing, even with no click to
+// make, tells its owner alone.
+func TestAdjustersFriendlyMessages(t *testing.T) {
+	l, pi := gap001W(t, false)
+	l.g.Players[1].Relations[0] = engine.RelationFriend
+	l.g.Planets[pi].Env = [3]int{66, 60, 60}
+	l.g.Fleets = l.g.Fleets[1:] // fleet 1/1, two clicks: gravity 66 → 64
+	h66, h64 := engine.Habitability(race(), [3]int{66, 60, 60}), engine.Habitability(race(), [3]int{64, 60, 60})
+	if h66 == h64 {
+		t.Fatalf("habitability %d, %d", h66, h64)
+	}
+	ev := Rules{}.Adjust(l.g)
+	type msg struct {
+		kind                  engine.EventKind
+		player, before, after int
+	}
+	var got []msg
+	for _, e := range ev {
+		before := -1
+		if len(e.Axes) == 1 {
+			before = e.Axes[0]
+		}
+		if e.Fleet != l.g.Fleets[0].ID || e.Planet != l.g.Planets[pi].ID {
+			t.Errorf("event %+v", e)
+		}
+		got = append(got, msg{e.Kind, e.Player, before, e.Count})
+	}
+	imp := engine.EventPlanetImproved
+	if want := []msg{{imp, 1, h66, h64}, {imp, 0, h66, h64}}; l.g.Planets[pi].Env != [3]int{64, 60, 60} || !slices.Equal(got, want) {
+		t.Errorf("improved: env %v, messages %+v, want %+v", l.g.Planets[pi].Env, got, want)
+	}
+	// At 50/57/57 every axis is as near the centre 50 as the reach (±11,
+	// ±3, ±3 from 60) allows: no click, and "cannot improve beyond" the
+	// unchanged value to the fleet owner alone.
+	l, pi = gap001W(t, false)
+	l.g.Players[1].Relations[0] = engine.RelationFriend
+	l.g.Planets[pi].Env = [3]int{50, 57, 57}
+	l.g.Fleets = l.g.Fleets[1:]
+	best := engine.Habitability(race(), [3]int{50, 57, 57})
+	ev = Rules{}.Adjust(l.g)
+	if l.g.Planets[pi].Env != [3]int{50, 57, 57} || len(ev) != 1 || ev[0].Kind != engine.EventPlanetNotImproved || ev[0].Player != 1 || ev[0].Count != best || ev[0].Axes != nil {
+		t.Errorf("nothing to improve: env %v, messages %+v", l.g.Planets[pi].Env, ev)
 	}
 }

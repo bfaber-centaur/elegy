@@ -28,6 +28,12 @@ const (
 // (MESSAGES.md 0x15b, CONFIRMED GAP-001 W1, stars-elegy 0d63a84).
 const EventPlanetNotDegraded EventKind = EventTransportNoHold + 1
 
+// EventPlanetNotImproved: Fleet, the planet owner's own or a friend's,
+// made no change to the planet owner's habitability (Count) at Planet,
+// whether or not it could click; the fleet owner (Player) alone is told
+// (MESSAGES.md 0x12d, BINARY-ONLY).
+const EventPlanetNotImproved EventKind = EventPlanetCaptured + 1
+
 // Terraformer is the terraforming, remote-mining and Orbital Adjuster
 // rules, which the terraform package implements (it imports this package,
 // so the engine reaches it through this interface).

@@ -64,7 +64,9 @@ type Adjustment struct {
 //   - Otherwise: nothing if the planet has a starbase; else each click
 //     worsens it (Worsen).
 //
-// Only fleets that made at least one click are returned.
+// Every such fleet is returned, also one that made no click (its Axes
+// empty, Before = After): MESSAGES.md "Remote terraforming" says the
+// message is sent every turn even when nothing changes (BINARY-ONLY).
 //
 // ASSUMPTION T3: fleets act one at a time in fleet order (owner, then
 // number), each on the state the previous left.
@@ -103,9 +105,6 @@ func Adjust(g *engine.Game) []Adjustment {
 				break
 			}
 			adj.Axes = append(adj.Axes, a)
-		}
-		if len(adj.Axes) == 0 {
-			continue
 		}
 		adj.Before, adj.After = before, engine.Habitability(race, p.Env)
 		adj.HabChanged = adj.After != before
