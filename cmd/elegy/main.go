@@ -73,6 +73,9 @@ func run(args []string, out io.Writer) error {
 		return cmdPlay(args, out)
 	case "vector":
 		return cmdVector(args, out)
+	case "help", "-h", "-help", "--help":
+		_, err := fmt.Fprintln(out, usage+"\nplaying a game: docs/PLAYTEST.md")
+		return err
 	}
 	return fmt.Errorf("unknown command %q; %s", cmd, usage)
 }
