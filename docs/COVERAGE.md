@@ -95,7 +95,7 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 | label | lines | heaviest in |
 |---|---:|---|
 | BINARY-ONLY (from analysis, no oracle run) | 188 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 20, AI 17, COMBAT 17, TAKEOVER 18 |
-| ASSUMPTION | 79 | KERNEL 33, TAKEOVER 12, PARITY 11, COMBAT 7 |
+| ASSUMPTION | 80 | KERNEL 33, PARITY 12, TAKEOVER 12, COMBAT 7 |
 | NOT RUN | 22 | COMBAT 9, PARITY 5, TAKEOVER 4 |
 | UNRESOLVED | 12 | PARITY 4, TAKEOVER 3 |
 
@@ -109,7 +109,7 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 3. **Viewer reports and client estimates.** 156 report views and 216 estimates are not compared (milestone 3).
 4. **Message coverage.** 63 ids have no event mapping, and minefield messages are the largest group.
 5. **Fleet-to-fleet cargo.** Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (TAKEOVER-STATUS.md "Not modelled"; 38 expectations).
-6. **Labels.** 188 BINARY-ONLY and 79 ASSUMPTION lines are claims no oracle run has checked.
+6. **Labels.** 188 BINARY-ONLY and 80 ASSUMPTION lines are claims no oracle run has checked.
 7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
 
 ## Remaining comparator gaps, ranked

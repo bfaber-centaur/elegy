@@ -51,7 +51,7 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 
 | column | state | what is missing |
 |---|---|---|
-| playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), and a saved game reloads identically. Deferred: design and battle-plan authoring by name, derived numbers and a front end. |
+| playable | done for the vertical slice | Every step works from the CLI with readable output (`elegy show`, `order`, `check`, #266), including design and battle-plan authoring by name (#268, `TestOrderDesigns`, `TestOrderPlans`), and a saved game reloads identically. Deferred: derived numbers and a front end. |
 | behaviorally faithful | partial | 0 known discrepancies inside the compared set. Not compared: AI decisions, viewer reports, client estimates, 63 message ids and fleet-to-fleet cargo. |
 | bit-exact RNG parity | missing | The original's generator is not in the harness (SPRINT.md P1-1, pending Bobby). |
 

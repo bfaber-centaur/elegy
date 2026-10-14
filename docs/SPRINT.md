@@ -39,10 +39,11 @@ Each cell is done, partial or missing, with its evidence. The coverage numbers b
 | readable inspection (planets, fleets, designs, research, messages) | done: `elegy show` (#266, `TestShow`, `TestShowCommand`) | n/a | n/a |
 | order authoring by name with dry-run validation | done: `elegy order` and `elegy check` (#266, `TestOrderKinds`, `TestOrderErrors`) | n/a | n/a |
 | readable event names, end-to-end demo and docs/PLAYING.md | done: #266 (`TestCLIPlayableSlice`, docs/PLAYING.md) | n/a | n/a |
-| ship design and battle plan authoring by name; derived numbers (resources a year, maximum population, research cost, range) | missing, deferred: not needed to play (raw JSON works) | n/a | n/a |
+| ship design and battle plan authoring by name | done: `elegy order design`, `delete-design`, `plan`, `delete-plan`, `fleet-plan` and `show plans` (#268, `TestOrderDesigns`, `TestOrderPlans`) | n/a | n/a |
+| derived numbers (resources a year, maximum population, research cost, range) | missing, deferred: not needed to play | n/a | n/a |
 | graphical or terminal front end | missing, by choice for now (milestone 3) | n/a | n/a |
 
-Overall: **playable** is done for the vertical slice: every step works from the command line with readable output (#266). Ship design and battle plan authoring by name, derived numbers and a front end remain. **Behaviorally faithful** is partial: the corpora show 0 known discrepancies, inside the coverage limits COVERAGE.md lists. **Bit-exact RNG parity** is missing, because the original's generator is not in the harness (P1-1).
+Overall: **playable** is done for the vertical slice: every step works from the command line with readable output (#266), including ship design and battle plan authoring by name (#268). Derived numbers and a front end remain. **Behaviorally faithful** is partial: the corpora show 0 known discrepancies, inside the coverage limits COVERAGE.md lists. **Bit-exact RNG parity** is missing, because the original's generator is not in the harness (P1-1).
 
 ## Starting point (verified at main ba7a03e, 2026-10-12)
 
