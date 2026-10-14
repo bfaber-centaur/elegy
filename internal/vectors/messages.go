@@ -765,8 +765,9 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// PARITY.md "Wormholes and Mystery Trader, round 2", part
 			// rewards (CONFIRMED, O-48, WT-003 A): 0x10b for ten parts,
 			// 0x10c for the Mini Morph hull, 0x10f for the Genesis
-			// Device, to the fleet's owner. MESSAGES.md also has 0x10b
-			// CONFIRMED (ob/ob004). Research and ship rewards are not
+			// Device, to the fleet's owner. MESSAGES.md has all three
+			// CONFIRMED (0x10b ob/ob004; 0x10c and 0x10f WT-003, as of
+			// stars-elegy 369a3b4), with the slot's identity UNRESOLVED. Research and ship rewards are not
 			// mapped. The one slot is not compared: in WT-003 the fleet
 			// number, the Trader number and the item bit are equal, so
 			// the run cannot tell which one it names. The part focus is
@@ -782,7 +783,7 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			case objects.BitGenesisDevice:
 				id = 0x10f
 			}
-			send(ev.Player, pvMsg{id: id, params: make([]int, 1), known: make([]bool, 1), why: whyNot(id, "slot (fleet, Trader or item; equal in WT-003)")})
+			send(ev.Player, pvMsg{id: id, params: make([]int, 1), known: make([]bool, 1), why: whyNot(id, "slot UNRESOLVED (fleet, Trader or item; equal in WT-003)")})
 		case engine.EventMinefieldSwept:
 			// Slots: the field's object id (owner·512 + number), amount
 			// (two slots), type and centre (MESSAGES.md "Sweep slots",

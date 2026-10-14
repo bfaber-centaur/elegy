@@ -404,12 +404,12 @@ Measured on elegy main `f09acd9` (#269) plus this branch, by MESSAGES.md at star
 
 ### Mystery Trader part messages and player Trader items (lane D)
 
-Measured on elegy main `b0cab2f` (#271) plus this branch, by stars-elegy `4f59d8d`.
+Measured on elegy main `b0cab2f` (#271) plus this branch, by stars-elegy `4f59d8d` (MESSAGES.md labels as of `369a3b4`).
 
 - **Mapped:** a trade whose reward is a part sends **0x10b** to the fleet's owner, or **0x10c** for the Mini Morph hull (bit 8) and **0x10f** for the Genesis Device (bit 10). CONFIRMED: PARITY.md "Wormholes and Mystery Trader, round 2", O-48 (WT-003 A, all twelve parts); MESSAGES.md also has 0x10b CONFIRMED (ob/ob004). `EventTraderTrade` now carries the part's bit (`Axes`).
-  - MESSAGES.md still labels 0x10c and 0x10f BINARY-ONLY, which PARITY.md's O-48 row contradicts. Elegy follows PARITY.md, the canonical record; the MESSAGES.md label is left to stars-elegy.
+  - MESSAGES.md (stars-elegy `369a3b4`, #213) labels 0x10c and 0x10f CONFIRMED too (WT-003 A08 and A10, O-48), with a dated correction of its earlier label. The identity of their slot is UNRESOLVED there. 0x10b's slot is the fleet slot, design·512 + number, MEASURED from one OB-004 record.
   - Not mapped: the research rewards (0x109, 0x10a, 0x10e) and the ship rewards (0x14f, 0x150). Their 3 skips stay.
-  - Presence and the message id are compared. The one slot is not compared: in WT-003 the fleet number, the Trader number and the item bit are equal (the slot reads 0x0400 + 8 and 0x0400 + 10), so the run cannot tell which one it names (found by lane F). Elegy implements no reading. The part focus is not compared either.
+  - Presence and the message id are compared. The one slot is not compared (UNRESOLVED): in WT-003 the fleet number, the Trader number and the item bit are equal (the slot reads 0x0400 + 8 and 0x0400 + 10), so the run cannot tell which one it names (found by lane F). Elegy implements no reading. 0x10b's MEASURED fleet reading rests on the one OB-004 record, which is itself a vector, so comparing the slot with it would be circular. The part focus is not compared either.
 - **Player `mystery_trader_items`** is compared now: the player's Trader part word, as the part names in bit order (stars-elegy `tools/vectors/build.py`; OBJECTS.md "Encounters", CONFIRMED WT-003 A). A missing or an extra part mismatches.
 - **Other corpora:** 17 expectations that were skipped are compared now: 0x10b 10, 0x10c 1 and 0x10f 1 (all WT-003), and 5 `mystery_trader_items` (WT-003-A, WT-003-B, WT-002-B, OB-030-T ×2). Every one is a sample.
   - 13 match on the reference seed.

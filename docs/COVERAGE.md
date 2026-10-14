@@ -120,7 +120,7 @@ Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows 
 
 Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section adds one line that matches `BINARY-ONLY`: it names 0x0c7 and 0x0cb, which stay unmapped because MESSAGES.md labels them BINARY-ONLY, so no implemented rule is behind it. By the same `grep -c` the totals become 191 BINARY-ONLY (was 190) and 83 ASSUMPTION (unchanged).
 
-Updated 2026-10-14 (lane D, Mystery Trader parts): PARITY-STATUS's Trader section adds one line that matches `BINARY-ONLY`. It records that MESSAGES.md labels 0x10c and 0x10f BINARY-ONLY while PARITY.md's O-48 row confirms them, and Elegy follows PARITY.md. By the same `grep -c` the totals become 192 BINARY-ONLY and 83 ASSUMPTION (unchanged).
+Updated 2026-10-14 (lane D, Mystery Trader parts): no label line changes; the totals stay 191 BINARY-ONLY and 83 ASSUMPTION by the same `grep -c`.
 
 ## Biggest blind spots
 
