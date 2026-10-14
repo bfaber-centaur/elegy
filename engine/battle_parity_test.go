@@ -1124,7 +1124,7 @@ func sortedInts(s []int) []int {
 
 // BattleRecordVectors lists the vectors holding battle records, by path
 // ("cb/cb010.json").
-func BattleRecordVectors(t *testing.T) []string {
+func BattleRecordVectors(t testing.TB) []string {
 	var names []string
 	for name := range loadBattleRecords(t) {
 		names = append(names, name)
