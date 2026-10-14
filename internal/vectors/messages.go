@@ -770,8 +770,9 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// mapped. The one slot is not compared: in WT-003 the fleet
 			// number, the Trader number and the item bit are equal, so
 			// the run cannot tell which one it names. The part focus is
-			// not compared either.
-			if objects.TraderItemKind(ev.Count) != objects.ItemPart || len(ev.Axes) == 0 {
+			// not compared either. A part trade always carries the part's
+			// bit (objects TestTraderTradeEventAxes).
+			if objects.TraderItemKind(ev.Count) != objects.ItemPart {
 				break
 			}
 			id := 0x10b
