@@ -71,11 +71,16 @@ func TestFleetHeadingView(t *testing.T) {
 	viewer := 0
 	l := &pvLoaded{views: [][]engine.PlayerView{nil, {{}}}}
 	e := pvExpect{Year: 1, Viewer: &viewer, Subject: json.RawMessage(`{"kind":"fleet","owner":1,"id":0}`)}
-	for _, k := range []string{"heading", "mass_shown"} {
-		eq := map[string]json.RawMessage{k: json.RawMessage(`[75,25,5]`)}
+	// Each value a wrong default would give: a moved fleet's heading, the
+	// not-moved encoding, and a mass of 0.
+	for _, c := range []struct{ k, want string }{
+		{"heading", `[75,25,5]`}, {"heading", `[-127,-127,0]`},
+		{"mass_shown", `29`}, {"mass_shown", `0`},
+	} {
+		eq := map[string]json.RawMessage{c.k: json.RawMessage(c.want)}
 		got := l.viewCheck(&engine.Game{}, e, eq, func(int, int) *engine.Fleet { return nil })
 		if got == "" || strings.HasPrefix(got, "skip") {
-			t.Errorf("%s of an unseen fleet: %q, want a mismatch", k, got)
+			t.Errorf("%s %s of an unseen fleet: %q, want a mismatch", c.k, c.want, got)
 		}
 	}
 }
