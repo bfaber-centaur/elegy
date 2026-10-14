@@ -159,8 +159,14 @@ func (s *Space) MineHit(g *engine.Game, fi int, kind int, rng engine.Rand) []eng
 	s.LearnHit(g, &g.Fleets[fi], Stop{Hit: true, Kind: MineKind(kind)}, g.Fleets[fi].Pos)
 	h := ApplyHit(g, s, fi, MineKind(kind), rng)
 	f := &g.Fleets[fi]
-	out := []engine.Event{{Kind: engine.EventMineHit, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: h.Paid}}
-	out = append(out, shipsLost(f, h.Designs)...)
+	lost := shipsLost(f, h.Designs)
+	ships := 0
+	for _, ev := range lost {
+		ships += ev.Count
+	}
+	out := []engine.Event{{Kind: engine.EventMineHit, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: h.Paid,
+		Axes: []int{h.Field.Owner, int(h.Kind), ships}}}
+	out = append(out, lost...)
 	s.AddMineSalvage(g, f.Owner, f.Pos, h.Salvage)
 	return out
 }
@@ -361,11 +367,14 @@ func (s *Space) LayMines(g *engine.Game, layers []engine.MineLayer) []engine.Eve
 			continue
 		}
 		for _, r := range s.Lay(g, []Layer{{Fleet: l.Fleet, Half: l.Half}}) {
-			kind := engine.EventMinesLaid
-			if r.Field < 0 {
-				kind = engine.EventMinesNotLaid
+			ev := engine.Event{Kind: engine.EventMinesLaid, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: r.Amount, Axes: []int{0, int(r.Kind)}}
+			switch {
+			case r.Field < 0:
+				ev.Kind = engine.EventMinesNotLaid
+			case r.New:
+				ev.Axes[0] = 1
 			}
-			out = append(out, engine.Event{Kind: kind, Player: f.Owner, Planet: -1, Fleet: f.ID, Count: r.Amount})
+			out = append(out, ev)
 		}
 	}
 	return out

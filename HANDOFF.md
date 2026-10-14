@@ -31,6 +31,8 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
   | RG-003 | 8 / 100 | 0 / 76 | 5287 / 450 | 0 / 0 | 5921 |
   | RG-004 | 4 / 47 | 1 / 17 | 2519 / 263 | 2 / 2 | 2855 |
 
+  Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 58 message ids are unmapped (was 63). MF-13a and MF-13b leave the parity baseline as "differs" under `Legacy.FieldLimit511` (PARITY-STATUS.md "Minefield laying and hit messages").
+
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.
   - No restart refuses an order.
@@ -59,7 +61,7 @@ The full checklist, by subsystem and column, is docs/SPRINT.md "Engine-completio
 
 - COVERAGE.md "Remaining comparator gaps, ranked" lists what to route next. The top three:
   - viewer reports (156 expectations, lane B);
-  - minefield messages (35, lane D);
+  - ~~minefield messages (35, lane D)~~ done 2026-10-14;
   - fleet-to-fleet transport (38, lane A, a mechanic).
 - Random-driven lines stay open until the original's generator is in the harness.
 - The parity case tally lists most RG cases as `fail`, although there are 0 known discrepancies.

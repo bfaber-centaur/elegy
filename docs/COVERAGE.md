@@ -67,6 +67,8 @@ Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts.
 | differs | 2 | INTENTIONALLY DIFFERENT under the `elegy` ruleset (FO-03-E, FO-06-G, `Legacy.MergeOverflow` off) |
 | skip | 565 | every expectation of the case is skipped, by the reasons below |
 
+- Updated 2026-10-14 (lane D, minefield messages): MF-13a and MF-13b move from pass to differs (`Legacy.FieldLimit511` off; PARITY-STATUS.md "Minefield laying and hit messages"). pass was 981, differs 2 (FO-03-E, FO-06-G).
+
 Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 
 | class | expectations | reasons |
@@ -76,7 +78,7 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (d) absent source value | 334 | player not in the state 291; computer players' planned orders 24, and 16 score records that depend on them; null planet records 3 |
 | (e) client estimates (milestone 3) | 216 | 21 reasons: ETA, travel time, mining rate, completion, research dialog, ship designer, population and defense estimates |
 | (e) viewer reports | 156 | view of `other_players` 96, `player` 56, `design` 4 |
-| (e) messages with no event mapping | 148 | 63 ids (145 expectations) and 2 ids' sequence entries (3) |
+| (e) messages with no event mapping | 113 | 58 ids (110 expectations) and 2 ids' sequence entries (3) |
 | (e) fleet-to-fleet transport | 38 | the task 15, its target 15, transport fuel 8 |
 | (e) other fields and expectations | 33 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; fleet heading 7, `mass_shown` 3; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
@@ -87,6 +89,8 @@ The most frequent unmapped message ids are:
 - 0x0ff (patrol picks a target): 9;
 - 0x0c3 and 0x0c4 (mines laid, new or added): 5 each;
 - 0x17e (mines not laid, object limit): 3.
+
+Updated 2026-10-14 (lane D, minefield messages): 0x0c3, 0x0c4, 0x0c6, 0x0ca and 0x17e are mapped, which compares their 35 expectations; the messages row was "148 | 63 ids (145 expectations) …". The most frequent unmapped ids are now 0x10b (10) and 0x0ff (9).
 
 ## Unproven claims in the status documents
 
@@ -107,7 +111,7 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
    - This needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Viewer reports and client estimates.** 156 report views and 216 estimates are not compared (milestone 3).
-4. **Message coverage.** 63 ids have no event mapping, and minefield messages are the largest group.
+4. **Message coverage.** 58 ids have no event mapping (updated 2026-10-14 after the minefield messages; it was 63, and minefield messages were the largest group).
 5. **Fleet-to-fleet cargo.** Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (TAKEOVER-STATUS.md "Not modelled"; 38 expectations).
 6. **Labels.** 188 BINARY-ONLY and 80 ASSUMPTION lines are claims no oracle run has checked.
 7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
@@ -119,7 +123,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 | rank | gap | expectations | proposed owner |
 |---:|---|---:|---|
 | 1 | viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness) |
-| 2 | minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e | 35 | lane D |
+| 2 | ~~minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e~~ done 2026-10-14 (lane D): 33 match, MF-13a/b differ | 35 | lane D |
 | 3 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator) |
 | 4 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 5 | patrol target 0x0ff | 9 | lane A |

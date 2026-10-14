@@ -689,3 +689,68 @@ func TestPredictionTraderGiftNumberInTurn(t *testing.T) {
 		t.Errorf("fleets %+v, want only the gift fleet, number 3", g.Fleets)
 	}
 }
+
+// eventsOf runs one turn and returns its events of kind k.
+func eventsOf(t *testing.T, g engine.Game, rng engine.Rand, k engine.EventKind) []engine.Event {
+	t.Helper()
+	r, err := engine.GenerateTurn(withRules(g), nil, rng)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out []engine.Event
+	for _, e := range r.Events {
+		if e.Kind == k {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+// A mine hit names the paying field's owner, its kind and the ships
+// lost (internal/vectors maps 0x0c6 and 0x0ca from them): player 1's
+// heavy field damages two Tanks and kills none, and destroys a lone
+// Freighter.
+func TestMineHitEventAxes(t *testing.T) {
+	l := newLab(t)
+	fi := l.fleet(0, at(100, 200), "Tank", 2)
+	l.g.Fleets[fi].Fuel = 500
+	l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: at(400, 200), Warp: 9}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Heavy, Pos: at(200, 200), Count: 2500}}}
+	if got := eventsOf(t, *l.g, zero{}, engine.EventMineHit); len(got) != 1 || !reflect.DeepEqual(got[0].Axes, []int{1, int(Heavy), 0}) {
+		t.Errorf("Tanks: %+v, want one hit with Axes [1 %d 0]", got, Heavy)
+	}
+
+	l = newLab(t)
+	fi = l.fleet(0, at(100, 200), "Freighter", 1)
+	l.g.Fleets[fi].Fuel = 450
+	l.g.Fleets[fi].Waypoints = []engine.Waypoint{{Pos: at(200, 200), Warp: 9}}
+	l.g.Objects = &Space{Minefields: []Minefield{{Owner: 1, Kind: Standard, Pos: at(200, 200), Count: 2500}}}
+	if got := eventsOf(t, *l.g, zero{}, engine.EventMineHit); len(got) != 1 || !reflect.DeepEqual(got[0].Axes, []int{1, int(Standard), 1}) {
+		t.Errorf("Freighter: %+v, want one hit with Axes [1 %d 1]", got, Standard)
+	}
+}
+
+// Laying names whether the mines made a new field (0x0c3) or joined an
+// own field (0x0c4): a new field in year 1, a merge in year 2; with no
+// room the mines are lost (0x17e).
+func TestMinesLaidEventAxes(t *testing.T) {
+	l := newLab(t)
+	fi := l.fleet(0, origin, "MML", 1)
+	l.g.Fleets[fi].Task = engine.Task{Kind: engine.TaskLayMines, Years: engine.YearsIndefinitely}
+	l.g.Objects = &Space{}
+	if got := eventsOf(t, *l.g, top{}, engine.EventMinesLaid); len(got) != 1 || !reflect.DeepEqual(got[0].Axes, []int{1, int(Standard)}) {
+		t.Errorf("year 1: %+v, want a new standard field", got)
+	}
+	g := turn(t, *l.g, top{})
+	if got := eventsOf(t, g, top{}, engine.EventMinesLaid); len(got) != 1 || !reflect.DeepEqual(got[0].Axes, []int{0, int(Standard)}) {
+		t.Errorf("year 2: %+v, want a merge", got)
+	}
+	full := &Space{}
+	for n := 0; n < 512; n++ {
+		full.Minefields = append(full.Minefields, Minefield{Owner: 0, Number: n, Kind: Heavy, Pos: at(1000+n, 1000), Count: 5000})
+	}
+	l.g.Objects = full
+	if got := eventsOf(t, *l.g, top{}, engine.EventMinesNotLaid); len(got) != 1 || got[0].Count != 160 || !reflect.DeepEqual(got[0].Axes, []int{0, int(Standard)}) {
+		t.Errorf("512 fields: %+v, want the mines lost", got)
+	}
+}

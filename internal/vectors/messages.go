@@ -76,6 +76,11 @@ func pvMessageIDs() map[int]string {
 		0x0c2: "EventMinesSwept by a fleet",
 		0x0f4: "EventMinesSwept by a starbase",
 		0x0be: "EventMinefieldSwept",
+		0x0c3: "EventMinesLaid into a new field",
+		0x0c4: "EventMinesLaid into an own field",
+		0x17e: "EventMinesNotLaid",
+		0x0c6: "EventMineHit by a standard or heavy field, no ships lost",
+		0x0ca: "EventMineHit by a standard or heavy field, no ships lost, to the field's owner",
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
 		0x17c: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the bomber",
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
@@ -692,6 +697,43 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				send(ev.Player, pvMsg{id: 0x0c2, params: swept, known: make([]bool, len(swept)),
 					why: "0x0c2 fleet gone by the end of the year"})
 			}
+		case engine.EventMinesLaid, engine.EventMinesNotLaid:
+			// MESSAGES.md 0x0c3 (a new field), 0x0c4 (mines added to an
+			// own field) and 0x17e (no room for a new field), one per
+			// mine type laid, to the fleet's owner (CONFIRMED: cs/cs-003,
+			// fm2/fm102, ob/ob002; ob/ob019-y2; MF-13). Slots: fleet and
+			// amount, not compared (no sequence record names them).
+			id := 0x0c4
+			switch {
+			case ev.Kind == engine.EventMinesNotLaid:
+				id = 0x17e
+			case ev.Axes[0] == 1:
+				id = 0x0c3
+			}
+			m := pvMsg{id: id, params: []int{0, ev.Count}, known: []bool{false, false}, why: whyNot(id, "fleet and amount slots")}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.focus, m.focusKnown, m.params[0] = pvFocusFleet|code, true, code
+			}
+			send(ev.Player, m)
+		case engine.EventMineHit:
+			// MESSAGES.md 0x0c6 to the fleet's owner and 0x0ca to the
+			// field's owner: a standard or heavy field stopped and damaged
+			// a moving fleet that lost no ships (CONFIRMED: ob/ob010,
+			// mf/mf01). Speed bumps (0x0c5, 0x0c9) and ships lost (0x0c7,
+			// 0x0c8, 0x0cb, 0x0cc) are not mapped. Slots are not compared
+			// (no sequence record names them).
+			owner, kind, lost := ev.Axes[0], ev.Axes[1], ev.Axes[2]
+			if kind == int(objects.SpeedBump) || lost > 0 {
+				break
+			}
+			victim := pvMsg{id: 0x0c6, params: make([]int, 5), known: make([]bool, 5), why: "0x0c6 fleet, field owner, type, location and damage slots"}
+			field := pvMsg{id: 0x0ca, params: make([]int, 4), known: make([]bool, 4), why: "0x0ca fleet, type, location and damage slots"}
+			if code, ok := fleet(ev.Fleet); ok {
+				victim.focus, victim.focusKnown = pvFocusFleet|code, true
+				field.focus, field.focusKnown = pvFocusFleet|code, true
+			}
+			send(ev.Player, victim)
+			send(owner, field)
 		case engine.EventMinefieldSwept:
 			// Slots: the field's object id (owner·512 + number), amount
 			// (two slots), type and centre (MESSAGES.md "Sweep slots",
