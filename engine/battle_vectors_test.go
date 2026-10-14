@@ -1,7 +1,6 @@
 package engine_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -72,7 +71,11 @@ func TestBattleRecords(t *testing.T) {
 	}
 	// The representative games' records go to their ledgers
 	// (battle_ledger_test.go).
-	ledgers := rgBattleLedgers(t)
+	rg := rgBattleLedgers(t)
+	ledgers := map[string]string{}
+	for game, g := range rg {
+		ledgers[game] = g.Ledger
+	}
 	l := &ledgerTB{TB: t, ledgers: ledgers, lines: map[string]string{}}
 	ungen := engine.CheckBattleRecords(l, starts, battleVariants(t))
 	for corpus, n := range ungen {
@@ -103,55 +106,19 @@ func TestBattleRecords(t *testing.T) {
 		}
 		checkBattleLedger(t, got, ledger)
 		checked += len(got)
-		checkRGBattleCoverage(t, l.lines, game, rawBattleRecords(t, game))
+		checkRGBattleCoverage(t, l.lines, game, rg[game].BattleRecords)
 	}
 	if checked != len(l.lines) {
 		t.Errorf("%d battle ledger lines taken, %d checked against a ledger", len(l.lines), checked)
 	}
 }
 
-// rawBattleRecords counts the `battle` expectations in game's runs
-// (rgNNN.json and rgNNN-yK.json, as vectors.RGGames admits no other
-// rgNNN*.json) from the raw JSON, apart from the
-// vectors loader and BattleRecordVectors, as checkRGBattleCoverage's
-// count of records: it replaces a hand count per game.
-func rawBattleRecords(t *testing.T, game string) int {
-	paths, err := filepath.Glob(filepath.Join("testdata", "vectors", "rg", game+"*.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	n := 0
-	for _, p := range paths {
-		data, err := os.ReadFile(p)
-		if err != nil {
-			t.Fatal(err)
-		}
-		var v struct {
-			Cases []struct {
-				Expect []struct {
-					Kind string `json:"kind"`
-				} `json:"expect"`
-			} `json:"cases"`
-		}
-		if err := json.Unmarshal(data, &v); err != nil {
-			t.Fatalf("%s: %v", p, err)
-		}
-		for _, c := range v.Cases {
-			for _, e := range c.Expect {
-				if e.Kind == "battle" {
-					n++
-				}
-			}
-		}
-	}
-	return n
-}
-
 // checkRGBattleCoverage fails unless every battle record of the
 // representative game named by its chained run ("rg002") has both its
 // expectations and at least one ledger line: the internal/vectors ledger
 // leaves the `battle` and `battle_actions` expectations to these lines,
-// so none may go unreported. want is the game's number of records.
+// so none may go unreported. want is the game's number of records, as
+// its ledger header pins it (vectors.RGGame.BattleRecords).
 func checkRGBattleCoverage(t *testing.T, lines map[string]string, game string, want int) {
 	covered := map[string]bool{}
 	for k := range lines {

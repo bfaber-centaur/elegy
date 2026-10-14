@@ -10,43 +10,82 @@ import (
 
 // TestRGGames pins how the representative games are found: the corpus as
 // it stands, a new game that needs no code, and the layouts that fail
-// instead of dropping a game, a deleted ledger first.
+// instead of dropping or shrinking a game: a deleted ledger, game or
+// trailing restart, and a count that disagrees with its ledger header.
 func TestRGGames(t *testing.T) {
 	games, err := RGGames(rgCorpus)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := fmt.Sprint(games), fmt.Sprintf("[{rg001  6} {rg002 %[1]s/rg002-ledger.txt 6} {rg003 %[1]s/rg003-ledger.txt 12} {rg004 %[1]s/rg004-ledger.txt 12}]", rgCorpus); got != want {
+	if got, want := fmt.Sprint(games), fmt.Sprintf("[{rg001  6 0} {rg002 %[1]s/rg002-ledger.txt 6 88} {rg003 %[1]s/rg003-ledger.txt 12 204} {rg004 %[1]s/rg004-ledger.txt 12 110}]", rgCorpus); got != want {
 		t.Errorf("RGGames(%s) = %s, want %s", rgCorpus, got, want)
 	}
-	base := []string{"rg001.json", "rg001-y1.json", "rg002.json", "rg002-y1.json", "rg002-y2.json", "rg002-ledger.txt", "README.md"}
+	const (
+		battle    = `{"cases": [{"expect": [{"kind": "battle"}, {"kind": "battle_actions"}]}]}`
+		header    = "# RG-002\n# restarts: 2\n# battle records: 2\n"
+		gamesFile = "# the gamesFile\n\nrg001 no-ledger\nrg002\n"
+		withNew   = gamesFile + "rg005\n"
+		newGame   = "# restarts: 1\n# battle records: 0\n"
+	)
+	base := map[string]string{
+		"GAMES": gamesFile, "README.md": "",
+		"rg001.json": "", "rg001-y1.json": "",
+		"rg002.json": battle, "rg002-y1.json": battle, "rg002-y2.json": "{}", "rg002-ledger.txt": header + "sample | x\n",
+	}
 	for _, c := range []struct {
 		name          string
-		add, remove   []string
+		set           map[string]string // files added or rewritten
+		remove        []string
 		want, wantErr string
 	}{
-		{"as is", nil, nil, "[{rg001  1} {rg002 rg002-ledger.txt 2}]", ""},
-		{"new game", []string{"rg005.json", "rg005-y1.json", "rg005-ledger.txt"}, nil, "[{rg001  1} {rg002 rg002-ledger.txt 2} {rg005 rg005-ledger.txt 1}]", ""},
-		{"new game, no restarts", []string{"rg005.json", "rg005-ledger.txt"}, nil, "[{rg001  1} {rg002 rg002-ledger.txt 2} {rg005 rg005-ledger.txt 0}]", ""},
+		{"as is", nil, nil, "[{rg001  1 0} {rg002 rg002-ledger.txt 2 2}]", ""},
+		{"new game", map[string]string{"GAMES": withNew, "rg005.json": "{}", "rg005-y1.json": "{}", "rg005-ledger.txt": newGame},
+			nil, "[{rg001  1 0} {rg002 rg002-ledger.txt 2 2} {rg005 rg005-ledger.txt 1 0}]", ""},
+		{"new game, no restarts", map[string]string{"GAMES": withNew, "rg005.json": battle, "rg005-ledger.txt": "# restarts: 0\n# battle records: 1\n"},
+			nil, "[{rg001  1 0} {rg002 rg002-ledger.txt 2 2} {rg005 rg005-ledger.txt 0 1}]", ""},
+		{"new game, not in GAMES", map[string]string{"rg005.json": "{}", "rg005-y1.json": "{}", "rg005-ledger.txt": newGame}, nil, "", "rg005.json: rg005 is not in GAMES"},
+		{"game deleted", nil, []string{"rg002.json", "rg002-y1.json", "rg002-y2.json", "rg002-ledger.txt"}, "", "GAMES lists rg002, but there is no rg002.json"},
 		{"ledger deleted", nil, []string{"rg002-ledger.txt"}, "", "rg002: no ledger rg002-ledger.txt"},
-		{"new game, no ledger", []string{"rg005.json", "rg005-y1.json"}, nil, "", "rg005: no ledger rg005-ledger.txt"},
-		{"RG-001 with a ledger", []string{"rg001-ledger.txt"}, nil, "", "rg001: has a ledger, but is held to exact matches"},
-		{"restart gap", []string{"rg002-y4.json"}, nil, "", "rg002: restarts [1 2 4] skip year 3"},
+		{"trailing restart deleted", nil, []string{"rg002-y2.json"}, "", "rg002: 1 restarts on disk, its ledger header pins 2"},
+		{"restart added", map[string]string{"rg002-y3.json": "{}"}, nil, "", "rg002: 3 restarts on disk, its ledger header pins 2"},
+		{"battle record lost", map[string]string{"rg002-y1.json": "{}"}, nil, "", "rg002: 1 battle records in its runs, its ledger header pins 2"},
+		{"header count wrong", map[string]string{"rg002-ledger.txt": "# restarts: 2\n# battle records: 3\n"}, nil, "", "rg002: 2 battle records in its runs, its ledger header pins 3"},
+		{"header without restarts", map[string]string{"rg002-ledger.txt": "# battle records: 2\n"}, nil, "", `no "# restarts: N" header line`},
+		{"header without records", map[string]string{"rg002-ledger.txt": "# restarts: 2\n"}, nil, "", `no "# battle records: N" header line`},
+		{"count below the header", map[string]string{"rg002-ledger.txt": "# restarts: 2\nsample | x\n# battle records: 2\n"}, nil, "", `no "# battle records: N" header line`},
+		{"count twice", map[string]string{"rg002-ledger.txt": header + "# restarts: 2\n"}, nil, "", "header pins restarts twice"},
+		{"count not a number", map[string]string{"rg002-ledger.txt": "# restarts: two\n# battle records: 2\n"}, nil, "", `header "# restarts: two"`},
+		{"broken run", map[string]string{"rg002-y2.json": "{"}, nil, "", "rg002-y2.json: unexpected end of JSON input"},
+		{"no GAMES", nil, []string{"GAMES"}, "", "GAMES: no such file"},
+		{"GAMES lists a game twice", map[string]string{"GAMES": gamesFile + "rg002\n"}, nil, "", "GAMES:5: rg002 listed twice"},
+		{"GAMES with a bad name", map[string]string{"GAMES": gamesFile + "rg02\n"}, nil, "", `GAMES:5: "rg02" is not a game`},
+		{"GAMES with a bad marker", map[string]string{"GAMES": gamesFile + "rg005 strict\n"}, nil, "", `GAMES:5: "rg005 strict" is not a game`},
+		{"GAMES with a third field", map[string]string{"GAMES": gamesFile + "rg005 no-ledger x\n"}, nil, "", `GAMES:5: "rg005 no-ledger x" is not a game`},
+		{"RG-001 with a ledger", map[string]string{"rg001-ledger.txt": newGame}, nil, "", "rg001: has a ledger, but GAMES holds it to exact matches"},
+		{"restart gap", map[string]string{"rg002-y4.json": "{}"}, nil, "", "rg002: restarts [1 2 4] skip year 3"},
 		{"restarts from y2", nil, []string{"rg002-y1.json"}, "", "rg002: restarts [2] skip year 1"},
 		{"chained run deleted", nil, []string{"rg002.json"}, "", "no chained run rg002.json"},
-		{"ledger alone", []string{"rg005-ledger.txt"}, nil, "", "rg005-ledger.txt: no chained run rg005.json"},
-		{"stray run", []string{"rg002-y1b.json"}, nil, "", "rg002-y1b.json: not a representative game's run"},
-		{"restarts alone", []string{"rg005-y1.json"}, nil, "", "rg005: restarts with no chained run rg005.json"},
-		{"four digits", []string{"rg0021.json"}, nil, "", "rg0021.json: not a representative game's run"},
-		{"letters", []string{"rg00a.json"}, nil, "", "rg00a.json: not a representative game's run"},
-		{"year 0", []string{"rg002-y0.json"}, nil, "", "rg002-y0.json: not a representative game's run"},
+		{"ledger alone", map[string]string{"GAMES": withNew, "rg005-ledger.txt": newGame}, nil, "", "rg005-ledger.txt: no chained run rg005.json"},
+		{"restarts alone", map[string]string{"rg005-y1.json": ""}, nil, "", "rg005: restarts with no chained run rg005.json"},
+		{"stray run", map[string]string{"rg002-y1b.json": ""}, nil, "", "rg002-y1b.json: not a representative game's run"},
+		{"four digits", map[string]string{"rg0021.json": ""}, nil, "", "rg0021.json: not a representative game's run"},
+		{"letters", map[string]string{"rg00a.json": ""}, nil, "", "rg00a.json: not a representative game's run"},
+		{"year 0", map[string]string{"rg002-y0.json": ""}, nil, "", "rg002-y0.json: not a representative game's run"},
 	} {
 		dir := t.TempDir()
-		for _, f := range append(append([]string{}, base...), c.add...) {
-			if !contains(c.remove, f) {
-				if err := os.WriteFile(filepath.Join(dir, f), nil, 0o644); err != nil {
-					t.Fatal(err)
-				}
+		files := map[string]string{}
+		for f, data := range base {
+			files[f] = data
+		}
+		for f, data := range c.set {
+			files[f] = data
+		}
+		for _, f := range c.remove {
+			delete(files, f)
+		}
+		for f, data := range files {
+			if err := os.WriteFile(filepath.Join(dir, f), []byte(data), 0o644); err != nil {
+				t.Fatal(err)
 			}
 		}
 		games, err := RGGames(dir)
@@ -58,15 +97,6 @@ func TestRGGames(t *testing.T) {
 			t.Errorf("%s: %s, %v; want the error %q", c.name, got, err, c.wantErr)
 		}
 	}
-}
-
-func contains(list []string, s string) bool {
-	for _, x := range list {
-		if x == s {
-			return true
-		}
-	}
-	return false
 }
 
 // A new game's ledger starts as its header alone: its first difference

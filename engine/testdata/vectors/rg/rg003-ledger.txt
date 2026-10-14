@@ -8,6 +8,9 @@
 # engine TestBattleRecords, with RG-002's classes (rg002_ledger_test.go).
 # Rewrite with RG002_LEDGER=write go test -run 'TestRG00[234]Ledger'
 # ./internal/vectors, then classify every UNCLASSIFIED line by hand.
+# Counts kept by hand, checked by internal/vectors RGGames (a rewrite keeps them):
+# restarts: 12
+# battle records: 204
 sample | rg003 | RG-003-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg003 | RG-003-2463 y1 #136 | planet id=9 | excess = 26, want 31
 sample | rg003 | RG-003-2463 y1 #211 | planet id=83 | surface_minerals = [28708 26762 21160], want [28709 26762 21160]

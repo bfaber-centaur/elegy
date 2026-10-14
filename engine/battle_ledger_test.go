@@ -23,19 +23,20 @@ import (
 // (CheckBattleRecords' random column) is "random-driven" with its count
 // of matching variants, so a change in that count fails too.
 
-// rgBattleLedgers are the representative games' ledgers by chained run
-// (vectors.RGGames): each game's records go to its own ledger, with
-// RG-002's classes. A game without a ledger (RG-001) is held strict.
-func rgBattleLedgers(t testing.TB) map[string]string {
+// rgBattleLedgers are the representative games with a ledger, by
+// chained run (vectors.RGGames): each game's records go to its own
+// ledger, with RG-002's classes. A game without a ledger (RG-001) is
+// held strict.
+func rgBattleLedgers(t testing.TB) map[string]vectors.RGGame {
 	t.Helper()
 	games, err := vectors.RGGames(filepath.Join("testdata", "vectors", "rg"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	out := map[string]string{}
+	out := map[string]vectors.RGGame{}
 	for _, g := range games {
 		if g.Ledger != "" {
-			out[g.Name] = g.Ledger
+			out[g.Name] = g
 		}
 	}
 	return out
@@ -67,9 +68,10 @@ var rg002RandomDraws = regexp.MustCompile(`^random \(after \d+ draws in the year
 var rg002SampleDraws = regexp.MustCompile(`^sample \((?:after \d+ draws of earlier years|flagged in the vector|alt_battle in the vector)\) `)
 
 // ledgerTB takes CheckBattleRecords' failures and sample misses of the
-// games in ledgers (rgBattleLedgers) as ledger lines, by key, with "", "sample" or "random-driven" (lane D's
-// in-year rule, with its count of matching variants) as the class, and passes
-// everything else to the test.
+// games in ledgers (game → ledger path) as ledger lines, by key, with "",
+// "sample" or "random-driven" (lane D's in-year rule, with its count of
+// matching variants) as the class, and passes everything else to the
+// test.
 type ledgerTB struct {
 	testing.TB
 	ledgers map[string]string

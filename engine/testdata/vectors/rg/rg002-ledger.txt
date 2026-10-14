@@ -13,6 +13,9 @@
 # omissions, both UNRESOLVED in meaning and constant across RG-002: the
 # lay-mines task's second word (6 orders, all "indefinitely") and the high
 # nibble of the waypoint target type (0x31 and 0x51, 23 orders).
+# Counts kept by hand, checked by internal/vectors RGGames (a rewrite keeps them):
+# restarts: 6
+# battle records: 88
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | environment = [77 18 82], want [77 19 82]
 sample | rg002 | RG-002-2463 y1 #136 | planet id=9 | excess = 26, want 31
 sample | rg002 | RG-002-2463 y1 #211 | planet id=83 | surface_minerals = [28708 26762 21160], want [28709 26762 21160]
