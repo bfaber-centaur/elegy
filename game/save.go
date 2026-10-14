@@ -25,7 +25,7 @@ import (
 // See docs/GAME-LOOP.md.
 const (
 	SaveFormat  = "elegy-save"
-	SaveVersion = 12
+	SaveVersion = 13
 )
 
 // saveFile is the saved document. Field order is the encoding order.

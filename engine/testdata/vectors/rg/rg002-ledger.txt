@@ -103,7 +103,7 @@ sample | rg002 | RG-002-2464 y2 #422 | player id=2 seen_by=2 | score_record.esco
 sample | rg002 | RG-002-2464 y2 #424 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 21
 sample | rg002 | RG-002-2464 y2 #47 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
 sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | waypoints[0] position = {1373 1318}, want {1375 1324}
-sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | waypoints[1] = {{1364 1319} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1367 1327} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | waypoints[1] = {{1364 1319} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1367 1327} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | x = 1373, want 1375
 sample | rg002 | RG-002-2464 y2 #53 | fleet owner=1 id=57 | y = 1318, want 1324
 sample | rg002 | RG-002-2464 y2 #6 | fleet owner=1 id=7 | cargo.germanium = 0, want 1
@@ -387,7 +387,7 @@ sample | rg002 | RG-002-2466 y4 #426 | player id=4 seen_by=4 | score_record.unar
 sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.resources = 10999, want 11016
 sample | rg002 | RG-002-2466 y4 #428 | player id=5 seen_by=5 | score_record.score = 603, want 604
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[0] position = {1371 1309}, want {1369 1308}
-sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[1] = {{1367 1327} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1348 1358} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | waypoints[1] = {{1367 1327} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1348 1358} 4 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | x = 1371, want 1369
 sample | rg002 | RG-002-2466 y4 #48 | fleet owner=1 id=49 | y = 1309, want 1308
 sample | rg002 | RG-002-2466 y4 #49 | fleet owner=1 id=50 | cargo.germanium = 517, want 518
@@ -403,7 +403,7 @@ sample | rg002 | RG-002-2466 y4 #76 | fleet owner=2 id=7 | cargo.ironium = 198, 
 sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | fuel = 3062, want 963
 sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | ships = map[14:1 15:3], want map[15:4]
 sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | waypoints[0] position = {1368 1305}, want {1367 1305}
-sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | waypoints[1] = {{1371 1309} 6 2 100050 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1369 1308} 6 2 100050 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | waypoints[1] = {{1371 1309} 6 2 100050 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1369 1308} 6 2 100050 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2466 y4 #82 | fleet owner=2 id=13 | x = 1368, want 1367
 sample | rg002 | RG-002-2466 y4 #93 | fleet owner=3 id=2 | fleet gone
 sample | rg002 | RG-002-2466 y4 #95 | fleet owner=3 id=4 | orbiting = 3, want 7
@@ -418,10 +418,10 @@ sample | rg002 | RG-002-2466 y4 #97 | fleet owner=3 id=7 | waypoints[0] position
 sample | rg002 | RG-002-2466 y4 #97 | fleet owner=3 id=7 | x = 1048, want 1096
 sample | rg002 | RG-002-2466 y4 #97 | fleet owner=3 id=7 | y = 1275, want 1191
 sample | rg002 | RG-002-2467 y5 #10 | fleet owner=1 id=11 | cargo.germanium = 2, want 1
-sample | rg002 | RG-002-2467 y5 #100 | fleet owner=2 id=18 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2467 y5 #100 | fleet owner=2 id=18 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2467 y5 #101 | fleet owner=2 id=19 | fuel = 650, want 2250
 sample | rg002 | RG-002-2467 y5 #101 | fleet owner=2 id=19 | ships = map[16:1], want map[14:1]
-sample | rg002 | RG-002-2467 y5 #102 | fleet owner=2 id=20 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2467 y5 #102 | fleet owner=2 id=20 | waypoints[1] = {{1335 1315} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1335 1320} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2467 y5 #103 | fleet owner=2 id=21 | fleet gone
 sample | rg002 | RG-002-2467 y5 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg002 | RG-002-2467 y5 #108 | fleet owner=3 id=4 | cargo.colonists = 0, want 132
@@ -644,7 +644,7 @@ sample | rg002 | RG-002-2467 y5 #95 | fleet owner=2 id=13 | ships = map[14:1 15:
 sample | rg002 | RG-002-2467 y5 #95 | fleet owner=2 id=13 | waypoints[0] position = {1335 1315}, want {1335 1320}
 sample | rg002 | RG-002-2467 y5 #95 | fleet owner=2 id=13 | y = 1315, want 1320
 sample | rg002 | RG-002-2468 y6 #101 | fleet owner=2 id=11 | waypoints[0] position = {1414 1286}, want {1411 1281}
-sample | rg002 | RG-002-2468 y6 #101 | fleet owner=2 id=11 | waypoints[1] = {{1365 1319} 7 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1335 1320} 7 6 0 1 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2468 y6 #101 | fleet owner=2 id=11 | waypoints[1] = {{1365 1319} 7 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1335 1320} 7 6 0 1 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2468 y6 #101 | fleet owner=2 id=11 | x = 1414, want 1411
 sample | rg002 | RG-002-2468 y6 #101 | fleet owner=2 id=11 | y = 1286, want 1281
 sample | rg002 | RG-002-2468 y6 #103 | fleet owner=2 id=13 | 0 waypoints after waypoint 0 [], want 1
@@ -767,7 +767,7 @@ sample | rg002 | RG-002-2468 y6 #245 | planet id=46 | surface_minerals = [153 37
 sample | rg002 | RG-002-2468 y6 #246 | planet id=47 | surface_minerals = [96 363 328], want [96 361 328]
 sample | rg002 | RG-002-2468 y6 #247 | planet id=48 | surface_minerals = [49 924 579], want [52 926 579]
 sample | rg002 | RG-002-2468 y6 #25 | fleet owner=1 id=26 | waypoints[0] position = {1409 1296}, want {1361 1304}
-sample | rg002 | RG-002-2468 y6 #25 | fleet owner=1 id=26 | waypoints[1] = {{1346 1290} 6 1 60 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1299 1325} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2468 y6 #25 | fleet owner=1 id=26 | waypoints[1] = {{1346 1290} 6 1 60 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1299 1325} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2468 y6 #25 | fleet owner=1 id=26 | x = 1409, want 1361
 sample | rg002 | RG-002-2468 y6 #25 | fleet owner=1 id=26 | y = 1296, want 1304
 sample | rg002 | RG-002-2468 y6 #252 | planet id=51 | surface_minerals = [1366 1017 1], want [1365 1015 0]
@@ -832,7 +832,7 @@ sample | rg002 | RG-002-2468 y6 #326 | planet id=122 | surface_minerals = [120 8
 sample | rg002 | RG-002-2468 y6 #328 | planet id=124 | surface_minerals = [198 113 4], want [199 111 2]
 sample | rg002 | RG-002-2468 y6 #329 | planet id=125 | surface_minerals = [247 208 2], want [247 210 1]
 sample | rg002 | RG-002-2468 y6 #33 | fleet owner=1 id=34 | waypoints[0] position = {1271 1529}, want {1268 1530}
-sample | rg002 | RG-002-2468 y6 #33 | fleet owner=1 id=34 | waypoints[1] = {{1211 1337} 6 1 41 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1215 1409} 6 1 42 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg002 | RG-002-2468 y6 #33 | fleet owner=1 id=34 | waypoints[1] = {{1211 1337} 6 1 41 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1215 1409} 6 1 42 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg002 | RG-002-2468 y6 #33 | fleet owner=1 id=34 | x = 1271, want 1268
 sample | rg002 | RG-002-2468 y6 #33 | fleet owner=1 id=34 | y = 1529, want 1530
 sample | rg002 | RG-002-2468 y6 #332 | player id=0 | research_accumulated.biotechnology = 1454, want 1453
@@ -1112,7 +1112,7 @@ sample | rg002-y3 | RG-002-Y3-2465 y1 #428 | player id=6 seen_by=6 | score_recor
 sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.boranium = 144, want 143
 sample | rg002-y3 | RG-002-Y3-2465 y1 #7 | fleet owner=1 id=7 | cargo.germanium = 3, want 2
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[0] position = {1369 1321}, want {1355 1356} (4/8 variants match)
-random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[1] = {{1340 1269} 6 1 58 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1348 1358} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (4/8 variants match)
+random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | waypoints[1] = {{1340 1269} 6 1 58 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1348 1358} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}} (4/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | x = 1369, want 1355 (4/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #13 | fleet owner=1 id=12 | y = 1321, want 1356 (4/8 variants match)
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #172 | planet id=35 | concentrations = [61 53 64], want [61 53 54] (7/8 variants match)
@@ -1149,7 +1149,7 @@ random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | x = 136
 random-driven | rg002-y4 | RG-002-Y4-2466 y1 #82 | fleet owner=2 id=13 | y = 1284, want 1305 (5/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg002-y5 | RG-002-Y5-2467 y1 #126 | fleet_gone owner=5 id=9 | fleet still exists
-random-driven | rg002-y5 | RG-002-Y5-2467 y1 #172 | fleet owner=6 id=12 | waypoints[1] = {{1262 1345} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1262 1345} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (4/8 variants match)
+random-driven | rg002-y5 | RG-002-Y5-2467 y1 #172 | fleet owner=6 id=12 | waypoints[1] = {{1262 1345} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1262 1345} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}} (4/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #178 | planet id=0 | surface_minerals = [117 16 1], want [119 18 2]
 random-driven | rg002-y5 | RG-002-Y5-2467 y1 #181 | planet id=3 | surface_minerals = [0 0 0], want [7783 7191 3948] (7/8 variants match)
 sample | rg002-y5 | RG-002-Y5-2467 y1 #190 | planet id=12 | surface_minerals = [62 610 9], want [64 611 10]
@@ -1195,7 +1195,7 @@ sample | rg002-y5 | RG-002-Y5-2467 y1 #464 | player id=5 seen_by=5 | score_recor
 sample | rg002-y5 | RG-002-Y5-2467 y1 #47 | fleet owner=1 id=47 | cargo.boranium = 252, want 253
 sample | rg002-y5 | RG-002-Y5-2467 y1 #53 | fleet owner=1 id=52 | cargo.germanium = 13, want 14
 sample | rg002-y6 | RG-002-Y6-2468 y1 #114 | fleet owner=3 id=2 | fleet gone
-random-driven [lane D]: movement tie draws in Elegy's battle at (1296,1356), where the target, player 3's fleet 2, is shot down on 6 of 8 seeds (102 of 200 fresh seeds) and the waypoint then loses its fleet target; it survives on seeds 1 and 5, where the waypoint matches. Each of the fleeing token's 7 moves has 7-8 squares tied (take 30, the estimate's per-weapon floor), and 6 of the chaser's 8 moves tie diagonal against straight. The record's move timing, disengage counter (leaves on its 8th move, round 9) and reach (distance 2 after round 8, 0 hits) match Elegy, and all 16 recorded moves are in Elegy's tie sets. The record steps toward the chaser once, (1,3) to (2,3) with the chaser at (6,5), consistent with flat scoring (MEASURED, one battle); the vector flags fleet 3/2's survival a sample | rg002-y6 | RG-002-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}} (2/8 variants match)
+random-driven [lane D]: movement tie draws in Elegy's battle at (1296,1356), where the target, player 3's fleet 2, is shot down on 6 of 8 seeds (102 of 200 fresh seeds) and the waypoint then loses its fleet target; it survives on seeds 1 and 5, where the waypoint matches. Each of the fleeing token's 7 moves has 7-8 squares tied (take 30, the estimate's per-weapon floor), and 6 of the chaser's 8 moves tie diagonal against straight. The record's move timing, disengage counter (leaves on its 8th move, round 9) and reach (distance 2 after round 8, 0 hits) match Elegy, and all 16 recorded moves are in Elegy's tie sets. The record steps toward the chaser once, (1,3) to (2,3) with the chaser at (6,5), consistent with flat scoring (MEASURED, one battle); the vector flags fleet 3/2's survival a sample | rg002-y6 | RG-002-Y6-2468 y1 #187 | fleet owner=6 id=12 | waypoints[1] = {{1296 1356} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1296 1356} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}} (2/8 variants match)
 sample | rg002-y6 | RG-002-Y6-2468 y1 #225 | planet id=29 | surface_minerals = [9 24 7], want [9 23 7]
 sample | rg002-y6 | RG-002-Y6-2468 y1 #250 | planet id=49 | starbase = design 102 damage 0, want design 102 damage 390
 sample | rg002-y6 | RG-002-Y6-2468 y1 #281 | planet id=79 | surface_minerals = [2 2193 2136], want [1 2193 2135]

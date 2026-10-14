@@ -189,14 +189,24 @@ const (
 	FaithfulRulesID = "jrc3-faithful"
 )
 
-// ElegyRules is Elegy's default ruleset, its latest version: version 6.
-// Four switches are off, where Elegy has chosen its own rule over the
-// original's: FieldLimit511, MergeOverflow, KeepUnentitledParts and
+// ElegyRules is Elegy's default ruleset, its latest version: version 7.
+// Three switches are off, where Elegy has chosen its own rule over the
+// original's: MergeOverflow, KeepUnentitledParts and
 // ZeroMaxPopulationStop. So are the two Cybertron switches, which version
 // 2 predates.
 //
-// Version 6 adds LostPlanetMessageCarry, on; version 5 predates it.
+// Version 7 turns FieldLimit511 on (MEASURED MF-13), off in versions 1 to
+// 6.
 func ElegyRules() Ruleset {
+	r := elegyRulesV6()
+	r.Version = 7
+	r.Legacy.FieldLimit511 = true
+	return r
+}
+
+// elegyRulesV6 is the Elegy ruleset, version 6: version 5 with
+// LostPlanetMessageCarry on.
+func elegyRulesV6() Ruleset {
 	r := elegyRulesV5()
 	r.Version = 6
 	r.Legacy.LostPlanetMessageCarry = true
@@ -269,7 +279,7 @@ func elegyRulesV1() Ruleset {
 
 // FaithfulRules is the faithful J-RC3 ruleset, its latest version:
 // version 6, every legacy switch on. It differs from ElegyRules only in
-// FieldLimit511, MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
+// MergeOverflow, KeepUnentitledParts, ZeroMaxPopulationStop
 // and the two Cybertron switches. It is only as faithful as the switches
 // go: behaviour Elegy has not modelled, or models differently without a
 // switch, is the same in both.
@@ -335,7 +345,7 @@ func faithfulRulesV1() Ruleset {
 // the old version stays here so games saved under it still load and
 // replay.
 func Rulesets() []Ruleset {
-	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), elegyRulesV4(), elegyRulesV5(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), faithfulRulesV4(), faithfulRulesV5(), FaithfulRules()}
+	return []Ruleset{elegyRulesV1(), elegyRulesV2(), elegyRulesV3(), elegyRulesV4(), elegyRulesV5(), elegyRulesV6(), ElegyRules(), faithfulRulesV1(), faithfulRulesV2(), faithfulRulesV3(), faithfulRulesV4(), faithfulRulesV5(), FaithfulRules()}
 }
 
 // ErrNoRuleset is returned for a game with no ruleset (the zero Ruleset).

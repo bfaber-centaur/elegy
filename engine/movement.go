@@ -403,6 +403,12 @@ func (g *Game) arrive(f *Fleet) []Event {
 		f.Target0 = &ObjectRef{Owner: reached.Owner, Number: reached.ID}
 	}
 	f.Task = reached.Task
+	// A transport task at a waypoint aimed at a fleet acts on that fleet:
+	// the reached waypoint becomes waypoint 0 (ORDERS.md "Waypoint 0 aimed
+	// at a fleet", BINARY-ONLY; CONFIRMED FO-02 S, U).
+	if f.Task.Kind == TaskTransport && reached.Target == TargetFleet {
+		f.Task.ToFleet, f.Task.Fleet = true, reached.ID
+	}
 	f.Waypoints = f.Waypoints[1:]
 	if n := len(f.Waypoints); f.Repeat && reached.Task.Kind != TaskPatrol && n > 0 && f.Waypoints[n-1].Pos != reached.Pos {
 		f.Waypoints = append(f.Waypoints[:n:n], reached)

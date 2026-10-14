@@ -80,6 +80,9 @@ RG-005 (stars-elegy `419229a`, PREDICTION.md the pre-run record) was run first o
 | differs | 2 | INTENTIONALLY DIFFERENT under the `elegy` ruleset (FO-03-E, FO-06-G, `Legacy.MergeOverflow` off) |
 | skip | 399 | every expectation of the case is skipped, by the reasons below |
 
+- Updated 2026-10-14 (lane D, minefield messages): no case changes status. MF-13a and MF-13b now compare 0x17e and still pass, under `elegy` v7, which turns `Legacy.FieldLimit511` on (PARITY-STATUS.md "Minefield laying and hit messages").
+- Updated 2026-10-14 (RG-005 ingest PR): RG-005 adds 24 cases (1851 in all), with the computer level loaded: fail 48 → 60, random passing on some seeds 16 → 25, random with the reference seed failing 12 → 15 (the rg corpus row goes from fail 48, random 13 and 9 to 60, 22 and 12). No other corpus changes a case. Skips (skips.txt) gain "sample: one stream's random outcome" 2001 → 2234, battle 497 → 533, battle_actions 484 → 520, player Mystery Trader items 5 → 9, and the two Trader-slot reasons, 15 ("a Trader left/appeared during the run"). Class (e) rises from 347 (after the minefield note below) to 366: Mystery Trader items 4 and Trader slots 15.
+
 Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 
 | class | expectations | reasons |
@@ -93,6 +96,8 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (e) other fields and expectations | 23 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
 
+Updated 2026-10-14 (lane A, fleet-to-fleet transport): with transport tasks aimed at fleets and transport fuel implemented, 16 cases go from skip to pass (FO-01-E, FO-02 L–P, R, S, U, FO-04 A–C, FO-05 A–C, FM-102-N; pass 1147 → 1162, measured pass 178 → 179, skip 399 → 383). The (e) fleet-to-fleet row of 38 becomes 2 expectations, FO-02-Q's "load optimal" fuel (`transport load_optimal (no fuel need estimate)` and its target), so class (e) falls from 418 to 382. No RG ledger line moves.
+
 Updated 2026-10-14 (economy, 0x12c/0x12d mapping): "messages with no event mapping" was "148 | 63 ids (145 expectations) and 2 ids' sequence entries (3)" on `f09acd9`; 0x12c (2 + 1 sequence entry) and 0x12d (3 + 2) are now compared and match, so it is 140 (61 ids, no sequence entries) and class (e) is 584. The other numbers on this page are still `f09acd9`'s.
 
 The most frequent unmapped message ids are:
@@ -102,7 +107,13 @@ The most frequent unmapped message ids are:
 - 0x0c3 and 0x0c4 (mines laid, new or added): 5 each;
 - 0x17e (mines not laid, object limit): 3.
 
-Updated 2026-10-14 (RG-005 ingest PR): the partial-starbase owner reading of the viewer reports PR now has its own ASSUMPTION row in SCANNING-STATUS.md (pinned by `TestDesignViews`), so the ASSUMPTION count is 81 (was 80). The RG-005 section of PARITY-STATUS.md adds 2 UNRESOLVED lines (the first-run cause of its deterministic misses), so that count is 14 (was 12). Blind spot 4 said "63 ids"; since the 0x12c/0x12d mapping it is 61.
+Updated 2026-10-14 (RG-005 ingest PR): the partial-starbase owner reading of the viewer reports PR now has its own ASSUMPTION row in SCANNING-STATUS.md (pinned by `TestDesignViews`), so the ASSUMPTION count rises by 1 (81 on this PR's base, 84 with lane A's and lane D's rows; the table below is recounted on the merge with main `b0cab2f`). The RG-005 section of PARITY-STATUS.md adds 2 UNRESOLVED lines (the first-run cause of its deterministic misses), so that count is 14 (was 12). Blind spot 4 said "63 ids"; since the 0x12c/0x12d mapping it is 61.
+
+Updated 2026-10-14 (lane D, minefield messages): 0x0c3, 0x0c4, 0x0c6, 0x0ca and 0x17e are mapped, which compares their 35 expectations: "messages with no event mapping" goes from 140 (61 ids, after the economy note above) to 105 (56 ids, no sequence entries), and class (e) falls from 382 (after lane A's note above) to 347. The most frequent unmapped ids are now 0x10b (10) and 0x0ff (9).
+
+Minefield ids still not compared (4 expectations, "message 0x… has no event mapping" in skips.txt):
+- 0x0c5 and 0x0c9 (a speed bump stopped a fleet, to the fleet's and the field's owners), 1 each. Both are CONFIRMED (mf/mf07, ob/ob024) and are also sent when a speed bump detonates, to every other player's fleet inside it. That second trigger needs the detonation event to carry the field type and each fleet, so it is left for a follow-up rather than mapping half of each id.
+- 0x0c7 and 0x0cb (a hit destroyed ships, to the two owners), 1 each: MESSAGES.md labels both BINARY-ONLY, and their pairing with `EventMineShipsLost` has no oracle record to pin it.
 
 ## Unproven claims in the status documents
 
@@ -110,10 +121,14 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 
 | label | lines | heaviest in |
 |---|---:|---|
-| BINARY-ONLY (from analysis, no oracle run) | 188 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 20, AI 17, COMBAT 17, TAKEOVER 18 |
-| ASSUMPTION | 81 | KERNEL 33, PARITY 12, TAKEOVER 12, COMBAT 7 |
+| BINARY-ONLY (from analysis, no oracle run) | 191 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 20, TAKEOVER 20, AI 17, COMBAT 17 |
+| ASSUMPTION | 84 | KERNEL 33, TAKEOVER 15, PARITY 12, COMBAT 7 |
 | NOT RUN | 22 | COMBAT 9, PARITY 5, TAKEOVER 4 |
 | UNRESOLVED | 14 | PARITY 6, TAKEOVER 3 |
+
+Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows added for transport aimed at a fleet and transport fuel (the implemented rows, T16 to T22, the year-end drop and the T19 row citing MESSAGES.md) take TAKEOVER from 18 to 20 BINARY-ONLY lines and from 12 to 15 ASSUMPTION lines by the same `grep -c`. The totals become 190 BINARY-ONLY (was 188) and 83 ASSUMPTION (was 80). The table above keeps the earlier figures.
+
+Updated 2026-10-14 (lane D, minefield messages): PARITY-STATUS's new section adds one line that matches `BINARY-ONLY`: it names 0x0c7 and 0x0cb, which stay unmapped because MESSAGES.md labels them BINARY-ONLY, so no implemented rule is behind it. By the same `grep -c` the totals become 191 BINARY-ONLY (was 190) and 83 ASSUMPTION (unchanged).
 
 ## Biggest blind spots
 
@@ -123,9 +138,9 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
    - This needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
-4. **Message coverage.** 61 ids have no event mapping, and minefield messages are the largest group.
-5. **Fleet-to-fleet cargo.** Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (TAKEOVER-STATUS.md "Not modelled"; 38 expectations).
-6. **Labels.** 188 BINARY-ONLY and 81 ASSUMPTION lines are claims no oracle run has checked.
+4. **Message coverage.** 56 ids have no event mapping (updated 2026-10-14 after the economy and minefield messages; it was 63, and minefield messages were the largest group).
+5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
+6. **Labels.** 191 BINARY-ONLY and 84 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims"). Updated 2026-10-14 (RG-005 ingest PR): this read "190 BINARY-ONLY and 83 ASSUMPTION"; the minefield-messages line adds 1 BINARY-ONLY and the SCANNING-STATUS partial-starbase row 1 ASSUMPTION.
 7. **Breadth.** RG covers three representative games (RG-002/003 share years 1–6) plus RG-005, the out-of-sample game. On RG-005's first run the zero did not hold: 12 strict expectations missed on all 8 seeds, all from a harness gap now closed (section "RG-005" above).
 
 ## Remaining comparator gaps, ranked
@@ -134,8 +149,8 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 
 | rank | gap | expectations | proposed owner |
 |---:|---|---:|---|
-| 1 | minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e | 35 | lane D |
-| 2 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator) |
+| 1 | ~~minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e~~ done 2026-10-14 (lane D): all 35 match on the reference seed (`elegy` v7) | 35 | lane D |
+| 2 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator). Done 2026-10-14: 36 compared and pass (16 cases); FO-02-Q's "load optimal" stays not compared (2) |
 | 3 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 4 | patrol target 0x0ff | 9 | lane A |
 | 5 | planet value messages 0x12c, 0x12d (and their sequence entries); Updated 2026-10-14: mapped, all 8 match (rows BINARY-ONLY) | 8 | economy |

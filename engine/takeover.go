@@ -45,17 +45,19 @@ const (
 )
 
 // Cargo types of a transport order: the three minerals by their Minerals
-// index, then colonists. Fuel is never unloaded to a planet (KERNEL.md
-// "Fuel cannot be unloaded onto a planet", CONFIRMED FM-101..105), so it
-// has no action here.
+// index, then colonists (the cargo hold's), then fuel (CargoFuel, the
+// tank's). NumTransport counts all five.
 const (
 	CargoColonists = NumMinerals
 	NumCargo       = NumMinerals + 1
+	NumTransport   = NumCargo + 1
 )
 
 // TransportAction is a transport order's action for one cargo type
-// (TAKEOVER.md "Unload and load amounts"). Every action but the fuel
-// ones is modelled; fuel has no transport action in Elegy.
+// (TAKEOVER.md "Unload and load amounts"). Every action but "load
+// optimal" (fuel only) is modelled. Fuel takes the same actions as the
+// other types, against the fuel tank; only another fleet gives or takes
+// it (fleetTransport, transportFuelIgnored).
 type TransportAction int
 
 const (
@@ -81,11 +83,17 @@ type Transport struct {
 // waypoint 0), or of a waypoint.
 type Task struct {
 	Kind      TaskKind
-	Transport [NumCargo]Transport // for TaskTransport
-	Fleet     int                 // target fleet id, for TaskMerge
-	Range     int                 // patrol range in ly, for TaskPatrol
-	Player    int                 // recipient, for TaskTransferFleet
-	Years     int                 // duration, for TaskLayMines (objects.go)
+	Transport [NumTransport]Transport // for TaskTransport
+	Fleet     int                     // target fleet id, for TaskMerge, and for TaskTransport when ToFleet
+	Range     int                     // patrol range in ly, for TaskPatrol
+	Player    int                     // recipient, for TaskTransferFleet
+	Years     int                     // duration, for TaskLayMines (objects.go)
+	// ToFleet is set by the engine, never by an order (validTask), on a
+	// transport task whose waypoint 0 is aimed at fleet Fleet: a follower
+	// (FollowOrder), or a fleet that reached a waypoint aimed at a fleet
+	// (arrive). It lasts until the year's files are written
+	// (dropFleetTargets).
+	ToFleet bool
 }
 
 // planetOrder is the planet indices in planet-id order.
@@ -523,6 +531,10 @@ func (g *Game) removeFleetsAs(ids map[int]bool, standIn bool) {
 // loadSalvage), never from a packet. Deep space with no salvage, and
 // another player's planet, are not sources (noSource).
 func (g *Game) load(f *Fleet, after bool) []Event {
+	if f.Task.ToFleet {
+		return g.loadFromFleet(f, after)
+	}
+	g.transportFuelIgnored(f)
 	if named, si, cargo := g.namedSource(f); named {
 		var ev []Event
 		switch {
@@ -668,11 +680,16 @@ const EventColonistsBeamedDown EventKind = EventNoQueue + 1
 // Away from a planet, minerals unload into the salvage object at the
 // fleet's position (ASSUMPTION T5, unloadSalvage).
 //
-// ASSUMPTION T1: Elegy's task does not record what a waypoint pointed
-// at, so a fleet away from any planet and any salvage but sharing its
-// position with another fleet keeps its cargo: unloads to fleets are not
-// modelled. Anywhere else away from a planet is deep space.
+// A task whose waypoint 0 is aimed at a fleet (Task.ToFleet) unloads
+// into that fleet instead (unloadToFleet). Any other task away from a
+// planet and salvage is in deep space, even where another fleet shares
+// the position. Fuel actions there and at a planet are ignored
+// (transportFuelIgnored).
 func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
+	if f.Task.ToFleet {
+		return g.unloadToFleet(f)
+	}
+	g.transportFuelIgnored(f)
 	var events []Event
 	pi := g.planetAt(f.Pos)
 	for c := range NumCargo {
@@ -729,7 +746,7 @@ func (g *Game) unload(f *Fleet, owned []bool, queue *[]drop) []Event {
 			events = append(events, g.dropColonists(f, pi, amount, owned, queue)...)
 		}
 	}
-	if f.Task.Transport == ([NumCargo]Transport{}) {
+	if f.Task.Transport == ([NumTransport]Transport{}) {
 		f.Task = Task{}
 	}
 	return events
@@ -750,8 +767,16 @@ func (t *Transport) unloadWant(have, avail int) int {
 // targetHolds is A for a "set waypoint to" action of cargo type c: the
 // planet's surface mineral or population at the fleet's position, else
 // the salvage object's mineral there (ASSUMPTION T5), else 0 (ASSUMPTION
-// T12: TAKEOVER.md defines A only for a planet).
+// T12: TAKEOVER.md defines A only for a planet). For a task aimed at a
+// fleet (Task.ToFleet) it is that fleet's cargo of the type, or 0 when
+// the fleet is not there (transportTarget).
 func (g *Game) targetHolds(f *Fleet, c int) int {
+	if f.Task.ToFleet {
+		if t := g.transportTarget(f); t >= 0 {
+			return *held(&g.Fleets[t], c)
+		}
+		return 0
+	}
 	if pi := g.planetAt(f.Pos); pi >= 0 {
 		if c < NumMinerals {
 			return g.Planets[pi].Surface[c]
@@ -912,7 +937,7 @@ func (g *Game) settled(f *Fleet, after bool, planet int) []Event {
 			events = append(events, g.loadWaiting(f, c, planet))
 		}
 	}
-	if f.Task.Transport == ([NumCargo]Transport{}) {
+	if f.Task.Transport == ([NumTransport]Transport{}) {
 		f.Task = Task{}
 	}
 	return events
@@ -932,10 +957,9 @@ func (g *Game) settled(f *Fleet, after bool, planet int) []Event {
 // wants more is the one refused; the cancel ends the whole task, so no
 // later cargo type is told.
 func (g *Game) noSource(f *Fleet, cancel bool, planet int) []Event {
-	capacity := g.cargoCapacity(f)
-	for c := range NumCargo {
+	for c := range NumTransport {
 		t := &f.Task.Transport[c]
-		want, ok := t.sourceWant(capacity, *held(f, c), g.targetHolds(f, c))
+		want, ok := t.sourceWant(g.capacityFor(f, c), *held(f, c), g.targetHolds(f, c))
 		switch {
 		case !ok:
 		case want <= 0:
@@ -949,7 +973,7 @@ func (g *Game) noSource(f *Fleet, cancel bool, planet int) []Event {
 			return append(events, Event{Kind: EventLoadRefused, Player: f.Owner, Planet: planet, Fleet: f.ID, Axes: []int{c}})
 		}
 	}
-	if f.Task.Transport == ([NumCargo]Transport{}) {
+	if f.Task.Transport == ([NumTransport]Transport{}) {
 		f.Task = Task{}
 	}
 	return nil

@@ -32,8 +32,6 @@
    1 expectation no_new_fleets
  192 expectation sample
    1 expectation starbase_design_gone
-  15 fleet-to-fleet transport
-  15 fleet-to-fleet transport (target)
    1 message 0x000 has no event mapping
    3 message 0x002 has no event mapping
    1 message 0x003 has no event mapping
@@ -53,13 +51,9 @@
    2 message 0x0b8 has no event mapping
    2 message 0x0bb has no event mapping
    2 message 0x0bc has no event mapping
-   5 message 0x0c3 has no event mapping
-   5 message 0x0c4 has no event mapping
    1 message 0x0c5 has no event mapping
-  11 message 0x0c6 has no event mapping
    1 message 0x0c7 has no event mapping
    1 message 0x0c9 has no event mapping
-  11 message 0x0ca has no event mapping
    1 message 0x0cb has no event mapping
    2 message 0x0de has no event mapping
    2 message 0x0e2 has no event mapping
@@ -94,7 +88,6 @@
    1 message 0x173 has no event mapping
    1 message 0x174 has no event mapping
    1 message 0x179 has no event mapping
-   3 message 0x17e has no event mapping
    1 message_sequence 0x182 player slot not compared
    2 message_sequence of sample entries only
    9 planet field defense_estimate
@@ -113,4 +106,5 @@
    3 score_record: Super Stealth research stealing
    5 score_record: a computer player's planned orders (not in the vector)
 5129 stream (another oracle random stream)
-   8 transport fuel
+   1 transport load_optimal (no fuel need estimate)
+   1 transport load_optimal (no fuel need estimate) (target)

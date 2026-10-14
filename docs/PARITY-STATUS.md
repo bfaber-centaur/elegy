@@ -392,6 +392,19 @@ Measured on elegy main `bd0ed07` (#231) plus this branch.
 - **Other corpora:** 32 expectations that were skipped as unmapped (0x0f4 18, 0x0be 14) are now compared. The MF lane's 28 match on the reference seed. Both `message_sequence` entries of 0x0f4 that were skipped as unmapped (RG-003 year 11, chained and restart) are now compared: the restart's sweeper and amount (82) match exactly, and the chained one is a sample (below). The restart's unknown slots stay a "not compared" tally. No vector names 0x0c2. Every per-corpus tally and the parity baseline are unchanged.
 - **RG-003:** the restarts' 0x0f4 match (y11, y12). In the chained run, y11 and y12 have no starbase sweep in Elegy: 3 sample lines, from the chained state after earlier draws.
 
+### Minefield laying and hit messages (lane D)
+
+Measured on elegy main `f09acd9` (#269) plus this branch, by MESSAGES.md at stars-elegy `4f59d8d`.
+
+- **Mapped** from Elegy's existing lay and hit steps (objects `Space.Lay`, `MineHit`):
+  - **0x0c3**: mines laid into a new field. **0x0c4**: mines added to an own field. **0x17e**: no room for a new field. One per mine type laid, to the fleet's owner (CONFIRMED: 0x0c3 cs/cs-003, fm2/fm102, ob/ob002; 0x0c4 ob/ob019-y2; 0x17e MF-13). `EventMinesLaid` and `EventMinesNotLaid` now carry whether the field is new and the mine type (`Axes`).
+  - **0x0c6** to the fleet's owner and **0x0ca** to the field's owner: a standard or heavy field hit a moving fleet that lost no ships (CONFIRMED ob/ob010, mf/mf01). `EventMineHit` now carries the field's owner, its type and the ships lost (`Axes`).
+  - Not mapped: speed bumps (0x0c5, 0x0c9; CONFIRMED, also sent on a speed-bump detonation, which the detonation event does not yet describe) and hits that destroyed ships (0x0c7, 0x0cb BINARY-ONLY; 0x0c8, 0x0cc). Their 4 skips stay (COVERAGE.md lists them with the reasons). MESSAGES.md's "LEGACY BUG?" note on 0x0c4 when a fleet lays two mine types is not modelled; no vector has one.
+- **Slots.** Only presence and the fleet focus are compared. No public sequence record gives these messages' slot values, so each slot is a "not compared" tally.
+- **Other corpora:** 35 presence expectations that were skipped as unmapped are compared now (0x0c3 5, 0x0c4 5, 0x0c6 11, 0x0ca 11, 0x17e 3). All 35 match on the reference seed, MF-13a and MF-13b under `elegy` v7 (below). No RG ledger moves.
+- **MF-13a and MF-13b: `elegy` v7 turns `Legacy.FieldLimit511` on.** Each expects 0x17e when a player's 512th field is refused because another space object sorts after its minefields. The original's limit is not a flat 511: the 512th field (number 511) is made only when no other space object sorts after the owner's minefields, so a player is held to 511 fields when something does and gets 512 otherwise (MEASURED MF-11 and MF-13, one run each; MF-13c made a 512th field). `Legacy.FieldLimit511` is that conditional rule, LEGACY BUG (RULESET.md `field_limit_511`; `objects` `Space.freeNumber`). The switch had been off in `elegy` since the minefield code landed (elegy #18, `0bc91a9`, an author choice with no recorded decision). Comparing 0x17e made the difference visible, so `elegy` v7 turns it on (Bobby, project chat decision card, 2026-10-14 04:33Z: chose "Match 511", that is, match the original); v1–v6 stay registered unchanged. Both cases stay in the parity baseline. `TestFieldLimit511Cases` pins them: they pass under the default (v7), and under `elegy` v6 each fails on 0x17e alone.
+- **Census:** skips.txt loses "message 0x0c3 has no event mapping" (5), "0x0c4" (5), "0x0c6" (11), "0x0ca" (11) and "0x17e" (3). baseline.txt is unchanged. Every RG ledger is unchanged.
+
 ### Salvage and bombing message slots (lane D)
 
 Measured on this branch, by MESSAGES.md at stars-elegy e1b2ad9.

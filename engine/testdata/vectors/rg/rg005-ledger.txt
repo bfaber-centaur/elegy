@@ -358,7 +358,7 @@ sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | fuel = 280, want 650
 sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | orbiting = 286, want 202
 sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | ships = map[3:1], want map[4:1]
 sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | waypoints[0] position = {2183 1525}, want {1838 1530}
-sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}, want {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}
+sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}, want {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}
 sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | x = 2183, want 1838
 sample | rg005 | RG-005-2470 y5 #6 | fleet owner=0 id=8 | y = 1525, want 1530
 sample | rg005 | RG-005-2470 y5 #61 | fleet owner=0 id=70 | fuel = 120, want 200
@@ -514,7 +514,7 @@ sample | rg005 | RG-005-2471 y6 #59 | fleet owner=0 id=70 | x = 2055, want 2056
 sample | rg005 | RG-005-2471 y6 #59 | fleet owner=0 id=70 | y = 1815, want 1766
 sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | fuel = 66, want 0
 sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | waypoints[0] position = {1980 1428}, want {1989 1471}
-sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | waypoints[1] = {{2067 1831} 8 1 258 0 {2 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{2067 1831} 1 1 258 0 {2 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | waypoints[1] = {{2067 1831} 8 1 258 0 {2 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{2067 1831} 1 1 258 0 {2 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | x = 1980, want 1989
 sample | rg005 | RG-005-2471 y6 #61 | fleet owner=1 id=1 | y = 1428, want 1471
 sample | rg005 | RG-005-2471 y6 #70 | planet id=71 | surface_minerals = [6048 6043 5932], want [6049 6041 5932]
@@ -675,7 +675,7 @@ sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | fuel = 280, want 1300
 sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | orbiting = 286, want 202
 sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | ships = map[3:1], want map[4:2]
 sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | waypoints[0] position = {2183 1525}, want {1838 1530}
-sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}, want {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}
+sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}, want {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}
 sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | x = 2183, want 1838
 sample | rg005 | RG-005-2472 y7 #6 | fleet owner=0 id=8 | y = 1525, want 1530
 sample | rg005 | RG-005-2472 y7 #60 | fleet owner=0 id=70 | 0 waypoints after waypoint 0 [], want 1
@@ -841,7 +841,7 @@ sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | fuel = 280, want 1950
 sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | orbiting = 286, want 202
 sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | ships = map[3:1], want map[4:3]
 sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | waypoints[0] position = {2183 1525}, want {1838 1530}
-sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}, want {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}
+sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | waypoints[0] task = {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}, want {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}
 sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | x = 2183, want 1838
 sample | rg005 | RG-005-2473 y8 #6 | fleet owner=0 id=8 | y = 1525, want 1530
 sample | rg005 | RG-005-2473 y8 #71 | planet id=71 | surface_minerals = [6775 6771 6745], want [6776 6768 6745]
@@ -1190,7 +1190,7 @@ sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | cargo.colonists = 2
 sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | fuel = 76, want 200
 sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | orbiting = null, want 184
 sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | waypoints[0] position = {1650 1581}, want {1799 1635}
-sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | x = 1650, want 1799
 sample | rg005 | RG-005-2475 y10 #31 | fleet owner=0 id=37 | y = 1581, want 1635
 sample | rg005 | RG-005-2475 y10 #33 | fleet owner=0 id=39 | fuel = 650, want 200
@@ -1211,7 +1211,7 @@ sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | fuel = 650, want 20
 sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | orbiting = 201, want 202
 sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | ships = map[4:1], want map[1:1]
 sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | waypoints[0] position = {1837 1540}, want {1838 1530}
-sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | x = 1837, want 1838
 sample | rg005 | RG-005-2475 y10 #38 | fleet owner=0 id=44 | y = 1540, want 1530
 sample | rg005 | RG-005-2475 y10 #40 | fleet owner=0 id=46 | fuel = 650, want 200
@@ -1534,7 +1534,7 @@ sample | rg005 | RG-005-2476 y11 #29 | fleet owner=0 id=36 | y = 1789, want 1775
 sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | 2 waypoints after waypoint 0 [{1638 1604} {1589 1597}], want 1
 sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | fuel = 76, want 146
 sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | waypoints[0] position = {1650 1581}, want {1736 1623}
-sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | x = 1650, want 1736
 sample | rg005 | RG-005-2476 y11 #30 | fleet owner=0 id=37 | y = 1581, want 1623
 sample | rg005 | RG-005-2476 y11 #32 | fleet owner=0 id=39 | cargo.colonists = 0, want 25
@@ -1558,7 +1558,7 @@ sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | fuel = 650, want 18
 sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | orbiting = 201, want none
 sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | ships = map[4:1], want map[1:1]
 sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | waypoints[0] position = {1837 1540}, want {1808 1550}
-sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | x = 1837, want 1808
 sample | rg005 | RG-005-2476 y11 #37 | fleet owner=0 id=44 | y = 1540, want 1550
 sample | rg005 | RG-005-2476 y11 #39 | fleet owner=0 id=46 | cargo.colonists = 0, want 25
@@ -1937,7 +1937,7 @@ sample | rg005 | RG-005-2477 y12 #28 | fleet owner=0 id=36 | y = 1824, want 1810
 sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | 2 waypoints after waypoint 0 [{1638 1604} {1589 1597}], want 1
 sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | fuel = 76, want 92
 sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | waypoints[0] position = {1650 1581}, want {1673 1611}
-sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | x = 1650, want 1673
 sample | rg005 | RG-005-2477 y12 #29 | fleet owner=0 id=37 | y = 1581, want 1611
 sample | rg005 | RG-005-2477 y12 #31 | fleet owner=0 id=39 | cargo.colonists = 0, want 25
@@ -1961,7 +1961,7 @@ sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | fuel = 650, want 16
 sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | orbiting = 201, want none
 sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | ships = map[4:1], want map[1:1]
 sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | waypoints[0] position = {1837 1540}, want {1778 1570}
-sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 -1}, want {0 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}
+sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | waypoints[0] task = {7 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 -1 false}, want {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}
 sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | x = 1837, want 1778
 sample | rg005 | RG-005-2477 y12 #36 | fleet owner=0 id=44 | y = 1540, want 1570
 sample | rg005 | RG-005-2477 y12 #38 | fleet owner=0 id=46 | cargo.colonists = 0, want 25
@@ -1974,7 +1974,7 @@ sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | cargo.colonists = 0
 sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | fuel = 0, want 92
 sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | ships = map[3:1], want map[1:1]
 sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | waypoints[0] position = {1831 1454}, want {1823 1243}
-sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | waypoints[1] = {{1802 1146} 6 1 186 0 {2 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}, want {{1802 1146} 8 1 186 0 {2 [{0 0} {0 0} {0 0} {0 0}] 0 0 0 0}}
+sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | waypoints[1] = {{1802 1146} 6 1 186 0 {2 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1802 1146} 8 1 186 0 {2 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | x = 1831, want 1823
 sample | rg005 | RG-005-2477 y12 #39 | fleet owner=0 id=47 | y = 1454, want 1243
 sample | rg005 | RG-005-2477 y12 #42 | fleet owner=0 id=50 | 2 waypoints after waypoint 0 [{1752 2108} {1908 1826}], want 1

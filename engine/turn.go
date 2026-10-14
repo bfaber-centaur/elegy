@@ -684,6 +684,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
 	g.heldNumbers, g.costLevels, g.fleetIDs, g.removedFleets = nil, nil, 0, nil
+	g.dropFleetTargets()
 	g.dropBareRecords()
 	return TurnResult{
 		Game:   g,
