@@ -20,7 +20,8 @@ func (Rules) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Mineral
 
 // Adjust runs Adjust and turns each change into its messages (MESSAGES.md
 // 0x12c, 0x15a and 0x15b). Messages go per fleet; Count is the planet
-// owner's habitability after.
+// owner's habitability after the fleet's clicks and, for a changed value,
+// Axes[0] is it before them.
 //
 //   - The clicks changed the planet owner's habitability: the fleet owner
 //     is told, and the planet owner too when it is someone else.
@@ -34,10 +35,9 @@ func (Rules) Adjust(g *engine.Game) []engine.Event {
 	var out []engine.Event
 	for _, a := range Adjust(g) {
 		f, p := &g.Fleets[a.Fleet], &g.Planets[a.Planet]
-		hab := engine.Habitability(g.Players[p.Owner].Race, p.Env)
 		if !a.HabChanged {
 			if a.Hostile {
-				out = append(out, engine.Event{Kind: engine.EventPlanetNotDegraded, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})
+				out = append(out, engine.Event{Kind: engine.EventPlanetNotDegraded, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: a.After})
 			}
 			continue
 		}
@@ -45,9 +45,9 @@ func (Rules) Adjust(g *engine.Game) []engine.Event {
 		if a.Hostile {
 			kind = engine.EventPlanetDegraded
 		}
-		out = append(out, engine.Event{Kind: kind, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})
+		out = append(out, engine.Event{Kind: kind, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: a.After, Axes: []int{a.Before}})
 		if p.Owner != f.Owner {
-			out = append(out, engine.Event{Kind: kind, Player: p.Owner, Planet: p.ID, Fleet: f.ID, Count: hab})
+			out = append(out, engine.Event{Kind: kind, Player: p.Owner, Planet: p.ID, Fleet: f.ID, Count: a.After, Axes: []int{a.Before}})
 		}
 	}
 	return out
