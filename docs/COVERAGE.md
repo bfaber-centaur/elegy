@@ -81,6 +81,8 @@ Expectations skipped, by class (engine/testdata/vectors/skips.txt):
 | (e) other fields and expectations | 33 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; fleet heading 7, `mass_shown` 3; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
 | (e) message slots not compared | 1 | 0x182 player 1 |
 
+Updated 2026-10-14 (lane A, fleet-to-fleet transport): these tables are main `f09acd9`'s. With transport tasks aimed at fleets and transport fuel implemented, 16 cases go from skip to pass (pass 981 → 996, measured pass 178 → 179, skip 565 → 549), and the (e) fleet-to-fleet row of 38 becomes 2 expectations, FO-02-Q's "load optimal" fuel (`transport load_optimal (no fuel need estimate)` and its target). No RG ledger line moves.
+
 The most frequent unmapped message ids are:
 - 0x0c6 and 0x0ca (fleet stopped and damaged in a minefield, both sides): 11 each;
 - 0x10b (Mystery Trader trade): 10;
@@ -108,7 +110,7 @@ Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weak
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Viewer reports and client estimates.** 156 report views and 216 estimates are not compared (milestone 3).
 4. **Message coverage.** 63 ids have no event mapping, and minefield messages are the largest group.
-5. **Fleet-to-fleet cargo.** Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (TAKEOVER-STATUS.md "Not modelled"; 38 expectations).
+5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
 6. **Labels.** 188 BINARY-ONLY and 80 ASSUMPTION lines are claims no oracle run has checked.
 7. **Breadth.** RG covers two representative games (RG-002/003 share years 1–6). An out-of-sample game (RG-005, lane F) will test whether the zero holds.
 
@@ -120,7 +122,7 @@ Ranked by expectations unblocked, then by whether a mapping exists to build on. 
 |---:|---|---:|---|
 | 1 | viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness) |
 | 2 | minefield messages 0x0c3, 0x0c4, 0x0c6, 0x0ca, 0x17e | 35 | lane D |
-| 3 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator) |
+| 3 | fleet-to-fleet transport and transport fuel | 38 | lane A (mechanic, not only the comparator). Done 2026-10-14: 36 compared and pass (16 cases: FO-01-E, FO-02 L–P, R, S, U, FO-04 A–C, FO-05 A–C, FM-102-N); FO-02-Q's "load optimal" stays not compared (2) |
 | 4 | Mystery Trader trade 0x10b and player Trader items | 15 | lane D (objects) |
 | 5 | patrol target 0x0ff | 9 | lane A |
 | 6 | fleet heading and `mass_shown` | 10 | lane B (harness) |
