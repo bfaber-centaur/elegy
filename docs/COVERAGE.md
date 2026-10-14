@@ -2,16 +2,18 @@
 
 What Elegy's comparison with the original covers, what it leaves out, and how much of each. Measured on elegy main `f09acd9`, with stars-elegy vectors `104e8f5`, after every RG ledger was regenerated with `RG002_LEDGER=write` (no line moved). [PARITY-STATUS.md](PARITY-STATUS.md) holds the per-corpus detail and the history behind these numbers.
 
+**Re-measured 2026-10-14 on main `2943788`** (the final integration: #276 `97fb5d2`, #277 `d64c936` and #278 on top; vectors as synced in #276 from stars-elegy `bdb4921`). Every RG ledger, baseline.txt and skips.txt were regenerated (`RG002_LEDGER=write`, `PARITY_BASELINE=write`) and nothing moved; `go test ./...` passes. The tables on this page now carry that measurement, and the RG table has RG-005's corrected column. RG-005's first run stays separate (section "RG-005" here, and PARITY-STATUS.md "RG-005", which scores it as pre-registered). Every dated note below is history and quotes the figures it replaced. This fold-in replaced: the intro's "7,324 skipped expectations" and "418 more expectations"; the "All corpora" table on 1827 cases (pass 1147, measured pass 178, random 16 and 12, fail 48, skip 399); the skip-class rows (c) 7,324, battle 994, (e) messages 148 (63 ids and 2 sequence entries), fleet-to-fleet 38, other 23 and slots 1; the label table's BINARY-ONLY 191 (KERNEL 20) and UNRESOLVED 14 (PARITY 6); the rg case tally fail 48, random 13 and 9; and an RG table without RG-005.
+
 Updated 2026-10-14 (viewer reports PR): the sc corpus's 156 viewer-report expectations (views of `other_players` 96, `player` 56, `design` 4) are now compared, and all pass. All-corpora pass rose from 981 to 1137 and skip fell from 565 to 409. Class (e) fell from 584 (after the 0x12c/0x12d mapping, below) to 428, and the gap ranking lost its old rank 1, "viewer reports: `other_players`, `player`, `design` views | 156 | lane B (harness)". The RG numbers are unchanged from `f09acd9`. One reading is an ASSUMPTION: `starbase_designs_full` lists the subject's own starbase designs, while the original's file names no owner for a partial starbase design and the sc experiment's reader counts every such design for the subject. The sc cases have two players, so they cannot tell the two readings apart (pinned by `internal/vectors` `TestDesignViews`).
 
 Updated 2026-10-14 (fleet heading and mass PR): the sc corpus's 7 fleet `heading` and 3 `mass_shown` expectations are now compared, and all pass. All-corpora pass rose from 1137 to 1147 and skip fell from 409 to 399. Class (e) fell from 428 to 418, the "other fields" row from 33 to 23, and the gap ranking lost its old rank 5, "fleet heading and `mass_shown` | 10 | lane B (harness)".
 
 Tested at #260's head `b78c03c` (tree `59a494d`), a merge of main `f09acd9` with this PR's docs-only commits. Outside docs/ and HANDOFF.md its files are identical to `f09acd9`'s (`git diff f09acd9 b78c03c -- . ':!docs' ':!HANDOFF.md'` is empty), so the code tested is main `f09acd9`'s (tree `b7e0e77`). No test reads the files this PR changes. The candidate is #260's merge commit, whose tree differs from `f09acd9`'s only in docs/ and HANDOFF.md. On that head: `go test ./...` passes; the PR-subset matrix (24 games of 60 years, replayed and reloaded after 23) has 24 with no failure; the nightly matrix has 96 of 96 games with no failure (12 seeds × 2 rulesets × 4 opponent sets, 150 years on a medium map, replayed and reloaded after 77 years; 444 s).
 
-**Zero known discrepancies is not complete equivalence.** No compared value in RG-002, RG-003 or RG-004 differs from the original in a way no seed variant reproduces, and no targeted corpus case fails. That claim covers only what is compared:
+**Zero known discrepancies is not complete equivalence.** No compared value in RG-002, RG-003, RG-004 or (after the harness fixes its first run exposed, section "RG-005") RG-005 differs from the original in a way no seed variant reproduces, and no targeted corpus case fails. That claim covers only what is compared:
 - most random outcomes are compared as samples or across 8 seed variants, never replayed bit for bit;
-- 7,324 skipped expectations are samples of another random stream;
-- 418 more expectations test mechanics or views the harness does not compare yet (class e);
+- 7,561 skipped expectations are samples of another random stream;
+- 336 more expectations test mechanics or views the harness does not compare yet (class e);
 - whole subsystems, such as the computer players' choices and the client's estimates, have no oracle comparison at all.
 
 The biggest blind spots are listed at the end.
@@ -28,79 +30,82 @@ The biggest blind spots are listed at the end.
 
 Updated 2026-10-14 (RG-005 ingest PR): computer players now load with their level (stars-elegy #214), so expert players make Mystery Trader planet trades. This table and the ledger counts below are regenerated with it: RG-002 and RG-003 each gain one random-driven restart line (Y5 planet 3), and RG-003 and RG-004 chained samples move. On `f09acd9` the rows read: strict pass 356 / 2227, 356 / 4833, 197 / 2517; random-driven 0 / 25, 0 / 59, 1 / 12; sample matched 1663 / 185, 3112 / 452, 1732 / 139; sample missed 562 / 144, 2196 / 320, 898 / 160; ledger lines 1305, 5921, 2855; random-driven lines 35, 76, 18.
 
-Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts. Battle records are counted separately below.
+Field expectations on the reference seed; chained run / 12 (RG-002: 6) restarts. Battle records are counted separately below. Re-measured on `2943788`. The RG-005 column is its corrected result (computer level loaded, fix A, Trader items compared), not its first run.
 
-| class | RG-002 | RG-003 | RG-004 |
-|---|---|---|---|
-| (a) strict pass | 356 / 2226 | 356 / 4832 | 197 / 2517 |
-| strict miss, no seed matches | 0 / 0 | 0 / 0 | 0 / 0 |
-| (b) random-driven | 0 / 26 | 0 / 60 | 1 / 12 |
-| (c) sample, matched | 1663 / 185 | 3110 / 452 | 1726 / 139 |
-| (c) sample, missed | 562 / 144 | 2198 / 320 | 904 / 160 |
-| not compared | 0 / 0 | 1 / 1 | 3 / 3 |
-| expectations per run | 2581 | 5665 | 2831 |
+| class | RG-002 | RG-003 | RG-004 | RG-005 (corrected) |
+|---|---|---|---|---|
+| (a) strict pass | 356 / 2226 | 356 / 4832 | 197 / 2517 | 184 / 2467 |
+| strict miss, no seed matches | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| (b) random-driven | 0 / 26 | 0 / 60 | 1 / 12 | 2 / 9 |
+| (c) sample, matched | 1663 / 185 | 3110 / 452 | 1726 / 139 | 1662 / 144 |
+| (c) sample, missed | 562 / 144 | 2198 / 320 | 904 / 160 | 853 / 90 |
+| not compared | 0 / 0 | 1 / 1 | 3 / 3 | 12 / 3 |
+| expectations per run | 2581 | 5665 | 2831 | 2713 |
 
-- **Ledger lines** (one per difference or battle record): RG-002 1306, RG-003 5926, RG-004 2875. Not-compared lines: 0 / 0, 0 / 0 and 2 / 2.
+- **Ledger lines** (one per difference or battle record): RG-002 1306, RG-003 5926, RG-004 2875, RG-005 2410. Not-compared lines: 0 / 0, 0 / 0, 2 / 2 and 12 / 3.
   - None is an incorrect mechanic or unresolved randomness.
-  - Random-driven lines: RG-002 36, RG-003 77, RG-004 18.
+  - Random-driven lines: RG-002 36, RG-003 77, RG-004 18, RG-005 11.
   - Six of them carry a named draw. Lane D's is a movement tie; economy's is the germanium mining +1 draw. Each of RG-002 and RG-003 has 1 of lane D's and 2 of economy's.
 - **Orders:** every recorded order is loaded and accounted for: RG-002 1867, RG-003 3731, RG-004 2049.
-  - The chained runs refuse 37, 220 and 84 orders, all samples.
+  - The chained runs refuse 37, 220 and 84 orders, all samples. RG-005's chained run refuses 56 after year 1, all samples.
   - No restart refuses an order, and no vector has a load error.
 - **Battle records** (`TestBattleRecords`, rg corpus): 418 records.
   - 220 were generated and replayed: 146 of 146 hits matched, 2432 of 2432 conditioned hits matched, and 3957 of 3957 recorded moves checked.
   - 1569 moves are unchecked. The battle samples match 75 of 195, and 3 records are random.
-  - Ledger classes: RG-002 52 matched, 41 sample and 1 random-driven; RG-003 108, 108 and 3; RG-004 51, 63 and 2.
-- **Case tally** (`TestParityVectors`): 0 pass, 2 measured pass, 48 fail, 13 random and 9 random with the reference seed failing.
+  - Ledger classes: RG-002 52 matched, 41 sample and 1 random-driven; RG-003 108, 108 and 3; RG-004 51, 63 and 2. RG-005 (not in the counts above): 21 matched and 16 sample lines, 0 random-driven.
+- **Case tally** (`TestParityVectors`, rg corpus, with RG-001 and RG-005): 0 pass, 2 measured pass, 60 fail, 22 random and 12 random with the reference seed failing. Before RG-005 it was 48 fail, 13 random and 9.
   - Every failing case fails on samples or random-driven expectations (PARITY-STATUS.md "Current status", per-seed check).
 - **Not compared here:**
   - `design_gone` (RG-004, 1 per run): lane B, untested (e);
   - a sequence of sample entries only (RG-004, 1 per run), which has nothing strict to compare;
-  - `alt_battle` (RG-003 and RG-004, 1 per run), which the battle harness judges instead (a battle-ledger sample), so it has no vectors-ledger line.
+  - `alt_battle` (RG-003 and RG-004, 1 per run), which the battle harness judges instead (a battle-ledger sample), so it has no vectors-ledger line;
+  - Trader slots (RG-005, 12 chained / 3 restarts): where a Trader left or appeared during the run, Elegy's dense Trader list cannot say which slot a Trader holds, untested (e).
 
 ## RG-005: the out-of-sample game (2026-10-14)
 
 RG-005 (stars-elegy `419229a`, PREDICTION.md the pre-run record) was run first on the candidate 8584f92 unchanged; PARITY-STATUS.md "RG-005" has the four tallies and the scoring. Not in the RG table above, which stays the candidate's in-sample result.
-- **The zero did not hold out of sample.** On the first run, and after fix A, 12 strict expectations (19 ledger lines) missed on all 8 seeds: Y2 planet 218 and Trader 3, and Y11 planets 71 and 162, player 2's tech and score, and Traders 0 and 1. The cause was a harness gap: the vectors did not carry the computer players' level, so they loaded as Easy and made no Trader planet trade. With the level loaded (stars-elegy #214) all 12 match, so RG-005 now has 0 deterministic misses. It is no longer out of sample for this harness.
+- **The zero did not hold out of sample.** On the first run, and after fix A, 12 strict expectations (19 ledger lines) missed on all 8 seeds: Y2 planet 218 and Trader 3, and Y11 planets 71 and 162, player 2's tech and score, and Traders 0 and 1. The cause was a harness gap: the vectors did not carry the computer players' level, so they loaded as Easy and made no Trader planet trade. With the level loaded (stars-elegy #214) all 12 match, so RG-005 now has 0 deterministic misses. It is no longer out of sample for this harness. The RG-005 column of the RG table above is this corrected result; the first run's figures are only here and in PARITY-STATUS.md "RG-005".
 - **Fix A (harness).** A vector Trader id is the original's slot, not Elegy's dense index. Where a Trader left or appeared during the run, Elegy cannot say which slot a Trader holds, and the comparison is not compared with that reason (15 expectations).
 - Field expectations, chained / restarts, with the level loaded: strict matched 184 / 2465, random-driven 2 / 9, strict missed 0 / 0, sample matched 1661 / 144, sample missed 852 / 90, not compared 14 / 5 (12 / 3 since the Mystery Trader items are compared, 2026-10-14: strict matched restarts 2467, sample matched 1662 and sample missed 853 chained; after fix A alone: 2453 strict matched and 12 strict missed in the restarts). Orders: no refusal in a restart or chained year 1, no load error, no panic.
 
 ## All corpora
 
-`TestParityVectors` over 31 corpora, 1827 cases:
+`TestParityVectors` over 31 corpora, 1851 cases (re-measured on `2943788`):
 
 | status | cases | class |
 |---|---:|---|
-| pass | 1147 | (a) |
-| measured pass | 178 | (a), with a MEASURED tag |
-| random, passes on some seeds | 16 | (b) |
-| random, reference seed fails | 12 | (b) |
+| pass | 1162 | (a) |
+| measured pass | 179 | (a), with a MEASURED tag |
+| random, passes on some seeds | 25 | (b) |
+| random, reference seed fails | 15 | (b) |
 | sample-only | 25 | (c) |
-| fail | 48 | all in RG chained years and restarts: (b) and (c), as above |
+| fail | 60 | all in RG chained years and restarts: (b) and (c), as above |
 | differs | 2 | INTENTIONALLY DIFFERENT under the `elegy` ruleset (FO-03-E, FO-06-G, `Legacy.MergeOverflow` off) |
-| skip | 399 | every expectation of the case is skipped, by the reasons below |
+| skip | 383 | every expectation of the case is skipped, by the reasons below |
 
 - Updated 2026-10-14 (lane D, minefield messages): no case changes status. MF-13a and MF-13b now compare 0x17e and still pass, under `elegy` v7, which turns `Legacy.FieldLimit511` on (PARITY-STATUS.md "Minefield laying and hit messages").
 - Updated 2026-10-14 (RG-005 ingest PR): RG-005 adds 24 cases (1851 in all), with the computer level loaded: fail 48 → 60, random passing on some seeds 16 → 25, random with the reference seed failing 12 → 15 (the rg corpus row goes from fail 48, random 13 and 9 to 60, 22 and 12). No other corpus changes a case. Skips (skips.txt) gain "sample: one stream's random outcome" 2001 → 2234, battle 497 → 533, battle_actions 484 → 520, player Mystery Trader items 5 → 9, and the two Trader-slot reasons, 15 ("a Trader left/appeared during the run"). Class (e) rises from 347 (after the minefield note below) to 366: Mystery Trader items 4 and Trader slots 15.
 
-Expectations skipped, by class (engine/testdata/vectors/skips.txt):
+Expectations skipped, by class (engine/testdata/vectors/skips.txt, re-measured on `2943788`; 9,297 in all):
 
 | class | expectations | reasons |
 |---|---:|---|
-| (c) another stream, or a stream's random outcome | 7,324 | "stream" 5129, "sample: one stream's random outcome" 2001, "expectation sample" 192, sample-only sequences 2 |
-| judged by `TestBattleRecords`, not here | 994 | battle 497, battle_actions 484, no_battle 9, alt_battle 4 |
+| (c) another stream, or a stream's random outcome | 7,561 | "stream" 5129, "sample: one stream's random outcome" 2238, "expectation sample" 192, sample-only sequences 2 |
+| judged by `TestBattleRecords`, not here | 1,066 | battle 533, battle_actions 520, no_battle 9, alt_battle 4 |
 | (d) absent source value | 334 | player not in the state 291; computer players' planned orders 24, and 16 score records that depend on them; null planet records 3 |
 | (e) client estimates (milestone 3) | 216 | 21 reasons: ETA, travel time, mining rate, completion, research dialog, ship designer, population and defense estimates |
-| (e) messages with no event mapping | 148 | 63 ids (145 expectations) and 2 ids' sequence entries (3) |
-| (e) fleet-to-fleet transport | 38 | the task 15, its target 15, transport fuel 8 |
-| (e) other fields and expectations | 23 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; planet `environment_visible` 2, `starbase_design` 1; player Mystery Trader items 5, relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
-| (e) message slots not compared | 1 | 0x182 player 1 |
+| (e) messages with no event mapping | 84 | 52 ids, no sequence entries |
+| (e) fleet-to-fleet transport | 2 | FO-02-Q's "load optimal" fuel, the task 1 and its target 1 |
+| (e) other fields and expectations | 18 | `design_gone` 5, `starbase_design_gone` 1, `no_new_fleets` 1; planet `environment_visible` 2, `starbase_design` 1; player relations 1, `ship_design_count` 1; Super Stealth research stealing 6 |
+| (e) slots not compared | 16 | 0x182 player 1; RG-005 Trader slots 15 ("a Trader left during the run" 14, "appeared" 1) |
+
+Class (e) is 336 (216 + 84 + 2 + 18 + 16).
 
 Updated 2026-10-14 (lane A, fleet-to-fleet transport): with transport tasks aimed at fleets and transport fuel implemented, 16 cases go from skip to pass (FO-01-E, FO-02 L–P, R, S, U, FO-04 A–C, FO-05 A–C, FM-102-N; pass 1147 → 1162, measured pass 178 → 179, skip 399 → 383). The (e) fleet-to-fleet row of 38 becomes 2 expectations, FO-02-Q's "load optimal" fuel (`transport load_optimal (no fuel need estimate)` and its target), so class (e) falls from 418 to 382. No RG ledger line moves.
 
 Updated 2026-10-14 (economy, 0x12c/0x12d mapping): "messages with no event mapping" was "148 | 63 ids (145 expectations) and 2 ids' sequence entries (3)" on `f09acd9`; 0x12c (2 + 1 sequence entry) and 0x12d (3 + 2) are now compared and match, so it is 140 (61 ids, no sequence entries) and class (e) is 584. The other numbers on this page are still `f09acd9`'s.
 
-The most frequent unmapped message ids are:
+Re-measured on `2943788`: no unmapped id has more than 3 expectations (0x002, 0x02d, 0x058, 0x0e9, 0x0ec, 0x127, 0x14c, 0x160 and 0x163 have 3 each). On `f09acd9` the most frequent unmapped ids were (all mapped since):
 - 0x0c6 and 0x0ca (fleet stopped and damaged in a minefield, both sides): 11 each;
 - 0x10b (Mystery Trader trade): 10;
 - 0x0ff (patrol picks a target): 9 (mapped 2026-10-14 by lane A: presence compared, slots not; all 9 match);
@@ -121,14 +126,14 @@ Minefield ids still not compared (4 expectations, "message 0x… has no event ma
 
 ## Unproven claims in the status documents
 
-Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weaker than CONFIRMED or MEASURED (a count of labelled lines, `grep -c`, not of distinct rules):
+Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weaker than CONFIRMED or MEASURED (a count of labelled lines, `grep -c`, not of distinct rules). Re-measured on `2943788`, which folds in the four dated notes below:
 
 | label | lines | heaviest in |
 |---|---:|---|
-| BINARY-ONLY (from analysis, no oracle run) | 191 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 20, TAKEOVER 20, AI 17, COMBAT 17 |
+| BINARY-ONLY (from analysis, no oracle run) | 192 | OBJECTS 44, ORDERS-LAYER 24, KERNEL 21, TAKEOVER 20, AI 17, COMBAT 17 |
 | ASSUMPTION | 84 | KERNEL 33, TAKEOVER 15, PARITY 12, COMBAT 7 |
 | NOT RUN | 22 | COMBAT 9, PARITY 5, TAKEOVER 4 |
-| UNRESOLVED | 14 | PARITY 6, TAKEOVER 3 |
+| UNRESOLVED | 16 | PARITY 8, TAKEOVER 3, AI 2 |
 
 Updated 2026-10-14 (lane A, fleet-to-fleet transport): the TAKEOVER-STATUS rows added for transport aimed at a fleet and transport fuel (the implemented rows, T16 to T22, the year-end drop and the T19 row citing MESSAGES.md) take TAKEOVER from 18 to 20 BINARY-ONLY lines and from 12 to 15 ASSUMPTION lines by the same `grep -c`. The totals become 190 BINARY-ONLY (was 188) and 83 ASSUMPTION (was 80). The table above keeps the earlier figures.
 
@@ -142,13 +147,13 @@ Updated 2026-10-14 (lane D, Mystery Trader parts): PARITY-STATUS's Trader sectio
 
 1. **Random parity.** Exact parity is 0 in every corpus (RANDOM-PARITY.md).
    - Random outcomes are compared as samples or across 8 seeds, never replayed.
-   - The 7,324 other-stream expectations and the chained years after year 1 test only plausibility.
+   - The 7,561 other-stream expectations (7,324 on `f09acd9`) and the chained years after year 1 test only plausibility.
    - This needs the original's generator in the harness (SPRINT.md P1-1, pending Bobby).
 2. **Computer players.** No AI decision is compared with the oracle (AI-STATUS.md "Implemented"; 17 BINARY-ONLY lines). Their planned orders are absent from the vectors (24 expectations, plus 16 score records).
 3. **Client estimates.** 216 estimates are not compared (milestone 3).
 4. **Message coverage.** 52 ids have no event mapping (updated 2026-10-14 after the economy, minefield, patrol and Mystery Trader messages; it was 63, and minefield messages were the largest group).
 5. **Fleet-to-fleet cargo.** Robber Baron and Pick Pocket stealing, and the fuel action "load optimal", are not modelled (TAKEOVER-STATUS.md "Not modelled"; 2 expectations). Updated 2026-10-14 (lane A): this read "Loads between fleets, from another player's fleet, Robber Baron stealing and transport fuel actions are not modelled (… 38 expectations)"; transport tasks aimed at fleets and the other fuel actions are now implemented, and 36 of the 38 are compared and pass.
-6. **Labels.** 191 BINARY-ONLY and 84 ASSUMPTION lines are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims"). Updated 2026-10-14 (RG-005 ingest PR): this read "190 BINARY-ONLY and 83 ASSUMPTION"; the minefield-messages line adds 1 BINARY-ONLY and the SCANNING-STATUS partial-starbase row 1 ASSUMPTION. Updated 2026-10-14 (lane A, patrol target 0x0ff): 192 BINARY-ONLY; the KERNEL-STATUS 0x0ff slot line adds 1 (note under "Unproven claims").
+6. **Labels.** 192 BINARY-ONLY and 84 ASSUMPTION lines (re-measured on `2943788`; this sentence read 191 before) are claims no oracle run has checked. Updated 2026-10-14 (lane A): this read "188 BINARY-ONLY and 80 ASSUMPTION lines"; the fleet-to-fleet transport rows in TAKEOVER-STATUS add 2 and 3 (note under "Unproven claims"). Updated 2026-10-14 (RG-005 ingest PR): this read "190 BINARY-ONLY and 83 ASSUMPTION"; the minefield-messages line adds 1 BINARY-ONLY and the SCANNING-STATUS partial-starbase row 1 ASSUMPTION. Updated 2026-10-14 (lane A, patrol target 0x0ff): 192 BINARY-ONLY; the KERNEL-STATUS 0x0ff slot line adds 1 (note under "Unproven claims").
 7. **Breadth.** RG covers three representative games (RG-002/003 share years 1–6) plus RG-005, the out-of-sample game. On RG-005's first run the zero did not hold: 12 strict expectations missed on all 8 seeds, all from a harness gap now closed (section "RG-005" above).
 
 ## Remaining comparator gaps, ranked
