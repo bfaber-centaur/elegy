@@ -102,6 +102,7 @@ var eventNames = map[engine.EventKind]string{
 	engine.EventArtifactFound:           "artifact found",
 	engine.EventTransportNoHold:         "transport no hold",
 	engine.EventPlanetNotDegraded:       "planet not degraded",
+	engine.EventPlanetNotImproved:       "planet not improved",
 	engine.EventBattleSummary:           "battle summary",
 	engine.EventLevelUp:                 "level up",
 	engine.EventPartAvailable:           "part available",

@@ -25,20 +25,23 @@ func (Rules) RemoteMine(g *engine.Game, fi int, rng engine.Rand) (engine.Mineral
 //
 //   - The clicks changed the planet owner's habitability: the fleet owner
 //     is told, and the planet owner too when it is someone else.
-//   - A hostile fleet's clicks left it unchanged, even with an axis moved:
-//     the fleet owner alone gets "cannot degrade any further" (CONFIRMED,
-//     GAP-001 W1; KERNEL.md "Terraforming", stars-elegy 0d63a84).
-//
-// Not modelled: 0x12d for a friendly fleet that left the value unchanged,
-// and the messages for a fleet that made no click at all.
+//   - The value is unchanged, even with an axis moved: the fleet owner
+//     alone gets "cannot degrade any further" for a hostile fleet
+//     (0x15b, CONFIRMED GAP-001 W1; KERNEL.md "Terraforming", stars-elegy
+//     0d63a84) or "cannot improve beyond" for a friendly one (0x12d,
+//     BINARY-ONLY). A fleet that could make no click is told the same
+//     (MESSAGES.md "Remote terraforming": every turn, even when nothing
+//     changes; BINARY-ONLY).
 func (Rules) Adjust(g *engine.Game) []engine.Event {
 	var out []engine.Event
 	for _, a := range Adjust(g) {
 		f, p := &g.Fleets[a.Fleet], &g.Planets[a.Planet]
 		if !a.HabChanged {
+			kind := engine.EventPlanetNotImproved
 			if a.Hostile {
-				out = append(out, engine.Event{Kind: engine.EventPlanetNotDegraded, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: a.After})
+				kind = engine.EventPlanetNotDegraded
 			}
+			out = append(out, engine.Event{Kind: kind, Player: f.Owner, Planet: p.ID, Fleet: f.ID, Count: a.After})
 			continue
 		}
 		kind := engine.EventPlanetImproved

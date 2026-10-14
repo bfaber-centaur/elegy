@@ -20,7 +20,7 @@ const (
 	// EventFleetLoadRefused: Player's Fleet could not load cargo type
 	// Axes[0] from another player's fleet Axes[1]; the task is cancelled
 	// (MESSAGES.md 0x120, CONFIRMED fo/fo04). Sent after movement only.
-	EventFleetLoadRefused EventKind = iota + EventPlanetCaptured + 1
+	EventFleetLoadRefused EventKind = iota + EventPlanetNotImproved + 1
 	// EventColonistsToForeignFleet: Player's Fleet could not give
 	// colonists to another player's fleet Axes[0]; the task is cancelled
 	// and the colonists stay aboard (MESSAGES.md 0x155, CONFIRMED
