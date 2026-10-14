@@ -1,0 +1,9 @@
+# The representative games (internal/vectors RGGames), one per line:
+# rgNNN, or "rgNNN no-ledger" for a game held to exact matches. Kept by
+# hand, so a game whose files are all deleted fails instead of vanishing.
+# A ledgered game's restart and battle record counts are pinned by hand in
+# its ledger header ("# restarts: N", "# battle records: N").
+rg001 no-ledger
+rg002
+rg003
+rg004
