@@ -555,7 +555,7 @@ Field expectations, chained / restarts (reference seed, 8 seeds for random-drive
 - early, `trader 2/3 missing` UNCLASSIFIED (7) and random-driven (Y2 #191) → matched, except Y2 #192, which now compares Trader 3 and misses on `met` (UNCLASSIFIED → UNCLASSIFIED, new detail);
 - chained y2 and y3 #191/#192 samples → matched, or the same `met` sample miss;
 - Y4 #180 sample (Elegy's loaded Trader compared against the original's new Trader 0) → sample `trader 0 missing`; Y4 #181/#182 `object_gone` (silently passed before) → not compared, a Trader left;
-- Y7 #190 sample → not compared, a Trader appeared; chained y7–y12 Trader samples (14) → not compared, a Trader left.
+- Y7 #190 sample → not compared, a Trader appeared; chained y7–y12 Trader samples (12) → not compared, a Trader left.
 
 **Hand classes: 19 lines, 12 expectations, every one missing on all 8 seeds.** Each is `state-import error [lane B]` with cause UNRESOLVED, and each stays counted as a deterministic miss. The leading candidate: the vectors do not carry a computer player's level, so the harness loads every computer player at level 0 (Easy), and an Easy player makes no Mystery Trader planet trade. Lane D's retrodiction (MEASURED, level 3 for every computer player, on the first run's mapping) turns 13 expectations from miss to match: Y2 #121 and #151, and Y11 #100, #118, #177, #179, #213, #214, #219, #225, #231, #237 and #243. Y2 #192, compared only since fix A, matches in lane B's run with the same change. The 12:
 - Y2 #121 planet 218 `surface_minerals`; Y2 #192 Trader 3 `met` = [], want [1];
