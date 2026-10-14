@@ -33,6 +33,8 @@ Is main `f09acd9` a parity release candidate? That means knowing what is compare
 
   Updated 2026-10-14 (lane D, minefield messages): the ledgers do not move. 35 skipped minefield message expectations are compared now, and 56 message ids are unmapped (was 61). `elegy` v7 turns `Legacy.FieldLimit511` on, so MF-13a and MF-13b keep passing with 0x17e compared (PARITY-STATUS.md "Minefield laying and hit messages").
 
+  Updated 2026-10-14 (lane A, patrol target 0x0ff): the ledgers do not move. The 9 skipped 0x0ff expectations, all in the WU patrol cases, are compared now and match, and 55 message ids are unmapped (was 56). Class (e) goes from 366 to 357 (COVERAGE.md).
+
 - **Orders:** every recorded order is loaded and accounted for, and no vector has a load error.
   - The chained runs refuse 37, 220 and 84 orders, all samples.
   - No restart refuses an order.

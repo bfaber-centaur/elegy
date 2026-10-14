@@ -84,6 +84,10 @@ func TestPvMessageList(t *testing.T) {
 		{"planet not improved below zero, fleet gone", []engine.Event{{Kind: engine.EventPlanetNotImproved, Player: 1, Planet: 5, Fleet: 8, Count: -4}}, 1,
 			[]pvMsg{{id: 0x12d, params: []int{0, 4, -4}, known: []bool{false, true, false}, why: "0x12d fleet gone by the end of the year, negative percent slot"}}},
 		{"planet degraded, no before", []engine.Event{{Kind: engine.EventPlanetDegraded, Player: 1, Planet: 5, Fleet: 9, Count: 70}}, 1, nil},
+		// MESSAGES.md 0x0ff: to the patrolling fleet's owner; slots not
+		// compared.
+		{"patrol target", []engine.Event{{Kind: engine.EventPatrolTarget, Player: 1, Planet: -1, Fleet: 9, Axes: []int{7}}}, 1,
+			[]pvMsg{{id: 0x0ff, params: make([]int, 2), known: make([]bool, 2), why: "0x0ff slots (no record gives their values)"}}},
 		{"merged count", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 1}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
 		{"defenses", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemDefenses, Count: 20}}, 2,
@@ -391,9 +395,9 @@ func TestSequenceCheck(t *testing.T) {
 		{"a sample is not compared", seq(0, b36, sample(m(0x03f, 9, 9)), q5, q6, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"a sample's order is not compared", seq(0, sample(q6), b36, q5, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"samples only", seq(0, sample(b36)), "skip: message_sequence of sample entries only"},
-		{"unmapped entry", seq(0, m(0x0ff, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x0ff has no event mapping"},
-		{"unmapped entry, mismatch", seq(0, m(0x0ff, 7, 7, 8), b36, q6, q5, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x0ff has no event mapping"},
+		{"unmapped entry", seq(0, m(0x0c5, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x0c5 has no event mapping"},
+		{"unmapped entry, mismatch", seq(0, m(0x0c5, 7, 7, 8), b36, q6, q5, lv, empt),
+			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x0c5 has no event mapping"},
 		{"empty list, messages sent", seq(0),
 			"message 0x036 (focus 7, params [2 7]) = sent, want not sent; message 0x03f (focus 5, params [5]) = sent, want not sent; message 0x03f (focus 6, params [6]) = sent, want not sent; message 0x050 (focus 65534, params [5 2 3]) = sent, want not sent; message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
 		{"queue not loaded", seq(2, m(0x036, 4, 3, 4), m(0x03f, 4, 4), m(0x026, 4, 4, 12, 0)), "skip: message_sequence entry from a production queue not loaded"},
