@@ -231,6 +231,7 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 108
@@ -317,6 +318,7 @@
      "starbase_designs": 1
     },
     "computer": true,
+    "computer_level": "expert",
     "default_queue": [],
     "default_leftover_to_research": false,
     "homeworld": 80

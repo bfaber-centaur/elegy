@@ -4,6 +4,8 @@ Elegy's end-to-end results against the original, one entry per full-order regres
 
 ## Current status: RG-002, RG-003 and RG-004 on main `f09acd9`
 
+Updated 2026-10-14 (RG-005 ingest PR): RG-005, the out-of-sample game, is in the rg corpus, and its result is in section "RG-005" below, not in the tables of this section, which stay the candidate's in-sample result. On its first run (and after fix A) RG-005 had 12 strict expectations that missed on all 8 seeds, all of them gone once the computer players' level is loaded (fourth tally there). With it, the rg corpus case tally is fail 60, random 22, random with the reference seed failing 12, and baseline.txt keeps 29 RG entries (RG-005 12; 7 on the first run, 10 after fix A). Loading the level also moves RG-002, RG-003 and RG-004 lines (the dated note below the classification table).
+
 The combined run on elegy main `f09acd9` (the release candidate, [COVERAGE.md](COVERAGE.md); the RG vectors are stars-elegy main `104e8f5`'s, with #206's year-6 rebuild) is the result the three corpora rest on. Run on that SHA with no local change, the ledgers regenerated with `RG002_LEDGER=write` (no line moved):
 - Updated 2026-10-14: this section was first measured on main `5a735e1` (after #242), then on `215cd38` (after #251–#257). The changes since are in the dated notes below, which quote the earlier values.
 - `go test ./...`: every package passes.
@@ -23,11 +25,11 @@ The combined run on elegy main `f09acd9` (the release candidate, [COVERAGE.md](C
 |---|---|---|---|
 | matched | 8 / 44 | 8 / 100 | 4 / 47 |
 | strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 |
-| random-driven | 0 / 35 | 0 / 76 | 1 / 17 |
+| random-driven | 0 / 36 | 0 / 77 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
-| sample | 1019 / 199 | 5287 / 450 | 2519 / 263 |
+| sample | 1019 / 199 | 5291 / 450 | 2539 / 263 |
 | not compared | 0 / 0 | 0 / 0 | 2 / 2 |
-| total | 1305 | 5921 | 2855 |
+| total | 1306 | 5926 | 2875 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
@@ -38,6 +40,7 @@ The combined run on elegy main `f09acd9` (the release candidate, [COVERAGE.md](C
 - Updated 2026-10-13 (lane A, chase): chasers of a fleet destroyed during movement go to its start position (stars-elegy #198 de1bd6f, Z-MD; regenerated on main 8cf4236, #254). RG-003-Y11's battle at (1323,1300) moves from sample to random-driven: on 1 of the 7 other variants fleet 3/12 dies in the field and its chasers fight there (section "Battle records the vector flags sample"). The other moves are chained samples whose values changed or went: RG-002 5, RG-003 5, RG-004 12 fewer. The rows were "random-driven 0 / 35 | 0 / 75 | 1 / 17", "sample 1024 / 199 | 5291 / 451 | 2531 / 263" and the totals 1312, 5929, 2869.
 - Updated 2026-10-13 (alt_battle PR): the 4 `alt_battle` expectations (RG-003 y9 (1388,1386), RG-004 y3 (1365,1400), chained and restart) get their lines from `TestBattleRecords` only, which judges each as a sample, and no longer also a not-compared line in the vectors ledger. Three already had a battle-set sample line (Elegy fights there with the alternative stream's players). The fourth, RG-003's chained y9, where Elegy does not fight, gains "sample matched: no battle here, as in the recorded stream". An `alt_battle` in a year that failed to run fails, and one where Elegy fights in a year with no battle record is judged as an extra battle would be; none of the 4 is in either case. The rows were "sample … | 5286 / 450 | …", "not compared 1 / 1 | 2 / 2 | 3 / 3" and the totals 1307, 5924, 2857.
 - Updated 2026-10-14 (lane A, 0x02e slots): 0x02e's cargo type and location slots are compared (cargo type 3 for colonists; a planet as 65535 then the planet number; MEASURED, stars-elegy CM-1, 4f59d8d; regenerated on main 0237862, #261). The year-1 sequence entries that held them (RG-002 and RG-003, chained and restart) now match in full, which removes their 4 not-compared lines. The fleet slot is compared as before; its owner·512 part for players other than 0 is an ASSUMPTION (consistent with FS-1 and 0x028, not measured for 0x02e). The row was "1 / 1 | 1 / 1 | 2 / 2" and the totals 1307, 5923, 2855.
+- Updated 2026-10-14 (RG-005 ingest PR, computer level): the vectors now carry each computer player's `computer_level` (stars-elegy #214, bdb4921; the vectors are otherwise byte-identical), and the harness loads it as `Player.Level` (easy 0 to expert 3). Every RG computer player is expert, so Harder-and-Expert Mystery Trader planet trades now happen (OBJECTS.md "Computer players' planets"). RG-002 and RG-003 Y5 #181 (planet 3, `surface_minerals` = [0 0 0], want [7783 7191 3948]) move from strict matched to random-driven: the planet trades on the reference seed and not on 7 of 8 variants. The chained runs gain samples (RG-003 4, RG-004 20, the year-1 divergence carried on). No line is a deterministic miss. The rows were "random-driven 0 / 35 | 0 / 76 | 1 / 17", "sample 1019 / 199 | 5287 / 450 | 2519 / 263" and the totals 1305, 5921, 2855; in the field table, RG-002 restarts "2227 | 25", RG-003 chained "3112 | 2196" and restarts "4833 | 59", RG-004 chained "1732 | 898".
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 3 battle (2 before the chase PR), 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -48,10 +51,10 @@ Field expectations (one per compared field; battle records are in `TestBattleRec
 | corpus | run | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
 |---|---|---:|---:|---:|---:|---:|---:|
 | RG-002 | chained | 356 | 0 | 0 | 1663 | 562 | 0 |
-| RG-002 | restarts | 2227 | 25 | 0 | 185 | 144 | 0 |
-| RG-003 | chained | 356 | 0 | 0 | 3112 | 2196 | 1 |
-| RG-003 | restarts | 4833 | 59 | 0 | 452 | 320 | 1 |
-| RG-004 | chained | 197 | 1 | 0 | 1732 | 898 | 3 |
+| RG-002 | restarts | 2226 | 26 | 0 | 185 | 144 | 0 |
+| RG-003 | chained | 356 | 0 | 0 | 3110 | 2198 | 1 |
+| RG-003 | restarts | 4832 | 60 | 0 | 452 | 320 | 1 |
+| RG-004 | chained | 197 | 1 | 0 | 1726 | 904 | 3 |
 | RG-004 | restarts | 2517 | 12 | 0 | 139 | 160 | 3 |
 
 Recomputed on main `f09acd9` (2026-10-14). The 0x02e slots (CM-1) moved one year-1 sequence entry per run from not compared to strict matched in RG-002 and RG-003. The not-compared expectations left are `alt_battle` (RG-003, RG-004; judged by `TestBattleRecords`), `design_gone` and one sequence of sample entries only (RG-004). On `215cd38` the table read:
@@ -534,6 +537,54 @@ RG-004 (vectors README.md "rg", stars-elegy experiments/rg004/README.md) is a se
 - **Reading.** Under the co-location rule (SCANNING.md "Co-location", LEGACY BUG, `Legacy.Colocation`), every test passes at distance 0. Elegy now treats an owned planet with no scanner as a viewer with ranges 0 for space objects, so it sees a minefield centred on it. The restart results are MEASURED. The mechanism is CONFIRMED by prediction (stars-elegy `898c526`, MV-1: player 0 at tech 3 with electronics 0, standard fields, one year, one planet per case): with no fleet anywhere near, a field centred exactly on the planet was seen, and fields at d² 1 and 1280 containing it were not. So it is co-location, not sight of the laying fleet.
 - **Not seen when merely inside.** RG-002 and RG-003 hold the counter-case. Player 3's field 2 contains player 6's scannerless planet 6 at d² 1280. In 15 restarts (RG-002 Y1–Y6, RG-003 Y1–Y9) it was unknown to player 6 at the start of the year and stayed unknown (MEASURED; SCANNING.md already says planets do not get the inside rule). In RG-003 Y10 player 6 learns it because its fleet 13 ends the year inside the field, 22 ly from the centre (the fleet inside rule).
 - **Effect.** Both hand lines go, and so do 10 chained sample lines on the same fields. Restarts Y6 and Y10 now pass with some seeds (baseline `random 1` and `random 7`). No RG-002 or RG-003 line moves. Packets, salvage and wormholes at a scannerless planet's exact position would also be seen; MV-1 did not run them and no vector has one (ASSUMPTION).
+
+### RG-005: the out-of-sample validation game
+
+RG-005 (vectors README.md "rg"; stars-elegy experiments/rg005/README.md and PARITY.md "Representative game (RG-005)") is the out-of-sample check of the release candidate. Five custom races (CA, SS, AR, WM, SD) are played by expert computer players on a medium map, 12 chained years (2466 to 2477) after 65 unrecorded warm-up years, with no injected orders. Its 13 files are copied verbatim from stars-elegy main `419229a` (#212). The pre-run record, stars-elegy experiments/rg005/PREDICTION.md, was pushed alone in `1019fa7` at 02:19:31Z on 2026-10-14, and the oracle run started at 02:19:47Z. The ledger is `engine/testdata/vectors/rg/rg005-ledger.txt` (12 restarts, 36 battle records), checked by `TestRG00xLedger` and `TestBattleRecords`.
+
+**Four tallies.** The first run is the record commit `9bb2cb6`, whose parent is the candidate `8584f92`: testdata and registration only, every line as found. Fix A is a harness change (below), regenerated on main `d1edb22`. The hand classes then class every UNCLASSIFIED line. The fourth loads each computer player's level from the vectors (stars-elegy #214). "Early" is the restarts of years 1–6 plus chained year 1, the only lines a CONFIRMED-by-prediction verdict may rest on; the rest are MEASURED.
+
+| ledger lines | first run (`9bb2cb6`) | after fix A | after hand classes | computer level loaded |
+|---|---|---|---|---|
+| UNCLASSIFIED (total / early) | 25 / 8 | 19 / 2 | 0 / 0 | 0 / 0 |
+| state-import error [lane B], cause UNRESOLVED | 0 / 0 | 0 / 0 | 19 / 2 | 0 / 0 |
+| random-driven | 12 / 5 | 11 / 4 | 11 / 4 | 11 / 4 |
+| not compared | 4 / 1 | 19 / 3 | 19 / 3 | 19 / 3 |
+| sample (fields, orders, battles) | 2424 / 116 | 2369 / 111 | 2369 / 111 | 2362 / 111 |
+| matched (battle records) | 21 / 12 | 21 / 12 | 21 / 12 | 21 / 12 |
+| total | 2486 | 2439 | 2439 | 2413 |
+
+Field expectations, chained / restarts (reference seed, 8 seeds for random-driven):
+
+| | strict matched | strict random-driven | strict missed | sample matched | sample missed | not compared |
+|---|---:|---:|---:|---:|---:|---:|
+| first run | 182 / 2449 | 2 / 9 | 2 / 17 | 1652 / 145 | 873 / 91 | 2 / 2 |
+| after fix A | 184 / 2453 | 2 / 9 | 0 / 12 | 1654 / 144 | 859 / 90 | 14 / 5 |
+| computer level loaded | 184 / 2465 | 2 / 9 | 0 / 0 | 1661 / 144 | 852 / 90 | 14 / 5 |
+
+- `TestParityVectors`, rg corpus: first run fail 65, random 19, random with the reference seed failing 10 (pass 0, measured pass 2); after fix A fail 62, random 20, random with the reference seed failing 12; with the computer level loaded fail 60, random 22 and 12 (RG-002-Y5 and RG-003-Y5 lose `random` status; RG-005-Y2 and -Y11 gain it).
+- No load error, no panic, and no recorded order refused in a restart or in chained year 1. The chained runs refuse 56 orders after year 1, all samples.
+- The record commit's message gave the case tally as "(17 before RG-005…)". Corrected 2026-10-14: the rg corpus went from fail 48 to 65 and random 13 to 19.
+
+**Fix A (harness): a Trader by its vector id.** A vector Trader id is the original's object slot. RG-005 year 1 has slots 2 and 3 only, and the harness indexed Elegy's dense `objects.Space.Traders` by the id, so both loaded Traders read as missing (7 early misses and 1 early random-driven line, all "trader 2/3 missing"). A loaded id now maps to its rank among the loaded ids (`pvTraderIndex`, `TestTraderVectorIDs`). Where the dense list cannot say which slot a Trader holds, because a Trader left during the run or the compared id was not loaded and one appeared, the comparison is not compared with that reason (15 expectations), never compared against the wrong Trader. The original gives a new Trader the lowest free slot (RG-005 y4: id 0 after slots 2 and 3 left; y7: id 1), while Elegy appends. Classes that moved (old → new):
+- early, `trader 2/3 missing` UNCLASSIFIED (7) and random-driven (Y2 #191) → matched, except Y2 #192, which now compares Trader 3 and misses on `met` (UNCLASSIFIED → UNCLASSIFIED, new detail);
+- chained y2 and y3 #191/#192 samples → matched, or the same `met` sample miss;
+- Y4 #180 sample (Elegy's loaded Trader compared against the original's new Trader 0) → sample `trader 0 missing`; Y4 #181/#182 `object_gone` (silently passed before) → not compared, a Trader left;
+- Y7 #190 sample → not compared, a Trader appeared; chained y7–y12 Trader samples (12) → not compared, a Trader left.
+
+**Hand classes: 19 lines, 12 expectations, every one missing on all 8 seeds.** Each is `state-import error [lane B]` with cause UNRESOLVED, and each stays counted as a deterministic miss. The leading candidate: the vectors do not carry a computer player's level, so the harness loads every computer player at level 0 (Easy), and an Easy player makes no Mystery Trader planet trade. Lane D's retrodiction (MEASURED, level 3 for every computer player, on the first run's mapping) turns 13 expectations from miss to match: Y2 #121 and #151, and Y11 #100, #118, #177, #179, #213, #214, #219, #225, #231, #237 and #243. Y2 #192, compared only since fix A, matches in lane B's run with the same change. The 12:
+- Y2 #121 planet 218 `surface_minerals`; Y2 #192 Trader 3 `met` = [], want [1];
+- Y11 #100 planet 71 and #118 planet 162 `surface_minerals`; #177 player 2 `tech` (biotechnology, construction, weapons); #213 and #214 Traders 0 and 1 `met`; #219, #225, #231, #237 and #243 player 2's `score_record` (score and tech level sum) as players 0–4 see it.
+
+**Scored against PREDICTION.md, on the first comparison as found.**
+- "The original creates RG5 and every chain repeat is byte-identical." Lane F's; scored in stars-elegy PARITY.md "Representative game (RG-005)".
+- "RC does not hold out of sample: at least one deterministic miss or refused order in the restarts or chained year 1." CONFIRMED by prediction: 8 early expectations missed on all 8 seeds (chained y1 #180 and #181, Y1 #180 and #181, Y2 #192, Y3 #191 and #192: "trader 2/3 missing"; Y2 #121: planet 218). The record defines a deterministic miss by the harness's result, so the verdict stands as pre-registered, although 7 of the 8 were the harness's Trader ids. After fix A, the early support rests on Y2 #121 (planet 218) and Y2 #192 (Trader 3 `met`), both on the Player.Level candidate. Y11's 10 are MEASURED only.
+- "At least one random-driven line, and at least one not-compared line." CONFIRMED by prediction in years 1–6: random-driven Y1 #142 (player 1 electronics research, 6 of 8) and #161 (planet 202's queue, 6 of 8), chained and restart; not compared Y2 #151 (player 1's `mystery_trader_items`, a field the harness does not map; PREDICTION.md:124–125 asks for exactly this report).
+- An outcome nobody predicted, MEASURED: the deterministic misses cluster on Mystery Trader planet trades, and 7 of the first run's 8 early misses were a harness defect rather than an engine one.
+
+**Computer level loaded (fourth tally).** stars-elegy #214 (`bdb4921`) adds each computer player's `computer_level`, decoded from the host file (vectors/README.md "Computer level"; MEASURED from UG records); the 59 rebuilt vectors are otherwise byte-identical to the ones copied here. The harness loads it as `Player.Level`, easy 0 to expert 3 (engine `Player.Level`). A computer player with no level loads at 0 as before, and every expectation the level can change (the Traders, and that player's planets, queues and record, once a Trader is loaded or has appeared) is skipped as "computer level not in the vector" (`TestComputerLevel`); no vector in elegy's corpus lacks one. With RG-005's recorded expert levels all 19 hand lines go: the 12 expectations match, as lane D's retrodiction and lane B's diagnostic run predicted, so their cause is MEASURED as this harness gap (`state-import error` → matched). Chained planet 218 moves from a 14,000 kT gap to a few kT (samples). The RG-005 players' expert level was written by the setup step, not at game creation (stars-elegy vectors/README.md "Computer level").
+
+**Not compared (19 after fix A):** 4 `mystery_trader_items` (Y2 player 1 and Y11 player 4, chained and restart) and 15 Trader comparisons whose slot Elegy cannot name. RG-005 is no longer out of sample for an engine or harness that carries fix A or a later change made for it.
 
 ### RG-002 and RG-003 year 6 rebuilt (stars-elegy #206, DA-1)
 

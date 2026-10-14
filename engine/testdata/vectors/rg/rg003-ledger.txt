@@ -2064,7 +2064,7 @@ sample | rg003 | RG-003-2471 y9 #269 | planet id=56 | surface_minerals = [143 22
 sample | rg003 | RG-003-2471 y9 #270 | planet id=57 | concentrations = [26 24 24], want [26 24 25]
 sample | rg003 | RG-003-2471 y9 #270 | planet id=57 | excess = 2, want 1
 sample | rg003 | RG-003-2471 y9 #270 | planet id=57 | population = 8361, want 8019
-sample | rg003 | RG-003-2471 y9 #270 | planet id=57 | surface_minerals = [7269 11289 3021], want [7329 11226 2958]
+sample | rg003 | RG-003-2471 y9 #270 | planet id=57 | surface_minerals = [7269 9310 0], want [7329 11226 2958]
 sample | rg003 | RG-003-2471 y9 #271 | planet id=58 | surface_minerals = [1510 1355 0], want [1511 1352 0]
 sample | rg003 | RG-003-2471 y9 #272 | planet id=59 | excess = 36, want 70
 sample | rg003 | RG-003-2471 y9 #272 | planet id=59 | population = 0, want 32
@@ -2294,8 +2294,8 @@ sample | rg003 | RG-003-2471 y9 #511 | player id=1 seen_by=1 | score_record.scor
 sample | rg003 | RG-003-2471 y9 #511 | player id=1 seen_by=1 | score_record.tech_level_sum = 57, want 58
 sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.escort_ships = 45, want 47
 sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.resources = 5508, want 5541
-sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.score = 345, want 350
-sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.tech_level_sum = 58, want 59
+sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.score = 367, want 350
+sample | rg003 | RG-003-2471 y9 #513 | player id=2 seen_by=2 | score_record.tech_level_sum = 64, want 59
 sample | rg003 | RG-003-2471 y9 #515 | player id=3 seen_by=3 | score_record.resources = 7643, want 7629
 sample | rg003 | RG-003-2471 y9 #515 | player id=3 seen_by=3 | score_record.unarmed_ships = 22, want 23
 sample | rg003 | RG-003-2471 y9 #519 | player id=5 seen_by=5 | score_record.resources = 12813, want 12753
@@ -2705,8 +2705,7 @@ sample | rg003 | RG-003-2472 y10 #273 | planet id=51 | factories = 490, want 489
 sample | rg003 | RG-003-2472 y10 #273 | planet id=51 | mines = 768, want 769
 sample | rg003 | RG-003-2472 y10 #274 | planet id=51 | starbase = design 45 damage 213, want design 45 damage 121
 sample | rg003 | RG-003-2472 y10 #274 | planet id=51 | surface_minerals = [2040 1653 3], want [2030 1647 2]
-sample | rg003 | RG-003-2472 y10 #276 | planet id=53 | factories = 130, want 131
-sample | rg003 | RG-003-2472 y10 #276 | planet id=53 | surface_minerals = [782 949 353], want [777 948 351]
+sample | rg003 | RG-003-2472 y10 #276 | planet id=53 | surface_minerals = [787 949 362], want [777 948 351]
 sample | rg003 | RG-003-2472 y10 #278 | planet id=55 | excess = 1, want 59
 sample | rg003 | RG-003-2472 y10 #278 | planet id=55 | mines = 78, want 128
 sample | rg003 | RG-003-2472 y10 #278 | planet id=55 | population = 1129, want 2796
@@ -2717,7 +2716,7 @@ sample | rg003 | RG-003-2472 y10 #28 | fleet owner=1 id=29 | cargo.ironium = 378
 sample | rg003 | RG-003-2472 y10 #280 | planet id=56 | surface_minerals = [145 232 163], want [147 232 165]
 sample | rg003 | RG-003-2472 y10 #281 | planet id=57 | excess = 54, want 20
 sample | rg003 | RG-003-2472 y10 #281 | planet id=57 | population = 8419, want 8099
-sample | rg003 | RG-003-2472 y10 #281 | planet id=57 | surface_minerals = [7185 11429 3071], want [7236 11357 2999]
+sample | rg003 | RG-003-2472 y10 #281 | planet id=57 | surface_minerals = [7190 9450 60], want [7236 11357 2999]
 sample | rg003 | RG-003-2472 y10 #282 | planet id=58 | surface_minerals = [1762 1559 1], want [1364 1556 1]
 sample | rg003 | RG-003-2472 y10 #283 | planet id=59 | excess = 36, want 19
 sample | rg003 | RG-003-2472 y10 #283 | planet id=59 | population = 0, want 35
@@ -2737,7 +2736,7 @@ sample | rg003 | RG-003-2472 y10 #295 | planet id=71 | surface_minerals = [233 3
 sample | rg003 | RG-003-2472 y10 #296 | planet id=72 | excess = 7, want 10
 sample | rg003 | RG-003-2472 y10 #296 | planet id=72 | population = 3028, want 2490
 sample | rg003 | RG-003-2472 y10 #296 | planet id=72 | surface_minerals = [1 1893 436], want [2 2114 417]
-sample | rg003 | RG-003-2472 y10 #297 | planet id=73 | surface_minerals = [132 115 294], want [129 115 294]
+sample | rg003 | RG-003-2472 y10 #297 | planet id=73 | surface_minerals = [131 115 294], want [129 115 294]
 sample | rg003 | RG-003-2472 y10 #298 | planet id=74 | factories = 728, want 729
 sample | rg003 | RG-003-2472 y10 #299 | planet id=74 | surface_minerals = [398 833 4], want [399 833 2]
 sample | rg003 | RG-003-2472 y10 #300 | planet id=75 | excess = 43, want 3
@@ -2753,7 +2752,7 @@ sample | rg003 | RG-003-2472 y10 #303 | planet id=79 | surface_minerals = [1 267
 sample | rg003 | RG-003-2472 y10 #304 | planet id=80 | surface_minerals = [8 3466 220], want [9 3464 222]
 sample | rg003 | RG-003-2472 y10 #305 | planet id=81 | surface_minerals = [902 873 51], want [901 873 53]
 sample | rg003 | RG-003-2472 y10 #306 | planet id=82 | surface_minerals = [481 751 4], want [0 752 3]
-sample | rg003 | RG-003-2472 y10 #308 | planet id=83 | starbase = design 88 damage 12, want design 88 damage 23
+sample | rg003 | RG-003-2472 y10 #308 | planet id=83 | starbase = design 88 damage 14, want design 88 damage 23
 sample | rg003 | RG-003-2472 y10 #308 | planet id=83 | surface_minerals = [34890 32833 27174], want [34890 32834 27172]
 sample | rg003 | RG-003-2472 y10 #309 | planet id=84 | excess = 14, want 76
 sample | rg003 | RG-003-2472 y10 #309 | planet id=84 | factories = 1049, want 1050
@@ -2769,14 +2768,14 @@ sample | rg003 | RG-003-2472 y10 #310 | planet id=85 | surface_minerals = [2305 
 sample | rg003 | RG-003-2472 y10 #311 | planet id=86 | excess = 69, want 86
 sample | rg003 | RG-003-2472 y10 #311 | planet id=86 | population = 8740, want 8188
 sample | rg003 | RG-003-2472 y10 #311 | planet id=86 | surface_minerals = [435 369 14], want [412 357 5]
-sample | rg003 | RG-003-2472 y10 #312 | planet id=87 | surface_minerals = [96 338 264], want [96 337 266]
+sample | rg003 | RG-003-2472 y10 #312 | planet id=87 | surface_minerals = [96 337 264], want [96 337 266]
 sample | rg003 | RG-003-2472 y10 #313 | planet id=88 | surface_minerals = [201 147 104], want [203 145 105]
 sample | rg003 | RG-003-2472 y10 #316 | planet id=91 | excess = 45, want 23
 sample | rg003 | RG-003-2472 y10 #316 | planet id=91 | factories = 492, want 505
 sample | rg003 | RG-003-2472 y10 #316 | planet id=91 | population = 8431, want 7694
 sample | rg003 | RG-003-2472 y10 #316 | planet id=91 | surface_minerals = [168 1247 6], want [214 1256 1]
 sample | rg003 | RG-003-2472 y10 #317 | planet id=92 | surface_minerals = [96 235 96], want [98 236 93]
-sample | rg003 | RG-003-2472 y10 #319 | planet id=93 | surface_minerals = [2 1426 1138], want [1 1426 1136]
+sample | rg003 | RG-003-2472 y10 #319 | planet id=93 | surface_minerals = [1 1426 1139], want [1 1426 1136]
 sample | rg003 | RG-003-2472 y10 #32 | fleet owner=1 id=34 | waypoints[0] position = {1228 1393}, want {1294 1390}
 sample | rg003 | RG-003-2472 y10 #32 | fleet owner=1 id=34 | waypoints[1] = {{1211 1337} 6 1 41 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1319 1308} 6 1 56 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}
 sample | rg003 | RG-003-2472 y10 #32 | fleet owner=1 id=34 | x = 1228, want 1294
@@ -2806,7 +2805,7 @@ sample | rg003 | RG-003-2472 y10 #343 | planet id=114 | concentrations = [55 2 9
 sample | rg003 | RG-003-2472 y10 #343 | planet id=114 | environment = [51 21 9], want [47 18 6]
 sample | rg003 | RG-003-2472 y10 #343 | planet id=114 | original_environment = [53 16 5], want [50 13 2]
 sample | rg003 | RG-003-2472 y10 #343 | planet id=114 | surface_minerals = [174 128 23], want [981 1217 855]
-sample | rg003 | RG-003-2472 y10 #345 | planet id=116 | surface_minerals = [239 249 82], want [237 249 82]
+sample | rg003 | RG-003-2472 y10 #345 | planet id=116 | surface_minerals = [239 249 81], want [237 249 82]
 sample | rg003 | RG-003-2472 y10 #346 | planet id=117 | surface_minerals = [15 123 2], want [14 121 3]
 sample | rg003 | RG-003-2472 y10 #347 | planet id=118 | surface_minerals = [209 273 1], want [212 274 1]
 sample | rg003 | RG-003-2472 y10 #349 | planet id=120 | excess = 33, want 35
@@ -2818,7 +2817,7 @@ sample | rg003 | RG-003-2472 y10 #355 | planet id=126 | surface_minerals = [52 1
 sample | rg003 | RG-003-2472 y10 #357 | player id=1 | tech.energy = 6, want 7
 sample | rg003 | RG-003-2472 y10 #358 | player id=1 | research_accumulated.construction = 48, want 57
 sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.biotechnology = 1449, want 1447
-sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.construction = 8262, want 7383
+sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.construction = 8293, want 7383
 sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.electronics = 3608, want 3605
 sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.energy = 3438, want 3436
 sample | rg003 | RG-003-2472 y10 #359 | player id=2 | research_accumulated.propulsion = 849, want 841
@@ -2859,7 +2858,7 @@ sample | rg003 | RG-003-2472 y10 #406 | production_queue planet=75 | queue = [{3
 sample | rg003 | RG-003-2472 y10 #407 | production_queue planet=78 | queue = [{8 2 46 0} {8 1 0 3}], want [{8 2 32 0} {8 1 0 3}]
 sample | rg003 | RG-003-2472 y10 #408 | production_queue planet=79 | queue = [{8 1 33 11}], want [{8 1 47 11}]
 sample | rg003 | RG-003-2472 y10 #413 | production_queue planet=90 | queue = [{3 1 23 0} {7 1 0 0} {8 2 33 0}], want [{3 1 39 0} {7 1 0 0} {8 2 41 0}]
-sample | rg003 | RG-003-2472 y10 #415 | production_queue planet=93 | queue = [{9 1 11 5}], want [{9 1 61 5}]
+sample | rg003 | RG-003-2472 y10 #415 | production_queue planet=93 | queue = [{9 1 12 5}], want [{9 1 61 5}]
 sample | rg003 | RG-003-2472 y10 #418 | production_queue planet=96 | queue = [{3 1 55 0} {7 1 0 0} {9 1 9 6}], want [{3 1 39 0} {7 1 0 0} {9 1 10 6}]
 sample | rg003 | RG-003-2472 y10 #419 | production_queue planet=97 | queue = [{9 1 9 5}], want [{9 1 64 5}]
 sample | rg003 | RG-003-2472 y10 #421 | production_queue planet=101 | queue = [{8 2 50 6} {8 2 0 7}], want [{8 1 49 6} {8 2 0 7}]
@@ -3003,8 +3002,9 @@ sample | rg003 | RG-003-2472 y10 #541 | player id=1 seen_by=1 | score_record.res
 sample | rg003 | RG-003-2472 y10 #541 | player id=1 seen_by=1 | score_record.score = 1176, want 1172
 sample | rg003 | RG-003-2472 y10 #541 | player id=1 seen_by=1 | score_record.tech_level_sum = 58, want 59
 sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.escort_ships = 55, want 50
-sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.resources = 5591, want 5688
-sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.score = 351, want 355
+sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.resources = 5593, want 5688
+sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.score = 370, want 355
+sample | rg003 | RG-003-2472 y10 #543 | player id=2 seen_by=2 | score_record.tech_level_sum = 64, want 59
 sample | rg003 | RG-003-2472 y10 #545 | player id=3 seen_by=3 | score_record.resources = 7703, want 7690
 sample | rg003 | RG-003-2472 y10 #549 | player id=5 seen_by=5 | score_record.escort_ships = 61, want 62
 sample | rg003 | RG-003-2472 y10 #549 | player id=5 seen_by=5 | score_record.planets = 16, want 17
@@ -3508,13 +3508,12 @@ sample | rg003 | RG-003-2473 y11 #272 | planet id=46 | surface_minerals = [151 4
 sample | rg003 | RG-003-2473 y11 #273 | planet id=47 | surface_minerals = [101 426 379], want [101 422 378]
 sample | rg003 | RG-003-2473 y11 #274 | planet id=48 | excess = 18, want 31
 sample | rg003 | RG-003-2473 y11 #274 | planet id=48 | population = 3550, want 3309
-sample | rg003 | RG-003-2473 y11 #275 | planet id=49 | surface_minerals = [905 452 242], want [737 328 92]
+sample | rg003 | RG-003-2473 y11 #275 | planet id=49 | surface_minerals = [904 452 240], want [737 328 92]
 sample | rg003 | RG-003-2473 y11 #277 | planet id=51 | factories = 548, want 547
 sample | rg003 | RG-003-2473 y11 #277 | planet id=51 | starbase = design 45 damage 163, want design 45 damage 71
 sample | rg003 | RG-003-2473 y11 #277 | planet id=51 | surface_minerals = [2270 1883 1], want [2261 1878 1]
 sample | rg003 | RG-003-2473 y11 #278 | planet id=52 | surface_minerals = [342 853 78], want [0 854 78]
-sample | rg003 | RG-003-2473 y11 #279 | planet id=53 | factories = 144, want 145
-sample | rg003 | RG-003-2473 y11 #279 | planet id=53 | surface_minerals = [607 963 255], want [602 962 253]
+sample | rg003 | RG-003-2473 y11 #279 | planet id=53 | surface_minerals = [617 963 274], want [602 962 253]
 sample | rg003 | RG-003-2473 y11 #280 | planet id=54 | excess = 33, want 85
 sample | rg003 | RG-003-2473 y11 #280 | planet id=54 | population = 2631, want 2342
 sample | rg003 | RG-003-2473 y11 #280 | planet id=54 | surface_minerals = [1 204 88], want [1 206 90]
@@ -3529,7 +3528,7 @@ sample | rg003 | RG-003-2473 y11 #282 | planet id=56 | surface_minerals = [148 2
 sample | rg003 | RG-003-2473 y11 #283 | planet id=57 | concentrations = [25 23 23], want [25 24 24]
 sample | rg003 | RG-003-2473 y11 #283 | planet id=57 | excess = 5, want 9
 sample | rg003 | RG-003-2473 y11 #283 | planet id=57 | population = 8470, want 8172
-sample | rg003 | RG-003-2473 y11 #283 | planet id=57 | surface_minerals = [7015 11510 3050], want [7058 11432 2970]
+sample | rg003 | RG-003-2473 y11 #283 | planet id=57 | surface_minerals = [7013 9531 51], want [7058 11432 2970]
 sample | rg003 | RG-003-2473 y11 #284 | planet id=58 | surface_minerals = [1997 1744 1], want [1525 1741 1]
 sample | rg003 | RG-003-2473 y11 #285 | planet id=59 | environment = [71 42 74], want [71 42 73]
 sample | rg003 | RG-003-2473 y11 #285 | planet id=59 | excess = 36, want 6
@@ -3552,7 +3551,7 @@ sample | rg003 | RG-003-2473 y11 #298 | planet id=71 | surface_minerals = [1 368
 sample | rg003 | RG-003-2473 y11 #299 | planet id=72 | excess = 47, want 36
 sample | rg003 | RG-003-2473 y11 #299 | planet id=72 | population = 3179, want 2674
 sample | rg003 | RG-003-2473 y11 #299 | planet id=72 | surface_minerals = [17 1984 492], want [48 2215 491]
-sample | rg003 | RG-003-2473 y11 #300 | planet id=73 | surface_minerals = [140 120 317], want [137 120 318]
+sample | rg003 | RG-003-2473 y11 #300 | planet id=73 | surface_minerals = [139 120 317], want [137 120 318]
 sample | rg003 | RG-003-2473 y11 #301 | planet id=74 | factories = 765, want 766
 sample | rg003 | RG-003-2473 y11 #301 | planet id=74 | surface_minerals = [526 944 4], want [528 944 3]
 sample | rg003 | RG-003-2473 y11 #302 | planet id=75 | population = 3940, want 3745
@@ -3575,7 +3574,7 @@ sample | rg003 | RG-003-2473 y11 #312 | planet id=85 | surface_minerals = [2652 
 sample | rg003 | RG-003-2473 y11 #313 | planet id=86 | excess = 2, want 59
 sample | rg003 | RG-003-2473 y11 #313 | planet id=86 | population = 8635, want 8119
 sample | rg003 | RG-003-2473 y11 #314 | planet id=86 | surface_minerals = [144 179 21], want [122 156 5]
-sample | rg003 | RG-003-2473 y11 #315 | planet id=87 | surface_minerals = [102 367 286], want [102 366 289]
+sample | rg003 | RG-003-2473 y11 #315 | planet id=87 | surface_minerals = [102 366 286], want [102 366 289]
 sample | rg003 | RG-003-2473 y11 #316 | planet id=88 | surface_minerals = [138 162 103], want [140 159 104]
 sample | rg003 | RG-003-2473 y11 #318 | planet id=90 | surface_minerals = [915 807 1], want [914 805 1]
 sample | rg003 | RG-003-2473 y11 #319 | planet id=91 | excess = 20, want 77
@@ -3589,6 +3588,7 @@ sample | rg003 | RG-003-2473 y11 #32 | fleet owner=1 id=32 | waypoints[0] positi
 sample | rg003 | RG-003-2473 y11 #32 | fleet owner=1 id=32 | x = 1266, want 1194
 sample | rg003 | RG-003-2473 y11 #32 | fleet owner=1 id=32 | y = 1400, want 1749
 sample | rg003 | RG-003-2473 y11 #320 | planet id=92 | surface_minerals = [97 267 137], want [100 268 134]
+sample | rg003 | RG-003-2473 y11 #321 | planet id=93 | surface_minerals = [1 1637 1336], want [1 1635 1332]
 sample | rg003 | RG-003-2473 y11 #322 | planet id=94 | excess = 8, want 10
 sample | rg003 | RG-003-2473 y11 #322 | planet id=94 | population = 6858, want 6677
 sample | rg003 | RG-003-2473 y11 #323 | planet id=94 | surface_minerals = [27 214 345], want [27 215 342]
@@ -3632,7 +3632,7 @@ sample | rg003 | RG-003-2473 y11 #358 | player id=0 | research_accumulated.biote
 sample | rg003 | RG-003-2473 y11 #358 | player id=0 | research_accumulated.energy = 411, want 414
 sample | rg003 | RG-003-2473 y11 #360 | player id=1 | research_accumulated.construction = 6282, want 6220
 sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.biotechnology = 1493, want 1491
-sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.construction = 11431, want 10509
+sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.construction = 11494, want 10509
 sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.electronics = 3705, want 3702
 sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.energy = 3500, want 3498
 sample | rg003 | RG-003-2473 y11 #361 | player id=2 | research_accumulated.propulsion = 893, want 885
@@ -3859,8 +3859,9 @@ sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.res
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.score = 1216, want 1207
 sample | rg003 | RG-003-2473 y11 #538 | player id=1 seen_by=1 | score_record.tech_level_sum = 58, want 59
 sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.escort_ships = 64, want 60
-sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.resources = 5683, want 5851
-sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.score = 354, want 362
+sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.resources = 5685, want 5851
+sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.score = 373, want 362
+sample | rg003 | RG-003-2473 y11 #540 | player id=2 seen_by=2 | score_record.tech_level_sum = 64, want 59
 sample | rg003 | RG-003-2473 y11 #542 | player id=3 seen_by=3 | score_record.resources = 7770, want 7758
 sample | rg003 | RG-003-2473 y11 #542 | player id=3 seen_by=3 | score_record.score = 421, want 420
 sample | rg003 | RG-003-2473 y11 #542 | player id=3 seen_by=3 | score_record.unarmed_ships = 21, want 18
@@ -4477,14 +4478,13 @@ sample | rg003 | RG-003-2474 y12 #292 | planet id=46 | surface_minerals = [147 4
 sample | rg003 | RG-003-2474 y12 #293 | planet id=47 | surface_minerals = [102 439 389], want [103 435 388]
 sample | rg003 | RG-003-2474 y12 #294 | planet id=48 | excess = 23, want 36
 sample | rg003 | RG-003-2474 y12 #294 | planet id=48 | population = 3660, want 3438
-sample | rg003 | RG-003-2474 y12 #295 | planet id=49 | surface_minerals = [674 221 4], want [506 97 0]
+sample | rg003 | RG-003-2474 y12 #295 | planet id=49 | surface_minerals = [673 221 2], want [506 97 0]
 sample | rg003 | RG-003-2474 y12 #296 | planet id=50 | surface_minerals = [114 52 43], want [114 50 44]
 sample | rg003 | RG-003-2474 y12 #297 | planet id=51 | factories = 586, want 585
 sample | rg003 | RG-003-2474 y12 #297 | planet id=51 | starbase = design 45 damage 113, want design 45 damage 21
 sample | rg003 | RG-003-2474 y12 #297 | planet id=51 | surface_minerals = [2420 2033 0], want [2412 2028 0]
 sample | rg003 | RG-003-2474 y12 #298 | planet id=52 | surface_minerals = [198 1018 142], want [0 874 142]
-sample | rg003 | RG-003-2474 y12 #299 | planet id=53 | factories = 204, want 205
-sample | rg003 | RG-003-2474 y12 #299 | planet id=53 | surface_minerals = [740 1061 192], want [735 1060 190]
+sample | rg003 | RG-003-2474 y12 #299 | planet id=53 | surface_minerals = [750 1061 211], want [735 1060 190]
 sample | rg003 | RG-003-2474 y12 #3 | fleet owner=1 id=2 | cargo.germanium = 238, want 92
 sample | rg003 | RG-003-2474 y12 #300 | planet id=54 | excess = 60, want 89
 sample | rg003 | RG-003-2474 y12 #300 | planet id=54 | population = 2807, want 2534
@@ -4499,11 +4499,11 @@ sample | rg003 | RG-003-2474 y12 #301 | planet id=55 | surface_minerals = [128 1
 sample | rg003 | RG-003-2474 y12 #302 | planet id=56 | surface_minerals = [152 246 171], want [154 245 173]
 sample | rg003 | RG-003-2474 y12 #303 | planet id=57 | excess = 87, want 46
 sample | rg003 | RG-003-2474 y12 #303 | planet id=57 | population = 8520, want 8237
-sample | rg003 | RG-003-2474 y12 #303 | planet id=57 | surface_minerals = [7241 11736 3276], want [7279 11652 3190]
+sample | rg003 | RG-003-2474 y12 #303 | planet id=57 | surface_minerals = [7239 9757 277], want [7279 11652 3190]
 sample | rg003 | RG-003-2474 y12 #304 | planet id=58 | surface_minerals = [1550 1950 1], want [1078 1947 1]
 sample | rg003 | RG-003-2474 y12 #305 | planet id=59 | excess = 36, want 17
 sample | rg003 | RG-003-2474 y12 #306 | planet id=59 | surface_minerals = [378 222 248], want [408 233 265]
-sample | rg003 | RG-003-2474 y12 #307 | planet id=60 | surface_minerals = [3081 3580 1001], want [3079 3578 1002]
+sample | rg003 | RG-003-2474 y12 #307 | planet id=60 | surface_minerals = [2059 544 59], want [3079 3578 1002]
 sample | rg003 | RG-003-2474 y12 #309 | planet id=62 | population = 1202, want 860
 sample | rg003 | RG-003-2474 y12 #309 | planet id=62 | surface_minerals = [3371 1896 3], want [4211 1871 2]
 sample | rg003 | RG-003-2474 y12 #310 | planet id=63 | factories = 316, want 319
@@ -4520,7 +4520,7 @@ sample | rg003 | RG-003-2474 y12 #318 | planet id=71 | surface_minerals = [2 377
 sample | rg003 | RG-003-2474 y12 #319 | planet id=72 | excess = 34, want 17
 sample | rg003 | RG-003-2474 y12 #319 | planet id=72 | population = 3319, want 2848
 sample | rg003 | RG-003-2474 y12 #319 | planet id=72 | surface_minerals = [60 2084 563], want [123 2325 583]
-sample | rg003 | RG-003-2474 y12 #320 | planet id=73 | surface_minerals = [149 125 340], want [146 126 342]
+sample | rg003 | RG-003-2474 y12 #320 | planet id=73 | surface_minerals = [148 125 340], want [146 126 342]
 sample | rg003 | RG-003-2474 y12 #321 | planet id=74 | factories = 797, want 798
 sample | rg003 | RG-003-2474 y12 #322 | planet id=74 | surface_minerals = [638 1038 2], want [640 1037 1]
 sample | rg003 | RG-003-2474 y12 #323 | planet id=75 | excess = 4, want 65
@@ -4551,7 +4551,7 @@ sample | rg003 | RG-003-2474 y12 #333 | planet id=86 | concentrations = [42 38 3
 sample | rg003 | RG-003-2474 y12 #333 | planet id=86 | excess = 54, want 32
 sample | rg003 | RG-003-2474 y12 #333 | planet id=86 | population = 8764, want 8306
 sample | rg003 | RG-003-2474 y12 #333 | planet id=86 | surface_minerals = [269 269 25], want [238 238 1]
-sample | rg003 | RG-003-2474 y12 #334 | planet id=87 | surface_minerals = [108 401 308], want [108 400 315]
+sample | rg003 | RG-003-2474 y12 #334 | planet id=87 | surface_minerals = [108 400 308], want [108 400 315]
 sample | rg003 | RG-003-2474 y12 #335 | planet id=87 | environment = [56 97 53], want [56 98 52]
 sample | rg003 | RG-003-2474 y12 #335 | planet id=87 | original_environment = [56 97 53], want [56 98 53]
 sample | rg003 | RG-003-2474 y12 #336 | planet id=88 | surface_minerals = [153 116 114], want [154 113 115]
@@ -4565,7 +4565,7 @@ sample | rg003 | RG-003-2474 y12 #34 | fleet owner=1 id=32 | waypoints[0] positi
 sample | rg003 | RG-003-2474 y12 #34 | fleet owner=1 id=32 | x = 1284, want 1247
 sample | rg003 | RG-003-2474 y12 #34 | fleet owner=1 id=32 | y = 1461, want 1713
 sample | rg003 | RG-003-2474 y12 #340 | planet id=92 | surface_minerals = [80 289 171], want [83 290 168]
-sample | rg003 | RG-003-2474 y12 #342 | planet id=93 | surface_minerals = [1 1851 1531], want [1 1850 1530]
+sample | rg003 | RG-003-2474 y12 #342 | planet id=93 | surface_minerals = [1 1852 1536], want [1 1850 1530]
 sample | rg003 | RG-003-2474 y12 #343 | planet id=94 | excess = 24, want 67
 sample | rg003 | RG-003-2474 y12 #343 | planet id=94 | population = 6995, want 6830
 sample | rg003 | RG-003-2474 y12 #344 | planet id=94 | surface_minerals = [20 229 430], want [19 228 425]
@@ -4612,10 +4612,13 @@ sample | rg003 | RG-003-2474 y12 #379 | player id=0 | research_accumulated.biote
 sample | rg003 | RG-003-2474 y12 #379 | player id=0 | research_accumulated.electronics = 737, want 738
 sample | rg003 | RG-003-2474 y12 #379 | player id=0 | research_accumulated.energy = 411, want 414
 sample | rg003 | RG-003-2474 y12 #380 | player id=1 | research_accumulated.construction = 13124, want 12981
+sample | rg003 | RG-003-2474 y12 #381 | player id=2 | tech.biotechnology = 10, want 8
+sample | rg003 | RG-003-2474 y12 #381 | player id=2 | tech.energy = 11, want 9
+sample | rg003 | RG-003-2474 y12 #381 | player id=2 | tech.weapons = 11, want 10
 sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.biotechnology = 1539, want 1537
 sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.construction = 1208, want 1196
 sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.electronics = 3791, want 3788
-sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.energy = 5665, want 4720
+sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.energy = 5643, want 4720
 sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.propulsion = 939, want 931
 sample | rg003 | RG-003-2474 y12 #382 | player id=2 | research_accumulated.weapons = 3439, want 3460
 sample | rg003 | RG-003-2474 y12 #383 | player id=3 | research_accumulated.biotechnology = 7178, want 7163
@@ -4658,7 +4661,7 @@ sample | rg003 | RG-003-2474 y12 #431 | production_queue planet=72 | queue = [{8
 sample | rg003 | RG-003-2474 y12 #432 | production_queue planet=78 | queue = [{8 1 56 3}], want [{8 1 35 3}]
 sample | rg003 | RG-003-2474 y12 #433 | production_queue planet=85 | queue = [{8 1 35 3} {2 4 0 0}], want [{8 1 27 3} {2 4 0 0}]
 sample | rg003 | RG-003-2474 y12 #434 | production_queue planet=90 | queue = [{3 1 51 0} {7 1 0 0} {8 2 31 0}], want [{3 1 31 0} {7 1 0 0} {8 1 5 0}]
-sample | rg003 | RG-003-2474 y12 #436 | production_queue planet=93 | queue = [{9 1 12 5}], want [{9 1 84 5}]
+sample | rg003 | RG-003-2474 y12 #436 | production_queue planet=93 | queue = [{9 1 13 5}], want [{9 1 84 5}]
 sample | rg003 | RG-003-2474 y12 #437 | production_queue planet=94 | queue = [{3 1 43 0} {7 1 0 0} {9 1 86 5}], want [{3 1 75 0} {7 1 0 0} {9 1 85 5}]
 sample | rg003 | RG-003-2474 y12 #439 | production_queue planet=96 | queue = [{3 1 63 0} {7 1 0 0} {9 1 18 6}], want [{3 1 95 0} {7 1 0 0} {9 1 49 6}]
 sample | rg003 | RG-003-2474 y12 #440 | production_queue planet=97 | queue = [{9 1 29 5}], want [{9 1 83 5}]
@@ -4832,11 +4835,12 @@ sample | rg003 | RG-003-2474 y12 #563 | message | message 0x0f4 to player 0 pres
 sample | rg003 | RG-003-2474 y12 #565 | player id=0 seen_by=0 | score_record.resources = 3157, want 3156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.escort_ships = 149, want 156
 sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.resources = 24202, want 23712
-sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.score = 1264, want 1244
-sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.tech_level_sum = 58, want 59
+sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.score = 1280, want 1244
+sample | rg003 | RG-003-2474 y12 #567 | player id=1 seen_by=1 | score_record.tech_level_sum = 64, want 59
 sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.escort_ships = 64, want 58
-sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.resources = 5841, want 6073
-sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.score = 361, want 371
+sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.resources = 5843, want 6073
+sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.score = 380, want 371
+sample | rg003 | RG-003-2474 y12 #570 | player id=2 seen_by=2 | score_record.tech_level_sum = 65, want 60
 sample | rg003 | RG-003-2474 y12 #572 | player id=3 seen_by=3 | score_record.resources = 7848, want 7837
 sample | rg003 | RG-003-2474 y12 #572 | player id=3 seen_by=3 | score_record.unarmed_ships = 23, want 20
 sample | rg003 | RG-003-2474 y12 #576 | player id=5 seen_by=5 | score_record.escort_ships = 65, want 66
@@ -5511,6 +5515,7 @@ sample | rg003-y5 | RG-003-Y5-2467 y1 #106 | fleet owner=3 id=2 | fleet gone
 sample | rg003-y5 | RG-003-Y5-2467 y1 #126 | fleet_gone owner=5 id=9 | fleet still exists
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #172 | fleet owner=6 id=12 | waypoints[1] = {{1262 1345} 6 0 0 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}}, want {{1262 1345} 6 2 300003 0 {0 [{0 0} {0 0} {0 0} {0 0} {0 0}] 0 0 0 0 false}} (4/8 variants match)
 sample | rg003-y5 | RG-003-Y5-2467 y1 #178 | planet id=0 | surface_minerals = [117 16 1], want [119 18 2]
+random-driven | rg003-y5 | RG-003-Y5-2467 y1 #181 | planet id=3 | surface_minerals = [0 0 0], want [7783 7191 3948] (7/8 variants match)
 sample | rg003-y5 | RG-003-Y5-2467 y1 #190 | planet id=12 | surface_minerals = [62 610 9], want [64 611 10]
 random-driven | rg003-y5 | RG-003-Y5-2467 y1 #215 | planet id=35 | surface_minerals = [3 1896 567], want [3 1898 567] (5/8 variants match)
 sample | rg003-y5 | RG-003-Y5-2467 y1 #221 | planet id=39 | surface_minerals = [415 1397 12], want [417 1398 12]
@@ -5814,7 +5819,7 @@ sample | rg003 | RG-003-2473 y11 | battle record (1323,1300) | sample missed: to
 sample | rg003 | RG-003-2473 y11 | battle record (1342,1272) | sample missed: tokens: token 2 (owner 2, design 10): not among Elegy's 2 tokens
 sample | rg003 | RG-003-2473 y11 | battle record (1364,1319) | sample missed: tokens: a recorded fleet is not in Elegy's game
 sample | rg003 | RG-003-2473 y11 | battle record (1523,1298) | sample missed: tokens: Elegy has no battle here
-sample | rg003 | RG-003-2473 y11 | battle record (1571,1434) | sample missed: tokens: token 1: Elegy {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:200 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:323 Pct:100} Fleet:0x? Planet:<nil>}
+sample | rg003 | RG-003-2473 y11 | battle record (1571,1434) | sample missed: tokens: token 1: Elegy {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:78 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:323 Pct:100} Fleet:0x? Planet:<nil>}
 sample | rg003 | RG-003-2474 y12 | battle record (1101,1621) | sample missed: tokens: Elegy has no battle here
 sample | rg003 | RG-003-2474 y12 | battle record (1204,1566) | sample missed: tokens: token 0: Elegy {Owner:1 Kind:ships Design:12 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:484 Shield:0 Ships:1 Damage:{Units:312 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:1 Kind:ships Design:12 StartSquare:[1 4] Initiative:4 Jammer:0 Computer:20 Capacitor:0 Deflector:100 Mass:484 Shield:0 Ships:1 Damage:{Units:328 Pct:100} Fleet:0x? Planet:<nil>}
 sample | rg003 | RG-003-2474 y12 | battle record (1227,1429) | sample missed: tokens: Elegy has no battle here
@@ -5825,7 +5830,7 @@ sample | rg003 | RG-003-2474 y12 | battle record (1346,1290) | sample missed: to
 sample | rg003 | RG-003-2474 y12 | battle record (1364,1319) | sample missed: tokens: Elegy has 3 tokens, the record 2
 sample | rg003 | RG-003-2474 y12 | battle record (1367,1439) | sample missed: tokens: Elegy has no battle here
 sample | rg003 | RG-003-2474 y12 | battle record (1423,1158) | sample matched
-sample | rg003 | RG-003-2474 y12 | battle record (1571,1434) | sample missed: tokens: token 1: Elegy {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:200 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:323 Pct:100} Fleet:0x? Planet:<nil>}
+sample | rg003 | RG-003-2474 y12 | battle record (1571,1434) | sample missed: tokens: token 1: Elegy {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:78 Pct:100} Fleet:0x? Planet:<nil>}, record {Owner:5 Kind:ships Design:0 StartSquare:[8 5] Initiative:4 Jammer:0 Computer:0 Capacitor:0 Deflector:100 Mass:116 Shield:200 Ships:4 Damage:{Units:323 Pct:100} Fleet:0x? Planet:<nil>}
 sample | rg003 | RG-003-2474 y12 | battle record (1576,1306) | sample matched
 sample | rg003 | RG-003-2474 y12 | battle record (1633,1380) | sample matched
 matched | rg003-y1 | RG-003-Y1-2463 y1 | battle record (1199,1324) | matched: 2 tokens, players and planet; 3 of 3 hits compared; 14 moves allowed

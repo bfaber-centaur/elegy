@@ -48,6 +48,7 @@ tests can supply their own.
 | Left out of a battle by its size limit: normal report | `battles`, `view` | BINARY-ONLY | `TestPredictionLeftOutOfBattle` |
 | Designs that fought the viewer disclosed in full, destroyed ones too | `battles`, `view` | CONFIRMED (SC-031) | `TestConfirmedBattleDisclosure` |
 | Disclosure: partial designs, WM full, CA habitability, cargo scan | `view` | CONFIRMED | `TestConfirmedDisclosure`; parity: the sc views of `other_players`, `player` and `design` (156, all pass; `internal/vectors` `pvDesignViews`, `TestDesignViews`) |
+| Partial starbase designs in a `player` view: `starbase_designs_full` lists only the subject's own starbase designs (the original's file names no owner for a partial starbase design; the sc cases have two players, so they cannot tell this from counting every partial starbase design) | `internal/vectors` `pvDesignViews` (harness) | ASSUMPTION | `TestDesignViews` (player 2 row) |
 | Allies do not share | `Views` | CONFIRMED (one run) | `TestConfirmedAlliesDoNotShare` |
 | Views at the end of the turn | `GenerateTurn` | BINARY-ONLY | `TestPredictionTurnViews` |
 

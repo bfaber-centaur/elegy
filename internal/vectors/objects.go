@@ -189,6 +189,42 @@ func pvCompare(what string, got map[string]any, eq map[string]json.RawMessage, t
 	return pvResult(errs, why)
 }
 
+// pvTraderIDs is the vector ids of the Traders in initial_state.objects,
+// in ascending order.
+func pvTraderIDs(raw []json.RawMessage) []int {
+	var ids []int
+	for _, r := range raw {
+		var o pvObject
+		if json.Unmarshal(r, &o) == nil && o.Kind == "trader" {
+			ids = append(ids, o.ID)
+		}
+	}
+	slices.Sort(ids)
+	return ids
+}
+
+// pvTraderIndex is the index in objects.Space.Traders, which holds have
+// Traders, of the Trader the vector numbers id, or -1 when Elegy holds no
+// such Trader. A vector id is the original's object slot, which need not
+// start at 0 (RG-005 y1: slots 2 and 3 only), while Elegy keeps a dense
+// list: the loaded Traders in ascending id order (pvObjects.Load), less
+// any that left, then any that appeared. When none left, a loaded id is
+// its rank among the loaded ids. When some left, or the id is not loaded
+// and a Trader appeared, the dense list cannot say which slot a Trader
+// holds, so the comparison is skipped with that reason.
+func pvTraderIndex(m pvMaps, have, id int) (int, string) {
+	i, loaded := slices.BinarySearch(m.Traders, id)
+	switch {
+	case !loaded && m.TradersAppeared == 0, have == 0:
+		return -1, ""
+	case have != len(m.Traders)+m.TradersAppeared:
+		return -1, "skip: a Trader left during the run; Elegy's dense Trader list does not keep the original's slots"
+	case !loaded:
+		return -1, "skip: a Trader appeared during the run; Elegy's dense Trader list does not keep the original's slots"
+	}
+	return i, ""
+}
+
 func pvMinefield(s *objects.Space, owner, id int) *objects.Minefield {
 	for i := range s.Minefields {
 		if m := &s.Minefields[i]; m.Owner == owner && m.Number == id {
@@ -283,10 +319,14 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 		}
 		return pvCompare("wormhole", got, eq, tol, nil)
 	case "trader":
-		if *e.ID >= len(s.Traders) {
+		i, why := pvTraderIndex(m, len(s.Traders), *e.ID)
+		if why != "" {
+			return why
+		}
+		if i < 0 {
 			return fmt.Sprintf("trader %d gone", *e.ID)
 		}
-		return pvCompare("trader", traderFields(s.Traders[*e.ID], *e.ID), eq, tol, nil)
+		return pvCompare("trader", traderFields(s.Traders[i], *e.ID), eq, tol, nil)
 	case "packet":
 		p := pvPacket(s, *e.Owner, *e.ID)
 		if p == nil {
@@ -298,10 +338,14 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 		json.Unmarshal(e.Equals, &o)
 		switch o.Kind {
 		case "trader":
-			if o.ID >= len(s.Traders) {
+			i, why := pvTraderIndex(m, len(s.Traders), o.ID)
+			if why != "" {
+				return why
+			}
+			if i < 0 {
 				return fmt.Sprintf("trader %d missing", o.ID)
 			}
-			return pvCompare("trader", traderFields(s.Traders[o.ID], o.ID), eq, tol, nil)
+			return pvCompare("trader", traderFields(s.Traders[i], o.ID), eq, tol, nil)
 		case "packet":
 			p := pvPacket(s, o.Owner, o.ID)
 			if p == nil {
@@ -339,7 +383,11 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 				return "packet still exists"
 			}
 		case "trader":
-			if sub.ID < len(s.Traders) {
+			i, why := pvTraderIndex(m, len(s.Traders), sub.ID)
+			if why != "" {
+				return why
+			}
+			if i >= 0 {
 				return "trader still exists"
 			}
 		default:
@@ -348,4 +396,21 @@ func (pvObjects) Check(g *engine.Game, e pvObjExpect, m pvMaps) string {
 		return ""
 	}
 	return "skip: " + e.Kind
+}
+
+// pvTraderExpect reports whether e compares a Mystery Trader: the trader
+// form, or an object or object_gone expectation of kind trader.
+func pvTraderExpect(e pvExpect) bool {
+	var o struct {
+		Kind string `json:"kind"`
+	}
+	switch e.Kind {
+	case "trader":
+		return true
+	case "object":
+		json.Unmarshal(e.Equals, &o)
+	case "object_gone":
+		json.Unmarshal(e.Subject, &o)
+	}
+	return o.Kind == "trader"
 }
