@@ -105,8 +105,9 @@ The order kinds:
 
 Later orders in the file build on earlier ones: `-append` adds to the
 queue the file already sets, an unset research or plan flag keeps what
-the file's earlier order set, and a new design skips the slots the file
-already fills.
+the file's earlier order set, plan numbers count the file's earlier
+`delete-plan` (later plans move down one, as in the engine), and a new
+design skips the slots the file already fills.
 
 `show designs` prints each design's fills in the `SLOT:COUNT:PART` form
 `design` takes. The engine drops or cuts a fill it cannot use (a part

@@ -5,6 +5,46 @@ The coordinator updates it as work merges. It records claims with their evidence
 the status documents (`docs/*-STATUS.md`) stay the authority on what each
 subsystem implements.
 
+## Engine-completion checklist (release candidate, main `f09acd9`)
+
+Three columns:
+- **Playable:** a person can do every step of a game from the command line with readable output, and a saved game reloads and continues identically. This column says nothing about fidelity.
+- **Behaviorally faithful:** the mechanics match the original's, by the behavioral record and the parity corpora.
+- **Bit-exact RNG parity:** the same draws in the same order as the original's generator.
+
+Each cell is done, partial or missing, with its evidence. The coverage numbers behind the faithful column are in [COVERAGE.md](COVERAGE.md). The playable rows at the end come from the "Playable vertical slice" thread's capability audit on main `7e6be58`, updated for its #266.
+
+| subsystem | playable | behaviorally faithful | bit-exact RNG parity |
+|---|---|---|---|
+| turn order, kernel | done: `GenerateTurn`; `TestSmokeDeterministic`; long games with replay and reload | partial: every modelled step is in order (KERNEL-STATUS.md "Turn order implemented"); 33 ASSUMPTION and 20 BINARY-ONLY lines | partial: draw order checked (`TestConfirmedYearDrawOrderKX004`); player shuffle BINARY-ONLY; exact parity 0 |
+| production, research, economy | done: queues, default queue, research orders (ORDERS-LAYER-STATUS.md) | done for RG: 0 deterministic misses in RG-002/003/004. Partial elsewhere: Trader items and queued items lost with a starbase are not modelled (COMBAT-STATUS.md "Not implemented") | missing: the mining +1 draw is Elegy's (economy's named draw, planet 102) |
+| population, growth | done | partial: overcrowding floor and IS breeding tested. RG restarts match strictly or random-driven | missing |
+| mining, terraform | done (TERRAFORM-STATUS.md "Turn wiring") | partial: kx, ob, cs corpora pass; ASSUMPTION T1–T3, R1; remote-mining reports not modelled | missing: PP packet terraform samples match 3 of 24 |
+| movement, fuel, waypoints | done: order file v1, follow, chase | partial: fm corpus passes. Patrol, transfer-fleet and repeat are not accepted in waypoint orders; a waypoint can't target a wormhole end (AI-STATUS.md A46); transport fuel actions are not modelled | partial: movement tie draws checked only as allowed (`TestBattleRecords`) |
+| fleets: merge, split, cargo | done between own fleets | partial: merge rules CONFIRMED. Fleet-to-fleet transport, loads from another player's fleet and Robber Baron stealing are missing (38 expectations, COVERAGE.md) | n/a |
+| combat | done | partial: 12,561 of 12,561 hits compared and recorded moves all match; 9 NOT RUN (COMBAT-STATUS.md "Not tested against the oracle") | missing: torpedo rolls only conditioned |
+| takeover, invasion, bombing | done | partial: bombing and ground combat CONFIRMED; GC-1 with several attackers NOT RUN; 12 ASSUMPTION | missing: bombing roundings not replayed |
+| scanning, reports | done: `game.Report`, history, known designs | partial: sc corpus passes; 156 viewer-report and 216 client-estimate expectations not compared (milestone 3) | missing: population estimates use Elegy's stream (ELEGY CHOICE) |
+| minefields, packets, wormholes, salvage, Mystery Trader | done (OBJECTS-STATUS.md "Turn wiring") | partial: 44 BINARY-ONLY lines; minefield messages unmapped (35 expectations); battles never award Trader items | missing: mf never matches its random outcomes; ob and wt are samples |
+| races | done: `elegy race`, race file v1 | partial: RD-P1..RD-P21 pass; ASSUMPTION B1 | missing: random race uses Elegy's stream |
+| components, designs | done: catalog, design orders | partial: verbatim component table; design orders not in the vectors | n/a |
+| computer players | partial: Robotoid, Rototill and Cybertron play long games; unsupported steps are reported (`ai.Result.Unsupported`) | missing: no oracle comparison of any AI decision (AI-STATUS.md "Implemented"); 17 BINARY-ONLY lines | missing: draw counts follow the spec, no parity claimed |
+| messages | partial: events in the turn result and report | partial: compared ids match; 63 ids unmapped (148 expectations with sequence entries, COVERAGE.md) | n/a |
+| universe generation | done: `elegy new`, sizes, densities, built-in races | partial: ug vectors; planet and computer names are PLACEHOLDERs (UNIVERSE-STATUS.md "Not modelled") | missing: `newgame.NewRand` is an ELEGY CHOICE |
+| save and load | done: save v12, `Hash`, `Diff`, reload in long games | n/a: Elegy's own format, not the original's files (ELEGY CHOICE) | n/a: the generator state is saved |
+| create and load a game | done: `elegy new`/`race`/`-ai`, both rulesets (`TestCLIGame`) | n/a | n/a |
+| player-scoped report | done: `game.Report` (`TestReportSurvivesSaveLoad`) | see scanning | n/a |
+| turn with humans and computer players | done: order files, `elegy turn`, library clients through `game.Driver` | see above | see above |
+| save and reload continues identically | done: save v12 (`TestSmokeSaveLoadContinues`, `TestDriversSaveReload`) | n/a | n/a |
+| readable inspection (planets, fleets, designs, research, messages) | done: `elegy show` (#266, `TestShow`, `TestShowCommand`) | n/a | n/a |
+| order authoring by name with dry-run validation | done: `elegy order` and `elegy check` (#266, `TestOrderKinds`, `TestOrderErrors`) | n/a | n/a |
+| readable event names, end-to-end demo and docs/PLAYING.md | done: #266 (`TestCLIPlayableSlice`, docs/PLAYING.md) | n/a | n/a |
+| ship design and battle plan authoring by name | done: `elegy order design`, `delete-design`, `plan`, `delete-plan`, `fleet-plan` and `show plans` (#268, `TestOrderDesigns`, `TestOrderPlans`) | n/a | n/a |
+| derived numbers (resources a year, maximum population, research cost, range) | missing, deferred: not needed to play | n/a | n/a |
+| graphical or terminal front end | missing, by choice for now (milestone 3) | n/a | n/a |
+
+Overall: **playable** is done for the vertical slice: every step works from the command line with readable output (#266), including ship design and battle plan authoring by name (#268). Derived numbers and a front end remain. **Behaviorally faithful** is partial: the corpora show 0 known discrepancies, inside the coverage limits COVERAGE.md lists. **Bit-exact RNG parity** is missing, because the original's generator is not in the harness (P1-1).
+
 ## Starting point (verified at main ba7a03e, 2026-10-12)
 
 - `go test -skip '^TestLongGames$' ./...`: every package passes.
