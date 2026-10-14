@@ -125,7 +125,7 @@ func TestFillAndWaitForFromSalvage(t *testing.T) {
 	if f.Cargo.Minerals != (Minerals{105, 60, 0}) || sv.Minerals != (Minerals{455, 0, 0}) {
 		t.Errorf("fleet %v, salvage %v; want [105 60 0] and [455 0 0]", f.Cargo.Minerals, sv.Minerals)
 	}
-	want := [NumCargo]Transport{Boranium: {WaitFor, 50}}
+	want := [NumTransport]Transport{Boranium: {WaitFor, 50}}
 	if f.Task.Kind != TaskTransport || f.Task.Transport != want {
 		t.Errorf("task %+v, want %+v", f.Task, want)
 	}

@@ -172,7 +172,12 @@ The encoding is canonical: a game encodes to the same bytes every time,
 and a loaded game saves back byte for byte. `Hash` is the SHA-256 of
 those bytes. `Load` refuses an unknown format, another version, unknown
 fields, a state that fails `Check` and a level out of range (0..3 for a
-computer player, 0 for a human). Version 12 added the mark on a design
+computer player, 0 for a human). Version 13 added fuel to a transport
+task's actions (`engine.Task.Transport` has five entries, the last
+`engine.CargoFuel`) and the mark on a transport task aimed at a fleet
+(`engine.Task.ToFleet`, which no saved game holds: it is dropped as the
+year's files are written); a version 12 save is refused, as every older
+version is. Version 12 added the mark on a design
 slot that holds a design received with a fleet transfer
 (`engine.DesignSlot.Received`), which the year's design check skips; a
 version 11 save is refused because a received design would be checked.

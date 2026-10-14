@@ -523,6 +523,15 @@ type pvLoaded struct {
 	events [][]engine.Event
 	// rejected lists the vector's orders Elegy refused, by year.
 	rejected []string
+	// follows is the start's fleets whose only waypoint, waypoint 0, is
+	// aimed at another fleet, as year-1 follow orders (startFollows).
+	follows []pvFollow
+}
+
+// pvFollow is a start fleet that follows another fleet in year 1.
+type pvFollow struct {
+	player int
+	order  engine.FollowOrder
 }
 
 // pvWormholeEnds pairs the vector's wormhole ends: in id order, an end not
@@ -900,6 +909,23 @@ func loadVector(v *Vector) (*pvLoaded, error) {
 					l.unsupported[pvFleetKey(owner, *w.Target.ID)] = why + " (target)"
 				}
 			}
+			if i == 0 && w.Target.Kind == "fleet" && why == "" {
+				// A host-edited waypoint 0 aimed at a fleet: the fleet
+				// follows it this year (stars-elegy ORDERS.md "Waypoint 0
+				// aimed at a fleet"; CONFIRMED FO-02 R, and FO-04's
+				// followers came back with their own position). The
+				// harness gives it as the follow order that writes it.
+				wp, wwhy := l.waypoint(f.Owner, w)
+				switch {
+				case wwhy != "":
+					l.unsupported[key] = wwhy
+				case len(f.Waypoints) > 1:
+					l.unsupported[key] = "waypoint 0 aimed at a fleet, with more waypoints"
+				default:
+					l.follows = append(l.follows, pvFollow{f.Owner, engine.FollowOrder{Fleet: ef.ID, Leader: wp.ID, Task: task}})
+				}
+				continue
+			}
 			if i == 0 {
 				ef.Task = task
 				// Waypoint 0 naming a packet or salvage (Fleet.Target0).
@@ -1100,13 +1126,15 @@ func (l *pvLoaded) task(w pvWaypoint) (engine.Task, string) {
 		}
 		return engine.Task{Kind: engine.TaskMerge, Fleet: l.fleetID[pvFleetKey(owner, *w.Target.ID)]}, ""
 	case "transport":
-		if w.Target.Kind == "fleet" {
-			return engine.Task{}, "fleet-to-fleet transport"
-		}
+		// A transport task aimed at a fleet acts on it once it is the
+		// fleet's waypoint 0 (engine.Task.ToFleet).
 		t := engine.Task{Kind: engine.TaskTransport}
 		for _, cargo := range pvKeys(w.Task.Orders) {
 			o := w.Task.Orders[cargo]
 			c, ok := pvCargo()[cargo]
+			if cargo == "fuel" {
+				c, ok = engine.CargoFuel, true
+			}
 			if !ok {
 				return engine.Task{}, "transport " + cargo
 			}
@@ -1127,6 +1155,11 @@ func (l *pvLoaded) task(w pvWaypoint) (engine.Task, string) {
 				t.Transport[c] = engine.Transport{Action: engine.SetAmount, Amount: o.Value}
 			case "set_waypoint_to":
 				t.Transport[c] = engine.Transport{Action: engine.SetWaypoint, Amount: o.Value}
+			case "load_optimal":
+				// TAKEOVER.md "Load optimal": with a next waypoint it needs
+				// the fuel estimate for the leg (MG-003), which Elegy's
+				// task does not model.
+				return engine.Task{}, "transport load_optimal (no fuel need estimate)"
 			default:
 				return engine.Task{}, "transport " + o.Action
 			}
@@ -2292,6 +2325,9 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		if why != "" {
 			return l, games, nil, why
 		}
+		if y == 1 {
+			files = l.startFollows(files, g)
+		}
 		gy := g
 		gy.Rules = engine.ElegyRules()
 		turn := engine.GenerateTurn
@@ -2320,6 +2356,21 @@ func generate(v *Vector, run pvRun) (l *pvLoaded, games []engine.Game, genErr er
 		l.events = append(l.events, r.Events)
 	}
 	return l, games, nil, ""
+}
+
+// startFollows adds the start's follows (pvLoaded.follows) to the year-1
+// files, after each player's own orders, giving a player with none a
+// file of its own.
+func (l *pvLoaded) startFollows(files []engine.PlayerOrders, g engine.Game) []engine.PlayerOrders {
+	for _, fo := range l.follows {
+		i := slices.IndexFunc(files, func(f engine.PlayerOrders) bool { return f.Player == fo.player })
+		if i < 0 {
+			files = append(files, engine.PlayerOrders{Player: fo.player, GameID: g.ID, Year: g.Year})
+			i = len(files) - 1
+		}
+		files[i].Orders = append(files[i].Orders, fo.order)
+	}
+	return files
 }
 
 // checkCases checks every case of v against the generated games. Each

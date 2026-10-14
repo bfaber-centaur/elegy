@@ -65,6 +65,11 @@ func (o FollowOrder) apply(g *Game, player int, a *Applied) error {
 	}
 	f := &g.Fleets[i]
 	f.Task = o.Task
+	if f.Task.Kind == TaskTransport {
+		// The task acts on the leader (CONFIRMED FO-02 R; FO-02 L to Q,
+		// FO-04, FO-05 A to C).
+		f.Task.ToFleet, f.Task.Fleet = true, o.Leader
+	}
 	f.Waypoints = nil
 	if a.follows == nil {
 		a.follows = map[int]int{}
@@ -145,7 +150,9 @@ func (g *Game) follow(follows map[int]int) (done []Event, events []Event) {
 // "the same owner"; Elegy follows MESSAGES.md. A Merge with Fleet task
 // aimed at the old leader is aimed at the new one with it, so a follower
 // left following itself completes its merge with itself, merging nothing
-// (FO-03-F: no merge, 0x04e, task cleared).
+// (FO-03-F: no merge, 0x04e, task cleared). So is a transport task
+// (ASSUMPTION T21); one left aimed at the follower itself has no target
+// (transportTarget).
 //
 // ASSUMPTION F5: when several fleets qualify, the first in fleet order is
 // chosen.
@@ -163,7 +170,7 @@ func (g *Game) followLeader(f *Fleet, leader int) int {
 	owner := g.Fleets[l].Owner
 	for _, i := range g.fleetOrder() {
 		if c := &g.Fleets[i]; c.Owner == owner && c.Pos == f.Pos {
-			if f.Task.Kind == TaskMerge && f.Task.Fleet == leader {
+			if (f.Task.Kind == TaskMerge || f.Task.ToFleet) && f.Task.Fleet == leader {
 				f.Task.Fleet = c.ID
 			}
 			return c.ID

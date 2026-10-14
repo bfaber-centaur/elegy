@@ -429,8 +429,11 @@ func TestFollowOrderReplacesOrders(t *testing.T) {
 	if a.Results[0].Err != nil {
 		t.Fatal(a.Results[0].Err)
 	}
-	if f := g.Fleets[1]; f.Waypoints != nil || !reflect.DeepEqual(f.Task, order) {
-		t.Errorf("waypoints %v task %+v, want none and %+v", f.Waypoints, f.Task, order)
+	// The transport task is aimed at the leader (Task.ToFleet).
+	want := order
+	want.ToFleet, want.Fleet = true, 1
+	if f := g.Fleets[1]; f.Waypoints != nil || !reflect.DeepEqual(f.Task, want) {
+		t.Errorf("waypoints %v task %+v, want none and %+v", f.Waypoints, f.Task, want)
 	}
 	r := followTurn(t, l, FollowOrder{Fleet: 2, Leader: 1})
 	if f := followed(t, r.Game, 2); f.Pos != (Point{1200, 1200}) {
