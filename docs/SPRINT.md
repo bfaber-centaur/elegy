@@ -29,7 +29,7 @@ Each cell is done, partial or missing, with its evidence. The coverage numbers b
 | races | done: `elegy race`, race file v1 | partial: RD-P1..RD-P21 pass; ASSUMPTION B1 | missing: random race uses Elegy's stream |
 | components, designs | done: catalog, design orders | partial: verbatim component table; design orders not in the vectors | n/a |
 | computer players | partial: Robotoid, Rototill and Cybertron play long games; unsupported steps are reported (`ai.Result.Unsupported`) | missing: no oracle comparison of any AI decision (AI-STATUS.md "Implemented"); 17 BINARY-ONLY lines | missing: draw counts follow the spec, no parity claimed |
-| messages | partial: events in the turn result and report | partial: compared ids match; 63 ids unmapped (148 expectations with sequence entries, COVERAGE.md) | n/a |
+| messages | partial: events in the turn result and report | partial: compared ids match; 61 ids unmapped (140 expectations, COVERAGE.md; 63 and 148 on `f09acd9`) | n/a |
 | universe generation | done: `elegy new`, sizes, densities, built-in races | partial: ug vectors; planet and computer names are PLACEHOLDERs (UNIVERSE-STATUS.md "Not modelled") | missing: `newgame.NewRand` is an ELEGY CHOICE |
 | save and load | done: save v12, `Hash`, `Diff`, reload in long games | n/a: Elegy's own format, not the original's files (ELEGY CHOICE) | n/a: the generator state is saved |
 | create and load a game | done: `elegy new`/`race`/`-ai`, both rulesets (`TestCLIGame`) | n/a | n/a |

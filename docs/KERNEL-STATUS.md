@@ -200,7 +200,9 @@ message 0x02b. At the end of the turn, a patrol fleet
 with no waypoint takes the nearest enemy fleet it sees within 50 ly,
 ties by fleet order, at warp min(10, range ÷ 5), and the new waypoint
 carries the patrol task (ORDERS.md Q3, BINARY-ONLY; vectors WU-SW50 and
-WU-RNG20). A computer player never accepts a gifted fleet (ORDERS.md,
+WU-RNG20). The owner is told of each intercept picked, in fleet order
+(`EventPatrolTarget`, MESSAGES.md 0x0ff; its presence MEASURED in the WU
+patrol runs, its slots BINARY-ONLY and not compared). A computer player never accepts a gifted fleet (ORDERS.md,
 CONFIRMED WU-AICOMP3/4; `Player.Computer`).
 
 - **W5 (MEASURED WF-01..05, one stream; the earlier W5 is contradicted).**

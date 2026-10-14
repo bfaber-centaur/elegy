@@ -2,6 +2,8 @@
 # (TestParityVectors). Any change to a count fails the test until this
 # file is rewritten with PARITY_BASELINE=write.
    3 Super Stealth research stealing
+   1 a Trader appeared during the run; Elegy's dense Trader list does not keep the original's slots
+  14 a Trader left during the run; Elegy's dense Trader list does not keep the original's slots
   24 a computer player's planned orders (not in the vector)
   21 client estimate fleet_summary_report eta
   39 client estimate fleet_waypoints distance
@@ -23,8 +25,8 @@
    2 client estimate ship_designer scanner
   10 client estimate status_tile population
    4 expectation alt_battle
- 497 expectation battle
- 484 expectation battle_actions
+ 533 expectation battle
+ 520 expectation battle_actions
    5 expectation design_gone
    9 expectation no_battle
    1 expectation no_new_fleets
@@ -63,7 +65,6 @@
    2 message 0x0ea has no event mapping
    3 message 0x0ec has no event mapping
    1 message 0x0f2 has no event mapping
-   9 message 0x0ff has no event mapping
    2 message 0x109 has no event mapping
    3 message 0x127 has no event mapping
    1 message 0x147 has no event mapping
@@ -94,7 +95,7 @@
    1 player field relations
    1 player field ship_design_count
  291 player not in the state
-2005 sample: one stream's random outcome
+2238 sample: one stream's random outcome
    1 score_record rank and victory: player 1's a computer player's planned orders (not in the vector)
   10 score_record rank and victory: player 5's a computer player's planned orders (not in the vector)
    3 score_record: Super Stealth research stealing

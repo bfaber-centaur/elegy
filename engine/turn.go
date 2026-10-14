@@ -679,7 +679,7 @@ func generateTurn(game Game, orders []PlayerOrders, rng Rand, opts turnOptions) 
 	// fleets that are gone or that the owner does not see, then patrol
 	// intercepts (ORDERS.md).
 	events = append(events, g.fileRetarget(views)...)
-	g.patrol(views)
+	events = append(events, g.patrol(views)...)
 
 	// The year's files are written: numbers held by fleets that went away
 	// are free next year, and a bare unowned planet loses its record.
