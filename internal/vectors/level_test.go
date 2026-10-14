@@ -1,6 +1,7 @@
 package vectors
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -114,5 +115,25 @@ func TestComputerLevel(t *testing.T) {
 	l.traders = nil
 	if l.levelUnknown(1, 1) || l.levelUnknown(-2, 1) {
 		t.Error("level unknown with no Trader")
+	}
+}
+
+// pvTraderExpect finds a Trader in each expectation form, and in an
+// object_gone's subject, not its equals.
+func TestTraderExpect(t *testing.T) {
+	for _, c := range []struct {
+		e    pvExpect
+		want bool
+	}{
+		{pvExpect{Kind: "trader"}, true},
+		{pvExpect{Kind: "object", Equals: json.RawMessage(`{"kind": "trader", "id": 0}`)}, true},
+		{pvExpect{Kind: "object", Equals: json.RawMessage(`{"kind": "packet", "id": 0}`)}, false},
+		{pvExpect{Kind: "object_gone", Subject: json.RawMessage(`{"kind": "trader", "id": 2}`)}, true},
+		{pvExpect{Kind: "object_gone", Subject: json.RawMessage(`{"kind": "packet", "id": 2}`), Equals: json.RawMessage(`{"kind": "trader"}`)}, false},
+		{pvExpect{Kind: "planet", Equals: json.RawMessage(`{"kind": "trader"}`)}, false},
+	} {
+		if got := pvTraderExpect(c.e); got != c.want {
+			t.Errorf("pvTraderExpect(%s %s %s) = %v, want %v", c.e.Kind, c.e.Subject, c.e.Equals, got, c.want)
+		}
 	}
 }
