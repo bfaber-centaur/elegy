@@ -116,6 +116,7 @@ var eventNames = map[engine.EventKind]string{
 	engine.EventPlanetCaptured:          "planet captured",
 	engine.EventFleetLoadRefused:        "load from a foreign fleet refused",
 	engine.EventColonistsToForeignFleet: "colonists refused by a foreign fleet",
+	engine.EventPatrolTarget:            "patrol target picked",
 }
 
 // nameAt is names[i], or "" when i is not an index of names.

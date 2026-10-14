@@ -155,7 +155,8 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventPlanetDegraded, Player: 0, Planet: 3, Fleet: -1, Count: 70},
 			{Kind: engine.EventPlanetImproved, Player: 0, Planet: 3, Fleet: -1, Count: 74, Axes: []int{72}},
 			{Kind: engine.EventPlanetImproved, Player: 2, Planet: 5, Fleet: -1, Count: 74},
-			{Kind: engine.EventPlanetNotImproved, Player: 2, Planet: 5, Fleet: -1, Count: 100}}},
+			{Kind: engine.EventPlanetNotImproved, Player: 2, Planet: 5, Fleet: -1, Count: 100},
+			{Kind: engine.EventPatrolTarget, Player: 0, Planet: -1, Fleet: 7, Axes: []int{8}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -174,7 +175,9 @@ func TestMessageCheck(t *testing.T) {
 		{"missing", msg(0, 0x026, true, 1), "message 0x026 to player 0 present = false, want true"},
 		{"not wanted", msg(0, 0x04e, false, 1), "message 0x04e to player 0 present = true, want false"},
 		{"another player's", msg(2, 0x04e, true, 1), "message 0x04e to player 2 present = false, want true"},
-		{"unmapped id", msg(0, 0x0ff, true, 1), "skip: message 0x0ff has no event mapping"},
+		{"unmapped id", msg(0, 0x0c5, true, 1), "skip: message 0x0c5 has no event mapping"},
+		{"patrol target", msg(0, 0x0ff, true, 1), ""},
+		{"patrol target, not sent", msg(2, 0x0ff, true, 1), "message 0x0ff to player 2 present = false, want true"},
 		{"race penalized", msg(2, 0x117, true, 1), ""},
 		{"race penalized, not sent", msg(0, 0x117, true, 1), "message 0x117 to player 0 present = false, want true"},
 		{"another race penalized", msg(0, 0x182, true, 1), ""},

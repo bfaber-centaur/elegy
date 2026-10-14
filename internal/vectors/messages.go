@@ -26,6 +26,7 @@ func pvMessageIDs() map[int]string {
 		0x025: "EventHostileShrink",
 		0x026: "EventOvercrowded",
 		0x028: "EventTargetGone",
+		0x0ff: "EventPatrolTarget",
 		0x02e: "EventColonistsBeamedDown",
 		0x035: "EventBuilt of factories, one in all (merge rule)",
 		0x036: "EventBuilt of factories, more than one (merge rule)",
@@ -590,6 +591,11 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 				}
 			}
 			send(ev.Player, m)
+		case engine.EventPatrolTarget:
+			// Slots: the patrolling fleet, the target (MESSAGES.md 0x0ff,
+			// BINARY-ONLY). No record gives their values or the focus, so
+			// only the presence is compared.
+			send(ev.Player, pvMsg{id: 0x0ff, params: make([]int, 2), known: make([]bool, 2), why: "0x0ff slots (no record gives their values)"})
 		case engine.EventFleetScrapped:
 			if ev.Planet == -1 {
 				// Slots: the salvage's object id, 0x2000 + owner·512 +
