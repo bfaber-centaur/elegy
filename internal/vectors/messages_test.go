@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 )
 
 // TestPvMessages pins the event to message id mapping (MESSAGES.md).
@@ -160,7 +161,10 @@ func TestMessageCheck(t *testing.T) {
 			{Kind: engine.EventMinesLaid, Player: 0, Planet: -1, Fleet: -1, Count: 100, Axes: []int{1, 0}},
 			{Kind: engine.EventMinesLaid, Player: 2, Planet: -1, Fleet: -1, Count: 100, Axes: []int{0, 0}},
 			{Kind: engine.EventMinesNotLaid, Player: 0, Planet: -1, Fleet: -1, Count: 100, Axes: []int{0, 0}},
-			{Kind: engine.EventMineHit, Player: 2, Planet: -1, Fleet: -1, Count: 10, Axes: []int{0, 0, 0}}}},
+			{Kind: engine.EventMineHit, Player: 2, Planet: -1, Fleet: -1, Count: 10, Axes: []int{0, 0, 0}},
+			{Kind: engine.EventTraderTrade, Player: 0, Planet: -1, Fleet: -1, Count: int(objects.ItemPart), Axes: []int{objects.BitJumpGate}},
+			{Kind: engine.EventTraderTrade, Player: 2, Planet: -1, Fleet: -1, Count: int(objects.ItemPart), Axes: []int{objects.BitMiniMorph}},
+			{Kind: engine.EventTraderTrade, Player: 0, Planet: -1, Fleet: -1, Count: int(objects.ItemPart), Axes: []int{objects.BitGenesisDevice}}}},
 	}
 	g := &engine.Game{Players: []engine.Player{{}, {}, {}}}
 	g.Players[0].Race.LRT.GeneralizedResearch = true
@@ -245,6 +249,12 @@ func TestMessageCheck(t *testing.T) {
 		{"mine hit, field's owner", msg(0, 0x0ca, true, 1), ""},
 		{"mine hit, field's owner, not sent", msg(2, 0x0ca, true, 1), "message 0x0ca to player 2 present = false, want true"},
 		{"mine hit, speed bump id unmapped", msg(2, 0x0c5, true, 1), "skip: message 0x0c5 has no event mapping"},
+		{"trader part", msg(0, 0x10b, true, 1), ""},
+		{"trader part, not sent", msg(2, 0x10b, true, 1), "message 0x10b to player 2 present = false, want true"},
+		{"trader hull", msg(2, 0x10c, true, 1), ""},
+		{"trader hull, not sent", msg(0, 0x10c, true, 1), "message 0x10c to player 0 present = false, want true"},
+		{"trader planetary device", msg(0, 0x10f, true, 1), ""},
+		{"trader planetary device, not sent", msg(2, 0x10f, true, 1), "message 0x10f to player 2 present = false, want true"},
 		{"no queue, not sent", msg(0, 0x03f, true, 1), "message 0x03f to player 0 present = false, want true"},
 		{"queue not loaded, no queue", msg(2, 0x03f, true, 1), "skip: a queue message from a production queue not loaded"},
 		{"queue not loaded, queue completed", msg(2, 0x03e, false, 1), "skip: a queue message from a production queue not loaded"},

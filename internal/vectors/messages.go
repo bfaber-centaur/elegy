@@ -82,6 +82,9 @@ func pvMessageIDs() map[int]string {
 		0x17e: "EventMinesNotLaid",
 		0x0c6: "EventMineHit by a standard or heavy field, no ships lost",
 		0x0ca: "EventMineHit by a standard or heavy field, no ships lost, to the field's owner",
+		0x10b: "EventTraderTrade for a part",
+		0x10c: "EventTraderTrade for the Trader's hull",
+		0x10f: "EventTraderTrade for the Trader's planetary device",
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
 		0x17c: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the bomber",
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
@@ -764,6 +767,29 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			}
 			send(ev.Player, victim)
 			send(owner, field)
+		case engine.EventTraderTrade:
+			// PARITY.md "Wormholes and Mystery Trader, round 2", part
+			// rewards (CONFIRMED, O-48, WT-003 A): 0x10b for ten parts,
+			// 0x10c for the Mini Morph hull, 0x10f for the Genesis
+			// Device, to the fleet's owner. MESSAGES.md has all three
+			// CONFIRMED (0x10b ob/ob004; 0x10c and 0x10f WT-003, as of
+			// stars-elegy 369a3b4), with the slot's identity UNRESOLVED. Research and ship rewards are not
+			// mapped. The one slot is not compared: in WT-003 the fleet
+			// number, the Trader number and the item bit are equal, so
+			// the run cannot tell which one it names. The part focus is
+			// not compared either. A part trade always carries the part's
+			// bit (objects TestTraderTradeEventAxes).
+			if objects.TraderItemKind(ev.Count) != objects.ItemPart {
+				break
+			}
+			id := 0x10b
+			switch ev.Axes[0] {
+			case objects.BitMiniMorph:
+				id = 0x10c
+			case objects.BitGenesisDevice:
+				id = 0x10f
+			}
+			send(ev.Player, pvMsg{id: id, params: make([]int, 1), known: make([]bool, 1), why: whyNot(id, "slot UNRESOLVED (fleet, Trader or item; equal in WT-003)")})
 		case engine.EventMinefieldSwept:
 			// Slots: the field's object id (owner·512 + number), amount
 			// (two slots), type and centre (MESSAGES.md "Sweep slots",

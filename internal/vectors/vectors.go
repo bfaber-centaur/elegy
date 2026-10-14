@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bfaber-centaur/elegy/engine"
+	"github.com/bfaber-centaur/elegy/objects"
 	"github.com/bfaber-centaur/elegy/races"
 	"github.com/bfaber-centaur/elegy/terraform"
 )
@@ -2195,6 +2196,28 @@ func (l *pvLoaded) playerEquals(g *engine.Game, id int, eq map[string]json.RawMe
 			if st.Spend != spend || st.Stat15 != q.Stat15 || st.ExpensiveAt3 != q.TechsStartHigh {
 				errs = append(errs, pvMismatch("race settings", fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", st.Spend, st.Stat15, st.ExpensiveAt3),
 					fmt.Sprintf("spend %d, stat 15 %d, techs start high %v", spend, q.Stat15, q.TechsStartHigh)))
+			}
+		case "mystery_trader_items":
+			// The player's Trader part word, by bit (stars-elegy
+			// tools/vectors/build.py; OBJECTS.md "Encounters", CONFIRMED
+			// WT-003 A). Elegy keeps it in the space objects.
+			var want []string
+			if json.Unmarshal(eq[k], &want) != nil {
+				errs = append(errs, fmt.Sprintf("%s: malformed expectation %s", k, eq[k]))
+				continue
+			}
+			if g.Objects == nil {
+				skipped("mystery_trader_items without space objects")
+				continue
+			}
+			got := []string{}
+			for b, name := range objects.TraderPartNames {
+				if g.Objects.OwnsTraderBit(id, b) {
+					got = append(got, name)
+				}
+			}
+			if !slices.Equal(got, want) {
+				errs = append(errs, pvMismatch(k, got, want))
 			}
 		default:
 			skipped("player field " + k)

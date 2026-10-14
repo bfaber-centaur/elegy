@@ -779,3 +779,27 @@ func TestMinesLaidEventKindAxis(t *testing.T) {
 		}
 	}
 }
+
+// A trade for a part names the part's bit, which picks the message (0x10b,
+// 0x10c for the hull, 0x10f for the Genesis Device); other rewards name
+// none (PARITY.md O-48, CONFIRMED WT-003 A).
+func TestTraderTradeEventAxes(t *testing.T) {
+	for _, c := range []struct {
+		item TraderItem
+		axes []int
+	}{
+		{TraderItem{Kind: ItemPart, Bit: BitJumpGate}, []int{BitJumpGate}},
+		{TraderItem{Kind: ItemPart, Bit: BitMiniMorph}, []int{BitMiniMorph}},
+		{TraderItem{Kind: ItemResearch}, nil},
+	} {
+		l, s := traderLab(t, c.item)
+		s.Traders[0].Dest = at(0, 0)
+		s.Traders[0].Pos = at(0, 0)
+		cargo(l, l.fleet(0, origin, "Freighter", 1), 5000)
+		l.g.Objects = s
+		evs := eventsOf(t, *l.g, top{}, engine.EventTraderTrade)
+		if len(evs) != 1 || evs[0].Count != int(c.item.Kind) || !reflect.DeepEqual(evs[0].Axes, c.axes) {
+			t.Errorf("item %+v: trades %+v, want one of kind %d with Axes %v", c.item, evs, c.item.Kind, c.axes)
+		}
+	}
+}

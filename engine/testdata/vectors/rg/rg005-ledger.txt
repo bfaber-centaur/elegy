@@ -46,7 +46,6 @@ sample | rg005 | RG-005-2467 y2 #147 | planet id=286 | original_environment = [3
 sample | rg005 | RG-005-2467 y2 #150 | player id=0 | research_accumulated.biotechnology = 247, want 15
 sample | rg005 | RG-005-2467 y2 #150 | player id=0 | research_accumulated.electronics = 3753, want 3768
 sample | rg005 | RG-005-2467 y2 #150 | player id=0 | research_accumulated.energy = 0, want 315
-not compared | rg005 | RG-005-2467 y2 #151 | player id=1 | player field mystery_trader_items
 sample | rg005 | RG-005-2467 y2 #152 | player id=1 | research_accumulated.electronics = 1310, want 1312
 sample | rg005 | RG-005-2467 y2 #176 | production_queue planet=230 | queue = [{2 2 79 0}], want [{2 2 99 0}]
 sample | rg005 | RG-005-2467 y2 #177 | production_queue planet=254 | queue = [{8 1 3 10}], want [{8 1 29 10}]
@@ -1459,7 +1458,7 @@ sample | rg005 | RG-005-2476 y11 #177 | player id=2 | tech.propulsion = 2, want 
 sample | rg005 | RG-005-2476 y11 #177 | player id=2 | tech.weapons = 1, want 3
 sample | rg005 | RG-005-2476 y11 #178 | player id=3 | research_accumulated.energy = 1103, want 1104
 sample | rg005 | RG-005-2476 y11 #178 | player id=3 | research_accumulated.propulsion = 780, want 779
-not compared | rg005 | RG-005-2476 y11 #179 | player id=4 | player field mystery_trader_items
+sample | rg005 | RG-005-2476 y11 #179 | player id=4 | mystery_trader_items = [Hush-a-Boom], want [Mega Poly Shell Hush-a-Boom]
 sample | rg005 | RG-005-2476 y11 #189 | production_queue planet=184 | queue = [{2 3 59 0}], want [{2 2 19 0}]
 sample | rg005 | RG-005-2476 y11 #192 | production_queue planet=201 | queue = [{8 1 10 1}], want [{8 1 76 1}]
 sample | rg005 | RG-005-2476 y11 #196 | production_queue planet=275 | queue = [{9 1 6 5}], want [{9 1 77 5}]
@@ -2250,7 +2249,6 @@ sample | rg005-y11 | RG-005-Y11-2476 y1 #130 | planet id=184 | surface_minerals 
 sample | rg005-y11 | RG-005-Y11-2476 y1 #141 | planet id=211 | original_environment = [62 35 55], want [62 36 55]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | environment = [16 26 60], want [16 27 60]
 sample | rg005-y11 | RG-005-Y11-2476 y1 #161 | planet id=254 | original_environment = [16 19 58], want [16 20 58]
-not compared | rg005-y11 | RG-005-Y11-2476 y1 #179 | player id=4 | player field mystery_trader_items
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: x = 1569, want 1561
 sample | rg005-y11 | RG-005-Y11-2476 y1 #211 | object | wormhole: y = 1095, want 1076
 sample | rg005-y11 | RG-005-Y11-2476 y1 #212 | object | wormhole: x = 1283, want 1297
@@ -2274,7 +2272,6 @@ sample | rg005-y2 | RG-005-Y2-2467 y1 #147 | planet id=286 | environment = [31 3
 sample | rg005-y2 | RG-005-Y2-2467 y1 #147 | planet id=286 | original_environment = [31 24 60], want [31 25 60]
 sample | rg005-y2 | RG-005-Y2-2467 y1 #150 | player id=0 | research_accumulated.biotechnology = 174, want 15
 sample | rg005-y2 | RG-005-Y2-2467 y1 #150 | player id=0 | research_accumulated.energy = 0, want 315
-not compared | rg005-y2 | RG-005-Y2-2467 y1 #151 | player id=1 | player field mystery_trader_items
 sample | rg005-y2 | RG-005-Y2-2467 y1 #189 | object | wormhole: x = 2067, want 2060
 sample | rg005-y2 | RG-005-Y2-2467 y1 #189 | object | wormhole: y = 1397, want 1411
 sample | rg005-y2 | RG-005-Y2-2467 y1 #190 | object | wormhole: known_to = [3], want [1]
