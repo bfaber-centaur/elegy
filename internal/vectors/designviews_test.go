@@ -32,6 +32,8 @@ func TestDesignViews(t *testing.T) {
 	}{
 		{"other_players", 0, 0, `{"foreign_designs":{"full":1,"partial":0},"foreign_starbase_designs":{"full":1,"partial":2}}`},
 		{"player", 0, 1, `{"player_block":"full","starbase_designs_full":[false,true]}`},
+		// ASSUMPTION pinning row: only player 2's own starbase design,
+		// not player 1's partial ones (pvDesignViews).
 		{"player", 0, 2, `{"player_block":"partial","starbase_designs_full":[false]}`},
 		{"player", 0, 3, `{"player_block":null,"starbase_designs_full":[]}`},
 		{"design", 1, 4, `{"design_full":true}`},

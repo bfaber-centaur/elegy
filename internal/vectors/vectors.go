@@ -2529,10 +2529,11 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 //     only) or "full" (with habitability, a Claim Adjuster viewer), and
 //     starbase_designs_full, the player's starbase designs in the
 //     viewer's file by slot, each true when full;
-//     (the original's file names no owner for a partial starbase design,
-//     and stars-elegy experiments/sc round2.py counts those for the
-//     subject; the sc cases have two players, where the two readings
-//     agree);
+//     (ASSUMPTION: the design's own owner. The original's file names no
+//     owner for a partial starbase design, and stars-elegy experiments/sc
+//     round2.py counts every such design for the subject. The sc cases
+//     have two players, where the two readings cannot be told apart.
+//     Pinned by TestDesignViews, player 2);
 //   - design: design_full for one ship design, null when it is not in
 //     the viewer's file.
 func pvDesignViews(g *engine.Game, v engine.PlayerView, kind string, owner, id int, design map[[2]int]int, got map[string]any) {
