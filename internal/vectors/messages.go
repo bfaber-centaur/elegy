@@ -81,6 +81,7 @@ func pvMessageIDs() map[int]string {
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
 		0x117: "EventRacePenalized",
 		0x182: "EventRaceHacked",
+		0x15a: "EventPlanetDegraded",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -428,6 +429,30 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// for it, so it is not compared.
 			send(ev.Player, pvMsg{id: 0x182, focus: pvFocusNone, focusKnown: true,
 				params: []int{ev.Count}, known: []bool{false}, why: "0x182 player slot"})
+		case engine.EventPlanetDegraded:
+			// MESSAGES.md 0x15a (CONFIRMED GAP-001 W1, stars-elegy
+			// 28a3175): fleet, planet, percent before, percent after;
+			// focus the fleet for its owner, the planet for the planet
+			// owner. A negative percent's slot value is not measured.
+			if len(ev.Axes) != 1 {
+				break
+			}
+			m := pvMsg{id: 0x15a, focus: ev.Planet - 1, focusKnown: true,
+				params: []int{0, ev.Planet - 1, ev.Axes[0], ev.Count}, known: []bool{false, true, true, true},
+				why: "0x15a fleet gone by the end of the year"}
+			if code, ok := fleet(ev.Fleet); ok {
+				m.params[0], m.known[0], m.why = code, true, ""
+				if code>>9 == ev.Player {
+					m.focus = pvFocusFleet | code
+				}
+			} else if ev.Player != owner(ev.Planet) {
+				m.focusKnown = false
+			}
+			if ev.Axes[0] < 0 || ev.Count < 0 {
+				m.known[2], m.known[3] = ev.Axes[0] >= 0, ev.Count >= 0
+				m.why = whyNot(0x15a, "negative percent slot")
+			}
+			send(ev.Player, m)
 		case engine.EventOvercrowded:
 			send(ev.Player, pvMsg{id: 0x026, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventHostileShrink:

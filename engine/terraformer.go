@@ -10,7 +10,8 @@ const (
 	// EventPlanetImproved: Fleet's Orbital Adjusters improved Planet.
 	// Player = told (the fleet owner, and the planet owner when it is
 	// someone else and the planet owner's value changed), Count = the
-	// planet owner's habitability after.
+	// planet owner's habitability after the fleet's clicks, Axes[0] =
+	// before them.
 	EventPlanetImproved EventKind = iota + EventRaceHacked + 1
 	// EventPlanetDegraded: as EventPlanetImproved, by a fleet that is not
 	// the planet owner's friend.

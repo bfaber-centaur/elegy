@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/bfaber-centaur/elegy/engine"
@@ -58,7 +59,7 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 	if h := [3]int{engine.Habitability(race(), [3]int{60, 60, 60}), engine.Habitability(race(), [3]int{62, 60, 60}), engine.Habitability(race(), [3]int{63, 60, 60})}; h != [3]int{72, 70, 70} {
 		t.Fatalf("habitability %v, want 72/70/70", h)
 	}
-	type msg struct{ kind, player, planet, fleetNumber, hab int }
+	type msg struct{ kind, player, planet, fleetNumber, hab, before int }
 	var got []msg
 	for _, e := range ev {
 		n := -1
@@ -67,12 +68,18 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 				n = f.Number
 			}
 		}
-		got = append(got, msg{int(e.Kind), e.Player, e.Planet, n, e.Count})
+		before := -1
+		if len(e.Axes) == 1 {
+			before = e.Axes[0]
+		}
+		got = append(got, msg{int(e.Kind), e.Player, e.Planet, n, e.Count, before})
 	}
 	deg := int(engine.EventPlanetDegraded)
 	not := int(engine.EventPlanetNotDegraded)
 	id := l.g.Planets[pi].ID
-	want := []msg{{deg, 1, id, 1, 70}, {deg, 0, id, 1, 70}, {not, 1, id, 4, 70}}
+	// GAP-001 W1's 0x15a slots read 72 then 70 (MESSAGES.md 0x15a,
+	// "percent, percent"); 0x15b has one percent slot.
+	want := []msg{{deg, 1, id, 1, 70, 72}, {deg, 0, id, 1, 70, 72}, {not, 1, id, 4, 70, -1}}
 	if len(got) != len(want) {
 		t.Fatalf("W1: messages %+v, want %+v", got, want)
 	}
@@ -105,5 +112,46 @@ func TestPredictionGAP001Worsen(t *testing.T) {
 	l, pi = gap001W(t, true)
 	if ev := (Rules{}).Adjust(l.g); len(ev) != 0 || l.g.Planets[pi].Env != [3]int{60, 60, 60} {
 		t.Errorf("W2: env %v, messages %+v", l.g.Planets[pi].Env, ev)
+	}
+}
+
+// Not GAP-001: two hostile fleets that each change player 0's
+// habitability report their own before and after values (ASSUMPTION T3:
+// fleets act in turn, each on the state the previous left). Fleet 1/1's
+// two clicks take gravity 60 → 62 (72% → 70%), then fleet 1/2's two
+// clicks 62 → 64.
+func TestAdjustersReportEachFleetsChange(t *testing.T) {
+	l, pi := gap001W(t, false)
+	l.g.Fleets[0].Number = 2
+	l.g.Fleets[0].Stacks[0].Design = l.designs["Adjuster"]
+	h62, h64 := engine.Habitability(race(), [3]int{62, 60, 60}), engine.Habitability(race(), [3]int{64, 60, 60})
+	if h62 != 70 || h64 == h62 {
+		t.Fatalf("habitability %d, %d", h62, h64)
+	}
+	ev := Rules{}.Adjust(l.g)
+	if p := l.g.Planets[pi]; p.Env != [3]int{64, 60, 60} {
+		t.Fatalf("env %v", p.Env)
+	}
+	type msg struct{ player, fleetNumber, before, after int }
+	var got []msg
+	for _, e := range ev {
+		n := -1
+		for _, f := range l.g.Fleets {
+			if f.ID == e.Fleet {
+				n = f.Number
+			}
+		}
+		before := -1
+		if len(e.Axes) == 1 {
+			before = e.Axes[0]
+		}
+		if e.Kind != engine.EventPlanetDegraded {
+			t.Errorf("kind %v", e.Kind)
+		}
+		got = append(got, msg{e.Player, n, before, e.Count})
+	}
+	want := []msg{{1, 1, 72, 70}, {0, 1, 72, 70}, {1, 2, 70, h64}, {0, 2, 70, h64}}
+	if !slices.Equal(got, want) {
+		t.Errorf("messages %+v, want %+v", got, want)
 	}
 }
