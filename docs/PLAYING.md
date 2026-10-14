@@ -127,7 +127,8 @@ $ ./elegy turn -game game.json
 game 2817366194855738197 year 2402 hash 29662a4c...
 ```
 
-After a few years the colony ship has settled its planet:
+Two more `turn` calls later (year 2404) the colony ship has settled its
+planet:
 
 ```console
 $ ./elegy show -game game.json planets messages
