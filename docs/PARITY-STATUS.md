@@ -23,9 +23,9 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 | strict miss (incorrect mechanic, any owner) | 0 / 0 | 0 / 0 | 0 / 0 |
 | random-driven | 0 / 35 | 0 / 76 | 1 / 17 |
 | of which hand-classed with the draw | 0 / 3 | 0 / 3 | 0 / 0 |
-| sample | 1019 / 199 | 5286 / 450 | 2519 / 263 |
-| not compared | 0 / 0 | 1 / 1 | 3 / 3 |
-| total | 1305 | 5922 | 2857 |
+| sample | 1019 / 199 | 5287 / 450 | 2519 / 263 |
+| not compared | 0 / 0 | 0 / 0 | 2 / 2 |
+| total | 1305 | 5921 | 2855 |
 
 - Updated 2026-10-13 (#247): the 0x08f/0x090 bombing fleet is now compared, which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "3 / 3 | 11 / 11 | 19 / 19" and the totals 1316, 5947, 2893.
 - Updated 2026-10-13 (#248): a null `packet_destination` on a planet that lost its starbase is now compared (PK-1), which removes 2 RG-002 and 4 RG-003 not-compared lines. The row was "2 / 2 | 9 / 9 | 19 / 19" and the totals 1314, 5943, 2893.
@@ -34,7 +34,8 @@ The combined run on elegy main `5a735e1` (after #242; the RG vectors are stars-e
 - Updated 2026-10-13 (FS-1 PR): 0x05b's fleet slot is now compared (design·512 + fleet number, stars-elegy FS-1, 28a3175) and matches in all 4 entries (regenerated on main cbc3354, #251). The counts do not move: the same year-1 sequence entries stay not compared for 0x02e's mineral and location slots (lane A), which the ledger line now names. The not-compared row was "0x05b fleet slot … lane D".
 - Updated 2026-10-13 (0x0cd PR): 0x0cd is mapped, which removes RG-003's 4 0x0cd lines (2 chained, 2 restart), all matching (regenerated on main c3916f8, #253). The row was "1 / 1 | 4 / 4 | 3 / 3" and the totals 1312, 5933, 2869.
 - Updated 2026-10-13 (lane A, chase): chasers of a fleet destroyed during movement go to its start position (stars-elegy #198 de1bd6f, Z-MD; regenerated on main 8cf4236, #254). RG-003-Y11's battle at (1323,1300) moves from sample to random-driven: on 1 of the 7 other variants fleet 3/12 dies in the field and its chasers fight there (section "Battle records the vector flags sample"). The other moves are chained samples whose values changed or went: RG-002 5, RG-003 5, RG-004 12 fewer. The rows were "random-driven 0 / 35 | 0 / 75 | 1 / 17", "sample 1024 / 199 | 5291 / 451 | 2531 / 263" and the totals 1312, 5929, 2869.
-- Updated 2026-10-13 (lane A, 0x02e slots): 0x02e's cargo type and location slots are compared (cargo type 3 for colonists; a planet as 65535 then the planet number; MEASURED, stars-elegy CM-1, 4f59d8d). The year-1 sequence entries that held them (RG-002 and RG-003, chained and restart) now match in full, which removes their 4 not-compared lines. The row was "1 / 1 | 2 / 2 | 3 / 3" and the totals 1307, 5924, 2857.
+- Updated 2026-10-13 (alt_battle PR): the 4 `alt_battle` expectations (RG-003 y9 (1388,1386), RG-004 y3 (1365,1400), chained and restart) get their lines from `TestBattleRecords` only, which judges each as a sample, and no longer also a not-compared line in the vectors ledger. Three already had a battle-set sample line (Elegy fights there with the alternative stream's players). The fourth, RG-003's chained y9, where Elegy does not fight, gains "sample matched: no battle here, as in the recorded stream". An `alt_battle` in a year that failed to run fails, and one where Elegy fights in a year with no battle record is judged as an extra battle would be; none of the 4 is in either case. The rows were "sample … | 5286 / 450 | …", "not compared 1 / 1 | 2 / 2 | 3 / 3" and the totals 1307, 5924, 2857.
+- Updated 2026-10-14 (lane A, 0x02e slots): 0x02e's cargo type and location slots are compared (cargo type 3 for colonists; a planet as 65535 then the planet number; MEASURED, stars-elegy CM-1, 4f59d8d; regenerated on main 0237862, #261). The year-1 sequence entries that held them (RG-002 and RG-003, chained and restart) now match in full, which removes their 4 not-compared lines. The fleet slot is compared as before; its owner·512 part for players other than 0 is an ASSUMPTION (consistent with FS-1 and 0x028, not measured for 0x02e). The row was "1 / 1 | 1 / 1 | 2 / 2" and the totals 1307, 5923, 2855.
 
 - "matched" ledger lines are battle records. Matching fields get no line. Matched field expectations are in the next table.
 - Random-driven lines by object: RG-002 14 fleet, 11 planet, 5 production queue, 3 player, 1 battle, 1 message sequence. RG-003 26 fleet, 22 planet, 18 production queue, 3 minefield, 3 player, 3 battle (2 before the chase PR), 1 message sequence. RG-004 10 fleet, 3 planet, 2 battle, 1 minefield, 1 player, 1 production queue.
@@ -60,6 +61,8 @@ Not recomputed for the 0x040 PR (2026-10-13): it compares the 0x040 entries coun
 Not recomputed for the invasion messages either (2026-10-13): they compare the 0x004 and 0x007 entries counted here as not compared (RG-003 chained and restarts, RG-004 chained and restarts). Every restart one matches on the reference seed; the chained RG-004 ones that miss are samples.
 
 Not recomputed for the 0x0cd PR (2026-10-13): it compares the 0x0cd entries counted here as not compared in RG-003, and every one of them matches on the reference seed (no ledger line names 0x0cd).
+
+Not recomputed for the alt_battle PR (2026-10-13): the `alt_battle` expectations counted here as not compared (RG-003 and RG-004, one per run) are judged in `TestBattleRecords`, like the battle records this table leaves out.
 
 "Chained, strict" counts year 1 only. Later chained years count as samples, as in the ledger.
 
@@ -87,12 +90,13 @@ RG-004's 9 restart refusals and 9 chained ones (the delete of empty design slot 
 
 | cause | RG-002 | RG-003 | RG-004 | owner |
 |---|---:|---:|---:|---|
-| `alt_battle`: judged by the battle harness (#236), not the vectors comparator | 0 | 2 | 2 | lane D (battle harness; consumed) |
 | `design_gone` expectation not compared | 0 | 0 | 2 | lane B (harness) |
 | message sequence of sample entries only (nothing strict to compare) | 0 | 0 | 2 | none needed |
-| total | 0 | 2 | 6 | |
+| total | 0 | 0 | 4 | |
 
-- Updated 2026-10-13 (lane A, 0x02e slots): the row "0x02e mineral and location slots (MESSAGES.md does not say which word of a planet location holds the planet), in the year-1 sequence entry that also holds 0x05b | 2 | 2 | 0 | lane A" is gone (stars-elegy CM-1, 4f59d8d), and the total was 2 | 4 | 6.
+- Updated 2026-10-13 (alt_battle PR): the `alt_battle` row (0 | 2 | 2, lane D) is gone; those expectations are battle-ledger samples (Current status notes). The total was 2 | 4 | 6.
+- Updated 2026-10-14 (lane A, 0x02e slots): the row "0x02e mineral and location slots (MESSAGES.md does not say which word of a planet location holds the planet), in the year-1 sequence entry that also holds 0x05b | 2 | 2 | 0 | lane A" is gone (stars-elegy CM-1, 4f59d8d), and the total was 2 | 2 | 4.
+
 - stars-elegy MESSAGES.md "Invasion slots" now gives 0x004's and 0x007's slots (MEASURED: the player slot is the player number + 0x30, the troops are the total dropped). That answers the slot question this section used to leave to lanes F and G. Updated 2026-10-13: the mapping is in (lane A, section "Invasion messages"), and the table's 0x004 row (RG-003 2) and 0x007 row (RG-003 4, RG-004 26) are gone; the total was 2 | 14 | 32.
 - 0x040 against 0x023 depends on the previous planet processed (MESSAGES.md 0x040 notes), so mapping it needs that rule as well as an event.
   - Updated 2026-10-13 (0x040 PR): mapped with that rule (Legacy `lost_planet_message_carry`, ruleset v6). The 0x007 row was 24 (RG-004) and the total 2 | 14 | 38; two sequences now stop at 0x007 instead of 0x040.
@@ -432,7 +436,7 @@ Counts are from the reference seed on main `217ab4b`.
   - the bombing fleet of 0x08f and 0x090;
   - 0x05b's salvage and fleet slots;
   - 0x004's colonists and player slots;
-  - 0x02e's mineral and location slots, because MESSAGES.md does not say which word of a planet location holds the planet (updated 2026-10-13: compared since stars-elegy CM-1, 4f59d8d);
+  - 0x02e's mineral and location slots, because MESSAGES.md does not say which word of a planet location holds the planet (updated 2026-10-14: compared since stars-elegy CM-1, 4f59d8d);
   - a battle summary's focus and slots;
   - 0x04e's and 0x02e's fleet when the fleet is gone by the end of the year.
 - **Result.**

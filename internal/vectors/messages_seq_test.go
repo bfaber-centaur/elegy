@@ -50,6 +50,10 @@ func TestPvMessageList(t *testing.T) {
 	}{
 		{"one factory", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemFactory, Count: 1}}, 2,
 			[]pvMsg{{id: 0x035, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
+		{"race penalized", []engine.Event{{Kind: engine.EventRacePenalized, Player: 1, Planet: -1, Fleet: -1}, {Kind: engine.EventRaceHacked, Player: 2, Planet: -1, Fleet: -1, Count: 1}}, 1,
+			[]pvMsg{{id: 0x117, focus: 0xffff, focusKnown: true, params: []int{}, known: []bool{}}}},
+		{"another race penalized", []engine.Event{{Kind: engine.EventRacePenalized, Player: 1, Planet: -1, Fleet: -1}, {Kind: engine.EventRaceHacked, Player: 2, Planet: -1, Fleet: -1, Count: 1}}, 2,
+			[]pvMsg{{id: 0x182, focus: 0xffff, focusKnown: true, params: []int{1}, known: []bool{false}, why: "0x182 player slot"}}},
 		{"merged count", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 1}, {Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemMine, Count: 3}}, 2,
 			[]pvMsg{{id: 0x038, focus: 4, focusKnown: true, params: []int{4, 4}, known: all(2)}}},
 		{"defenses", []engine.Event{{Kind: engine.EventBuilt, Player: 2, Planet: 5, Item: engine.ItemDefenses, Count: 20}}, 2,
@@ -226,6 +230,9 @@ func TestPvMessageList(t *testing.T) {
 			[]pvMsg{{id: 0x12a, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
 		{"terraform order cut", []engine.Event{{Kind: engine.EventOrderClipped, Player: 2, Planet: 5, Item: engine.ItemTerraform, Count: 0}}, 2,
 			[]pvMsg{{id: 0x12f, focus: 4, focusKnown: true, params: []int{4}, known: all(1)}}},
+		// Player 1's fleet slot pins Elegy's owner·512 choice and the
+		// amount 70000 its high-word reading (ASSUMPTION and inferred,
+		// not measured: stars-elegy CM-1).
 		{"colonists beamed down", []engine.Event{{Kind: engine.EventColonistsBeamedDown, Player: 1, Planet: 5, Fleet: 9, Count: 70000}}, 1,
 			[]pvMsg{{id: 0x02e, focus: 0x8000 | 1<<9 | 3, focusKnown: true, params: []int{1<<9 | 3, 70000 - 65536, 1, 3, 65535, 4},
 				known: all(6)}}},
@@ -332,9 +339,9 @@ func TestSequenceCheck(t *testing.T) {
 		{"a sample is not compared", seq(0, b36, sample(m(0x03f, 9, 9)), q5, q6, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"a sample's order is not compared", seq(0, sample(q6), b36, q5, lv, empt), "skip: message_sequence 0x090 bombing fleet not compared"},
 		{"samples only", seq(0, sample(b36)), "skip: message_sequence of sample entries only"},
-		{"unmapped entry", seq(0, m(0x117, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x117 has no event mapping"},
-		{"unmapped entry, mismatch", seq(0, m(0x117, 7, 7, 8), b36, q6, q5, lv, empt),
-			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x117 has no event mapping"},
+		{"unmapped entry", seq(0, m(0x0ff, 7, 7, 8), b36, q5, q6, lv, empt), "skip: message_sequence entry 0x0ff has no event mapping"},
+		{"unmapped entry, mismatch", seq(0, m(0x0ff, 7, 7, 8), b36, q6, q5, lv, empt),
+			"message 0x03f (focus 5, params [5]) = sent before 0x03f (focus 6, params [6]), want after; message 0x03f (focus 5, params [5]) = sent, want not sent\nalso skipped: message_sequence entry 0x0ff has no event mapping"},
 		{"empty list, messages sent", seq(0),
 			"message 0x036 (focus 7, params [2 7]) = sent, want not sent; message 0x03f (focus 5, params [5]) = sent, want not sent; message 0x03f (focus 6, params [6]) = sent, want not sent; message 0x050 (focus 65534, params [5 2 3]) = sent, want not sent; message 0x090 (focus 8, params [? 8]) = sent, want not sent"},
 		{"queue not loaded", seq(2, m(0x036, 4, 3, 4), m(0x03f, 4, 4), m(0x026, 4, 4, 12, 0)), "skip: message_sequence entry from a production queue not loaded"},

@@ -79,6 +79,8 @@ func pvMessageIDs() map[int]string {
 		0x090: "EventBombed then EventPlanetEmptied, to the old owner",
 		0x17c: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the bomber",
 		0x17d: "EventBombed with several fleets in orbit, then EventPlanetEmptied, to the old owner",
+		0x117: "EventRacePenalized",
+		0x182: "EventRaceHacked",
 	}
 	for k, id := range pvSummaryIDs {
 		if k != int(engine.SummaryNone) {
@@ -171,6 +173,7 @@ type pvMsg struct {
 // Focus codes (MESSAGES.md "How messages work", focus codes) as stored
 // 16-bit values.
 const (
+	pvFocusNone     = 0x10000 - 1
 	pvFocusFleet    = 0x8000
 	pvFocusResearch = 0x10000 - 2
 	pvFocusDesign   = 0x10000 - 3
@@ -414,6 +417,17 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			if j := send(ev.Player, m); j >= 0 {
 				arrived[ev.Fleet] = j
 			}
+		case engine.EventRacePenalized:
+			// MESSAGES.md 0x117: no slots, focus none (stars-elegy
+			// 28a3175, CONFIRMED RD-P12, KX-003).
+			send(ev.Player, pvMsg{id: 0x117, focus: pvFocusNone, focusKnown: true, params: []int{}})
+		case engine.EventRaceHacked:
+			// MESSAGES.md 0x182: player (the penalized one), focus none.
+			// The slot's value is in one KX-003 record only and the
+			// article/plural flags "Slot types" allows are not measured
+			// for it, so it is not compared.
+			send(ev.Player, pvMsg{id: 0x182, focus: pvFocusNone, focusKnown: true,
+				params: []int{ev.Count}, known: []bool{false}, why: "0x182 player slot"})
 		case engine.EventOvercrowded:
 			send(ev.Player, pvMsg{id: 0x026, focus: ev.Planet - 1, focusKnown: true, params: []int{ev.Planet - 1, ev.Count & 0xffff, ev.Count >> 16}})
 		case engine.EventHostileShrink:
@@ -496,8 +510,14 @@ func pvMessageList(g *engine.Game, events []engine.Event) map[int][]pvMsg {
 			// location is 65535 then the planet number (MEASURED,
 			// stars-elegy CM-1, 4f59d8d: 14 and 39 records). Elegy sends
 			// 0x02e only at the fleet's owner's own planet. The fleet
-			// slot and the focus need the fleet, so they are not
-			// compared when it is gone by the end of the year.
+			// slot is owner·512 + (number − 1): CM-1 measured the plain
+			// number for player 0's one-design fleets only, and the
+			// owner·512 part for other players is an ASSUMPTION
+			// (consistent with FS-1 and 0x028, not measured for 0x02e).
+			// The amount's second slot as its high word is inferred
+			// (CM-1: 0 in every record, at most 300). The fleet slot and
+			// the focus need the fleet, so they are not compared when it
+			// is gone by the end of the year.
 			m := pvMsg{id: 0x02e, params: []int{0, ev.Count & 0xffff, ev.Count >> 16, pvCargoColonists, pvLocationPlanet, ev.Planet - 1},
 				known: []bool{false, true, true, true, true, true}, why: "0x02e fleet gone by the end of the year"}
 			if code, ok := fleet(ev.Fleet); ok {
