@@ -33,7 +33,6 @@ sample | rg002 | RG-002-2463 y1 #376 | object | wormhole: y = 1625, want 1639
 sample | rg002 | RG-002-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002 | RG-002-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002 | RG-002-2463 y1 #403 | message_sequence | message_sequence 0x02e mineral and location slots not compared
 sample | rg002 | RG-002-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002 | RG-002-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002 | RG-002-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
@@ -1012,7 +1011,6 @@ sample | rg002-y1 | RG-002-Y1-2463 y1 #376 | object | wormhole: y = 1625, want 1
 sample | rg002-y1 | RG-002-Y1-2463 y1 #377 | object | wormhole: x = 1548, want 1535
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: x = 1238, want 1246
 sample | rg002-y1 | RG-002-Y1-2463 y1 #378 | object | wormhole: y = 1776, want 1767
-not compared | rg002-y1 | RG-002-Y1-2463 y1 #403 | message_sequence | message_sequence 0x02e mineral and location slots not compared
 sample | rg002-y1 | RG-002-Y1-2463 y1 #408 | player id=2 seen_by=2 | score_record.escort_ships = 46, want 44
 sample | rg002-y1 | RG-002-Y1-2463 y1 #65 | fleet_gone owner=2 id=2 | fleet still exists
 sample | rg002-y1 | RG-002-Y1-2463 y1 #72 | fleet owner=2 id=9 | cargo.germanium = 160, want 159
