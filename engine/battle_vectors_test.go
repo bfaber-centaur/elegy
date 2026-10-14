@@ -119,7 +119,7 @@ func TestBattleRecords(t *testing.T) {
 // leaves the `battle` and `battle_actions` expectations to these lines,
 // so none may go unreported. want is the game's number of records, as
 // its ledger header pins it (vectors.RGGame.BattleRecords).
-func checkRGBattleCoverage(t *testing.T, lines map[string]string, game string, want int) {
+func checkRGBattleCoverage(t testing.TB, lines map[string]string, game string, want int) {
 	covered := map[string]bool{}
 	for k := range lines {
 		parts := strings.SplitN(k, " | ", 4)
@@ -458,5 +458,33 @@ func TestBattleRecordNoStartSampleIsSample(t *testing.T) {
 	}
 	if n == 0 {
 		t.Error("no flagged sample line")
+	}
+}
+
+// TestCheckRGBattleCoverage pins checkRGBattleCoverage's count against
+// the count the ledger header pins: a game with fewer records in its
+// vectors (rg900, none) or more (RG-002, its 88 against 87) fails, once
+// for the count, and one with as many passes.
+func TestCheckRGBattleCoverage(t *testing.T) {
+	for _, c := range []struct {
+		game  string
+		want  int
+		count []string // the count's error, if any
+	}{
+		{"rg900", 0, nil},
+		{"rg900", 1, []string{"0 rg900 battle records, want 1"}},
+		{"rg002", 87, []string{"88 rg002 battle records, want 87"}},
+	} {
+		r := &recordTB{TB: t}
+		checkRGBattleCoverage(r, map[string]string{}, c.game, c.want)
+		var counts []string
+		for _, e := range r.errs {
+			if strings.Contains(e, " battle records, want ") {
+				counts = append(counts, e)
+			}
+		}
+		if fmt.Sprint(counts) != fmt.Sprint(c.count) {
+			t.Errorf("%s want %d: count errors %q, want %q", c.game, c.want, counts, c.count)
+		}
 	}
 }
