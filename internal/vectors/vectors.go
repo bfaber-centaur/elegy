@@ -2481,6 +2481,9 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 		}
 		f := fleet(sub.Owner, sub.ID)
 		level := 0
+		// heading and mass_shown are null for a fleet the viewer does not
+		// see, so an expectation on one is never silent.
+		got["heading"], got["mass_shown"] = nil, nil
 		if f != nil {
 			for _, s := range v.Fleets {
 				if s.Fleet == f.ID {
@@ -2490,6 +2493,7 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 					if s.Cargo != nil {
 						level = 4
 					}
+					got["heading"], got["mass_shown"] = pvHeading(s), s.Mass
 				}
 			}
 		}
@@ -2517,6 +2521,18 @@ func (l *pvLoaded) viewCheck(g *engine.Game, e pvExpect, eq map[string]json.RawM
 		return "skip: view of a " + sub.Kind
 	}
 	return pvCompare(sub.Kind, got, eq, 0, nil)
+}
+
+// pvHeading is a sighting's heading as the vectors give it: [dx, dy,
+// warp]. A fleet that did not move has heading (0, 0) and warp 0, which
+// the original's file stores as bytes of 0 holding value + 127, so the
+// vectors read it as [-127, -127, 0] (SCANNING.md "Heading" and "Notes for
+// comparing with original-game files", MEASURED SC-027).
+func pvHeading(s engine.FleetSighting) []int {
+	if s.Warp == 0 && s.Heading == (engine.Point{}) {
+		return []int{-127, -127, 0}
+	}
+	return []int{s.Heading.X, s.Heading.Y, s.Warp}
 }
 
 // pvDesignViews fills got with what viewer v's file holds of other
