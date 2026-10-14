@@ -92,6 +92,10 @@ The most frequent unmapped message ids are:
 
 Updated 2026-10-14 (lane D, minefield messages): 0x0c3, 0x0c4, 0x0c6, 0x0ca and 0x17e are mapped, which compares their 35 expectations; the messages row was "148 | 63 ids (145 expectations) …". The most frequent unmapped ids are now 0x10b (10) and 0x0ff (9).
 
+Minefield ids still not compared (4 expectations, "message 0x… has no event mapping" in skips.txt):
+- 0x0c5 and 0x0c9 (a speed bump stopped a fleet, to the fleet's and the field's owners), 1 each. Both are CONFIRMED (mf/mf07, ob/ob024) and are also sent when a speed bump detonates, to every other player's fleet inside it. That second trigger needs the detonation event to carry the field type and each fleet, so it is left for a follow-up rather than mapping half of each id.
+- 0x0c7 and 0x0cb (a hit destroyed ships, to the two owners), 1 each: MESSAGES.md labels both BINARY-ONLY, and their pairing with `EventMineShipsLost` has no oracle record to pin it.
+
 ## Unproven claims in the status documents
 
 Lines in elegy's `docs/*-STATUS.md` and RANDOM-PARITY.md that carry a label weaker than CONFIRMED or MEASURED (a count of labelled lines, `grep -c`, not of distinct rules):
